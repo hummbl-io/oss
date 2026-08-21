@@ -42,16 +42,16 @@ This is exactly the collision risk that the scoped `@hummbl/*` naming decision (
 ## 1. PyPI (Python) — 47 candidates
 
 ### Live (8) — verified HUMMBL-owned
-| Package | Version | Repo | Notes |
-|---------|---------|------|-------|
-| `hummbl-governance` | 1.4.1 | hummbl-governance → oss | Governance primitives — kill switch, circuit breaker, etc. Links remediated to `github.com/hummbl-io/oss` in 1.4.1 (this session). |
-| `hummbl-bus` | 0.1.0 | hummbl-bus | Secure append-only TSV coordination bus. No project_urls on PyPI — needs link remediation on next publish. |
-| `hummbl-cognition` | 0.1.0 | hummbl-cognition | Cognitive Ledger Protocol + Open Brain server. No project_urls on PyPI — needs link remediation on next publish. |
-| `hummbl-tuples` | 0.2.0 | hummbl-tuples | Typed Tuples governance model (polyglot: also Go, Rust, TS). No project_urls on PyPI — needs link remediation. |
-| `hummbl-bif` | 1.0.1 | bif | Batch Ingestion Framework. README says archived into `hummbl-io/hummbl-toolkit`. No project_urls on PyPI. |
-| `base120` | 3.0.0 | base120 | 120 reasoning operators — stdlib-only, tuple-native. Repo link = `hummbl.io` (no GitHub URL). |
-| `governed-compression` | 0.1.0 | governed-compression | Governed vector + KV-cache compression (ML). CPU reference implementation for quantization methods (TurboQuant-style, QJL, baselines). Runtime dep: `hummbl-governance>=1.1.0` (cross-package dependency — see MONOREPO-DESIGN.md section 7). Confirmed HUMMBL-owned by operator 2026-08-21. Repo link on PyPI: none (needs remediation on next publish). |
-| `OBLITERATUS` | 0.0.1 | — | **NOT HUMMBL's — belongs to Pliny (pliny-lab).** Reserved-name placeholder, no functionality. Listed here only to document that it is excluded from the migration. Do not migrate. |
+| Package | Version | Repo | Ownership verified | Notes |
+|---------|---------|------|--------------------|-------|
+| `hummbl-governance` | 1.4.1 | hummbl-governance → oss | 2026-08-21 (published this session) | Governance primitives — kill switch, circuit breaker, etc. Links remediated to `github.com/hummbl-io/oss` in 1.4.1. |
+| `hummbl-bus` | 0.1.0 | hummbl-bus | 2026-08-21 (naming + repo match) | Secure append-only TSV coordination bus. No project_urls on PyPI — needs link remediation on next publish. |
+| `hummbl-cognition` | 0.1.0 | hummbl-cognition | 2026-08-21 (naming + repo match) | Cognitive Ledger Protocol + Open Brain server. No project_urls on PyPI — needs link remediation on next publish. |
+| `hummbl-tuples` | 0.2.0 | hummbl-tuples | 2026-08-21 (naming + repo match) | Typed Tuples governance model (polyglot: also Go, Rust, TS). No project_urls on PyPI — needs link remediation. |
+| `hummbl-bif` | 1.0.1 | bif | 2026-08-21 (naming + repo match) | Batch Ingestion Framework. README says archived into `hummbl-io/hummbl-toolkit`. No project_urls on PyPI. |
+| `base120` | 3.0.0 | base120 | 2026-08-21 (repo link = hummbl.io, HUMMBL domain) | 120 reasoning operators — stdlib-only, tuple-native. Repo link = `hummbl.io` (no GitHub URL). |
+| `governed-compression` | 0.1.0 | governed-compression | 2026-08-21 (operator-confirmed; naming + matching private repo) | Governed vector + KV-cache compression (ML). CPU reference implementation for quantization methods (TurboQuant-style, QJL, baselines). Runtime dep: `hummbl-governance>=1.1.0` (cross-package dependency — see MONOREPO-DESIGN.md section 7). Repo link on PyPI: none (needs remediation on next publish). |
+| `OBLITERATUS` | 0.0.1 | — | 2026-08-21 (operator: NOT HUMMBL's — Pliny's) | **NOT HUMMBL's — belongs to Pliny (pliny-lab).** Reserved-name placeholder, no functionality. Listed here only to document that it is excluded from the migration. Do not migrate. |
 
 **Name collisions (NOT HUMMBL's — do not migrate):** The following PyPI package names were previously listed as HUMMBL's in an earlier draft but are unrelated packages by other authors, verified 2026-08-21 via PyPI author/repository fields:
 - `arbiter` v1.1.2 → R.A. Stern (`rastern/arbiter`)

@@ -236,7 +236,8 @@ before any job starts — with no logs.
 
 The workflow examples in sections 4.1-4.8 below show SHA-pinned actions
 matching these rules. When updating an action, resolve the new tag to its
-SHA and replace the pin.
+SHA and replace the pin. These rules are also documented in
+[`CONTRIBUTING.md`](../CONTRIBUTING.md) section 1 for contributor visibility.
 
 ### 4.1 Python → PyPI
 
