@@ -49,14 +49,14 @@ jobs:
           python-version: "3.13"
 
       - name: Install build tools
-        run: pip install build twine
+        run: pip install build
 
       - name: Build package
         working-directory: ${{ steps.pkg.outputs.path }}
         run: python -m build
 
       - name: Publish to PyPI
-        working-directory: ${{ steps.pkg.outputs.path }}
-        env:
-          TWINE_NON_INTERACTIVE: "1"
-        run: python -m twine upload dist/*
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          packages-dir: ${{ steps.pkg.outputs.path }}/dist/
+          skip-existing: true
