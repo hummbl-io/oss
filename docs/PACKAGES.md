@@ -10,7 +10,7 @@
 | Registry | Live | Publishable (not yet live) | Needs work | Total candidates |
 |----------|------|-----------------------------|------------|------------------|
 | **PyPI** (Python) | 13 | ~31 | ~8 | 52 |
-| **npm** (JS/TS) | 7 | ~10 | ~4 | 21 |
+| **npm** (JS/TS) | 2 | ~10 | ~4 | 16 |
 | **crates.io** (Rust) | 0 | 2 | 0 | 2 |
 | **Go module proxy** | 0 | 1 | 0 | 1 |
 | **Maven Central** (Java/Kotlin) | 0 | 2 | 0 | 2 |
@@ -19,15 +19,13 @@
 | **Nix flakes** | 0 | 2 | 0 | 2 |
 | **GitHub Pages** (static sites) | 0 | ~6 | 0 | 6 |
 | **Mintlify docs** | 0 | 2 | 0 | 2 |
-| **TOTAL** | **20** | **~64** | **~16** | **~100** |
+| **TOTAL** | **15** | **~64** | **~16** | **~95** |
 
 **Polyglot packages** (same package published across multiple languages):
 - `hummbl-tuples`: Python (live) + Go + Rust + TypeScript (3 not published) — the polyglot model
-- `arbiter`: Python (live) + npm (live)
-- `arcana`: Python (live) + npm (live)
-- `crab`: Python (live) + npm (live)
-- `randy`: Python (live) + npm (live)
-- `hermes-agent`: Python (live) + npm (live) + nix flake
+- `hermes-agent`: Python (live) + nix flake (npm name is a collision with an unrelated package by another author — see npm section)
+
+**Name-collision warning (npm):** The unscoped npm names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and `mcp-server` are NOT HUMMBL's — they are unrelated packages by other authors (verified 2026-08-21 via repository + maintainer fields on npm: hermes-agent→wrtensi, arbiter→skbolton, arcana→flipactual, crab→kossnocorp, randy→deestan, mcp-server→Melvin Carvalho). This is exactly the collision risk that the scoped `@hummbl/*` naming decision (section 4.2 of MONOREPO-DESIGN.md) eliminates. HUMMBL's npm packages are published under the `@hummbl/` scope.
 
 ---
 
@@ -103,18 +101,23 @@
 
 ---
 
-## 2. npm (JavaScript/TypeScript) — 21 candidates
+## 2. npm (JavaScript/TypeScript) — 16 candidates
 
-### Live (7)
-| Package | Version | Repo | Notes |
-|---------|---------|------|-------|
-| `hummbl-bibliography` | 1.0.0 | hummbl-bibliography | BibTeX citations (also TeX repo) |
-| `mcp-server` | 0.0.9 | mcp-server | HUMMBL MCP Server |
-| `hermes-agent` | 0.20.4 | hermes-agent | (also PyPI, nix) |
-| `arbiter` | 2.0.2 | arbiter | (also PyPI) |
-| `arcana` | 0.0.2 | arcana | (also PyPI) |
-| `crab` | 1.13.0 | crab | (also PyPI) |
-| `randy` | 1.5.1 | randy | (also PyPI) |
+### Live (2) — verified HUMMBL-owned
+| Package | Version | Repo link on npm | Notes |
+|---------|---------|------------------|-------|
+| `@hummbl/mcp-server` | 1.2.0 | `github.com/hummbl-dev/mcp-server` (stale — points to old org, private repo, 404 for public) | HUMMBL MCP Server for Base120. Scoped. 5 versions published (1.0.0–1.2.0). Repo link needs remediation → `github.com/hummbl-io/oss` after migration. |
+| `hummbl-bibliography` | 1.0.0 | `github.com/hummbl-dev/hummbl-bibliography` (stale — points to old org, private repo, 404 for public) | BibTeX citations (also TeX repo). Unscoped. Maintainer: `hummbl-dev`. Repo link needs remediation. Consider republishing as `@hummbl/bibliography` to match the scoped convention. |
+
+**Name collisions (NOT HUMMBL's — do not migrate):** The following unscoped npm package names were previously listed as HUMMBL's but are unrelated packages by other authors, verified 2026-08-21 via the npm registry `repository` and `maintainers` fields:
+- `mcp-server` v0.0.9 → Melvin Carvalho (`sandy-mount/mcp-server`). HUMMBL's is the scoped `@hummbl/mcp-server`.
+- `hermes-agent` v0.20.4 → `wrtensi/hermes-agent-npm`
+- `arbiter` v2.0.2 → `skbolton/Arbiter`
+- `arcana` v0.0.2 → `flipactual/arcana`
+- `crab` v1.13.0 → `kossnocorp/crab`
+- `randy` v1.5.1 → `deestan/randy`
+
+These are common-word package names squatted/published by other authors. This collision risk is the reason HUMMBL publishes under the `@hummbl/` scope going forward.
 
 ### Publishable but not yet on npm (~10)
 | Repo | package.json name | Notes |
