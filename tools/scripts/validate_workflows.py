@@ -15,6 +15,15 @@ Context: hummbl-io/oss has sha_pinning_required: true. On 2026-08-21, four
 consecutive runs failed with startup_failure because workflows used tag-pinned
 actions (e.g. @v4) instead of 40-char commit SHAs. This validator catches those
 conditions before tag push.
+
+Known limitation -- runtime-fetch vector: SHA-pinning verifies code identity
+but does NOT prevent an action from fetching external resources at runtime
+(e.g. curl | python3). The tj-actions/changed-files compromise (CVE-2025-30066,
+March 2025) used exactly this vector -- a pinned SHA that fetched a remote
+memory-dump script. Static analysis cannot detect runtime fetch. For that
+vector, use StepSecurity Harden-Runner (network egress control) as a
+complementary defense. This validator addresses the tag-modification vector
+only.
 """
 from __future__ import annotations
 
@@ -129,6 +138,8 @@ def main() -> int:
         print("Exit: 1 (failures found)")
         return 1
     print("Exit: 0 (all passed)")
+    print("Note: SHA-pin check covers tag-modification vector only.")
+    print("      For runtime-fetch vector, use StepSecurity Harden-Runner.")
     return 0
 
 
