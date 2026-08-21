@@ -78,7 +78,7 @@
 | `scavenger-mode` | root | |
 | `idp-spec` | root | Intelligent Delegation Profile |
 | `model-routing-as-code` | root | Model/provider selection rules |
-| `provider-governance` | root (+ `PROJECTS/platform/packages/runtime/`) | |
+| `provider-governance` | root (+ subdirectory packages) | |
 | `psychedelic-claim-validator` | root | |
 | `general-claim-validator` | root | |
 | `governance-tuple-reference` | root | DCT-signed capability tokens |
@@ -99,7 +99,7 @@
 | `hummbl-agent` | `packages/runtime`, `skills/local-places` | Agent runtime with multiple packages |
 | `hummbl-production` | `hummbl-governed-quest-sim`, `minecraft-governance` | Production infra with game governance |
 | `pliny-lab` | `OBLITERATUS`, `P4RS3LT0NGV3` | Red-team lab with multiple packages |
-| `apex-nexus` | `hosts/anvil/PROJECTS/hummbl-risk-contracts` | Fleet mesh with embedded packages |
+| `apex-nexus` | root (+ embedded package subdirs) | Fleet mesh with embedded packages |
 
 ---
 

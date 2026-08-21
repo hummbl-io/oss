@@ -110,9 +110,21 @@ single-language monorepo. For a polyglot monorepo it breaks down:
 ### Migration from current `packages/<name>/`
 
 The current `packages/hummbl-governance/` moves to
-`packages/python/hummbl-governance/`. This is a `git mv` — history is
-preserved. The `publish-pypi.yml` workflow tag filter and path extraction
-are updated in the same PR.
+`packages/python/hummbl-governance/`. The `publish-pypi.yml` workflow tag
+filter and path extraction are updated in the same PR.
+
+**Migration method depends on the source repo's visibility:**
+
+- **From a private repo:** use a **clean snapshot (no history)** with a
+  PII scan before copy. Private repos may contain hostnames, internal
+  paths, credentials, or personal data in their git history that must not
+  enter a public monorepo. `hummbl-governance` was migrated this way —
+  clean snapshot, PII-scanned, no history carried over.
+- **From a public repo:** a `git mv` preserving history is safe, since
+  the history is already public.
+
+Never `git mv` from a private repo into this public monorepo without
+scanning the full history for PII first.
 
 ---
 
@@ -189,6 +201,43 @@ install one package, not the monorepo.
 
 ## 4. Per-language publishing workflows
 
+### 4.0 Workflow authoring rules (apply to every workflow in this repo)
+
+These rules are mandatory on `hummbl-io/oss`. They were learned from
+debugging 4 consecutive `startup_failure` runs during the
+`hummbl-governance` 1.4.1 publish. Ignore them and the workflow fails
+before any job starts — with no logs.
+
+1. **SHA-pin every action.** The repo has `sha_pinning_required: true`
+   (verify: `gh api repos/hummbl-io/oss/actions/permissions`). Tag refs
+   (`@v4`, `@v5`, `@stable`, `@main`) cause `startup_failure`. Always
+   pin to the full 40-char commit SHA:
+   `actions/checkout@11d5960a326750d5838078e36cf38b85af677262`. Resolve
+   a tag to its SHA with
+   `gh api repos/<owner>/<repo>/commits/<tag> --jq '.sha'`.
+
+2. **ASCII only.** No em-dashes, smart quotes, or non-ASCII characters
+   anywhere in `.github/workflows/*.yml` — including comments. Use `--`
+   and straight quotes. A single em-dash (`—`, U+2014) in a comment
+   caused a `startup_failure` on this repo.
+
+3. **LF line endings.** CRLF causes `startup_failure`. Add a
+   `.gitattributes` with `.github/workflows/*.yml text eol=lf` to enforce
+   this regardless of contributor OS.
+
+4. **Create environments before referencing them.** GitHub Actions fails
+   at startup if a job references an environment that doesn't exist.
+   Create each environment first:
+   `gh api repos/hummbl-io/oss/environments/<name> -X PUT`. The
+   `pypi` environment already exists (created 2026-08-21).
+
+5. **Quote the `on:` key.** YAML 1.1 treats `on` as a boolean. Write
+   `"on":` (quoted) to avoid parse ambiguity.
+
+The workflow examples in sections 4.1-4.8 below show SHA-pinned actions
+matching these rules. When updating an action, resolve the new tag to its
+SHA and replace the pin.
+
 ### 4.1 Python → PyPI
 
 **Registry:** [pypi.org](https://pypi.org)
@@ -216,7 +265,7 @@ jobs:
     permissions:
       id-token: write  # OIDC trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract package name from tag
         id: pkg
@@ -227,7 +276,7 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "path=packages/python/$name" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.13"
 
@@ -249,9 +298,9 @@ jobs:
 **Per-package setup (one-time):**
 1. On pypi.org → Manage → Publishing → Add trusted publisher
 2. Workflow file: `.github/workflows/publish-pypi.yml`
-3. Environment: `pypi`
-3. Repository: `hummbl-io/oss`
-4. Tag pattern: `python/<package-name>/v*`
+3. Environment: `pypi` (already created on this repo)
+4. Repository: `hummbl-io/oss`
+5. Tag pattern: `python/<package-name>/v*`
 
 **To publish:**
 ```bash
@@ -288,7 +337,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: npm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract package name from tag
         id: pkg
@@ -298,7 +347,7 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "path=packages/node/$name" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
@@ -322,7 +371,18 @@ jobs:
 1. Set `package.json` `"private": false` (remove `"private": true`)
 2. Ensure `"name"`, `"version"`, `"license"`, `"repository"` fields are set
 3. Add `NPM_TOKEN` to GitHub repo secrets (one token, shared across all npm packages)
-4. Tag and push: `git tag node/hummbl-agent/v0.1.0 && git push origin node/hummbl-agent/v0.1.0`
+4. Create the `npm` environment: `gh api repos/hummbl-io/oss/environments/npm -X PUT`
+5. Tag and push: `git tag node/hummbl-agent/v0.1.0 && git push origin node/hummbl-agent/v0.1.0`
+
+**Package naming -- open decision (pending operator confirmation):**
+- **Scoped (recommended):** `@hummbl/<name>` (e.g. `@hummbl/governance`). Avoids
+  name squatters, is npm best practice for orgs, but diverges from the PyPI
+  spelling (`hummbl-governance`).
+- **Unscoped:** `hummbl-<name>` (matches PyPI exactly). Simpler cross-registry
+  consistency, but exposes the package to name collisions on npm.
+
+This decision is irreversible after first publish. Recommendation: scoped
+(`@hummbl/*`). Record the choice in the decision log (section 11) once made.
 
 ### 4.3 Rust → crates.io
 
@@ -349,7 +409,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: crates
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract package name from tag
         id: pkg
@@ -359,7 +419,7 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "path=packages/rust/$name" >> "$GITHUB_OUTPUT"
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
 
       - name: Publish
         working-directory: ${{ steps.pkg.outputs.path }}
@@ -371,7 +431,8 @@ jobs:
 **Per-package setup:**
 1. Ensure `Cargo.toml` has `[package] name`, `version`, `description`, `license`, `repository`
 2. Add `CARGO_REGISTRY_TOKEN` to GitHub repo secrets
-3. Tag and push: `git tag rust/demosmesh/v0.1.0 && git push origin rust/demosmesh/v0.1.0`
+3. Create the `crates` environment: `gh api repos/hummbl-io/oss/environments/crates -X PUT`
+4. Tag and push: `git tag rust/demosmesh/v0.1.0 && git push origin rust/demosmesh/v0.1.0`
 
 ### 4.4 Go → Go module proxy
 
@@ -420,8 +481,8 @@ jobs:
       matrix:
         go-version: ["1.22", "1.23"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test
@@ -454,7 +515,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: maven
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract package name from tag
         id: pkg
@@ -464,13 +525,13 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "path=packages/jvm/$name" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
         with:
           java-version: "21"
           distribution: "temurin"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a
 
       - name: Publish
         working-directory: ${{ steps.pkg.outputs.path }}
@@ -487,7 +548,8 @@ jobs:
 1. Configure `build.gradle` with `maven-publish` plugin and Central Portal credentials
 2. Set up GPG signing key (Maven Central requires signed artifacts)
 3. Add secrets: `SONATYPE_USERNAME`, `SONATYPE_PASSWORD`, `GPG_KEY_ID`, `GPG_PRIVATE_KEY`, `GPG_PASSWORD`
-4. Tag and push: `git tag jvm/fabric-adapter/v0.1.0 && git push origin jvm/fabric-adapter/v0.1.0`
+4. Create the `maven` environment: `gh api repos/hummbl-io/oss/environments/maven -X PUT`
+5. Tag and push: `git tag jvm/fabric-adapter/v0.1.0 && git push origin jvm/fabric-adapter/v0.1.0`
 
 ### 4.6 Nix → FlakeHub / nixpkgs
 
@@ -516,7 +578,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: nix
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract package name from tag
         id: pkg
@@ -526,9 +588,9 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "path=packages/nix/$name" >> "$GITHUB_OUTPUT"
 
-      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25  # v22
 
-      - uses: DeterminateSystems/flakehub-push@main
+      - uses: DeterminateSystems/flakehub-push@71f57208810a5d299fc6545350981de98fdbc860  # v6
         with:
           visibility: public
           name: hummbl-io/${{ steps.pkg.outputs.name }}
@@ -567,7 +629,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract paper name from tag
         id: pkg
@@ -577,12 +639,12 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "path=papers/$name" >> "$GITHUB_OUTPUT"
 
-      - uses: xu-cheng/latex-action@v3
+      - uses: xu-cheng/latex-action@e2f99d4b3685b0da93f97e1b86ad8fab81105098
         with:
           working_directory: ${{ steps.pkg.outputs.path }}
           root_file: main.tex
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: paper-${{ steps.pkg.outputs.name }}
           path: ${{ steps.pkg.outputs.path }}/main.pdf
@@ -625,7 +687,7 @@ jobs:
   manifests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Extract package name and version
         id: pkg
@@ -858,5 +920,10 @@ the paper's `LICENSE` file.
 | 2026-08-21 | Tag format `<lang>/<name>/v<version>` | Encodes language + package + version in one string; unambiguous for CI |
 | 2026-08-21 | Independent per-package versioning | Packages are independently useful libraries, not a unified platform |
 | 2026-08-21 | PyPI Trusted Publishing (OIDC) | No API tokens to rotate; GitHub-native auth |
-| 2026-08-21 | Per-language CI workflows | Fast CI — Python change doesn't run Rust tests |
+| 2026-08-21 | Per-language CI workflows | Fast CI -- Python change doesn't run Rust tests |
 | 2026-08-21 | Apache-2.0 for all packages | Consistent with existing HUMMBL OSS license |
+| 2026-08-21 | SHA-pin all workflow actions | Repo has `sha_pinning_required: true`; tag refs cause `startup_failure`. Learned from 4 failed runs during 1.4.1 publish |
+| 2026-08-21 | ASCII-only + LF for workflow YAML | Em-dash + CRLF caused `startup_failure` on this repo |
+| 2026-08-21 | Clean snapshot (no history) for private-repo migrations | Private repo history may contain PII (hostnames, paths, credentials); `git mv` would carry it into the public monorepo |
+| 2026-08-21 | Create GitHub environments before workflow reference | Jobs referencing a nonexistent environment fail at startup with no logs |
+| 2026-08-21 | npm package naming: **OPEN** (scoped `@hummbl/*` recommended) | Irreversible after first publish; scoped avoids name squatters but diverges from PyPI spelling. Pending operator confirmation |
