@@ -1,0 +1,13 @@
+# Enforce LF line endings on workflow files (CRLF causes GitHub Actions startup_failure)
+.github/workflows/*.yml text eol=lf
+.github/workflows/*.yaml text eol=lf
+
+# YAML in general
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Markdown (CRLF-tolerant, but normalize for consistency)
+*.md text eol=lf
