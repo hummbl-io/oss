@@ -14,7 +14,7 @@ name: Publish to PyPI
 #   2. Add its source under packages/<name>/
 #   3. Configure the trusted publisher on pypi.org
 
-on:
+"on":
   push:
     tags:
       - "hummbl-governance/v*"
@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   publish:
-    name: Publish ${{ github.ref_name }}
+    name: publish
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
