@@ -9,8 +9,8 @@
 
 | Registry | Live | Publishable (not yet live) | Needs work | Total candidates |
 |----------|------|-----------------------------|------------|------------------|
-| **PyPI** (Python) | 13 | ~31 | ~8 | 52 |
-| **npm** (JS/TS) | 2 | ~10 | ~4 | 16 |
+| **PyPI** (Python) | 8 | ~31 | ~8 | 47 |
+| **npm** (JS/TS) | 0 | ~10 | ~4 | 16 |
 | **crates.io** (Rust) | 0 | 2 | 0 | 2 |
 | **Go module proxy** | 0 | 1 | 0 | 1 |
 | **Maven Central** (Java/Kotlin) | 0 | 2 | 0 | 2 |
@@ -19,34 +19,48 @@
 | **Nix flakes** | 0 | 2 | 0 | 2 |
 | **GitHub Pages** (static sites) | 0 | ~6 | 0 | 6 |
 | **Mintlify docs** | 0 | 2 | 0 | 2 |
-| **TOTAL** | **15** | **~64** | **~16** | **~95** |
+| **TOTAL** | **8** | **~64** | **~16** | **~90** |
 
 **Polyglot packages** (same package published across multiple languages):
 - `hummbl-tuples`: Python (live) + Go + Rust + TypeScript (3 not published) — the polyglot model
-- `hermes-agent`: Python (live) + nix flake (npm name is a collision with an unrelated package by another author — see npm section)
 
-**Name-collision warning (npm):** The unscoped npm names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and `mcp-server` are NOT HUMMBL's — they are unrelated packages by other authors (verified 2026-08-21 via repository + maintainer fields on npm: hermes-agent→wrtensi, arbiter→skbolton, arcana→flipactual, crab→kossnocorp, randy→deestan, mcp-server→Melvin Carvalho). This is exactly the collision risk that the scoped `@hummbl/*` naming decision (section 4.2 of MONOREPO-DESIGN.md) eliminates. HUMMBL's npm packages are published under the `@hummbl/` scope.
+**Name-collision warning (PyPI + npm):** The package names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and `mcp-server` are NOT HUMMBL's on either PyPI or npm — they are unrelated packages by other authors that happened to share common-word names. Verified 2026-08-21 against both registries' author/repository/maintainer fields:
+
+| Name | PyPI owner | npm owner |
+|------|-----------|-----------|
+| `hermes-agent` | Nous Research | wrtensi |
+| `arbiter` | R.A. Stern (`rastern/arbiter`) | skbolton (`skbolton/Arbiter`) |
+| `arcana` | (arcana.readthedocs.io) | flipactual (`flipactual/arcana`) |
+| `crab` | Graham Bell (`grahambell/crab`) | kossnocorp (`kossnocorp/crab`) |
+| `randy` | Francis Horsman (Bitbucket `sys-git/randy`) | deestan (`deestan/randy`) |
+| `mcp-server` | — | Melvin Carvalho (`sandy-mount/mcp-server`) |
+
+This is exactly the collision risk that the scoped `@hummbl/*` naming decision (section 4.2 of MONOREPO-DESIGN.md) eliminates on npm. On PyPI, HUMMBL's packages use the `hummbl-*` prefix which is distinctive enough to avoid collisions; the colliding names above are unprefixed common words.
 
 ---
 
-## 1. PyPI (Python) — 52 candidates
+## 1. PyPI (Python) — 47 candidates
 
-### Live (13)
+### Live (8) — verified HUMMBL-owned
 | Package | Version | Repo | Notes |
 |---------|---------|------|-------|
-| `hummbl-governance` | 1.4.0 | hummbl-governance | Governance primitives — kill switch, circuit breaker, etc. |
-| `hummbl-bus` | 0.1.0 | hummbl-bus | Secure append-only TSV coordination bus |
-| `hummbl-cognition` | 0.1.0 | hummbl-cognition | Cognitive Ledger Protocol + Open Brain server |
-| `hummbl-tuples` | 0.2.0 | hummbl-tuples | Typed Tuples governance model (polyglot: also Go, Rust, TS) |
-| `hummbl-bif` | 1.0.1 | bif | Batch Ingestion Framework |
-| `base120` | 3.0.0 | base120 | 120 reasoning operators — stdlib-only, tuple-native |
-| `arbiter` | 1.1.2 | arbiter | Agent-aware code quality scoring (also on npm) |
-| `arcana` | 0.10.19 | arcana | Multi-lens governance/political-philosophy analysis (also on npm) |
-| `crab` | 0.5.1 | crab | CRAB methodology: Check, Reason, Act, Bus (also on npm) |
-| `randy` | 0.9.3 | randy | (also on npm) |
-| `governed-compression` | 0.1.0 | governed-compression | Compression with governance-aware artifact management |
-| `hermes-agent` | 0.19.0 | hermes-agent | The agent that grows with you (also on npm, nix) |
-| `OBLITERATUS` | 0.0.1 | OBLITERATUS | (also in pliny-lab subdir) |
+| `hummbl-governance` | 1.4.1 | hummbl-governance → oss | Governance primitives — kill switch, circuit breaker, etc. Links remediated to `github.com/hummbl-io/oss` in 1.4.1 (this session). |
+| `hummbl-bus` | 0.1.0 | hummbl-bus | Secure append-only TSV coordination bus. No project_urls on PyPI — needs link remediation on next publish. |
+| `hummbl-cognition` | 0.1.0 | hummbl-cognition | Cognitive Ledger Protocol + Open Brain server. No project_urls on PyPI — needs link remediation on next publish. |
+| `hummbl-tuples` | 0.2.0 | hummbl-tuples | Typed Tuples governance model (polyglot: also Go, Rust, TS). No project_urls on PyPI — needs link remediation. |
+| `hummbl-bif` | 1.0.1 | bif | Batch Ingestion Framework. README says archived into `hummbl-io/hummbl-toolkit`. No project_urls on PyPI. |
+| `base120` | 3.0.0 | base120 | 120 reasoning operators — stdlib-only, tuple-native. Repo link = `hummbl.io` (no GitHub URL). |
+| `governed-compression` | 0.1.0 | governed-compression | "Private research surface for governed compression experiments." No author/repo metadata — likely HUMMBL's based on naming convention + matching private repo `hummbl-io/governed-compression`. |
+| `OBLITERATUS` | 0.0.1 | — | **NOT HUMMBL's — belongs to Pliny (pliny-lab).** Reserved-name placeholder, no functionality. Listed here only to document that it is excluded from the migration. Do not migrate. |
+
+**Name collisions (NOT HUMMBL's — do not migrate):** The following PyPI package names were previously listed as HUMMBL's in an earlier draft but are unrelated packages by other authors, verified 2026-08-21 via PyPI author/repository fields:
+- `arbiter` v1.1.2 → R.A. Stern (`rastern/arbiter`)
+- `arcana` v0.10.19 → `arcana.readthedocs.io`
+- `crab` v0.5.1 → Graham Bell (`grahambell/crab`)
+- `randy` v0.9.3 → Francis Horsman (Bitbucket `sys-git/randy`)
+- `hermes-agent` v0.19.0 → Nous Research
+
+These are unprefixed common-word names. HUMMBL's packages use the `hummbl-*` prefix, which avoids this collision class on PyPI.
 
 ### Publishable but not yet on PyPI (~31)
 | Repo | Has pyproject.toml | Notes |
@@ -103,14 +117,15 @@
 
 ## 2. npm (JavaScript/TypeScript) — 16 candidates
 
-### Live (2) — verified HUMMBL-owned
-| Package | Version | Repo link on npm | Notes |
-|---------|---------|------------------|-------|
-| `@hummbl/mcp-server` | 1.2.0 | `github.com/hummbl-dev/mcp-server` (stale — points to old org, private repo, 404 for public) | HUMMBL MCP Server for Base120. Scoped. 5 versions published (1.0.0–1.2.0). Repo link needs remediation → `github.com/hummbl-io/oss` after migration. |
-| `hummbl-bibliography` | 1.0.0 | `github.com/hummbl-dev/hummbl-bibliography` (stale — points to old org, private repo, 404 for public) | BibTeX citations (also TeX repo). Unscoped. Maintainer: `hummbl-dev`. Repo link needs remediation. Consider republishing as `@hummbl/bibliography` to match the scoped convention. |
+### Live (0) — clean slate
+All previously-published HUMMBL npm packages were **deprecated by the operator on 2026-08-21**:
+- `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
+- `hummbl-bibliography` v1.0.0 — deprecated ("Package no longer supported")
 
-**Name collisions (NOT HUMMBL's — do not migrate):** The following unscoped npm package names were previously listed as HUMMBL's but are unrelated packages by other authors, verified 2026-08-21 via the npm registry `repository` and `maintainers` fields:
-- `mcp-server` v0.0.9 → Melvin Carvalho (`sandy-mount/mcp-server`). HUMMBL's is the scoped `@hummbl/mcp-server`.
+The `@hummbl` scope still exists (operator owns it under the `hummbl-dev` npm account with `write` permission). Future HUMMBL npm packages publish fresh under `@hummbl/*` from this monorepo. No live packages to migrate — Phase 2 of the migration plan is a clean greenfield.
+
+**Name collisions (NOT HUMMBL's — never were):** The following unscoped npm package names were previously listed as HUMMBL's in an earlier draft of this inventory but are unrelated packages by other authors, verified 2026-08-21 via the npm registry `repository` and `maintainers` fields:
+- `mcp-server` v0.0.9 → Melvin Carvalho (`sandy-mount/mcp-server`)
 - `hermes-agent` v0.20.4 → `wrtensi/hermes-agent-npm`
 - `arbiter` v2.0.2 → `skbolton/Arbiter`
 - `arcana` v0.0.2 → `flipactual/arcana`

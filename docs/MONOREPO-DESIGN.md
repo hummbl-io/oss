@@ -812,32 +812,40 @@ dependent's version constraint, tag both.
 - [ ] Update `publish-pypi.yml` path extraction for `packages/python/` prefix
 - [ ] Update README.md package table
 
-### Phase 1: Migrate live PyPI packages (5)
+### Phase 1: Migrate live PyPI packages (7 remaining)
 
-Move source for the 5 live PyPI packages into the monorepo. Each
-package is migrated in its own PR to keep diffs reviewable.
+Move source for the live HUMMBL-owned PyPI packages into the monorepo.
+`hummbl-governance` is already migrated (this session, commit 7df31bc).
+Each remaining package is migrated in its own PR to keep diffs reviewable.
 
+- [x] `hummbl-governance` → `packages/python/hummbl-governance/` (DONE — 1.4.1 published via trusted publishing)
 - [ ] `hummbl-bus` → `packages/python/hummbl-bus/`
 - [ ] `hummbl-cognition` → `packages/python/hummbl-cognition/`
 - [ ] `hummbl-tuples` → `packages/python/hummbl-tuples/` (+ `packages/rust/`, `packages/go/`, `packages/node/` for reference impls)
 - [ ] `hummbl-bif` → `packages/python/hummbl-bif/`
 - [ ] `base120` → `packages/python/base120/`
+- [ ] `governed-compression` → `packages/python/governed-compression/` (verify ownership — no author metadata on PyPI, likely HUMMBL's based on naming + matching private repo)
+
+**Excluded from Phase 1 (not HUMMBL's):** `arbiter`, `arcana`, `crab`, `randy`, `hermes-agent` are name collisions on PyPI by other authors (see PACKAGES.md). `OBLITERATUS` belongs to Pliny (pliny-lab), not HUMMBL.
 
 **For each:** configure trusted publisher on pypi.org, verify dry-run
-build, then tag the next release from the monorepo.
+build, then tag the next release from the monorepo. Use clean-snapshot
+migration (no history) from private repos — see section 1.
 
-### Phase 2: Migrate live npm packages (7)
+### Phase 2: Publish npm packages (clean slate, 0 live)
 
-- [ ] `mcp-server` → `packages/node/mcp-server/`
-- [ ] `hermes-agent` → `packages/node/hermes-agent/`
-- [ ] `hummbl-bibliography` → `packages/node/hummbl-bibliography/`
-- [ ] `arbiter` → `packages/node/arbiter/`
-- [ ] `arcana` → `packages/node/arcana/`
-- [ ] `crab` → `packages/node/crab/`
-- [ ] `randy` → `packages/node/randy/`
+All previously-published HUMMBL npm packages were deprecated by the
+operator on 2026-08-21. The `@hummbl` scope is retained (operator owns
+it under the `hummbl-dev` npm account). Phase 2 is a clean greenfield:
+publish fresh under `@hummbl/*` from this monorepo.
 
-**For each:** set `NPM_TOKEN` secret, flip `private: true` → `false`,
-verify build, tag release.
+- [ ] `@hummbl/mcp-server` → `packages/node/mcp-server/` (re-publish fresh under scope; old `@hummbl/mcp-server` v1.2.0 is deprecated)
+- [ ] `@hummbl/bibliography` → `packages/node/hummbl-bibliography/` (re-publish scoped; old unscoped `hummbl-bibliography` v1.0.0 is deprecated)
+- [ ] Other npm candidates from PACKAGES.md "Publishable but not yet on npm" section
+
+**Excluded from Phase 2 (name collisions, never HUMMBL's):** `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, `mcp-server` (unscoped) are unrelated packages by other authors on npm (see PACKAGES.md).
+
+**For each:** set `NPM_TOKEN` secret, create `npm` environment, flip `private: true` → `false`, set `"name"` to `@hummbl/<name>`, verify build, tag release.
 
 ### Phase 3: Publish not-yet-live packages (~31 PyPI, ~10 npm)
 
