@@ -1,6 +1,6 @@
 name: Publish to PyPI
 
-# Trusted Publishing (OIDC) — no API tokens.
+# Trusted Publishing (OIDC) -- no API tokens.
 # Each package is configured as a trusted publisher on pypi.org pointing to
 # this repo + this workflow + the `pypi` environment.
 #
