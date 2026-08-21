@@ -25,7 +25,7 @@ import sys
 import unicodedata
 from pathlib import Path
 
-SHA_PIN_RE = re.compile(r"uses:\s+[\w.-]+/[\w.-]+@[0-9a-f]{40}\s*$")
+SHA_PIN_RE = re.compile(r"uses:\s+[\w.-]+(?:/[\w.-]+)+@[0-9a-fA-F]{40}\s*$")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s+(.+)$")
 ON_RE = re.compile(r"^on:(\s|$)")
 ENV_RE = re.compile(r"^\s*environment:\s+[\"']?([^\"'\s#]+)")
@@ -91,7 +91,7 @@ def main() -> int:
     args = ap.parse_args()
 
     wdir = Path(args.workflows_dir)
-    print("Validating .github/workflows/*.yml")
+    print(f"Validating {wdir}/*.yml and *.yaml")
     print("=" * 32)
     print()
 
@@ -99,7 +99,7 @@ def main() -> int:
         print("No workflows found.")
         return 0
 
-    files = sorted(wdir.glob("*.yml"))
+    files = sorted(wdir.glob("*.yml")) + sorted(wdir.glob("*.yaml"))
     if not files:
         print("No workflows found.")
         return 0
