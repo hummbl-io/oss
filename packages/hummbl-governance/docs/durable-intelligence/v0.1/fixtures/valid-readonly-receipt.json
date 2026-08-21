@@ -1,0 +1,69 @@
+{
+  "schema_version": "agent_session_receipt.v0.1",
+  "session_id": "session-2026-07-10-002",
+  "source_agent": "devin",
+  "environment": {
+    "host": "anvil",
+    "platform": "darwin",
+    "python_version": "3.13.13"
+  },
+  "tools_available": ["shell", "filesystem", "read_only"],
+  "repository_or_system_scope": ["hummbl-io/hummbl-governance"],
+  "starting_state": {
+    "branch": "main",
+    "head_commit": "abc123def456"
+  },
+  "actions_attempted": [
+    {
+      "action": "Read CONSTITUTION.md files for analysis",
+      "result": "succeeded",
+      "evidence_ref": null
+    }
+  ],
+  "mutations_made": [],
+  "claims": [
+    {
+      "claim": "25 CONSTITUTION.md files exist across PROJECTS/",
+      "posture": "observed",
+      "evidence_ref": "find command output"
+    }
+  ],
+  "decisions": [],
+  "negative_knowledge": [
+    {
+      "statement": "No code changed",
+      "context": "Read-only session"
+    },
+    {
+      "statement": "No branch created",
+      "context": "Read-only session"
+    },
+    {
+      "statement": "No commit made",
+      "context": "Read-only session"
+    }
+  ],
+  "open_questions": [
+    {
+      "question": "Which constitution archetype should be canonical?",
+      "blocking": true,
+      "owner": "operator"
+    }
+  ],
+  "next_actions": [
+    {
+      "action": "Operator decides on canonical archetype",
+      "owner": "operator",
+      "priority": "high",
+      "acceptance_criteria": "Operator decision recorded"
+    }
+  ],
+  "authority_boundaries": {
+    "allowed": ["read files", "search repos"],
+    "disallowed": ["write", "merge", "deploy"],
+    "escalation": "Operator required for all write actions"
+  },
+  "receipt_destination": "github_issue",
+  "completion_status": "INCONCLUSIVE",
+  "handoff_disposition": "BLOCKED_MISSING_AUTHORITY"
+}

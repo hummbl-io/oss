@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/research-integrity/v0.1/artifact-maturity.schema.json",
+  "title": "HUMMBL Research Integrity — Artifact Maturity and Claim Posture v0.1",
+  "description": "Machine-readable artifact maturity and claim-posture record",
+  "type": "object",
+  "required": ["artifact_id", "artifact_maturity", "claim_posture", "risk_assessment", "controls_satisfied", "evaluation_date", "evaluator"],
+  "properties": {
+    "artifact_id": {"type": "string"},
+    "artifact_maturity": {
+      "enum": ["EXPLORATORY", "INTERNAL_DRAFT", "INTERNAL_REPORT", "TECHNICAL_REPORT", "REPRODUCIBILITY_PACKET", "PREPRINT_CANDIDATE", "SUBMISSION_CANDIDATE", "SUBMITTED", "PEER_REVIEWED", "PUBLISHED", "CORRECTED", "SUPERSEDED", "RETRACTED"]
+    },
+    "claim_posture": {
+      "type": "object",
+      "required": ["novelty_claim", "evidence_strength", "reproducibility_claim", "peer_review_status"],
+      "properties": {
+        "novelty_claim": {"type": "string"},
+        "evidence_strength": {"enum": ["none", "anecdotal", "empirical_bounded", "empirical_general", "independently_validated"]},
+        "reproducibility_claim": {"enum": ["none", "claimed", "environment_documented", "independently_reproduced"]},
+        "peer_review_status": {"enum": ["none", "preprint_only", "submitted", "under_review", "peer_reviewed", "published"]}
+      }
+    },
+    "risk_assessment": {
+      "type": "object",
+      "properties": {
+        "R1_NOVELTY_OVERCLAIM": {"type": "boolean"},
+        "R2_PRIOR_ART_OMISSION": {"type": "boolean"},
+        "R3_EVIDENCE_STRENGTH_INFLATION": {"type": "boolean"},
+        "R4_REPRODUCIBILITY_GAP": {"type": "boolean"},
+        "R5_METHOD_OPACITY": {"type": "boolean"},
+        "R6_AUTHORSHIP_MISREPRESENTATION": {"type": "boolean"},
+        "R7_UNDISCLOSED_AI_ASSISTANCE": {"type": "boolean"},
+        "R8_CONFLICT_NONDISCLOSURE": {"type": "boolean"},
+        "R9_ETHICS_BOUNDARY_FAILURE": {"type": "boolean"},
+        "R10_DATA_RIGHTS_FAILURE": {"type": "boolean"},
+        "R11_VENUE_POLICY_NONCOMPLIANCE": {"type": "boolean"},
+        "R12_PUBLICITY_BEFORE_VALIDATION": {"type": "boolean"},
+        "R13_FAILURE_TO_CORRECT": {"type": "boolean"},
+        "R14_DISCIPLINE_PRESTIGE_BORROWING": {"type": "boolean"},
+        "R15_TERMINOLOGY_COLONIZATION": {"type": "boolean"}
+      }
+    },
+    "controls_satisfied": {
+      "type": "object",
+      "required": ["novelty_and_prior_art", "evidence_and_methods", "reproducibility", "authorship_and_contribution", "ai_use_disclosure", "independent_review", "ethics_privacy_rights", "publication_restraint", "correction_and_retraction"],
+      "properties": {
+        "novelty_and_prior_art": {"type": "boolean"},
+        "evidence_and_methods": {"type": "boolean"},
+        "reproducibility": {"type": "boolean"},
+        "authorship_and_contribution": {"type": "boolean"},
+        "ai_use_disclosure": {"type": "boolean"},
+        "independent_review": {"type": "boolean"},
+        "ethics_privacy_rights": {"type": "boolean"},
+        "publication_restraint": {"type": "boolean"},
+        "correction_and_retraction": {"type": "boolean"}
+      }
+    },
+    "evaluation_date": {"type": "string", "format": "date"},
+    "evaluator": {
+      "type": "object",
+      "required": ["evaluator_id", "independent"],
+      "properties": {
+        "evaluator_id": {"type": "string"},
+        "independent": {"type": "boolean"},
+        "qualifications": {"type": "string"}
+      }
+    },
+    "prohibited_claims_checked": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "unresolved_risks": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "correction_contact": {"type": "string"},
+    "version_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "date", "change"],
+        "properties": {
+          "version": {"type": "string"},
+          "date": {"type": "string", "format": "date"},
+          "change": {"type": "string"}
+        }
+      }
+    }
+  }
+}

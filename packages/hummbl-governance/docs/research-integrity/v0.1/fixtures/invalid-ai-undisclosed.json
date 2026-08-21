@@ -1,0 +1,37 @@
+{
+  "schema_version": "research_integrity_artifact.v0.1",
+  "artifact_id": "invalid-ai-undisclosed",
+  "title": "Research Report on Governance Models",
+  "maturity_state": "SUBMISSION_CANDIDATE",
+  "claim_postures": [
+    {"claim": "Five governance models identified", "posture": "OBSERVATION", "evidence_ref": "literature scan"}
+  ],
+  "risk_checks": [
+    {"risk_class": "R7", "status": "FAIL", "evidence_ref": null}
+  ],
+  "authorship": {
+    "human_authors": [
+      {"name": "Reuben Bowlby", "responsibility": "all work", "orcid": "0009-0002-5620-1103"}
+    ],
+    "agent_contributions": []
+  },
+  "ai_use_disclosure": {
+    "material_assistance": [],
+    "citation_fabrication_check": true
+  },
+  "independent_review": {
+    "reviewer_not_author": true,
+    "review_completed": true,
+    "reviewer_disagreements": [],
+    "unresolved_objections": []
+  },
+  "reproducibility_manifest": {
+    "methods_preserved": true,
+    "versions_preserved": true,
+    "negative_results_preserved": true
+  },
+  "correction_contact": "reuben@hummbl.dev",
+  "version_history": [
+    {"version": "0.1.0", "date": "2026-07-10", "change": "Initial draft"}
+  ]
+}

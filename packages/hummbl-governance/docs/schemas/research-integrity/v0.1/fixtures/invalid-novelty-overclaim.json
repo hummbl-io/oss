@@ -1,0 +1,42 @@
+{
+  "artifact_id": "report-002",
+  "artifact_maturity": "PREPRINT_CANDIDATE",
+  "claim_posture": {
+    "novelty_claim": "First novel approach to X",
+    "evidence_strength": "anecdotal",
+    "reproducibility_claim": "none",
+    "peer_review_status": "preprint_only"
+  },
+  "risk_assessment": {
+    "R1_NOVELTY_OVERCLAIM": true,
+    "R2_PRIOR_ART_OMISSION": true,
+    "R3_EVIDENCE_STRENGTH_INFLATION": true,
+    "R4_REPRODUCIBILITY_GAP": true,
+    "R5_METHOD_OPACITY": true,
+    "R6_AUTHORSHIP_MISREPRESENTATION": false,
+    "R7_UNDISCLOSED_AI_ASSISTANCE": true,
+    "R8_CONFLICT_NONDISCLOSURE": false,
+    "R9_ETHICS_BOUNDARY_FAILURE": false,
+    "R10_DATA_RIGHTS_FAILURE": false,
+    "R11_VENUE_POLICY_NONCOMPLIANCE": false,
+    "R12_PUBLICITY_BEFORE_VALIDATION": true,
+    "R13_FAILURE_TO_CORRECT": false,
+    "R14_DISCIPLINE_PRESTIGE_BORROWING": true,
+    "R15_TERMINOLOGY_COLONIZATION": false
+  },
+  "controls_satisfied": {
+    "novelty_and_prior_art": false,
+    "evidence_and_methods": false,
+    "reproducibility": false,
+    "authorship_and_contribution": true,
+    "ai_use_disclosure": false,
+    "independent_review": false,
+    "ethics_privacy_rights": true,
+    "publication_restraint": false,
+    "correction_and_retraction": false
+  },
+  "evaluation_date": "2026-07-11",
+  "evaluator": {"evaluator_id": "author-A", "independent": false, "qualifications": "author"},
+  "prohibited_claims_checked": [],
+  "unresolved_risks": ["novelty_overclaim", "prior_art_omission", "evidence_strength_inflation", "reproducibility_gap", "method_opacity", "undisclosed_ai_assistance", "publicity_before_validation", "discipline_prestige_borrowing"]
+}

@@ -1094,3 +1094,371 @@ class TestComplianceMapperNISTCSF:
         parsed = json.loads(report.to_json())
         assert parsed["framework"] == "NIST_CSF"
         assert len(parsed["controls"]["GOVERN"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# TestComplianceMapperGPAI (EU AI Act Article 53)
+# ---------------------------------------------------------------------------
+
+
+def _training_attest_entry(entry_id: str = "e_train") -> dict:
+    return {
+        "entry_id": entry_id,
+        "timestamp": "2026-03-23T12:00:00Z",
+        "task_id": "t_train",
+        "intent_id": "i_train",
+        "signature": "sigtrain",
+        "tuple_type": "ATTEST",
+        "tuple_data": {
+            "claim": "training data provenance verified",
+            "outcome": "PASS",
+        },
+    }
+
+
+def _adversarial_attest_entry(entry_id: str = "e_adv") -> dict:
+    return {
+        "entry_id": entry_id,
+        "timestamp": "2026-03-23T12:01:00Z",
+        "task_id": "t_adv",
+        "intent_id": "i_adv",
+        "signature": "sigadv",
+        "tuple_type": "ATTEST",
+        "tuple_data": {
+            "claim": "adversarial test suite passed",
+            "outcome": "PASS",
+        },
+    }
+
+
+class TestComplianceMapperGPAI:
+    def test_gpai_all_controls_initialized(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert report.framework == "EU_AI_ACT_GPAI"
+        expected = {
+            "Art.53.1.a", "Art.53.1.b", "Art.53.1.c", "Art.53.1.d",
+            "Art.53.2.a", "Art.53.2.b", "Art.53.2.c", "Art.53.2.d", "Art.53.2.e",
+        }
+        assert set(report.controls.keys()) == expected
+
+    def test_attest_maps_to_art53_1a(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.1.a"]) == 1
+        assert report.controls["Art.53.1.a"][0]["claim"] == "output validated"
+
+    def test_dctx_maps_to_art53_1b(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dctx_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.1.b"]) == 1
+        assert report.controls["Art.53.1.b"][0]["delegator"] == "agent-1"
+
+    def test_contract_maps_to_art53_1c(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_contract_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.1.c"]) == 1
+
+    def test_training_attest_maps_to_art53_1d(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_training_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.1.d"]) == 1
+        assert "training" in report.controls["Art.53.1.d"][0]["claim"]
+
+    def test_non_training_attest_skips_art53_1d(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.1.d"]) == 0
+
+    def test_attest_with_outcome_maps_to_art53_2a(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.a"]) == 1
+
+    def test_circuit_breaker_maps_to_art53_2b(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.b"]) == 1
+
+    def test_adversarial_attest_maps_to_art53_2c(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_adversarial_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.c"]) == 1
+        assert "adversarial" in report.controls["Art.53.2.c"][0]["claim"]
+
+    def test_non_adversarial_attest_skips_art53_2c(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.c"]) == 0
+
+    def test_killswitch_maps_to_art53_2d(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_killswitch_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.d"]) == 1
+        assert report.controls["Art.53.2.d"][0]["state"] == "HALT_ALL"
+
+    def test_signed_maps_to_art53_2e(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=True)])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.e"]) >= 1
+
+    def test_unsigned_skips_art53_2e(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=False)])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        assert len(report.controls["Art.53.2.e"]) == 0
+
+    def test_gpai_empty_dir(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        for ctrl in report.controls.values():
+            assert ctrl == []
+
+    def test_gpai_cli(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        rc = main(["--framework", "gpai", "--dir", str(tmp_path)])
+        assert rc == 0
+
+    def test_gpai_report_to_json_roundtrip(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dctx_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_gpai_report(days=30)
+        parsed = json.loads(report.to_json())
+        assert parsed["framework"] == "EU_AI_ACT_GPAI"
+        assert len(parsed["controls"]["Art.53.1.b"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# TestComplianceMapperCOSAiS
+# ---------------------------------------------------------------------------
+
+
+def _health_probe_entry(entry_id: str = "e_hp") -> dict:
+    return {
+        "entry_id": entry_id,
+        "timestamp": "2026-03-23T13:00:00Z",
+        "task_id": "t_hp",
+        "intent_id": "i_hp",
+        "signature": "sighp",
+        "tuple_type": "HEALTH_PROBE",
+        "tuple_data": {
+            "state": "HEALTHY",
+        },
+    }
+
+
+class TestComplianceMapperCOSAiS:
+    def test_cosais_all_controls_initialized(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert report.framework == "NIST_COSAIS"
+        expected = {
+            "AC-2", "AC-3", "AU-2", "AU-6", "AU-12",
+            "CM-2", "IA-2", "RA-3", "RA-5", "SA-9",
+            "SC-8", "SI-2", "SI-7", "SI-10",
+        }
+        assert set(report.controls.keys()) == expected
+
+    def test_dct_maps_to_ac2_and_ia2(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["AC-2"]) == 1
+        assert len(report.controls["IA-2"]) == 1
+        assert report.controls["AC-2"][0]["subject"] == "agent-1"
+
+    def test_dct_maps_to_ac3(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["AC-3"]) == 1
+        assert report.controls["AC-3"][0]["ops_allowed"] == ["read"]
+
+    def test_signed_maps_to_au2_and_au12(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=True)])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["AU-2"]) == 1
+        assert len(report.controls["AU-12"]) == 1
+
+    def test_unsigned_skips_au2_and_au12(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=False)])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["AU-2"]) == 0
+        assert len(report.controls["AU-12"]) == 0
+
+    def test_circuit_breaker_maps_to_au6(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["AU-6"]) == 1
+
+    def test_health_probe_maps_to_au6(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_health_probe_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["AU-6"]) == 1
+
+    def test_contract_maps_to_cm2(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_contract_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["CM-2"]) == 1
+
+    def test_circuit_breaker_maps_to_ra3(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["RA-3"]) == 1
+
+    def test_health_probe_maps_to_ra5(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_health_probe_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["RA-5"]) == 1
+
+    def test_attest_maps_to_ra5(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["RA-5"]) == 1
+
+    def test_dctx_maps_to_sa9(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dctx_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["SA-9"]) == 1
+        assert report.controls["SA-9"][0]["delegator"] == "agent-1"
+
+    def test_signed_maps_to_sc8_and_si7(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=True)])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["SC-8"]) == 1
+        assert len(report.controls["SI-7"]) == 1
+
+    def test_circuit_breaker_maps_to_si2(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["SI-2"]) == 1
+
+    def test_attest_maps_to_si10(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        assert len(report.controls["SI-10"]) == 1
+
+    def test_cosais_empty_dir(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        for ctrl in report.controls.values():
+            assert ctrl == []
+
+    def test_cosais_cli(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        rc = main(["--framework", "cosais", "--dir", str(tmp_path)])
+        assert rc == 0
+
+    def test_cosais_report_to_json_roundtrip(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_cosais_report(days=30)
+        parsed = json.loads(report.to_json())
+        assert parsed["framework"] == "NIST_COSAIS"
+        assert len(parsed["controls"]["AC-2"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# TestComplianceMapperCrosswalk
+# ---------------------------------------------------------------------------
+
+
+class TestComplianceMapperCrosswalk:
+    def test_crosswalk_framework_label(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        assert report.framework == "CROSSWALK"
+
+    def test_crosswalk_has_entries_and_summary(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        assert "entries" in report.controls
+        assert "summary" in report.controls
+
+    def test_crosswalk_summary_includes_all_10_frameworks(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        summary_frameworks = {s["framework"] for s in report.controls["summary"]}
+        expected = {
+            "SOC2", "GDPR", "OWASP_AGENTIC", "NIST_AI_RMF", "EU_AI_ACT",
+            "EU_AI_ACT_GPAI", "ISO27001", "ISO42001", "NIST_CSF", "NIST_COSAIS",
+        }
+        assert summary_frameworks == expected
+
+    def test_crosswalk_summary_counts(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        soc2_summary = next(s for s in report.controls["summary"] if s["framework"] == "SOC2")
+        assert soc2_summary["total_evidence"] >= 1
+        assert soc2_summary["controls_with_evidence"] >= 1
+
+    def test_crosswalk_dct_entry_appears_in_multiple_frameworks(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        entries = report.controls["entries"]
+        assert len(entries) == 1
+        entry = entries[0]
+        assert entry["entry_id"] == "e1"
+        # DCT should appear in multiple frameworks
+        frameworks_covered = set(entry["frameworks"].keys())
+        assert "SOC2" in frameworks_covered
+        assert "ISO27001" in frameworks_covered
+
+    def test_crosswalk_empty_dir(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        assert report.controls["entries"] == []
+        # Summary still has all frameworks with zero evidence
+        assert len(report.controls["summary"]) == 10
+        for s in report.controls["summary"]:
+            assert s["total_evidence"] == 0
+
+    def test_crosswalk_multiple_entries_accumulate(self, tmp_path):
+        _write_governance_file(
+            tmp_path, _today_str(),
+            [_dct_entry("e1"), _dctx_entry("e2"), _intent_entry("e3")],
+        )
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        assert len(report.controls["entries"]) == 3
+
+    def test_crosswalk_cli(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        rc = main(["--framework", "crosswalk", "--dir", str(tmp_path)])
+        assert rc == 0
+
+    def test_crosswalk_report_to_json_roundtrip(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_crosswalk_report(days=30)
+        parsed = json.loads(report.to_json())
+        assert parsed["framework"] == "CROSSWALK"
+        assert len(parsed["controls"]["entries"]) == 1
+        assert len(parsed["controls"]["summary"]) == 10
