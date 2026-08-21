@@ -1,0 +1,64 @@
+{
+  "test_id": "T12_INVALID_BOUNDARY_MISMATCH",
+  "description": "Boundary rule denies action but receipt recorded ALLOW, yields INVALID with E_BOUNDARY_MISMATCH",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_DEPLOY"
+      ],
+      "boundary_rules": {
+        "ACT_DEPLOY": {
+          "allow": false,
+          "required_params": []
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t7",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:07:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_DEPLOY",
+          "params": {},
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t7"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t7"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALID",
+    "primary_reason_code": "E_BOUNDARY_MISMATCH",
+    "reason_codes": [
+      "E_BOUNDARY_MISMATCH"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t7",
+      "receipt_hash": "sha256:receipt-t7"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1"
+  },
+  "expected_report_sha256": "16d95fbfc546bafdfec9f78e5b83211d13113510a6331beee0b142d37884e68a"
+}

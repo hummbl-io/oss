@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.receipt_integrity_monitor.v1.json",
+  "title": "Receipt Integrity Monitor Primitive v1",
+  "description": "Schema candidate for P30 ReceiptIntegrityMonitor — enforces K11 (INTEGRITY): receipt sequences are complete and unbroken. Detects gaps in receipt sequences (K4 violation), hash chain breaks, and retroactive insertion. Raises KernelPanic on violation. Status: PROPOSED — not yet implemented.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "monitor_run_id",
+    "agent_id",
+    "check_results",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "monitor_run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique ID for this monitoring sweep."
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Agent whose receipts are being monitored."
+    },
+    "check_results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence_check", "hash_chain_check", "timestamp_check"],
+      "properties": {
+        "sequence_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passed", "receipts_scanned"],
+          "properties": {
+            "passed": {
+              "type": "boolean",
+              "description": "True if no sequence gaps detected."
+            },
+            "receipts_scanned": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "gaps_found": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["expected_sequence", "found_sequence"],
+                "properties": {
+                  "expected_sequence": { "type": "integer" },
+                  "found_sequence": { "type": "integer" },
+                  "missing_count": { "type": "integer", "minimum": 1 }
+                }
+              },
+              "description": "Sequence gaps detected. Each entry describes a gap where expected_sequence was not found and the next found sequence is found_sequence."
+            }
+          },
+          "description": "K4 (TEMPORAL) check: verifies receipt sequence_ids are contiguous."
+        },
+        "hash_chain_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passed", "chains_verified"],
+          "properties": {
+            "passed": {
+              "type": "boolean",
+              "description": "True if all hash chain links are valid."
+            },
+            "chains_verified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "broken_links": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["receipt_id", "expected_prev_hash", "actual_prev_hash"],
+                "properties": {
+                  "receipt_id": { "type": "string" },
+                  "expected_prev_hash": { "type": "string" },
+                  "actual_prev_hash": { "type": "string" },
+                  "receipt_sequence": { "type": "integer" }
+                }
+              },
+              "description": "Hash chain breaks detected. Each entry identifies a receipt whose prev_receipt_hash doesn't match the previous receipt's hash."
+            }
+          },
+          "description": "K1 (RECEIPT) check: verifies SHA-256 hash chain integrity."
+        },
+        "timestamp_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passed"],
+          "properties": {
+            "passed": {
+              "type": "boolean",
+              "description": "True if no retroactive insertion detected."
+            },
+            "anomalies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["receipt_id", "anomaly_type"],
+                "properties": {
+                  "receipt_id": { "type": "string" },
+                  "anomaly_type": {
+                    "type": "string",
+                    "enum": ["retroactive_insertion", "future_timestamp", "timestamp_gap"]
+                  },
+                  "receipt_sequence": { "type": "integer" },
+                  "receipt_timestamp": { "type": "string", "format": "date-time" },
+                  "expected_timestamp_range": {
+                    "type": "object",
+                    "properties": {
+                      "earliest": { "type": "string", "format": "date-time" },
+                      "latest": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              },
+              "description": "Timestamp anomalies detected. Retroactive insertion: receipt timestamp is inconsistent with its sequence position."
+            }
+          },
+          "description": "Temporal consistency check: detects retroactive receipt insertion."
+        },
+        "signature_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passed"],
+          "properties": {
+            "passed": {
+              "type": "boolean",
+              "description": "True if all receipt signatures are valid."
+            },
+            "invalid_signatures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["receipt_id"],
+                "properties": {
+                  "receipt_id": { "type": "string" },
+                  "receipt_sequence": { "type": "integer" },
+                  "expected_signer": { "type": "string" },
+                  "failure_reason": { "type": "string" }
+                }
+              }
+            }
+          },
+          "description": "K3 (IDENTITY) check: verifies receipt signatures match agent identity."
+        }
+      },
+      "description": "Results of all integrity checks performed in this monitoring sweep."
+    },
+    "panic_triggered": {
+      "type": "boolean",
+      "description": "True if any check failed and KernelPanic was raised. False if all checks passed."
+    },
+    "panic_details": {
+      "type": ["object", "null"],
+      "properties": {
+        "invariant_violated": {
+          "type": "string",
+          "enum": ["K1", "K3", "K4", "K11"],
+          "description": "Which invariant was violated."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["WARNING", "CRITICAL", "FATAL"]
+        },
+        "description": { "type": "string" }
+      },
+      "description": "Details of the KernelPanic if triggered."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_hash"],
+      "properties": {
+        "receipt_hash": { "type": "string", "minLength": 1 },
+        "receipt_sequence": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Receipt gate: hash-chained proof of monitoring sweep."
+    }
+  }
+}

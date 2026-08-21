@@ -1,0 +1,14 @@
+id: SL-10
+title: "Constraint State Scaling"
+status: empirically.tested
+candidate_law_statement: "Constraints drift across memory, delegation, tool use, communication, and optimization unless represented as signed executable state. Refresh required every 10 steps without positive marker."
+falsification_criterion: "Agent exceeds 10 messages/steps without constraint.refresh applied, refreshed marker, or positive refresh signal."
+experiment_receipts: []
+boundary_conditions:
+  - "Constraints first-class execution state"
+  - "Signed refresh mechanism"
+  - "Drift channel identifiable"
+related_modules:
+  - "output_validator"
+  - "capability_fence"
+  - "kill_switch"

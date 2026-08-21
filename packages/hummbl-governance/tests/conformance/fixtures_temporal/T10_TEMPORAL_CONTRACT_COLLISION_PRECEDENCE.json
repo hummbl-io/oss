@@ -1,0 +1,101 @@
+{
+  "test_id": "T10_TEMPORAL_CONTRACT_COLLISION_PRECEDENCE",
+  "description": "Contract collision in origin epoch takes precedence over temporal invalidation",
+  "inputs": {
+    "contract_a": {
+      "contract_id": "contract-temporal5-e1",
+      "contract_version": "1.0.0",
+      "contract_sha256": "7171717171717171717171717171717171717171717171717171717171717171",
+      "epoch_number": 1,
+      "action_space": [
+        "ACT_SEND_NOTIFICATION",
+        "ACT_READ_STATUS"
+      ],
+      "constraints": {
+        "budget_max": 100
+      },
+      "risk_policy": {
+        "ACT_SEND_NOTIFICATION": 2,
+        "ACT_READ_STATUS": 1
+      },
+      "semantics_changed": false
+    },
+    "contract_b": {
+      "contract_id": "contract-temporal5-e2",
+      "contract_version": "2.0.0",
+      "contract_sha256": "7272727272727272727272727272727272727272727272727272727272727272",
+      "epoch_number": 2,
+      "action_space": [
+        "ACT_READ_STATUS"
+      ],
+      "constraints": {
+        "budget_max": 100
+      },
+      "risk_policy": {
+        "ACT_READ_STATUS": 1
+      },
+      "semantics_changed": false
+    },
+    "receipt": {
+      "receipt_version": "1.0.0",
+      "execution_id": "exec-t10",
+      "contract_ref": {
+        "contract_id": "contract-temporal5-e1",
+        "contract_version": "1.0.0",
+        "contract_sha256": "7373737373737373737373737373737373737373737373737373737373737373"
+      },
+      "epoch_ref": {
+        "epoch_id": "epoch-1",
+        "epoch_number": 1
+      },
+      "actions": [
+        {
+          "index": 0,
+          "action_id": "ACT_SEND_NOTIFICATION",
+          "params_c14n_sha256": "7474747474747474747474747474747474747474747474747474747474747474",
+          "params_inline": {
+            "channel": "ops"
+          },
+          "boundary_assertion": {
+            "decision": "ALLOW",
+            "basis": "POLICY_MATCH"
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "ev-t10-1",
+          "kind": "PLAN_HASH",
+          "sha256": "7575757575757575757575757575757575757575757575757575757575757575"
+        }
+      ],
+      "integrity": {
+        "receipt_c14n_sha256": "7676767676767676767676767676767676767676767676767676767676767676"
+      },
+      "signature": {
+        "alg": "ed25519",
+        "kid": "k1",
+        "sig": "VALIDSIG_T10"
+      }
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALID",
+    "primary_reason_code": "E_CONTRACT_VERSION_COLLISION",
+    "reason_codes": [
+      "E_CONTRACT_VERSION_COLLISION"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-temporal5-e1",
+      "contract_hash": "sha256:7373737373737373737373737373737373737373737373737373737373737373"
+    },
+    "receipt_ref": {
+      "receipt_id": "exec-t10",
+      "receipt_hash": "sha256:7676767676767676767676767676767676767676767676767676767676767676"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1"
+  },
+  "expected_report_sha256": "3bbc7329d78ff1daa6407fc929d8b2394a86f5ee3f998dcc921fb9ce883788c6"
+}

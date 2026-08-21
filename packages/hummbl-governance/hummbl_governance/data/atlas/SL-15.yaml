@@ -1,0 +1,14 @@
+id: SL-15
+title: "Reliability and Drift Scaling"
+status: ratified
+candidate_law_statement: "Consistency, robustness, predictability, and safety need separate curves; single success metrics hide operational failure modes. Calibration required every 500 interactions."
+falsification_criterion: "Agent exceeds 500 interactions without calibration complete, calibrated=true, or calibrated marker."
+experiment_receipts: []
+boundary_conditions:
+  - "Interaction length measurable"
+  - "Task diversity bounded"
+  - "Model update frequency known"
+related_modules:
+  - "behavior_monitor"
+  - "convergence_guard"
+  - "drift_detect"

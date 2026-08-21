@@ -1,0 +1,64 @@
+{
+  "test_id": "T14_INVALID_CONTRACT_VERSION_COLLISION",
+  "description": "Receipt contract_hash differs from contract yields INVALID with E_CONTRACT_VERSION_COLLISION",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_READ_STATUS"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t9",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1-TAMPERED",
+      "timestamp_utc": "2026-02-27T00:09:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_READ_STATUS",
+          "params": {},
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t9"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t9"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALID",
+    "primary_reason_code": "E_CONTRACT_VERSION_COLLISION",
+    "reason_codes": [
+      "E_CONTRACT_VERSION_COLLISION"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1-TAMPERED"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t9",
+      "receipt_hash": "sha256:receipt-t9"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1"
+  },
+  "expected_report_sha256": "62edc71456d58498fc5d9cd3eed2b97019f98766cedf6cb5c02bc1ee825d965d"
+}

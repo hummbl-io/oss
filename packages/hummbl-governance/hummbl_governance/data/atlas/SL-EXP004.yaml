@@ -1,0 +1,79 @@
+record_id: SL-EXP004
+name: "Exp-004 GPU Chinchilla TinyShakespeare Scaling"
+description: "Chinchilla-style scaling law reconstruction on GPU (RTX 3080 Ti). Character-level transformer on TinyShakespeare. 25 configs (5 sizes x 5 token budgets). Fits Loss = E + A/N^alpha + B/D^beta."
+
+category: EMPIRICAL
+status: empirically.tested
+date_created: "2026-06-18T00:09:36Z"
+date_updated: "2026-06-18T00:09:36Z"
+version: "1.0"
+author: "devin"
+review_status: "SELF"
+
+# Law parameters
+parameters:
+  E: 1.7341746513355272
+  A: 70.0694319121458
+  alpha: 0.43156467708125085
+  B: 99.99999999568361
+  beta: 0.3806855307458165
+
+# Goodness of fit
+metrics:
+  rmse: 0.12617870442665272
+  r_squared: 0.8648004435011658
+
+# Conditions
+type: "INEQUALITY"
+operator: "<="
+threshold_value: null
+unit: "cross_entropy_loss"
+scope: "EMPIRICAL"
+
+# Evidence
+evidence:
+  - "GPU sweep: 25 runs on RTX 3080 Ti via JAX/Flax in WSL2 Ubuntu"
+  - "Batch size: 64, Eval every: 250 steps"
+  - "Model sizes: 200K, 1M, 3M, 6M, 10M parameters"
+  - "Token budgets: 250K, 500K, 1M, 2M, 4M"
+  - "Dataset: TinyShakespeare (~1.1M chars, 65 vocab)"
+
+citations: []
+
+# Notes
+notes: |
+  GPU-derived exponents differ from CPU (SL-EXP003):
+  - alpha: 0.432 (GPU) vs 0.367 (CPU) — params matter MORE on GPU
+  - beta: 0.381 (GPU) vs 0.128 (CPU) — data matters MORE on GPU
+  - R^2: 0.865 (GPU) vs 0.962 (CPU) — higher variance on GPU
+  
+  Possible explanations:
+  1. GPU batch dynamics (64 vs 32/64 CPU) change convergence
+  2. JAX JIT compilation introduces different numerical behavior
+  3. Fewer eval steps (250 vs 500) gives noisier loss estimates
+  
+  This finding suggests scaling laws may be hardware-dependent,
+  which has implications for cross-platform model training.
+
+# Tags
+tags:
+  - scaling_law
+  - chinchilla
+  - gpu
+  - jax
+  - tinyshakespeare
+  - empirical
+
+# Falsifier (D2 falsifiability requirement)
+falsifier: |
+  If a repeated GPU sweep (same 25 configs, RTX 3080 Ti, JAX/Flax, WSL2)
+  produces alpha outside [0.30, 0.55] OR beta outside [0.15, 0.50]
+  OR R^2 < 0.80 on the fitted model, this law is rejected.
+  Hardware change (different GPU architecture) does not falsify;
+  it produces a new law (SL-EXP005+).
+
+# Test expectations
+test_expectations:
+  alpha_range: [0.30, 0.55]
+  beta_range: [0.15, 0.50]
+  min_r_squared: 0.80

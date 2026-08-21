@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.rollback.v1.json",
+  "title": "Rollback Primitive v1",
+  "description": "Schema candidate for P28 Rollback — enforces K9 (REVERSIBILITY): every governed action declares a rollback path or is explicitly marked irreversible with a recorded risk acceptance. Status: PROPOSED — not yet implemented.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "action_id",
+    "reversibility",
+    "authority",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ID of the governed action this rollback declaration covers."
+    },
+    "reversibility": {
+      "type": "string",
+      "enum": ["reversible", "partially_reversible", "irreversible"],
+      "description": "Reversibility classification of the action."
+    },
+    "rollback_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Required when reversibility is 'reversible' or 'partially_reversible'.",
+      "required_if": {
+        "property": "reversibility",
+        "values": ["reversible", "partially_reversible"]
+      },
+      "properties": {
+        "rollback_steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["step_id", "description"],
+            "properties": {
+              "step_id": { "type": "string", "minLength": 1 },
+              "description": { "type": "string", "minLength": 1 },
+              "estimated_duration_minutes": { "type": "integer", "minimum": 0 },
+              "data_loss": { "type": "boolean", "description": "Whether this step causes data loss." }
+            }
+          },
+          "description": "Ordered steps to reverse the action."
+        },
+        "checkpoint_ref": {
+          "type": "string",
+          "description": "Reference to the state checkpoint to restore."
+        },
+        "partial_rollback_scope": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "For partially_reversible: which aspects can be rolled back."
+        }
+      }
+    },
+    "irreversibility_acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Required when reversibility is 'irreversible'. Records accepted residual risk.",
+      "properties": {
+        "risk_description": { "type": "string", "minLength": 1 },
+        "risk_severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "mitigation_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References to mitigations for irreversible consequences."
+        },
+        "acceptor_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identity of the operator accepting the irreversibility risk."
+        }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared_by"],
+      "properties": {
+        "declared_by": { "type": "string", "minLength": 1 },
+        "delegation_ref": { "type": "string" }
+      },
+      "description": "Authority gate: who declared the rollback plan."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_hash"],
+      "properties": {
+        "receipt_hash": { "type": "string", "minLength": 1 },
+        "receipt_sequence": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Receipt gate: hash-chained proof of rollback declaration."
+    }
+  }
+}

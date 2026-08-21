@@ -1,0 +1,19 @@
+{
+  "receipt_id": "sig-003",
+  "surface": "signal",
+  "lane": "candidate_command",
+  "actor_or_agent": "operator",
+  "recipient_alias": "claude-code",
+  "group_alias": null,
+  "event_class": "inbound_instruction",
+  "risk_class": "candidate_command",
+  "message_hash": "c3d4e5f6789012345678901234567890abcdef1234567890abcdef12345678901234",
+  "message_summary": "Inbound instruction parsed as candidate bus event — no direct execution",
+  "admission_decision": "pending_approval",
+  "executor": null,
+  "transport_mode": "daemon",
+  "sent_timestamp": null,
+  "received_timestamp": "2026-06-29T12:05:00Z",
+  "durable_uri": "receipts/signal/sig-003.json",
+  "redactions_applied": []
+}

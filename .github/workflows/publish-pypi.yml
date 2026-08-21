@@ -1,0 +1,62 @@
+name: Publish to PyPI
+
+# Trusted Publishing (OIDC) — no API tokens.
+# Each package is configured as a trusted publisher on pypi.org pointing to
+# this repo + this workflow + the `pypi` environment.
+#
+# To publish a package:
+#   1. Configure the trusted publisher on pypi.org for that package
+#      (see docs/MONOREPO-DESIGN.md for the exact values)
+#   2. Tag and push: git tag hummbl-governance/v1.4.1 && git push origin hummbl-governance/v1.4.1
+#
+# To add a new Python package:
+#   1. Add its tag pattern to the `tags` filter below
+#   2. Add its source under packages/<name>/
+#   3. Configure the trusted publisher on pypi.org
+
+on:
+  push:
+    tags:
+      - "hummbl-governance/v*"
+      - "hummbl-bus/v*"
+      - "hummbl-cognition/v*"
+      - "hummbl-tuples/v*"
+      - "hummbl-bif/v*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # OIDC for trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract package name from tag
+        id: pkg
+        run: |
+          # tag format: <package-name>/v<version>
+          pkg="${GITHUB_REF_NAME%%/v*}"
+          echo "name=$pkg" >> "$GITHUB_OUTPUT"
+          echo "path=packages/$pkg" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build package
+        working-directory: ${{ steps.pkg.outputs.path }}
+        run: python -m build
+
+      - name: Publish to PyPI
+        working-directory: ${{ steps.pkg.outputs.path }}
+        env:
+          TWINE_NON_INTERACTIVE: "1"
+        run: python -m twine upload dist/*

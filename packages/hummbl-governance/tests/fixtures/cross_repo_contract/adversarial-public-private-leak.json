@@ -1,0 +1,92 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "crc:hummbl-io:research-source-packet-private-leak",
+  "contract_version": "0.1.0",
+  "contract_status": "candidate",
+  "producer": {
+    "repo": "hummbl-io/research-source-packets",
+    "authority_ref": "https://github.com/hummbl-io/research-source-packets/issues/18",
+    "artifact_locator": "private://hummbl-research/source-packets"
+  },
+  "consumers": [
+    {
+      "repo": "hummbl-io/hummbl-research",
+      "requirement": "required"
+    },
+    {
+      "repo": "hummbl-io/claim-evidence-ledger",
+      "requirement": "optional"
+    }
+  ],
+  "interface": {
+    "artifact_type": "research_source_packet",
+    "payload_schema_uri": "https://github.com/hummbl-io/research-source-packets/blob/main/schemas/research-source-packets-v0.1.json",
+    "identifier_namespace": "rsp",
+    "locator_pattern": "^rsp:[a-z0-9._/-]+$"
+  },
+  "compatibility": {
+    "supported_contract_versions": [
+      "0.1.x"
+    ],
+    "supported_payload_versions": [
+      "v0.1"
+    ],
+    "breaking_change_policy": "new_major_and_migration",
+    "migration_refs": []
+  },
+  "postures": {
+    "visibility": "public",
+    "privacy": "public_safe",
+    "claim_posture": "evidence_linked",
+    "canon_posture": "noncanonical"
+  },
+  "validation": {
+    "deterministic_commands": [
+      "python -m hummbl_governance.cross_repo_contract tests/fixtures/cross_repo_contract/valid-wave1-contract.json --manifest tests/fixtures/cross_repo_contract/valid-wave1-manifest.json"
+    ],
+    "valid_fixtures": [
+      "repo://tests/fixtures/cross_repo_contract/valid-wave1-contract.json"
+    ],
+    "invalid_fixtures": [
+      "repo://tests/fixtures/cross_repo_contract/invalid-unsupported-payload-manifest.json"
+    ],
+    "adversarial_fixtures": [
+      "repo://tests/fixtures/cross_repo_contract/adversarial-public-private-leak.json",
+      "repo://tests/fixtures/cross_repo_contract/adversarial-receipt-as-verification.json"
+    ],
+    "offline_core_required": true
+  },
+  "receipts": {
+    "on_publish": [
+      "contract_publish_receipt"
+    ],
+    "on_accept": [
+      "consumer_acceptance_receipt"
+    ],
+    "on_reject": [
+      "consumer_rejection_receipt"
+    ],
+    "receipt_schema_refs": [
+      "https://github.com/hummbl-io/execution-receipts/blob/main/schemas/execution-receipts-v0.1.json"
+    ]
+  },
+  "assurance": {
+    "refs": [
+      {
+        "kind": "evidence",
+        "ref": "https://github.com/hummbl-io/hummbl-governance/issues/234"
+      },
+      {
+        "kind": "review_receipt",
+        "ref": "https://github.com/hummbl-io/hummbl-governance/pull/235"
+      }
+    ]
+  },
+  "lifecycle": {
+    "effective_at": null,
+    "review_by": "2026-08-11",
+    "supersedes": [],
+    "deprecated_at": null,
+    "replacement_contract_ref": null
+  }
+}

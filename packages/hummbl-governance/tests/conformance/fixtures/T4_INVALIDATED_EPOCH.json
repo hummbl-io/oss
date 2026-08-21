@@ -1,0 +1,95 @@
+{
+  "test_id": "T4_INVALIDATED_EPOCH",
+  "description": "Execution valid in origin epoch becomes invalidated under newer epoch",
+  "inputs": {
+    "origin_contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_READ_STATUS",
+        "ACT_SEND_NOTIFICATION"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        },
+        "ACT_SEND_NOTIFICATION": {
+          "allow": true,
+          "required_params": [
+            "channel"
+          ]
+        }
+      }
+    },
+    "target_contract": {
+      "contract_id": "contract-e2-v2",
+      "contract_hash": "sha256:contract-e2-v2",
+      "epoch": 2,
+      "action_space": [
+        "ACT_READ_STATUS"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        },
+        "ACT_SEND_NOTIFICATION": {
+          "allow": false,
+          "required_params": [
+            "channel"
+          ]
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t4",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:03:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_SEND_NOTIFICATION",
+          "params": {
+            "channel": "ops"
+          },
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t4"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t4"
+    },
+    "evaluation_mode": "future_epoch_revalidation"
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALIDATED",
+    "reason_codes": [
+      "E_EPOCH_INVALIDATED"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e2-v2",
+      "contract_hash": "sha256:contract-e2-v2"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t4",
+      "receipt_hash": "sha256:receipt-t4"
+    },
+    "evaluated_epoch": 2,
+    "origin_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1",
+    "primary_reason_code": "E_EPOCH_INVALIDATED"
+  },
+  "expected_report_sha256": "5fe62529c6593f59463bd6d438895ab8c05ba14b20946abd093e441864d8b33e"
+}

@@ -1,0 +1,14 @@
+id: SL-02
+title: "Test-Time Compute Scaling"
+status: empirically.tested
+candidate_law_statement: "Performance rises with inference budget (samples, search steps, revision rounds), but optimal allocation depends on prompt difficulty and verifier quality."
+falsification_criterion: "No improvement when verifier is unreliable or task is non-verifiable; sublinear returns beyond verifier capacity."
+experiment_receipts: []
+boundary_conditions:
+  - "Verifier quality known and stable"
+  - "Prompt difficulty measurable"
+  - "Compute budget bounded"
+  - "Task verifiable"
+related_modules:
+  - "resource_selector"
+  - "inference_bench"

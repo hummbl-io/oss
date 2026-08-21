@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.admission_control.v1.json",
+  "title": "Admission Control Primitive v1",
+  "description": "Bounded admission-control schema for governed permission of state transitions. Promoted from candidate 004 (admission-gate-doctrine) as an admission-control primitive, NOT a full 15-gate doctrine blob. Invariant: admission is not truth; admission is governed permission for state transition under authority, executor, scope, evidence, and receipt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority",
+    "executor",
+    "scope",
+    "evidence",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema. v1.0.0 is the bounded promotion from candidate 004."
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_instruction_present", "authority_scope", "review_required"],
+      "properties": {
+        "owner_instruction_present": { "type": "boolean" },
+        "authority_scope": { "type": "string" },
+        "review_required": { "type": "boolean" },
+        "approval_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Authority gate: who authorized this state transition and under what scope."
+    },
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_id", "executor_id"],
+      "properties": {
+        "actor_id": { "type": "string", "minLength": 1 },
+        "executor_id": { "type": "string", "minLength": 1 }
+      },
+      "description": "Actor gate: who is requesting and who will execute."
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reversibility"],
+      "properties": {
+        "reversibility": {
+          "type": "string",
+          "enum": ["reversible", "partially_reversible", "irreversible"]
+        },
+        "target_paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "writes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "deletes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Scope gate: what will be touched and how reversible it is."
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_refs"],
+      "properties": {
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Evidence gate: what evidence supports this state transition."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_hash"],
+      "properties": {
+        "receipt_hash": { "type": "string", "minLength": 1 },
+        "receipt_sequence": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Receipt gate: hash-chained proof of admission."
+    },
+    "cost_latency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_runtime_minutes", "max_model_escalations", "preferred_model_lane"],
+      "properties": {
+        "max_runtime_minutes": { "type": "integer", "minimum": 1 },
+        "max_model_escalations": { "type": "integer", "minimum": 0 },
+        "max_cloud_sessions": { "type": "integer", "minimum": 0 },
+        "preferred_model_lane": {
+          "type": "string",
+          "enum": ["T1-BYOK", "T2-ZEN", "T3-FREE"]
+        },
+        "escalation_allowed": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Cost/Latency gate (novel, candidate 004 §3.1): admission-time cost and escalation budget. preferred_model_lane is enum-tied to MODEL_TIERS.md (resolved 2026-06-23)."
+    },
+    "data_sensitivity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "secrets_allowed", "pii_allowed"],
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted"]
+        },
+        "allowed_surfaces": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References protected-surfaces.md categories: protected/operating/shared/handoff/exit/observable."
+        },
+        "allowed_model_tiers": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["T1-BYOK", "T2-ZEN", "T3-FREE"] },
+          "description": "References model-tier-policy.md surfaces. Separate from allowed_surfaces (resolved 2026-06-23: both taxonomies as separate fields)."
+        },
+        "disallowed_surfaces": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "secrets_allowed": { "type": "boolean" },
+        "pii_allowed": { "type": "boolean" },
+        "local_only": { "type": "boolean" },
+        "doctrine": {
+          "type": "boolean",
+          "description": "True if the proposal touches doctrine/guardrail files. Routes through cross-check-protocol.md review regardless of classification."
+        }
+      },
+      "description": "Data Sensitivity gate (novel, candidate 004 §3.2): admission-time data classification. doctrine: true routes through cross-check review."
+    },
+    "context_freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_of_record", "freshness_required"],
+      "properties": {
+        "source_of_record": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Proposer-emitted. References to canonical sources (git refs, receipt hashes, rule file paths, task registry entries)."
+        },
+        "freshness_required": {
+          "type": "boolean",
+          "description": "Proposer-emitted. If true, the gateway must populate freshness_checked_at and stale_sources before execution."
+        },
+        "freshness_checked_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "GATEWAY-EMITTED ONLY. Set by the action-gateway's deterministic enrichment stage, not by the proposer. Proposer-supplied values must be rejected by the gateway."
+        },
+        "stale_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "GATEWAY-EMITTED ONLY. Sources found stale at admission time; must be refreshed before execution. Populated by the gateway, not the proposer."
+        }
+      },
+      "description": "Context Freshness gate (novel, candidate 004 §3.3): admission-time freshness check. Gateway-emitted fields enforced by action-gateway implementation (resolved 2026-06-23: document in docs/action-gateway.md)."
+    }
+  }
+}

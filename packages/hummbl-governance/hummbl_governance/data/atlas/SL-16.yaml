@@ -1,0 +1,13 @@
+id: SL-16
+title: "Agent Market and Economy Scaling"
+status: ratified
+candidate_law_statement: "Agent markets outperform internal orchestration only when discovery, negotiation, trust, verification, and dispute costs stay below specialization gain."
+falsification_criterion: "Transaction cost exceeds 50% of specialization gain at market size >10 agents."
+experiment_receipts: []
+boundary_conditions:
+  - "Market mechanism designed"
+  - "Reputation system operational"
+  - "Dispute resolution defined"
+related_modules:
+  - "openclaw_gateway"
+  - "agent_market"

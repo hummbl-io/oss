@@ -1,0 +1,41 @@
+{
+  "schema_version": "evidence-readiness-review-receipt.v1",
+  "receipt_id": "synthetic-review-001",
+  "created_at": "2026-05-15T11:00:00Z",
+  "matter_id": "synthetic-employment-separation",
+  "data_classification": "PUBLIC_SYNTHETIC",
+  "intended_audience": "client",
+  "packet_paths": [
+    "06_relay_safe/client-summary.md",
+    "99_audit/review-receipt.md"
+  ],
+  "source_manifest_ref": {
+    "path": "01_sources/manifest.md",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "reviewer": {
+    "id": "codex",
+    "role": "critical_peer"
+  },
+  "verdict": "APPROVE_WITH_P2",
+  "findings": [
+    {
+      "severity": "P2",
+      "item": "signing-bonus note",
+      "status": "OPEN",
+      "summary": "Counsel should evaluate favorable and adverse readings."
+    }
+  ],
+  "claim_honesty": {
+    "unsupported_claims": 0,
+    "interpretations_labeled": true,
+    "legal_questions_reserved_for_counsel": true,
+    "public_use_approved": false
+  },
+  "relay_decision": {
+    "allowed": true,
+    "conditions": [
+      "Do not share with opposing-side actors."
+    ]
+  }
+}

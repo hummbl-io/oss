@@ -1,0 +1,20 @@
+{
+  "version": "v1.0.0",
+  "registry": [
+    {
+      "id": "ERR-SCHEMA-001",
+      "fm": ["FM15"],
+      "severity": "fatal"
+    },
+    {
+      "id": "ERR-RECOVERY-001",
+      "fm": ["FM29"],
+      "severity": "fatal"
+    },
+    {
+      "id": "ERR-GOV-004",
+      "fm": ["FM30"],
+      "severity": "escalation"
+    }
+  ]
+}

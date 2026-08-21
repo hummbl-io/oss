@@ -1,0 +1,82 @@
+# governance.yml — HUMMBL package governance metadata
+#
+# This file is the first-class governance artifact shipped with every HUMMBL
+# package. It declares the package's governance posture: safety controls, cost
+# limits, compliance frameworks, and build provenance.
+#
+# hummbl-governance is both the library that defines these primitives AND a
+# consumer of them. This file describes the governance posture of the library
+# itself.
+
+package:
+  name: hummbl-governance
+  version: 1.4.0
+  license: Apache-2.0
+  publisher: HUMMBL, LLC
+  description: Governance primitives for AI agent orchestration
+
+safety:
+  kill_switch:
+    supported: true
+    default_mode: DISENGAGED
+    modes_available: [DISENGAGED, HALT_NONCRITICAL, HALT_ALL, EMERGENCY]
+    critical_tasks: [health_check, audit_log_write, kill_switch_engage]
+    noncritical_tasks: [briefing_generation, cost_report, compliance_report]
+  circuit_breaker:
+    supported: true
+    failure_threshold: 5
+    recovery_timeout_seconds: 30
+    states: [CLOSED, HALF_OPEN, OPEN]
+  output_validation:
+    supported: true
+    pii_detection: true
+    injection_detection: true
+    blocklist_filtering: true
+  capability_fence:
+    supported: true
+    enforcement: allowlist
+
+cost:
+  cost_governor:
+    supported: true
+    soft_cap_usd: 50.0
+    hard_cap_usd: 100.0
+    alert_threshold_pct: 80
+    currency: USD
+
+identity:
+  delegation_tokens:
+    supported: true
+    signing: HMAC-SHA256
+    chain_depth_limit: 3
+  agent_registry:
+    supported: true
+    trust_tiers: [low, medium, high]
+
+audit:
+  audit_log:
+    supported: true
+    format: JSONL
+    append_only: true
+    rotation: true
+    retention_days: 90
+  compliance_mapping:
+    frameworks:
+      - NIST-AI-RMF
+      - OWASP-Top-10-Agentic-2026
+      - SOC2
+      - GDPR
+      - ISO-27001
+      - ISO-42001
+      - EU-AI-Act
+    coverage: engineering_mapping
+
+provenance:
+  build_system: github-actions
+  trusted_publishing: true
+  testpypi_staging: true
+  source_repo: https://github.com/hummbl-io/hummbl-governance
+  license: Apache-2.0
+  supply_chain_risk: none
+  dependencies: zero
+  tests: 2314

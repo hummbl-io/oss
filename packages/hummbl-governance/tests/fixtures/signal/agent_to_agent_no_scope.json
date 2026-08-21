@@ -1,0 +1,19 @@
+{
+  "receipt_id": "sig-005",
+  "surface": "signal",
+  "lane": "agent_coordination",
+  "actor_or_agent": "claude-code",
+  "recipient_alias": "codex",
+  "group_alias": null,
+  "event_class": "agent_to_agent",
+  "risk_class": "forbidden",
+  "message_hash": "e5f6789012345678901234567890abcdef1234567890abcdef12345678901234567890",
+  "message_summary": "Agent-to-agent message without declared lane scope — denied by G-SIGNAL-AGENT-TO-AGENT-SCOPE",
+  "admission_decision": "denied",
+  "executor": null,
+  "transport_mode": "dry_run",
+  "sent_timestamp": null,
+  "received_timestamp": null,
+  "durable_uri": "receipts/signal/sig-005.json",
+  "redactions_applied": []
+}

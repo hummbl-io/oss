@@ -1,0 +1,78 @@
+{
+  "test_id": "T1_VALID",
+  "description": "All checks pass in originating epoch",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_READ_STATUS",
+        "ACT_SEND_NOTIFICATION"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        },
+        "ACT_SEND_NOTIFICATION": {
+          "allow": true,
+          "required_params": [
+            "channel"
+          ]
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t1",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:00:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_READ_STATUS",
+          "params": {},
+          "boundary_decision": "ALLOW"
+        },
+        {
+          "action_id": "ACT_SEND_NOTIFICATION",
+          "params": {
+            "channel": "ops"
+          },
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t1"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t1"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "VALID",
+    "reason_codes": [
+      "E_OK_VALID"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t1",
+      "receipt_hash": "sha256:receipt-t1"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1",
+    "primary_reason_code": "E_OK_VALID"
+  },
+  "expected_report_sha256": "296ba8fe986086071ae237370ae62b1990cebe479dbd44131c72709fc917b165"
+}

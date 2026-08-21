@@ -1,0 +1,19 @@
+{
+  "receipt_id": "sig-002",
+  "surface": "signal",
+  "lane": "notify",
+  "actor_or_agent": "claude-code",
+  "recipient_alias": "unknown_recipient",
+  "group_alias": null,
+  "event_class": "health_summary",
+  "risk_class": "forbidden",
+  "message_hash": "b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567890",
+  "message_summary": "Attempted notify to unknown recipient — denied by G-SIGNAL-RECIPIENT-ALLOWLIST",
+  "admission_decision": "denied",
+  "executor": null,
+  "transport_mode": "dry_run",
+  "sent_timestamp": null,
+  "received_timestamp": null,
+  "durable_uri": "receipts/signal/sig-002.json",
+  "redactions_applied": []
+}

@@ -1,0 +1,73 @@
+{
+  "test_id": "T3_INVALID_CLOSURE",
+  "description": "Action outside contract action space yields INVALID",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_READ_STATUS",
+        "ACT_SEND_NOTIFICATION"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        },
+        "ACT_SEND_NOTIFICATION": {
+          "allow": true,
+          "required_params": [
+            "channel"
+          ]
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t3",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:02:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_DELETE_LEDGER",
+          "params": {
+            "target": "daily_ops"
+          },
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t3"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t3"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALID",
+    "reason_codes": [
+      "E_ACTION_OUT_OF_SPACE"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t3",
+      "receipt_hash": "sha256:receipt-t3"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1",
+    "primary_reason_code": "E_ACTION_OUT_OF_SPACE"
+  },
+  "expected_report_sha256": "6c2c46935f4d0f664385b402711ce9bbfffc0c5cdc0203a54494acb10b43d37b"
+}

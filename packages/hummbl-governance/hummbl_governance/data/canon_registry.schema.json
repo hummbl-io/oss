@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.canon_registry.v1.json",
+  "title": "Canon Registry Primitive v1",
+  "description": "Schema candidate for P27 CanonRegistry — governs promotion from draft to canonical status. Closes the governance feedback loop: admission -> authority -> execution -> receipt -> evidence -> PROMOTION. Enforces D5 (NO_AUTO_PROMOTION): no agent can promote an artifact to canonical status without operator approval. Status: PROPOSED — not yet implemented.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "artifact_type",
+    "current_canon_level",
+    "proposed_canon_level",
+    "authority",
+    "evidence",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier of the artifact being promoted."
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": [
+        "research_artifact",
+        "doctrine",
+        "schema",
+        "contract",
+        "policy",
+        "runbook",
+        "standard",
+        "framework_definition"
+      ],
+      "description": "Type of artifact being promoted."
+    },
+    "current_canon_level": {
+      "type": "string",
+      "enum": ["draft", "reviewed", "validated", "adopted", "canonical", "deprecated"],
+      "description": "Current canonical level of the artifact."
+    },
+    "proposed_canon_level": {
+      "type": "string",
+      "enum": ["draft", "reviewed", "validated", "adopted", "canonical", "deprecated"],
+      "description": "Proposed next canonical level. Transitions must be sequential: draft -> reviewed -> validated -> adopted -> canonical. Deprecation can occur from any level."
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator_approval", "approver_id"],
+      "properties": {
+        "operator_approval": {
+          "type": "boolean",
+          "description": "Must be true for any promotion. Enforces D5 (NO_AUTO_PROMOTION)."
+        },
+        "approver_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identity of the operator approving the promotion."
+        },
+        "approval_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When approval was granted."
+        },
+        "delegation_chain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "If approval was delegated, the chain of delegation token hashes."
+        }
+      },
+      "description": "Authority gate: operator must explicitly approve promotion. Agents cannot self-promote."
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_refs"],
+      "properties": {
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "References to evidence supporting promotion (test results, peer review, validation receipts)."
+        },
+        "review_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References to peer review artifacts."
+        },
+        "validation_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References to validation results."
+        }
+      },
+      "description": "Evidence gate: what evidence supports this promotion."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_hash"],
+      "properties": {
+        "receipt_hash": { "type": "string", "minLength": 1 },
+        "receipt_sequence": { "type": "integer", "minimum": 0 },
+        "prev_receipt_hash": { "type": "string" }
+      },
+      "description": "Receipt gate: hash-chained proof of promotion."
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reviewer_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Identities of reviewers who assessed the artifact."
+        },
+        "review_verdict": {
+          "type": "string",
+          "enum": ["pass", "conditional_pass", "fail"],
+          "description": "Collective verdict of reviewers."
+        },
+        "review_conditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Conditions that must be met for conditional_pass verdicts."
+        }
+      },
+      "description": "Review gate: peer review results (required for reviewed -> validated transition)."
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "parent_artifact_id": {
+          "type": "string",
+          "description": "If this artifact supersedes another, the parent's ID."
+        },
+        "evolution_lineage_ref": {
+          "type": "string",
+          "description": "Reference to evolution_lineage record tracking this artifact's ancestry."
+        }
+      },
+      "description": "Lineage tracking: connects to evolution_lineage primitive."
+    }
+  }
+}
