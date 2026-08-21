@@ -220,6 +220,35 @@ the full migration method.
 
 ---
 
-## 5. License
+## 5. Package deprecation policy (Revival Hijack defense)
+
+**Never delete a published package from PyPI, npm, or crates.io.**
+
+When a PyPI maintainer deletes a project, the package name immediately
+becomes re-registerable. An attacker can register the same name and
+publish a malicious version -- any existing user who runs
+`pip install <name>` or has it in a `requirements.txt` without a pinned
+version will receive the malicious package. JFrog (2024) identified
+**22,000 PyPI packages** vulnerable to this "Revival Hijack" attack
+class. npm and crates.io have analogous risks.
+
+**To deprecate a HUMMBL package:**
+
+1. **Yank specific versions** (`pip download <name>==<version>` no longer
+   finds it, but `pip install <name>==<version>` still works for users
+   who pinned it) -- do NOT delete the project
+2. **Publish a final empty/deprecated release** with a deprecation notice
+   in the description and README
+3. **Keep the project owned by `hummbl-io`** to prevent name re-registration
+4. **Document the deprecation** in `docs/PACKAGES.md` with the date and
+   reason
+
+This policy applies to PyPI, npm, and crates.io. Maven Central is fully
+immutable (no deletion possible). Go module proxy tags are immutable once
+pushed (delete the tag in git, but the proxy caches the version forever).
+
+---
+
+## 6. License
 
 All packages in this monorepo are Apache-2.0. See [`LICENSE`](./LICENSE).

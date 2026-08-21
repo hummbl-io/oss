@@ -255,6 +255,16 @@ SHA and replace the pin. These rules are also documented in
 **Build tool:** `python -m build` (PEP 517)
 **Publish tool:** `twine upload`
 
+> **Reusable-workflow constraint:** `pypa/gh-action-pypi-publish` (and the
+> `twine upload` + `id-token: write` pattern it wraps) **cannot be used from
+> within a reusable workflow** (`on: workflow_call`). The OIDC token's
+> `repository_owner`/`repository_name` claims filter to the *calling* repo,
+> so the publish step must run in a non-reusable workflow file in
+> `hummbl-io/oss`. If a future refactor consolidates publish logic into a
+> shared reusable workflow, the PyPI publish step must remain in a wrapper
+> job in the calling workflow, not inside the reusable workflow itself.
+> (Source: [pypa/gh-action-pypi-publish README](https://github.com/pypa/gh-action-pypi-publish))
+
 **Workflow:** `.github/workflows/publish-pypi.yml`
 
 ```yaml
@@ -325,11 +335,20 @@ git push origin python/hummbl-governance/v1.4.1
 ### 4.2 Node → npm
 
 **Registry:** [npmjs.com](https://npmjs.com)
-**Auth:** npm automation token (stored as GitHub secret `NPM_TOKEN`)
+**Auth:** Trusted Publishing (OIDC) — GA July 2025; no `NPM_TOKEN` secret needed
 **Build tool:** package-specific (tsc, bun, vite, etc.)
-**Publish tool:** `npm publish`
+**Publish tool:** `npm publish --provenance`
 
-**Workflow:** `.github/workflows/publish-npm.yml`
+> **Trusted Publishing (preferred):** npm reached OIDC Trusted Publishing GA
+> in July 2025, matching PyPI's model. Requires npm CLI ≥11.5.1 and Node
+> ≥22.14.0. The `package.json` `repository` field must match the GitHub
+> OIDC claims exactly (Sigstore verifies this); in a monorepo, each
+> `package.json` must declare `repository` with the correct `directory`
+> subpath or publishing fails with `422 Unprocessable Entity`. The legacy
+> `NPM_TOKEN` secret approach below is kept as a fallback for packages not
+> yet migrated.
+
+**Workflow (Trusted Publishing):** `.github/workflows/publish-npm.yml`
 
 ```yaml
 name: Publish to npm
@@ -341,6 +360,7 @@ name: Publish to npm
 
 permissions:
   contents: read
+  id-token: write  # OIDC trusted publishing
 
 jobs:
   publish:
@@ -359,7 +379,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: "22"
+          node-version: "22.14.0"
           registry-url: "https://registry.npmjs.org"
 
       - name: Install
@@ -372,15 +392,17 @@ jobs:
 
       - name: Publish
         working-directory: ${{ steps.pkg.outputs.path }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: npm publish --provenance --access public
 ```
 
-**Per-package setup:**
+**Per-package setup (Trusted Publishing):**
 1. Set `package.json` `"private": false` (remove `"private": true`)
-2. Ensure `"name"`, `"version"`, `"license"`, `"repository"` fields are set
-3. Add `NPM_TOKEN` to GitHub repo secrets (one token, shared across all npm packages)
+2. Ensure `"name"`, `"version"`, `"license"`, `"repository"` fields are set.
+   `repository` must point to `github.com/hummbl-io/oss` with the correct
+   `directory` subpath (e.g. `packages/node/hummbl-agent`) — Sigstore
+   verifies this matches the OIDC claims.
+3. On npmjs.com → package settings → Trusted Publishing → add the GitHub
+   repo + workflow file + environment
 4. Create the `npm` environment: `gh api repos/hummbl-io/oss/environments/npm -X PUT`
 5. Tag and push: `git tag node/hummbl-agent/v0.1.0 && git push origin node/hummbl-agent/v0.1.0`
 
@@ -400,11 +422,19 @@ of namespace safety on npm.
 ### 4.3 Rust → crates.io
 
 **Registry:** [crates.io](https://crates.io)
-**Auth:** crates.io API token (stored as GitHub secret `CARGO_REGISTRY_TOKEN`)
+**Auth:** Trusted Publishing (OIDC) — GA July 2025; no `CARGO_REGISTRY_TOKEN` secret needed (after first publish)
 **Build tool:** `cargo build`
-**Publish tool:** `cargo publish`
+**Publish tool:** `cargo publish` (via `rust-lang/crates-io-auth-action`)
 
-**Workflow:** `.github/workflows/publish-crates.yml`
+> **Trusted Publishing (preferred):** crates.io reached OIDC Trusted Publishing
+> GA in July 2025 (RFC #3691). Uses `rust-lang/crates-io-auth-action@v1` to
+> exchange a GitHub OIDC token for a short-lived API token. **First publish
+> of each crate must still be manual** (crates.io requires initial
+> owner-confirmed publish); subsequent publishes can use Trusted Publishing.
+> The legacy `CARGO_REGISTRY_TOKEN` approach is kept as a fallback for the
+> first publish or for packages not yet migrated.
+
+**Workflow (Trusted Publishing):** `.github/workflows/publish-crates.yml`
 
 ```yaml
 name: Publish to crates.io
@@ -416,6 +446,7 @@ name: Publish to crates.io
 
 permissions:
   contents: read
+  id-token: write  # OIDC trusted publishing
 
 jobs:
   publish:
@@ -434,18 +465,29 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
 
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
       - name: Publish
         working-directory: ${{ steps.pkg.outputs.path }}
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish --token "$CARGO_REGISTRY_TOKEN"
 ```
 
-**Per-package setup:**
+**Per-package setup (Trusted Publishing):**
 1. Ensure `Cargo.toml` has `[package] name`, `version`, `description`, `license`, `repository`
-2. Add `CARGO_REGISTRY_TOKEN` to GitHub repo secrets
-3. Create the `crates` environment: `gh api repos/hummbl-io/oss/environments/crates -X PUT`
-4. Tag and push: `git tag rust/demosmesh/v0.1.0 && git push origin rust/demosmesh/v0.1.0`
+2. **First publish must be manual** (`cargo login` + `cargo publish` locally)
+3. On crates.io → package settings → Trusted Publishing → add the GitHub
+   repo + workflow file + environment
+4. Create the `crates` environment: `gh api repos/hummbl-io/oss/environments/crates -X PUT`
+5. Tag and push: `git tag rust/demosmesh/v0.1.0 && git push origin rust/demosmesh/v0.1.0`
+
+> **Workspace ordering:** When publishing multiple crates from a Cargo
+> workspace, crates.io requires dependencies to be available before
+> dependent crates. Publish in topological order with a `sleep 30-120`
+> between publishes to wait for index propagation. There is no
+> `cargo publish --workspace` that handles this automatically.
 
 ### 4.4 Go → Go module proxy
 
@@ -474,6 +516,17 @@ git push origin packages/go/hummbl-tuples/v0.1.0
 # Tag prefix MUST match the module path (packages/go/<name>) for the
 # Go module proxy to resolve the version. See section 2.
 ```
+
+> **proxy.golang.org slash-tag bug:** The public Go proxy has a known issue
+> (golang/go#73143) where tags containing slashes — which our
+> `packages/go/<name>/v*` format requires — can return
+> `invalid: disallowed version string` from `proxy.golang.org` even though
+> the tag format is spec-correct. If `go get` fails to resolve a HUMMBL
+> Go module, set `GONOSUMDB=github.com/hummbl-io/oss` and
+> `GONOSUMPROXY=github.com/hummbl-io/oss` in the consuming environment, or
+> fetch directly from VCS with `GOFLAGS=-mod=mod GOPROXY=direct`. This is a
+> proxy-side bug, not a problem with the tag format. Track golang/go#73143
+> for resolution.
 
 **CI (optional, for validation only):** `.github/workflows/ci-go.yml`
 
@@ -618,16 +671,19 @@ jobs:
 ### 4.7 TeX → arXiv / Zenodo
 
 **Registry:** [arxiv.org](https://arxiv.org) (preprints), [Zenodo](https://zenodo.org) (DOI deposits)
-**Auth:** arXiv API key, Zenodo API token
-**Publish tool:** manual submission (arXiv), `zenodo_upload` script (Zenodo)
+**Auth:** Zenodo API token (arXiv has **no submission API** — see note below)
+**Publish tool:** `zenodo_deposit.py` (Zenodo, automated); **manual web upload** (arXiv, no API exists)
 
 TeX papers are not "published" in the package sense. The workflow is:
 
 1. Tag: `papers/<name>/v<version>`
 2. CI builds PDF from `.tex` sources
-3. Upload PDF to arXiv (manual or API)
-4. Deposit sources + PDF on Zenodo for a citable DOI
-5. Update `CITATION.cff` with the DOI
+3. CI attaches PDF + LaTeX source bundle to the GitHub Release (for the human to download)
+4. **Human manually uploads** the PDF to arXiv via the web form (arXiv has no submission API, no OAuth, no webhook — this step cannot be automated)
+5. CI deposits sources + PDF on Zenodo for a citable DOI (automated)
+6. Human updates `CITATION.cff` with the arXiv ID and Zenodo DOI
+
+> **arXiv automation gap:** arXiv is categorically different from every other registry in this document. There is no end-to-end automated path from git tag to arXiv submission ID, regardless of CI sophistication. The workflow prepares the bundle; a human must complete the submission. Do not attempt to automate this — it will fail.
 
 **Workflow:** `.github/workflows/publish-papers.yml`
 
@@ -640,7 +696,7 @@ name: Build and deposit papers
       - "papers/*/v*"
 
 permissions:
-  contents: read
+  contents: write  # needed to attach bundle to the GitHub Release
 
 jobs:
   build:
@@ -666,7 +722,17 @@ jobs:
           name: paper-${{ steps.pkg.outputs.name }}
           path: ${{ steps.pkg.outputs.path }}/main.pdf
 
-      # Zenodo deposit (creates DOI)
+      # Attach PDF + source bundle to the GitHub Release for manual arXiv upload.
+      # arXiv has no submission API — a human must download this bundle and
+      # upload it via the arXiv web form.
+      - name: Attach bundle to GitHub Release
+        uses: softprops/action-gh-release@da05d552573ad5aba9dff4d2c33b7e2a8d9651b8
+        with:
+          files: |
+            ${{ steps.pkg.outputs.path }}/main.pdf
+            ${{ steps.pkg.outputs.path }}/*.tex
+
+      # Zenodo deposit (creates DOI) — automated
       - name: Deposit to Zenodo
         env:
           ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
@@ -770,17 +836,21 @@ concerns:
 
 ## 6. Secrets management
 
-Each publish workflow references the registry credentials it needs via
-`${{ secrets.<NAME> }}`. The exact secret names are defined in the workflow
-files and configured in the repo's GitHub Actions secrets settings. PyPI
-uses no secrets (Trusted Publishing via OIDC). The remaining registries
-(npm, crates.io, Maven Central, Zenodo, FlakeHub) each require a registry
-token or credential set; see the per-language workflow in section 4 for
-the specific secret references.
+Three registries now support OIDC Trusted Publishing and require **no
+long-lived secrets**: PyPI (GA April 2023), npm (GA July 2025), and
+crates.io (GA July 2025). The remaining registries (Maven Central, Zenodo,
+FlakeHub) each require a registry token or credential set; see the
+per-language workflow in section 4 for the specific secret references.
 
-**PyPI uses no secrets** — Trusted Publishing (OIDC) authenticates via
-the GitHub Actions identity. This is the preferred model; use it for
-any registry that supports it.
+**Registries using Trusted Publishing (no secrets):** PyPI, npm, crates.io.
+**Registries requiring secrets:** Maven Central (GPG + Sonatype Portal
+token), Zenodo (API token), FlakeHub (JWT). Go module proxy uses no auth
+(tag push is the publish).
+
+**Trusted Publishing is the preferred model** — use it for any registry
+that supports it. It eliminates long-lived tokens, narrows the credential-
+theft attack surface, and (for npm and PyPI) generates provenance
+attestations automatically.
 
 Secrets are stored as GitHub repository secrets with environment
 gating (`environment: pypi`, `environment: npm`, etc.) so a publish
@@ -856,7 +926,7 @@ publish fresh under `@hummbl/*` from this monorepo.
 
 **Excluded from Phase 2 (name collisions, never HUMMBL's):** `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, `mcp-server` (unscoped) are unrelated packages by other authors on npm (see PACKAGES.md).
 
-**For each:** set `NPM_TOKEN` secret, create `npm` environment, flip `private: true` → `false`, set `"name"` to `@hummbl/<name>`, verify build, tag release.
+**For each:** configure Trusted Publishing on npmjs.com (or set `NPM_TOKEN` secret as fallback for packages not yet migrated), create `npm` environment, flip `private: true` → `false`, set `"name"` to `@hummbl/<name>`, verify build, tag release.
 
 ### Phase 3: Publish not-yet-live packages (~31 PyPI, ~10 npm)
 
@@ -942,3 +1012,7 @@ the paper's `LICENSE` file.
 | 2026-08-21 | Clean snapshot (no history) for private-repo migrations | Private repo history may contain PII (hostnames, paths, credentials); `git mv` would carry it into the public monorepo |
 | 2026-08-21 | Create GitHub environments before workflow reference | Jobs referencing a nonexistent environment fail at startup with no logs |
 | 2026-08-21 | npm package naming: scoped `@hummbl/*` (operator-confirmed) | Irreversible after first publish; scoped avoids name squatters. Cross-registry spelling divergence (PyPI `hummbl-governance` vs npm `@hummbl/governance`) accepted as cost of namespace safety |
+| 2026-08-21 | Adopt Trusted Publishing for npm + crates.io (GA July 2025) | Eliminates `NPM_TOKEN` and `CARGO_REGISTRY_TOKEN` secrets; matches PyPI model; provenance attestations generated automatically for npm. crates.io first publish still manual. |
+| 2026-08-21 | arXiv submission stays manual (no API) | arXiv has no submission API, OAuth, or webhook. CI prepares bundle + attaches to GitHub Release; human uploads via web form. Documented to prevent future automation attempts that will fail. |
+| 2026-08-21 | PyPI publish step must NOT live in a reusable workflow | `pypa/gh-action-pypi-publish` + OIDC cannot run inside `on: workflow_call`; the publish step must be in a non-reusable wrapper job in the calling workflow. |
+| 2026-08-21 | Document Go proxy slash-tag bug (golang/go#73143) | `proxy.golang.org` may reject spec-correct `packages/go/<name>/v*` tags with `invalid: disallowed version string`. Workaround: `GONOSUMDB`/`GONOSUMPROXY` or `GOPROXY=direct`. Tag format unchanged (spec-correct). |
