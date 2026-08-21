@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/evidence-set.schema.json",
+  "title": "HUMMBL Evidence Set",
+  "description": "Tier 1 Governance Core: Grounds claims. Distinct from ReceiptBundle — evidence grounds, receipts attest. Phase 0 schema seed — draft status, not canon.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "hummbl_object_envelope.schema.json" }
+  ],
+  "required": ["object_type", "evidence_entries"],
+  "properties": {
+    "object_type": { "const": "EvidenceSet" },
+    "tier": { "const": "tier1_governance_core" },
+    "evidence_entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "evidence_type", "source", "evidence_state"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^evidence-[0-9]+$"
+          },
+          "evidence_type": {
+            "type": "string",
+            "enum": ["repo_path", "commit_hash", "test_output", "schema_validation", "doc_reference", "adr_reference", "external_publication", "operator_statement", "agent_report", "measurement", "log_entry"]
+          },
+          "source": {
+            "type": "string",
+            "description": "Concrete source: file path, commit hash, URL, test name, etc."
+          },
+          "evidence_state": {
+            "type": "string",
+            "enum": ["verified_direct", "internally_cross_referenced", "reported", "inferred", "speculative", "unimplemented"],
+            "description": "Per ChatGPT review: evidence states tightened. 'verified_direct' requires concrete artifact inspection."
+          },
+          "claim_refs": {
+            "type": "array",
+            "description": "Claims this evidence substantiates",
+            "items": { "type": "string", "pattern": "^hummbl:claim-set:[a-f0-9-]+$" }
+          },
+          "fingerprint": {
+            "type": "string",
+            "description": "SHA-256 hash of the evidence content for integrity verification",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "collected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "collected_by": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

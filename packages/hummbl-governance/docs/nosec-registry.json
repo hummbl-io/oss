@@ -1,0 +1,56 @@
+{
+  "description": "Registry of all nosec suppressions in production code. Review quarterly per ADR-007 and issue #137.",
+  "total": 6,
+  "justified": 6,
+  "unjustified": 0,
+  "suppressions": [
+    {
+      "file": "hummbl_governance/errors.py",
+      "line_no": 68,
+      "rule": "B105",
+      "justification": "error code enum, not a password",
+      "has_justification": true,
+      "source_line": "TOKEN_EXPIRED = \"HG_E_TOKEN_EXPIRED\"  # nosec B105 — error code enum, not a password"
+    },
+    {
+      "file": "hummbl_governance/errors.py",
+      "line_no": 69,
+      "rule": "B105",
+      "justification": "error code enum, not a password",
+      "has_justification": true,
+      "source_line": "TOKEN_INVALID = \"HG_E_TOKEN_INVALID\"  # nosec B105 — error code enum, not a password"
+    },
+    {
+      "file": "hummbl_governance/kernel/doctrine_engine.py",
+      "line_no": 135,
+      "rule": "B108",
+      "justification": "path prefix check, not a hardcoded temp dir",
+      "has_justification": true,
+      "source_line": "if not p.startswith(\"playground/\") and not p.startswith(\"/tmp/\")  # nosec B108 — path prefix check, not a hardcoded temp dir"
+    },
+    {
+      "file": "hummbl_governance/statistical_framework.py",
+      "line_no": 97,
+      "rule": "B311",
+      "justification": "statistical sampling, not cryptographic",
+      "has_justification": true,
+      "source_line": "sample = random.choices(values, k=n)  # nosec B311 — statistical sampling, not cryptographic"
+    },
+    {
+      "file": "hummbl_governance/statistical_framework.py",
+      "line_no": 109,
+      "rule": "B311",
+      "justification": "statistical sampling, not cryptographic",
+      "has_justification": true,
+      "source_line": "sample = random.choices(values, k=n)  # nosec B311 — statistical sampling, not cryptographic"
+    },
+    {
+      "file": "hummbl_governance/statistical_framework.py",
+      "line_no": 227,
+      "rule": "B311",
+      "justification": "permutation test, not cryptographic",
+      "has_justification": true,
+      "source_line": "shuffled = random.sample(pooled, len(pooled))  # nosec B311 — permutation test, not cryptographic"
+    }
+  ]
+}

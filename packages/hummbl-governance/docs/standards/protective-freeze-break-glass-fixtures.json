@@ -1,0 +1,144 @@
+{
+  "valid_dry_runs": [
+    {
+      "incident_id": "dryrun-package-publishing-001",
+      "mode": "dry_run",
+      "surface": "package_publishing",
+      "authority_chain": [
+        {
+          "actor": "operator",
+          "role": "incident_authority",
+          "decision": "approve"
+        }
+      ],
+      "actions": [
+        {
+          "primitive": "PROTECTIVE_FREEZE",
+          "asset_reference": "package-publish-workflow",
+          "scope": "block package publishing until metadata and token posture are reviewed",
+          "credential_value_present": false
+        },
+        {
+          "primitive": "BREAK_GLASS_REVOKE",
+          "asset_reference": "package-publish-token-reference",
+          "scope": "rotate the publish credential reference without recording the value",
+          "credential_value_present": false
+        }
+      ],
+      "recovery_route": "verify replacement credential scope, run publish dry-run, then require human re-enable",
+      "human_reenable_required": true,
+      "validation_steps": [
+        "confirm old credential reference is disabled",
+        "confirm replacement credential has least-privilege scope",
+        "confirm package metadata dry-run succeeds"
+      ],
+      "post_restore_monitoring": "watch release workflow and package registry for one release window",
+      "residual_risk": "package ecosystem propagation may lag after credential rotation"
+    },
+    {
+      "incident_id": "dryrun-agent-credential-001",
+      "mode": "dry_run",
+      "surface": "agent_credentials",
+      "authority_chain": [
+        {
+          "actor": "operator",
+          "role": "incident_authority",
+          "decision": "approve"
+        }
+      ],
+      "actions": [
+        {
+          "primitive": "PROTECTIVE_FREEZE",
+          "asset_reference": "agent-write-capability",
+          "scope": "disable write capability for the affected agent identity",
+          "credential_value_present": false
+        }
+      ],
+      "recovery_route": "reissue scoped credential after identity validation and bus receipt review",
+      "human_reenable_required": true,
+      "validation_steps": [
+        "confirm affected agent can no longer write",
+        "confirm unrelated agents remain unaffected",
+        "confirm new credential is scoped to required repositories only"
+      ],
+      "post_restore_monitoring": "monitor bus and repository writes for one incident window",
+      "residual_risk": "stale local sessions may need explicit termination outside this receipt"
+    },
+    {
+      "incident_id": "dryrun-repo-token-001",
+      "mode": "dry_run",
+      "surface": "repository_tokens",
+      "authority_chain": [
+        {
+          "actor": "operator",
+          "role": "incident_authority",
+          "decision": "approve"
+        }
+      ],
+      "actions": [
+        {
+          "primitive": "BREAK_GLASS_REVOKE",
+          "asset_reference": "repo-token-reference",
+          "scope": "revoke the repository token reference and preserve branch protections",
+          "credential_value_present": false
+        }
+      ],
+      "recovery_route": "restore least-privilege GitHub app or token grant after checks pass",
+      "human_reenable_required": true,
+      "validation_steps": [
+        "confirm token reference is disabled",
+        "confirm branch protection remains active",
+        "confirm CI can run with replacement grant"
+      ],
+      "post_restore_monitoring": "watch workflow and branch-protection audit logs",
+      "residual_risk": "automation depending on the revoked token may need explicit reroute"
+    },
+    {
+      "incident_id": "dryrun-connector-credential-001",
+      "mode": "dry_run",
+      "surface": "connector_credentials",
+      "authority_chain": [
+        {
+          "actor": "operator",
+          "role": "incident_authority",
+          "decision": "approve"
+        }
+      ],
+      "actions": [
+        {
+          "primitive": "PROTECTIVE_FREEZE",
+          "asset_reference": "connector-write-grant",
+          "scope": "pause connector writes until data boundary review completes",
+          "credential_value_present": false
+        }
+      ],
+      "recovery_route": "reconnect with scoped grant and validate no private data leakage",
+      "human_reenable_required": true,
+      "validation_steps": [
+        "confirm connector writes are paused",
+        "confirm read-only access remains within approved scope",
+        "confirm reconnected grant excludes sensitive surfaces"
+      ],
+      "post_restore_monitoring": "monitor connector write receipts for one review window",
+      "residual_risk": "third-party connector audit logs may be delayed"
+    }
+  ],
+  "rejected_dry_runs": [
+    {
+      "case": "overbroad_revoke",
+      "reason": "scope targets all assets without bounded authority or staged recovery"
+    },
+    {
+      "case": "missing_recovery_path",
+      "reason": "revocation is proposed without a restoration route"
+    },
+    {
+      "case": "missing_human_approval",
+      "reason": "automation attempts to re-enable a sensitive surface without human approval"
+    },
+    {
+      "case": "token_leakage_marker",
+      "reason": "receipt includes a credential value instead of an asset reference"
+    }
+  ]
+}

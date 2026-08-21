@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/mcp-resource-access-policy.schema.json",
+  "title": "MCP Resource Access Policy",
+  "description": "Advisory checklist schema for future resource-bound MCP access review. Draft only; not canon and not live server policy.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "policy_id",
+    "server_id",
+    "resource_selector",
+    "allowed_operations",
+    "denied_operations",
+    "credential_scope",
+    "approval_required_for",
+    "audit_receipt"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "pattern": "^1\\.0\\.0$"},
+    "policy_id": {"type": "string", "pattern": "^mcp-[a-z0-9-]+$"},
+    "server_id": {"type": "string", "minLength": 1},
+    "resource_selector": {"type": "string", "minLength": 1},
+    "allowed_operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["read", "list", "search", "draft", "write", "delete"]}
+    },
+    "denied_operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["read", "list", "search", "draft", "write", "delete", "raw_shell", "secret_exfiltration"]}
+    },
+    "credential_scope": {"type": "string", "enum": ["none", "read_only", "scoped_write", "admin"]},
+    "approval_required_for": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["write", "delete", "external_send", "credential_use", "admin_change"]}
+    },
+    "audit_receipt": {"type": "string", "pattern": "^hummbl:receipt:[a-z0-9-]+$"}
+  },
+  "additionalProperties": false
+}

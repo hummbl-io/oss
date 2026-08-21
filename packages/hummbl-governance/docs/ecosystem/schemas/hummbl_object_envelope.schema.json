@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/hummbl-object-envelope.schema.json",
+  "title": "HUMMBL Object Envelope",
+  "description": "Shared envelope that all HUMMBL Set Grammar objects inherit. Defines identity, status, provenance, and governance fields common to every object family. Phase 0 schema seed — draft status, not canon.",
+  "type": "object",
+  "required": [
+    "object_type",
+    "object_id",
+    "schema_version",
+    "status",
+    "canon_level",
+    "tier",
+    "created_at",
+    "created_by",
+    "semantic_confidence"
+  ],
+  "properties": {
+    "object_type": {
+      "type": "string",
+      "description": "The object family name (e.g., ClaimSet, EvidenceSet, DecisionLedger)",
+      "enum": [
+        "ClaimSet",
+        "EvidenceSet",
+        "DecisionLedger",
+        "GateSet",
+        "ReceiptBundle",
+        "ProblemGraph",
+        "ProblemConstellation",
+        "QuestionSet",
+        "ContextPack",
+        "AssumptionSet",
+        "TaskSet",
+        "PromptPack",
+        "EvalSuite",
+        "RiskRegister",
+        "ArtifactRegistry",
+        "UncertaintyMap",
+        "OntologySet",
+        "AgentRegistry",
+        "CapabilityRegistry",
+        "CanonRegistry"
+      ]
+    },
+    "object_id": {
+      "type": "string",
+      "description": "Globally unique identifier for this object instance",
+      "pattern": "^hummbl:[a-z0-9-]+:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+      "examples": [
+        "hummbl:claim-set:550e8400-e29b-41d4-a716-446655440000"
+      ]
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "SemVer version of the schema this object conforms to",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "const": "0.1.0"
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status of this object instance",
+      "enum": ["seed", "candidate", "draft", "reviewed", "validated", "adopted", "canonical", "deprecated", "superseded"]
+    },
+    "canon_level": {
+      "type": "string",
+      "description": "Authority level of this object",
+      "enum": ["non-authoritative", "advisory", "binding", "superseded"]
+    },
+    "tier": {
+      "type": "string",
+      "description": "Phase 0 tier classification",
+      "enum": ["tier1_governance_core", "tier2_inquiry_context", "tier3_execution_evaluation", "tier4_semantic_identity"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Agent or human identity that created this object",
+      "examples": ["devin", "operator:reuben", "chatgpt"]
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "origin_commit": {
+      "type": "string",
+      "description": "Git commit hash where this object was first introduced",
+      "pattern": "^[0-9a-f]{7,40}$"
+    },
+    "semantic_confidence": {
+      "type": "object",
+      "description": "Structured confidence per ChatGPT review — no unqualified confidence scores",
+      "required": ["semantic_confidence", "confidence_kind", "calibration_status", "basis"],
+      "properties": {
+        "semantic_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "confidence_kind": {
+          "type": "string",
+          "enum": ["synthesis_judgment", "empirical_measurement", "logical_derivation", "operator_assertion", "reported_by_agent"]
+        },
+        "calibration_status": {
+          "type": "string",
+          "enum": ["uncalibrated", "calibrated", "recalibration_needed"]
+        },
+        "basis": {
+          "type": "string",
+          "description": "What the confidence is based on"
+        },
+        "independent_verification": {
+          "type": "string",
+          "enum": ["pending", "passed", "failed", "not_applicable"]
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "References to EvidenceSet entries that substantiate this object",
+      "items": {
+        "type": "string",
+        "pattern": "^hummbl:evidence-set:[a-f0-9-]+$"
+      }
+    },
+    "receipt_refs": {
+      "type": "array",
+      "description": "References to ReceiptBundle entries that attest to this object's lifecycle events",
+      "items": {
+        "type": "string",
+        "pattern": "^hummbl:receipt-bundle:[a-f0-9-]+$"
+      }
+    },
+    "gate_refs": {
+      "type": "array",
+      "description": "References to GateSet instances that govern this object's promotion path",
+      "items": {
+        "type": "string",
+        "pattern": "^hummbl:gate-set:[a-f0-9-]+$"
+      }
+    },
+    "decision_refs": {
+      "type": "array",
+      "description": "References to DecisionLedger entries that record decisions about this object",
+      "items": {
+        "type": "string",
+        "pattern": "^hummbl:decision-ledger:[a-f0-9-]+$"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/research-integrity/v0.1/artifact-maturity.schema.json",
+  "title": "Artifact Maturity Record v0.1",
+  "description": "Machine-readable record of a scholarly artifact's maturity state, claim postures, and integrity checks.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "title",
+    "maturity_state",
+    "claim_postures",
+    "risk_checks",
+    "authorship",
+    "ai_use_disclosure",
+    "independent_review",
+    "reproducibility_manifest",
+    "correction_contact",
+    "version_history"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "research_integrity_artifact.v0.1"
+    },
+    "artifact_id": {"type": "string"},
+    "title": {"type": "string"},
+    "maturity_state": {
+      "type": "string",
+      "enum": ["IDEA", "RESEARCH_NOTE", "SOURCE_GROUNDED_CANDIDATE",
+               "INTERNAL_TECHNICAL_REPORT", "REPRODUCIBLE_REPORT",
+               "PREPRINT_CANDIDATE", "SUBMISSION_CANDIDATE",
+               "SUBMITTED", "PEER_REVIEWED",
+               "CORRECTED", "SUPERSEDED", "RETRACTED"]
+    },
+    "claim_postures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim", "posture"],
+        "properties": {
+          "claim": {"type": "string"},
+          "posture": {
+            "type": "string",
+            "enum": ["OBSERVATION", "MEASUREMENT", "EXPERIMENTAL_RESULT",
+                     "INFERENCE", "HYPOTHESIS", "DESIGN_PROPOSAL",
+                     "NORMATIVE_ARGUMENT", "THEORETICAL_CLAIM",
+                     "NOVELTY_CLAIM", "EXTERNAL_FACT", "UNVERIFIED"]
+          },
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "risk_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["risk_class", "status"],
+        "properties": {
+          "risk_class": {
+            "type": "string",
+            "enum": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8",
+                     "R9", "R10", "R11", "R12", "R13", "R14", "R15"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "NOT_APPLICABLE", "UNRESOLVED"]
+          },
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "authorship": {
+      "type": "object",
+      "required": ["human_authors", "agent_contributions"],
+      "properties": {
+        "human_authors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "responsibility"],
+            "properties": {
+              "name": {"type": "string"},
+              "responsibility": {"type": "string"},
+              "orcid": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "agent_contributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["agent", "role", "scope"],
+            "properties": {
+              "agent": {"type": "string"},
+              "role": {
+                "type": "string",
+                "enum": ["tool", "assistant", "reviewer", "execution_system"]
+              },
+              "scope": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "ai_use_disclosure": {
+      "type": "object",
+      "required": ["material_assistance", "citation_fabrication_check"],
+      "properties": {
+        "material_assistance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "description"],
+            "properties": {
+              "category": {
+                "type": "string",
+                "enum": ["research", "coding", "analysis", "drafting",
+                         "translation", "figure_generation", "review"]
+              },
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "citation_fabrication_check": {"type": "boolean"}
+      }
+    },
+    "independent_review": {
+      "type": "object",
+      "required": ["reviewer_not_author", "review_completed"],
+      "properties": {
+        "reviewer_not_author": {"type": "boolean"},
+        "review_completed": {"type": "boolean"},
+        "reviewer_disagreements": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "unresolved_objections": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "reproducibility_manifest": {
+      "type": "object",
+      "required": ["methods_preserved", "versions_preserved", "negative_results_preserved"],
+      "properties": {
+        "methods_preserved": {"type": "boolean"},
+        "versions_preserved": {"type": "boolean"},
+        "environments_preserved": {"type": "boolean"},
+        "data_lineage_preserved": {"type": "boolean"},
+        "seeds_preserved": {"type": ["boolean", "null"]},
+        "negative_results_preserved": {"type": "boolean"},
+        "non_reproducible_parts": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "prior_art_review": {
+      "type": ["object", "null"],
+      "properties": {
+        "adjacent_disciplines_searched": {"type": "boolean"},
+        "direct_neighbors": {"type": "array", "items": {"type": "string"}},
+        "partial_precedents": {"type": "array", "items": {"type": "string"}},
+        "convergent_work": {"type": "array", "items": {"type": "string"}},
+        "disconfirming_sources": {"type": "array", "items": {"type": "string"}},
+        "novelty_challenge_completed": {"type": "boolean"}
+      }
+    },
+    "ethics_determination": {
+      "type": ["object", "null"],
+      "properties": {
+        "human_subjects_involved": {"type": "boolean"},
+        "sensitive_data_involved": {"type": "boolean"},
+        "consent_obtained": {"type": ["boolean", "null"]},
+        "license_verified": {"type": "boolean"}
+      }
+    },
+    "venue_policy_check": {
+      "type": ["object", "null"],
+      "properties": {
+        "venue": {"type": "string"},
+        "policy_checked_at": {"type": ["string", "null"], "format": "date-time"},
+        "disclosure_rules_met": {"type": "boolean"}
+      }
+    },
+    "correction_contact": {"type": "string"},
+    "version_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "date", "change"],
+        "properties": {
+          "version": {"type": "string"},
+          "date": {"type": "string", "format": "date"},
+          "change": {"type": "string"}
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

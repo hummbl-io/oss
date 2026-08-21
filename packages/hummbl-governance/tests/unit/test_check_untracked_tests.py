@@ -23,6 +23,8 @@ def _git_init(repo: Path) -> None:
     subprocess.run(["git", "init", "-q"], cwd=str(repo), check=True)
     subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=str(repo), check=True)
     subprocess.run(["git", "config", "user.name", "test"], cwd=str(repo), check=True)
+    subprocess.run(["git", "config", "commit.gpgsign", "false"], cwd=str(repo), check=True)
+    subprocess.run(["git", "config", "core.hooksPath", ""], cwd=str(repo), check=True)
     # Commit a placeholder so HEAD exists
     (repo / ".gitkeep").write_text("", encoding="utf-8")
     subprocess.run(["git", "add", "-A"], cwd=str(repo), check=True)

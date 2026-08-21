@@ -1,0 +1,64 @@
+{
+  "examples": [
+    {
+      "name": "instant_typo_fix",
+      "declaration": {
+        "selected_tier": "Instant",
+        "consequence_surface": ["public_docs"],
+        "rationale": "Typo-only edit in a non-canonical public docs page.",
+        "receipts_required": ["validation"],
+        "downgrade_allowed": true,
+        "escalation_conditions": [],
+        "source_of_record": "linked issue or PR body",
+        "review_route": "normal PR review",
+        "no_self_approval": true,
+        "residual_risk": "low; reviewer should confirm diff is typo-only"
+      }
+    },
+    {
+      "name": "medium_candidate_gate_doc",
+      "declaration": {
+        "selected_tier": "Medium",
+        "consequence_surface": ["public_docs", "source_of_record"],
+        "rationale": "Adds candidate governance language but does not change runtime behavior.",
+        "receipts_required": ["source_of_record", "peer_review", "validation"],
+        "downgrade_allowed": true,
+        "escalation_conditions": ["namespace_term_promoted", "runtime_enforcement_added"],
+        "source_of_record": "hummbl-governance issue",
+        "review_route": "non-author review comment before ready-for-review promotion",
+        "no_self_approval": true,
+        "residual_risk": "candidate language could be overread as canon"
+      }
+    },
+    {
+      "name": "high_schema_identifier",
+      "declaration": {
+        "selected_tier": "High",
+        "consequence_surface": ["schema", "namespace", "source_of_record"],
+        "rationale": "Introduces schema identifiers and candidate namespace terms.",
+        "receipts_required": ["source_of_record", "operator_approval", "peer_review", "validation"],
+        "downgrade_allowed": true,
+        "escalation_conditions": ["schema_breaking_change_detected", "public_package_metadata_affected"],
+        "source_of_record": "approved issue plus schema receipt",
+        "review_route": "operator or delegated reviewer plus CodeRabbit",
+        "no_self_approval": true,
+        "residual_risk": "schema names may become sticky before namespace audit"
+      }
+    },
+    {
+      "name": "xhigh_release_security_surface",
+      "declaration": {
+        "selected_tier": "XHigh",
+        "consequence_surface": ["security", "release", "package_metadata"],
+        "rationale": "Touches release or security posture and may affect external consumers.",
+        "receipts_required": ["source_of_record", "operator_approval", "peer_review", "validation", "merge_receipt"],
+        "downgrade_allowed": true,
+        "escalation_conditions": ["credential_surface_detected", "protected_branch_or_release_workflow_touched"],
+        "source_of_record": "operator instruction plus linked high-consequence issue",
+        "review_route": "operator approval and non-author review required",
+        "no_self_approval": true,
+        "residual_risk": "must hold if reviewer capacity or source evidence is insufficient"
+      }
+    }
+  ]
+}

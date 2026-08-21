@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/event-ledger-entry.schema.json",
+  "title": "Event Ledger Entry",
+  "description": "Advisory schema for deterministic event-ledger entries separating intention from applied state mutation. Draft only; not canon.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "actor",
+    "proposed_effect",
+    "validation_result",
+    "approval_state",
+    "applied_effect",
+    "projection_hashes",
+    "replay_status",
+    "receipt_ref"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "pattern": "^1\\.0\\.0$"},
+    "event_id": {"type": "string", "pattern": "^evt-[a-z0-9-]+$"},
+    "actor": {"type": "string", "minLength": 1},
+    "proposed_effect": {"type": "string", "minLength": 1},
+    "validation_result": {"type": "string", "enum": ["valid", "invalid", "indeterminate"]},
+    "approval_state": {"type": "string", "enum": ["not_required", "pending_human", "approved", "rejected"]},
+    "applied_effect": {"type": ["string", "null"]},
+    "projection_hashes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["projection", "sha256"],
+        "properties": {
+          "projection": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "replay_status": {"type": "string", "enum": ["not_replayed", "replay_passed", "replay_failed", "compensated"]},
+    "compensation_ref": {"type": ["string", "null"]},
+    "receipt_ref": {"type": "string", "pattern": "^hummbl:receipt:[a-z0-9-]+$"}
+  },
+  "additionalProperties": false
+}
