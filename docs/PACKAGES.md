@@ -9,7 +9,7 @@
 
 | Registry | Live | Publishable (not yet live) | Needs work | Total candidates |
 |----------|------|-----------------------------|------------|------------------|
-| **PyPI** (Python) | 8 | ~31 | ~8 | 47 |
+| **PyPI** (Python) | 7 | ~31 | ~8 | 47 |
 | **npm** (JS/TS) | 0 | ~10 | ~4 | 16 |
 | **crates.io** (Rust) | 0 | 2 | 0 | 2 |
 | **Go module proxy** | 0 | 1 | 0 | 1 |
@@ -19,12 +19,12 @@
 | **Nix flakes** | 0 | 2 | 0 | 2 |
 | **GitHub Pages** (static sites) | 0 | ~6 | 0 | 6 |
 | **Mintlify docs** | 0 | 2 | 0 | 2 |
-| **TOTAL** | **8** | **~64** | **~16** | **~90** |
+| **TOTAL** | **7** | **~64** | **~16** | **~90** |
 
 **Polyglot packages** (same package published across multiple languages):
 - `hummbl-tuples`: Python (live) + Go + Rust + TypeScript (3 not published) — the polyglot model
 
-**Name-collision warning (PyPI + npm):** The package names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and `mcp-server` are NOT HUMMBL's on either PyPI or npm — they are unrelated packages by other authors that happened to share common-word names. Verified 2026-08-21 against both registries' author/repository/maintainer fields:
+**Name-collision warning (PyPI + npm):** The package names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and `mcp-server` are NOT HUMMBL's — they are unrelated packages by other authors that happened to share common-word names. Verified 2026-08-21 against the registries' author/repository/maintainer fields. `mcp-server` is npm-only (no PyPI package by that name); the other 5 collide on both registries:
 
 | Name | PyPI owner | npm owner |
 |------|-----------|-----------|
@@ -33,7 +33,7 @@
 | `arcana` | (arcana.readthedocs.io) | flipactual (`flipactual/arcana`) |
 | `crab` | Graham Bell (`grahambell/crab`) | kossnocorp (`kossnocorp/crab`) |
 | `randy` | Francis Horsman (Bitbucket `sys-git/randy`) | deestan (`deestan/randy`) |
-| `mcp-server` | — | Melvin Carvalho (`sandy-mount/mcp-server`) |
+| `mcp-server` | (not on PyPI) | Melvin Carvalho (`sandy-mount/mcp-server`) |
 
 This is exactly the collision risk that the scoped `@hummbl/*` naming decision (section 4.2 of MONOREPO-DESIGN.md) eliminates on npm. On PyPI, HUMMBL's packages use the `hummbl-*` prefix which is distinctive enough to avoid collisions; the colliding names above are unprefixed common words.
 
@@ -41,7 +41,7 @@ This is exactly the collision risk that the scoped `@hummbl/*` naming decision (
 
 ## 1. PyPI (Python) — 47 candidates
 
-### Live (8) — verified HUMMBL-owned
+### Live (7) — verified HUMMBL-owned
 | Package | Version | Repo | Ownership verified | Notes |
 |---------|---------|------|--------------------|-------|
 | `hummbl-governance` | 1.4.1 | hummbl-governance → oss | 2026-08-21 (published this session) | Governance primitives — kill switch, circuit breaker, etc. Links remediated to `github.com/hummbl-io/oss` in 1.4.1. |
@@ -51,7 +51,11 @@ This is exactly the collision risk that the scoped `@hummbl/*` naming decision (
 | `hummbl-bif` | 1.0.1 | bif | 2026-08-21 (naming + repo match) | Batch Ingestion Framework. README says archived into `hummbl-io/hummbl-toolkit`. No project_urls on PyPI. |
 | `base120` | 3.0.0 | base120 | 2026-08-21 (repo link = hummbl.io, HUMMBL domain) | 120 reasoning operators — stdlib-only, tuple-native. Repo link = `hummbl.io` (no GitHub URL). |
 | `governed-compression` | 0.1.0 | governed-compression | 2026-08-21 (operator-confirmed; naming + matching private repo) | Governed vector + KV-cache compression (ML). CPU reference implementation for quantization methods (TurboQuant-style, QJL, baselines). Runtime dep: `hummbl-governance>=1.1.0` (cross-package dependency — see MONOREPO-DESIGN.md section 7). Repo link on PyPI: none (needs remediation on next publish). |
-| `OBLITERATUS` | 0.0.1 | — | 2026-08-21 (operator: NOT HUMMBL's — Pliny's) | **NOT HUMMBL's — belongs to Pliny (pliny-lab).** Reserved-name placeholder, no functionality. Listed here only to document that it is excluded from the migration. Do not migrate. |
+
+### Excluded from migration (not HUMMBL's)
+| Package | Version | Owner | Notes |
+|---------|---------|-------|-------|
+| `OBLITERATUS` | 0.0.1 | Pliny (pliny-lab) | Reserved-name placeholder, no functionality. Operator-confirmed 2026-08-21: NOT HUMMBL's. Do not migrate. |
 
 **Name collisions (NOT HUMMBL's — do not migrate):** The following PyPI package names were previously listed as HUMMBL's in an earlier draft but are unrelated packages by other authors, verified 2026-08-21 via PyPI author/repository fields:
 - `arbiter` v1.1.2 → R.A. Stern (`rastern/arbiter`)
@@ -100,7 +104,7 @@ These are unprefixed common-word names. HUMMBL's packages use the `hummbl-*` pre
 | `artifact-compiler` | root | |
 | `autoresearch-win-rtx` | root | GPU research agent |
 | `foundermode-app` | root | Voice-first morning coaching app |
-| `reubenos` | root | Personal governed counterpart twin (review before publishing) |
+| `reubenos` | root | Personal governed counterpart twin — **review before publishing** (may contain personal data) |
 | `ST3GG` | root | |
 
 ### Multi-package repos (subdir pyproject.toml — each is a separate package)
@@ -109,9 +113,9 @@ These are unprefixed common-word names. HUMMBL's packages use the `hummbl-*` pre
 | `mcp-server` | `packages/python/base120`, `packages/python/bif` | MCP server with embedded Python packages |
 | `hummbl-toolkit` | `adversary-emulation`, `bif` | Shared utilities, multiple packages |
 | `hummbl-agent` | `packages/runtime`, `skills/local-places` | Agent runtime with multiple packages |
-| `hummbl-production` | `hummbl-governed-quest-sim`, `minecraft-governance` | Production infra with game governance |
+| `hummbl-production` | `hummbl-governed-quest-sim`, `minecraft-governance` | Production infra — **review before publishing** (may contain internal fleet URLs) |
 | `pliny-lab` | `OBLITERATUS`, `P4RS3LT0NGV3` | Red-team lab with multiple packages |
-| `apex-nexus` | root (+ embedded package subdirs) | Fleet mesh with embedded packages |
+| `apex-nexus` | root (+ embedded package subdirs) | Fleet mesh — **review before publishing** (internal fleet infrastructure) |
 
 ---
 
@@ -154,7 +158,7 @@ These are common-word package names squatted/published by other authors. This co
 | Repo | Issue | Notes |
 |------|-------|-------|
 | `hummbl-tuples` TS ref impl | No package.json (only `tuple.ts`, `conformance_test.ts`) | Needs package.json to publish |
-| `coaching-private` | | Review — may be personal |
+| `coaching-private` | | **Review before publishing** — may be personal |
 | `hummbl-cyber` | Has `bin/` but no package.json in root | CLI tool — needs package.json |
 
 ---
@@ -192,7 +196,7 @@ These are common-word package names squatted/published by other authors. This co
 | `hummbl-bibliography` | likely | Provenance corpus, BibTeX citations, position papers |
 | `hummbl-theory` | likely | Formal definitions and proofs for Base120 |
 | `krineia` | yes | Cryptographic receipt system for skill invocations |
-| `coaching-private` | likely | Coaching methodology (review — may be personal) |
+| `coaching-private` | likely | Coaching methodology — **review before publishing** (may be personal) |
 
 ---
 
@@ -242,33 +246,14 @@ These are common-word package names squatted/published by other authors. This co
 
 ---
 
-## NOT publishable (internal/personal — exclude from OSS)
+## Excluded from OSS migration
 
-| Repo | Reason |
-|------|--------|
-| `job-search-2026` | Personal job search |
-| `jenna-collaboration-routing` | Private collaboration map |
-| `delta-fleet` | Private workstation config |
-| `professional-history` | Personal |
-| `reubenos` | Personal governed twin (review carefully) |
-| `meeting-archive` | Private meeting transcripts |
-| `lsat-prep` | Personal study |
-| `hd-ai-education-internal` | Internal |
-| `hd-ai-education-research` | Internal research |
-| `microsoft-locked-clients-research` | Research on vendor lock-in |
-| `vault` | Secrets |
-| `fleet-manifests` | Internal fleet config |
-| `fleet-runbooks` | Internal runbooks |
-| `vendor-skill-fleet` | Internal vendor skills |
-| `anvil-bin` | Host-specific utilities |
-| `delta-disaster-assessment` | Research models (review) |
-| `NemoClaw` | Unclear purpose |
-| `gitea-cicd-canary` | Internal CI canary |
-| `github-public-surface-crawl` | Internal audit tool |
-| `swarm-test-archive` | Internal test archive |
-| `autoresearch-reports` | Internal reports |
-| `legacy-hummbl-dev-org-profile` | Legacy profile |
-| `jenna-collaboration-routing` | Private |
+Repos that are not candidates for public publishing (personal data,
+internal fleet infrastructure, secrets, host-specific configs) are
+tracked in an internal runbook, not enumerated in this public document.
+The categorization (personal vs. internal-infra vs. secrets) is maintained
+privately to avoid publishing a categorized inventory of non-public
+infrastructure.
 
 ---
 

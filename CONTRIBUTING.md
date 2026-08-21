@@ -146,11 +146,11 @@ For scoped npm packages, URL-encode the slash: `@hummbl%2Fmcp-server`.
 
 ### 2.3 PACKAGES.md "Live" table format
 
-Every "Live" table must include ownership verification evidence. The
-current tables use a "Notes" column that records the verification date and
-method. Maintain this. Do not add a package to a "Live" table without
-having run the lookup and confirmed the author/repository/maintainers
-fields match HUMMBL.
+Every "Live" table must include an "Ownership verified" column that
+records the verification date and method (e.g. "2026-08-21 (naming + repo
+match)" or "2026-08-21 (operator-confirmed)"). Do not add a package to a
+"Live" table without having run the registry lookup and confirmed the
+author/repository/maintainers fields match HUMMBL.
 
 ### 2.4 Collision-prone names
 
@@ -169,8 +169,12 @@ This is a **public** repo. Before pushing anything, scan for:
 - Internal host paths: `PROJECTS/`, `hosts/anvil`, `hosts/delta`,
   `C:\Users`, `/opt/hummbl`
 - Machine names in path context: `anvil`, `delta`, `hummbl-vps`,
-  `nodezero` (machine names as GitHub repo names are fine -- they're
-  already public)
+  `nodezero` (machine names as **public** GitHub repo names are fine --
+  they're already public; **private** repo names are still internal and
+  must not be enumerated in public docs)
+- Private repo names with sensitive descriptions (e.g. "vault / Secrets",
+  "meeting-archive / Private transcripts") -- do not publish categorized
+  inventories of non-public infrastructure
 - Operator personal name
 - 1Password item IDs (format: `id=<20-char alphanumeric>`)
 - Tailscale topology details

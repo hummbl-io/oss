@@ -31,12 +31,12 @@ oss/
 │   │   ├── hummbl-tuples/
 │   │   ├── hummbl-bif/
 │   │   ├── base120/
-│   │   ├── arbiter/
+│   │   ├── governed-compression/
 │   │   └── …
 │   ├── node/                # npm
 │   │   ├── hummbl-agent/
 │   │   ├── hummbl-asi/
-│   │   ├── mcp-server/
+│   │   ├── mcp-server/      # publishes as @hummbl/mcp-server
 │   │   ├── hummbl-tuples/   # TS reference impl
 │   │   └── …
 │   ├── rust/                # crates.io
@@ -53,7 +53,7 @@ oss/
 │   ├── hummbl-bibliography/
 │   ├── hummbl-theory/
 │   └── krineia/
-├── docs/                    # Mintlify docs site
+├── site/                    # Mintlify docs site (separate from design docs)
 ├── sites/                   # GitHub Pages (static)
 │   ├── hummbl-dev/
 │   ├── hummbl-brand/
@@ -75,14 +75,17 @@ oss/
 │       ├── publish-pypi.yml
 │       ├── publish-npm.yml
 │       ├── publish-crates.yml
-│       ├── publish-go.yml
 │       └── publish-jvm.yml
 ├── README.md
 ├── LICENSE                  # Apache-2.0
-└── docs/
+└── docs/                    # design docs (this file + PACKAGES.md)
     ├── MONOREPO-DESIGN.md   # this file
     └── PACKAGES.md          # full inventory
 ```
+
+Note: Go has no `publish-go.yml` workflow — tag push IS the publish for Go
+modules (the Go module proxy fetches from the repo on demand). See section
+4.4.
 
 ### Why language-namespaced `packages/<lang>/<name>/`
 
@@ -137,6 +140,12 @@ and version:
 <lang>/<package-name>/v<version>
 ```
 
+**Exception — Go:** The Go module proxy requires the tag prefix to match
+the module path. Go modules at `packages/go/<name>/` with module path
+`github.com/hummbl-io/oss/packages/go/<name>` must be tagged
+`packages/go/<name>/v<version>` (not `go/<name>/v<version>`). This is the
+only language where the tag includes the `packages/` prefix.
+
 Examples:
 
 | Tag | Registry | Package | Version |
@@ -145,7 +154,7 @@ Examples:
 | `python/hummbl-bus/v0.2.0` | PyPI | hummbl-bus | 0.2.0 |
 | `node/hummbl-agent/v0.1.0` | npm | hummbl-agent | 0.1.0 |
 | `rust/demosmesh/v0.1.0` | crates.io | demosmesh | 0.1.0 |
-| `go/hummbl-tuples/v0.1.0` | Go proxy | hummbl.io/tuples | 0.1.0 |
+| `packages/go/hummbl-tuples/v0.1.0` | Go proxy | github.com/hummbl-io/oss/packages/go/hummbl-tuples | 0.1.0 |
 | `jvm/fabric-adapter/v0.1.0` | Maven Central | fabric-adapter | 0.1.0 |
 
 ### Polyglot package releases
@@ -154,10 +163,10 @@ A polyglot package like `hummbl-tuples` has independent versions per
 language. Each language variant is tagged and released separately:
 
 ```
-python/hummbl-tuples/v0.2.1    # PyPI
-rust/hummbl-tuples/v0.1.0      # crates.io
-go/hummbl-tuples/v0.1.0        # Go proxy
-node/hummbl-tuples/v0.1.0      # npm
+python/hummbl-tuples/v0.2.1              # PyPI
+rust/hummbl-tuples/v0.1.0                # crates.io
+packages/go/hummbl-tuples/v0.1.0         # Go proxy (tag prefix must match module path)
+node/hummbl-tuples/v0.1.0                # npm
 ```
 
 Versions MAY align across languages for a coordinated release, but this
@@ -459,9 +468,11 @@ go 1.22
 
 **To publish:**
 ```bash
-git tag go/hummbl-tuples/v0.1.0
-git push origin go/hummbl-tuples/v0.1.0
+git tag packages/go/hummbl-tuples/v0.1.0
+git push origin packages/go/hummbl-tuples/v0.1.0
 # Go proxy fetches within minutes — no CI needed
+# Tag prefix MUST match the module path (packages/go/<name>) for the
+# Go module proxy to resolve the version. See section 2.
 ```
 
 **CI (optional, for validation only):** `.github/workflows/ci-go.yml`
@@ -595,6 +606,8 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25  # v22
 
       - uses: DeterminateSystems/flakehub-push@71f57208810a5d299fc6545350981de98fdbc860  # v6
+        env:
+          FLAKEHUB_TOKEN: ${{ secrets.FLAKEHUB_TOKEN }}
         with:
           visibility: public
           name: hummbl-io/${{ steps.pkg.outputs.name }}
@@ -714,9 +727,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B main
           git add cli/
           git commit -m "chore: update CLI manifests for ${{ steps.pkg.outputs.name }} v${{ steps.pkg.outputs.version }}"
-          git push
+          git push origin main
 ```
 
 ---
@@ -756,17 +770,13 @@ concerns:
 
 ## 6. Secrets management
 
-| Secret | Used by | Scope |
-|--------|---------|-------|
-| `NPM_TOKEN` | publish-npm.yml | npm automation token (shared) |
-| `CARGO_REGISTRY_TOKEN` | publish-crates.yml | crates.io API token |
-| `SONATYPE_USERNAME` | publish-jvm.yml | Maven Central Portal |
-| `SONATYPE_PASSWORD` | publish-jvm.yml | Maven Central Portal |
-| `GPG_KEY_ID` | publish-jvm.yml | Artifact signing |
-| `GPG_PRIVATE_KEY` | publish-jvm.yml | Artifact signing |
-| `GPG_PASSWORD` | publish-jvm.yml | Artifact signing |
-| `ZENODO_TOKEN` | publish-papers.yml | Zenodo deposit |
-| `FLAKEHUB_TOKEN` | publish-nix.yml | FlakeHub push |
+Each publish workflow references the registry credentials it needs via
+`${{ secrets.<NAME> }}`. The exact secret names are defined in the workflow
+files and configured in the repo's GitHub Actions secrets settings. PyPI
+uses no secrets (Trusted Publishing via OIDC). The remaining registries
+(npm, crates.io, Maven Central, Zenodo, FlakeHub) each require a registry
+token or credential set; see the per-language workflow in section 4 for
+the specific secret references.
 
 **PyPI uses no secrets** — Trusted Publishing (OIDC) authenticates via
 the GitHub Actions identity. This is the preferred model; use it for
@@ -890,19 +900,12 @@ After a package is fully migrated and publishing from the monorepo:
 
 ## 9. What stays in private repos
 
-The monorepo is for **public-publishable** packages only. The following
-stay in `hummbl-io/*` private repos:
-
-- **Internal fleet infrastructure:** `apex-nexus`, `agents`, `fleet-manifests`,
-  `fleet-runbooks`, `anvil-bin`, `delta-fleet`
-- **Private governance/agent runtime:** `hummbl-production`, `hummbl-iac`,
-  `hummbl-gitea-control-plane`, `hummbl-dashboard` (if it contains
-  internal fleet URLs — review before publishing)
-- **Personal/workflow:** `job-search-2026`, `meeting-archive`,
-  `professional-history`, `reubenos`, `lsat-prep`, `jenna-collaboration-routing`
-- **Research with sensitive data:** `hd-ai-education-internal`,
-  `microsoft-locked-clients-research`
-- **Secrets:** `vault`
+The monorepo is for **public-publishable** packages only. Repos that are
+not candidates for public publishing — personal data, internal fleet
+infrastructure, secrets, host-specific configs, and private governance/agent
+runtimes — stay in `hummbl-io/*` private repos and are tracked in an internal
+runbook. They are not enumerated in this public document to avoid publishing
+a categorized inventory of non-public infrastructure.
 
 The rule: if it contains internal hostnames, fleet URLs, personal data,
 or secrets, it stays private. If it is a self-contained library that a
