@@ -374,15 +374,18 @@ jobs:
 4. Create the `npm` environment: `gh api repos/hummbl-io/oss/environments/npm -X PUT`
 5. Tag and push: `git tag node/hummbl-agent/v0.1.0 && git push origin node/hummbl-agent/v0.1.0`
 
-**Package naming -- open decision (pending operator confirmation):**
-- **Scoped (recommended):** `@hummbl/<name>` (e.g. `@hummbl/governance`). Avoids
+**Package naming -- DECIDED: scoped `@hummbl/*`**
+- **Scoped:** `@hummbl/<name>` (e.g. `@hummbl/governance`). Avoids
   name squatters, is npm best practice for orgs, but diverges from the PyPI
   spelling (`hummbl-governance`).
-- **Unscoped:** `hummbl-<name>` (matches PyPI exactly). Simpler cross-registry
-  consistency, but exposes the package to name collisions on npm.
+- ~~Unscoped: `hummbl-<name>` (matches PyPI exactly).~~ Rejected -- exposes
+  the package to name collisions on npm.
 
-This decision is irreversible after first publish. Recommendation: scoped
-(`@hummbl/*`). Record the choice in the decision log (section 11) once made.
+Operator confirmed scoped `@hummbl/*` on 2026-08-21. This decision is
+irreversible after first publish. All npm packages in this monorepo use
+the `@hummbl/` scope. The cross-registry spelling divergence (PyPI
+`hummbl-governance` vs npm `@hummbl/governance`) is accepted as the cost
+of namespace safety on npm.
 
 ### 4.3 Rust → crates.io
 
@@ -926,4 +929,4 @@ the paper's `LICENSE` file.
 | 2026-08-21 | ASCII-only + LF for workflow YAML | Em-dash + CRLF caused `startup_failure` on this repo |
 | 2026-08-21 | Clean snapshot (no history) for private-repo migrations | Private repo history may contain PII (hostnames, paths, credentials); `git mv` would carry it into the public monorepo |
 | 2026-08-21 | Create GitHub environments before workflow reference | Jobs referencing a nonexistent environment fail at startup with no logs |
-| 2026-08-21 | npm package naming: **OPEN** (scoped `@hummbl/*` recommended) | Irreversible after first publish; scoped avoids name squatters but diverges from PyPI spelling. Pending operator confirmation |
+| 2026-08-21 | npm package naming: scoped `@hummbl/*` (operator-confirmed) | Irreversible after first publish; scoped avoids name squatters. Cross-registry spelling divergence (PyPI `hummbl-governance` vs npm `@hummbl/governance`) accepted as cost of namespace safety |
