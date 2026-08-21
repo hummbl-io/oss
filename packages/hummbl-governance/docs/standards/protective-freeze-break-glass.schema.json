@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/protective-freeze-break-glass.schema.json",
+  "title": "Protective Freeze and Break-Glass Recovery Receipt",
+  "type": "object",
+  "required": [
+    "incident_id",
+    "mode",
+    "surface",
+    "authority_chain",
+    "actions",
+    "recovery_route",
+    "human_reenable_required",
+    "validation_steps",
+    "residual_risk"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["dry_run", "tabletop", "live"]
+    },
+    "surface": {
+      "type": "string",
+      "enum": [
+        "package_publishing",
+        "agent_credentials",
+        "repository_tokens",
+        "connector_credentials"
+      ]
+    },
+    "authority_chain": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["actor", "role", "decision"],
+        "additionalProperties": false,
+        "properties": {
+          "actor": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "decision": {
+            "type": "string",
+            "enum": ["approve", "deny", "review_only"]
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["primitive", "asset_reference", "scope", "credential_value_present"],
+        "additionalProperties": false,
+        "properties": {
+          "primitive": {
+            "type": "string",
+            "enum": ["PROTECTIVE_FREEZE", "BREAK_GLASS_REVOKE"]
+          },
+          "asset_reference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credential_value_present": {
+            "type": "boolean",
+            "const": false
+          }
+        }
+      }
+    },
+    "recovery_route": {
+      "type": "string",
+      "minLength": 1
+    },
+    "human_reenable_required": {
+      "type": "boolean",
+      "const": true
+    },
+    "validation_steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "post_restore_monitoring": {
+      "type": "string"
+    },
+    "residual_risk": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

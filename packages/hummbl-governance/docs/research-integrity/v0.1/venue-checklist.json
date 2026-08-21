@@ -1,0 +1,14 @@
+{
+  "venue_checks": [
+    {"check": "Venue policy reviewed for AI-use disclosure requirements", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Venue policy reviewed for authorship criteria", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Venue policy reviewed for formatting and submission requirements", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Venue policy reviewed for data availability requirements", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Venue policy reviewed for ethics statement requirements", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Venue policy reviewed for conflict of interest disclosure", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Venue policy reviewed for licensing/copyright requirements", "required_before": "SUBMISSION_CANDIDATE"},
+    {"check": "Preprint policy checked (if applicable)", "required_before": "PREPRINT_CANDIDATE"},
+    {"check": "Peer-review status not claimed for preprint", "required_before": "PREPRINT_CANDIDATE"},
+    {"check": "Current policy version confirmed (not stale)", "required_before": "SUBMISSION_CANDIDATE"}
+  ]
+}

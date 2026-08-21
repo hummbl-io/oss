@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/durable-intelligence/v0.1/session-receipt.schema.json",
+  "title": "Agent Session Receipt v0.1",
+  "description": "Compact durable state transition left by an agent session for accurate continuation by future sessions.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "session_id",
+    "source_agent",
+    "environment",
+    "tools_available",
+    "repository_or_system_scope",
+    "starting_state",
+    "actions_attempted",
+    "mutations_made",
+    "claims",
+    "decisions",
+    "negative_knowledge",
+    "open_questions",
+    "next_actions",
+    "authority_boundaries",
+    "receipt_destination",
+    "completion_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "agent_session_receipt.v0.1"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_agent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "type": "object",
+      "required": ["host", "platform", "python_version"],
+      "properties": {
+        "host": {"type": "string"},
+        "platform": {"type": "string"},
+        "python_version": {"type": "string"}
+      }
+    },
+    "tools_available": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["shell", "filesystem", "network", "connector", "browser",
+                 "test_runner", "deployment", "write_access", "read_only"]
+      }
+    },
+    "repository_or_system_scope": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "starting_state": {
+      "type": "object",
+      "required": ["branch", "head_commit"],
+      "properties": {
+        "branch": {"type": "string"},
+        "head_commit": {"type": "string"},
+        "open_prs": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "open_issues": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "actions_attempted": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "result"],
+        "properties": {
+          "action": {"type": "string"},
+          "result": {
+            "type": "string",
+            "enum": ["succeeded", "failed", "partial", "blocked", "skipped"]
+          },
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "mutations_made": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact_type", "identifier", "created"],
+        "properties": {
+          "artifact_type": {
+            "type": "string",
+            "enum": ["branch", "commit", "pr", "issue", "file", "deployment", "other"]
+          },
+          "identifier": {"type": "string"},
+          "created": {"type": "boolean"}
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim", "posture"],
+        "properties": {
+          "claim": {"type": "string"},
+          "posture": {
+            "type": "string",
+            "enum": ["observed", "source_reported", "inferred", "provisional",
+                     "verified", "refuted", "unresolved"]
+          },
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["decision", "authority_source"],
+        "properties": {
+          "decision": {"type": "string"},
+          "authority_source": {"type": "string"},
+          "timestamp": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "negative_knowledge": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["statement"],
+        "properties": {
+          "statement": {"type": "string"},
+          "context": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question"],
+        "properties": {
+          "question": {"type": "string"},
+          "blocking": {"type": "boolean"},
+          "owner": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "owner"],
+        "properties": {
+          "action": {"type": "string"},
+          "owner": {"type": "string"},
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "acceptance_criteria": {"type": "string"}
+        }
+      }
+    },
+    "authority_boundaries": {
+      "type": "object",
+      "required": ["allowed", "disallowed"],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "disallowed": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "escalation": {"type": ["string", "null"]}
+      }
+    },
+    "receipt_destination": {
+      "type": "string",
+      "enum": ["github_issue", "github_pr_comment", "governed_receipt_dir",
+               "claim_evidence_ledger", "task_registry", "handoff_index"]
+    },
+    "completion_status": {
+      "type": "string",
+      "enum": ["COMPLETED", "PARTIAL", "BLOCKED", "INCONCLUSIVE", "SUPERSEDED"]
+    },
+    "handoff_disposition": {
+      "type": ["string", "null"],
+      "enum": ["CONFIRMED", "REFUTED", "INCONCLUSIVE",
+               "BLOCKED_MISSING_AUTHORITY", "SUPERSEDED", null]
+    }
+  },
+  "additionalProperties": false
+}

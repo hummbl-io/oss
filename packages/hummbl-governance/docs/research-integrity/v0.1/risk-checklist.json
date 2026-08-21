@@ -1,0 +1,19 @@
+{
+  "risks": [
+    {"class": "R1", "label": "NOVELTY_OVERCLAIM", "check": "Is novelty stated narrowly and compositionally? Is there an independent novelty challenge?"},
+    {"class": "R2", "label": "PRIOR_ART_OMISSION", "check": "Were adjacent disciplines searched? Are direct neighbors, partial precedents, and convergent work recorded?"},
+    {"class": "R3", "label": "EVIDENCE_STRENGTH_INFLATION", "check": "Does claim posture match evidence strength? Are hypotheses distinguished from observations?"},
+    {"class": "R4", "label": "REPRODUCIBILITY_GAP", "check": "Are methods, versions, environments, data lineage preserved? Are non-reproducible parts stated?"},
+    {"class": "R5", "label": "METHOD_OPACITY", "check": "Are methods documented sufficiently for replication?"},
+    {"class": "R6", "label": "AUTHORSHIP_OR_CONTRIBUTION_MISREPRESENTATION", "check": "Is human authorship explicit? Are agent contributions disclosed as tools, not authors?"},
+    {"class": "R7", "label": "UNDISCLOSED_AI_ASSISTANCE", "check": "Is material AI assistance recorded? Are citations checked for fabrication?"},
+    {"class": "R8", "label": "CONFLICT_OR_INCENTIVE_NONDISCLOSURE", "check": "Are conflicts of interest disclosed?"},
+    {"class": "R9", "label": "ETHICS_OR_HUMAN_SUBJECTS_BOUNDARY_FAILURE", "check": "Is a human-subjects determination made when relevant? Is consent obtained?"},
+    {"class": "R10", "label": "DATA_RIGHTS_PRIVACY_OR_LICENSE_FAILURE", "check": "Are dataset, code, figure, and source licenses verified?"},
+    {"class": "R11", "label": "VENUE_POLICY_NONCOMPLIANCE", "check": "Are venue-specific disclosure rules checked at submission time?"},
+    {"class": "R12", "label": "PUBLICITY_BEFORE_VALIDATION", "check": "Are press-style claims avoided before evidence and review are stable?"},
+    {"class": "R13", "label": "FAILURE_TO_CORRECT_OR_RETRACT", "check": "Is a correction contact available? Is version history maintained?"},
+    {"class": "R14", "label": "DISCIPLINE_PRESTIGE_BORROWING", "check": "Does the artifact borrow prestige from disciplines without earning it?"},
+    {"class": "R15", "label": "TERMINOLOGY_OR_NAMESPACE_COLONIZATION", "check": "Does the artifact colonize terminology or namespaces from other fields?"}
+  ]
+}

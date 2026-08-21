@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/claim-set.schema.json",
+  "title": "HUMMBL Claim Set",
+  "description": "Tier 1 Governance Core: Bridge between QuestionSet and EvidenceSet. Each Claim carries an epistemic quadrant tag. Phase 0 schema seed — draft status, not canon.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "hummbl_object_envelope.schema.json" }
+  ],
+  "required": ["object_type", "claims", "uncertainty_map_ref"],
+  "properties": {
+    "object_type": { "const": "ClaimSet" },
+    "tier": { "const": "tier1_governance_core" },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "statement", "epistemic_quadrant", "evidence_state"],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^claim-[0-9]+$"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "epistemic_quadrant": {
+            "type": "string",
+            "enum": ["known-known", "known-unknown", "unknown-known", "unknown-unknown"],
+            "description": "Rumsfeld quadrant from uncertainty-map skill. If no UncertaintyMap exists, default to 'unknown-known' (conservative)."
+          },
+          "evidence_state": {
+            "type": "string",
+            "enum": ["verified_direct", "internally_cross_referenced", "reported", "inferred", "speculative", "unimplemented"],
+            "description": "Per ChatGPT review: 'verified' reserved for direct inspection of concrete artifacts."
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^hummbl:evidence-set:[a-f0-9-]+$" }
+          },
+          "assumption_set_ref": {
+            "type": "string",
+            "pattern": "^hummbl:assumption-set:[a-f0-9-]+$",
+            "description": "Co-bridge: every Claim has an AssumptionSet surfacing what's taken for granted (OQ-2)."
+          },
+          "falsifiability": {
+            "type": "string",
+            "description": "How this claim could be proven false"
+          },
+          "is_public": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, stricter promotion path applies (OQ-8): independent review + evidence verification + disclosure handling + operator approval."
+          }
+        }
+      }
+    },
+    "uncertainty_map_ref": {
+      "type": "string",
+      "pattern": "^hummbl:uncertainty-map:[a-f0-9-]+$",
+      "description": "Parent UncertaintyMap that generated this ClaimSet. Claims inherit quadrant from parent (OQ-2)."
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, all claims in this set follow the stricter Public Claim Set promotion path (OQ-8)."
+    },
+    "disclosure_scan_auth_ref": {
+      "type": "string",
+      "description": "Required for public ClaimSets referencing security findings: Disclosure-Producing Scan authorization (OQ-8)."
+    }
+  },
+  "additionalProperties": true
+}

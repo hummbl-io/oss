@@ -1,0 +1,389 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/hummbl-problem-grammar.schema.json",
+  "title": "HUMMBL Problem Grammar",
+  "description": "Machine-validatable schema for the HUMMBL Problem grammar (HUAOMP × MTSMU × Base120). Validates structure, not truth of claims.",
+  "type": "object",
+  "required": ["artifact", "framework", "status", "canon_level", "meta_definition", "huaomp", "mtsmu", "base120", "compositional", "confidence", "questions"],
+  "properties": {
+    "artifact": {
+      "type": "string",
+      "const": "HUMMBL_PROBLEM_GRAMMAR"
+    },
+    "framework": {
+      "type": "string",
+      "const": "HUAOMP × MTSMU × Base120"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "provisional", "canonical", "deprecated"]
+    },
+    "canon_level": {
+      "type": "string",
+      "enum": ["non-authoritative", "advisory", "binding", "superseded"]
+    },
+    "origin_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "requires": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["schema", "fixtures", "evidence_ledger", "fleet_review"]
+      }
+    },
+    "meta_definition": {
+      "type": "object",
+      "required": ["problem_statement", "components", "assessment"],
+      "properties": {
+        "problem_statement": { "type": "string" },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "assessment": {
+          "$ref": "#/$defs/semantic_confidence"
+        }
+      }
+    },
+    "huaomp": {
+      "type": "object",
+      "required": ["holistic", "universal", "absolute", "omni", "meta", "paradigmatic"],
+      "properties": {
+        "holistic": { "$ref": "#/$defs/lens" },
+        "universal": {
+          "type": "object",
+          "required": ["invariants", "spec_constraints"],
+          "properties": {
+            "invariants": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "base120_operators": { "$ref": "#/$defs/operator_list" },
+            "spec_constraints": { "$ref": "#/$defs/constraint_list" }
+          }
+        },
+        "absolute": {
+          "type": "object",
+          "required": ["must_never", "must_eventually", "physically_impossible", "spec_constraints"],
+          "properties": {
+            "must_never": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "must_eventually": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "physically_impossible": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "base120_operators": { "$ref": "#/$defs/operator_list" },
+            "spec_constraints": { "$ref": "#/$defs/constraint_list" }
+          }
+        },
+        "omni": {
+          "type": "object",
+          "required": ["perspectives", "failure_modes", "spec_constraints"],
+          "properties": {
+            "perspectives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["role", "question"],
+                "properties": {
+                  "role": { "type": "string" },
+                  "question": { "type": "string" }
+                }
+              },
+              "minItems": 1
+            },
+            "failure_modes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["mode", "response"],
+                "properties": {
+                  "mode": { "type": "string" },
+                  "response": { "type": "string" }
+                }
+              }
+            },
+            "base120_operators": { "$ref": "#/$defs/operator_list" },
+            "spec_constraints": { "$ref": "#/$defs/constraint_list" }
+          }
+        },
+        "meta": { "$ref": "#/$defs/lens" },
+        "paradigmatic": { "$ref": "#/$defs/lens" }
+      }
+    },
+    "mtsmu": {
+      "type": "object",
+      "required": ["evidence_chain", "confidence_bands", "output_contract", "convergence_target"],
+      "properties": {
+        "evidence_chain": {
+          "type": "object",
+          "required": ["claim", "source_types", "uncertainty", "verification", "receipt"],
+          "properties": {
+            "claim": { "type": "string" },
+            "source_types": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["test_result", "probe", "log_entry", "bus_receipt", "git_diff", "bandit_finding", "arbiter_score", "scanner_output", "authorization_manifest"]
+              }
+            },
+            "uncertainty": { "type": "string" },
+            "verification": { "type": "string" },
+            "receipt": { "type": "string" }
+          }
+        },
+        "confidence_bands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["range", "description"],
+            "properties": {
+              "range": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "output_contract": {
+          "type": "object",
+          "required": ["evidence", "uncertainties", "action", "verification", "next_lanes"],
+          "properties": {
+            "evidence": { "type": "string" },
+            "uncertainties": { "type": "string" },
+            "action": { "type": "string" },
+            "verification": { "type": "string" },
+            "next_lanes": { "type": "string" }
+          }
+        },
+        "convergence_target": {
+          "type": "object",
+          "required": ["conditions"],
+          "properties": {
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "description", "testable", "non_self_approved"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": ["identity", "authority", "evidence", "exception_path", "rollback", "audit_receipt", "independent_review"]
+                  },
+                  "description": { "type": "string" },
+                  "testable": { "type": "boolean" },
+                  "non_self_approved": { "type": "boolean" }
+                }
+              },
+              "minItems": 7,
+              "maxItems": 7
+            }
+          }
+        }
+      }
+    },
+    "base120": {
+      "type": "object",
+      "required": ["transformations"],
+      "properties": {
+        "transformations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/transformation" },
+          "minItems": 6,
+          "maxItems": 6
+        }
+      }
+    },
+    "compositional": {
+      "type": "object",
+      "required": ["primitives"],
+      "properties": {
+        "primitives": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/governance_primitive" }
+        },
+        "integration_patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "flow", "independence_preservation", "anti_strange_loop", "contract"],
+            "properties": {
+              "name": { "type": "string" },
+              "flow": { "type": "array", "items": { "type": "string" } },
+              "independence_preservation": { "type": "array", "items": { "type": "string" } },
+              "anti_strange_loop": { "type": "array", "items": { "type": "string" } },
+              "contract": {
+                "type": "object",
+                "properties": {
+                  "finding_format": { "type": "string" },
+                  "signature": { "type": "string" },
+                  "freshness": { "type": "string" },
+                  "missing_findings": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "confidence": {
+      "$ref": "#/$defs/semantic_confidence_with_evidence"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question", "decision", "rationale"],
+        "properties": {
+          "question": { "type": "string" },
+          "decision": { "type": "string" },
+          "rationale": { "type": "string" },
+          "references": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "semantic_confidence": {
+      "type": "object",
+      "required": ["semantic_confidence", "confidence_kind", "calibration_status", "basis"],
+      "properties": {
+        "semantic_confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "confidence_kind": {
+          "type": "string",
+          "enum": ["synthesis_judgment", "direct_verification", "inferred", "speculative"]
+        },
+        "calibration_status": {
+          "type": "string",
+          "enum": ["uncalibrated", "calibrated", "pending_calibration"]
+        },
+        "basis": { "type": "string" },
+        "evidence": { "type": "string" }
+      }
+    },
+    "semantic_confidence_with_evidence": {
+      "allOf": [
+        { "$ref": "#/$defs/semantic_confidence" },
+        {
+          "type": "object",
+          "properties": {
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["claim", "source", "verification_status"],
+                "properties": {
+                  "claim": { "type": "string" },
+                  "source": { "type": "string" },
+                  "verification_status": {
+                    "type": "string",
+                    "enum": ["verified", "reported", "inferred", "speculative", "unimplemented"]
+                  }
+                }
+              }
+            },
+            "uncertainties": { "type": "array", "items": { "type": "string" } },
+            "verification": { "type": "array", "items": { "type": "string" } },
+            "next_lanes": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      ]
+    },
+    "lens": {
+      "type": "object",
+      "required": ["findings", "spec_constraints"],
+      "properties": {
+        "findings": { "type": "array", "items": { "type": "string" } },
+        "base120_operators": { "$ref": "#/$defs/operator_list" },
+        "spec_constraints": { "$ref": "#/$defs/constraint_list" }
+      }
+    },
+    "operator_list": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(P|IN|CO|DE|RE|SY)\\d{1,2}$"
+      }
+    },
+    "constraint_list": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "transformation": {
+      "type": "object",
+      "required": ["family", "name", "maps_to", "operators", "implemented_by"],
+      "properties": {
+        "family": {
+          "type": "string",
+          "enum": ["P", "IN", "CO", "DE", "RE", "SY"]
+        },
+        "name": { "type": "string" },
+        "maps_to": { "type": "string" },
+        "operators": { "$ref": "#/$defs/operator_list" },
+        "implemented_by": { "type": "array", "items": { "type": "string" } },
+        "is_system_property_contract": {
+          "type": "boolean",
+          "description": "True for SY — emergent, no single repo owns it"
+        },
+        "scan_taxonomy": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scan_type", "authorization_required"],
+            "properties": {
+              "scan_type": {
+                "type": "string",
+                "enum": ["discovery", "privileged", "destructive", "disclosure_producing"]
+              },
+              "authorization_required": { "type": "string" },
+              "example": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "governance_primitive": {
+      "type": "object",
+      "required": ["name", "huaomp_lens", "base120_family", "mtsmu_evidence", "semantic_confidence", "confidence_kind", "receipt", "implementation"],
+      "properties": {
+        "name": { "type": "string" },
+        "huaomp_lens": {
+          "type": "string",
+          "enum": ["H", "U", "A", "O", "M", "P"]
+        },
+        "base120_family": { "type": "string" },
+        "mtsmu_evidence": { "type": "string" },
+        "semantic_confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "confidence_kind": {
+          "type": "string",
+          "enum": ["synthesis_judgment", "direct_verification", "inferred", "speculative"]
+        },
+        "receipt": { "type": "string" },
+        "implementation": { "type": "string" }
+      }
+    }
+  }
+}
