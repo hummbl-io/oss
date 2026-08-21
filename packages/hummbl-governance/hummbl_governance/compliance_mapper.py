@@ -902,6 +902,344 @@ class ComplianceMapper:
 
         return report
 
+    def generate_gpai_report(self, days: int = 30) -> ComplianceReport:
+        """Generate an EU AI Act Article 53 (GPAI provider) compliance report.
+
+        Maps governance traces to GPAI provider obligations under Article 53.
+        These are the obligations that became enforceable on 2 August 2026
+        with fines up to EUR 15M or 3% of worldwide turnover.
+
+        Article 53(1) applies to all GPAI providers; Article 53(2) adds
+        obligations for GPAI models with systemic risk.
+
+        Controls with no runtime evidence are initialised empty; they are
+        satisfied by model documentation and organisational artefacts
+        outside the library.
+
+        Reference: Regulation (EU) 2024/1689, Article 53.
+        """
+        now = datetime.now(timezone.utc)
+
+        report = ComplianceReport(
+            generated_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            framework="EU_AI_ACT_GPAI",
+        )
+
+        # Article 53(1) -- all GPAI providers
+        report.controls["Art.53.1.a"] = []  # Technical documentation
+        report.controls["Art.53.1.b"] = []  # Information to downstream providers
+        report.controls["Art.53.1.c"] = []  # Copyright policy compliance
+        report.controls["Art.53.1.d"] = []  # Training content summary
+        # Article 53(2) -- GPAI with systemic risk
+        report.controls["Art.53.2.a"] = []  # Model evaluation
+        report.controls["Art.53.2.b"] = []  # Risk mitigation
+        report.controls["Art.53.2.c"] = []  # Adversarial testing
+        report.controls["Art.53.2.d"] = []  # Incident reporting
+        report.controls["Art.53.2.e"] = []  # Cybersecurity
+
+        files = self._collect_files(days)
+        entries = self._read_entries(files)
+
+        for entry in entries:
+            evidence = self._base_evidence(entry)
+            tuple_type = entry.get("tuple_type")
+            tuple_data = entry.get("tuple_data", {})
+            claim_str = str(tuple_data.get("claim", "")).lower()
+
+            # Art.53.1.a: Technical documentation -- ATTEST/EVIDENCE tuples document model specs
+            if tuple_type in ("ATTEST", "EVIDENCE"):
+                doc_evidence = evidence.copy()
+                doc_evidence.update({
+                    "tuple_type": tuple_type,
+                    "claim": tuple_data.get("claim"),
+                    "outcome": tuple_data.get("outcome"),
+                })
+                report.controls["Art.53.1.a"].append(doc_evidence)
+
+            # Art.53.1.b: Downstream provider info -- DCTX delegation chains show provider-to-provider info
+            if tuple_type == "DCTX":
+                downstream_evidence = evidence.copy()
+                downstream_evidence.update({
+                    "delegator": tuple_data.get("delegator"),
+                    "delegatee": tuple_data.get("delegatee"),
+                    "event": tuple_data.get("event"),
+                })
+                report.controls["Art.53.1.b"].append(downstream_evidence)
+
+            # Art.53.1.c: Copyright policy -- CONTRACT tuples prove policy compliance
+            if tuple_type == "CONTRACT":
+                copyright_evidence = evidence.copy()
+                copyright_evidence.update({
+                    "issuer": tuple_data.get("issuer"),
+                    "operations": tuple_data.get("operations"),
+                })
+                report.controls["Art.53.1.c"].append(copyright_evidence)
+
+            # Art.53.1.d: Training content summary -- ATTEST tuples with training data evidence
+            if tuple_type == "ATTEST" and "training" in claim_str:
+                training_evidence = evidence.copy()
+                training_evidence.update({
+                    "claim": tuple_data.get("claim"),
+                    "outcome": tuple_data.get("outcome"),
+                })
+                report.controls["Art.53.1.d"].append(training_evidence)
+
+            # Art.53.2.a: Model evaluation -- ATTEST/EVIDENCE tuples with evaluation results
+            if tuple_type in ("ATTEST", "EVIDENCE") and tuple_data.get("outcome"):
+                eval_evidence = evidence.copy()
+                eval_evidence.update({
+                    "tuple_type": tuple_type,
+                    "claim": tuple_data.get("claim"),
+                    "outcome": tuple_data.get("outcome"),
+                })
+                report.controls["Art.53.2.a"].append(eval_evidence)
+
+            # Art.53.2.b: Risk mitigation -- CIRCUIT_BREAKER/KILLSWITCH events
+            if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
+                risk_evidence = evidence.copy()
+                risk_evidence.update({
+                    "tuple_type": tuple_type,
+                    "state": tuple_data.get("state"),
+                })
+                report.controls["Art.53.2.b"].append(risk_evidence)
+
+            # Art.53.2.c: Adversarial testing -- ATTEST tuples with adversarial test evidence
+            if tuple_type == "ATTEST" and "adversarial" in claim_str:
+                adv_evidence = evidence.copy()
+                adv_evidence.update({
+                    "claim": tuple_data.get("claim"),
+                    "outcome": tuple_data.get("outcome"),
+                })
+                report.controls["Art.53.2.c"].append(adv_evidence)
+
+            # Art.53.2.d: Incident reporting -- KILLSWITCH events (incident response)
+            if tuple_type == "KILLSWITCH":
+                incident_evidence = evidence.copy()
+                incident_evidence.update({
+                    "state": tuple_data.get("state"),
+                    "adapter": tuple_data.get("adapter"),
+                })
+                report.controls["Art.53.2.d"].append(incident_evidence)
+
+            # Art.53.2.e: Cybersecurity -- signed entries prove integrity
+            if entry.get("signature"):
+                cyber_evidence = evidence.copy()
+                cyber_evidence["tuple_type"] = tuple_type
+                report.controls["Art.53.2.e"].append(cyber_evidence)
+
+        return report
+
+    def generate_cosais_report(self, days: int = 30) -> ComplianceReport:
+        """Generate a NIST COSAiS (Control Overlays for Securing AI Systems) report.
+
+        Maps governance traces to SP 800-53 control overlays for AI systems.
+        COSAiS applies NIST SP 800-53 security controls to AI system
+        deployment contexts (predictive AI and generative AI).
+
+        Controls with no runtime evidence are initialised empty; they are
+        satisfied by organisational process documentation outside the library.
+
+        Reference: NIST COSAiS (Control Overlays for Securing AI Systems),
+        emerging drafts applying SP 800-53 to AI systems.
+        """
+        now = datetime.now(timezone.utc)
+
+        report = ComplianceReport(
+            generated_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            framework="NIST_COSAIS",
+        )
+
+        # SP 800-53 control families applied to AI systems
+        report.controls["AC-2"] = []   # Account management -- DCT identity binding
+        report.controls["AC-3"] = []   # Access enforcement -- DCT ops_allowed
+        report.controls["AU-2"] = []   # Audit events -- signed entries
+        report.controls["AU-6"] = []   # Audit review -- CB/HEALTH_PROBE events
+        report.controls["AU-12"] = []  # Audit record generation -- signed entries
+        report.controls["CM-2"] = []   # Baseline configuration -- CONTRACT tuples
+        report.controls["IA-2"] = []   # Identification and authentication -- DCT identity
+        report.controls["RA-3"] = []   # Risk assessment -- CB/KS
+        report.controls["RA-5"] = []   # Vulnerability monitoring -- HEALTH_PROBE/ATTEST
+        report.controls["SA-9"] = []   # External system services -- DCTX delegation
+        report.controls["SC-8"] = []   # Transmission confidentiality -- signed entries
+        report.controls["SI-2"] = []   # Flaw remediation -- CB state transitions
+        report.controls["SI-7"] = []   # Software integrity -- signed entries
+        report.controls["SI-10"] = []  # Information input validation -- ATTEST/EVIDENCE
+
+        files = self._collect_files(days)
+        entries = self._read_entries(files)
+
+        for entry in entries:
+            evidence = self._base_evidence(entry)
+            tuple_type = entry.get("tuple_type")
+            tuple_data = entry.get("tuple_data", {})
+
+            # AC-2 & IA-2: Account management + Identification -- DCT identity binding
+            if tuple_type == "DCT":
+                identity_evidence = evidence.copy()
+                identity_evidence.update({
+                    "issuer": tuple_data.get("issuer"),
+                    "subject": tuple_data.get("subject"),
+                })
+                report.controls["AC-2"].append(identity_evidence)
+                report.controls["IA-2"].append(identity_evidence.copy())
+
+            # AC-3: Access enforcement -- DCT ops_allowed restrictions
+            if tuple_type == "DCT":
+                ac3_evidence = evidence.copy()
+                ac3_evidence.update({
+                    "ops_allowed": tuple_data.get("ops_allowed"),
+                    "resources": tuple_data.get("resource_selectors"),
+                })
+                report.controls["AC-3"].append(ac3_evidence)
+
+            # AU-2 & AU-12: Audit events and record generation -- signed entries
+            if entry.get("signature"):
+                audit_evidence = evidence.copy()
+                audit_evidence["tuple_type"] = tuple_type
+                report.controls["AU-2"].append(audit_evidence)
+                report.controls["AU-12"].append(audit_evidence.copy())
+
+            # AU-6: Audit review -- CB/HEALTH_PROBE/BEHAVIOR_MONITOR events
+            if tuple_type in ("CIRCUIT_BREAKER", "HEALTH_PROBE", "BEHAVIOR_MONITOR"):
+                review_evidence = evidence.copy()
+                review_evidence.update({
+                    "tuple_type": tuple_type,
+                    "state": tuple_data.get("state"),
+                })
+                report.controls["AU-6"].append(review_evidence)
+
+            # CM-2: Baseline configuration -- CONTRACT tuples
+            if tuple_type == "CONTRACT":
+                cm_evidence = evidence.copy()
+                cm_evidence.update({
+                    "issuer": tuple_data.get("issuer"),
+                    "operations": tuple_data.get("operations"),
+                })
+                report.controls["CM-2"].append(cm_evidence)
+
+            # RA-3: Risk assessment -- CB/KS
+            if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
+                ra_evidence = evidence.copy()
+                ra_evidence.update({
+                    "tuple_type": tuple_type,
+                    "state": tuple_data.get("state"),
+                })
+                report.controls["RA-3"].append(ra_evidence)
+
+            # RA-5: Vulnerability monitoring -- HEALTH_PROBE/ATTEST/EVIDENCE
+            if tuple_type in ("HEALTH_PROBE", "ATTEST", "EVIDENCE"):
+                vuln_evidence = evidence.copy()
+                vuln_evidence.update({
+                    "tuple_type": tuple_type,
+                    "claim": tuple_data.get("claim"),
+                    "outcome": tuple_data.get("outcome"),
+                })
+                report.controls["RA-5"].append(vuln_evidence)
+
+            # SA-9: External system services -- DCTX delegation
+            if tuple_type == "DCTX":
+                sa_evidence = evidence.copy()
+                sa_evidence.update({
+                    "delegator": tuple_data.get("delegator"),
+                    "delegatee": tuple_data.get("delegatee"),
+                })
+                report.controls["SA-9"].append(sa_evidence)
+
+            # SC-8 & SI-7: Transmission confidentiality + Software integrity -- signed entries
+            if entry.get("signature"):
+                sc_evidence = evidence.copy()
+                sc_evidence["tuple_type"] = tuple_type
+                report.controls["SC-8"].append(sc_evidence)
+                report.controls["SI-7"].append(sc_evidence.copy())
+
+            # SI-2: Flaw remediation -- CB state transitions
+            if tuple_type == "CIRCUIT_BREAKER":
+                si2_evidence = evidence.copy()
+                si2_evidence.update({
+                    "state": tuple_data.get("state"),
+                    "adapter": tuple_data.get("adapter"),
+                })
+                report.controls["SI-2"].append(si2_evidence)
+
+            # SI-10: Information input validation -- ATTEST/EVIDENCE
+            if tuple_type in ("ATTEST", "EVIDENCE"):
+                si10_evidence = evidence.copy()
+                si10_evidence.update({
+                    "tuple_type": tuple_type,
+                    "claim": tuple_data.get("claim"),
+                    "outcome": tuple_data.get("outcome"),
+                })
+                report.controls["SI-10"].append(si10_evidence)
+
+        return report
+
+    def generate_crosswalk_report(self, days: int = 30) -> ComplianceReport:
+        """Generate a cross-framework crosswalk report.
+
+        Shows which governance entries satisfy controls across ALL frameworks
+        simultaneously. This is the multi-framework differentiation: instead
+        of N separate reports, one unified view showing crosswalk coverage.
+
+        For each governance entry, the crosswalk shows which controls it
+        satisfies in each framework. A summary shows total evidence count
+        per control per framework.
+        """
+        now = datetime.now(timezone.utc)
+
+        # Generate all framework reports
+        framework_reports = {
+            "SOC2": self.generate_soc2_report(days),
+            "GDPR": self.generate_gdpr_report(days),
+            "OWASP_AGENTIC": self.generate_owasp_report(days),
+            "NIST_AI_RMF": self.generate_nist_rmf_report(days),
+            "EU_AI_ACT": self.generate_eu_ai_act_report(days),
+            "EU_AI_ACT_GPAI": self.generate_gpai_report(days),
+            "ISO27001": self.generate_iso27001_report(days),
+            "ISO42001": self.generate_iso42001_report(days),
+            "NIST_CSF": self.generate_nist_csf_report(days),
+            "NIST_COSAIS": self.generate_cosais_report(days),
+        }
+
+        # Build per-entry crosswalk: entry_id -> {framework: [control_ids]}
+        crosswalk: dict[str, dict[str, list[str]]] = {}
+        for framework, fw_report in framework_reports.items():
+            for control_id, evidence_list in fw_report.controls.items():
+                for ev in evidence_list:
+                    entry_id = ev.get("entry_id")
+                    if entry_id is None:
+                        continue
+                    if entry_id not in crosswalk:
+                        crosswalk[entry_id] = {}
+                    if framework not in crosswalk[entry_id]:
+                        crosswalk[entry_id][framework] = []
+                    if control_id not in crosswalk[entry_id][framework]:
+                        crosswalk[entry_id][framework].append(control_id)
+
+        # Build summary: per-framework control counts
+        summary: list[dict[str, Any]] = []
+        for framework, fw_report in framework_reports.items():
+            total_controls = len(fw_report.controls)
+            controls_with_evidence = sum(1 for v in fw_report.controls.values() if v)
+            total_evidence = sum(len(v) for v in fw_report.controls.values())
+            summary.append({
+                "framework": framework,
+                "total_controls": total_controls,
+                "controls_with_evidence": controls_with_evidence,
+                "total_evidence": total_evidence,
+            })
+
+        report = ComplianceReport(
+            generated_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            framework="CROSSWALK",
+        )
+        report.controls["entries"] = [
+            {"entry_id": eid, "frameworks": fw_map}
+            for eid, fw_map in sorted(crosswalk.items())
+        ]
+        report.controls["summary"] = summary
+
+        return report
+
 
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
@@ -913,7 +1251,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--framework",
-        choices=["soc2", "gdpr", "owasp", "nist-rmf", "eu-ai-act", "iso27001", "iso42001", "nist-csf"],
+        choices=["soc2", "gdpr", "owasp", "nist-rmf", "eu-ai-act", "iso27001", "iso42001", "nist-csf", "gpai", "cosais", "crosswalk"],
         default="soc2",
         help="Compliance framework",
     )
@@ -958,6 +1296,12 @@ def main(argv: list[str] | None = None) -> int:
         report = mapper.generate_iso42001_report(days=args.days)
     elif args.framework == "nist-csf":
         report = mapper.generate_nist_csf_report(days=args.days)
+    elif args.framework == "gpai":
+        report = mapper.generate_gpai_report(days=args.days)
+    elif args.framework == "cosais":
+        report = mapper.generate_cosais_report(days=args.days)
+    elif args.framework == "crosswalk":
+        report = mapper.generate_crosswalk_report(days=args.days)
     else:
         report = mapper.generate_soc2_report(days=args.days)
 
