@@ -824,7 +824,7 @@ Each remaining package is migrated in its own PR to keep diffs reviewable.
 - [ ] `hummbl-tuples` → `packages/python/hummbl-tuples/` (+ `packages/rust/`, `packages/go/`, `packages/node/` for reference impls)
 - [ ] `hummbl-bif` → `packages/python/hummbl-bif/`
 - [ ] `base120` → `packages/python/base120/`
-- [ ] `governed-compression` → `packages/python/governed-compression/` (verify ownership — no author metadata on PyPI, likely HUMMBL's based on naming + matching private repo)
+- [ ] `governed-compression` → `packages/python/governed-compression/` (ML: governed vector + KV-cache compression; runtime dep on `hummbl-governance>=1.1.0` — cross-package dependency, see section 7)
 
 **Excluded from Phase 1 (not HUMMBL's):** `arbiter`, `arcana`, `crab`, `randy`, `hermes-agent` are name collisions on PyPI by other authors (see PACKAGES.md). `OBLITERATUS` belongs to Pliny (pliny-lab), not HUMMBL.
 

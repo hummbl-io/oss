@@ -50,7 +50,7 @@ This is exactly the collision risk that the scoped `@hummbl/*` naming decision (
 | `hummbl-tuples` | 0.2.0 | hummbl-tuples | Typed Tuples governance model (polyglot: also Go, Rust, TS). No project_urls on PyPI — needs link remediation. |
 | `hummbl-bif` | 1.0.1 | bif | Batch Ingestion Framework. README says archived into `hummbl-io/hummbl-toolkit`. No project_urls on PyPI. |
 | `base120` | 3.0.0 | base120 | 120 reasoning operators — stdlib-only, tuple-native. Repo link = `hummbl.io` (no GitHub URL). |
-| `governed-compression` | 0.1.0 | governed-compression | "Private research surface for governed compression experiments." No author/repo metadata — likely HUMMBL's based on naming convention + matching private repo `hummbl-io/governed-compression`. |
+| `governed-compression` | 0.1.0 | governed-compression | Governed vector + KV-cache compression (ML). CPU reference implementation for quantization methods (TurboQuant-style, QJL, baselines). Runtime dep: `hummbl-governance>=1.1.0` (cross-package dependency — see MONOREPO-DESIGN.md section 7). Confirmed HUMMBL-owned by operator 2026-08-21. Repo link on PyPI: none (needs remediation on next publish). |
 | `OBLITERATUS` | 0.0.1 | — | **NOT HUMMBL's — belongs to Pliny (pliny-lab).** Reserved-name placeholder, no functionality. Listed here only to document that it is excluded from the migration. Do not migrate. |
 
 **Name collisions (NOT HUMMBL's — do not migrate):** The following PyPI package names were previously listed as HUMMBL's in an earlier draft but are unrelated packages by other authors, verified 2026-08-21 via PyPI author/repository fields:
