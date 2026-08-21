@@ -1,0 +1,14 @@
+id: SL-11
+title: "Observability and Provenance Scaling"
+status: empirically.tested
+candidate_law_statement: "Delegation-scoped reconstruction fails if context is not bound at execution time; logs alone are underdetermined. Sequence ID required for STATUS, SITREP, and PROPOSAL messages."
+falsification_criterion: "Message missing sequence_id when action type is STATUS, SITREP, or PROPOSAL; reconstructability below threshold."
+experiment_receipts: []
+boundary_conditions:
+  - "Context bound at execution time"
+  - "Log granularity sufficient"
+  - "Cross-linked identifiers present"
+related_modules:
+  - "governance_bus"
+  - "dctx"
+  - "audit_log"

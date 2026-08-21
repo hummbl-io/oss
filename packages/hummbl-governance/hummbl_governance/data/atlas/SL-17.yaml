@@ -1,0 +1,14 @@
+id: SL-17
+title: "Governance and Accountability Scaling"
+status: ratified
+candidate_law_statement: "Legal accountability becomes harder as speed, autonomy, cross-domain action, and delegation chains increase."
+falsification_criterion: "No auditable receipt for high-stakes agent action; accountability gap exceeds one delegation hop."
+experiment_receipts: []
+boundary_conditions:
+  - "Jurisdiction defined"
+  - "Action auditable"
+  - "Delegation chain traceable"
+related_modules:
+  - "compliance_mapper"
+  - "audit_log"
+  - "receipt_engine"

@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-governance"
+version = "1.4.1"
+description = "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.11"
+authors = [
+    {name = "Reuben Bowlby", email = "reuben@hummbl.io"},
+    {name = "HUMMBL, LLC"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+]
+keywords = ["governance", "ai", "agents", "kill-switch", "circuit-breaker", "delegation", "audit", "basentuple", "schema-registry", "adversarial-testing"]
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+    "build>=1.0",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "cryptography>=42.0",
+]
+primitives = [
+    "cryptography>=42.0",
+]
+
+[project.scripts]
+hummbl-governance-mcp = "mcp_server:main"
+hummbl-compliance-mcp = "mcp_compliance:main"
+hummbl-sandbox-mcp = "mcp_sandbox:main"
+hummbl-identity-mcp = "mcp_identity:main"
+hummbl-agent-monitor-mcp = "mcp_agent_monitor:main"
+hummbl-reasoning-mcp = "mcp_reasoning:main"
+hummbl-physical-mcp = "mcp_physical:main"
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+
+[tool.setuptools.packages.find]
+include = ["hummbl_governance*"]
+
+[tool.setuptools]
+py-modules = [
+    "mcp_agent_monitor",
+    "mcp_compliance",
+    "mcp_identity",
+    "mcp_physical",
+    "mcp_reasoning",
+    "mcp_sandbox",
+    "mcp_server",
+]
+
+[tool.setuptools.package-data]
+hummbl_governance = ["data/*.json", "data/registry/models.jsonl", "data/atlas/*.yaml", "governance.yml"]
+
+[tool.vulture]
+exclude = [".venv", "demo", "src"]
+min_confidence = 80
+
+[tool.ruff]
+line-length = 120
+exclude = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]  # assert_used — legitimate in test code

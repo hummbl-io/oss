@@ -1,0 +1,14 @@
+id: SL-12
+title: "Identity and Authorization Scaling"
+status: ratified
+candidate_law_statement: "Authorization risk scales with permission breadth, tool surface, delegation depth, and credential ambiguity."
+falsification_criterion: "Least-privilege delegation violated; permission breadth exceeds task need by >2x."
+experiment_receipts: []
+boundary_conditions:
+  - "Identity verifiable"
+  - "Credential unambiguous"
+  - "Permission model defined"
+related_modules:
+  - "identity"
+  - "delegation"
+  - "agent_registry"

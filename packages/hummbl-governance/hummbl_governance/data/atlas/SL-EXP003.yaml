@@ -1,0 +1,21 @@
+id: SL-EXP003
+title: "Chinchilla TinyShakespeare Scaling Reconstruction"
+status: empirically.tested
+candidate_law_statement: "On TinyShakespeare character-level language modeling, loss follows L(N,D) = E + A/N^alpha + B/D^beta with alpha=0.367 (close to Chinchilla ~0.34), beta=0.128 (lower than Chinchilla ~0.28 due to small corpus), E=1.395, RMSE=0.022, R^2=0.962. All models undertrained at 2M tokens; continued improvement to 4M tokens suggests compute-optimal point lies beyond 4M tokens for this setup."
+falsification_criterion: "Power-law fit R^2 < 0.90; alpha deviates from [0.25, 0.50] interval; no improvement from 2M to 4M tokens for any model size."
+experiment_receipts:
+  - "exp-003-2026-06-17-tinyshakespeare-sweep"
+  - "frontier-lab-readiness/tracks/02-scaling-laws/reconstructions/2026-06-17-scaling-law-reconstruction"
+boundary_conditions:
+  - "TinyShakespeare corpus (~1.1M chars, 65 unique)"
+  - "Character-level tokenization"
+  - "JAX 0.4.21 on CPU (Windows)"
+  - "AdamW optimizer (lr=3e-4)"
+  - "Model sizes: 33K to 3.2M parameters"
+  - "Training tokens: 250K to 4M"
+  - "Single seed, no error bars"
+  - "No dropout, deterministic training"
+related_modules:
+  - "tiny-jax-transformer"
+  - "local-inference-bench"
+  - "kernel.law"

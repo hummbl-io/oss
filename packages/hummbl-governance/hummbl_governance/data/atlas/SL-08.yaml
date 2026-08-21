@@ -1,0 +1,14 @@
+id: SL-08
+title: "Human Oversight Scaling"
+status: ratified
+candidate_law_statement: "Oversight capacity is bounded by attention, context load, review latency, and fatigue; high-stakes work needs steeper escalation curves."
+falsification_criterion: "Review quality drops >20% when agent count doubles at fixed human headcount."
+experiment_receipts: []
+boundary_conditions:
+  - "Human working memory bounded"
+  - "Context reconstruction cost measurable"
+  - "Action criticality defined"
+related_modules:
+  - "review_tier"
+  - "peer_review"
+  - "health_probe"

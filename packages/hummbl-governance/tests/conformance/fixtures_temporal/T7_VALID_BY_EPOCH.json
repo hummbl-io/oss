@@ -1,0 +1,103 @@
+{
+  "test_id": "T7_VALID_BY_EPOCH",
+  "description": "Receipt remains VALID under target epoch when action stays in scope",
+  "inputs": {
+    "contract_a": {
+      "contract_id": "contract-temporal2-e1",
+      "contract_version": "1.0.0",
+      "contract_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "epoch_number": 1,
+      "action_space": [
+        "ACT_READ_STATUS",
+        "ACT_SEND_NOTIFICATION"
+      ],
+      "constraints": {
+        "budget_max": 100
+      },
+      "risk_policy": {
+        "ACT_READ_STATUS": 1,
+        "ACT_SEND_NOTIFICATION": 2
+      },
+      "semantics_changed": false
+    },
+    "contract_b": {
+      "contract_id": "contract-temporal2-e2",
+      "contract_version": "2.0.0",
+      "contract_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "epoch_number": 2,
+      "action_space": [
+        "ACT_READ_STATUS",
+        "ACT_SEND_NOTIFICATION",
+        "ACT_ARCHIVE"
+      ],
+      "constraints": {
+        "budget_max": 120
+      },
+      "risk_policy": {
+        "ACT_READ_STATUS": 1,
+        "ACT_SEND_NOTIFICATION": 2,
+        "ACT_ARCHIVE": 1
+      },
+      "semantics_changed": false
+    },
+    "receipt": {
+      "receipt_version": "1.0.0",
+      "execution_id": "exec-t7",
+      "contract_ref": {
+        "contract_id": "contract-temporal2-e1",
+        "contract_version": "1.0.0",
+        "contract_sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "epoch_ref": {
+        "epoch_id": "epoch-1",
+        "epoch_number": 1
+      },
+      "actions": [
+        {
+          "index": 0,
+          "action_id": "ACT_READ_STATUS",
+          "params_c14n_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "params_inline": {},
+          "boundary_assertion": {
+            "decision": "ALLOW",
+            "basis": "POLICY_MATCH"
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "ev-t7-1",
+          "kind": "PLAN_HASH",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "integrity": {
+        "receipt_c14n_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "signature": {
+        "alg": "ed25519",
+        "kid": "k1",
+        "sig": "VALIDSIG_T7"
+      }
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "VALID",
+    "primary_reason_code": "E_OK_VALID",
+    "reason_codes": [
+      "E_OK_VALID"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-temporal2-e2",
+      "contract_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+    },
+    "receipt_ref": {
+      "receipt_id": "exec-t7",
+      "receipt_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "evaluated_epoch": 2,
+    "validator_profile": "eal-fixture-profile-v1"
+  },
+  "expected_report_sha256": "7fbd2328f9d0bcdd16cf66537dbd178fe510f7f5ff4717df3350a771626bfb42"
+}

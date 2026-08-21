@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json",
+  "title": "HUMMBL Cross-Repo Shared Reference Definitions v0.1",
+  "description": "Candidate definition library for cross-repo contract schemas. These definitions do not replace domain payload schemas or authority objects.",
+  "$comment": "The stdlib SchemaValidator resolves $ref against this document via RefRegistry. Runtime cross-repo schemas may reference definitions such as https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref.",
+  "$defs": {
+    "repo_ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "description": "GitHub-style owner/repository reference. It identifies a repository, not its authority scope."
+    },
+    "artifact_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Resolvable or locally scoped artifact locator. Resolution and integrity require separate evidence."
+    },
+    "schema_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Versioned or immutable payload-schema reference owned by the producing repository."
+    },
+    "actor_or_authority_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to an authority declaration. This does not flatten domain-specific authority objects."
+    },
+    "receipt_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Typed receipt locator or logical identifier with a declared resolver."
+    },
+    "identifier_namespace": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$",
+      "description": "Producer-owned identifier namespace recorded by the contract."
+    },
+    "contract_semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Exact cross-repo contract SemVer."
+    },
+    "contract_version_declaration": {
+      "type": "string",
+      "pattern": "^(?:[0-9]+\\.[0-9]+\\.[0-9]+|[0-9]+\\.[0-9]+\\.x)$",
+      "description": "Exact contract SemVer or bounded patch wildcard."
+    },
+    "payload_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque version identifier owned by the payload-producing repository."
+    },
+    "compatibility_decision": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "conditional",
+        "rejected"
+      ]
+    },
+    "consumer_requirement": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional",
+        "advisory"
+      ]
+    },
+    "assurance_kind": {
+      "type": "string",
+      "enum": [
+        "evidence",
+        "verification",
+        "attestation",
+        "review_receipt",
+        "execution_receipt",
+        "promotion_receipt"
+      ],
+      "description": "Reference type. Kinds are non-interchangeable."
+    },
+    "visibility_privacy_posture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visibility",
+        "privacy"
+      ],
+      "properties": {
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "internal",
+            "private"
+          ]
+        },
+        "privacy": {
+          "type": "string",
+          "enum": [
+            "public_safe",
+            "metadata_only",
+            "restricted",
+            "sensitive"
+          ]
+        }
+      }
+    },
+    "supersession_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "old_ref",
+        "new_ref",
+        "relationship"
+      ],
+      "properties": {
+        "old_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "new_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationship": {
+          "type": "string",
+          "enum": [
+            "supersedes",
+            "rebinds",
+            "replaces",
+            "retires_without_replacement"
+          ]
+        },
+        "migration_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

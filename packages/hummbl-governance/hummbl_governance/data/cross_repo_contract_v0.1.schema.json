@@ -1,0 +1,386 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cross-repo-contract-v0.1.schema.json",
+  "title": "HUMMBL Cross-Repo Contract Envelope v0.1",
+  "description": "Candidate additive envelope for versioned producer/consumer contracts. Schema validity is not truth, verification, canonization, or deployment authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "contract_version",
+    "contract_status",
+    "producer",
+    "consumers",
+    "interface",
+    "compatibility",
+    "postures",
+    "validation",
+    "receipts",
+    "assurance",
+    "lifecycle"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "contract_id": {
+      "type": "string",
+      "pattern": "^crc:[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$"
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "contract_status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "active",
+        "deprecated",
+        "retired"
+      ]
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo",
+        "authority_ref",
+        "artifact_locator"
+      ],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "authority_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_locator": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repo",
+          "requirement"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "requirement": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "advisory"
+            ]
+          }
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_type",
+        "payload_schema_uri",
+        "identifier_namespace",
+        "locator_pattern"
+      ],
+      "properties": {
+        "artifact_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_schema_uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identifier_namespace": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]*$"
+        },
+        "locator_pattern": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported_contract_versions",
+        "supported_payload_versions",
+        "breaking_change_policy",
+        "migration_refs"
+      ],
+      "properties": {
+        "supported_contract_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(?:[0-9]+\\.[0-9]+\\.[0-9]+|[0-9]+\\.[0-9]+\\.x)$"
+          }
+        },
+        "supported_payload_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "breaking_change_policy": {
+          "type": "string",
+          "enum": [
+            "new_major_and_migration",
+            "new_contract_and_migration",
+            "explicit_consumer_reacceptance"
+          ]
+        },
+        "migration_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "postures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visibility",
+        "privacy",
+        "claim_posture",
+        "canon_posture"
+      ],
+      "properties": {
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "internal",
+            "private"
+          ]
+        },
+        "privacy": {
+          "type": "string",
+          "enum": [
+            "public_safe",
+            "metadata_only",
+            "restricted",
+            "sensitive"
+          ]
+        },
+        "claim_posture": {
+          "type": "string",
+          "enum": [
+            "none",
+            "candidate_claims",
+            "evidence_linked",
+            "externally_corroborated"
+          ]
+        },
+        "canon_posture": {
+          "type": "string",
+          "enum": [
+            "noncanonical",
+            "candidate",
+            "adopted",
+            "canonical",
+            "deprecated"
+          ]
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deterministic_commands",
+        "valid_fixtures",
+        "invalid_fixtures",
+        "adversarial_fixtures",
+        "offline_core_required"
+      ],
+      "properties": {
+        "deterministic_commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "valid_fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "invalid_fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "adversarial_fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "offline_core_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "on_publish",
+        "on_accept",
+        "on_reject",
+        "receipt_schema_refs"
+      ],
+      "properties": {
+        "on_publish": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "on_accept": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "on_reject": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "receipt_schema_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "refs"
+      ],
+      "properties": {
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "ref"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "evidence",
+                  "verification",
+                  "attestation",
+                  "review_receipt",
+                  "execution_receipt",
+                  "promotion_receipt"
+                ]
+              },
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "effective_at",
+        "review_by",
+        "supersedes",
+        "deprecated_at",
+        "replacement_contract_ref"
+      ],
+      "properties": {
+        "effective_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "deprecated_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "replacement_contract_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

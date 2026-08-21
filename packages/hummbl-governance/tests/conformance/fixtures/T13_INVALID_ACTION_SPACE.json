@@ -1,0 +1,64 @@
+{
+  "test_id": "T13_INVALID_ACTION_SPACE",
+  "description": "Receipt action not in contract action_space yields INVALID with E_ACTION_OUT_OF_SPACE",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_READ_STATUS"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t8",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:08:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_DELETE_ALL",
+          "params": {},
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t8"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t8"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALID",
+    "primary_reason_code": "E_ACTION_OUT_OF_SPACE",
+    "reason_codes": [
+      "E_ACTION_OUT_OF_SPACE"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t8",
+      "receipt_hash": "sha256:receipt-t8"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1"
+  },
+  "expected_report_sha256": "765f5b0ca1650f1dee89917bfbc1bc4dee414426f8095e9ee56749f3b5821e9c"
+}

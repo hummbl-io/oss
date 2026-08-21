@@ -1,0 +1,16 @@
+id: SL-01
+title: "Base LLM Scaling"
+status: empirically.tested
+candidate_law_statement: "Loss and capability follow empirical power laws with model parameters N, dataset size D, and training compute C. Compute-optimal training balances model size and tokens."
+falsification_criterion: "Overfitting when N >> D; undertraining when C insufficient; deviation from power-law fit in controlled sweep."
+experiment_receipts: []
+boundary_conditions:
+  - "Homogeneous training data"
+  - "Fixed architecture"
+  - "Subword or character-level tokenization"
+  - "Standard optimizer (AdamW)"
+  - "Sufficient training stability"
+related_modules:
+  - "tiny-jax-transformer"
+  - "cost_tracker"
+  - "kernel.law"

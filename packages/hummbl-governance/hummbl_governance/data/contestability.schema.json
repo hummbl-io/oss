@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.contestability.v1.json",
+  "title": "Contestability Primitive v1",
+  "description": "Schema for P31 Contestability — allows affected parties to flag an AI decision for human review, suspending the decision's effects until review completes. Enforces D6 (CONTESTABILITY): affected parties can flag AI decisions for human review. Requires evidence or justification for the contest, not just a bare flag.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contest_id",
+    "decision_id",
+    "contest_reason",
+    "contest_evidence",
+    "contest_status",
+    "authority",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "contest_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this contestation."
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the AI decision being contested."
+    },
+    "contest_reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Non-empty justification for the contest. D6 requires evidence or justification, not a bare flag."
+    },
+    "contest_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_refs"
+      ],
+      "properties": {
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "References to evidence supporting the contest (logs, outputs, affected party statements)."
+        },
+        "affected_party_id": {
+          "type": "string",
+          "description": "Identifier of the affected party requesting review."
+        },
+        "impact_description": {
+          "type": "string",
+          "description": "Description of the impact on the affected party."
+        }
+      },
+      "description": "Evidence gate: proof that the contest has substantive basis."
+    },
+    "contest_status": {
+      "type": "string",
+      "enum": [
+        "flagged",
+        "under_review",
+        "upheld",
+        "overturned",
+        "withdrawn"
+      ],
+      "description": "Status of the contest. 'flagged' suspends decision effects. 'under_review' means human review is in progress. 'upheld' confirms the decision. 'overturned' reverses the decision. 'withdrawn' means the contesting party withdrew."
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "review_outcome"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the human reviewer."
+        },
+        "review_outcome": {
+          "type": "string",
+          "enum": [
+            "upheld",
+            "overturned",
+            "modified",
+            "escalated"
+          ],
+          "description": "Outcome of the human review."
+        },
+        "review_notes": {
+          "type": "string",
+          "description": "Reviewer's notes on the decision."
+        }
+      },
+      "description": "Human review record. Required when contest_status is 'upheld' or 'overturned'."
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flagged_by"
+      ],
+      "properties": {
+        "flagged_by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identity of the party flagging the decision for review."
+        },
+        "delegation_ref": {
+          "type": "string",
+          "description": "Optional reference to a delegation token authorizing the flag."
+        }
+      },
+      "description": "Authority gate: who is flagging the decision."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_hash"
+      ],
+      "properties": {
+        "receipt_hash": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hash-chained proof of the contest declaration."
+        },
+        "receipt_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sequence ID for ordering."
+        }
+      },
+      "description": "Receipt gate: hash-chained proof of contest."
+    }
+  }
+}

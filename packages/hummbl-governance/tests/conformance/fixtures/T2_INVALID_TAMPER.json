@@ -1,0 +1,64 @@
+{
+  "test_id": "T2_INVALID_TAMPER",
+  "description": "Receipt tamper/signature failure yields INVALID",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_READ_STATUS"
+      ],
+      "boundary_rules": {
+        "ACT_READ_STATUS": {
+          "allow": true,
+          "required_params": []
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t2",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:01:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "invalid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_READ_STATUS",
+          "params": {},
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "trace.json",
+          "sha256": "sha256:evidence-t2"
+        }
+      ],
+      "receipt_hash": "sha256:receipt-t2-tampered"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INVALID",
+    "reason_codes": [
+      "E_SIG_INVALID"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t2",
+      "receipt_hash": "sha256:receipt-t2-tampered"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1",
+    "primary_reason_code": "E_SIG_INVALID"
+  },
+  "expected_report_sha256": "5b1a6cd1e8c2eb822d2dd6d7e181ec8d895b812d3e0d09278c60edb9f5507553"
+}

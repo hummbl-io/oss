@@ -1,0 +1,722 @@
+[
+  {
+    "code": "P1",
+    "name": "First Principles Framing",
+    "transformation": "P",
+    "definition": "Reduce complex problems to foundational truths that cannot be further simplified"
+  },
+  {
+    "code": "P2",
+    "name": "Stakeholder Mapping",
+    "transformation": "P",
+    "definition": "Identify all parties with interest, influence, or impact in a system or decision"
+  },
+  {
+    "code": "P3",
+    "name": "Identity Stack",
+    "transformation": "P",
+    "definition": "Recognize that individuals operate from multiple nested identities simultaneously"
+  },
+  {
+    "code": "P4",
+    "name": "Lens Shifting",
+    "transformation": "P",
+    "definition": "Deliberately adopt different interpretive frameworks to reveal hidden aspects"
+  },
+  {
+    "code": "P5",
+    "name": "Empathy Mapping",
+    "transformation": "P",
+    "definition": "Systematically capture what stakeholders see, think, feel, and do in their context"
+  },
+  {
+    "code": "P6",
+    "name": "Point-of-View Anchoring",
+    "transformation": "P",
+    "definition": "Establish and maintain a consistent reference frame before analysis begins"
+  },
+  {
+    "code": "P7",
+    "name": "Perspective Switching",
+    "transformation": "P",
+    "definition": "Rotate through multiple viewpoints to identify invariants and blind spots"
+  },
+  {
+    "code": "P8",
+    "name": "Narrative Framing",
+    "transformation": "P",
+    "definition": "Structure information as causal stories with conflict, choice, and consequence"
+  },
+  {
+    "code": "P9",
+    "name": "Cultural Lens Shifting",
+    "transformation": "P",
+    "definition": "Adjust communication and interpretation for different cultural contexts and norms"
+  },
+  {
+    "code": "P10",
+    "name": "Context Windowing",
+    "transformation": "P",
+    "definition": "Define explicit boundaries in time, space, and scope for analysis or action"
+  },
+  {
+    "code": "P11",
+    "name": "Role Perspective-Taking",
+    "transformation": "P",
+    "definition": "Temporarily inhabit specific roles to understand constraints and priorities"
+  },
+  {
+    "code": "P12",
+    "name": "Temporal Framing",
+    "transformation": "P",
+    "definition": "Organize understanding across past causes, present states, and future implications"
+  },
+  {
+    "code": "P13",
+    "name": "Spatial Framing",
+    "transformation": "P",
+    "definition": "Scale perspective from local details to global patterns and back"
+  },
+  {
+    "code": "P14",
+    "name": "Reference Class Framing",
+    "transformation": "P",
+    "definition": "Select comparable situations to inform judgment and avoid uniqueness bias"
+  },
+  {
+    "code": "P15",
+    "name": "Assumption Surfacing",
+    "transformation": "P",
+    "definition": "Explicitly identify and document beliefs underlying plans or models"
+  },
+  {
+    "code": "P16",
+    "name": "Identity-Context Reciprocity",
+    "transformation": "P",
+    "definition": "Recognize how identities shape interpretations and contexts reinforce identities"
+  },
+  {
+    "code": "P17",
+    "name": "Frame Control & Reframing",
+    "transformation": "P",
+    "definition": "Consciously select or reshape interpretive frames to enable new solutions"
+  },
+  {
+    "code": "P18",
+    "name": "Boundary Object Selection",
+    "transformation": "P",
+    "definition": "Choose representations that bridge multiple perspectives while remaining meaningful"
+  },
+  {
+    "code": "P19",
+    "name": "Sensemaking Canvases",
+    "transformation": "P",
+    "definition": "Deploy structured templates to systematically capture and organize observations"
+  },
+  {
+    "code": "P20",
+    "name": "Worldview Articulation",
+    "transformation": "P",
+    "definition": "Make explicit the fundamental beliefs and values that drive interpretation and action"
+  },
+  {
+    "code": "IN1",
+    "name": "Subtractive Thinking",
+    "transformation": "IN",
+    "definition": "Improve systems by removing elements rather than adding complexity"
+  },
+  {
+    "code": "IN2",
+    "name": "Premortem Analysis",
+    "transformation": "IN",
+    "definition": "Assume failure has occurred and work backward to identify causes"
+  },
+  {
+    "code": "IN3",
+    "name": "Problem Reversal",
+    "transformation": "IN",
+    "definition": "Solve the inverse of the stated problem to reveal insights"
+  },
+  {
+    "code": "IN4",
+    "name": "Contra-Logic",
+    "transformation": "IN",
+    "definition": "Argue the opposite position to stress-test assumptions and expose weak reasoning"
+  },
+  {
+    "code": "IN5",
+    "name": "Negative Space Framing",
+    "transformation": "IN",
+    "definition": "Study what is absent rather than what is present"
+  },
+  {
+    "code": "IN6",
+    "name": "Inverse/Proof by Contradiction",
+    "transformation": "IN",
+    "definition": "Assume a claim is false, derive logical impossibility, thus proving the claim true"
+  },
+  {
+    "code": "IN7",
+    "name": "Boundary Testing",
+    "transformation": "IN",
+    "definition": "Explore extreme conditions to find system limits and breaking points"
+  },
+  {
+    "code": "IN8",
+    "name": "Contrapositive Reasoning",
+    "transformation": "IN",
+    "definition": "Use logical equivalence that \"if A then B\" equals \"if not B then not A\""
+  },
+  {
+    "code": "IN9",
+    "name": "Backward Induction",
+    "transformation": "IN",
+    "definition": "Begin with desired end state and work backward to determine necessary steps"
+  },
+  {
+    "code": "IN10",
+    "name": "Red Teaming",
+    "transformation": "IN",
+    "definition": "Organize adversarial review to find vulnerabilities through simulated attack"
+  },
+  {
+    "code": "IN11",
+    "name": "Devil",
+    "transformation": "IN",
+    "definition": "Assign explicit role to argue against group consensus or preferred option"
+  },
+  {
+    "code": "IN12",
+    "name": "Failure First Design",
+    "transformation": "IN",
+    "definition": "Begin planning by identifying all possible failure modes and designing to prevent them"
+  },
+  {
+    "code": "IN13",
+    "name": "Opportunity Cost Focus",
+    "transformation": "IN",
+    "definition": "Evaluate options by what must be forgone rather than what is gained"
+  },
+  {
+    "code": "IN14",
+    "name": "Second-Order Effects (Inverted)",
+    "transformation": "IN",
+    "definition": "Trace negative downstream consequences rather than immediate benefits"
+  },
+  {
+    "code": "IN15",
+    "name": "Constraint Reversal",
+    "transformation": "IN",
+    "definition": "Temporarily remove assumed constraints to explore alternative solution space"
+  },
+  {
+    "code": "IN16",
+    "name": "Inverse Optimization",
+    "transformation": "IN",
+    "definition": "Maximize worst outcomes to understand system vulnerabilities"
+  },
+  {
+    "code": "IN17",
+    "name": "Counterfactual Negation",
+    "transformation": "IN",
+    "definition": "Imagine outcomes if key decision had been reversed"
+  },
+  {
+    "code": "IN18",
+    "name": "Kill-Criteria & Stop Rules",
+    "transformation": "IN",
+    "definition": "Define conditions that trigger project termination before launch"
+  },
+  {
+    "code": "IN19",
+    "name": "Harm Minimization (Via Negativa)",
+    "transformation": "IN",
+    "definition": "Improve by removing harmful elements rather than adding beneficial ones"
+  },
+  {
+    "code": "IN20",
+    "name": "Antigoals & Anti-Patterns Catalog",
+    "transformation": "IN",
+    "definition": "Document failure modes to avoid rather than success patterns to emulate"
+  },
+  {
+    "code": "CO1",
+    "name": "Synergy Principle",
+    "transformation": "CO",
+    "definition": "Design combinations where integrated value exceeds sum of parts"
+  },
+  {
+    "code": "CO2",
+    "name": "Chunking",
+    "transformation": "CO",
+    "definition": "Group related elements into meaningful units to reduce cognitive load"
+  },
+  {
+    "code": "CO3",
+    "name": "Functional Composition",
+    "transformation": "CO",
+    "definition": "Chain pure operations where output of one becomes input of next"
+  },
+  {
+    "code": "CO4",
+    "name": "Interdisciplinary Synthesis",
+    "transformation": "CO",
+    "definition": "Merge insights from distinct fields to generate novel solutions"
+  },
+  {
+    "code": "CO5",
+    "name": "Emergence",
+    "transformation": "CO",
+    "definition": "Recognize higher-order behavior arising from component interactions"
+  },
+  {
+    "code": "CO6",
+    "name": "Gestalt Integration",
+    "transformation": "CO",
+    "definition": "Perceive and leverage whole patterns rather than isolated components"
+  },
+  {
+    "code": "CO7",
+    "name": "Network Effects",
+    "transformation": "CO",
+    "definition": "Exploit increasing value as user base or connections grow"
+  },
+  {
+    "code": "CO8",
+    "name": "Layered Abstraction",
+    "transformation": "CO",
+    "definition": "Separate concerns into hierarchical levels with clear interfaces between them"
+  },
+  {
+    "code": "CO9",
+    "name": "Interface Contracts",
+    "transformation": "CO",
+    "definition": "Define explicit agreements about data structures and behavior between components"
+  },
+  {
+    "code": "CO10",
+    "name": "Pipeline Orchestration",
+    "transformation": "CO",
+    "definition": "Coordinate sequential stages with explicit handoffs and error handling"
+  },
+  {
+    "code": "CO11",
+    "name": "Pattern Composition (Tiling)",
+    "transformation": "CO",
+    "definition": "Combine repeating elements to construct complex structures efficiently"
+  },
+  {
+    "code": "CO12",
+    "name": "Modular Interoperability",
+    "transformation": "CO",
+    "definition": "Ensure independent components work together through standardized connections"
+  },
+  {
+    "code": "CO13",
+    "name": "Cross-Domain Analogy",
+    "transformation": "CO",
+    "definition": "Transfer solution patterns from one domain to solve problems in another"
+  },
+  {
+    "code": "CO14",
+    "name": "Platformization",
+    "transformation": "CO",
+    "definition": "Extract common capabilities into reusable infrastructure serving multiple use cases"
+  },
+  {
+    "code": "CO15",
+    "name": "Combinatorial Design",
+    "transformation": "CO",
+    "definition": "Systematically explore option combinations to find optimal configurations"
+  },
+  {
+    "code": "CO16",
+    "name": "System Integration Testing",
+    "transformation": "CO",
+    "definition": "Verify assembled components work correctly together, not just in isolation"
+  },
+  {
+    "code": "CO17",
+    "name": "Orchestration vs Choreography",
+    "transformation": "CO",
+    "definition": "Choose between centralized coordination or distributed peer-to-peer interaction"
+  },
+  {
+    "code": "CO18",
+    "name": "Knowledge Graphing",
+    "transformation": "CO",
+    "definition": "Represent information as interconnected entities and relationships"
+  },
+  {
+    "code": "CO19",
+    "name": "Multi-Modal Integration",
+    "transformation": "CO",
+    "definition": "Synthesize information from different sensory or data modalities"
+  },
+  {
+    "code": "CO20",
+    "name": "Holistic Integration",
+    "transformation": "CO",
+    "definition": "Unify disparate elements into coherent, seamless whole where boundaries dissolve"
+  },
+  {
+    "code": "DE1",
+    "name": "Root Cause Analysis (5 Whys)",
+    "transformation": "DE",
+    "definition": "Iteratively ask why problems occur until fundamental cause emerges"
+  },
+  {
+    "code": "DE2",
+    "name": "Factorization",
+    "transformation": "DE",
+    "definition": "Separate multiplicative components to understand relative contribution of each factor"
+  },
+  {
+    "code": "DE3",
+    "name": "Modularization",
+    "transformation": "DE",
+    "definition": "Partition system into self-contained units with minimal interdependencies"
+  },
+  {
+    "code": "DE4",
+    "name": "Layered Breakdown",
+    "transformation": "DE",
+    "definition": "Decompose from system to subsystem to component progressively"
+  },
+  {
+    "code": "DE5",
+    "name": "Dimensional Reduction",
+    "transformation": "DE",
+    "definition": "Focus on most informative variables while discarding noise or redundancy"
+  },
+  {
+    "code": "DE6",
+    "name": "Taxonomy/Classification",
+    "transformation": "DE",
+    "definition": "Organize entities into hierarchical categories based on shared properties"
+  },
+  {
+    "code": "DE7",
+    "name": "Pareto Decomposition (80/20)",
+    "transformation": "DE",
+    "definition": "Identify vital few drivers producing most impact versus trivial many"
+  },
+  {
+    "code": "DE8",
+    "name": "Work Breakdown Structure",
+    "transformation": "DE",
+    "definition": "Hierarchically divide project into deliverable-oriented components with clear ownership"
+  },
+  {
+    "code": "DE9",
+    "name": "Signal Separation",
+    "transformation": "DE",
+    "definition": "Distinguish meaningful patterns from random variation or confounding factors"
+  },
+  {
+    "code": "DE10",
+    "name": "Abstraction Laddering",
+    "transformation": "DE",
+    "definition": "Move up and down conceptual hierarchy to find appropriate solution level"
+  },
+  {
+    "code": "DE11",
+    "name": "Scope Delimitation",
+    "transformation": "DE",
+    "definition": "Define precise boundaries of what is included versus excluded from consideration"
+  },
+  {
+    "code": "DE12",
+    "name": "Constraint Isolation",
+    "transformation": "DE",
+    "definition": "Identify specific limiting factor preventing performance improvement"
+  },
+  {
+    "code": "DE13",
+    "name": "Failure Mode Analysis (FMEA)",
+    "transformation": "DE",
+    "definition": "Enumerate potential failure points with severity, likelihood, and detectability ratings"
+  },
+  {
+    "code": "DE14",
+    "name": "Variable Control & Isolation",
+    "transformation": "DE",
+    "definition": "Hold factors constant to measure single variable's causal impact"
+  },
+  {
+    "code": "DE15",
+    "name": "Decision Tree Expansion",
+    "transformation": "DE",
+    "definition": "Map choices and their consequences as branching paths"
+  },
+  {
+    "code": "DE16",
+    "name": "Hypothesis Disaggregation",
+    "transformation": "DE",
+    "definition": "Break compound claim into testable sub-hypotheses"
+  },
+  {
+    "code": "DE17",
+    "name": "Orthogonalization",
+    "transformation": "DE",
+    "definition": "Ensure factors vary independently without correlation or interdependence"
+  },
+  {
+    "code": "DE18",
+    "name": "Scenario Decomposition",
+    "transformation": "DE",
+    "definition": "Partition future possibilities into discrete, mutually exclusive scenarios"
+  },
+  {
+    "code": "DE19",
+    "name": "Critical Path Unwinding",
+    "transformation": "DE",
+    "definition": "Trace longest sequence of dependent tasks determining minimum project duration"
+  },
+  {
+    "code": "DE20",
+    "name": "Partition-and-Conquer",
+    "transformation": "DE",
+    "definition": "Divide problem into independent subproblems solvable separately then combined"
+  },
+  {
+    "code": "RE1",
+    "name": "Recursive Improvement (Kaizen)",
+    "transformation": "RE",
+    "definition": "Continuously refine process through small, frequent enhancements"
+  },
+  {
+    "code": "RE2",
+    "name": "Feedback Loops",
+    "transformation": "RE",
+    "definition": "Create mechanisms where system outputs influence future inputs"
+  },
+  {
+    "code": "RE3",
+    "name": "Meta-Learning (Learn-to-Learn)",
+    "transformation": "RE",
+    "definition": "Improve the process of learning itself, not just domain knowledge"
+  },
+  {
+    "code": "RE4",
+    "name": "Nested Narratives",
+    "transformation": "RE",
+    "definition": "Structure information as stories within stories for depth and memorability"
+  },
+  {
+    "code": "RE5",
+    "name": "Fractal Reasoning",
+    "transformation": "RE",
+    "definition": "Recognize self-similar patterns repeating across different scales"
+  },
+  {
+    "code": "RE6",
+    "name": "Recursive Framing",
+    "transformation": "RE",
+    "definition": "Apply mental models to the process of selecting mental models"
+  },
+  {
+    "code": "RE7",
+    "name": "Self-Referential Logic",
+    "transformation": "RE",
+    "definition": "Create systems that monitor, measure, or modify themselves"
+  },
+  {
+    "code": "RE8",
+    "name": "Bootstrapping",
+    "transformation": "RE",
+    "definition": "Build capability using currently available resources, then use that to build more"
+  },
+  {
+    "code": "RE9",
+    "name": "Iterative Prototyping",
+    "transformation": "RE",
+    "definition": "Cycle rapidly through build-test-learn loops with increasing fidelity"
+  },
+  {
+    "code": "RE10",
+    "name": "Compounding Cycles",
+    "transformation": "RE",
+    "definition": "Design systems where gains reinforce future gains exponentially"
+  },
+  {
+    "code": "RE11",
+    "name": "Calibration Loops",
+    "transformation": "RE",
+    "definition": "Repeatedly check predictions against outcomes to improve forecasting accuracy"
+  },
+  {
+    "code": "RE12",
+    "name": "Bayesian Updating in Practice",
+    "transformation": "RE",
+    "definition": "Continuously revise beliefs as new evidence arrives, weighting by reliability"
+  },
+  {
+    "code": "RE13",
+    "name": "Gradient Descent Heuristic",
+    "transformation": "RE",
+    "definition": "Iteratively adjust toward improvement, even without perfect knowledge of optimal direction"
+  },
+  {
+    "code": "RE14",
+    "name": "Spiral Learning",
+    "transformation": "RE",
+    "definition": "Revisit concepts at increasing depth, building on previous understanding"
+  },
+  {
+    "code": "RE15",
+    "name": "Convergence-Divergence Cycling",
+    "transformation": "RE",
+    "definition": "Alternate between expanding possibilities and narrowing to decisions"
+  },
+  {
+    "code": "RE16",
+    "name": "Retrospective\u2192Prospective Loop",
+    "transformation": "RE",
+    "definition": "Use systematic reflection on past to inform future planning"
+  },
+  {
+    "code": "RE17",
+    "name": "Versioning & Diff",
+    "transformation": "RE",
+    "definition": "Track changes over time and compare versions to understand evolution"
+  },
+  {
+    "code": "RE18",
+    "name": "Anti-Catastrophic Forgetting",
+    "transformation": "RE",
+    "definition": "Preserve critical knowledge while adapting to new information"
+  },
+  {
+    "code": "RE19",
+    "name": "Auto-Refactor",
+    "transformation": "RE",
+    "definition": "Systematically improve system structure without changing external behavior"
+  },
+  {
+    "code": "RE20",
+    "name": "Recursive Governance (Guardrails that Learn)",
+    "transformation": "RE",
+    "definition": "Establish rules that adapt based on their own effectiveness"
+  },
+  {
+    "code": "SY1",
+    "name": "Leverage Points",
+    "transformation": "SY",
+    "definition": "Identify intervention points where small changes produce disproportionate effects"
+  },
+  {
+    "code": "SY2",
+    "name": "System Boundaries",
+    "transformation": "SY",
+    "definition": "Define what is inside versus outside system scope for analysis or design"
+  },
+  {
+    "code": "SY3",
+    "name": "Stocks & Flows",
+    "transformation": "SY",
+    "definition": "Distinguish accumulations from rates of change affecting them"
+  },
+  {
+    "code": "SY4",
+    "name": "Requisite Variety",
+    "transformation": "SY",
+    "definition": "Match control system's complexity to system being controlled"
+  },
+  {
+    "code": "SY5",
+    "name": "Systems Archetypes",
+    "transformation": "SY",
+    "definition": "Recognize recurring dynamic patterns across different domains"
+  },
+  {
+    "code": "SY6",
+    "name": "Feedback Structure Mapping",
+    "transformation": "SY",
+    "definition": "Diagram causal loops showing how variables influence each other"
+  },
+  {
+    "code": "SY7",
+    "name": "Path Dependence",
+    "transformation": "SY",
+    "definition": "Acknowledge how early decisions constrain future options through accumulated consequences"
+  },
+  {
+    "code": "SY8",
+    "name": "Homeostasis/Dynamic Equilibrium",
+    "transformation": "SY",
+    "definition": "Understand self-regulating mechanisms maintaining stable states despite disturbances"
+  },
+  {
+    "code": "SY9",
+    "name": "Phase Transitions & Tipping Points",
+    "transformation": "SY",
+    "definition": "Identify thresholds where gradual changes produce sudden qualitative shifts"
+  },
+  {
+    "code": "SY10",
+    "name": "Causal Loop Diagrams",
+    "transformation": "SY",
+    "definition": "Visualize circular cause-effect relationships with reinforcing and balancing dynamics"
+  },
+  {
+    "code": "SY11",
+    "name": "Governance Patterns",
+    "transformation": "SY",
+    "definition": "Design decision rights, accountability structures, and coordination mechanisms"
+  },
+  {
+    "code": "SY12",
+    "name": "Protocol/Interface Standards",
+    "transformation": "SY",
+    "definition": "Specify rules for interaction enabling coordination without central control"
+  },
+  {
+    "code": "SY13",
+    "name": "Incentive Architecture",
+    "transformation": "SY",
+    "definition": "Design reward and penalty structures aligning individual actions with system goals"
+  },
+  {
+    "code": "SY14",
+    "name": "Risk & Resilience Engineering",
+    "transformation": "SY",
+    "definition": "Build systems that fail gracefully and recover automatically"
+  },
+  {
+    "code": "SY15",
+    "name": "Multi-Scale Alignment",
+    "transformation": "SY",
+    "definition": "Ensure strategy, operations, and execution cohere across organizational levels"
+  },
+  {
+    "code": "SY16",
+    "name": "Ecosystem Strategy",
+    "transformation": "SY",
+    "definition": "Position organization within network of partners, competitors, and stakeholders"
+  },
+  {
+    "code": "SY17",
+    "name": "Policy Feedbacks",
+    "transformation": "SY",
+    "definition": "Anticipate how rules shape behavior, which creates conditions affecting future rules"
+  },
+  {
+    "code": "SY18",
+    "name": "Measurement & Telemetry",
+    "transformation": "SY",
+    "definition": "Instrument systems to capture state, changes, and anomalies for informed response"
+  },
+  {
+    "code": "SY19",
+    "name": "Meta-Model Selection",
+    "transformation": "SY",
+    "definition": "Choose appropriate framework or tool for specific problem characteristics"
+  },
+  {
+    "code": "SY20",
+    "name": "Systems-of-Systems Coordination",
+    "transformation": "SY",
+    "definition": "Manage interactions between independent systems with emergent behaviors"
+  }
+]

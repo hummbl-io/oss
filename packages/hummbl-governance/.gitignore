@@ -1,0 +1,31 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+.pytest_cache/
+*.egg
+*.db
+
+# Generated graph reports
+reports/*.html
+reports/*.json
+.coverage
+.kernel/
+_state/
+hummbl_governance/data/registry/*.jsonl
+
+# Credentials and secrets
+.env
+.env.*
+!.env.example
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+id_ecdsa

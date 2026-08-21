@@ -1,0 +1,61 @@
+{
+  "test_id": "T5_INDETERMINATE_MISSING",
+  "description": "Missing decision-critical evidence yields INDETERMINATE",
+  "inputs": {
+    "contract": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "epoch": 1,
+      "action_space": [
+        "ACT_SEND_NOTIFICATION"
+      ],
+      "boundary_rules": {
+        "ACT_SEND_NOTIFICATION": {
+          "allow": true,
+          "required_params": [
+            "channel"
+          ]
+        }
+      }
+    },
+    "receipt": {
+      "receipt_id": "receipt-t5",
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1",
+      "timestamp_utc": "2026-02-27T00:04:00Z",
+      "signature": {
+        "key_id": "test-key-1",
+        "algorithm": "ed25519",
+        "status": "valid"
+      },
+      "actions": [
+        {
+          "action_id": "ACT_SEND_NOTIFICATION",
+          "params": {},
+          "boundary_decision": "ALLOW"
+        }
+      ],
+      "evidence": [],
+      "receipt_hash": "sha256:receipt-t5"
+    }
+  },
+  "expected_report": {
+    "schema_version": "eal.validation.report.v1",
+    "classification": "INDETERMINATE",
+    "reason_codes": [
+      "E_EVIDENCE_MISSING"
+    ],
+    "contract_ref": {
+      "contract_id": "contract-e1-v1",
+      "contract_hash": "sha256:contract-e1-v1"
+    },
+    "receipt_ref": {
+      "receipt_id": "receipt-t5",
+      "receipt_hash": "sha256:receipt-t5"
+    },
+    "evaluated_epoch": 1,
+    "validator_profile": "eal-fixture-profile-v1",
+    "primary_reason_code": "E_EVIDENCE_MISSING"
+  },
+  "expected_report_sha256": "1505c73b0d128e547fa56e3da4dfa6662d7e61faa4c4efba3d24af14eaa878dd"
+}

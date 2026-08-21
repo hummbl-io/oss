@@ -1,0 +1,13 @@
+id: SL-04
+title: "Agent Architecture Scaling"
+status: ratified
+candidate_law_statement: "Independent, centralized, decentralized, and hybrid architectures have different communication, verification, and error-propagation curves."
+falsification_criterion: "Centralized bottleneck exceeds 2x latency of decentralized at >5 agents; hybrid fails to recover from single-point failure."
+experiment_receipts: []
+boundary_conditions:
+  - "Topology fixed during measurement"
+  - "Message-passing latency bounded"
+  - "Failure model defined"
+related_modules:
+  - "agent_governance_harness"
+  - "mesh_topology"

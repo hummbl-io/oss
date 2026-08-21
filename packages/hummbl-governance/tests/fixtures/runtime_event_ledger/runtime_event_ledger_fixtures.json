@@ -1,0 +1,135 @@
+{
+  "deterministic_runtime_decision_boundary": {
+    "schema": "docs/ecosystem/schemas/deterministic_runtime_decision_boundary.schema.json",
+    "valid": {
+      "schema_version": "1.0.0",
+      "boundary_id": "drdb-review-summary",
+      "workflow_id": "workflow-review-summary",
+      "controller": "workflow",
+      "model_allowed_outputs": ["summary", "proposal"],
+      "forbidden_model_authority": [
+        "loop_control",
+        "termination",
+        "approval_override",
+        "irreversible_side_effect_approval"
+      ],
+      "approval_gate": {
+        "human_required_for": ["external_write", "irreversible_effect"],
+        "reviewer_role": "operator"
+      },
+      "receipt_ref": "hummbl:receipt:drdb-review-summary"
+    },
+    "invalid": {
+      "schema_version": "1.0.0",
+      "boundary_id": "drdb-invalid-model-control",
+      "workflow_id": "workflow-invalid-model-control",
+      "controller": "model",
+      "model_allowed_outputs": ["loop_control"],
+      "forbidden_model_authority": ["approval_override"],
+      "approval_gate": {
+        "human_required_for": ["external_write"],
+        "reviewer_role": "operator"
+      },
+      "receipt_ref": "hummbl:receipt:drdb-invalid"
+    }
+  },
+  "event_ledger_entry": {
+    "schema": "docs/ecosystem/schemas/event_ledger_entry.schema.json",
+    "valid": {
+      "schema_version": "1.0.0",
+      "event_id": "evt-apply-reviewed-doc",
+      "actor": "codex",
+      "proposed_effect": "apply reviewed docs-only patch",
+      "validation_result": "valid",
+      "approval_state": "approved",
+      "applied_effect": "patch applied to docs only",
+      "projection_hashes": [
+        {
+          "projection": "docs",
+          "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        }
+      ],
+      "replay_status": "not_replayed",
+      "compensation_ref": null,
+      "receipt_ref": "hummbl:receipt:evt-apply-reviewed-doc"
+    },
+    "invalid": {
+      "schema_version": "1.0.0",
+      "event_id": "evt-bad-projection",
+      "actor": "codex",
+      "proposed_effect": "apply mutation without stable projection hash",
+      "validation_result": "valid",
+      "approval_state": "approved",
+      "applied_effect": "mutation applied",
+      "projection_hashes": [
+        {
+          "projection": "docs",
+          "sha256": "not-a-sha"
+        }
+      ],
+      "replay_status": "not_replayed",
+      "compensation_ref": null,
+      "receipt_ref": "hummbl:receipt:evt-bad-projection"
+    }
+  },
+  "recovery_policy": {
+    "schema": "docs/ecosystem/schemas/recovery_policy.schema.json",
+    "valid": {
+      "schema_version": "1.0.0",
+      "policy_id": "rp-schema-violation",
+      "failure_class": "schema_violation",
+      "detector": "schema_validator",
+      "allowed_recovery": ["halt", "open_review_patch"],
+      "forbidden_recovery": ["auto_apply_unverified_patch"],
+      "budget": {
+        "max_attempts": 1,
+        "max_seconds": 300
+      },
+      "verifier": "non_author_review",
+      "side_effect_mode": "dry_run",
+      "escalation": "human_review",
+      "receipt_required": true
+    },
+    "invalid": {
+      "schema_version": "1.0.0",
+      "policy_id": "rp-unbounded-retry",
+      "failure_class": "tool_failure",
+      "detector": "tool_exit_code",
+      "allowed_recovery": ["retry_forever"],
+      "forbidden_recovery": ["halt"],
+      "budget": {
+        "max_attempts": 99,
+        "max_seconds": 7200
+      },
+      "verifier": "self_check_only",
+      "side_effect_mode": "external_write",
+      "escalation": "none",
+      "receipt_required": false
+    }
+  },
+  "mcp_resource_access_policy": {
+    "schema": "docs/ecosystem/schemas/mcp_resource_access_policy.schema.json",
+    "valid": {
+      "schema_version": "1.0.0",
+      "policy_id": "mcp-docs-read",
+      "server_id": "hummbl-governance-docs",
+      "resource_selector": "docs/**",
+      "allowed_operations": ["read", "list", "search", "draft"],
+      "denied_operations": ["write", "delete", "raw_shell", "secret_exfiltration"],
+      "credential_scope": "read_only",
+      "approval_required_for": ["write", "delete", "credential_use"],
+      "audit_receipt": "hummbl:receipt:mcp-docs-read"
+    },
+    "invalid": {
+      "schema_version": "1.0.0",
+      "policy_id": "mcp-raw-shell",
+      "server_id": "hummbl-governance-docs",
+      "resource_selector": "**",
+      "allowed_operations": ["read", "raw_shell"],
+      "denied_operations": ["secret_exfiltration"],
+      "credential_scope": "admin",
+      "approval_required_for": [],
+      "audit_receipt": "hummbl:receipt:mcp-raw-shell"
+    }
+  }
+}

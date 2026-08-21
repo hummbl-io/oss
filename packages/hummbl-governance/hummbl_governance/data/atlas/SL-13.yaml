@@ -1,0 +1,14 @@
+id: SL-13
+title: "Protocol Scaling"
+status: ratified
+candidate_law_statement: "Interoperability increases reachable capability but also increases latency, attack surface, validation burden, and protocol-fragmentation cost."
+falsification_criterion: "Protocol count >3 with no abstraction layer; integration debt exceeds specialization gain."
+experiment_receipts: []
+boundary_conditions:
+  - "Protocols comparable across dimensions"
+  - "Security model defined"
+  - "Latency budget known"
+related_modules:
+  - "protocol_adapter"
+  - "mcp_server"
+  - "a2a_bridge"

@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.doctrine_amendment.v1.json",
+  "title": "Doctrine Amendment Primitive v1",
+  "description": "Schema for P38 DoctrineAmendment — governs changes to invariants themselves (K1-K11, D1-D7). Enforces D7 (DOCTRINE_AMENDMENT): no invariant or doctrine amendment may take effect without operator approval and a recorded receipt. Ungated amendments are blocked at the promotion gate. Proposed change -> operator review -> evidence -> receipt -> promotion. This is meta-governance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "amendment_id",
+    "target_invariant",
+    "amendment_type",
+    "change_description",
+    "authority",
+    "evidence",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "amendment_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this amendment."
+    },
+    "target_invariant": {
+      "type": "string",
+      "enum": [
+        "K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8", "K9", "K10", "K11",
+        "D1", "D2", "D3", "D4", "D5", "D6", "D7"
+      ],
+      "description": "The invariant being amended."
+    },
+    "amendment_type": {
+      "type": "string",
+      "enum": [
+        "add",
+        "modify",
+        "remove",
+        "supersede"
+      ],
+      "description": "Type of amendment. 'add' creates a new invariant. 'modify' changes an existing one. 'remove' deletes an invariant. 'supersede' replaces an invariant with a new one."
+    },
+    "change_description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Description of the proposed change."
+    },
+    "proposed_text": {
+      "type": "string",
+      "description": "Proposed new text for the invariant (if add/modify/supersede)."
+    },
+    "impact_analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "affected_primitives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of primitives affected by this amendment."
+        },
+        "breaking_change": {
+          "type": "boolean",
+          "description": "Whether this amendment is a breaking change."
+        },
+        "migration_plan": {
+          "type": "string",
+          "description": "Plan for migrating affected systems."
+        }
+      },
+      "description": "Analysis of the impact of this amendment."
+    },
+    "amendment_status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "under_review",
+        "approved",
+        "rejected",
+        "ratified",
+        "withdrawn"
+      ],
+      "description": "Status of the amendment. 'ratified' means the amendment has taken effect."
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "review_outcome"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the operator reviewing the amendment."
+        },
+        "review_outcome": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "escalated"
+          ],
+          "description": "Outcome of the operator review."
+        },
+        "review_notes": {
+          "type": "string",
+          "description": "Reviewer's notes on the amendment."
+        }
+      },
+      "description": "Operator review record. Required when amendment_status is 'approved', 'rejected', or 'ratified'."
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator_approval",
+        "approver_id"
+      ],
+      "properties": {
+        "operator_approval": {
+          "type": "boolean",
+          "description": "Must be true for any amendment to take effect. Enforces D7 (DOCTRINE_AMENDMENT)."
+        },
+        "approver_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identity of the operator approving the amendment."
+        },
+        "delegation_ref": {
+          "type": "string",
+          "description": "Optional reference to a delegation token."
+        }
+      },
+      "description": "Authority gate: operator approval required for any invariant change."
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_refs"
+      ],
+      "properties": {
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "References to evidence supporting the amendment (incident reports, audit findings, framework requirements)."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Rationale for the amendment."
+        }
+      },
+      "description": "Evidence gate: proof that the amendment has substantive basis."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_hash"
+      ],
+      "properties": {
+        "receipt_hash": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hash-chained proof of the amendment declaration."
+        },
+        "receipt_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sequence ID for ordering."
+        }
+      },
+      "description": "Receipt gate: hash-chained proof of amendment."
+    }
+  }
+}

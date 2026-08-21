@@ -1,0 +1,22 @@
+{
+  "receipt_id": "slack-006",
+  "surface": "slack",
+  "workspace_id_hash": "d96b53c59206c8da5ed30f074b8dd0fda46dfda0b8a2b4f317066d642f079787",
+  "channel_id_hash": "a393bb6c4206da305340bd870026f26f649d8a40d2d3b7bdd2e5efa02bd6db18",
+  "thread_ts": null,
+  "actor_id_hash": "b5634efa560c79ad7e180d226a4eb2864c01768996689e8072fdb25533db0e46",
+  "received_at": "2026-06-29T12:25:00Z",
+  "command_text_hash": "dd6a0ad16262fdb56265701187672957143cb3f97ecb0833cab733a529b21d66",
+  "parsed_intent": "unknown_verb",
+  "risk_class": "forbidden",
+  "requested_repo": null,
+  "requested_tool": null,
+  "authority": "operator",
+  "executor": null,
+  "admission_decision": "denied",
+  "approval_ref": null,
+  "output_policy": "summarized",
+  "slack_response_ts": "1719601501.000000",
+  "durable_receipt_uri": "receipts/slack/slack-006.json",
+  "redactions_applied": []
+}

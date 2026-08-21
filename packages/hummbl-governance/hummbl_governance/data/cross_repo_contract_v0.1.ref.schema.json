@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cross-repo-contract-v0.1.ref.schema.json",
+  "title": "HUMMBL Cross-Repo Contract Envelope v0.1 ($ref variant)",
+  "description": "Variant of the candidate additive envelope that resolves shared definitions through $ref instead of inlining equivalent shapes. Requires a RefRegistry populated with cross_repo_shared_refs_v0.1.schema.json. Schema validity is not truth, verification, canonization, or deployment authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "contract_version",
+    "contract_status",
+    "producer",
+    "consumers",
+    "interface",
+    "compatibility",
+    "postures",
+    "validation",
+    "receipts",
+    "assurance",
+    "lifecycle"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "contract_id": {
+      "type": "string",
+      "pattern": "^crc:[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$"
+    },
+    "contract_version": {
+      "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/contract_semver"
+    },
+    "contract_status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "active",
+        "deprecated",
+        "retired"
+      ]
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo",
+        "authority_ref",
+        "artifact_locator"
+      ],
+      "properties": {
+        "repo": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"
+        },
+        "authority_ref": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/actor_or_authority_ref"
+        },
+        "artifact_locator": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/artifact_ref"
+        }
+      }
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repo",
+          "requirement"
+        ],
+        "properties": {
+          "repo": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"
+          },
+          "requirement": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/consumer_requirement"
+          }
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_type",
+        "payload_schema_uri",
+        "identifier_namespace",
+        "locator_pattern"
+      ],
+      "properties": {
+        "artifact_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_schema_uri": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/schema_ref"
+        },
+        "identifier_namespace": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/identifier_namespace"
+        },
+        "locator_pattern": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported_contract_versions",
+        "supported_payload_versions",
+        "breaking_change_policy",
+        "migration_refs"
+      ],
+      "properties": {
+        "supported_contract_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/contract_version_declaration"
+          }
+        },
+        "supported_payload_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/payload_version"
+          }
+        },
+        "breaking_change_policy": {
+          "type": "string",
+          "enum": [
+            "new_major_and_migration",
+            "new_contract_and_migration",
+            "explicit_consumer_reacceptance"
+          ]
+        },
+        "migration_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "postures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visibility",
+        "privacy",
+        "claim_posture",
+        "canon_posture"
+      ],
+      "properties": {
+        "visibility": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/visibility_privacy_posture/properties/visibility"
+        },
+        "privacy": {
+          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/visibility_privacy_posture/properties/privacy"
+        },
+        "claim_posture": {
+          "type": "string",
+          "enum": [
+            "none",
+            "candidate_claims",
+            "evidence_linked",
+            "externally_corroborated"
+          ]
+        },
+        "canon_posture": {
+          "type": "string",
+          "enum": [
+            "noncanonical",
+            "candidate",
+            "adopted",
+            "canonical",
+            "deprecated"
+          ]
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deterministic_commands",
+        "valid_fixtures",
+        "invalid_fixtures",
+        "adversarial_fixtures",
+        "offline_core_required"
+      ],
+      "properties": {
+        "deterministic_commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "valid_fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "invalid_fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "adversarial_fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "offline_core_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "on_publish",
+        "on_accept",
+        "on_reject",
+        "receipt_schema_refs"
+      ],
+      "properties": {
+        "on_publish": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
+          }
+        },
+        "on_accept": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
+          }
+        },
+        "on_reject": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
+          }
+        },
+        "receipt_schema_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/schema_ref"
+          }
+        }
+      }
+    },
+    "assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "refs"
+      ],
+      "properties": {
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "ref"
+            ],
+            "properties": {
+              "kind": {
+                "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/assurance_kind"
+              },
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "effective_at",
+        "review_by",
+        "supersedes",
+        "deprecated_at",
+        "replacement_contract_ref"
+      ],
+      "properties": {
+        "effective_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "deprecated_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "replacement_contract_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

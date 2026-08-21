@@ -1,0 +1,13 @@
+id: SL-06
+title: "Task Decomposition Scaling"
+status: ratified
+candidate_law_statement: "Optimal task granularity occurs where verification gain exceeds coordination overhead."
+falsification_criterion: "Finer decomposition yields negative return when sub-task verification cost > coordination savings."
+experiment_receipts: []
+boundary_conditions:
+  - "Task decomposable"
+  - "Verification cost measurable"
+  - "Coordination overhead bounded"
+related_modules:
+  - "scope_decompose"
+  - "ai_factory_scheduler"

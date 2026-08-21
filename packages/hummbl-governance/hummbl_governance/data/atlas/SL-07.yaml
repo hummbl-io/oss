@@ -1,0 +1,14 @@
+id: SL-07
+title: "Delegation Chain Scaling"
+status: empirically.tested
+candidate_law_statement: "Reliability and accountability decay with chain length unless authority is attenuated and each hop is logged and verifiable. Depth > 3 triggers exponential decay."
+falsification_criterion: "Delegation depth exceeds 3 without attenuation or logging; chain reliability drops below 80% at depth 4."
+experiment_receipts: []
+boundary_conditions:
+  - "Authority attenuation monotonic"
+  - "Each hop logged"
+  - "Verification cost bounded"
+related_modules:
+  - "delegation_token"
+  - "governance_bus"
+  - "idp"

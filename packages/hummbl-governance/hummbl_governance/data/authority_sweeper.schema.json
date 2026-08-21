@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.authority_sweeper.v1.json",
+  "title": "Authority Sweeper Primitive v1",
+  "description": "Schema for P34 AuthoritySweeper — sweeps expired authority grants, revokes them, and emits notification records. Enforces K6 (AUTHORITY): authority grants have scope, limit, and expiry; expired grants must be revoked and notified.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sweep_id",
+    "sweep_timestamp",
+    "grants_scanned",
+    "grants_expired",
+    "grants_revoked",
+    "revocations",
+    "authority",
+    "receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "sweep_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this sweep run."
+    },
+    "sweep_timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+      "description": "ISO 8601 timestamp when the sweep was executed."
+    },
+    "grants_scanned": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of authority grants examined."
+    },
+    "grants_expired": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of grants found to be expired."
+    },
+    "grants_revoked": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of expired grants actually revoked. May be less than grants_expired if some were already revoked."
+    },
+    "revocations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "grant_id",
+          "agent_id",
+          "role_id",
+          "authority",
+          "expired_at",
+          "revoked_at"
+        ],
+        "properties": {
+          "grant_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identifier of the revoked authority grant."
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Agent that held the grant."
+          },
+          "role_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Role under which the grant was issued."
+          },
+          "authority": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Authority name that was granted."
+          },
+          "expired_at": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+            "description": "ISO 8601 timestamp when the grant expired."
+          },
+          "revoked_at": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+            "description": "ISO 8601 timestamp when the grant was revoked by the sweeper."
+          },
+          "notification_sent": {
+            "type": "boolean",
+            "description": "Whether a notification was sent to the affected agent."
+          }
+        }
+      },
+      "description": "List of revocation records for expired grants."
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sweep_operator_id"
+      ],
+      "properties": {
+        "sweep_operator_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identity of the operator authorizing the sweep."
+        },
+        "operator_approval": {
+          "type": "boolean",
+          "description": "Whether the operator explicitly approved this sweep run."
+        }
+      },
+      "description": "Authority gate: who authorized the sweep."
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_hash"
+      ],
+      "properties": {
+        "receipt_hash": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hash-chained proof of the sweep record."
+        },
+        "receipt_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sequence ID for ordering."
+        }
+      },
+      "description": "Receipt gate: hash-chained proof of sweep."
+    }
+  }
+}
