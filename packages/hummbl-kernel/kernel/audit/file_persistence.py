@@ -6,6 +6,7 @@ Implements file-based persistence for audit trails with HMAC signing for integri
 
 import json
 import hashlib
+import hmac
 import logging
 import os
 from datetime import datetime, timezone
@@ -35,7 +36,13 @@ class AuditTrailPersistence:
             signing_key: Optional HMAC signing key (defaults to environment variable)
         """
         self.base_dir = Path(base_dir)
-        self.signing_key = signing_key or os.environ.get("MISSION_MODE_SIGNING_KEY", "default-key")
+        self.signing_key = signing_key or os.environ.get("MISSION_MODE_SIGNING_KEY")
+        if not self.signing_key:
+            raise ValueError(
+                "AuditTrailPersistence requires a signing key. "
+                "Pass signing_key= or set MISSION_MODE_SIGNING_KEY env var. "
+                "Do not use a hardcoded default key."
+            )
         
         # Create base directory if it doesn't exist
         self.base_dir.mkdir(parents=True, exist_ok=True)
@@ -48,9 +55,11 @@ class AuditTrailPersistence:
     
     def _compute_hmac(self, data: str) -> str:
         """Compute HMAC-SHA256 signature for data"""
-        key = self.signing_key.encode()
-        msg = data.encode()
-        return hashlib.sha256(key + msg).hexdigest()
+        return hmac.new(
+            self.signing_key.encode(),
+            data.encode(),
+            hashlib.sha256,
+        ).hexdigest()
     
     def _sign_audit_trail(self, audit_trail: Dict[str, Any]) -> Dict[str, Any]:
         """Add HMAC signature to audit trail"""

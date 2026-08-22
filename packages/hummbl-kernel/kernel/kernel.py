@@ -7,14 +7,15 @@ fleet coordination between nodezero and Anvil, and lightweight security enforcem
 
 import json
 import hashlib
+import hmac
 import logging
+import os
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 import asyncio
 import subprocess
-import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -61,9 +62,9 @@ class FleetConfig:
     nodezero_m4_pro: bool = True
     anvil_rtx_3080ti: bool = True
     
-    # Service endpoints
-    nodezero_ollama: str = "http://100.x.x.x:11434"
-    anvil_gitea: str = "https://<fleet-node>.ts.net"
+    # Service endpoints (override via env vars; do not hardcode internal IPs/URLs)
+    nodezero_ollama: str = field(default_factory=lambda: os.environ.get("NODEZERO_OLLAMA_URL", "http://100.x.x.x:11434"))
+    anvil_gitea: str = field(default_factory=lambda: os.environ.get("ANVIL_GITEA_URL", "https://example.ts.net"))
     
     # Health check intervals
     heartbeat_interval_seconds: int = 30
@@ -142,18 +143,26 @@ class MissionModeKernel:
     def _compute_hash(self, data: str) -> str:
         """Compute SHA-256 hash"""
         return hashlib.sha256(data.encode()).hexdigest()
-    
+
     def _sign_event(self, event: AuditEvent) -> str:
-        """Sign audit event with kernel signature"""
-        # In production, this would use proper cryptographic signing
-        # For now, use hash-based signature
+        """Sign audit event with HMAC-SHA256 using kernel signing key"""
+        signing_key = os.environ.get("MISSION_MODE_SIGNING_KEY")
+        if not signing_key:
+            raise ValueError(
+                "Audit event signing requires MISSION_MODE_SIGNING_KEY env var. "
+                "Do not use a hardcoded default key."
+            )
         event_data = json.dumps({
             "event_id": event.event_id,
             "timestamp": event.timestamp,
             "event_type": event.event_type,
             "payload": event.payload
         }, sort_keys=True)
-        return self._compute_hash(event_data)
+        return hmac.new(
+            signing_key.encode(),
+            event_data.encode(),
+            hashlib.sha256,
+        ).hexdigest()
     
     async def check_fleet_health(self) -> Dict[str, bool]:
         """Check health of fleet nodes"""
