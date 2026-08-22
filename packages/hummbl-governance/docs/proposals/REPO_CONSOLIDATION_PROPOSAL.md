@@ -69,7 +69,7 @@ The PROJECTS directory has 164 repos. This creates:
 
 Proposed monorepos:
 - `hummbl-governance` (absorb `governance-as-code`, `compliance-as-code`, `policy-as-code`, `governance-docs`, `governance-tuple-reference`, `governed-compression`, `governed-counterpart`, `governed-agents-agent-governance-demo`, `execution-receipts`)
-- `hummbl-fleet` (absorb `agent-tools`, `agent-as-code`, `agent-evaluation-patterns`, `agent-instruction-format`, `agent-runtime-governance`, `agents`, `apex-nexus` + variants, `fleet-standard`, `anvil-fleet`)
+- `hummbl-fleet` (absorb `agent-tools`, `agent-as-code`, `agent-evaluation-patterns`, `agent-instruction-format`, `agent-runtime-governance`, `agents`, `apex-nexus` + variants, `fleet-standard`, `fleet-repo`)
 - `hummbl-research` (absorb `hummbl-bibliography` + variants, `hummbl-papers`, `research-and-development`, `corpus`, `autoresearch-pipeline`, benchmark repos)
 - `hummbl-infra` (absorb `infrastructure-as-code`, `observability-as-code`, `security-as-code`, `hummbl-docker`, `ollama-mon`, `workspace-mcp`)
 - `hummbl-edu` (absorb `hd-*` repos, `coaching`, `coaching-private`, `study-companion`, `hummbl-learning`)

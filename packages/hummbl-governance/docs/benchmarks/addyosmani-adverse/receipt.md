@@ -12,11 +12,11 @@
 
 > **Provenance note (per second-pass review, 2026-07-05)**: The commit hash
 > `4b9eb7b`, Node v22.22.2, and the 118/124 test result are **local execution
-> receipt facts** from Anvil (observed via `git log -1` and `npm test` on the audit
+> receipt facts** from <machine> (observed via `git log -1` and `npm test` on the audit
 > clone), not independently verified from a fetched public GitHub page. Publicly
 > corroborable facts (v0.2.1, Node >=20 engine, MIT, `node --test` script) are
 > visible in the repo's `package.json`.
-- **Runtime**: Windows 11 (Anvil), git-bash, Node v22.22.2
+- **Runtime**: Windows 11 (self-hosted runner), git-bash, Node v22.22.2
 - **Models/agents used**: claude-fable-5 only (this session). **No LLM review runs of adverse were executed** — no `claude -p`/`codex`/`ollama` invocations, zero agent spend
 - **Network/tooling used**: `git clone --depth 1` (GitHub, read-only), local `node --test`
 
@@ -76,7 +76,7 @@ Failing tests (all in tests/collect.test.mjs):
 
 Failure classification:
 - environment/worktree assumption (tests create fixtures under os.tmpdir() and
-  assume that path is NOT inside a git worktree; on Anvil, %TEMP% resolves under
+  assume that path is NOT inside a git worktree; on <machine>, %TEMP% resolves under
   the operator home directory (redacted), which is itself a git repository, so collect.mjs's isGitRepo()
   returns true for the fixture dirs and collection switches to git ls-files
   semantics)

@@ -261,5 +261,5 @@ bias_label: analyst operates in HUMMBL governance context; Scheme's research/edu
 next_step: synthesis-mode or cross-language comparison recommended
 proof_source: web_search + webfetch primary sources (MIT AI Memos, RnRS specifications, SRFI, scheme-reports mailing lists, Eich blog, SICP/OCW, ICFP papers)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

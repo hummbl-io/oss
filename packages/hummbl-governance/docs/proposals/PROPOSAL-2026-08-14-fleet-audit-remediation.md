@@ -59,13 +59,13 @@ A comprehensive 18-test sweep of the entire fleet — 6 MCP servers (47 tools), 
 - Current test pass rate: 98.1% (17,521 / 17,860 non-skipped)
 
 **Alternatives:**
-- a) **Install from PyPI** (recommended) — `pip install hummbl-governance` in the Delta venv. The package is published on PyPI. This is the same package Anvil uses. Single command, resolves 18 imports + 23 collection errors + ~100 test failures.
+- a) **Install from PyPI** (recommended) — `pip install hummbl-governance` in the Delta venv. The package is published on PyPI. This is the same package <machine> uses. Single command, resolves 18 imports + 23 collection errors + ~100 test failures.
 - b) **Install from source** — clone `hummbl-dev-org/hummbl-governance` and `pip install -e .` for development. Slower, but allows patching if the PyPI version is behind.
 - c) **Defer** — leave as-is. The 98.1% pass rate is already high, and the missing package only affects governance-dependent modules. Risk: any agent running tests on Delta sees 339 failures and doesn't know they're all from one missing package.
 
-**Recommendation:** a) Install from PyPI. One command resolves the largest cluster of failures in the entire audit. The package is a first-party extraction from this repo and is already installed on Anvil.
+**Recommendation:** a) Install from PyPI. One command resolves the largest cluster of failures in the entire audit. The package is a first-party extraction from this repo and is already installed on <machine>.
 
-**Basis:** `pip show hummbl-governance` returns "Package not found" on Delta. The package is on PyPI (`https://pypi.org/project/hummbl-governance/`). Anvil has it installed. All 18 failing modules import from `hummbl_governance` — this is a dependency, not a code bug.
+**Basis:** `pip show hummbl-governance` returns "Package not found" on <machine>. The package is on PyPI (`https://pypi.org/project/hummbl-governance/`). <machine> has it installed. All 18 failing modules import from `hummbl_governance` — this is a dependency, not a code bug.
 
 ---
 
@@ -76,7 +76,7 @@ A comprehensive 18-test sweep of the entire fleet — 6 MCP servers (47 tools), 
 1. **Signing policy**: `BUS_SECURITY_POLICY=strict` is set. The handler calls `post_message()` without a `secret` parameter. `BUS_SIGNING_SECRET` is not set and `KeyManager` has no key for `mcp-client`. Result: `ValueError: Bus security policy STRICT: unsigned message rejected`.
 2. **Sender identity**: The handler defaults sender to `mcp-client`, which is not in the known agent roster. Result: `ValueError: Unknown bus sender identity`.
 3. **Host tagging**: Agent-originated posts require `host=` in the message body. The handler doesn't inject it. Result: `ValueError: missing required host= tag`.
-4. **Remote/local routing**: `BUS_CANONICAL_BRIDGE_URL` is set, so posts route to the remote bus on hummbl-vps. But `bus_search` reads the local TSV file. Posts and searches hit different data stores.
+4. **Remote/local routing**: `BUS_CANONICAL_BRIDGE_URL` is set, so posts route to the remote bus on <vps-host>. But `bus_search` reads the local TSV file. Posts and searches hit different data stores.
 
 **Alternatives:**
 - a) **Full fix** (recommended) — (1) resolve signing secret via `KeyManager` or `BUS_SIGNING_SECRET` env var, (2) accept `sender` as a tool argument with a default of `devin`, (3) auto-inject `host=` tag from env or tool arg, (4) make `bus_search` query the canonical bus (via bridge URL) not just local TSV.
@@ -100,11 +100,11 @@ A comprehensive 18-test sweep of the entire fleet — 6 MCP servers (47 tools), 
 This suggests the graph backend (not the MCP server itself) is down or unpopulated. The server process is alive (other tools respond), but the status endpoint and query results are empty.
 
 **Alternatives:**
-- a) **Diagnose on hummbl-vps** (recommended) — SSH to the graph backend host, check if the graph index service is running, check if the corpus data is loaded, restart if needed.
+- a) **Diagnose on <vps-host>** (recommended) — SSH to the graph backend host, check if the graph index service is running, check if the corpus data is loaded, restart if needed.
 - b) **Re-index the graph** — if the backend is up but the index is empty, trigger a re-index of the `projects` corpus.
 - c) **Defer** — the graph is not blocking any production workflow. Risk: any agent relying on graph queries gets empty results silently.
 
-**Recommendation:** a) Diagnose on hummbl-vps. The server is alive but the backend is down or empty. This needs a human to check the graph service status on the host machine.
+**Recommendation:** a) Diagnose on <vps-host>. The server is alive but the backend is down or empty. This needs a human to check the graph service status on the host machine.
 
 **Basis:** `graph_corpora` works (server is up), `graph_status` crashes (backend unreachable), `graph_query` returns `[]` (no data). Classic split between MCP server process and backend service.
 
@@ -224,8 +224,8 @@ The `wolfram` server handles this correctly at the framework level. `cognitive-l
 
 ### D10 — Fix MCP `bus_search` to read from canonical bus (P3)
 
-**Current state:** Messages posted via `bus-global.py` (which routes to the hummbl-vps bridge) are invisible to MCP `bus_search` (which reads the local TSV file). The two paths hit different data stores:
-- `bus-global.py` → HTTP bridge → canonical bus on hummbl-vps
+**Current state:** Messages posted via `bus-global.py` (which routes to the <vps-host> bridge) are invisible to MCP `bus_search` (which reads the local TSV file). The two paths hit different data stores:
+- `bus-global.py` → HTTP bridge → canonical bus on <vps-host>
 - MCP `bus_search` → local `_state/coordination/messages.tsv`
 
 A test message posted via CLI was confirmed present on the canonical bus but returned 0 results via MCP search. Direct file write to local TSV + MCP search worked, proving the search logic is correct but the data source is wrong.

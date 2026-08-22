@@ -171,14 +171,14 @@ retired as a public brand name per the namespace audit. Internal daemon filename
 
 **Gap analysis**:
 - `RECEIPT_SCHEMA.md` is v0.1 DRAFT — near-complete, covers all event types
-- Reference daemon at `C:/Users/Owner/overnight/verum_daemon.py` — not yet committed
+- Reference daemon at `/path/to/overnight/verum_daemon.py` — not yet committed
 - `tools/verify_chain.py` — planned but not written
 - `INVARIANTS.md` — planned but not written
 
 **Work items**:
 1. Write `tools/verify_chain.py` — standalone SHA-256 chain validator (stdlib-only)
 2. Write `INVARIANTS.md` — the four governing invariants (formal language)
-3. Commit daemon code to `daemon/verum_daemon.py` and `daemon/nodezero_orchestrator.py`
+3. Commit daemon code to `daemon/verum_daemon.py` and `daemon/orchestrator.py`
    (filenames unchanged for now — migration debt, rename in a future PR)
 4. Bump RECEIPT_SCHEMA.md status from DRAFT to v1.0; update its header to say
    "Krineia Governance Receipt Chain" not "VERUM"

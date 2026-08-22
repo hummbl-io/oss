@@ -74,7 +74,7 @@ Exact evidence commands and results are recorded in
 | `agent_memory_registry` | `state_store` | local agent state | `.agents/MEMORY.md` and related memory skill state | local agent memory, not canonical product doctrine |
 | `knowledge_agent_memory` | `state_store` | local agent state | `.knowledge/agents/*/memory.jsonl` | per-agent memory log state |
 | `memory_skills` | `runtime_surface` | local skills | `.agents/skills/memory-*` and related skill copies | agent capability surfaces, not Memory City repos |
-| `archived_memory_material` | `archive` | archive/backups | `Archive/`, `_internal-anvil-mirror/`, `.claude/*.bak*`, `.agy/*.bak*` | read-only historical material unless promoted by review |
+| `archived_memory_material` | `archive` | archive/backups | `Archive/`, `_internal-local-mirror/`, `.claude/*.bak*`, `.agy/*.bak*` | read-only historical material unless promoted by review |
 
 ---
 

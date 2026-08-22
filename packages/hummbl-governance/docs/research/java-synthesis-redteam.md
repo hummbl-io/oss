@@ -184,5 +184,5 @@ decision_framework: 6 leading indicators + 4-scenario decision matrix
 recommendation: Begin serious investigation of "editions" mechanism at language layer
 next_step: await economics-mode (compatibility tax quantification) and epochs deep-dive results from parallel subagents
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

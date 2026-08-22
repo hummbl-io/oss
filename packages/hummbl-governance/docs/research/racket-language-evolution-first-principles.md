@@ -270,5 +270,5 @@ bias_label: analyst operates in HUMMBL governance context; Racket is assessed as
 next_step: cross-language synthesis with Java report recommended
 proof_source: web_search (12 searches covering origins, LOP, #lang, HTDP, contracts, gradual typing, Scheme schism, Chez migration, governance, macros, rename, research influence)
 session: 20260820T200000Z
-host: anvil
+host: <machine>
 ```

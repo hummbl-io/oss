@@ -255,5 +255,5 @@ bias_label: analyst operates in HUMMBL governance context; Erlang's telecom/infr
 next_step: cross-language synthesis with Java report, or red-team-mode recommended
 proof_source: web_search + webfetch primary sources (Armstrong HOPL/thesis/CACM, erlang.org docs, elixir-lang.org, erlef.org, erlang-questions mailing list)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

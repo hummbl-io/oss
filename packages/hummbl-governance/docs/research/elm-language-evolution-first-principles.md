@@ -256,5 +256,5 @@ bias_label: analyst operates in HUMMBL governance context; Elm's governance mode
 next_step: synthesis-mode or comparative-mode (Elm vs PureScript governance) recommended
 proof_source: web_search + webfetch primary sources (elm-lang.org, github.com/elm/compiler, Harvard, discourse.elm-lang.org, NoRedInk blog)
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

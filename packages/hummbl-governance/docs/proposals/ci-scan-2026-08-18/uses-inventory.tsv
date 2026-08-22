@@ -287,8 +287,8 @@ hummbl-production	dashboard-pr-check.yml	actions/setup-node@v4
 hummbl-production	dashboard.yml	actions/checkout@v4
 hummbl-production	dashboard.yml	actions/setup-node@v4
 hummbl-production	dashboard.yml	cloudflare/wrangler-action@v4
-hummbl-production	deploy-reubenbowlby.yml	actions/checkout@v4
-hummbl-production	deploy-reubenbowlby.yml	cloudflare/wrangler-action@v4
+hummbl-production	deploy.yml	actions/checkout@v4
+hummbl-production	deploy.yml	cloudflare/wrangler-action@v4
 hummbl-production	fabric-build-gate.yml	actions/checkout@v4
 hummbl-production	fabric-build-gate.yml	actions/setup-java@v5.7.0
 hummbl-production	fabric-build-gate.yml	gradle/actions/setup-gradle@v6

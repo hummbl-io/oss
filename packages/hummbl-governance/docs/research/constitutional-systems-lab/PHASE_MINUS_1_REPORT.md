@@ -272,4 +272,4 @@ the existing LLL admission packet.
 
 - Issue: hummbl-io/hummbl-governance#224
 - Constitutional Integrity Remediation: hummbl-io/hummbl-governance#220
-- LLL Engineering protocol: hummbl-dev/hummbl-papers#20
+- LLL Engineering protocol: hummbl-io/hummbl-papers#20

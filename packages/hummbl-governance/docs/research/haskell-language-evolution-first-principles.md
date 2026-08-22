@@ -271,5 +271,5 @@ bias_label: analyst operates in HUMMBL governance context (enterprise software p
 next_step: cross-language synthesis with Java report, or red-team H2 (GHC-as-laboratory vs. no-corporate-stewardship confound)
 proof_source: web_search + webfetch primary sources (Haskell Reports, HOPL-III, Wadler/Blott, Wadler monads, Linear Haskell, GHC docs, Haskell Prime mailing lists, Rust/Scala references)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

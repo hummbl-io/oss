@@ -25,9 +25,9 @@ GitHub is the mirror.
 |------|--------|-------|-------------|------|--------------|
 | `hummbl-governance` | `hummbl-io/hummbl-governance` | `HUMMBL/hummbl-governance` | Governed multi-agent AI OS, 138 modules, 14k+ tests | Python | stdlib-only; test: pytest, pytest-cov, pytest-asyncio, numpy, jsonschema |
 | `hummbl-governance` | `hummbl-io/hummbl-governance` | `HUMMBL/hummbl-governance` | PyPI v1.2.2, 34 governance primitives, 7 MCP servers | Python | stdlib-only; test: pytest, pytest-cov, build, ruff |
-| `hummbl-production` | `hummbl-dev/hummbl-production` | `reubenbowlby/hummbl-production` | Cloudflare Workers/Pages stack for hummbl.io | TS/JS | hono, wrangler, vitest; dashboard: next 15, react 18, recharts, tailwind |
-| `arbiter` | `hummbl-dev/arbiter` | `HUMMBL/arbiter` | Agent-aware code quality scoring A-F | Python | stdlib-only |
-| `fleet-standard` | `hummbl-dev/fleet-standard` | `HUMMBL/fleet-standard` | Fleet standard definitions | - | - |
+| `hummbl-production` | `hummbl-io/hummbl-production` | `reuben/hummbl-production` | Cloudflare Workers/Pages stack for hummbl.io | TS/JS | hono, wrangler, vitest; dashboard: next 15, react 18, recharts, tailwind |
+| `arbiter` | `hummbl-io/arbiter` | `HUMMBL/arbiter` | Agent-aware code quality scoring A-F | Python | stdlib-only |
+| `fleet-standard` | `hummbl-io/fleet-standard` | `HUMMBL/fleet-standard` | Fleet standard definitions | - | - |
 | `_between` | (not on GitHub) | `HUMMBL/_between` | Fleet-standard migration staging | - | - |
 
 ### Active, private, GitHub-only (no Gitea mirror found)
@@ -39,7 +39,7 @@ GitHub is the mirror.
 | `arcana` | Multi-lens governance/political-philosophy analysis pipeline | Python | stdlib-only |
 | `autoresearch-pipeline` | GPU research agent framework | Python | stdlib-only |
 | `baseN` | Base-N tier multi-variant operator catalog | - | - |
-| `claude-config` | Claude Code profile config (Anvil-side) | - | - |
+| `claude-config` | Claude Code profile config (machine-side) | - | - |
 | `coaching` | Open-source coaching methodology (NSCA All-American) | - | - |
 | `corpus` | - | - | - |
 | `crab` | CRAB methodology: Check, Reason, Act, Bus | - | - |
@@ -221,7 +221,7 @@ policy hides significant local-only content:
 | `hummbl-governance/bus/` | Gitignored | Bus subsystem (runtime module, NOT just state) |
 | `.pytest_cache/` | Gitignored | Test cache |
 | `__pycache__/` | Gitignored | Python bytecode cache |
-| `_internal/` | Gitignored | Internal mirror (memory-tier-b, anvil-mirror) |
+| `_internal/` | Gitignored | Internal mirror (memory-tier-b, local-mirror) |
 | `.claude/` | Tracked | Skills, rules, hooks, agents, tempos |
 | `.devin/` | Tracked | Devin CLI config |
 | `.agents/` | Tracked | Agent fleet config |
@@ -329,11 +329,11 @@ policy hides significant local-only content:
 | Cloudflare Pages | hummbl-production | Static site hosting for hummbl.io |
 | Cloudflare D1 | hummbl-production | SQLite-at-edge database |
 | Cloudflare KV | hummbl-production | Key-value store |
-| Gitea | self-hosted on Anvil | Canonical git host + CI runner |
+| Gitea | self-hosted on <machine> | Canonical git host + CI runner |
 | `tea` CLI | local | Gitea API client (token expired) |
 | `gh` CLI | local | GitHub API client |
-| Ollama | nodezero (dormant since 2026-07-13) | Local LLM inference — offline, rejoin pending re-onboarding |
-| OpenClaw | nodezero (dormant since 2026-07-13) | Agent gateway — offline with host |
+| Ollama | <machine> (dormant since 2026-07-13) | Local LLM inference — offline, rejoin pending re-onboarding |
+| OpenClaw | <machine> (dormant since 2026-07-13) | Agent gateway — offline with host |
 
 ---
 

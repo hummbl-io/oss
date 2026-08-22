@@ -1,7 +1,7 @@
 # HMIK v0.0.4 Engineering Receipt
 
 **Recorded:** 2026-08-14
-**Lane:** `codex`, host `anvil`, surface `desktop-codex`
+**Lane:** `codex`, host `<machine>`, surface `desktop-codex`
 **Disposition:** ready for human review; not canonical
 
 ## Authority and scope

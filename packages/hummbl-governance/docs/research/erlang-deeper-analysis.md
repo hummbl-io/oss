@@ -433,5 +433,5 @@ integration_findings: 6 lessons (fault-tolerance generalizes, primitive > policy
 claim_honesty: [A] claims from Tier-1 primary sources; [B] from Tier-2 analysis/surveys; [C] from tertiary
 bias_label: analyst operates in HUMMBL governance context; BEAM ecosystem treated as the relevant frame; Java report used as structural reference for cross-language comparison
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

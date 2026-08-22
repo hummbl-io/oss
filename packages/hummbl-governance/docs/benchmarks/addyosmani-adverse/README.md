@@ -2,7 +2,7 @@
 
 **Status**: Tier 1 source-candidate / implementation benchmark — NOT HUMMBL canon
 **Audited**: 2026-07-05
-**Auditor**: claude-code (Fable 5), Anvil
+**Auditor**: claude-code (Fable 5)
 **External repo**: https://github.com/addyosmani/adverse
 **Commit inspected**: `4b9eb7b764a9d55ea08dff4f1c960926e0691f2a` (2026-06-20, v0.2.1)
 **Target repo/branch**: `hummbl-io/hummbl-governance`, `docs/claude/adverse-benchmark`
@@ -62,8 +62,8 @@ this is the same thing as two-provider review").
    lone critical Adversary reject with two approvals exits 0 (SHIP-WITH-CAVEATS). Any
    gate must be a severity/persona-aware HUMMBL policy over the JSON report. See
    recommendations.md § Adoption constraints.
-5. **Empirical note**: on Anvil (Node v22.22.2), `npm test` → 118/124 pass, 3 skipped
-   (live-Claude), 3 fail — all 3 failures are environment artifacts of Anvil's
+5. **Empirical note**: on <machine> (Node v22.22.2), `npm test` → 118/124 pass, 3 skipped
+   (live-Claude), 3 fail — all 3 failures are environment artifacts of <machine>'s
    home-directory-as-git-repo layout (tests assume `os.tmpdir()` is not inside a git
    worktree), not core-logic defects. Exact failing test names + stderr excerpts in
    receipt.md. Commit hash, Node version, and test counts are local execution receipt

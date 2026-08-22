@@ -41,8 +41,8 @@ git worktree add -b <your-branch> <worktree-path> origin/main
 
 Example:
 ```powershell
-cd C:\Users\Owner\PROJECTS\hummbl-skills
-git worktree add -b fix/devin/goal-cycle-platform-note-v2 C:\Users\Owner\PROJECTS\hummbl-skills-worktree origin/main
+cd /path/to/projects/hummbl-skills
+git worktree add -b fix/devin/goal-cycle-platform-note-v2 /path/to/projects/hummbl-skills-worktree origin/main
 ```
 
 This creates a new branch from `origin/main` and checks it out in a

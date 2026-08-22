@@ -16,13 +16,13 @@ last_reviewed: 2026-08-18
 
 ## 1. Problem Statement
 
-The hummbl-governance CI runs on a bare-metal Windows self-hosted Gitea runner (`anvil-ci`) with a hardcoded Python path (`C:\gitea\runner\toolcache\Python\3.13.13\x64`). This has several drawbacks:
+The hummbl-governance CI runs on a self-hosted runner (`ci-runner`) with a hardcoded Python path (`/path/to/runner/toolcache/Python\3.13.13\x64`). This has several drawbacks:
 
 1. **Environment drift** — the runner's Python, pip packages, and system tools drift from what developers run locally; CI passes/failures become non-reproducible
 2. **No isolation** — every job runs in the same Windows user session; a failing job can pollute the environment for the next job (leftover files, pip cache, env vars)
-3. **Single point of failure** — one runner, one host; if Anvil reboots or the runner process crashes, all CI stops
+3. **Single point of failure** — one runner, one host; if <machine> reboots or the runner process crashes, all CI stops
 4. **Hardcoded paths** — the `PYTHON` env var in `.gitea/workflows/ci.yml` is brittle; upgrading Python requires editing the workflow
-5. **No local reproducibility** — developers cannot run `docker run` to reproduce a CI failure locally; they must SSH to Anvil or guess
+5. **No local reproducibility** — developers cannot run `docker run` to reproduce a CI failure locally; they must SSH to <machine> or guess
 6. **Windows-only** — the fleet has macOS and (potentially) Linux hosts that cannot run these workflows because all shells are `powershell`
 
 ## 2. Current State
@@ -31,17 +31,17 @@ The hummbl-governance CI runs on a bare-metal Windows self-hosted Gitea runner (
 
 | Hostname | Runner Name | Status | Platform |
 |----------|-------------|--------|----------|
-| Anvil | anvil-windows-general | ONLINE | Windows 11 x86_64, Python 3.11.15 |
-| Nodezero | nodezero-macos-* (3 runners) | OFFLINE | macOS 15 ARM64 |
-| Anvil | anvil-windows-arm64/x64 | OFFLINE | Windows 11 |
+| <machine> | windows-general | ONLINE | Windows 11 x86_64, Python 3.11.15 |
+| <machine> | macos-runner-* (3 runners) | OFFLINE | macOS 15 ARM64 |
+| <machine> | windows-arm64/x64 | OFFLINE | Windows 11 |
 
-**Total**: 6 runners, 1 online. Nodezero has been DORMANT since 2026-07-01.
+**Total**: 6 runners, 1 online. <machine> has been DORMANT since 2026-07-01.
 
 ### Current workflow (`.gitea/workflows/ci.yml`)
 
-- **Runs-on**: `[self-hosted, windows, python-ci, anvil, windows-general]`
+- **Runs-on**: `[self-hosted, windows, python-ci, windows-general]`
 - **Shell**: `powershell` on every step
-- **Python**: hardcoded `C:\gitea\runner\toolcache\Python\3.13.13\x64\python.exe`
+- **Python**: hardcoded `/path/to/runner/toolcache/Python\3.13.13\x64\python.exe`
 - **Jobs**: `test`, `install-smoke`, `lint`, `arbiter-governance`, `coverage-matrix-validate`, `ci-aggregate`
 - **Dependencies**: zero runtime deps; test extras are `build`, `pytest`, `pytest-cov`, `ruff`, `cryptography`
 
@@ -85,7 +85,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 **Cons**:
 - **Breaking change**: all workflow shells must change from `powershell` to `bash`
 - PowerShell-specific scripts in `scripts/` (e.g., `build_wheel_from_sdist.py`, `verify_ci_jobs.py`) may have Windows-path assumptions that need auditing
-- Requires Docker installed on Anvil (or a new Linux host)
+- Requires Docker installed on <machine> (or a new Linux host)
 - Gitea `act_runner` Docker mode requires careful config (registration token, labels, container network)
 - Windows-specific tests (if any) would need conditional skips or a separate Windows runner
 
@@ -191,7 +191,7 @@ CMD ["python", "-m", "pytest", "tests/", "-v", "--cov=hummbl_governance", "--cov
 2. The Dockerfile created in Option C becomes the base image for Option A
 3. Option A's workflow rewrite (powershell→bash) is a breaking change that deserves a planned migration, not a surprise
 4. The `scripts/` directory has Windows-specific Python scripts (`build_wheel_from_sdist.py`, `install_wheel_from_sdist.py`, `smoke_installed_wheel.py`, `verify_ci_jobs.py`, `arbiter_audit.py`, `validate_coverage_matrices.py`, `build_evidence_validation_report.py`) that need auditing for path and shell assumptions before the cutover
-5. Nodezero is DORMANT — there's no urgency to enable cross-platform runners today
+5. <machine> is DORMANT — there's no urgency to enable cross-platform runners today
 
 **If the operator wants maximum isolation now**: Option A is the right choice, but budget 1-2 days for the workflow rewrite and script audit.
 
@@ -199,15 +199,15 @@ CMD ["python", "-m", "pytest", "tests/", "-v", "--cov=hummbl_governance", "--cov
 
 ## 5. Prerequisites (for any option)
 
-- [ ] Docker installed on the target host (Anvil for A/B, developer machines for C)
+- [ ] Docker installed on the target host (<machine> for A/B, developer machines for C)
 - [ ] Gitea runner registration token (for A/B — available in Gitea UI: Site Administration → Actions → Runners → Create Runner)
 - [ ] Audit `scripts/*.py` for Windows-path assumptions (required for A, recommended for C)
 - [ ] Confirm `arbiter-dev[analyzers]==0.2.0` is installable in the target container (it's a third-party package used in the `arbiter-governance` job)
 
 ## 6. Open questions
 
-1. Does Anvil have Docker installed? (Determines whether A/B can run there or need a new host)
-2. Is there a Linux host available in the fleet, or does Anvil need to run Docker Desktop?
+1. Does <machine> have Docker installed? (Determines whether A/B can run there or need a new host)
+2. Is there a Linux host available in the fleet, or does <machine> need to run Docker Desktop?
 3. Should the container image be stored in the Gitea container registry or built on-the-fly?
 4. Is `arbiter-dev[analyzers]==0.2.0` compatible with Linux? (It's used in the `arbiter-governance` job)
 5. Are there Windows-specific tests in the suite that would need conditional skips under Linux?

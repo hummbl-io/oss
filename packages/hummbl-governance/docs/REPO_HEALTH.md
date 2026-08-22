@@ -61,7 +61,7 @@ Two separate CI surfaces. Both must be green before release.
 
 ### Gitea CI (canonical — self-hosted Windows, Python 3.13)
 
-- `.gitea/workflows/ci.yml` runs the same 5-job pipeline on a self-hosted Windows runner (`anvil-ci`), **Python 3.13.13 only** (toolcache path: `C:\gitea\runner\toolcache\Python\3.13.13\x64`).
+- `.gitea/workflows/ci.yml` runs the same 5-job pipeline on a self-hosted Windows runner (`ci-runner`), **Python 3.13.13 only** (toolcache path: `/path/to/runner/toolcache/Python\3.13.13\x64`).
 - Uses `& "$env:PYTHON"` explicit invocation. Do NOT use `actions/setup-python@v5` or bare `python` on this runner.
 - Includes Arbiter governance score gate (minimum 90.0).
 - Aspirational: expand Gitea CI to match GitHub multi-Python matrix in a future pass.
@@ -70,7 +70,7 @@ Two separate CI surfaces. Both must be green before release.
 
 `main` should require pull request review and the hosted CI checks that protect package correctness, installability, linting, zero-runtime-dependency posture, and Arbiter governance score.
 
-Branch protection is tracked centrally in `hummbl-dev/hummbl-dev#18`; do not overclaim required checks until that audit is updated.
+Branch protection is tracked centrally in `hummbl-io/hummbl-dev#18`; do not overclaim required checks until that audit is updated.
 
 ## Operational Notes
 
