@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl"
+version = "0.1.0"
+description = "Structured reasoning framework for AI agents — turns plans, hypotheses, observations, evaluations, decisions, and reflections into durable, inspectable artifacts"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+    { name = "Reuben Bowlby", email = "reuben@hummbl.io" },
+    { name = "HUMMBL, LLC" },
+]
+keywords = ["reasoning", "ai", "agents", "plans", "hypotheses", "evaluations", "scientific-method", "artifacts", "hummbl"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+    "pytest>=9,<10",
+]
+
+[project.urls]
+Homepage = "https://hummbl.io"
+Repository = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/hummbl"
+Issues = "https://github.com/hummbl-io/oss/issues"
+
+[tool.setuptools.packages.find]
+include = ["hummbl*"]
+exclude = ["tests*", "traces*"]
