@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/memory-system-registry.v0.1-candidate.json",
+  "$id": "https://hummbl.io/schemas/memory-system-registry.v0.1-candidate.json",
   "title": "Memory System Registry v0.1 Candidate",
   "type": "object",
   "additionalProperties": false,

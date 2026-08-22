@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/cross-repo-compatibility-manifest-v0.1.schema.json",
+  "$id": "https://hummbl.io/schemas/cross-repo-compatibility-manifest-v0.1.schema.json",
   "title": "HUMMBL Cross-Repo Compatibility Manifest v0.1",
   "description": "Candidate producer/consumer acceptance manifest. Acceptance records compatibility, not factual correctness, security, or canon status.",
   "type": "object",

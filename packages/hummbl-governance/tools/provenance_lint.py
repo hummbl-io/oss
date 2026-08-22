@@ -57,7 +57,7 @@ BLOCKED_IDENTITY_PATTERN = re.compile(
 # starts with a HUMMBL org handle or whose email is on a HUMMBL domain is
 # permitted. The blocklist above still rejects AI/agent names.
 ALLOWED_NAME_PREFIXES: tuple[str, ...] = ("hummbl-", "HUMMBL")
-ALLOWED_EMAIL_DOMAINS: tuple[str, ...] = ("hummbl.io", "hummbl.dev")
+ALLOWED_EMAIL_DOMAINS: tuple[str, ...] = ("hummbl.io", "hummbl.io")
 
 
 def _is_allowed_identity(name: str, email: str) -> bool:

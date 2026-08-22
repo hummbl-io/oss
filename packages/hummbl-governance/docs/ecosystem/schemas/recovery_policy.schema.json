@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/recovery-policy.schema.json",
+  "$id": "https://hummbl.io/schemas/recovery-policy.schema.json",
   "title": "Runtime Recovery Policy",
   "description": "Advisory schema mapping failure classes to bounded recovery, forbidden recovery, budgets, verifiers, escalation, and receipts. Draft only; not canon.",
   "type": "object",

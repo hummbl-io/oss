@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/tiershift-declaration.schema.json",
+  "$id": "https://hummbl.io/schemas/tiershift-declaration.schema.json",
   "title": "TierShift Declaration",
   "type": "object",
   "required": [

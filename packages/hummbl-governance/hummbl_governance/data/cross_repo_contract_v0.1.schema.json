@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/cross-repo-contract-v0.1.schema.json",
+  "$id": "https://hummbl.io/schemas/cross-repo-contract-v0.1.schema.json",
   "title": "HUMMBL Cross-Repo Contract Envelope v0.1",
   "description": "Candidate additive envelope for versioned producer/consumer contracts. Schema validity is not truth, verification, canonization, or deployment authority.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/hummbl-problem-grammar.schema.json",
+  "$id": "https://hummbl.io/schemas/hummbl-problem-grammar.schema.json",
   "title": "HUMMBL Problem Grammar",
   "description": "Machine-validatable schema for the HUMMBL Problem grammar (HUAOMP × MTSMU × Base120). Validates structure, not truth of claims.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/decision-ledger.schema.json",
+  "$id": "https://hummbl.io/schemas/decision-ledger.schema.json",
   "title": "HUMMBL Decision Ledger",
   "description": "Tier 1 Governance Core: Authority. 4-layer scope matching ADR-FM-057 Graph of Graphs (L1 Artifact, L2 Category, L3 Tier, L4 Fleet). Phase 0 schema seed — draft status, not canon.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.contestability.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.contestability.v1.json",
   "title": "Contestability Primitive v1",
   "description": "Schema for P31 Contestability — allows affected parties to flag an AI decision for human review, suspending the decision's effects until review completes. Enforces D6 (CONTESTABILITY): affected parties can flag AI decisions for human review. Requires evidence or justification for the contest, not just a bare flag.",
   "type": "object",

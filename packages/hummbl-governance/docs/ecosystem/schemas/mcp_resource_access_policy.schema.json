@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/mcp-resource-access-policy.schema.json",
+  "$id": "https://hummbl.io/schemas/mcp-resource-access-policy.schema.json",
   "title": "MCP Resource Access Policy",
   "description": "Advisory checklist schema for future resource-bound MCP access review. Draft only; not canon and not live server policy.",
   "type": "object",

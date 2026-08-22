@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/event-ledger-entry.schema.json",
+  "$id": "https://hummbl.io/schemas/event-ledger-entry.schema.json",
   "title": "Event Ledger Entry",
   "description": "Advisory schema for deterministic event-ledger entries separating intention from applied state mutation. Draft only; not canon.",
   "type": "object",

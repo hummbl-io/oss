@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/deterministic-runtime-decision-boundary.schema.json",
+  "$id": "https://hummbl.io/schemas/deterministic-runtime-decision-boundary.schema.json",
   "title": "Deterministic Runtime Decision Boundary",
   "description": "Advisory schema for separating deterministic program authority from bounded model output. Draft only; not canon.",
   "type": "object",

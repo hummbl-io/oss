@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.authority_sweeper.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.authority_sweeper.v1.json",
   "title": "Authority Sweeper Primitive v1",
   "description": "Schema for P34 AuthoritySweeper — sweeps expired authority grants, revokes them, and emits notification records. Enforces K6 (AUTHORITY): authority grants have scope, limit, and expiry; expired grants must be revoked and notified.",
   "type": "object",

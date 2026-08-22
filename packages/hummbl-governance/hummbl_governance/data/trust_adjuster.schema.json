@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.trust_adjuster.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.trust_adjuster.v1.json",
   "title": "Trust Adjuster Primitive v1",
   "description": "Schema for P36 TrustAdjuster — compliance-to-identity loop: violations reduce an agent's trust tier. Enforces K3 (IDENTITY): trust tier changes require evidence and operator approval. Severity maps to tier reduction steps.",
   "type": "object",

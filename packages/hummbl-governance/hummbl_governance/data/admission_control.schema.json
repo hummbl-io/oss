@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.admission_control.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.admission_control.v1.json",
   "title": "Admission Control Primitive v1",
   "description": "Bounded admission-control schema for governed permission of state transitions. Promoted from candidate 004 (admission-gate-doctrine) as an admission-control primitive, NOT a full 15-gate doctrine blob. Invariant: admission is not truth; admission is governed permission for state transition under authority, executor, scope, evidence, and receipt.",
   "type": "object",

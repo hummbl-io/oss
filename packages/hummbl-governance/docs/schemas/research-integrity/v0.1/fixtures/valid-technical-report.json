@@ -39,6 +39,6 @@
   "evaluator": {"evaluator_id": "reviewer-A", "independent": true, "qualifications": "senior researcher"},
   "prohibited_claims_checked": ["novel", "reproducible", "empirically demonstrated"],
   "unresolved_risks": [],
-  "correction_contact": "research@hummbl.dev",
+  "correction_contact": "research@hummbl.io",
   "version_history": [{"version": "0.1", "date": "2026-07-11", "change": "Initial technical report"}]
 }

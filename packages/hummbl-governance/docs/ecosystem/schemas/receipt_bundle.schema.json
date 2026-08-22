@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/receipt-bundle.schema.json",
+  "$id": "https://hummbl.io/schemas/receipt-bundle.schema.json",
   "title": "HUMMBL Receipt Bundle",
   "description": "Tier 1 Governance Core: AuditReceipt. Regeneratable from underlying receipts, but regeneration produces a meta-receipt (OQ-6). Individual receipts are immutable append-only. Phase 0 schema seed — draft status, not canon.",
   "type": "object",

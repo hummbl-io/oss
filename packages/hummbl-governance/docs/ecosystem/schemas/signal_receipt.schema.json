@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/signal_receipt.schema.json",
+  "$id": "https://hummbl.io/schemas/signal_receipt.schema.json",
   "title": "HUMMBL Signal Command Receipt",
   "description": "Receipt for a Signal CLI communication event — outbound notify, inbound candidate command, or agent coordination. Draft status, not canon until namespace review.",
   "type": "object",

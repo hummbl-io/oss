@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/research-integrity/v0.1/artifact-maturity.schema.json",
+  "$id": "https://hummbl.io/schemas/research-integrity/v0.1/artifact-maturity.schema.json",
   "title": "Artifact Maturity Record v0.1",
   "description": "Machine-readable record of a scholarly artifact's maturity state, claim postures, and integrity checks.",
   "type": "object",

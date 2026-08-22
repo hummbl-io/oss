@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/claim-set.schema.json",
+  "$id": "https://hummbl.io/schemas/claim-set.schema.json",
   "title": "HUMMBL Claim Set",
   "description": "Tier 1 Governance Core: Bridge between QuestionSet and EvidenceSet. Each Claim carries an epistemic quadrant tag. Phase 0 schema seed — draft status, not canon.",
   "type": "object",

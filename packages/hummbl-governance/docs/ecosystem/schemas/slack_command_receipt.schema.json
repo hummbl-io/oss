@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/slack_command_receipt.schema.json",
+  "$id": "https://hummbl.io/schemas/slack_command_receipt.schema.json",
   "title": "HUMMBL Slack Command Receipt",
   "description": "Receipt for a Slack-originated mobile command — read-only, draft, write-pending-approval, destructive, or forbidden. Draft status, not canon until namespace review.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/evidence-set.schema.json",
+  "$id": "https://hummbl.io/schemas/evidence-set.schema.json",
   "title": "HUMMBL Evidence Set",
   "description": "Tier 1 Governance Core: Grounds claims. Distinct from ReceiptBundle — evidence grounds, receipts attest. Phase 0 schema seed — draft status, not canon.",
   "type": "object",

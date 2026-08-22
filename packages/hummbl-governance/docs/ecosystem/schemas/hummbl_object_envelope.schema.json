@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/hummbl-object-envelope.schema.json",
+  "$id": "https://hummbl.io/schemas/hummbl-object-envelope.schema.json",
   "title": "HUMMBL Object Envelope",
   "description": "Shared envelope that all HUMMBL Set Grammar objects inherit. Defines identity, status, provenance, and governance fields common to every object family. Phase 0 schema seed — draft status, not canon.",
   "type": "object",

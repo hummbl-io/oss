@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json",
+  "$id": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json",
   "title": "HUMMBL Cross-Repo Shared Reference Definitions v0.1",
   "description": "Candidate definition library for cross-repo contract schemas. These definitions do not replace domain payload schemas or authority objects.",
-  "$comment": "The stdlib SchemaValidator resolves $ref against this document via RefRegistry. Runtime cross-repo schemas may reference definitions such as https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref.",
+  "$comment": "The stdlib SchemaValidator resolves $ref against this document via RefRegistry. Runtime cross-repo schemas may reference definitions such as https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref.",
   "$defs": {
     "repo_ref": {
       "type": "string",

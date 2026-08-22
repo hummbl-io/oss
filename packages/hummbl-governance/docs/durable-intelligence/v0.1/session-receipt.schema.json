@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/durable-intelligence/v0.1/session-receipt.schema.json",
+  "$id": "https://hummbl.io/schemas/durable-intelligence/v0.1/session-receipt.schema.json",
   "title": "Agent Session Receipt v0.1",
   "description": "Compact durable state transition left by an agent session for accurate continuation by future sessions.",
   "type": "object",

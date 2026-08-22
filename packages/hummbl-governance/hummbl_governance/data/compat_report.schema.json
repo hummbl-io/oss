@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/eal.compat.report.v1.json",
+  "$id": "https://hummbl.io/schemas/eal.compat.report.v1.json",
   "title": "EAL Compatibility Report v1",
   "description": "Deterministic compatibility classification report for two contracts.",
   "type": "object",
