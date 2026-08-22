@@ -27,8 +27,8 @@
     }
   ],
   "fleet_placement": {
-    "preferred": "anvil",
-    "fallback": "nodezero",
+    "preferred": "gpu",
+    "fallback": "primary",
     "gpu_required": false
   },
   "trace_support": {
@@ -222,6 +222,6 @@ Before implementing a real adapter:
 5. **Sandbox/isolation** - What isolation mode is required?
 6. **Test mode** - Can it run without external side effects?
 7. **Compliance framework support** - Does it support SOC 2/ISO 27001/PCI evidence requirements?
-8. **Fleet compatibility** - Can it run on both nodezero and Anvil?
+8. **Fleet compatibility** - Can it run on both primary and gpu?
 9. **Audit trail integration** - Can it log to Mission Mode audit trail?
 10. **Evidence validation** - Can it validate evidence quality and provenance?

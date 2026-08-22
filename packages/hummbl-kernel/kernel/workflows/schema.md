@@ -109,15 +109,15 @@ workflow:
 
 # Fleet deployment configuration
 fleet:
-  primary_compute: "nodezero"  # M4 Pro for inference
-  gpu_compute: "anvil"        # RTX 3080 Ti for GPU workloads
-  fallback_compute: "anvil"    # Fallback if nodezero unavailable
+  primary_compute: "primary"  # Apple Silicon for inference
+  gpu_compute: "gpu"        # NVIDIA GPU for GPU workloads
+  fallback_compute: "gpu"    # Fallback if primary unavailable
   
   # Agent placement rules
   agent_placement:
-    compliance_analyst: "nodezero"  # Heavy reasoning
-    evidence_collector: "anvil"     # File operations
-    audit_generator: "nodezero"    # Document generation
+    compliance_analyst: "primary"  # Heavy reasoning
+    evidence_collector: "gpu"     # File operations
+    audit_generator: "primary"    # Document generation
 
 # Audit trail configuration
 audit_trail:
@@ -226,21 +226,21 @@ requested → admitted → planned → running → completed
 
 ## Fleet Coordination
 
-### Nodezero (Primary Compute)
+### primary (Primary Compute)
 - **Role**: Primary inference engine for agent reasoning
-- **Hardware**: M4 Pro (12 cores, 48GB unified memory)
+- **Hardware**: Apple Silicon (12 cores, 48GB unified memory)
 - **Models**: qwen3.5:9b, qwen3.5:4b for agent workloads
 - **Services**: Ollama, OpenClaw gateways
 - **Responsibility**: Heavy reasoning tasks, document generation
 
-### Anvil (GPU/Compliance)
+### gpu (GPU/Compliance)
 - **Role**: GPU workloads and compliance operations
-- **Hardware**: RTX 3080 Ti (12GB VRAM, 270W cap)
+- **Hardware**: NVIDIA GPU (12GB VRAM, 270W cap)
 - **Services**: Gitea, file operations, GPU inference
 - **Responsibility**: File operations, evidence collection, GPU-intensive tasks
 
 ### Coordination Protocol
 1. **Agent placement rules** defined in workflow YAML
-2. **Fallback mechanism**: If nodezero unavailable, route to Anvil
+2. **Fallback mechanism**: If primary unavailable, route to gpu
 3. **Load balancing**: Distribute parallel steps across available compute
 4. **Heartbeat monitoring**: Fleet health checks every 30 seconds
