@@ -305,5 +305,5 @@ unexported_features_explained: 3 (condition system, module system, type provider
 governance_patterns: 9
 research_sustainability_ceiling: ~15yr (confirmed across 6 languages)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

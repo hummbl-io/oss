@@ -284,5 +284,5 @@ bias_label: analyst operates in multi-language research context with Java as ref
 next_step: synthesis-mode or comparative-mode (F# vs Java vs Scala) recommended
 proof_source: web_search + webfetch primary sources (HOPL paper, F# Language Spec, MSR publications, Microsoft Learn, FSSF governance, devblogs)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

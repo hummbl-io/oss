@@ -168,8 +168,8 @@ The existing 5 mapping docs (`gdpr-mapping.md`, `iso27001-mapping.md`, `nist-csf
 
 - Methodology issue: [hummbl-governance#26](https://github.com/hummbl-io/hummbl-governance/issues/26)
 - Memory rule: `feedback_no_self_grades_on_public_surface.md` (huxley)
-- Compliance status retirement: [hummbl-production#242](https://github.com/hummbl-dev/hummbl-production/pull/242)
-- Original A+ rubric shipment: [hummbl-governance@6a47ca2](https://github.com/hummbl-io/hummbl-governance/commit/6a47ca2) + [hummbl-production@9d297b2](https://github.com/hummbl-dev/hummbl-production/commit/9d297b2)
+- Compliance status retirement: [hummbl-production#242](https://github.com/hummbl-io/hummbl-production/pull/242)
+- Original A+ rubric shipment: [hummbl-governance@6a47ca2](https://github.com/hummbl-io/hummbl-governance/commit/6a47ca2) + [hummbl-production@9d297b2](https://github.com/hummbl-io/hummbl-production/commit/9d297b2)
 - Bus DECISION: 2026-05-14T~09:05Z `[lane=marketing/claude/no-self-grades]`
 - Existing mapping docs: `docs/{gdpr,iso27001,nist-csf,nist-rmf,soc2}-mapping.md`
 - Pilot artifact (companion to this ADR): `docs/coverage/eu-ai-act.md` (to be added in same PR)

@@ -286,5 +286,5 @@ bias_label: analyst operates in HUMMBL governance context; PureScript's niche st
 next_step: cross-language synthesis-mode recommended (Java + PureScript + Elm comparison)
 proof_source: web_search (11 searches covering origins, row polymorphism, type classes, FFI, backends, governance, adoption, Elm contrast, spec absence, version history, strict evaluation)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

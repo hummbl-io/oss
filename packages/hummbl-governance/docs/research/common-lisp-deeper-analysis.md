@@ -418,5 +418,5 @@ economics: CL community ~2 orders of magnitude smaller than Clojure (293 vs thou
 web_searches: 10 (condition system adoption, resumable exceptions, CL adoption metrics, implementation economics, CL vs Clojure vs Racket, AI winter, Worse is Better critique, CL production use, condition system non-adoption reasons, Racket governance)
 sources: 30 (16 Tier 1, 12 Tier 2, 3 Tier 3)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

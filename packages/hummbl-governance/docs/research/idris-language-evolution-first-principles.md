@@ -279,5 +279,5 @@ bias_label: analyst operates in HUMMBL governance context (enterprise software p
 next_step: synthesis-mode or cross-language comparison recommended
 proof_source: web_search (14 searches across 7 waves covering origins, Idris 1→2, QTT, totality, elaborator reflection, adoption debate, governance, session types, naming, soundness)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

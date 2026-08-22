@@ -281,5 +281,5 @@ bias_label: analyst operates in HUMMBL governance context; Scala assessed from e
 next_step: cross-language synthesis (Scala vs Java) or extend to Kotlin for controlled comparison
 proof_source: web_search (10 searches, 3 waves) covering origins, unification, implicits, type system, interop, complexity debate, Scala 3 migration, macros, Akka, Spark, governance, binary compat, Java/Haskell positioning, compile times
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

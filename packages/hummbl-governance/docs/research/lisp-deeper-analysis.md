@@ -274,5 +274,5 @@ economic_estimates: dialect fission tax ~10× market position; AI winter destroy
 strategic_position_2025: 4 niches (CL=conservation, Clojure=hosted-concurrency, Racket=LOP-research, embedded=Emacs/Fennel/Janet/Hy); 2.4% adoption; demographic aging risk
 key_insight: Lisp is a research program that lost every market and won every idea; longevity = idea generation, not market success
 session: 20260820T183000Z
-host: anvil
+host: <machine>
 ```

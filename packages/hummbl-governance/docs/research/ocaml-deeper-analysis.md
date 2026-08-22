@@ -422,5 +422,5 @@ bias_label: analyst operates in HUMMBL governance context; OCaml's industrial ad
 next_step: comparative-mode (OCaml vs Java evolution strategies) or longitudinal-mode (track OxCaml convergence through 5.4/5.5/5.6 releases)
 proof_source: web_search + primary source pages (oxcaml.org, Jane Street blog, Meta engineering blog, ocaml.org, Tarides, PLDI paper, ICFP blogs, Pappers.fr)
 session: 20250820T151138Z
-host: anvil
+host: <machine>
 ```

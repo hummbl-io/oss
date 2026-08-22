@@ -24,7 +24,7 @@ A prior audit cited in the originating handoff was public-only and treated `krin
 
 ## Decision
 
-Adopt **HUMMBL Repo Standard v0.1** as the global baseline for all `hummbl-dev` repositories, with canonical home in `hummbl-io/hummbl-governance` and templates mirrored in `hummbl-dev/.github`.
+Adopt **HUMMBL Repo Standard v0.1** as the global baseline for all `hummbl-dev` repositories, with canonical home in `hummbl-io/hummbl-governance` and templates mirrored in `hummbl-io/.github`.
 
 The standard defines:
 
@@ -55,7 +55,7 @@ The standard is **global** (informs every repo) but **not templated** (each repo
 ## Validation
 
 - `schemas/hummbl-repo-manifest.schema.json` validates against JSON Schema Draft 2020-12.
-- The companion `hummbl-dev/krineia/hummbl.repo.yaml` (to be added in a follow-up PR) is the reference instantiation.
+- The companion `hummbl-io/krineia/hummbl.repo.yaml` (to be added in a follow-up PR) is the reference instantiation.
 - The fleet audit matrix (`/tmp/hummbl_repo_audit_matrix.md` at draft time; to be committed as `docs/standards/AUDIT_2026-06-22.md` in a follow-up) is the baseline against which rollout progress is measured.
 
 ## Receipts
