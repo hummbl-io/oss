@@ -9,6 +9,7 @@ import subprocess
 import json
 import asyncio
 import logging
+import os
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
@@ -61,28 +62,31 @@ class FleetHealthChecker:
     and implements fallback strategy.
     """
     
-    def __init__(self, mode: FleetMode = FleetMode.HYBRID):
+    def __init__(self, mode: FleetMode = FleetMode.HYBRID, fleet_config: Optional[Dict] = None):
         self.mode = mode
-        self.fleet_config = {
-            "nodezero": {
-                "tailscale_ip": "100.x.x.x",
-                "hostname": "maks-mac-mini-1",
-                "ssh_alias": "nodezero",
-                "services": {
-                    "ollama": "http://100.x.x.x:11434/api/tags",
-                    "bus": "http://100.x.x.x:18790/health"
-                }
-            },
-            "anvil": {
-                "tailscale_ip": "100.x.x.x",
-                "hostname": "anvil",
-                "ssh_alias": "anvil",
-                "services": {
-                    "gitea": "https://<fleet-node>.ts.net",
-                    "ollama": "http://localhost:11434/api/tags"
+        if fleet_config:
+            self.fleet_config = fleet_config
+        else:
+            self.fleet_config = {
+                "nodezero": {
+                    "tailscale_ip": os.environ.get("NODEZERO_TAILSCALE_IP", "100.x.x.x"),
+                    "hostname": os.environ.get("NODEZERO_HOSTNAME", "nodezero"),
+                    "ssh_alias": "nodezero",
+                    "services": {
+                        "ollama": os.environ.get("NODEZERO_OLLAMA_URL", "http://100.x.x.x:11434/api/tags"),
+                        "bus": os.environ.get("NODEZERO_BUS_URL", "http://100.x.x.x:18790/health")
+                    }
+                },
+                "anvil": {
+                    "tailscale_ip": os.environ.get("ANVIL_TAILSCALE_IP", "100.x.x.x"),
+                    "hostname": os.environ.get("ANVIL_HOSTNAME", "anvil"),
+                    "ssh_alias": "anvil",
+                    "services": {
+                        "gitea": os.environ.get("ANVIL_GITEA_URL", "https://example.ts.net"),
+                        "ollama": "http://localhost:11434/api/tags"
+                    }
                 }
             }
-        }
         
         self.task_routing = {
             "inference": "nodezero",

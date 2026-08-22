@@ -9,7 +9,7 @@ Mission Mode operates across a hybrid fleet of two machines:
 - **Role**: Primary inference host, long-context reasoning, document synthesis
 - **Services**: Ollama hub, CI runner, canonical coordination bus
 - **Models**: `nemotron-3-nano:30b` (1M ctx), `qwen3.5:9b` (general chat), `qwen2.5-coder:3b` (fast-code)
-- **Network**: Tailscale IP `100.x.x.x` (maks-mac-mini-1)
+- **Network**: Tailscale IP `100.x.x.x` (nodezero)
 - **SSH**: `ssh nodezero` (logs in as `nodezero` user)
 
 ### Anvil (GPU/Compliance)
@@ -50,7 +50,7 @@ FLEET_HEALTH_ENDPOINTS = {
         "bus": "http://100.x.x.x:18790/health"
     },
     "anvil": {
-        "gitea": "https://<fleet-node>.ts.net",
+        "gitea": "https://example.ts.net",
         "ollama": "http://localhost:11434/api/tags"
     }
 }
@@ -97,7 +97,7 @@ curl -s http://localhost:11434/api/tags | python -m json.tool
 ### Gitea Repository Discovery
 ```bash
 # List Gitea repos
-gh -H "Authorization: token $GITEA_TOKEN" api https://<fleet-node>.ts.net/api/v1/repos/search
+gh -H "Authorization: token $GITEA_TOKEN (set via env var, never hardcode)" api https://example.ts.net/api/v1/repos/search
 ```
 
 ### Bus Discovery
@@ -200,7 +200,7 @@ nvidia-smi --query-gpu=power.limit --format=csv
 powershell -Command "Get-Service Gitea"
 
 # Check Gitea endpoint
-curl -s https://<fleet-node>.ts.net
+curl -s https://example.ts.net
 
 # Check Gitea logs
 cat C:/gitea/data/gitea.log
