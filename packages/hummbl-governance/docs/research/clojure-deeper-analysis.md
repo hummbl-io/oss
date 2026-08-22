@@ -457,5 +457,5 @@ hypotheses_refined: H1 bifurcated (hosting governs adoption/constraints; immutab
 new_findings: spec.alpha 10-year stall is governance failure (5/6 criteria); Malli as market verdict on spec governance; Clojure BDFL more fragile than Python's (no institutional infrastructure) and more absolute than Linux's (no delegation); hosted-language tax quantified (startup, reflection, deployment, serverless); ClojureScript in managed decline vs TypeScript; Nubank as single-point-of-failure
 bias_label: analyst operates in HUMMBL governance context; Clojure assessed as language ecosystem with enterprise/niche adoption; comparison to Java (already researched) and Python/Linux (BDFL governance) as reference frames
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

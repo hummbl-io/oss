@@ -454,5 +454,5 @@ bias_label: analyst builds on own first-principles report; H2 pipeline hypothesi
   despite being analyst's own; type provider failure assessed from production evidence not advocacy;
   FSSF governance assessed as model with stated limitations, not endorsed
 session: 20260820T170000Z
-host: anvil
+host: <machine>
 ```

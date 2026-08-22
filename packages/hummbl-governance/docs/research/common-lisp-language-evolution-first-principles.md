@@ -256,5 +256,5 @@ bias_label: analyst operates in HUMMBL governance context; CL is assessed as a l
 next_step: cross-language synthesis with Java report, or red-team-mode on H2
 proof_source: web_search (12 searches across 4 waves), no full-text primary source fetches
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

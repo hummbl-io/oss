@@ -45,7 +45,7 @@ decorrelated outputs across the model boundary."
 
 ## Practical notes for HUMMBL use
 
-1. **Anvil L4 feasibility is already verified**: the agent-mesh audit
+1. **Agent mesh L4 feasibility is already verified**: the agent-mesh audit
    (`~/.agents/rules/_candidates/agent-mesh-huaomp-mtsmu-matrix.md`) confirmed 5
    practically usable headless agents (devin, codex, `claude --bare`, pi, aider).
    An L4 wrapper is a loop over providers + a cross-run report differ — modest work,

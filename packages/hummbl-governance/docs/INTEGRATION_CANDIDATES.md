@@ -2,7 +2,7 @@
 
 **Date**: 2026-06-17
 **Analyst**: devin
-**Source**: ROLLOUT_v1.1.0.md, live repo inspection (GitHub + Gitea + Anvil local)
+**Source**: ROLLOUT_v1.1.0.md, live repo inspection (GitHub + Gitea + local machine)
 **Scope**: All repos that should integrate the Governance Kernel (26th primitive)
 
 ---
@@ -24,11 +24,11 @@ These 10 repos already declare `hummbl-governance` as a dependency and **must bu
 
 | # | Repo | Host | Current Spec | Target Spec | Verified? | Migration Notes |
 |---|------|------|-------------|-------------|-----------|-----------------|
-| 1 | **hummbl-governance** | GitHub `hummbl-io/hummbl-governance` | CI clones from GitHub (`../hummbl-governance`) | `>=1.1.0` via PyPI | **YES** — local copy on Anvil | **CRITICAL** — also migrate `hummbl_governance.kernel` imports to `hummbl_governance.kernel` |
-| 2 | **adversary-emulation-playbook** | GitHub `hummbl-dev/adversary-emulation-playbook` | `>=1.0.0` | `>=1.1.0` | **YES** — pyproject.toml confirmed | None — additive change |
+| 1 | **hummbl-governance** | GitHub `hummbl-io/hummbl-governance` | CI clones from GitHub (`../hummbl-governance`) | `>=1.1.0` via PyPI | **YES** — local copy on <machine> | **CRITICAL** — also migrate `hummbl_governance.kernel` imports to `hummbl_governance.kernel` |
+| 2 | **adversary-emulation-playbook** | GitHub `hummbl-io/adversary-emulation-playbook` | `>=1.0.0` | `>=1.1.0` | **YES** — pyproject.toml confirmed | None — additive change |
 | 3 | **hummbl-governance-showcase** | GitHub `hummbl-io/hummbl-governance-showcase` | `>=1.0.0` (assumed per rollout doc) | `>=1.1.0` | NO — not inspected | None — additive change |
-| 4 | **hummbl-agent-sdk** | GitHub `hummbl-dev/hummbl-agent` (assumed) | unpinned (assumed per rollout doc) | `>=1.1.0` | NO — not inspected | Pin for reproducibility |
-| 5 | **hummbl-cli** | GitHub `hummbl-dev/cli` (assumed) | unpinned (assumed per rollout doc) | `>=1.1.0` | NO — not inspected | Pin for reproducibility |
+| 4 | **hummbl-agent-sdk** | GitHub `hummbl-io/hummbl-agent` (assumed) | unpinned (assumed per rollout doc) | `>=1.1.0` | NO — not inspected | Pin for reproducibility |
+| 5 | **hummbl-cli** | GitHub `hummbl-io/cli` (assumed) | unpinned (assumed per rollout doc) | `>=1.1.0` | NO — not inspected | Pin for reproducibility |
 | 6 | **hummbl-dashboard** | Unknown | unpinned (assumed per rollout doc) | `>=1.1.0` | NO — not found on GitHub or local | Verify existence |
 | 7 | **hummbl-foundry** | Unknown | unpinned (assumed per rollout doc) | `>=1.1.0` | NO — not found on GitHub or local | Verify existence |
 | 8 | **hummbl-py** | Unknown | `>=1.0.0` (assumed per rollout doc) | `>=1.1.0` | NO — not found on GitHub or local | Verify existence |
@@ -37,7 +37,7 @@ These 10 repos already declare `hummbl-governance` as a dependency and **must bu
 
 ### Verified Details
 
-**hummbl-governance** (Anvil local):
+**hummbl-governance** (local machine):
 - Dependency is NOT in `pyproject.toml` — it is installed via CI workflow (`.github/workflows/ci.yml` lines 77-80, 176-179)
 - CI clones `hummbl-io/hummbl-governance` to `../hummbl-governance` and installs with `pip install -e ../hummbl-governance`
 - **Recommendation**: Change CI to `pip install hummbl-governance>=1.1.0` instead of cloning
@@ -58,29 +58,29 @@ Repos that do NOT currently depend on `hummbl-governance` but would benefit from
 
 | Repo | Host | Current hummbl-governance Dep? | Use Case | Adoption Effort | Verified? |
 |------|------|------------------------------|----------|----------------|-----------|
-| **hummbl-bus** | Local (Anvil) + GitHub `hummbl-dev/hummbl-bus` (assumed) | **NO** — `dependencies = []` | Governance receipts on every bus post | Low — add `Kernel.create_receipt()` call | **YES** — local pyproject.toml inspected |
+| **hummbl-bus** | Local (self-hosted runner) + GitHub `hummbl-io/hummbl-bus` (assumed) | **NO** — `dependencies = []` | Governance receipts on every bus post | Low — add `Kernel.create_receipt()` call | **YES** — local pyproject.toml inspected |
 | **hummbl-cognition** | Unknown | Unknown | Evidence grading for ledger entries | Low — use `EvidenceEngine.grade()` | NO |
 | **hummbl-autonomy** | Unknown | Unknown | Scaling-law evaluation for autonomous decisions | Low — use `LawEngine.evaluate()` | NO |
-| **hummbl-iac** | GitHub `hummbl-dev/hummbl-iac` | Unknown | Infrastructure governance — compliance checks, audit trails | Medium — wire `ComplianceMapper` + `AuditLog` | NO |
+| **hummbl-iac** | GitHub `hummbl-io/hummbl-iac` | Unknown | Infrastructure governance — compliance checks, audit trails | Medium — wire `ComplianceMapper` + `AuditLog` | NO |
 
 ---
 
-## 4. Local PROJECTS Candidates (Anvil)
+## 4. Local PROJECTS Candidates (self-hosted runner)
 
-Repos under `C:/Users/Owner/PROJECTS/` that are HUMMBL-owned and should adopt hummbl-governance:
+Repos under `/path/to/projects/` that are HUMMBL-owned and should adopt hummbl-governance:
 
 | Repo | Host | Has hummbl-governance? | Recommendation | Effort |
 |------|------|----------------------|----------------|--------|
 | **hummbl-governance** | GitHub + Gitea | CI-only (not in pyproject.toml) | **Bump CI + migrate imports** | High |
 | **hummbl-bus** | Local only (not on GitHub org list) | No | **Add dep** — receipts on bus writes | Low |
 | **hummbl-governance** | GitHub + Gitea | N/A (self) | N/A | — |
-| **arbiter** | GitHub `hummbl-dev/arbiter` | Unknown | Candidate — code quality scoring could use `EvidenceEngine` | Low |
-| **agent-governance-demo** | GitHub `hummbl-dev/agent-governance-demo` | Unknown | Likely already has it (demo repo) | Verify |
-| **hummbl-asi** | GitHub `hummbl-dev/hummbl-asi` | Unknown | Candidate — safety monitoring | Low |
-| **mcp-server** | GitHub `hummbl-dev/mcp-server` | Unknown | Candidate — governance MCP tools | Low |
-| **bif** | GitHub `hummbl-dev/bif` | Unknown | Candidate — framework integration | Medium |
+| **arbiter** | GitHub `hummbl-io/arbiter` | Unknown | Candidate — code quality scoring could use `EvidenceEngine` | Low |
+| **agent-governance-demo** | GitHub `hummbl-io/agent-governance-demo` | Unknown | Likely already has it (demo repo) | Verify |
+| **hummbl-asi** | GitHub `hummbl-io/hummbl-asi` | Unknown | Candidate — safety monitoring | Low |
+| **mcp-server** | GitHub `hummbl-io/mcp-server` | Unknown | Candidate — governance MCP tools | Low |
+| **bif** | GitHub `hummbl-io/bif` | Unknown | Candidate — framework integration | Medium |
 | **base120** | GitHub `hummbl-io/base120` | Unknown | Candidate — reasoning engine already in hummbl-governance | Verify |
-| **crab** | GitHub `hummbl-dev/crab` | Unknown | Candidate — safety/consequence analysis | Low |
+| **crab** | GitHub `hummbl-io/crab` | Unknown | Candidate — safety/consequence analysis | Low |
 
 ---
 

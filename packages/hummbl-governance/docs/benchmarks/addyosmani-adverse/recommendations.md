@@ -51,7 +51,7 @@ reviewing itself with three hats).
    findings-hash / human-decision / CI-outcome / fix-PR-link fields (the full Gap 3
    required set) and posts a bus RECEIPT. Wrap, don't fork.
 6. **Prototype the L4 decorrelation loop**: N runs across N providers from the
-   verified Anvil mesh (devin, codex, `claude --bare -p`, pi, aider, ollama) + a
+   verified agent mesh (devin, codex, `claude --bare -p`, pi, aider, ollama) + a
    cross-run finding differ. This is the highest-leverage extension adverse doesn't
    ship and plays directly to HUMMBL's existing multi-agent infrastructure.
 
@@ -118,7 +118,7 @@ Audit `addyosmani/adverse` as an external benchmark for HUMMBL governed agent re
 Follow-on issue candidates (file only if the operator advances the pattern):
 
 - `Adversarial Review Gate: receipt envelope schema for adverse JSON reports` (Gap 3 + Gap 5)
-- `Adversarial Review Gate: L4 decorrelation wrapper over the Anvil agent mesh` (assurance-levels L3→L4)
+- `Adversarial Review Gate: L4 decorrelation wrapper over the agent mesh` (assurance-levels L3→L4)
 - `Adversarial Review Gate: severity×confidence gate policy function (advisory-mode pilot)` (Gap 4)
 
 ## Suggested experiment
@@ -128,7 +128,7 @@ vulnerability, one maintainability smell — one per lane), NOT production code.
 
 ```bash
 # Environment record
-node --version          # v22.22.2 verified on Anvil
+node --version          # v22.22.2 verified on <machine>
 git rev-parse HEAD
 git status --short
 
@@ -136,7 +136,7 @@ git status --short
 npx adverse review ./src --agent "ollama run llama3.1" \
   --out adverse-review.md --json-out adverse-review.json --html-out adverse-review.html
 
-# Then one hosted run (requires spend approval) — Anvil-specific: use --bare
+# Then one hosted run (requires spend approval) — host-specific: use --bare
 npx adverse review ./src --agent "claude --bare -p" \
   --out adverse-review.md --json-out adverse-review.json
 ```

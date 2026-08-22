@@ -76,7 +76,7 @@ Every MPS must declare:
 
 ### Redaction Rules
 
-1. **Real repo names** → replace with `hummbl-dev/example` or `org/example-repo`
+1. **Real repo names** → replace with `hummbl-io/example` or `org/example-repo`
 2. **Agent identities** → replace with `agent-alpha`, `agent-beta`, etc.
 3. **Internal paths** → replace with `/path/to/repo` or `/path/to/artifact`
 4. **Issue numbers** → replace with sequential synthetic numbers (#1, #2, #3)
@@ -97,7 +97,7 @@ Every MPS must declare:
 ## 6. Examples
 
 ### IssueOps Controller (hummbl-governance#978)
-- **Surface:** `hummbl-dev/hummbl-issueops` (proposed)
+- **Surface:** `hummbl-io/hummbl-issueops` (proposed)
 - **Purpose:** Teach Agentic CI/CD patterns for issue management
 - **Source inputs:** hummbl-governance IssueOps controller, run receipts, dispatch pods
 - **Private boundaries:** Real issue content, agent identities, bus messages, cost data

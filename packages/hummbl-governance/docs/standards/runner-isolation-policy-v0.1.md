@@ -1,7 +1,7 @@
 # Runner-Isolation Policy v0.1
 
 **Status:** APPROVED by operator (2026-08-19)
-**Author:** devin @ anvil
+**Author:** devin @ <machine>
 **Unblocks:** hummbl-production #857, #838, hummbl-bibliography #138
 
 ## Problem
@@ -27,7 +27,7 @@ All PR-triggered CI for untrusted/PR-controlled code must run on an isolated, ep
 ### Prohibited
 
 - GitHub-hosted runners for any step that executes PR-controlled code
-- Persistent self-hosted runners (Anvil, Delta) for Dependabot/fork PRs
+- Persistent self-hosted runners (self-hosted runners) for Dependabot/fork PRs
 
 ## Implementation
 

@@ -124,5 +124,5 @@ recommendations: 5 (do not pursue editions; monitor Valhalla; recognize Kotlin a
 subagents_used: 2 (economics, epochs) — both read-only, reports saved by parent
 total_sources_across_all_tracks: ~38 (20 first-principles + 6 red-team + 12 economics + 8 epochs, with overlap)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

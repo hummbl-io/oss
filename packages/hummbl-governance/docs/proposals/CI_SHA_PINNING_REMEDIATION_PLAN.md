@@ -17,7 +17,7 @@ last_reviewed: 2026-08-18
 
 ## 2. Current State (Scan Results)
 
-Scan method: `gh repo list hummbl-io` (214 repos, 7 archived excluded) → latest run on each default branch via `gh run list --branch <default> --limit 1`. Artifact: `/tmp/ci-scan/results.tsv` on Anvil.
+Scan method: `gh repo list hummbl-io` (214 repos, 7 archived excluded) → latest run on each default branch via `gh run list --branch <default> --limit 1`. Artifact: `/tmp/ci-scan/results.tsv` on <machine>.
 
 | Conclusion | Count | Class |
 |---|---|---|

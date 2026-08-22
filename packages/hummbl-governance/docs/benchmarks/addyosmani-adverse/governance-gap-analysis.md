@@ -29,7 +29,7 @@ N different provider agents plus a report diff — which adverse supports via
 
 HUMMBL has an existing invariant here: constraint #9 of this audit ("Do not conflate
 single-model persona diversity with true independent model diversity") and the
-verified Anvil agent mesh (devin/codex/claude/pi/aider headless) is the raw material
+verified agent mesh (devin/codex/claude/pi/aider headless) is the raw material
 for an L4 decorrelated wrapper adverse does not provide.
 
 ---

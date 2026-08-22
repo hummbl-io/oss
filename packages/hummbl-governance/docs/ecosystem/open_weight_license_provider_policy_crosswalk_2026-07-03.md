@@ -3,7 +3,7 @@
 Status: candidate research crosswalk
 Date: 2026-07-03
 Scope: `hummbl-io/hummbl-governance#157`
-Related routing issues: `hummbl-dev/hummbl-production#566`,
+Related routing issues: `hummbl-io/hummbl-production#566`,
 `hummbl-io/hummbl-governance#1189`, `hummbl-io/hummbl-governance#1125`
 
 This document governs routing review for open-weight model candidates. It does

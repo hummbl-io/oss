@@ -111,7 +111,7 @@ deterministic fleet audit is run.
 
 | Repo | Disposition | Missing | Notes |
 |------|-------------|---------|-------|
-| anvil-fleet | scaffold | All | Private — active fleet surface |
+| fleet-repo | scaffold | All | Private — active fleet surface |
 | hummbl-bus | scaffold | All | Private — active bus module |
 | hummbl-cli | scaffold | All | Private — active CLI |
 | hummbl-cognition | scaffold | All | Private — active cognition module |

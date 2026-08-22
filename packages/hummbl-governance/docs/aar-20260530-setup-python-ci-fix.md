@@ -2,7 +2,7 @@ AAR: fix-ci-setup-python-v5 | INTERNAL | 20260530-1400Z | codex
 ═══════════════════════════════════════════════════════════════════
 
 ## 1. Mission & Intent
-- **Objective**: Fix CI failure where `actions/setup-python@v5` fails on the self-hosted Windows runner at Anvil due to lack of admin rights for the NSIS Python installer.
+- **Objective**: Fix CI failure where `actions/setup-python@v5` fails on the self-hosted Windows runner on <machine> due to lack of admin rights for the NSIS Python installer.
 - **Success criteria**: CI run passes lint + test matrix on both Python 3.12 and 3.13.
 - **Constraints**: No admin access on runner process. No modification to host Windows system Python. All provisioning must happen through the Gitea Actions toolcache.
 
@@ -32,7 +32,7 @@ AAR: fix-ci-setup-python-v5 | INTERNAL | 20260530-1400Z | codex
 
 ## 5. Sustains
 - Correctly diagnosed setup-python@v5's manifest-resolution behavior as the root cause. — evidence: PR #498 AAR identified the "looks up remote manifest not toolcache" mechanism.
-- Manually provisioned 3.12.13 + 3.13.13 in the toolcache with working `python.exe` and `x64.complete` markers. — evidence: `Get-ChildItem C:\gitea\runner\toolcache\Python\3.12.13\x64\` confirmed python.exe present.
+- Manually provisioned 3.12.13 + 3.13.13 in the toolcache with working `python.exe` and `x64.complete` markers. — evidence: `Get-ChildItem /path/to/runner/toolcache/Python\3.12.13\x64\` confirmed python.exe present.
 
 ## 6. Improves
 - Runner daemon not monitored. Runner stopped between run 560 and run 561; no alert fired. — evidence: `Get-Process -Name "act_runner"` returned empty; runs 561/562 stuck at "queued".
@@ -42,9 +42,9 @@ AAR: fix-ci-setup-python-v5 | INTERNAL | 20260530-1400Z | codex
 ## 7. Recommendations
 1. **[HIGH]** Restart the act_runner daemon. Check Task Scheduler for `Gitea Runner` scheduled task; if absent, reinstall or create it. Then verify runs 561/562 get picked up.
 2. **[MED]** Add a dead-runner heartbeat — a scheduled script or bus check that polls `Get-Process -Name "act_runner"` and posts STATUS/BLOCKED if missing. Wire into the morning-kickoff or fmproc digest.
-3. **[LOW]** Write a provisioning script for toolcache Python entries so they can be rebuilt on demand instead of copied from WSL. Path: `C:\gitea\runner\toolcache\Python\<version>\x64\`.
+3. **[LOW]** Write a provisioning script for toolcache Python entries so they can be rebuilt on demand instead of copied from WSL. Path: `/path/to/runner/toolcache/Python\<version>\x64\`.
 
 ---
 Base120 Applied: P6 (Point-of-View Anchoring), RE17 (Versioning & Diff), DE1 (Root Cause Analysis), DE7 (Pareto Decomposition)
-Evidence: `C:\gitea\runner\runner.log` (last entry 20:46:25), Gitea API (runs 560/561/562 status), `git log --oneline -10`
+Evidence: `/path/to/gitea/runner\runner.log` (last entry 20:46:25), Gitea API (runs 560/561/562 status), `git log --oneline -10`
 Bus: N (runner down, no write path — deferred to next session operator restart)

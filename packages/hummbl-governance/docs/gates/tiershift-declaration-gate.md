@@ -89,11 +89,11 @@ lower than first assumed.
 
 ## Related References
 
-- hummbl-dev/hummbl-production#540: candidate namespace audit.
-- hummbl-dev/hummbl-production#541: namespace source-of-record draft PR.
-- hummbl-dev/hummbl-production#560: HUMMBL TierShift governed execution-intensity architecture.
+- hummbl-io/hummbl-production#540: candidate namespace audit.
+- hummbl-io/hummbl-production#541: namespace source-of-record draft PR.
+- hummbl-io/hummbl-production#560: HUMMBL TierShift governed execution-intensity architecture.
 - hummbl-io/hummbl-governance#1185: Ownward TierShift coaching application.
-- hummbl-dev/hummbl-music#2: HUMMBL TierShift sound family.
+- hummbl-io/hummbl-music#2: HUMMBL TierShift sound family.
 
 ## Out of Scope
 

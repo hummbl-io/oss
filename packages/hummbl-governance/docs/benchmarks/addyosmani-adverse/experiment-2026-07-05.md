@@ -2,7 +2,7 @@
 
 **Date**: 2026-07-05
 **Operator authorization**: "i approve all experimental use" (chat, 2026-07-05)
-**Runner**: claude-code (Fable 5), Anvil (Windows 11, RTX 3080 Ti 12 GB)
+**Runner**: claude-code (Fable 5) (Windows 11, RTX 3080 Ti 12 GB)
 **adverse**: commit `4b9eb7b` (v0.2.1), Node v22.22.2
 **Fixture**: 34-line Python module, one seeded defect per persona lane (reviewer never saw the ground-truth file)
 
@@ -80,8 +80,8 @@ thrash), or the wall-time and reproducibility both degrade.
 ## What did NOT happen
 
 No successful synthesized report was produced in any arm. The experiment measured
-adverse's *operational envelope on Anvil*, not its review *quality* — that requires a
+adverse's *operational envelope on <machine>*, not its review *quality* — that requires a
 hosted arm run from a non-nested shell (deferred: codex usage-limited, claude nested,
 gemini deprecated during this window). No agent spend incurred (all local or blocked
-probes). Ground truth and all raw artifacts retained under the Anvil fixture dir; not
+probes). Ground truth and all raw artifacts retained under the local fixture dir; not
 committed (transient).

@@ -4,8 +4,8 @@
 **Issue**: https://github.com/hummbl-io/hummbl-governance/issues/152
 **Related**:
 - Mobile ops ADR addendum: https://github.com/hummbl-io/hummbl-governance/issues/1149
-- Signal adapter: https://github.com/hummbl-dev/hummbl-agent/issues/218
-- Bus Signal lane: https://github.com/hummbl-dev/hummbl-bus/issues/2
+- Signal adapter: https://github.com/hummbl-io/hummbl-agent/issues/218
+- Bus Signal lane: https://github.com/hummbl-io/hummbl-bus/issues/2
 
 ## Purpose
 

@@ -6,7 +6,7 @@ hummbl-iac	main	completed	startup_failure	CI	2026-08-18T15:09:38Z	push
 protocol-as-code	main	completed	startup_failure	CI	2026-08-18T15:09:34Z	push
 hummbl-dashboard	main	completed	startup_failure	ci	2026-08-18T15:09:31Z	push
 swarm-test-archive	main	completed	startup_failure	CI	2026-08-18T15:08:47Z	push
-anvil-bin	main	null	-	null	null	null
+host-bin	main	null	-	null	null	null
 unified-frameworks	main	completed	startup_failure	Schema Check	2026-08-18T15:07:42Z	push
 tandem-trade	main	completed	startup_failure	CI	2026-08-18T15:06:22Z	push
 autoresearch-pipeline	main	completed	startup_failure	CI	2026-08-18T15:06:17Z	push

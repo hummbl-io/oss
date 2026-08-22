@@ -23,9 +23,9 @@ comments.
 Initial public/write-safe repositories:
 
 - `hummbl-io/hummbl-governance`
-- `hummbl-dev/hummbl-agent`
-- `hummbl-dev/arbiter`
-- `hummbl-dev/mcp-server`
+- `hummbl-io/hummbl-agent`
+- `hummbl-io/arbiter`
+- `hummbl-io/mcp-server`
 
 ## Daily Limits
 

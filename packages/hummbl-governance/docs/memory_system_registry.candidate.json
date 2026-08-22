@@ -409,7 +409,7 @@
         },
         {
           "repo": "local-home",
-          "path": "_internal-anvil-mirror/",
+          "path": "_internal-local-mirror/",
           "path_type": "directory",
           "exists_checked": true,
           "exists": false

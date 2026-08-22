@@ -311,5 +311,5 @@ bias_label: analyst operates in HUMMBL governance context; Clojure assessed as a
 next_step: cross-language synthesis with Java report, or red-team of BDFL governance hypothesis
 proof_source: web_search (12 searches across 3 waves) covering origins, data structures, STM, hosted philosophy, transducers, core.async, spec, REPL, simplicity philosophy, startup time, Lisp comparison, FP influence, governance, Java interop
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

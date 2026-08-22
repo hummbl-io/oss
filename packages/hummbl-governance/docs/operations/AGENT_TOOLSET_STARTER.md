@@ -17,7 +17,7 @@ The following files are the first wave to standardize as agent-owned telemetry:
 | `scripts/pr_census.py` | PR and branch drift snapshot |
 | `scripts/claim_drift.py` | Claim/lineage drift detection |
 | `scripts/check-dependencies.py` | Dependency drift and pinning checks |
-| `scripts/anvil_git_signing_audit.py` | Git signing/toolchain health checks |
+| `scripts/git_signing_audit.py` | Git signing/toolchain health checks |
 | `scripts/audit-github-actions.py` | CI workflow health diagnostics |
 | `scripts/financial_pulse.py` | Spend/usage telemetry |
 | `scripts/ops/keepalive_fleet_loop.py` | Fleet liveness watchdog |
@@ -38,7 +38,7 @@ The following files are the first wave to standardize as agent-owned telemetry:
 - `python scripts/financial_pulse.py`
 
 ### Per-PR or pre-merge checks
-- `python scripts/anvil_git_signing_audit.py`
+- `python scripts/git_signing_audit.py`
 - `python scripts/audit-github-actions.py`
 - `python scripts/pr_census.py`
 - `python scripts/issue_pr_draft_coverage.py --repo hummbl-io/hummbl-governance --json`
@@ -71,7 +71,7 @@ python scripts/financial_pulse.py
 python scripts/pr_census.py
 python scripts/claim_drift.py
 python scripts/issue_pr_draft_coverage.py --repo hummbl-io/hummbl-governance --json
-python scripts/anvil_git_signing_audit.py
+python scripts/git_signing_audit.py
 python scripts/audit-github-actions.py
 ```
 

@@ -136,7 +136,7 @@ Each repo should be classified before it is used as narrative evidence.
 
 ```yaml
 repo_role_record:
-  repo: "hummbl-dev/example"
+  repo: "hummbl-io/example"
   chronology_index: 0
   chronology_evidence:
     source: "connector_order|github_created_at|git_history|manual"

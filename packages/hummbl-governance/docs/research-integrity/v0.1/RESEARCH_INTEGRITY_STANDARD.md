@@ -212,4 +212,4 @@ No project is grandfathered into compliance without evidence.
 ## References
 
 - Issue: hummbl-io/hummbl-governance#225
-- Related: hummbl-dev/hummbl-papers#20 (LLL Engineering), #19 (Publication Readiness Gate)
+- Related: hummbl-io/hummbl-papers#20 (LLL Engineering), #19 (Publication Readiness Gate)

@@ -40,7 +40,7 @@ Scan handoff is required as a single packet:
 scan_handoff:
   scan_id: scan-<timestamp>-<slug>
   source: github | web | adapter | local
-  target_repo: hummbl-dev/<repo>
+  target_repo: hummbl-io/<repo>
   hypotheses:
     - <hypothesis-1>
     - <hypothesis-2>
@@ -49,8 +49,8 @@ scan_handoff:
     basis: <command output | log excerpt | artifact>
   duplicate_preflight:
     query_examples:
-      - "repo:hummbl-dev/<repo> is:issue \"<signal>\" in:title,body is:open"
-      - "repo:hummbl-dev/<repo> is:issue \"<signal>\" in:title,body is:closed created:>=YYYY-MM-DD"
+      - "repo:hummbl-io/<repo> is:issue \"<signal>\" in:title,body is:open"
+      - "repo:hummbl-io/<repo> is:issue \"<signal>\" in:title,body is:closed created:>=YYYY-MM-DD"
     duplicate_status: no direct overlap found
   approved_actions:
     - propose_issue

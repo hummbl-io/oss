@@ -304,5 +304,5 @@ economic_findings: Idris 2 = 2,967 stars / 230 contributors / pre-1.0 / no produ
 key_insight: "practical dependent types" language does not yet exist; it would synthesize F* automation + Liquid Haskell integration + Idris 2 QTT erasure + Coq soundness
 bias_label: enterprise software perspective (HUMMBL governance context); Idris assessed from "could this matter for production?" lens; research/pedagogical value acknowledged but not primary frame
 session: 20260820T180000Z
-host: anvil
+host: <machine>
 ```

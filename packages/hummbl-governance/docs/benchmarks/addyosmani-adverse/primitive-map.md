@@ -151,7 +151,7 @@ limitation.
 
 **HUMMBL analogue**: The headless-agent mesh findings
 (`agent-mesh-huaomp-mtsmu-matrix.md` — `claude --bare -p`, `codex exec`, pi, aider all
-verified working on Anvil). adverse is a working consumer of exactly that mesh
+verified working on <machine>). adverse is a working consumer of exactly that mesh
 capability.
 
 **Strength**: Provider-agnostic by construction — this is the mechanism enabling L3/L4
@@ -159,10 +159,10 @@ decorrelation (run per-provider, diff reports).
 
 **Limitation**: Known HUMMBL mesh boundaries apply: nested invocations lose auth
 context (a `claude -p` spawned inside Claude Code fails — the repo's own live tests
-note "won't pass from inside a nested Claude Code session"); on Anvil, `claude`
+note "won't pass from inside a nested Claude Code session"); on <machine>, `claude`
 without `--bare` overflows context from skill auto-load.
 
-**Adoption recommendation**: ADOPT for experimentation; document Anvil-specific
+**Adoption recommendation**: ADOPT for experimentation; document host-specific
 invocation (`claude --bare -p`) in any run instructions.
 
 ---
@@ -279,7 +279,7 @@ sub-agent dispatches that require schema-conformant output.
 | 3 | Validate/Challenge Edges | ADOPT concept; use stable IDs, not title joins |
 | 4 | Deterministic Synthesis | ADOPT principle; ADAPT verdict policy |
 | 5 | Confidence Classification | ADOPT as candidate vocabulary |
-| 6 | Agent-Agnostic CLI | ADOPT for experiments (Anvil: `claude --bare -p`) |
+| 6 | Agent-Agnostic CLI | ADOPT for experiments (host: `claude --bare -p`) |
 | 7 | Skill Adapter | ADAPT (paths, model tier, bus receipts) |
 | 8 | CI Exit-Code Gate | NOT YET (advisory-only pending gate policy) |
 | 9 | Report Artifact Emission | ADAPT (wrap in receipt envelope) |

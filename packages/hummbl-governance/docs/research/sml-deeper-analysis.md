@@ -359,5 +359,5 @@ integration: SML as specialized success; formality-vs-agility trade-off is gover
 claim_honesty: [A] claims from Tier-1 primary sources (papers, AFP stats, implementation changelogs); [B] from Tier-2 analysis (forum discussions, industry reports, blog analyses); [C] from Tier-3 (market research firm estimates)
 bias_label: analyst operates in HUMMBL governance context; SML assessed as language-evolution case study for formality-vs-agility trade-off; economic estimates are conservative and explicitly labeled as approximate
 session: 20260820T180000Z
-host: anvil
+host: <machine>
 ```
