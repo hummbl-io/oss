@@ -10,7 +10,7 @@ Mission Mode operates across a hybrid fleet of two machines:
 - **Services**: Ollama hub, CI runner, canonical coordination bus
 - **Models**: `nemotron-3-nano:30b` (1M ctx), `qwen3.5:9b` (general chat), `qwen2.5-coder:3b` (fast-code)
 - **Network**: Tailscale IP `100.x.x.x` (nodezero)
-- **SSH**: `ssh nodezero` (logs in as `nodezero` user)
+- **SSH**: `ssh <your-host-alias>` (logs in as `nodezero` user)
 
 ### Anvil (GPU/Compliance)
 - **Hardware**: Windows 11 desktop, AMD Ryzen 7 5800X, RTX 3080 Ti (12GB VRAM)
@@ -97,7 +97,7 @@ curl -s http://localhost:11434/api/tags | python -m json.tool
 ### Gitea Repository Discovery
 ```bash
 # List Gitea repos
-gh -H "Authorization: token $GITEA_TOKEN (set via env var, never hardcode)" api https://example.ts.net/api/v1/repos/search
+gh -H "Authorization: token $GIT_TOKEN" api https://example.ts.net/api/v1/repos/search
 ```
 
 ### Bus Discovery
@@ -147,7 +147,7 @@ curl -s http://100.x.x.x:18790/health
 
 ### Initial Setup
 - [ ] Verify Tailscale connectivity between nodezero and Anvil
-- [ ] Configure SSH keys for passwordless login
+- [ ] Configure SSH keys for key-based authentication
 - [ ] Install Ollama on both machines
 - [ ] Configure Gitea on Anvil
 - [ ] Set up PostgreSQL on Anvil
@@ -176,7 +176,7 @@ curl -s http://100.x.x.x:18790/health
 tailscale status
 
 # Check SSH connectivity
-ssh nodezero echo "connected"
+ssh <your-host-alias> echo "connected"
 
 # Check Ollama endpoint
 curl -s http://100.x.x.x:11434/api/tags

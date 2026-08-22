@@ -63,8 +63,8 @@ class FleetConfig:
     anvil_rtx_3080ti: bool = True
     
     # Service endpoints (override via env vars; do not hardcode internal IPs/URLs)
-    nodezero_ollama: str = field(default_factory=lambda: os.environ.get("NODEZERO_OLLAMA_URL", "http://100.x.x.x:11434"))
-    anvil_gitea: str = field(default_factory=lambda: os.environ.get("ANVIL_GITEA_URL", "https://example.ts.net"))
+    nodezero_ollama: str = field(default_factory=lambda: os.environ.get("NODEZERO_OLLAMA_URL", ""))
+    anvil_gitea: str = field(default_factory=lambda: os.environ.get("ANVIL_GITEA_URL", ""))
     
     # Health check intervals
     heartbeat_interval_seconds: int = 30

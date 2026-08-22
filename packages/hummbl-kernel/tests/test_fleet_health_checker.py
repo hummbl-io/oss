@@ -14,7 +14,27 @@ from kernel.fleet.fleet_health_checker import (
 
 class TestFleetHealthChecker(unittest.TestCase):
     def setUp(self):
-        self.checker = FleetHealthChecker(mode=FleetMode.HYBRID)
+        self.test_config = {
+            "nodezero": {
+                "tailscale_ip": "100.x.x.x",
+                "hostname": "nodezero",
+                "ssh_alias": "nodezero",
+                "services": {
+                    "ollama": "http://100.x.x.x:11434/api/tags",
+                    "bus": "http://100.x.x.x:18790/health"
+                }
+            },
+            "anvil": {
+                "tailscale_ip": "100.x.x.x",
+                "hostname": "anvil",
+                "ssh_alias": "anvil",
+                "services": {
+                    "gitea": "https://example.ts.net",
+                    "ollama": "http://localhost:11434/api/tags"
+                }
+            }
+        }
+        self.checker = FleetHealthChecker(mode=FleetMode.HYBRID, fleet_config=self.test_config)
 
     def test_checker_initialization(self):
         """Health checker should initialize with correct mode."""
@@ -194,7 +214,7 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_local_mode_routing(self):
         """Local mode should route all tasks to anvil."""
-        local_checker = FleetHealthChecker(mode=FleetMode.LOCAL)
+        local_checker = FleetHealthChecker(mode=FleetMode.LOCAL, fleet_config=self.test_config)
         with patch.object(local_checker, '_check_machine') as mock_check:
             mock_check.return_value = MachineHealth(
                 name="test",
@@ -208,7 +228,7 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_nodezero_only_mode_routing(self):
         """Nodezero-only mode should route all tasks to nodezero."""
-        nodezero_checker = FleetHealthChecker(mode=FleetMode.NODEZERO_ONLY)
+        nodezero_checker = FleetHealthChecker(mode=FleetMode.NODEZERO_ONLY, fleet_config=self.test_config)
         with patch.object(nodezero_checker, '_check_machine') as mock_check:
             mock_check.return_value = MachineHealth(
                 name="test",
