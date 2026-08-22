@@ -11,6 +11,8 @@ Public monorepo for HUMMBL open-source packages. Consolidation in progress.
 | `hummbl-cognition` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-cognition)](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
 | `hummbl-tuples` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-tuples)](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
 | `hummbl-bif` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-bif)](https://pypi.org/project/hummbl-bif/) | Live — Batch Ingestion Framework |
+| `hummbl` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl)](https://pypi.org/project/hummbl/) | Pending first release — structured reasoning framework for AI agents |
+| `hummbl-kernel` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-kernel)](https://pypi.org/project/hummbl-kernel/) | Pending first release — orchestration kernel for workflow execution |
 
 ## Why a monorepo
 
