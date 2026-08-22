@@ -1,5 +1,6 @@
 """Tests for Mission Mode Kernel."""
 
+import os
 import unittest
 from datetime import datetime, timezone
 from kernel.kernel import (
@@ -11,6 +12,9 @@ from kernel.kernel import (
     MissionReceipt,
     FleetConfig,
 )
+
+# Set test signing key for audit event signing tests
+os.environ["MISSION_MODE_SIGNING_KEY"] = "test-signing-key"
 
 
 class TestMissionModeKernel(unittest.TestCase):

@@ -9,7 +9,7 @@ Mission Mode operates across a hybrid fleet of two machines:
 - **Role**: Primary inference host, long-context reasoning, document synthesis
 - **Services**: Ollama hub, CI runner, canonical coordination bus
 - **Models**: `nemotron-3-nano:30b` (1M ctx), `qwen3.5:9b` (general chat), `qwen2.5-coder:3b` (fast-code)
-- **Network**: Tailscale IP `100.109.69.16` (maks-mac-mini-1)
+- **Network**: Tailscale IP `100.x.x.x` (nodezero)
 - **SSH**: `ssh nodezero` (logs in as `nodezero` user)
 
 ### Anvil (GPU/Compliance)
@@ -17,7 +17,7 @@ Mission Mode operates across a hybrid fleet of two machines:
 - **Role**: GPU workloads, evidence storage, audit trail database, Gitea server
 - **Services**: Gitea, PostgreSQL, S3/MinIO, Ollama (secondary)
 - **GPU Config**: 270W cap + locked 1800 MHz GPU clock
-- **Network**: Tailscale IP `100.119.90.32` (anvil)
+- **Network**: Tailscale IP `100.x.x.x` (anvil)
 - **Primary Dev**: This is the primary development machine
 
 ## Fleet Coordination Protocol
@@ -46,11 +46,11 @@ HEALTH_CHECK_INTERVAL = 30  # seconds
 
 FLEET_HEALTH_ENDPOINTS = {
     "nodezero": {
-        "ollama": "http://100.109.69.16:11434/api/tags",
-        "bus": "http://100.109.69.16:18790/health"
+        "ollama": "http://100.x.x.x:11434/api/tags",
+        "bus": "http://100.x.x.x:18790/health"
     },
     "anvil": {
-        "gitea": "https://anvil.tail0ff7b3.ts.net",
+        "gitea": "https://example.ts.net",
         "ollama": "http://localhost:11434/api/tags"
     }
 }
@@ -88,7 +88,7 @@ FLEET_HEALTH_ENDPOINTS = {
 ### Ollama Model Discovery
 ```bash
 # Check nodezero models
-curl -s http://100.109.69.16:11434/api/tags | python -m json.tool
+curl -s http://100.x.x.x:11434/api/tags | python -m json.tool
 
 # Check Anvil models
 curl -s http://localhost:11434/api/tags | python -m json.tool
@@ -97,13 +97,13 @@ curl -s http://localhost:11434/api/tags | python -m json.tool
 ### Gitea Repository Discovery
 ```bash
 # List Gitea repos
-gh -H "Authorization: token $GITEA_TOKEN" api https://anvil.tail0ff7b3.ts.net/api/v1/repos/search
+gh -H "Authorization: token $GITEA_TOKEN (set via env var, never hardcode)" api https://example.ts.net/api/v1/repos/search
 ```
 
 ### Bus Discovery
 ```bash
 # Check bus health
-curl -s http://100.109.69.16:18790/health
+curl -s http://100.x.x.x:18790/health
 ```
 
 ## Data Synchronization
@@ -179,7 +179,7 @@ tailscale status
 ssh nodezero echo "connected"
 
 # Check Ollama endpoint
-curl -s http://100.109.69.16:11434/api/tags
+curl -s http://100.x.x.x:11434/api/tags
 ```
 
 ### Anvil GPU Issues
@@ -200,7 +200,7 @@ nvidia-smi --query-gpu=power.limit --format=csv
 powershell -Command "Get-Service Gitea"
 
 # Check Gitea endpoint
-curl -s https://anvil.tail0ff7b3.ts.net
+curl -s https://example.ts.net
 
 # Check Gitea logs
 cat C:/gitea/data/gitea.log
