@@ -260,5 +260,5 @@ bias_label: analyst operates in HUMMBL governance context; Elixir's web/real-tim
 next_step: cross-language synthesis with Java report recommended
 proof_source: web_search (12 searches, 4 waves) covering origins, BEAM, macros, Phoenix/LiveView, Erlang comparison, Go/Rust, Nerves, governance, Rails migration, type system, Gleam, Discord, Nx
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

@@ -21,7 +21,7 @@ hummbl-bibliography
 
 ## Existing contract/schema artifacts (10)
 
-1. `hummbl-dev/docs/evidence-graph/v0.1/schema.json` — minimal completed-batch graph
+1. `hummbl-io/docs/evidence-graph/v0.1/schema.json` — minimal completed-batch graph
 2. `research-source-packets/schemas/research-source-packets-v0.1.json` — bounded source packet
 3. `claim-evidence-ledger/schemas/claim-evidence-ledger-v0.1.json` — claim/evidence pair
 4. `knowledge-as-code/schemas/knowledge-as-code-v0.1.json` — versioned knowledge packet
@@ -61,7 +61,7 @@ The cross-repo contract must be an **additive envelope** around domain-owned pay
 - conformance fixtures
 - assurance and adoption boundaries
 
-### `hummbl-dev/hummbl-dev`
+### `hummbl-io/hummbl-dev`
 
 - organization-level contract registry/index
 - worked cross-repo integration graphs
@@ -76,7 +76,7 @@ Each repository owns its payload schema and release cadence. The shared contract
 
 ### Tier 1 — core contract spine
 
-`hummbl-bibliography`, `research-source-packets`, `hummbl-research`, `claim-evidence-ledger`, `hummbl-papers`, `hummbl-governance`, `hummbl-dev/hummbl-dev`
+`hummbl-bibliography`, `research-source-packets`, `hummbl-research`, `claim-evidence-ledger`, `hummbl-papers`, `hummbl-governance`, `hummbl-io/hummbl-dev`
 
 ### Tier 2 — assurance and provenance overlays
 
@@ -218,13 +218,13 @@ lifecycle:
 
 ## Cross-repo dependencies
 
-- `hummbl-dev/hummbl-dev#104` — completed minimal graph
-- `hummbl-dev/hummbl-dev#105` — completed implementation slice
-- `hummbl-dev/hummbl-dev#146` — active domain integration pilot
-- `hummbl-dev/hummbl-dev#153` — research-integrity master index
+- `hummbl-io/hummbl-dev#104` — completed minimal graph
+- `hummbl-io/hummbl-dev#105` — completed implementation slice
+- `hummbl-io/hummbl-dev#146` — active domain integration pilot
+- `hummbl-io/hummbl-dev#153` — research-integrity master index
 - `hummbl-io/hummbl-governance#225` — research-integrity parent standard
-- `hummbl-dev/hummbl-papers#19` — publication gate
-- `hummbl-dev/hummbl-dev#154` — repository responsibility topology
+- `hummbl-io/hummbl-papers#19` — publication gate
+- `hummbl-io/hummbl-dev#154` — repository responsibility topology
 
 ## Fact posture
 

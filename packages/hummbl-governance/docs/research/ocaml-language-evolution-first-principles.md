@@ -272,5 +272,5 @@ bias_label: analyst operates in HUMMBL governance context; OCaml's industrial ad
 next_step: synthesis-mode or comparative-mode (OCaml vs Java evolution strategies) recommended
 proof_source: web_search + primary source pages (ocaml.org, caml-list archives, GitHub, oxcaml.org, Jane Street blog, MSR, HOPL paper)
 session: 20250820T151138Z
-host: anvil
+host: <machine>
 ```

@@ -4,7 +4,7 @@
 - **Date:** 2026-06-16
 - **Decision owner:** Reuben Bowlby
 - **Steward:** HUMMBL Research Institute
-- **Authors:** devin (anvil)
+- **Authors:** devin
 - **Supersedes:** none
 - **Superseded by:** none
 - **Related:** `hummbl-governance#47` (release readiness gate), `docs/coverage/EVIDENCE_VALIDATION.md`

@@ -99,7 +99,7 @@
 | `hummbl-agent` | `packages/runtime`, `skills/local-places` | Agent runtime with multiple packages |
 | `hummbl-production` | `hummbl-governed-quest-sim`, `minecraft-governance` | Production infra with game governance |
 | `pliny-lab` | `OBLITERATUS`, `P4RS3LT0NGV3` | Red-team lab with multiple packages |
-| `apex-nexus` | `hosts/<fleet-node>/PROJECTS/hummbl-risk-contracts` | Fleet mesh with embedded packages |
+| `apex-nexus` | `hosts/<machine>/PROJECTS/hummbl-risk-contracts` | Fleet mesh with embedded packages |
 
 ---
 
@@ -242,7 +242,7 @@
 | `fleet-manifests` | Internal fleet config |
 | `fleet-runbooks` | Internal runbooks |
 | `vendor-skill-fleet` | Internal vendor skills |
-| `anvil-bin` | Host-specific utilities |
+| `host-bin` | Host-specific utilities |
 | `delta-disaster-assessment` | Research models (review) |
 | `NemoClaw` | Unclear purpose |
 | `gitea-cicd-canary` | Internal CI canary |
@@ -299,7 +299,7 @@ oss/
 │   └── krineia/
 ├── docs/                # Mintlify
 ├── sites/               # GitHub Pages
-│   ├── hummbl-dev/
+│   ├── hummbl-io/
 │   ├── hummbl-brand/
 │   └── ...
 ├── cli/                 # Scoop/Winget/Homebrew manifests

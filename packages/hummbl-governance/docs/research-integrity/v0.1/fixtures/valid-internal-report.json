@@ -69,7 +69,7 @@
   },
   "ethics_determination": null,
   "venue_policy_check": null,
-  "correction_contact": "reuben@hummbl.dev",
+  "correction_contact": "reuben@hummbl.io",
   "version_history": [
     {"version": "0.1.0", "date": "2026-03-15", "change": "Initial spec draft"},
     {"version": "0.2.0", "date": "2026-04-17", "change": "TUPLES v2 with envelope architecture"}

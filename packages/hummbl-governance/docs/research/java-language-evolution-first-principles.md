@@ -250,5 +250,5 @@ bias_label: analyst operates in HUMMBL governance context (enterprise software p
 next_step: synthesis-mode or red-team-mode recommended
 proof_source: web_search + webfetch primary sources (OpenJDK, JLS, JEPs, Goetz design notes, Gosling 1995)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

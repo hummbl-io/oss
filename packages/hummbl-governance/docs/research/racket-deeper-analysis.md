@@ -475,5 +475,5 @@ economic_estimates_produced: 3 (LOP tax components, research-language adoption g
 acknowledgment_assessment: Racket's contribution acknowledged in citation graph, invisible in popular narrative
 strategic_position_assessment: idea factory — sustainable but unscalable
 session: 20260820T230000Z
-host: anvil
+host: <machine>
 ```

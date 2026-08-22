@@ -9,13 +9,13 @@ This crosswalk records actual differences among current HUMMBL public schemas. I
 
 | Repository | Path | Inspected blob SHA |
 |---|---|---|
-| `hummbl-dev/hummbl-dev` | `docs/evidence-graph/v0.1/schema.json` | `9b2b7c29380c7e39aa0829744f31df651d65a958` |
-| `hummbl-dev/research-source-packets` | `schemas/research-source-packets-v0.1.json` | `73087e604a0ed96b5e18ee891c5526c25fc6b888` |
-| `hummbl-dev/claim-evidence-ledger` | `schemas/claim-evidence-ledger-v0.1.json` | `6d9f357a55ac2ddafdb0026ea3cd70950876a69b` |
-| `hummbl-dev/knowledge-as-code` | `schemas/knowledge-as-code-v0.1.json` | `29452d84763103fbbc9fd37bb6c6ae3bf146bd47` |
-| `hummbl-dev/ai-source-verification` | `schemas/ai-source-verification-v0.1.json` | `78226c3345ef7b5f5c4abe90ac4287ad6baad25b` |
-| `hummbl-dev/execution-receipts` | `schemas/execution-receipts-v0.1.json` | `972cebdfabc3771bdba11d68974c7d2d5caecf93` |
-| `hummbl-dev/protocol-as-code` | `schemas/protocol-as-code-v0.1.json` | `fae0a1797556671aa6488f6e844ec1512b65f4de` |
+| `hummbl-io/hummbl-dev` | `docs/evidence-graph/v0.1/schema.json` | `9b2b7c29380c7e39aa0829744f31df651d65a958` |
+| `hummbl-io/research-source-packets` | `schemas/research-source-packets-v0.1.json` | `73087e604a0ed96b5e18ee891c5526c25fc6b888` |
+| `hummbl-io/claim-evidence-ledger` | `schemas/claim-evidence-ledger-v0.1.json` | `6d9f357a55ac2ddafdb0026ea3cd70950876a69b` |
+| `hummbl-io/knowledge-as-code` | `schemas/knowledge-as-code-v0.1.json` | `29452d84763103fbbc9fd37bb6c6ae3bf146bd47` |
+| `hummbl-io/ai-source-verification` | `schemas/ai-source-verification-v0.1.json` | `78226c3345ef7b5f5c4abe90ac4287ad6baad25b` |
+| `hummbl-io/execution-receipts` | `schemas/execution-receipts-v0.1.json` | `972cebdfabc3771bdba11d68974c7d2d5caecf93` |
+| `hummbl-io/protocol-as-code` | `schemas/protocol-as-code-v0.1.json` | `fae0a1797556671aa6488f6e844ec1512b65f4de` |
 | `hummbl-io/hummbl-governance` | `hummbl_governance/data/canon_registry.schema.json` | `b0ef7af957a2f26b386af8742606b6239e4a147c` |
 
 ## Field-level crosswalk

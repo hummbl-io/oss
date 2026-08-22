@@ -249,5 +249,5 @@ bias_label: analyst operates in HUMMBL governance context; SML is assessed as a 
 next_step: cross-language synthesis with Java and OCaml governance models recommended
 proof_source: web_search + webfetch primary sources (smlfamily.github.io, MIT Press, ACM DL, princeton.edu, cmu.edu, inria.fr, mlton.org, rust-lang.org)
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

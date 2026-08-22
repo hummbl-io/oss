@@ -403,5 +403,5 @@ integration_lessons: 5 (phase-dependent minimalism, idea export without platform
 claim_honesty: [A] claims from Tier-1 primary sources; [B] from Tier-2 analysis; [C] from tertiary
 bias_label: enterprise/adoption lens applied to Scheme; cultural worth acknowledged but not assessed
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

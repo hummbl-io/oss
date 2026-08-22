@@ -441,7 +441,7 @@ The question for the next 35 years is whether Haskell can sustain its research-l
 - **The counterfactual analysis (Section 2.2) relies on comparing Haskell to OCaml/F# using adoption metrics and industrial experience reports — this is a structured analytical comparison, not an experimental result.**
 - **Bias note**: Analyst operates in HUMMBL governance context (enterprise software perspective). The research-funding bias is described as a structural consequence of GHC's research-vehicle identity, not as a moral failing of the Haskell community. The purity-adoption trade-off is analyzed as a design decision with measurable consequences, not as a verdict on the decision's wisdom.
 - **Session**: 20260820T151138Z (continuation of first-principles session)
-- **Host**: anvil
+- **Host**: <machine>
 
 ---
 
@@ -468,5 +468,5 @@ bias_label: enterprise software perspective; research-funding bias described str
 next_step: cross-language synthesis with Java deeper analysis (purity-as-axiom vs migration-compatibility-as-axiom; spec-governed vs implementation-governed evolution)
 proof_source: web_search + webfetch (ICFP proceedings, Well-Typed blog, Haskell Foundation discourse, TIOBE, Stack Overflow surveys, Meta engineering blog, Jane Street blog, OCaml discuss)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

@@ -377,5 +377,5 @@ bias_label: analyst operates in HUMMBL governance context; Elixir assessed via w
 next_step: monitor (1) Elixir type system annotation timeline, (2) Gleam ecosystem maturity (Phoenix-equivalent emergence), (3) Ericsson BEAM commit velocity, (4) ErlEF fiscal-host funding actuals
 proof_source: web_search (8 searches) + first-principles report (264 lines, 6 hypotheses, 6 unknown-unknowns)
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```

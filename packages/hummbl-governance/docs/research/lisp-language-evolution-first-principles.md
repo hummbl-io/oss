@@ -279,5 +279,5 @@ bias_label: analyst operates in HUMMBL governance context (enterprise software p
 next_step: synthesis-mode or cross-language comparison with Java report recommended
 proof_source: web_search + webfetch primary sources (McCarthy papers, HOPL proceedings, clojure.org, sbcl.org, nhplace.com, ACM DL)
 session: 20260820T160000Z
-host: anvil
+host: <machine>
 ```

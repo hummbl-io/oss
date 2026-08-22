@@ -520,5 +520,5 @@ unknown_unknown_deep_dove: Odersky key-person dependency (24 years, no successor
 bias_label: analyst operates in HUMMBL governance context; Scala assessed from enterprise/production perspective;
   Java 4-track assessment used as structural reference for comparison
 session: 20260820T170000Z
-host: anvil
+host: <machine>
 ```

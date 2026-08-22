@@ -3,7 +3,7 @@
   "session_id": "session-2026-07-10-004",
   "source_agent": "devin",
   "environment": {
-    "host": "anvil",
+    "host": "test-machine",
     "platform": "darwin",
     "python_version": "3.13.13"
   },

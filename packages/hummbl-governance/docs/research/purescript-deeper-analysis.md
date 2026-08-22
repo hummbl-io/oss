@@ -439,5 +439,5 @@ new_findings: 7 lessons about sophistication-adoption trade-off
 claim_honesty: [A] claims from Tier-1 primary sources; [B] from Tier-2 analysis; [C] from tertiary
 bias_label: analyst operates in HUMMBL governance context; PureScript's niche status treated as structural outcome of adoption economics, not as failure; Effect-TS threat assessed objectively without advocating for either technology
 session: 20260820T151138Z
-host: anvil
+host: <machine>
 ```
