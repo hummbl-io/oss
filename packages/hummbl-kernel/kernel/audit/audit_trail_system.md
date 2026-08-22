@@ -404,21 +404,21 @@ A.75.35: "Clear Desk and Clear Screen Policy"
 
 ## Integration with Fleet
 
-### Nodezero (Primary Compute)
+### primary (Primary Compute)
 - **Role**: Generate audit reports and compliance documentation
-- **Hardware**: M4 Pro for document generation and analysis
+- **Hardware**: Apple Silicon for document generation and analysis
 - **Models**: qwen3.5:9b for document synthesis
 - **Services**: Ollama, OpenClaw gateways
 
-### Anvil (GPU/Compliance)
+### gpu (GPU/Compliance)
 - **Role**: Store evidence artifacts and audit trail data
-- **Hardware**: RTX 3080 Ti for storage operations
+- **Hardware**: NVIDIA GPU for storage operations
 - **Services**: Gitea, PostgreSQL, S3/MinIO
 - **Responsibility**: Evidence storage, database operations, file system operations
 
 ### Coordination Protocol
-1. **Evidence collection**: Anvil (file operations)
-2. **Evidence validation**: Nodezero (analysis)
-3. **Report generation**: Nodezero (document synthesis)
-4. **Audit trail storage**: Anvil (database operations)
-5. **Fallback**: If Nodezero unavailable, Anvil handles all operations
+1. **Evidence collection**: gpu (file operations)
+2. **Evidence validation**: primary (analysis)
+3. **Report generation**: primary (document synthesis)
+4. **Audit trail storage**: gpu (database operations)
+5. **Fallback**: If primary unavailable, gpu handles all operations
