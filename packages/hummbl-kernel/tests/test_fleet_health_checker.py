@@ -26,7 +26,7 @@ class TestFleetHealthChecker(unittest.TestCase):
     def test_nodezero_config(self):
         """Nodezero should be configured with correct services."""
         nodezero_config = self.checker.fleet_config["nodezero"]
-        self.assertEqual(nodezero_config["hostname"], "maks-mac-mini-1")
+        self.assertEqual(nodezero_config["hostname"], "nodezero")
         self.assertEqual(nodezero_config["ssh_alias"], "nodezero")
         self.assertIn("ollama", nodezero_config["services"])
         self.assertIn("bus", nodezero_config["services"])
