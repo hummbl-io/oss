@@ -87,10 +87,10 @@ class AuditTrailPersistence:
         audit_trail_json = json.dumps(audit_trail_copy, sort_keys=True)
         computed_signature = self._compute_hmac(audit_trail_json)
         
-        is_valid = stored_signature == computed_signature
+        is_valid = hmac.compare_digest(stored_signature, computed_signature)
         if not is_valid:
             logger.warning("Audit trail signature verification failed")
-        
+
         return is_valid
     
     def save_audit_trail(self, audit_trail: Dict[str, Any]) -> bool:
@@ -181,31 +181,6 @@ class AuditTrailPersistence:
                 logger.warning(f"Failed to read audit trail file {file_path}: {e}")
         
         return audit_trail_ids
-    
-    def delete_audit_trail(self, audit_trail_id: str) -> bool:
-        """
-        Delete audit trail file.
-        
-        Args:
-            audit_trail_id: Audit trail identifier
-        
-        Returns:
-            True if deletion successful, False otherwise
-        """
-        try:
-            file_path = self._get_audit_trail_path(audit_trail_id)
-            
-            if file_path.exists():
-                file_path.unlink()
-                logger.info(f"Deleted audit trail: {audit_trail_id}")
-                return True
-            else:
-                logger.warning(f"Audit trail file not found: {audit_trail_id}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"Failed to delete audit trail: {e}")
-            return False
     
     def get_audit_trail_stats(self) -> Dict[str, Any]:
         """

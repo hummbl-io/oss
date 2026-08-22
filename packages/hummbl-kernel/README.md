@@ -77,4 +77,4 @@ result = kernel.execute(workflow)
 
 ## License
 
-TBD - HUMMBL Research Institute solo repo
+Apache-2.0 — see `LICENSE`.

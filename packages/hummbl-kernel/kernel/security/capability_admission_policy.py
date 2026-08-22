@@ -425,13 +425,16 @@ class CapabilityAdmissionPolicy:
         )
     
     def _get_allowed_targets(self, request: AdmissionRequest, capability: Capability) -> List[str]:
-        """Get allowed targets for a capability grant"""
-        # In production, this would be more sophisticated
-        # For now, allow the specific target if provided, or a default pattern
+        """Get allowed targets for a capability grant.
+
+        Fail closed: a request must explicitly specify a target.
+        """
         if request.target:
             return [request.target]
-        else:
-            return ["*"]  # Allow all targets (conservative for MVP)
+        raise ValueError(
+            f"Capability {request.capability} requires an explicit target. "
+            "Wildcard ('*') grants are not allowed by default."
+        )
     
     def approve_request(self, request_id: str, approved_by: str, 
                        expires_in_minutes: Optional[int] = None) -> AdmissionDecision:

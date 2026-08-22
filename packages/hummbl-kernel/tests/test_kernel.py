@@ -177,28 +177,28 @@ class TestMissionModeKernel(unittest.TestCase):
         self.assertEqual(receipt.audit_trail_ref, audit_trail_id)
 
     def test_fleet_config_default(self):
-        """Fleet config should have sensible defaults."""
+        """Fleet config should have generic defaults."""
         self.assertIsNotNone(self.kernel.fleet_config)
-        self.assertEqual(self.kernel.fleet_config.primary_compute, "nodezero")
-        self.assertEqual(self.kernel.fleet_config.gpu_compute, "anvil")
-        self.assertEqual(self.kernel.fleet_config.fallback_compute, "anvil")
+        self.assertEqual(self.kernel.fleet_config.primary_compute, "primary")
+        self.assertEqual(self.kernel.fleet_config.gpu_compute, "gpu")
+        self.assertEqual(self.kernel.fleet_config.fallback_compute, "primary")
 
     def test_fleet_config_custom(self):
         """Custom fleet config should be respected."""
         custom_config = FleetConfig(
-            primary_compute="anvil",
-            gpu_compute="nodezero",
-            fallback_compute="nodezero"
+            primary_compute="alpha",
+            gpu_compute="beta",
+            fallback_compute="gamma"
         )
         kernel_custom = MissionModeKernel(fleet_config=custom_config)
-        self.assertEqual(kernel_custom.fleet_config.primary_compute, "anvil")
-        self.assertEqual(kernel_custom.fleet_config.gpu_compute, "nodezero")
+        self.assertEqual(kernel_custom.fleet_config.primary_compute, "alpha")
+        self.assertEqual(kernel_custom.fleet_config.gpu_compute, "beta")
 
     def test_get_optimal_compute(self):
         """Optimal compute should be determined by task type."""
-        self.assertEqual(self.kernel.get_optimal_compute("inference"), "nodezero")
-        self.assertEqual(self.kernel.get_optimal_compute("gpu_workload"), "anvil")
-        self.assertEqual(self.kernel.get_optimal_compute("file_ops"), "anvil")
+        self.assertEqual(self.kernel.get_optimal_compute("inference"), "primary")
+        self.assertEqual(self.kernel.get_optimal_compute("gpu_workload"), "gpu")
+        self.assertEqual(self.kernel.get_optimal_compute("file_ops"), "gpu")
 
     def test_event_signing(self):
         """Audit events should be signed."""
