@@ -48,7 +48,7 @@ def test_allows_hummbl_io_identity():
 
 def test_allows_hummbl_dev_identity():
     findings = lint_identity_text(
-        "hummbl-dev <noreply@hummbl.dev> 1782843919 -0400",
+        "hummbl-dev <noreply@hummbl.io> 1782843919 -0400",
         label="author",
     )
 

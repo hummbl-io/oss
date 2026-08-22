@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.doctrine_amendment.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.doctrine_amendment.v1.json",
   "title": "Doctrine Amendment Primitive v1",
   "description": "Schema for P38 DoctrineAmendment — governs changes to invariants themselves (K1-K11, D1-D7). Enforces D7 (DOCTRINE_AMENDMENT): no invariant or doctrine amendment may take effect without operator approval and a recorded receipt. Ungated amendments are blocked at the promotion gate. Proposed change -> operator review -> evidence -> receipt -> promotion. This is meta-governance.",
   "type": "object",

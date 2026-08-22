@@ -64,7 +64,7 @@ def build_contract_registry() -> RefRegistry:
 
     The shared-refs schema declares an ``$id`` so contract schemas can
     reference definitions such as
-    ``https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref``.
+    ``https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref``.
     """
     registry = RefRegistry()
     shared = _load_packaged_schema(_SHARED_REFS_SCHEMA)

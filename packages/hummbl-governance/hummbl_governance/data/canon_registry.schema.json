@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.canon_registry.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.canon_registry.v1.json",
   "title": "Canon Registry Primitive v1",
   "description": "Schema candidate for P27 CanonRegistry — governs promotion from draft to canonical status. Closes the governance feedback loop: admission -> authority -> execution -> receipt -> evidence -> PROMOTION. Enforces D5 (NO_AUTO_PROMOTION): no agent can promote an artifact to canonical status without operator approval. Status: PROPOSED — not yet implemented.",
   "type": "object",

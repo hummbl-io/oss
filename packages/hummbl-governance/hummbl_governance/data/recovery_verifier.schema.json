@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.recovery_verifier.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.recovery_verifier.v1.json",
   "title": "Recovery Verifier Primitive v1",
   "description": "Schema candidate for P29 RecoveryVerifier — enforces K10 (RECOVERY): re-engagement after halt requires root-cause verification, evidence collection, and operator approval. Gates the kill_switch/circuit_breaker recovery path. Status: PROPOSED — not yet implemented.",
   "type": "object",

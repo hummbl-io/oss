@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/cross-repo-contract-v0.1.ref.schema.json",
+  "$id": "https://hummbl.io/schemas/cross-repo-contract-v0.1.ref.schema.json",
   "title": "HUMMBL Cross-Repo Contract Envelope v0.1 ($ref variant)",
   "description": "Variant of the candidate additive envelope that resolves shared definitions through $ref instead of inlining equivalent shapes. Requires a RefRegistry populated with cross_repo_shared_refs_v0.1.schema.json. Schema validity is not truth, verification, canonization, or deployment authority.",
   "type": "object",
@@ -29,7 +29,7 @@
       "pattern": "^crc:[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$"
     },
     "contract_version": {
-      "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/contract_semver"
+      "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/contract_semver"
     },
     "contract_status": {
       "type": "string",
@@ -50,13 +50,13 @@
       ],
       "properties": {
         "repo": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"
         },
         "authority_ref": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/actor_or_authority_ref"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/actor_or_authority_ref"
         },
         "artifact_locator": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/artifact_ref"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/artifact_ref"
         }
       }
     },
@@ -72,10 +72,10 @@
         ],
         "properties": {
           "repo": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"
           },
           "requirement": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/consumer_requirement"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/consumer_requirement"
           }
         }
       }
@@ -95,10 +95,10 @@
           "minLength": 1
         },
         "payload_schema_uri": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/schema_ref"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/schema_ref"
         },
         "identifier_namespace": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/identifier_namespace"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/identifier_namespace"
         },
         "locator_pattern": {
           "type": "string",
@@ -120,14 +120,14 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/contract_version_declaration"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/contract_version_declaration"
           }
         },
         "supported_payload_versions": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/payload_version"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/payload_version"
           }
         },
         "breaking_change_policy": {
@@ -158,10 +158,10 @@
       ],
       "properties": {
         "visibility": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/visibility_privacy_posture/properties/visibility"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/visibility_privacy_posture/properties/visibility"
         },
         "privacy": {
-          "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/visibility_privacy_posture/properties/privacy"
+          "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/visibility_privacy_posture/properties/privacy"
         },
         "claim_posture": {
           "type": "string",
@@ -246,28 +246,28 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
           }
         },
         "on_accept": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
           }
         },
         "on_reject": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/receipt_ref"
           }
         },
         "receipt_schema_refs": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/schema_ref"
+            "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/schema_ref"
           }
         }
       }
@@ -290,7 +290,7 @@
             ],
             "properties": {
               "kind": {
-                "$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/assurance_kind"
+                "$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/assurance_kind"
               },
               "ref": {
                 "type": "string",

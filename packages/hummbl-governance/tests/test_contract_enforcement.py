@@ -54,13 +54,13 @@ class TestBuildContractRegistry:
 
     def test_registry_contains_shared_refs(self):
         registry = build_contract_registry()
-        assert "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json" in registry
+        assert "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json" in registry
 
     def test_registry_resolves_repo_ref(self):
         registry = build_contract_registry()
-        instance = {"x": "hummbl-dev/research-source-packets"}
+        instance = {"x": "hummbl-io/research-source-packets"}
         # Validate a string against the repo_ref definition via the ref schema.
-        ref_schema = {"$ref": "https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"}
+        ref_schema = {"$ref": "https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref"}
         errors = SchemaValidator.validate(instance["x"], ref_schema, registry=registry)
         assert errors == []
 

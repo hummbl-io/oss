@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.rollback.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.rollback.v1.json",
   "title": "Rollback Primitive v1",
   "description": "Schema candidate for P28 Rollback — enforces K9 (REVERSIBILITY): every governed action declares a rollback path or is explicitly marked irreversible with a recorded risk acceptance. Status: PROPOSED — not yet implemented.",
   "type": "object",

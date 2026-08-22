@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/protective-freeze-break-glass.schema.json",
+  "$id": "https://hummbl.io/schemas/protective-freeze-break-glass.schema.json",
   "title": "Protective Freeze and Break-Glass Recovery Receipt",
   "type": "object",
   "required": [

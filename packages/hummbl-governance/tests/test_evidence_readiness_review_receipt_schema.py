@@ -94,7 +94,7 @@ def _validate(receipt: dict) -> tuple[bool, list[str]]:
 def test_schema_is_promoted_to_governed_v1():
     schema = _schema()
     assert schema["$id"] == (
-        "https://hummbl.dev/schemas/evidence-readiness-review-receipt.v1.json"
+        "https://hummbl.io/schemas/evidence-readiness-review-receipt.v1.json"
     )
     assert schema["title"] == "Evidence Readiness Review Receipt v1"
     assert (

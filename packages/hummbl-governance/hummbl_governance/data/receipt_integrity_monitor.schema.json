@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/kernel.receipt_integrity_monitor.v1.json",
+  "$id": "https://hummbl.io/schemas/kernel.receipt_integrity_monitor.v1.json",
   "title": "Receipt Integrity Monitor Primitive v1",
   "description": "Schema candidate for P30 ReceiptIntegrityMonitor — enforces K11 (INTEGRITY): receipt sequences are complete and unbroken. Detects gaps in receipt sequences (K4 violation), hash chain breaks, and retroactive insertion. Raises KernelPanic on violation. Status: PROPOSED — not yet implemented.",
   "type": "object",

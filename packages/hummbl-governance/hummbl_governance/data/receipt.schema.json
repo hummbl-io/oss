@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hummbl.dev/schemas/eal.receipt.v1.json",
+  "$id": "https://hummbl.io/schemas/eal.receipt.v1.json",
   "title": "EAL Receipt v1",
   "description": "Minimal receipt schema for deterministic EAL validation.",
   "type": "object",
