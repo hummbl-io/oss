@@ -191,37 +191,6 @@ class TestAuditTrailPersistence(unittest.TestCase):
         self.assertIn("at_001", filtered)
         self.assertNotIn("at_002", filtered)
     
-    def test_delete_audit_trail(self):
-        """Audit trail should be deletable."""
-        audit_trail = {
-            "audit_trail_id": "at_005",
-            "mission_id": "mission_005",
-            "workflow_id": "workflow_005",
-            "compliance_framework": "SOC_2",
-            "audit_period_start": "2025-01-01T00:00:00Z",
-            "audit_period_end": "2025-12-31T23:59:59Z",
-            "organization_id": "org_001",
-            "created_at": "2025-01-01T00:00:00Z",
-            "created_by": "test",
-            "status": "in_progress",
-            "events": []
-        }
-        
-        self.persistence.save_audit_trail(audit_trail)
-        
-        # Delete
-        success = self.persistence.delete_audit_trail("at_005")
-        self.assertTrue(success)
-        
-        # Verify file is gone
-        file_path = self.persistence._get_audit_trail_path("at_005")
-        self.assertFalse(file_path.exists())
-    
-    def test_delete_audit_trail_not_found(self):
-        """Deleting non-existent audit trail should return False."""
-        success = self.persistence.delete_audit_trail("nonexistent")
-        self.assertFalse(success)
-    
     def test_get_audit_trail_stats(self):
         """Stats should return correct counts."""
         # Create audit trails

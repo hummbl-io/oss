@@ -2,7 +2,7 @@
 Mission Mode Kernel - Hybrid Conductor-Kernel Architecture
 
 Implements deterministic mission orchestration with compliance audit trails,
-fleet coordination between nodezero and Anvil, and lightweight security enforcement.
+fleet coordination between user-supplied compute nodes, and lightweight security enforcement.
 """
 
 import json
@@ -12,7 +12,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from enum import Enum
 import asyncio
 import subprocess
@@ -53,18 +53,19 @@ class RiskClass(Enum):
 
 @dataclass
 class FleetConfig:
-    """Fleet configuration for nodezero and Anvil"""
-    primary_compute: str = "nodezero"
-    gpu_compute: str = "anvil"
-    fallback_compute: str = "anvil"
+    """Fleet configuration. Names and endpoints are user-supplied; no internal defaults."""
+    primary_compute: str = "primary"
+    gpu_compute: str = "gpu"
+    fallback_compute: str = "primary"
     
-    # Machine capabilities
-    nodezero_m4_pro: bool = True
-    anvil_rtx_3080ti: bool = True
+    # Machine capabilities flags are user-supplied; no internal hardware defaults.
+    primary_apple_silicon: bool = False
+    gpu_nvidia: bool = False
     
     # Service endpoints (override via env vars; do not hardcode internal IPs/URLs)
-    nodezero_ollama: str = field(default_factory=lambda: os.environ.get("NODEZERO_OLLAMA_URL", ""))
-    anvil_gitea: str = field(default_factory=lambda: os.environ.get("ANVIL_GITEA_URL", ""))
+    primary_ollama: str = field(default_factory=lambda: os.environ.get("PRIMARY_OLLAMA_URL", ""))
+    primary_bus: str = field(default_factory=lambda: os.environ.get("PRIMARY_BUS_URL", ""))
+    gpu_gitea: str = field(default_factory=lambda: os.environ.get("GPU_GITEA_URL", ""))
     
     # Health check intervals
     heartbeat_interval_seconds: int = 30
@@ -113,22 +114,24 @@ class MissionModeKernel:
     Combines:
     - Conductor-style deterministic YAML workflow orchestration
     - Lightweight kernel for security/compliance enforcement
-    - Fleet coordination between nodezero and Anvil
+    - Fleet coordination between user-supplied primary and GPU compute
     - Immutable audit trail generation for compliance frameworks
     """
     
     def __init__(self, fleet_config: Optional[FleetConfig] = None):
-        self.fleet_config = fleet_config or FleetConfig()
+        if fleet_config is None:
+            fleet_config = FleetConfig()
+        self.fleet_config = fleet_config
         self.active_missions: Dict[str, Dict] = {}
         self.audit_trails: Dict[str, List[AuditEvent]] = {}
         self.capability_registry: Dict[str, Dict] = {}
-        
-        # Initialize fleet health monitoring
+
+        # Initialize fleet health monitoring with generic machine names.
         self.fleet_health = {
-            "nodezero": True,
-            "anvil": True
+            self.fleet_config.primary_compute: True,
+            self.fleet_config.gpu_compute: True
         }
-        
+
         logger.info("Mission Mode Kernel initialized")
         logger.info(f"Fleet config: primary={self.fleet_config.primary_compute}, "
                    f"gpu={self.fleet_config.gpu_compute}, "
@@ -136,8 +139,9 @@ class MissionModeKernel:
     
     def _generate_id(self, prefix: str) -> str:
         """Generate unique identifier"""
+        import secrets
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        random_suffix = hashlib.md5(timestamp.encode()).hexdigest()[:8]
+        random_suffix = secrets.token_hex(4)
         return f"{prefix}_{timestamp}_{random_suffix}"
     
     def _compute_hash(self, data: str) -> str:
@@ -152,12 +156,10 @@ class MissionModeKernel:
                 "Audit event signing requires MISSION_MODE_SIGNING_KEY env var. "
                 "Do not use a hardcoded default key."
             )
-        event_data = json.dumps({
-            "event_id": event.event_id,
-            "timestamp": event.timestamp,
-            "event_type": event.event_type,
-            "payload": event.payload
-        }, sort_keys=True)
+        # Sign all fields except signature itself, sorted for stable serialization.
+        event_dict = asdict(event)
+        event_dict.pop("signature", None)
+        event_data = json.dumps(event_dict, sort_keys=True, default=str)
         return hmac.new(
             signing_key.encode(),
             event_data.encode(),
@@ -165,66 +167,72 @@ class MissionModeKernel:
         ).hexdigest()
     
     async def check_fleet_health(self) -> Dict[str, bool]:
-        """Check health of fleet nodes"""
+        """Check health of user-supplied fleet endpoints using stdlib urllib."""
         health_status = {}
-        
-        # Check nodezero (primary compute)
-        try:
-            # Check Ollama endpoint
-            result = subprocess.run(
-                ["curl", "-s", f"{self.fleet_config.nodezero_ollama}/api/tags"],
-                capture_output=True,
-                timeout=5
+
+        primary_url = self.fleet_config.primary_ollama
+        if primary_url:
+            health_status[self.fleet_config.primary_compute] = self._is_http_reachable(
+                f"{primary_url}/api/tags"
             )
-            health_status["nodezero"] = result.returncode == 0
-        except Exception as e:
-            logger.warning(f"Nodezero health check failed: {e}")
-            health_status["nodezero"] = False
-        
-        # Check Anvil (GPU/compliance)
-        try:
-            # Check Gitea endpoint
-            result = subprocess.run(
-                ["curl", "-s", self.fleet_config.anvil_gitea],
-                capture_output=True,
-                timeout=5
+        else:
+            health_status[self.fleet_config.primary_compute] = False
+
+        bus_url = self.fleet_config.primary_bus
+        if bus_url and bus_url != primary_url:
+            health_status[self.fleet_config.primary_compute] = (
+                health_status.get(self.fleet_config.primary_compute, False)
+                and self._is_http_reachable(bus_url)
             )
-            health_status["anvil"] = result.returncode == 0
-        except Exception as e:
-            logger.warning(f"Anvil health check failed: {e}")
-            health_status["anvil"] = False
-        
+
+        gpu_url = self.fleet_config.gpu_gitea
+        if gpu_url:
+            health_status[self.fleet_config.gpu_compute] = self._is_http_reachable(gpu_url)
+        else:
+            health_status[self.fleet_config.gpu_compute] = False
+
         self.fleet_health = health_status
         return health_status
+
+    def _is_http_reachable(self, url: str, timeout: int = 5) -> bool:
+        """Check if an HTTP endpoint is reachable using only stdlib."""
+        from urllib.request import urlopen
+        from urllib.error import URLError
+        try:
+            with urlopen(url, timeout=timeout):
+                return True
+        except (URLError, OSError) as e:
+            logger.warning(f"Health check failed for {url}: {e}")
+            return False
     
     def get_optimal_compute(self, task_type: str) -> str:
         """
-        Determine optimal compute node for task type
-        
+        Determine optimal compute node for task type.
+
         Args:
             task_type: Type of task (inference, file_ops, gpu_workload, etc.)
-        
+
         Returns:
-            Node identifier (nodezero or anvil)
+            Machine identifier from fleet_config.
         """
         # Check fleet health first
         health = self.fleet_health
-        
+
         # If primary is unhealthy, use fallback
         if not health.get(self.fleet_config.primary_compute, False):
             logger.warning(f"Primary compute {self.fleet_config.primary_compute} unhealthy, using fallback")
             return self.fleet_config.fallback_compute
-        
+
         # Task-based routing
         routing_rules = {
-            "inference": self.fleet_config.primary_compute,  # M4 Pro for reasoning
-            "file_ops": self.fleet_config.gpu_compute,       # Anvil for file operations
-            "gpu_workload": self.fleet_config.gpu_compute,      # RTX 3080 Ti for GPU
-            "document_generation": self.fleet_config.primary_compute,  # M4 Pro for synthesis
-            "database_ops": self.fleet_config.gpu_compute,       # Anvil for database
-            "storage_ops": self.fleet_config.gpu_compute,        # Anvil for storage
+            "inference": self.fleet_config.primary_compute,
+            "file_ops": self.fleet_config.gpu_compute,
+            "gpu_workload": self.fleet_config.gpu_compute,
+            "document_generation": self.fleet_config.primary_compute,
+            "database_ops": self.fleet_config.gpu_compute,
+            "storage_ops": self.fleet_config.gpu_compute,
         }
-        
+
         return routing_rules.get(task_type, self.fleet_config.primary_compute)
     
     def register_capability(self, capability: str, risk_class: RiskClass, 

@@ -14,58 +14,83 @@ from kernel.fleet.fleet_health_checker import (
 
 class TestFleetHealthChecker(unittest.TestCase):
     def setUp(self):
+        self.primary_name = "primary"
+        self.gpu_name = "gpu"
         self.test_config = {
-            "nodezero": {
+            self.primary_name: {
                 "tailscale_ip": "100.0.0.1",
-                "hostname": "nodezero",
-                "ssh_alias": "nodezero",
+                "hostname": "primary",
+                "ssh_alias": "primary",
                 "services": {
                     "ollama": "http://100.0.0.1:11434/api/tags",
                     "bus": "http://100.0.0.1:18790/health"
                 }
             },
-            "anvil": {
+            self.gpu_name: {
                 "tailscale_ip": "100.0.0.2",
-                "hostname": "anvil",
-                "ssh_alias": "anvil",
+                "hostname": "gpu",
+                "ssh_alias": "gpu",
                 "services": {
-                    "gitea": "https://example.ts.net",
+                    "gitea": "https://example.com",
                     "ollama": "http://localhost:11434/api/tags"
                 }
             }
         }
-        self.checker = FleetHealthChecker(mode=FleetMode.HYBRID, fleet_config=self.test_config)
+        self.test_routing = {
+            "inference": self.primary_name,
+            "file_ops": self.gpu_name,
+            "gpu_workload": self.gpu_name,
+            "document_generation": self.primary_name,
+            "database_ops": self.gpu_name,
+            "storage_ops": self.gpu_name,
+            "compliance_validation": self.primary_name,
+            "evidence_collection": self.gpu_name,
+            "report_generation": self.primary_name,
+            "audit_trail_storage": self.gpu_name
+        }
+        self.checker = FleetHealthChecker(
+            mode=FleetMode.HYBRID,
+            fleet_config=self.test_config,
+            task_routing=self.test_routing,
+        )
 
     def test_checker_initialization(self):
         """Health checker should initialize with correct mode."""
         self.assertEqual(self.checker.mode, FleetMode.HYBRID)
         self.assertIsNotNone(self.checker.fleet_config)
-        self.assertIn("nodezero", self.checker.fleet_config)
-        self.assertIn("anvil", self.checker.fleet_config)
+        self.assertIn(self.primary_name, self.checker.fleet_config)
+        self.assertIn(self.gpu_name, self.checker.fleet_config)
 
-    def test_nodezero_config(self):
-        """Nodezero should be configured with correct services."""
-        nodezero_config = self.checker.fleet_config["nodezero"]
-        self.assertEqual(nodezero_config["hostname"], "nodezero")
-        self.assertEqual(nodezero_config["ssh_alias"], "nodezero")
-        self.assertIn("ollama", nodezero_config["services"])
-        self.assertIn("bus", nodezero_config["services"])
+    def test_requires_explicit_config(self):
+        """Health checker should require explicit fleet_config and task_routing."""
+        with self.assertRaises(ValueError):
+            FleetHealthChecker()
+        with self.assertRaises(ValueError):
+            FleetHealthChecker(fleet_config=self.test_config)
 
-    def test_anvil_config(self):
-        """Anvil should be configured with correct services."""
-        anvil_config = self.checker.fleet_config["anvil"]
-        self.assertEqual(anvil_config["hostname"], "anvil")
-        self.assertEqual(anvil_config["ssh_alias"], "anvil")
-        self.assertIn("gitea", anvil_config["services"])
-        self.assertIn("ollama", anvil_config["services"])
+    def test_primary_config(self):
+        """Primary machine should be configured with correct services."""
+        primary_config = self.checker.fleet_config[self.primary_name]
+        self.assertEqual(primary_config["hostname"], self.primary_name)
+        self.assertEqual(primary_config["ssh_alias"], self.primary_name)
+        self.assertIn("ollama", primary_config["services"])
+        self.assertIn("bus", primary_config["services"])
+
+    def test_gpu_config(self):
+        """GPU machine should be configured with correct services."""
+        gpu_config = self.checker.fleet_config[self.gpu_name]
+        self.assertEqual(gpu_config["hostname"], self.gpu_name)
+        self.assertEqual(gpu_config["ssh_alias"], self.gpu_name)
+        self.assertIn("gitea", gpu_config["services"])
+        self.assertIn("ollama", gpu_config["services"])
 
     def test_task_routing_config(self):
         """Task routing should be configured."""
         self.assertIn("inference", self.checker.task_routing)
         self.assertIn("gpu_workload", self.checker.task_routing)
         self.assertIn("file_ops", self.checker.task_routing)
-        self.assertEqual(self.checker.task_routing["inference"], "nodezero")
-        self.assertEqual(self.checker.task_routing["gpu_workload"], "anvil")
+        self.assertEqual(self.checker.task_routing["inference"], self.primary_name)
+        self.assertEqual(self.checker.task_routing["gpu_workload"], self.gpu_name)
 
     def test_check_http_endpoint_success(self):
         """HTTP endpoint check should succeed for 2xx/3xx codes."""
@@ -91,14 +116,14 @@ class TestFleetHealthChecker(unittest.TestCase):
     def test_check_ssh_connectivity_success(self):
         """SSH connectivity check should succeed."""
         with patch.object(self.checker, '_check_ssh_connectivity', return_value=(True, "connected")):
-            is_healthy, msg = self.checker._check_ssh_connectivity("nodezero")
+            is_healthy, msg = self.checker._check_ssh_connectivity(self.primary_name)
             self.assertTrue(is_healthy)
             self.assertEqual(msg, "connected")
 
     def test_check_ssh_connectivity_failure(self):
         """SSH connectivity check should fail."""
         with patch.object(self.checker, '_check_ssh_connectivity', return_value=(False, "Connection refused")):
-            is_healthy, msg = self.checker._check_ssh_connectivity("nodezero")
+            is_healthy, msg = self.checker._check_ssh_connectivity(self.primary_name)
             self.assertFalse(is_healthy)
             self.assertEqual(msg, "Connection refused")
 
@@ -106,18 +131,18 @@ class TestFleetHealthChecker(unittest.TestCase):
         """Machine check should return healthy status when all checks pass."""
         with patch.object(self.checker, '_check_http_endpoint', return_value=(True, "HTTP 200")):
             with patch.object(self.checker, '_check_ssh_connectivity', return_value=(True, "connected")):
-                health = self.checker._check_machine("nodezero")
+                health = self.checker._check_machine(self.primary_name)
                 self.assertEqual(health.status, MachineStatus.HEALTHY)
-                self.assertEqual(health.name, "nodezero")
+                self.assertEqual(health.name, self.primary_name)
                 self.assertIsNotNone(health.timestamp)
 
     def test_check_machine_unhealthy(self):
         """Machine check should return unhealthy status when checks fail."""
         with patch.object(self.checker, '_check_http_endpoint', return_value=(False, "HTTP 404")):
             with patch.object(self.checker, '_check_ssh_connectivity', return_value=(False, "Connection refused")):
-                health = self.checker._check_machine("nodezero")
+                health = self.checker._check_machine(self.primary_name)
                 self.assertEqual(health.status, MachineStatus.UNHEALTHY)
-                self.assertEqual(health.name, "nodezero")
+                self.assertEqual(health.name, self.primary_name)
 
     def test_check_machine_unknown(self):
         """Machine check should return unknown status for unconfigured machines."""
@@ -130,12 +155,14 @@ class TestFleetHealthChecker(unittest.TestCase):
         """Fleet health check should return status for all machines."""
         with patch.object(self.checker, '_check_machine') as mock_check:
             # Mock both machines as healthy
-            mock_check.return_value = MachineHealth(
-                name="test",
-                status=MachineStatus.HEALTHY,
-                timestamp=datetime.now(timezone.utc).isoformat()
-            )
-            
+            def mock(name):
+                return MachineHealth(
+                    name=name,
+                    status=MachineStatus.HEALTHY,
+                    timestamp=datetime.now(timezone.utc).isoformat()
+                )
+            mock_check.side_effect = mock
+
             fleet_health = self.checker.check_fleet_health()
             self.assertEqual(fleet_health.overall_status, MachineStatus.HEALTHY)
             self.assertEqual(fleet_health.mode, FleetMode.HYBRID)
@@ -144,7 +171,7 @@ class TestFleetHealthChecker(unittest.TestCase):
     def test_fleet_health_degraded(self):
         """Fleet health should be degraded when one machine is unhealthy."""
         def mock_check_machine(name):
-            if name == "nodezero":
+            if name == self.primary_name:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
@@ -156,7 +183,7 @@ class TestFleetHealthChecker(unittest.TestCase):
                     status=MachineStatus.UNHEALTHY,
                     timestamp=datetime.now(timezone.utc).isoformat()
                 )
-        
+
         with patch.object(self.checker, '_check_machine', side_effect=mock_check_machine):
             fleet_health = self.checker.check_fleet_health()
             self.assertEqual(fleet_health.overall_status, MachineStatus.UNHEALTHY)
@@ -164,12 +191,14 @@ class TestFleetHealthChecker(unittest.TestCase):
     def test_routing_recommendations_hybrid(self):
         """Hybrid mode should generate routing recommendations."""
         with patch.object(self.checker, '_check_machine') as mock_check:
-            mock_check.return_value = MachineHealth(
-                name="test",
-                status=MachineStatus.HEALTHY,
-                timestamp=datetime.now(timezone.utc).isoformat()
-            )
-            
+            def mock(name):
+                return MachineHealth(
+                    name=name,
+                    status=MachineStatus.HEALTHY,
+                    timestamp=datetime.now(timezone.utc).isoformat()
+                )
+            mock_check.side_effect = mock
+
             fleet_health = self.checker.check_fleet_health()
             self.assertIn("inference", fleet_health.routing_recommendations)
             self.assertIn("gpu_workload", fleet_health.routing_recommendations)
@@ -177,7 +206,7 @@ class TestFleetHealthChecker(unittest.TestCase):
     def test_routing_recommendations_fallback(self):
         """Routing should fallback when primary node is unhealthy."""
         def mock_check_machine(name):
-            if name == "nodezero":
+            if name == self.primary_name:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.UNHEALTHY,
@@ -189,56 +218,70 @@ class TestFleetHealthChecker(unittest.TestCase):
                     status=MachineStatus.HEALTHY,
                     timestamp=datetime.now(timezone.utc).isoformat()
                 )
-        
+
         with patch.object(self.checker, '_check_machine', side_effect=mock_check_machine):
             fleet_health = self.checker.check_fleet_health()
-            # Inference should fallback to anvil when nodezero is unhealthy
-            self.assertEqual(fleet_health.routing_recommendations["inference"], "anvil")
+            # Inference should fallback to gpu when primary is unhealthy
+            self.assertEqual(fleet_health.routing_recommendations["inference"], self.gpu_name)
 
     def test_get_optimal_compute(self):
         """Optimal compute should return recommended node."""
         with patch.object(self.checker, 'check_fleet_health') as mock_health:
             mock_health.return_value = MagicMock(
-                routing_recommendations={"inference": "nodezero"}
+                routing_recommendations={"inference": self.primary_name}
             )
             optimal = self.checker.get_optimal_compute("inference")
-            self.assertEqual(optimal, "nodezero")
+            self.assertEqual(optimal, self.primary_name)
 
     def test_get_optimal_compute_with_health_param(self):
         """Optimal compute should use provided health status."""
         fleet_health = MagicMock(
-            routing_recommendations={"gpu_workload": "anvil"}
+            routing_recommendations={"gpu_workload": self.gpu_name}
         )
         optimal = self.checker.get_optimal_compute("gpu_workload", fleet_health)
-        self.assertEqual(optimal, "anvil")
+        self.assertEqual(optimal, self.gpu_name)
 
     def test_local_mode_routing(self):
-        """Local mode should route all tasks to anvil."""
-        local_checker = FleetHealthChecker(mode=FleetMode.LOCAL, fleet_config=self.test_config)
+        """Local mode should route all tasks to the configured single machine."""
+        local_routing = {task: self.gpu_name for task in self.test_routing}
+        local_checker = FleetHealthChecker(
+            mode=FleetMode.LOCAL,
+            fleet_config=self.test_config,
+            task_routing=local_routing,
+        )
         with patch.object(local_checker, '_check_machine') as mock_check:
-            mock_check.return_value = MachineHealth(
-                name="test",
-                status=MachineStatus.HEALTHY,
-                timestamp=datetime.now(timezone.utc).isoformat()
-            )
-            
+            def mock(name):
+                return MachineHealth(
+                    name=name,
+                    status=MachineStatus.HEALTHY,
+                    timestamp=datetime.now(timezone.utc).isoformat()
+                )
+            mock_check.side_effect = mock
+
             fleet_health = local_checker.check_fleet_health()
             for task, machine in fleet_health.routing_recommendations.items():
-                self.assertEqual(machine, "anvil")
+                self.assertEqual(machine, self.gpu_name)
 
-    def test_nodezero_only_mode_routing(self):
-        """Nodezero-only mode should route all tasks to nodezero."""
-        nodezero_checker = FleetHealthChecker(mode=FleetMode.NODEZERO_ONLY, fleet_config=self.test_config)
-        with patch.object(nodezero_checker, '_check_machine') as mock_check:
-            mock_check.return_value = MachineHealth(
-                name="test",
-                status=MachineStatus.HEALTHY,
-                timestamp=datetime.now(timezone.utc).isoformat()
-            )
-            
-            fleet_health = nodezero_checker.check_fleet_health()
+    def test_single_machine_mode_routing(self):
+        """Single-machine mode should route all tasks to the designated machine."""
+        single_routing = {task: self.primary_name for task in self.test_routing}
+        single_checker = FleetHealthChecker(
+            mode=FleetMode.SINGLE_MACHINE,
+            fleet_config=self.test_config,
+            task_routing=single_routing,
+        )
+        with patch.object(single_checker, '_check_machine') as mock_check:
+            def mock(name):
+                return MachineHealth(
+                    name=name,
+                    status=MachineStatus.HEALTHY,
+                    timestamp=datetime.now(timezone.utc).isoformat()
+                )
+            mock_check.side_effect = mock
+
+            fleet_health = single_checker.check_fleet_health()
             for task, machine in fleet_health.routing_recommendations.items():
-                self.assertEqual(machine, "nodezero")
+                self.assertEqual(machine, self.primary_name)
 
     def test_print_health_report(self):
         """Health report should print without errors."""
@@ -246,19 +289,19 @@ class TestFleetHealthChecker(unittest.TestCase):
             timestamp=datetime.now(timezone.utc).isoformat(),
             mode=FleetMode.HYBRID,
             machines={
-                "nodezero": MachineHealth(
-                    name="nodezero",
+                self.primary_name: MachineHealth(
+                    name=self.primary_name,
                     status=MachineStatus.HEALTHY,
                     timestamp=datetime.now(timezone.utc).isoformat()
                 ),
-                "anvil": MachineHealth(
-                    name="anvil",
+                self.gpu_name: MachineHealth(
+                    name=self.gpu_name,
                     status=MachineStatus.HEALTHY,
                     timestamp=datetime.now(timezone.utc).isoformat()
                 )
             },
             overall_status=MachineStatus.HEALTHY,
-            routing_recommendations={"inference": "nodezero"}
+            routing_recommendations={"inference": self.primary_name}
         )
         # Should not raise exception
         self.checker.print_health_report(fleet_health)

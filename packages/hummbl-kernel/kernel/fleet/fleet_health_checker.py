@@ -1,9 +1,10 @@
 """
 Mission Mode Fleet Health Checker
 
-Monitors health of nodezero and Anvil, provides task routing recommendations,
+Monitors health of a user-supplied fleet, provides task routing recommendations,
 and implements fallback strategy for hybrid fleet deployment.
-"""
+
+No internal fleet names, IPs, URLs, or ports are hardcoded."""
 
 import subprocess
 import json
@@ -24,7 +25,7 @@ class FleetMode(Enum):
     """Fleet deployment modes"""
     LOCAL = "local"
     HYBRID = "hybrid"
-    NODEZERO_ONLY = "nodezero_only"
+    SINGLE_MACHINE = "single_machine"
 
 
 class MachineStatus(Enum):
@@ -58,59 +59,34 @@ class FleetHealthChecker:
     """
     Fleet health checker for Mission Mode hybrid deployment
     
-    Monitors nodezero and Anvil, provides task routing recommendations,
+    Monitors a user-supplied fleet, provides task routing recommendations,
     and implements fallback strategy.
     """
     
-    def __init__(self, mode: FleetMode = FleetMode.HYBRID, fleet_config: Optional[Dict] = None):
+    def __init__(self, mode: FleetMode = FleetMode.HYBRID, fleet_config: Optional[Dict] = None, task_routing: Optional[Dict] = None):
         self.mode = mode
-        if fleet_config:
-            self.fleet_config = fleet_config
-        else:
-            # Require explicit fleet config via env vars or constructor.
-            # Do not hardcode internal IPs/URLs — raise if not provided.
-            nodezero_ip = os.environ.get("NODEZERO_TAILSCALE_IP")
-            anvil_ip = os.environ.get("ANVIL_TAILSCALE_IP")
-            if not nodezero_ip or not anvil_ip:
+        if not fleet_config:
+            raise ValueError(
+                "FleetHealthChecker requires an explicit fleet_config. "
+                "Do not use internal network defaults."
+            )
+        self.fleet_config = fleet_config
+
+        if not task_routing:
+            raise ValueError(
+                "FleetHealthChecker requires an explicit task_routing map. "
+                "Values must be keys present in fleet_config."
+            )
+        self.task_routing = task_routing
+
+        # Validate that task_routing values point to known machines.
+        for task, machine in task_routing.items():
+            if machine not in fleet_config:
                 raise ValueError(
-                    "FleetHealthChecker requires fleet_config or env vars "
-                    "(NODEZERO_TAILSCALE_IP, ANVIL_TAILSCALE_IP, etc.). "
-                    "Do not hardcode internal network addresses."
+                    f"task_routing['{task}'] = '{machine}' is not a key in fleet_config. "
+                    "All task routing targets must be defined in fleet_config."
                 )
-            self.fleet_config = {
-                "nodezero": {
-                    "tailscale_ip": nodezero_ip,
-                    "hostname": os.environ.get("NODEZERO_HOSTNAME", "nodezero"),
-                    "ssh_alias": "nodezero",
-                    "services": {
-                        "ollama": os.environ.get("NODEZERO_OLLAMA_URL", f"http://{nodezero_ip}:11434/api/tags"),
-                        "bus": os.environ.get("NODEZERO_BUS_URL", f"http://{nodezero_ip}:18790/health")
-                    }
-                },
-                "anvil": {
-                    "tailscale_ip": anvil_ip,
-                    "hostname": os.environ.get("ANVIL_HOSTNAME", "anvil"),
-                    "ssh_alias": "anvil",
-                    "services": {
-                        "gitea": os.environ.get("ANVIL_GITEA_URL", f"https://{anvil_ip}"),
-                        "ollama": "http://localhost:11434/api/tags"
-                    }
-                }
-            }
-        
-        self.task_routing = {
-            "inference": "nodezero",
-            "file_ops": "anvil",
-            "gpu_workload": "anvil",
-            "document_generation": "nodezero",
-            "database_ops": "anvil",
-            "storage_ops": "anvil",
-            "compliance_validation": "nodezero",
-            "evidence_collection": "anvil",
-            "report_generation": "nodezero",
-            "audit_trail_storage": "anvil"
-        }
-        
+
         logger.info(f"Fleet health checker initialized in {mode.value} mode")
     
     def _check_http_endpoint(self, url: str, timeout: int = 5) -> Tuple[bool, str]:
@@ -214,57 +190,51 @@ class FleetHealthChecker:
         )
     
     def _generate_routing_recommendations(self, machines: Dict[str, MachineHealth]) -> Dict[str, str]:
-        """Generate task routing recommendations based on fleet health and mode"""
+        """Generate task routing recommendations based on fleet health.
+
+        Routes each task to its default machine. If that machine is unhealthy,
+        falls back to any other healthy machine. All machine names come from the
+        user-supplied fleet_config and task_routing maps.
+        """
+        healthy_machines = [
+            name for name, health in machines.items()
+            if health.status == MachineStatus.HEALTHY
+        ]
         recommendations = {}
-        
-        nodezero_healthy = machines.get("nodezero", MachineHealth(
-            name="nodezero", status=MachineStatus.UNHEALTHY, timestamp=""
-        )).status == MachineStatus.HEALTHY
-        
-        anvil_healthy = machines.get("anvil", MachineHealth(
-            name="anvil", status=MachineStatus.UNHEALTHY, timestamp=""
-        )).status == MachineStatus.HEALTHY
-        
-        if self.mode == FleetMode.LOCAL:
-            # All tasks to Anvil
-            for task in self.task_routing.keys():
-                recommendations[task] = "anvil"
-        
-        elif self.mode == FleetMode.NODEZERO_ONLY:
-            # All tasks to nodezero
-            for task in self.task_routing.keys():
-                recommendations[task] = "nodezero"
-        
-        elif self.mode == FleetMode.HYBRID:
-            # Hybrid mode with fallback
-            for task, default_machine in self.task_routing.items():
-                if default_machine == "nodezero" and not nodezero_healthy:
-                    # Fallback to Anvil if nodezero unhealthy
-                    recommendations[task] = "anvil"
-                elif default_machine == "anvil" and not anvil_healthy:
-                    # Fallback to nodezero if Anvil unhealthy
-                    recommendations[task] = "nodezero"
-                else:
-                    # Use default routing
-                    recommendations[task] = default_machine
-        
+
+        for task, default_machine in self.task_routing.items():
+            if default_machine in healthy_machines:
+                recommendations[task] = default_machine
+            elif healthy_machines:
+                # Fall back to the first healthy machine.
+                recommendations[task] = healthy_machines[0]
+            else:
+                # No healthy machines; keep the default as best-effort.
+                recommendations[task] = default_machine
+
         return recommendations
-    
+
     def get_optimal_compute(self, task_type: str, fleet_health: Optional[FleetHealth] = None) -> str:
         """
-        Get optimal compute node for a task type
-        
+        Get optimal compute node for a task type.
+
         Args:
             task_type: Type of task (inference, file_ops, gpu_workload, etc.)
             fleet_health: Optional fleet health status (will check if not provided)
-        
+
         Returns:
-            Node identifier (nodezero or anvil)
+            Machine identifier from fleet_config.
         """
         if fleet_health is None:
             fleet_health = self.check_fleet_health()
-        
-        return fleet_health.routing_recommendations.get(task_type, "nodezero")
+
+        if task_type in fleet_health.routing_recommendations:
+            return fleet_health.routing_recommendations[task_type]
+
+        first_machine = next(iter(self.fleet_config), None)
+        if first_machine is None:
+            raise ValueError("fleet_config contains no machines")
+        return first_machine
     
     async def monitor_fleet_health(self, interval_seconds: int = 30):
         """Continuously monitor fleet health at specified interval"""
