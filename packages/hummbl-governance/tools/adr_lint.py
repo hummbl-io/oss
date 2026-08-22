@@ -16,7 +16,7 @@ Checks:
 
 Usage:
     python tools/adr_lint.py [path/to/docs/adr/]
-    python tools/adr_lint.py --check-repo <repo-name> --org hummbl-dev
+    python tools/adr_lint.py --check-repo <repo-name> --org hummbl-io
     python tools/adr_lint.py --ci  # CI mode: check all ADRs, exit 1 on violations
 
 Exit codes:
@@ -377,7 +377,7 @@ def lint_directory(adr_dir):
 
     return results, 0
 
-def lint_repo_via_api(repo, org="hummbl-dev"):
+def lint_repo_via_api(repo, org="hummbl-io"):
     """Lint ADRs in a remote repo via GitHub API."""
     cmd = ["gh", "api", f"repos/{org}/{repo}/git/trees/HEAD?recursive=1"]
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -456,7 +456,7 @@ def main():
     )
     parser.add_argument("path", nargs="?", default="docs/adr/", help="Path to ADR directory")
     parser.add_argument("--check-repo", help="Lint ADRs in a remote GitHub repo")
-    parser.add_argument("--org", default="hummbl-dev", help="GitHub org")
+    parser.add_argument("--org", default="hummbl-io", help="GitHub org")
     parser.add_argument("--ci", action="store_true", help="CI mode: exit 1 on violations")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format")
 

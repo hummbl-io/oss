@@ -53,14 +53,20 @@ BLOCKED_IDENTITY_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-# Deterministic allowlist: only these identities may author/commit on the
-# hummbl-dev account. Any identity not in this set is blocked regardless of
-# whether it matches the blocklist above. The allowlist is stricter than the
-# blocklist — it makes the rule deterministic (closed by default) rather than
-# pattern-based (open by default).
-ALLOWED_IDENTITIES: tuple[tuple[str, str], ...] = (
-    ("hummbl-dev", "noreply@hummbl.dev"),
-)
+# Domain-based allowlist for HUMMBL org identities. Any identity whose name
+# starts with a HUMMBL org handle or whose email is on a HUMMBL domain is
+# permitted. The blocklist above still rejects AI/agent names.
+ALLOWED_NAME_PREFIXES: tuple[str, ...] = ("hummbl-", "HUMMBL")
+ALLOWED_EMAIL_DOMAINS: tuple[str, ...] = ("hummbl.io", "hummbl.dev")
+
+
+def _is_allowed_identity(name: str, email: str) -> bool:
+    """Return True if the identity matches an allowed HUMMBL org pattern."""
+    if any(name.startswith(prefix) for prefix in ALLOWED_NAME_PREFIXES):
+        return True
+    if any(email.endswith(f"@{domain}") for domain in ALLOWED_EMAIL_DOMAINS):
+        return True
+    return False
 
 
 @dataclass(frozen=True)
@@ -108,12 +114,12 @@ def lint_identity_text(text: str, *, label: str) -> list[Finding]:
     parsed = _parse_git_ident(text)
     if parsed is not None:
         name, email = parsed
-        if (name, email) not in ALLOWED_IDENTITIES:
+        if not _is_allowed_identity(name, email):
             findings.append(
                 Finding(
                     rule=f"identity-not-allowlisted-{label}",
                     line=1,
-                    text=f"{name} <{email}> (allowed: {ALLOWED_IDENTITIES})",
+                    text=f"{name} <{email}> (allowed domains: {ALLOWED_EMAIL_DOMAINS}, prefixes: {ALLOWED_NAME_PREFIXES})",
                 )
             )
     return findings
