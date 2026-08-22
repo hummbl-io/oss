@@ -67,22 +67,32 @@ class FleetHealthChecker:
         if fleet_config:
             self.fleet_config = fleet_config
         else:
+            # Require explicit fleet config via env vars or constructor.
+            # Do not hardcode internal IPs/URLs — raise if not provided.
+            nodezero_ip = os.environ.get("NODEZERO_TAILSCALE_IP")
+            anvil_ip = os.environ.get("ANVIL_TAILSCALE_IP")
+            if not nodezero_ip or not anvil_ip:
+                raise ValueError(
+                    "FleetHealthChecker requires fleet_config or env vars "
+                    "(NODEZERO_TAILSCALE_IP, ANVIL_TAILSCALE_IP, etc.). "
+                    "Do not hardcode internal network addresses."
+                )
             self.fleet_config = {
                 "nodezero": {
-                    "tailscale_ip": os.environ.get("NODEZERO_TAILSCALE_IP", "100.x.x.x"),
+                    "tailscale_ip": nodezero_ip,
                     "hostname": os.environ.get("NODEZERO_HOSTNAME", "nodezero"),
                     "ssh_alias": "nodezero",
                     "services": {
-                        "ollama": os.environ.get("NODEZERO_OLLAMA_URL", "http://100.x.x.x:11434/api/tags"),
-                        "bus": os.environ.get("NODEZERO_BUS_URL", "http://100.x.x.x:18790/health")
+                        "ollama": os.environ.get("NODEZERO_OLLAMA_URL", f"http://{nodezero_ip}:11434/api/tags"),
+                        "bus": os.environ.get("NODEZERO_BUS_URL", f"http://{nodezero_ip}:18790/health")
                     }
                 },
                 "anvil": {
-                    "tailscale_ip": os.environ.get("ANVIL_TAILSCALE_IP", "100.x.x.x"),
+                    "tailscale_ip": anvil_ip,
                     "hostname": os.environ.get("ANVIL_HOSTNAME", "anvil"),
                     "ssh_alias": "anvil",
                     "services": {
-                        "gitea": os.environ.get("ANVIL_GITEA_URL", "https://example.ts.net"),
+                        "gitea": os.environ.get("ANVIL_GITEA_URL", f"https://{anvil_ip}"),
                         "ollama": "http://localhost:11434/api/tags"
                     }
                 }
