@@ -37,7 +37,16 @@ def test_blocks_ai_author_identity():
     assert "identity-not-allowlisted-author" in rules
 
 
-def test_allows_allowlisted_identity():
+def test_allows_hummbl_io_identity():
+    findings = lint_identity_text(
+        "hummbl-io <noreply@hummbl.io> 1782843919 -0400",
+        label="author",
+    )
+
+    assert findings == []
+
+
+def test_allows_hummbl_dev_identity():
     findings = lint_identity_text(
         "hummbl-dev <noreply@hummbl.dev> 1782843919 -0400",
         label="author",
@@ -46,29 +55,20 @@ def test_allows_allowlisted_identity():
     assert findings == []
 
 
-def test_blocks_non_allowlisted_human_identity():
-    """A human identity not in the allowlist is blocked by the allowlist check.
-
-    This is the deterministic guarantee: only hummbl-dev <noreply@hummbl.dev>
-    is permitted, even if the identity is clearly human and does not match
-    any blocklist pattern.
-    """
+def test_allows_hummbl_email_domain():
     findings = lint_identity_text(
         "Reuben Bowlby <reuben@hummbl.io> 1782843919 -0400",
         label="author",
     )
 
-    rules = [finding.rule for finding in findings]
-    assert "identity-not-allowlisted-author" in rules
-    # Blocklist does NOT match (no AI term), so only the allowlist finding.
-    assert "ai-author-identity" not in rules
+    assert findings == []
 
 
-def test_blocks_agent_bot_identity_not_in_blocklist():
-    """A hypothetical new agent name not in the blocklist is still caught by
+def test_blocks_non_hummbl_identity():
+    """A human identity outside the HUMMBL org is still caught by
     the allowlist (deterministic, closed by default)."""
     findings = lint_identity_text(
-        "NewAgent <newagent@example.com> 1782843919 -0400",
+        "Contributor <contributor@example.com> 1782843919 -0400",
         label="committer",
     )
 
