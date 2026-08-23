@@ -74,7 +74,7 @@ operator on 2026-08-21**:
 - `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
 - `hummbl-bibliography` v1.0.0 — deprecated ("Package no longer supported")
 
-The `@hummbl` scope still exists (operator owns it under the `hummbl-dev`
+The `@hummbl` scope still exists (operator owns it under the `hummbl-io`
 npm account with `write` permission). Future HUMMBL npm packages publish
 fresh under `@hummbl/*` from this monorepo.
 

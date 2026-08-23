@@ -9,7 +9,7 @@ This crosswalk records actual differences among current HUMMBL public schemas. I
 
 | Repository | Path | Inspected blob SHA |
 |---|---|---|
-| `hummbl-io/hummbl-dev` | `docs/evidence-graph/v0.1/schema.json` | `9b2b7c29380c7e39aa0829744f31df651d65a958` |
+| `hummbl-io/hummbl-io` | `docs/evidence-graph/v0.1/schema.json` | `9b2b7c29380c7e39aa0829744f31df651d65a958` |
 | `hummbl-io/research-source-packets` | `schemas/research-source-packets-v0.1.json` | `73087e604a0ed96b5e18ee891c5526c25fc6b888` |
 | `hummbl-io/claim-evidence-ledger` | `schemas/claim-evidence-ledger-v0.1.json` | `6d9f357a55ac2ddafdb0026ea3cd70950876a69b` |
 | `hummbl-io/knowledge-as-code` | `schemas/knowledge-as-code-v0.1.json` | `29452d84763103fbbc9fd37bb6c6ae3bf146bd47` |
