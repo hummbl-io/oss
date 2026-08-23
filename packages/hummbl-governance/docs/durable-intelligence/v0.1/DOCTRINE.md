@@ -2,7 +2,7 @@
 
 **Status: CANDIDATE DOCTRINE — REQUIRES REVIEW**
 
-Issue: hummbl-io/hummbl-dev#162
+Issue: hummbl-io/hummbl-io#162
 
 ## Purpose
 
@@ -207,6 +207,6 @@ Track practical indicators such as:
 
 ## References
 
-- Issue: hummbl-io/hummbl-dev#162
+- Issue: hummbl-io/hummbl-io#162
 - Seed example: hummbl-io/hummbl-production#747
 - Existing vocabulary: evidence-grade skill, claim-verify skill

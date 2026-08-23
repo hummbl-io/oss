@@ -70,7 +70,7 @@ Two separate CI surfaces. Both must be green before release.
 
 `main` should require pull request review and the hosted CI checks that protect package correctness, installability, linting, zero-runtime-dependency posture, and Arbiter governance score.
 
-Branch protection is tracked centrally in `hummbl-io/hummbl-dev#18`; do not overclaim required checks until that audit is updated.
+Branch protection is tracked centrally in `hummbl-io/hummbl-io#18`; do not overclaim required checks until that audit is updated.
 
 ## Operational Notes
 

@@ -232,7 +232,7 @@ claims need refresh immediately before external publication.
 7. Convert local-only evidence extractions into committed source packets or
    re-fetchable scripts before external use.
 8. Run a separate repo-by-repo pass if the intended scope is truly all 95
-   `hummbl-dev` repositories.
+   `hummbl-io` repositories.
 
 ## Sources checked
 

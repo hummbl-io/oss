@@ -11,7 +11,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **HUMMBL Repo Standard v0.1** (`docs/standards/HUMMBL_REPO_STANDARD.md`) — global baseline for all `hummbl-dev` repositories: 15-item artifact stack, five repo classes with required/prescribed/optional weightings, conflict-precedence ladder, provider-neutrality constraint, and routing doctrine (deterministic spine, stochastic muscle).
+- **HUMMBL Repo Standard v0.1** (`docs/standards/HUMMBL_REPO_STANDARD.md`) — global baseline for all `hummbl-io` repositories: 15-item artifact stack, five repo classes with required/prescribed/optional weightings, conflict-precedence ladder, provider-neutrality constraint, and routing doctrine (deterministic spine, stochastic muscle).
 - **`hummbl-repo-manifest.schema.json`** (`schemas/`) — JSON Schema Draft 2020-12 for the machine-readable `hummbl.repo.yaml` registry atom. Enforces provider neutrality (`model_provider_neutral: const true`) and KRINEIA operator surface (`append`/`project`/`cut` only).
 - **ADR-003** (`docs/adr/ADR-003-hummbl-repo-standard.md`) — decision record for the standard, including the live 91-repo audit findings (0% `KRINEIA.md`, 0% `hummbl.repo.yaml`, 1% `CONSTITUTION.md` coverage) and the split-home choice (canonical in `hummbl-governance`, templates mirrored in `.github`).
 

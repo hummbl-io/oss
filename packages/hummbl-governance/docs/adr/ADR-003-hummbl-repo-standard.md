@@ -9,7 +9,7 @@
 
 ## Context
 
-A live audit of all 91 `hummbl-dev` repositories (43 public + 48 private) found that the four files intended to form the core of a per-repo governance architecture are essentially unimplemented across the fleet:
+A live audit of all 91 `hummbl-io` repositories (43 public + 48 private) found that the four files intended to form the core of a per-repo governance architecture are essentially unimplemented across the fleet:
 
 | Artifact | Repos with it | Coverage |
 |----------|--------------|----------|
@@ -24,7 +24,7 @@ A prior audit cited in the originating handoff was public-only and treated `krin
 
 ## Decision
 
-Adopt **HUMMBL Repo Standard v0.1** as the global baseline for all `hummbl-dev` repositories, with canonical home in `hummbl-io/hummbl-governance` and templates mirrored in `hummbl-io/.github`.
+Adopt **HUMMBL Repo Standard v0.1** as the global baseline for all `hummbl-io` repositories, with canonical home in `hummbl-io/hummbl-governance` and templates mirrored in `hummbl-io/.github`.
 
 The standard defines:
 

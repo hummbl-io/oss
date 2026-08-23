@@ -37,7 +37,7 @@ issue-branch copies, and submodule-embedded copies):
 invariants, Normative files, Amendment.
 
 Repos: `.github`, `agent-tools-security-hardening`, `apex-nexus`,
-`baseN`, `lsat-prep`, `hummbl-papers`, `hummbl-dev`
+`baseN`, `lsat-prep`, `hummbl-papers`, `hummbl-io`
 
 ### Cluster B: Extended standard template
 
@@ -45,7 +45,7 @@ Repos: `.github`, `agent-tools-security-hardening`, `apex-nexus`,
 invariants (coverage floor, stdlib-only, schema contract, etc.).
 
 Repos: `autoresearch-pipeline`, `hummbl-bibliography-issue71`,
-`hummbl-dev`, `hummbl-governance`, `hummbl-governance-p0-api-clean`,
+`hummbl-io`, `hummbl-governance`, `hummbl-governance-p0-api-clean`,
 `hummbl-mcp-server`/`mcp-server`, `hummbl-models`, `hummbl-research`,
 `hummbl-tuples`, `hummbl-production`, `hummbl-agent`, `arbiter`
 

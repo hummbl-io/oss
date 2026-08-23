@@ -121,7 +121,7 @@ warrants a repo-specific repair issue at this time.
 | 14 | `hummbl-bibliography` | `CONSTITUTION.md` | 61 | 2553 | LIBRARY_OR_PACKAGE | Effective | git |
 | 15 | `hummbl-chatgpt-connector` | `CONSTITUTION.md` | 46 | 1399 | EXPERIMENTAL_LAB | Effective | git |
 | 16 | `hummbl-cyber-workbench` | `CONSTITUTION.md` | 36 | 984 | EXPERIMENTAL_LAB | Effective | git |
-| 17 | `hummbl-dev` | `CONSTITUTION.md` | 60 | 2435 | FLEET_ROOT | Effective | git |
+| 17 | `hummbl-io` | `CONSTITUTION.md` | 60 | 2435 | FLEET_ROOT | Effective | git |
 | 18 | `hummbl-doctrine` (upstream) | `CONSTITUTION.md` | 62 | 2616 | GOVERNANCE_STANDARD | Effective | git |
 | 19 | `hummbl-governance` | `CONSTITUTION.md` | ~70 | 4069 | GOVERNANCE_STANDARD | Effective | git |
 | 20 | `hummbl-governance-kernel` | `CONSTITUTION.md` | 25 | 964 | GOVERNANCE_STANDARD | Draft | git |

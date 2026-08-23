@@ -6,8 +6,8 @@ Controlling work:
 
 - `hummbl-io/hummbl-governance#234`
 - draft PR `hummbl-io/hummbl-governance#235`
-- portfolio ledger `hummbl-io/hummbl-dev#194`
-- Wave 1 pilot `hummbl-io/hummbl-dev#195`
+- portfolio ledger `hummbl-io/hummbl-io#194`
+- Wave 1 pilot `hummbl-io/hummbl-io#195`
 
 ## What this implements
 

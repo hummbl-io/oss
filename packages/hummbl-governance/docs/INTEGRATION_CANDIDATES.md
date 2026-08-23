@@ -84,9 +84,9 @@ Repos under `/path/to/projects/` that are HUMMBL-owned and should adopt hummbl-g
 
 ---
 
-## 5. GitHub hummbl-dev Org — Full Inventory
+## 5. GitHub hummbl-io Org — Full Inventory
 
-All 90 repos in `hummbl-dev` org. Candidates flagged with `[CANDIDATE]`.
+All 90 repos in `hummbl-io` org. Candidates flagged with `[CANDIDATE]`.
 
 | Repo | Visibility | Last Push | Candidate? | Rationale |
 |------|-----------|-----------|-------------|-----------|
@@ -94,7 +94,7 @@ All 90 repos in `hummbl-dev` org. Candidates flagged with `[CANDIDATE]`.
 | hummbl-governance | PUBLIC | 2026-06-17 | N/A | Self |
 | hummbl-production | PRIVATE | 2026-06-17 | **YES** | Production code — needs governance primitives |
 | unified-frameworks | PRIVATE | 2026-06-17 | **YES** | Framework orchestration — needs Kernel |
-| hummbl-dev | PUBLIC | 2026-06-17 | No | Meta/docs repo |
+| hummbl-io | PUBLIC | 2026-06-17 | No | Meta/docs repo |
 | adversary-emulation-playbook | PUBLIC | 2026-06-17 | **YES — existing dep** | Already depends on hummbl-governance |
 | idp-spec | PUBLIC | 2026-06-17 | **YES** | Identity-delegation protocol — natural fit for IdentityEngine |
 | agent-governance-demo | PUBLIC | 2026-06-16 | **YES** | Demo of governance primitives |

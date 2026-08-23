@@ -73,7 +73,7 @@ deterministic fleet audit is run.
 | huaomp | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Private |
 | hummbl-brand | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Private |
 | hummbl-cca-f | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Private |
-| hummbl-dev | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Public — high priority |
+| hummbl-io | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Public — high priority |
 | hummbl-doctrine | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Private |
 | hummbl-gameboard | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Private |
 | hummbl-graphs | scaffold | CHANGELOG, DOCTRINE, CODEOWNERS | Private |

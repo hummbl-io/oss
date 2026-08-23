@@ -3,7 +3,7 @@
 **Auditor:** devin (automated)
 **Date:** 2026-06-22
 **Remediation date:** 2026-06-22
-**Scope:** All 68 non-fork repos on `hummbl-dev` GitHub + local repos
+**Scope:** All 68 non-fork repos on `hummbl-io` GitHub + local repos
 **Total ADRs found:** 60 repos with ADRs, 100+ individual ADR files
 **Status:** ALL 10 FINDINGS REMEDIATED
 

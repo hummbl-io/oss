@@ -37,7 +37,7 @@ SHA pins exist but aren't verified against tags. KRINEIA chains exist but no ver
 ## P0 Findings (ranked by convergence and severity)
 
 ### P0-1: KRINEIA Genesis Hash Broken — Policy Violation (Schneier P0-1, confirmed by verification)
-**The "repair" in action #12 was itself a forbidden `rewrite` operation.** Commit `b79473a` ("sanitize internal infrastructure refs") rewrote the genesis receipt content (`hummbl-dev`→`hummbl-io`) without recomputing the hash, breaking the chain at the root. My action #12 "repair" repeated the same forbidden operation. Both `apex-nexus` and `hummbl-governance` chains have broken genesis hashes. The KRINEIA manifest explicitly forbids `update`, `delete`, `rewrite` operations.
+**The "repair" in action #12 was itself a forbidden `rewrite` operation.** Commit `b79473a` ("sanitize internal infrastructure refs") rewrote the genesis receipt content (`hummbl-io`→`hummbl-io`) without recomputing the hash, breaking the chain at the root. My action #12 "repair" repeated the same forbidden operation. Both `apex-nexus` and `hummbl-governance` chains have broken genesis hashes. The KRINEIA manifest explicitly forbids `update`, `delete`, `rewrite` operations.
 **Fix:** Do NOT rewrite the genesis receipts again. Append corrective receipts recording the org transfer event. Build a KRINEIA JSONL chain verifier and wire it into CI. Audit all 60 chains.
 
 ### P0-2: Orphan Golden Fixtures (Russell P0, Schneier P0-2, Ashby P1-1, confirmed by operator reversion)

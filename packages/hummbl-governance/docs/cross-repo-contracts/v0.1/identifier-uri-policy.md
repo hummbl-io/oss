@@ -17,7 +17,7 @@ crc:<authority-namespace>:<contract-name>
 Example:
 
 ```text
-crc:hummbl-dev:research-source-packet
+crc:hummbl-io:research-source-packet
 ```
 
 Rules:

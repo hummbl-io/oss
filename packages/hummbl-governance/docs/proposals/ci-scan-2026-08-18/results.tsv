@@ -134,7 +134,7 @@ hummbl-theory	main	completed	success	bibliography	2026-08-17T23:25:51Z	push
 hummbl-social-sim	main	null	-	null	null	null
 hummbl-production	main	completed	startup_failure	Route Health Probes	2026-08-18T15:00:57Z	schedule
 hummbl-models	main	completed	success	Validate	2026-08-17T23:25:11Z	push
-hummbl-dev	main	completed	success	Dependabot Updates	2026-08-13T21:33:42Z	dynamic
+hummbl-io	main	completed	success	Dependabot Updates	2026-08-13T21:33:42Z	dynamic
 hummbl-cca-f	main	completed	success	CI	2026-08-17T23:24:42Z	push
 hummbl-brand	main	completed	success	CI	2026-08-17T23:24:35Z	push
 hummbl-axis	main	completed	failure	CI	2026-08-17T23:24:28Z	push
@@ -193,7 +193,7 @@ representation-independent-software	main	completed	success	CI	2026-08-15T23:25:4
 hummbl-profiles	main	completed	success	CI	2026-08-15T23:25:01Z	push
 hummbl-market-lab	main	completed	success	CI	2026-08-15T23:24:52Z	push
 hummbl-design-docs	main	completed	success	CI	2026-08-15T23:24:44Z	push
-legacy-hummbl-dev-org-profile	main	completed	success	Dependabot Updates	2026-08-15T02:30:17Z	dynamic
+legacy-hummbl-io-org-profile	main	completed	success	Dependabot Updates	2026-08-15T02:30:17Z	dynamic
 hummbl-testing	main	completed	success	Dependabot Updates	2026-08-13T10:35:42Z	dynamic
 hummbl-security	main	completed	failure	Dependabot Updates	2026-08-13T10:35:29Z	dynamic
 hummbl-py	main	completed	failure	Dependabot Updates	2026-08-13T10:35:18Z	dynamic

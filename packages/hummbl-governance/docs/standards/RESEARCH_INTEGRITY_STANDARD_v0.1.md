@@ -3,7 +3,7 @@
 **Status: PROPOSED ORGANIZATION-WIDE STANDARD — NON-CANONICAL UNTIL REVIEW AND RATIFICATION**
 
 Issue: hummbl-io/hummbl-governance#225
-Parent program: hummbl-io/hummbl-dev#153
+Parent program: hummbl-io/hummbl-io#153
 
 ## Purpose
 
@@ -178,7 +178,7 @@ LLL itself must remain subject to this standard and may not define the standard 
 
 ## Related
 
-- `hummbl-io/hummbl-dev#153` — master program index
+- `hummbl-io/hummbl-io#153` — master program index
 - `hummbl-io/hummbl-papers#19` — Universal Publication Readiness Gate
 - `hummbl-io/hummbl-papers#20` — LLL scholarly contribution program
 - `hummbl-io/hummbl-governance#220` — constitutional integrity remediation

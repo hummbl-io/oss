@@ -55,7 +55,7 @@ oss/
 │   └── krineia/
 ├── site/                    # Mintlify docs site (separate from design docs)
 ├── sites/                   # GitHub Pages (static)
-│   ├── hummbl-dev/
+│   ├── hummbl-io/
 │   ├── hummbl-brand/
 │   └── …
 ├── cli/                     # Scoop / Winget / Homebrew manifests
@@ -917,7 +917,7 @@ migration (no history) from private repos — see section 1.
 
 All previously-published HUMMBL npm packages were deprecated by the
 operator on 2026-08-21. The `@hummbl` scope is retained (operator owns
-it under the `hummbl-dev` npm account). Phase 2 is a clean greenfield:
+it under the `hummbl-io` npm account). Phase 2 is a clean greenfield:
 publish fresh under `@hummbl/*` from this monorepo.
 
 - [ ] `@hummbl/mcp-server` → `packages/node/mcp-server/` (re-publish fresh under scope; old `@hummbl/mcp-server` v1.2.0 is deprecated)

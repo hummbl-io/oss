@@ -11,7 +11,7 @@ Canonical home: `hummbl-governance/docs/ecosystem/`
 Source basis:
 - `hummbl-governance/docs/ecosystem/VALIDATION_PASS_1_SUMMARY_2026-06-24.md`
   (redacted public-safe validation-pass summary)
-- Connector-visible `hummbl-dev` repository chronology supplied in session
+- Connector-visible `hummbl-io` repository chronology supplied in session
   context — `scratch_context`, non-reproducible. This chronology is not
   checked into any repo as a committed artifact. It must not be treated as
   canonical evidence. Pass 1 of the recommended extraction passes (§9)
@@ -99,7 +99,7 @@ From the 2026-06-24 validation pass (see
 
 ## 3. Chronology Strata
 
-The connector-visible `hummbl-dev` repo order can be used as a creation-order
+The connector-visible `hummbl-io` repo order can be used as a creation-order
 proxy, not as exact `created_at` evidence unless refreshed through GitHub
 metadata.
 

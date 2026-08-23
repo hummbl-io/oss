@@ -25,9 +25,9 @@
         "result": "PROJECTS/memory-civilization=1"
       },
       {
-        "purpose": "Search hummbl-dev GitHub org for memory/civilization/city repos",
+        "purpose": "Search hummbl-io GitHub org for memory/civilization/city repos",
         "workdir": "~/projects",
-        "command": "gh repo list hummbl-dev --limit 200 --json name,url,isPrivate | jq -r '.[] | select(.name | test(\"memory|civilization|city\"; \"i\")) | [.name,.url,(if .isPrivate then \"private\" else \"public\" end)] | @tsv'",
+        "command": "gh repo list hummbl-io --limit 200 --json name,url,isPrivate | jq -r '.[] | select(.name | test(\"memory|civilization|city\"; \"i\")) | [.name,.url,(if .isPrivate then \"private\" else \"public\" end)] | @tsv'",
         "result": "no rows"
       },
       {

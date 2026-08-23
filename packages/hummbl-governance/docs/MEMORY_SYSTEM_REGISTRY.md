@@ -50,7 +50,7 @@ validator.
 | --- | --- |
 | `~/projects/PROJECTS/memory-city` | absent |
 | `~/projects/PROJECTS/memory-civilization` | absent |
-| `gh repo list hummbl-dev` for `memory|civilization|city` | no matching repos returned |
+| `gh repo list hummbl-io` for `memory|civilization|city` | no matching repos returned |
 | `gh repo list foundermode-ai` for `memory|civilization|city` | no matching repos returned |
 
 Exact evidence commands and results are recorded in

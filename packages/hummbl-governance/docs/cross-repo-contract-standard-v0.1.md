@@ -61,7 +61,7 @@ The cross-repo contract must be an **additive envelope** around domain-owned pay
 - conformance fixtures
 - assurance and adoption boundaries
 
-### `hummbl-io/hummbl-dev`
+### `hummbl-io/hummbl-io`
 
 - organization-level contract registry/index
 - worked cross-repo integration graphs
@@ -76,7 +76,7 @@ Each repository owns its payload schema and release cadence. The shared contract
 
 ### Tier 1 — core contract spine
 
-`hummbl-bibliography`, `research-source-packets`, `hummbl-research`, `claim-evidence-ledger`, `hummbl-papers`, `hummbl-governance`, `hummbl-io/hummbl-dev`
+`hummbl-bibliography`, `research-source-packets`, `hummbl-research`, `claim-evidence-ledger`, `hummbl-papers`, `hummbl-governance`, `hummbl-io/hummbl-io`
 
 ### Tier 2 — assurance and provenance overlays
 
@@ -218,13 +218,13 @@ lifecycle:
 
 ## Cross-repo dependencies
 
-- `hummbl-io/hummbl-dev#104` — completed minimal graph
-- `hummbl-io/hummbl-dev#105` — completed implementation slice
-- `hummbl-io/hummbl-dev#146` — active domain integration pilot
-- `hummbl-io/hummbl-dev#153` — research-integrity master index
+- `hummbl-io/hummbl-io#104` — completed minimal graph
+- `hummbl-io/hummbl-io#105` — completed implementation slice
+- `hummbl-io/hummbl-io#146` — active domain integration pilot
+- `hummbl-io/hummbl-io#153` — research-integrity master index
 - `hummbl-io/hummbl-governance#225` — research-integrity parent standard
 - `hummbl-io/hummbl-papers#19` — publication gate
-- `hummbl-io/hummbl-dev#154` — repository responsibility topology
+- `hummbl-io/hummbl-io#154` — repository responsibility topology
 
 ## Fact posture
 
