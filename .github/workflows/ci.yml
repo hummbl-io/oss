@@ -2,6 +2,13 @@ name: Tests
 
 "on":
   push:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'README*'
     branches: [main]
     paths:
       - "packages/**"
@@ -11,6 +18,10 @@ name: Tests
       - "packages/**"
       - ".github/workflows/ci.yml"
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 permissions:
   contents: read
 
