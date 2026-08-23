@@ -6,16 +6,16 @@
   "contract": {
     "contract_id": "crc:hummbl-io:research-source-packet",
     "contract_version": "0.1.0",
-    "payload_schema_uri": "https://github.com/hummbl-io/research-source-packets/blob/main/schemas/research-source-packets-v0.1.json",
+    "payload_schema_uri": "https://github.com/hummbl-io/<private-repo>/blob/main/schemas/<private-repo>-v0.1.json",
     "payload_version": "v0.1"
   },
   "producer": {
-    "repo": "hummbl-io/research-source-packets",
+    "repo": "hummbl-io/<private-repo>",
     "publish_receipt_ref": "receipt:publish:rsp-v0.1-wave1"
   },
   "consumer_decisions": [
     {
-      "repo": "hummbl-io/hummbl-research",
+      "repo": "hummbl-io/<private-repo>",
       "decision": "accepted",
       "supported_contract_versions": [
         "0.1.x"
@@ -25,10 +25,10 @@
       ],
       "conditions": [],
       "reason": null,
-      "receipt_ref": "receipt:accept:hummbl-research-rsp-v0.1"
+      "receipt_ref": "receipt:accept:<private-repo>-rsp-v0.1"
     },
     {
-      "repo": "hummbl-io/claim-evidence-ledger",
+      "repo": "hummbl-io/<private-repo>",
       "decision": "conditional",
       "supported_contract_versions": [
         "0.1.x"
@@ -40,7 +40,7 @@
         "Claim ingestion must preserve source-packet provenance and evidence grade."
       ],
       "reason": "Conditional on provenance-preserving ingestion.",
-      "receipt_ref": "receipt:conditional:claim-evidence-ledger-rsp-v0.1"
+      "receipt_ref": "receipt:conditional:<private-repo>-rsp-v0.1"
     }
   ],
   "generated_at": "2026-07-11T23:30:00Z"

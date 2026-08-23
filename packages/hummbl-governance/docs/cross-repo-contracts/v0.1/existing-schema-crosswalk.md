@@ -10,19 +10,19 @@ This crosswalk records actual differences among current HUMMBL public schemas. I
 | Repository | Path | Inspected blob SHA |
 |---|---|---|
 | `hummbl-io/hummbl-io` | `docs/evidence-graph/v0.1/schema.json` | `9b2b7c29380c7e39aa0829744f31df651d65a958` |
-| `hummbl-io/research-source-packets` | `schemas/research-source-packets-v0.1.json` | `73087e604a0ed96b5e18ee891c5526c25fc6b888` |
-| `hummbl-io/claim-evidence-ledger` | `schemas/claim-evidence-ledger-v0.1.json` | `6d9f357a55ac2ddafdb0026ea3cd70950876a69b` |
-| `hummbl-io/knowledge-as-code` | `schemas/knowledge-as-code-v0.1.json` | `29452d84763103fbbc9fd37bb6c6ae3bf146bd47` |
-| `hummbl-io/ai-source-verification` | `schemas/ai-source-verification-v0.1.json` | `78226c3345ef7b5f5c4abe90ac4287ad6baad25b` |
-| `hummbl-io/execution-receipts` | `schemas/execution-receipts-v0.1.json` | `972cebdfabc3771bdba11d68974c7d2d5caecf93` |
-| `hummbl-io/protocol-as-code` | `schemas/protocol-as-code-v0.1.json` | `fae0a1797556671aa6488f6e844ec1512b65f4de` |
+| `hummbl-io/<private-repo>` | `schemas/<private-repo>-v0.1.json` | `73087e604a0ed96b5e18ee891c5526c25fc6b888` |
+| `hummbl-io/<private-repo>` | `schemas/<private-repo>-v0.1.json` | `6d9f357a55ac2ddafdb0026ea3cd70950876a69b` |
+| `hummbl-io/<private-repo>` | `schemas/<private-repo>-v0.1.json` | `29452d84763103fbbc9fd37bb6c6ae3bf146bd47` |
+| `hummbl-io/<private-repo>` | `schemas/<private-repo>-v0.1.json` | `78226c3345ef7b5f5c4abe90ac4287ad6baad25b` |
+| `hummbl-io/<private-repo>` | `schemas/<private-repo>-v0.1.json` | `972cebdfabc3771bdba11d68974c7d2d5caecf93` |
+| `hummbl-io/<private-repo>` | `schemas/<private-repo>-v0.1.json` | `fae0a1797556671aa6488f6e844ec1512b65f4de` |
 | `hummbl-io/hummbl-governance` | `hummbl_governance/data/canon_registry.schema.json` | `b0ef7af957a2f26b386af8742606b6239e4a147c` |
 
 ## Field-level crosswalk
 
 | Concern | Evidence Graph | Source Packet | Claim-Evidence | Knowledge-as-Code | Source Verification | Execution Receipt | Protocol-as-Code | Canon Registry |
 |---|---|---|---|---|---|---|---|---|
-| Schema/version field | `version: 0.1` numeric | `schemaVersion: v0.1` | `schemaVersion: 0.1` | `schemaVersion: v0.1` | `schemaVersion: ai-source-verification/v0.1` | `schemaVersion: execution-receipts/v0.1` | `schemaVersion: v0.1` | `schema_version: 1.0.0`-style SemVer |
+| Schema/version field | `version: 0.1` numeric | `schemaVersion: v0.1` | `schemaVersion: 0.1` | `schemaVersion: v0.1` | `schemaVersion: <private-repo>/v0.1` | `schemaVersion: <private-repo>/v0.1` | `schemaVersion: v0.1` | `schema_version: 1.0.0`-style SemVer |
 | Artifact lifecycle | `status` | `packetStatus` | `packetStatus` | `packetStatus` | `packetStatus` | `packetStatus` | `packetStatus` | `current_canon_level` + `proposed_canon_level` |
 | Identity/manifest | `graph_id`, nodes | `packetManifest` | `ledgerManifest` | `knowledgeManifest` | `verificationManifest` | `receiptManifest` | `protocolManifest` | `artifact_id`, `artifact_type` |
 | Authority shape | none at graph root | `producer`, `posture`, optional ORCID | `id`, `name`, optional URI | `owner`, `canActOnBehalfOf` | `producer`, `basis` | `assertedBy`, `posture`, optional timestamp | `owner`, `canActOnBehalfOf` | operator approval, approver, delegation chain |

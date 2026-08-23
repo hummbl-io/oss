@@ -26,32 +26,32 @@ oss/
 ├── packages/
 │   ├── python/              # PyPI
 │   │   ├── hummbl-governance/
-│   │   ├── hummbl-bus/
-│   │   ├── hummbl-cognition/
-│   │   ├── hummbl-tuples/
-│   │   ├── hummbl-bif/
-│   │   ├── base120/
+│   │   ├── <private-repo>/
+│   │   ├── <private-repo>/
+│   │   ├── <private-repo>/
+│   │   ├── <private-repo>/
+│   │   ├── <private-repo>/
 │   │   ├── governed-compression/
 │   │   └── …
 │   ├── node/                # npm
-│   │   ├── hummbl-agent/
-│   │   ├── hummbl-asi/
+│   │   ├── <private-repo>/
+│   │   ├── <private-repo>/
 │   │   ├── mcp-server/      # publishes as @hummbl/mcp-server
-│   │   ├── hummbl-tuples/   # TS reference impl
+│   │   ├── <private-repo>/   # TS reference impl
 │   │   └── …
 │   ├── rust/                # crates.io
-│   │   ├── demosmesh/
-│   │   └── hummbl-tuples/   # Rust reference impl
+│   │   ├── <private-repo>/
+│   │   └── <private-repo>/   # Rust reference impl
 │   ├── go/                  # Go module proxy
-│   │   └── hummbl-tuples/   # Go reference impl
+│   │   └── <private-repo>/   # Go reference impl
 │   ├── jvm/                 # Maven Central
 │   │   ├── fabric-adapter/
 │   │   └── v3sp3r/
 │   └── nix/                 # Nix flake registry
 │       └── hermes-agent/
 ├── papers/                  # arXiv / Zenodo (TeX)
-│   ├── hummbl-bibliography/
-│   ├── hummbl-theory/
+│   ├── <private-repo>/
+│   ├── <private-repo>/
 │   └── krineia/
 ├── site/                    # Mintlify docs site (separate from design docs)
 ├── sites/                   # GitHub Pages (static)
@@ -101,11 +101,11 @@ single-language monorepo. For a polyglot monorepo it breaks down:
    `ci-python.yml`, `packages/rust/**` triggers `ci-rust.yml`. No
    per-package glob lists.
 
-3. **Polyglot packages are explicit.** `hummbl-tuples` has 4 language
+3. **Polyglot packages are explicit.** `<private-repo>` has 4 language
    implementations. Under the flat scheme they'd collide on directory
    name. Under language namespacing they are siblings:
-   `packages/python/hummbl-tuples/`, `packages/rust/hummbl-tuples/`,
-   `packages/go/hummbl-tuples/`, `packages/node/hummbl-tuples/`.
+   `packages/python/<private-repo>/`, `packages/rust/<private-repo>/`,
+   `packages/go/<private-repo>/`, `packages/node/<private-repo>/`.
 
 4. **Registry mapping is obvious.** The directory name tells you which
    registry the package publishes to. No lookup table needed.
@@ -151,22 +151,22 @@ Examples:
 | Tag | Registry | Package | Version |
 |-----|----------|---------|---------|
 | `python/hummbl-governance/v1.4.1` | PyPI | hummbl-governance | 1.4.1 |
-| `python/hummbl-bus/v0.2.0` | PyPI | hummbl-bus | 0.2.0 |
-| `node/hummbl-agent/v0.1.0` | npm | hummbl-agent | 0.1.0 |
-| `rust/demosmesh/v0.1.0` | crates.io | demosmesh | 0.1.0 |
-| `packages/go/hummbl-tuples/v0.1.0` | Go proxy | github.com/hummbl-io/oss/packages/go/hummbl-tuples | 0.1.0 |
+| `python/<private-repo>/v0.2.0` | PyPI | <private-repo> | 0.2.0 |
+| `node/<private-repo>/v0.1.0` | npm | <private-repo> | 0.1.0 |
+| `rust/<private-repo>/v0.1.0` | crates.io | <private-repo> | 0.1.0 |
+| `packages/go/<private-repo>/v0.1.0` | Go proxy | github.com/hummbl-io/oss/packages/go/<private-repo> | 0.1.0 |
 | `jvm/fabric-adapter/v0.1.0` | Maven Central | fabric-adapter | 0.1.0 |
 
 ### Polyglot package releases
 
-A polyglot package like `hummbl-tuples` has independent versions per
+A polyglot package like `<private-repo>` has independent versions per
 language. Each language variant is tagged and released separately:
 
 ```
-python/hummbl-tuples/v0.2.1              # PyPI
-rust/hummbl-tuples/v0.1.0                # crates.io
-packages/go/hummbl-tuples/v0.1.0         # Go proxy (tag prefix must match module path)
-node/hummbl-tuples/v0.1.0                # npm
+python/<private-repo>/v0.2.1              # PyPI
+rust/<private-repo>/v0.1.0                # crates.io
+packages/go/<private-repo>/v0.1.0         # Go proxy (tag prefix must match module path)
+node/<private-repo>/v0.1.0                # npm
 ```
 
 Versions MAY align across languages for a coordinated release, but this
@@ -181,8 +181,8 @@ Use PEP 440 / SemVer suffixes directly in the tag:
 python/hummbl-governance/v1.5.0a1     # alpha
 python/hummbl-governance/v1.5.0b1     # beta
 python/hummbl-governance/v1.5.0rc1    # release candidate
-node/hummbl-agent/v0.2.0-beta.1       # npm pre-release
-rust/demosmesh/v0.1.0-pre.1           # crates pre-release
+node/<private-repo>/v0.2.0-beta.1       # npm pre-release
+rust/<private-repo>/v0.1.0-pre.1           # crates pre-release
 ```
 
 ---
@@ -193,7 +193,7 @@ rust/demosmesh/v0.1.0-pre.1           # crates pre-release
 its own changelog. There is no monorepo-wide "v1.2.3" release.
 
 Rationale: the packages are independently useful libraries. A governance
-fix should not force a version bump on `base120` or `demosmesh`. Users
+fix should not force a version bump on `<private-repo>` or `<private-repo>`. Users
 install one package, not the monorepo.
 
 **Version sources:**
@@ -399,12 +399,12 @@ jobs:
 1. Set `package.json` `"private": false` (remove `"private": true`)
 2. Ensure `"name"`, `"version"`, `"license"`, `"repository"` fields are set.
    `repository` must point to `github.com/hummbl-io/oss` with the correct
-   `directory` subpath (e.g. `packages/node/hummbl-agent`) — Sigstore
+   `directory` subpath (e.g. `packages/node/<private-repo>`) — Sigstore
    verifies this matches the OIDC claims.
 3. On npmjs.com → package settings → Trusted Publishing → add the GitHub
    repo + workflow file + environment
 4. Create the `npm` environment: `gh api repos/hummbl-io/oss/environments/npm -X PUT`
-5. Tag and push: `git tag node/hummbl-agent/v0.1.0 && git push origin node/hummbl-agent/v0.1.0`
+5. Tag and push: `git tag node/<private-repo>/v0.1.0 && git push origin node/<private-repo>/v0.1.0`
 
 **Package naming -- DECIDED: scoped `@hummbl/*`**
 - **Scoped:** `@hummbl/<name>` (e.g. `@hummbl/governance`). Avoids
@@ -481,7 +481,7 @@ jobs:
 3. On crates.io → package settings → Trusted Publishing → add the GitHub
    repo + workflow file + environment
 4. Create the `crates` environment: `gh api repos/hummbl-io/oss/environments/crates -X PUT`
-5. Tag and push: `git tag rust/demosmesh/v0.1.0 && git push origin rust/demosmesh/v0.1.0`
+5. Tag and push: `git tag rust/<private-repo>/v0.1.0 && git push origin rust/<private-repo>/v0.1.0`
 
 > **Workspace ordering:** When publishing multiple crates from a Cargo
 > workspace, crates.io requires dependencies to be available before
@@ -510,8 +510,8 @@ go 1.22
 
 **To publish:**
 ```bash
-git tag packages/go/hummbl-tuples/v0.1.0
-git push origin packages/go/hummbl-tuples/v0.1.0
+git tag packages/go/<private-repo>/v0.1.0
+git push origin packages/go/<private-repo>/v0.1.0
 # Go proxy fetches within minutes — no CI needed
 # Tag prefix MUST match the module path (packages/go/<name>) for the
 # Go module proxy to resolve the version. See section 2.
@@ -758,10 +758,10 @@ name: Generate CLI manifests
 "on":
   push:
     tags:
-      - "python/hummbl-cli/v*"
-      - "python/hummbl-bus/v*"
+      - "python/<private-repo>/v*"
+      - "python/<private-repo>/v*"
       - "python/hummbl-governance/v*"
-      - "python/base120/v*"
+      - "python/<private-repo>/v*"
 
 permissions:
   contents: write
@@ -861,17 +861,17 @@ job can only access the secrets for its registry.
 ## 7. Cross-package dependencies
 
 Some HUMMBL packages depend on other HUMMBL packages. For example,
-`hummbl-dashboard` may import `hummbl-governance`.
+`<private-repo>` may import `hummbl-governance`.
 
 **During development:** editable installs from the monorepo.
 
 ```bash
 pip install -e packages/python/hummbl-governance
-pip install -e packages/python/hummbl-dashboard
+pip install -e packages/python/<private-repo>
 ```
 
 **In published metadata:** normal registry dependencies. The
-`pyproject.toml` for `hummbl-dashboard` declares
+`pyproject.toml` for `<private-repo>` declares
 `dependencies = ["hummbl-governance>=1.4.0"]`. When published, pip
 resolves it from PyPI.
 
@@ -900,14 +900,14 @@ Move source for the live HUMMBL-owned PyPI packages into the monorepo.
 Each remaining package is migrated in its own PR to keep diffs reviewable.
 
 - [x] `hummbl-governance` → `packages/python/hummbl-governance/` (DONE — 1.4.1 published via trusted publishing)
-- [ ] `hummbl-bus` → `packages/python/hummbl-bus/`
-- [ ] `hummbl-cognition` → `packages/python/hummbl-cognition/`
-- [ ] `hummbl-tuples` → `packages/python/hummbl-tuples/` (+ `packages/rust/`, `packages/go/`, `packages/node/` for reference impls)
-- [ ] `hummbl-bif` → `packages/python/hummbl-bif/`
-- [ ] `base120` → `packages/python/base120/`
+- [ ] `<private-repo>` → `packages/python/<private-repo>/`
+- [ ] `<private-repo>` → `packages/python/<private-repo>/`
+- [ ] `<private-repo>` → `packages/python/<private-repo>/` (+ `packages/rust/`, `packages/go/`, `packages/node/` for reference impls)
+- [ ] `<private-repo>` → `packages/python/<private-repo>/`
+- [ ] `<private-repo>` → `packages/python/<private-repo>/`
 - [ ] `governed-compression` → `packages/python/governed-compression/` (ML: governed vector + KV-cache compression; runtime dep on `hummbl-governance>=1.1.0` — cross-package dependency, see section 7)
 
-**Excluded from Phase 1 (not HUMMBL's):** `arbiter`, `arcana`, `crab`, `randy`, `hermes-agent` are name collisions on PyPI by other authors (see PACKAGES.md). `OBLITERATUS` belongs to Pliny (pliny-lab), not HUMMBL.
+**Excluded from Phase 1 (not HUMMBL's):** `<private-repo>`, `arcana`, `<private-repo>`, `<private-repo>`, `hermes-agent` are name collisions on PyPI by other authors (see PACKAGES.md). `OBLITERATUS` belongs to Pliny (pliny-lab), not HUMMBL.
 
 **For each:** configure trusted publisher on pypi.org, verify dry-run
 build, then tag the next release from the monorepo. Use clean-snapshot
@@ -921,10 +921,10 @@ it under the `hummbl-io` npm account). Phase 2 is a clean greenfield:
 publish fresh under `@hummbl/*` from this monorepo.
 
 - [ ] `@hummbl/mcp-server` → `packages/node/mcp-server/` (re-publish fresh under scope; old `@hummbl/mcp-server` v1.2.0 is deprecated)
-- [ ] `@hummbl/bibliography` → `packages/node/hummbl-bibliography/` (re-publish scoped; old unscoped `hummbl-bibliography` v1.0.0 is deprecated)
+- [ ] `@hummbl/bibliography` → `packages/node/<private-repo>/` (re-publish scoped; old unscoped `<private-repo>` v1.0.0 is deprecated)
 - [ ] Other npm candidates from PACKAGES.md "Publishable but not yet on npm" section
 
-**Excluded from Phase 2 (name collisions, never HUMMBL's):** `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, `mcp-server` (unscoped) are unrelated packages by other authors on npm (see PACKAGES.md).
+**Excluded from Phase 2 (name collisions, never HUMMBL's):** `hermes-agent`, `<private-repo>`, `arcana`, `<private-repo>`, `<private-repo>`, `mcp-server` (unscoped) are unrelated packages by other authors on npm (see PACKAGES.md).
 
 **For each:** configure Trusted Publishing on npmjs.com (or set `NPM_TOKEN` secret as fallback for packages not yet migrated), create `npm` environment, flip `private: true` → `false`, set `"name"` to `@hummbl/<name>`, verify build, tag release.
 
@@ -936,17 +936,17 @@ publisher, tag first release.
 
 Prioritize by user value:
 1. **Governance ecosystem:** `hummbl-lattice`, `hummbl-eval`,
-   `hummbl-clp`, `hummbl-contracts`, `hummbl-validation`
-2. **Core libraries:** `hummbl-axis`, `hummbl-crucible`, `hummbl-intel`
-3. **Utility:** `hummbl-lint-config`, `hummbl-dashboard`
-4. **Domain-specific:** `peptide-check`, `whether-book`, `idp-spec`
+   `<private-repo>`, `<private-repo>`, `hummbl-validation`
+2. **Core libraries:** `<private-repo>`, `<private-repo>`, `<private-repo>`
+3. **Utility:** `<private-repo>`, `<private-repo>`
+4. **Domain-specific:** `peptide-check`, `<private-repo>`, `<private-repo>`
 
 ### Phase 4: Publish new-language packages
 
-- [ ] `demosmesh` → `packages/rust/demosmesh/` → crates.io
-- [ ] `hummbl-tuples` Rust ref impl → `packages/rust/hummbl-tuples/` → crates.io
-- [ ] `hummbl-tuples` Go ref impl → `packages/go/hummbl-tuples/` → Go proxy
-- [ ] `hummbl-tuples` TS ref impl → `packages/node/hummbl-tuples/` → npm (needs `package.json`)
+- [ ] `<private-repo>` → `packages/rust/<private-repo>/` → crates.io
+- [ ] `<private-repo>` Rust ref impl → `packages/rust/<private-repo>/` → crates.io
+- [ ] `<private-repo>` Go ref impl → `packages/go/<private-repo>/` → Go proxy
+- [ ] `<private-repo>` TS ref impl → `packages/node/<private-repo>/` → npm (needs `package.json`)
 - [ ] `fabric-adapter` → `packages/jvm/fabric-adapter/` → Maven Central
 - [ ] `v3sp3r` → `packages/jvm/v3sp3r/` → Maven Central
 - [ ] `hermes-agent` nix flake → `packages/nix/hermes-agent/` → FlakeHub

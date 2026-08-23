@@ -9,7 +9,7 @@
 
 ## Context
 
-The fleet currently includes a few non-`hummbl-*` repositories that are intentionally outside the default naming convention (`whether-book`, `base120`, `idp-spec`). Existing governance documents did not define an explicit, schema-backed mechanism to justify these exceptions, which made enforcement inconsistent across repos.
+The fleet currently includes a few non-`hummbl-*` repositories that are intentionally outside the default naming convention (`<private-repo>`, `<private-repo>`, `<private-repo>`). Existing governance documents did not define an explicit, schema-backed mechanism to justify these exceptions, which made enforcement inconsistent across repos.
 
 ## Decision
 

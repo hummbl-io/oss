@@ -18,7 +18,7 @@ class TestFleetHealthChecker(unittest.TestCase):
         self.gpu_name = "gpu"
         self.test_config = {
             self.primary_name: {
-                "tailscale_ip": "100.0.0.1",
+                "node_ip": "100.0.0.1",
                 "hostname": "primary",
                 "ssh_alias": "primary",
                 "services": {
@@ -27,11 +27,11 @@ class TestFleetHealthChecker(unittest.TestCase):
                 }
             },
             self.gpu_name: {
-                "tailscale_ip": "100.0.0.2",
+                "node_ip": "100.0.0.2",
                 "hostname": "gpu",
                 "ssh_alias": "gpu",
                 "services": {
-                    "gitea": "https://example.com",
+                    "<internal-ci>": "https://example.com",
                     "ollama": "http://localhost:11434/api/tags"
                 }
             }
@@ -81,7 +81,7 @@ class TestFleetHealthChecker(unittest.TestCase):
         gpu_config = self.checker.fleet_config[self.gpu_name]
         self.assertEqual(gpu_config["hostname"], self.gpu_name)
         self.assertEqual(gpu_config["ssh_alias"], self.gpu_name)
-        self.assertIn("gitea", gpu_config["services"])
+        self.assertIn("<internal-ci>", gpu_config["services"])
         self.assertIn("ollama", gpu_config["services"])
 
     def test_task_routing_config(self):

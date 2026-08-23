@@ -23,7 +23,7 @@
   "mutations_made": [],
   "claims": [
     {
-      "claim": "25 CONSTITUTION.md files exist across PROJECTS/",
+      "claim": "25 CONSTITUTION.md files exist across <internal-path>/",
       "posture": "observed",
       "evidence_ref": "find command output"
     }

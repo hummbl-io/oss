@@ -29,7 +29,7 @@ Usage:
 Configure in Claude Code settings.json:
     {
       "mcpServers": {
-        "hummbl-compliance": {
+        "<private-repo>": {
           "command": "python3",
           "args": ["path/to/mcp_compliance.py"],
           "env": {
@@ -62,7 +62,7 @@ from hummbl_governance.stride_mapper import (
 # ---------------------------------------------------------------------------
 AUDIT_DIR = os.environ.get("GOVERNANCE_AUDIT_DIR", os.path.join(tempfile.gettempdir(), "governance", "audit"))  # nosec B108 — env-overridable default, not hardcoded
 
-SERVER_NAME = "hummbl-compliance"
+SERVER_NAME = "<private-repo>"
 SERVER_VERSION = "0.1.0"
 PROTOCOL_VERSION = "2024-11-05"
 

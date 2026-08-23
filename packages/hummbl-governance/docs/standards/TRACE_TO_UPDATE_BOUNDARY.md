@@ -177,8 +177,8 @@ Minimum gate:
 
 ## Cross-Repository Links
 
-- Source packet PR: `hummbl-io/hummbl-production#579`
-- Model Router v2 grindability/learnability routing: `hummbl-io/hummbl-production#580`
+- Source packet PR: `hummbl-io/<private-repo>#579`
+- Model Router v2 grindability/learnability routing: `hummbl-io/<private-repo>#580`
 - Founder Mode ops traces as organizational learning substrate:
   `hummbl-io/hummbl-governance#1204`
 - Runtime/event-ledger adjacent lane: `hummbl-io/hummbl-governance#158`

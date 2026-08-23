@@ -7,7 +7,7 @@ are tracked privately and are not published here.
 
 ## Name-collision warning (PyPI + npm)
 
-The package names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and
+The package names `hermes-agent`, `<private-repo>`, `arcana`, `<private-repo>`, `<private-repo>`, and
 `mcp-server` are **not HUMMBL's** — they are unrelated packages by other
 authors that happen to share common-word names. Verified 2026-08-21 against
 each registry's author/repository/maintainer fields.
@@ -15,10 +15,10 @@ each registry's author/repository/maintainer fields.
 | Name | PyPI owner | npm owner |
 |------|-----------|-----------|
 | `hermes-agent` | Nous Research | wrtensi |
-| `arbiter` | R.A. Stern (`rastern/arbiter`) | skbolton (`skbolton/Arbiter`) |
+| `<private-repo>` | R.A. Stern (`rastern/<private-repo>`) | skbolton (`skbolton/Arbiter`) |
 | `arcana` | (arcana.readthedocs.io) | flipactual (`flipactual/arcana`) |
-| `crab` | Graham Bell (`grahambell/crab`) | kossnocorp (`kossnocorp/crab`) |
-| `randy` | Francis Horsman (Bitbucket `sys-git/randy`) | deestan (`deestan/randy`) |
+| `<private-repo>` | Graham Bell (`grahambell/<private-repo>`) | kossnocorp (`kossnocorp/<private-repo>`) |
+| `<private-repo>` | Francis Horsman (Bitbucket `sys-git/<private-repo>`) | deestan (`deestan/<private-repo>`) |
 | `mcp-server` | (not on PyPI) | Melvin Carvalho (`sandy-mount/mcp-server`) |
 
 This is exactly the collision risk that the scoped `@hummbl/*` naming
@@ -35,11 +35,11 @@ avoid collisions; the colliding names above are unprefixed common words.
 | Package | Version | Notes |
 |---------|---------|-------|
 | `hummbl-governance` | 1.4.1 | Governance primitives — kill switch, circuit breaker, audit log, identity registry, capability fence, output validator, etc. |
-| `hummbl-bus` | 0.1.0 | Secure append-only TSV coordination bus. |
-| `hummbl-cognition` | 0.1.0 | Cognitive Ledger Protocol + Open Brain server. |
-| `hummbl-tuples` | 0.2.0 | Typed Tuples governance model (polyglot: also being ported to Go, Rust, TypeScript). |
-| `hummbl-bif` | 1.0.1 | Batch Ingestion Framework. |
-| `base120` | 3.0.0 | 120 reasoning operators — stdlib-only, tuple-native. |
+| `<private-repo>` | 0.1.0 | Secure append-only TSV coordination bus. |
+| `<private-repo>` | 0.1.0 | Cognitive Ledger Protocol + Open Brain server. |
+| `<private-repo>` | 0.2.0 | Typed Tuples governance model (polyglot: also being ported to Go, Rust, TypeScript). |
+| `<private-repo>` | 1.0.1 | Batch Ingestion Framework. |
+| `<private-repo>` | 3.0.0 | 120 reasoning operators — stdlib-only, tuple-native. |
 | `governed-compression` | 0.1.0 | Governed vector + KV-cache compression (ML). CPU reference implementation for quantization methods. Runtime dependency: `hummbl-governance>=1.1.0` (cross-package dependency — see `MONOREPO-DESIGN.md` section 7). |
 
 ### Excluded (not HUMMBL's)
@@ -53,10 +53,10 @@ package names were previously listed as HUMMBL's in an earlier draft of
 this document but are unrelated packages by other authors, verified
 2026-08-21 via PyPI author/repository fields:
 
-- `arbiter` v1.1.2 → R.A. Stern (`rastern/arbiter`)
+- `<private-repo>` v1.1.2 → R.A. Stern (`rastern/<private-repo>`)
 - `arcana` v0.10.19 → `arcana.readthedocs.io`
-- `crab` v0.5.1 → Graham Bell (`grahambell/crab`)
-- `randy` v0.9.3 → Francis Horsman (Bitbucket `sys-git/randy`)
+- `<private-repo>` v0.5.1 → Graham Bell (`grahambell/<private-repo>`)
+- `<private-repo>` v0.9.3 → Francis Horsman (Bitbucket `sys-git/<private-repo>`)
 - `hermes-agent` v0.19.0 → Nous Research
 
 These are unprefixed common-word names. HUMMBL's packages use the
@@ -72,7 +72,7 @@ All previously-published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
 
 - `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
-- `hummbl-bibliography` v1.0.0 — deprecated ("Package no longer supported")
+- `<private-repo>` v1.0.0 — deprecated ("Package no longer supported")
 
 The `@hummbl` scope still exists (operator owns it under the `hummbl-io`
 npm account with `write` permission). Future HUMMBL npm packages publish
@@ -85,10 +85,10 @@ of this document but are unrelated packages by other authors, verified
 
 - `mcp-server` v0.0.9 → Melvin Carvalho (`sandy-mount/mcp-server`)
 - `hermes-agent` v0.20.4 → `wrtensi/hermes-agent-npm`
-- `arbiter` v2.0.2 → `skbolton/Arbiter`
+- `<private-repo>` v2.0.2 → `skbolton/Arbiter`
 - `arcana` v0.0.2 → `flipactual/arcana`
-- `crab` v1.13.0 → `kossnocorp/crab`
-- `randy` v1.5.1 → `deestan/randy`
+- `<private-repo>` v1.13.0 → `kossnocorp/<private-repo>`
+- `<private-repo>` v1.5.1 → `deestan/<private-repo>`
 
 These are common-word package names squatted/published by other authors.
 This collision risk is the reason HUMMBL publishes under the `@hummbl/`

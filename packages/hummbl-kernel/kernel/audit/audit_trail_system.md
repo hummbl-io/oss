@@ -413,7 +413,7 @@ A.75.35: "Clear Desk and Clear Screen Policy"
 ### gpu (GPU/Compliance)
 - **Role**: Store evidence artifacts and audit trail data
 - **Hardware**: NVIDIA GPU for storage operations
-- **Services**: Gitea, PostgreSQL, S3/MinIO
+- **Services**: <internal-ci>, PostgreSQL, S3/MinIO
 - **Responsibility**: Evidence storage, database operations, file system operations
 
 ### Coordination Protocol

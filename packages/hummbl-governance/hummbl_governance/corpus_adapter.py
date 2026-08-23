@@ -14,7 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Corpus adapter — bridge hummbl-governance receipts to unified-frameworks.
+"""Corpus adapter — bridge hummbl-governance receipts to an external corpus.
 
 Usage::
 
@@ -27,7 +27,7 @@ Usage::
     receipt = engine.create(agent_id="devin", action_type="BUS_POST")
     adapter.ingest_receipt(receipt)  # kernel_version defaults to hummbl_governance.__version__
 
-Best-effort: if unified-frameworks is not installed, receipts are queued
+Best-effort: if the corpus ingestion package is not installed, receipts are queued
 locally for later ingestion.
 """
 
@@ -44,7 +44,7 @@ from hummbl_governance import __version__ as _KERNEL_VERSION
 
 logger = logging.getLogger(__name__)
 
-# Lazy import of unified-frameworks corpus ingest (best-effort)
+# Lazy import of external corpus ingest (best-effort)
 try:
     from corpus.ingest import CorpusIngestor
 

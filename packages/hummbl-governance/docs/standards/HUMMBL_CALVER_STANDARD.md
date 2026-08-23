@@ -33,7 +33,7 @@ default for HUMMBL projects that ship frequently.
 
 This standard covers:
 
-- CalVer tag format for git tags and GitHub/Gitea releases
+- CalVer tag format for git tags and GitHub/<internal-ci> releases
 - Same-day suffixing for multiple releases per day
 - Phase-gated artifact versioning (the -1/0/1 ladder)
 - The relationship between CalVer tags and internal SemVer
@@ -301,7 +301,7 @@ The tool:
 - Generates a changelog from commits since the last tag
 - Creates an annotated git tag
 - Optionally pushes the tag to origin (`--push`)
-- Optionally creates a GitHub release (`--gh-release`; Gitea support planned)
+- Optionally creates a GitHub release (`--gh-release`; <internal-ci> support planned)
 - Posts a STATUS to the coordination bus (`--bus` on dry run; always on `--publish`)
 
 ## 10. What this standard does not mandate

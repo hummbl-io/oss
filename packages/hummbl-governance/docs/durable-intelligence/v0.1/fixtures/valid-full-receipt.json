@@ -61,12 +61,12 @@
   ],
   "claims": [
     {
-      "claim": "25 CONSTITUTION.md files found across PROJECTS/",
+      "claim": "25 CONSTITUTION.md files found across <internal-path>/",
       "posture": "observed",
-      "evidence_ref": "find ~/projects/PROJECTS -name CONSTITUTION.md"
+      "evidence_ref": "find <internal-path> -name CONSTITUTION.md"
     },
     {
-      "claim": "hummbl-cyber-workbench and hummbl-cyber-workbench-issue20 have byte-identical CONSTITUTION.md files",
+      "claim": "<private-repo> and <private-repo>-issue20 have byte-identical CONSTITUTION.md files",
       "posture": "verified",
       "evidence_ref": "diff command output"
     },
@@ -95,7 +95,7 @@
   ],
   "open_questions": [
     {
-      "question": "Should the 345-line hummbl-governance/PROJECTS/hummbl-doctrine CONSTITUTION.md be considered the canonical archetype?",
+      "question": "Should the 345-line hummbl-governance/<internal-path>/<private-repo> CONSTITUTION.md be considered the canonical archetype?",
       "blocking": false,
       "owner": "operator"
     }

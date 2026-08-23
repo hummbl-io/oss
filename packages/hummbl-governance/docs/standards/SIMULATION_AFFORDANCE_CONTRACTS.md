@@ -5,17 +5,17 @@ Last verified: 2026-07-03.
 
 ## Purpose
 
-`hummbl-production/hummbl-governed-quest-sim` now contains implementation
+`<private-repo>/hummbl-governed-quest-sim` now contains implementation
 evidence for Minecraft/Fabric governed simulation contracts. This document
 extracts candidate governance truth from that evidence without promoting the
 prototype itself into canon.
 
-Implementation evidence remains in `hummbl-production`. Canonical governance
+Implementation evidence remains in `<private-repo>`. Canonical governance
 truth enters `hummbl-governance` only after human and governance review.
 
 ## Evidence Baseline
 
-Source repository: `hummbl-io/hummbl-production`.
+Source repository: `hummbl-io/<private-repo>`.
 Evidence commit: `1838d30e553003115c1acaa11b7c1a993d7d6cf3`.
 Commit summary: `chore(deps): bump gradle/actions from 4 to 6 (#546)`.
 
@@ -47,17 +47,17 @@ The inventory below was read from that commit, not from a moving branch.
 
 | Production PR | Merged evidence | Candidate governance surface |
 |---|---|---|
-| `hummbl-production#489` | Engine-agnostic governance kernel and nine-primitives simulator | Simulation kernel remains implementation evidence; canonical truth is the engine-agnostic pattern and receipt requirement. |
-| `hummbl-production#494` | Adapter Contract | Candidate canonical adapter boundary: identity, capabilities, lifecycle, action/observation, providers, errors. |
-| `hummbl-production#496` | Fabric Adapter Skeleton | Candidate Fabric doctrine: Fabric may manifest but not govern. |
-| `hummbl-production#498` | Python-Java Bridge Contract | Candidate bridge envelope contract: action, observation, receipt_forward, error. |
-| `hummbl-production#500` | P0 Runtime Smoke | Runtime contact is evidence only; canonical truth is that engine contact requires automated gate verification. |
-| `hummbl-production#505` | P1 Tunnel Runtime Manifestation | Candidate tunnel invariants: gates, denial receipts, transit receipts, and ordered gate evaluation. |
-| `hummbl-production#526` | Integrated Scenario Replay Demo | Candidate replay contract: deterministic receipt sequence plus final-state assertions. |
-| `hummbl-production#528` | Short 2-3 agent bounded pilot | Pilot evidence only; outputs are play-generated candidates pending review. |
-| `hummbl-production#530` | 5-10 agent bounded pilot | Scale evidence only; outputs are not canon without promotion review. |
-| `hummbl-production#532` | 24h pilot infrastructure | Candidate operational contract: rollback, logging, and receipt export are required for endurance pilots. |
-| `hummbl-production#536` | Adapter Conformance Suite and WebAdapterContract | Candidate conformance gate set for any simulation adapter. |
+| `<private-repo>#489` | Engine-agnostic governance kernel and nine-primitives simulator | Simulation kernel remains implementation evidence; canonical truth is the engine-agnostic pattern and receipt requirement. |
+| `<private-repo>#494` | Adapter Contract | Candidate canonical adapter boundary: identity, capabilities, lifecycle, action/observation, providers, errors. |
+| `<private-repo>#496` | Fabric Adapter Skeleton | Candidate Fabric doctrine: Fabric may manifest but not govern. |
+| `<private-repo>#498` | Python-Java Bridge Contract | Candidate bridge envelope contract: action, observation, receipt_forward, error. |
+| `<private-repo>#500` | P0 Runtime Smoke | Runtime contact is evidence only; canonical truth is that engine contact requires automated gate verification. |
+| `<private-repo>#505` | P1 Tunnel Runtime Manifestation | Candidate tunnel invariants: gates, denial receipts, transit receipts, and ordered gate evaluation. |
+| `<private-repo>#526` | Integrated Scenario Replay Demo | Candidate replay contract: deterministic receipt sequence plus final-state assertions. |
+| `<private-repo>#528` | Short 2-3 agent bounded pilot | Pilot evidence only; outputs are play-generated candidates pending review. |
+| `<private-repo>#530` | 5-10 agent bounded pilot | Scale evidence only; outputs are not canon without promotion review. |
+| `<private-repo>#532` | 24h pilot infrastructure | Candidate operational contract: rollback, logging, and receipt export are required for endurance pilots. |
+| `<private-repo>#536` | Adapter Conformance Suite and WebAdapterContract | Candidate conformance gate set for any simulation adapter. |
 
 ## Candidate Canonical Contracts
 

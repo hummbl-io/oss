@@ -105,17 +105,17 @@ HUMMBL's without checking the author/repository/maintainers fields.
 
 | Name | Claimed as HUMMBL's | Actual owner |
 |------|---------------------|--------------|
-| `arbiter` (PyPI) | Yes | R.A. Stern (`rastern/arbiter`) |
+| `<private-repo>` (PyPI) | Yes | R.A. Stern (`rastern/<private-repo>`) |
 | `arcana` (PyPI) | Yes | `arcana.readthedocs.io` |
-| `crab` (PyPI) | Yes | Graham Bell (`grahambell/crab`) |
-| `randy` (PyPI) | Yes | Francis Horsman (Bitbucket `sys-git/randy`) |
+| `<private-repo>` (PyPI) | Yes | Graham Bell (`grahambell/<private-repo>`) |
+| `<private-repo>` (PyPI) | Yes | Francis Horsman (Bitbucket `sys-git/<private-repo>`) |
 | `hermes-agent` (PyPI) | Yes | Nous Research |
 | `mcp-server` (npm) | Yes | Melvin Carvalho (`sandy-mount/mcp-server`) |
 | `hermes-agent` (npm) | Yes | `wrtensi/hermes-agent-npm` |
-| `arbiter` (npm) | Yes | skbolton (`skbolton/Arbiter`) |
+| `<private-repo>` (npm) | Yes | skbolton (`skbolton/Arbiter`) |
 | `arcana` (npm) | Yes | flipactual (`flipactual/arcana`) |
-| `crab` (npm) | Yes | kossnocorp (`kossnocorp/crab`) |
-| `randy` (npm) | Yes | deestan (`deestan/randy`) |
+| `<private-repo>` (npm) | Yes | kossnocorp (`kossnocorp/<private-repo>`) |
+| `<private-repo>` (npm) | Yes | deestan (`deestan/<private-repo>`) |
 
 All 11 were unprefixed common-word names. HUMMBL's actual packages use the
 `hummbl-*` prefix on PyPI and the `@hummbl/*` scope on npm, which avoids
@@ -154,7 +154,7 @@ author/repository/maintainers fields match HUMMBL.
 
 ### 2.4 Collision-prone names
 
-Common-word package names (e.g. `arbiter`, `crab`, `randy`, `arcana`,
+Common-word package names (e.g. `<private-repo>`, `<private-repo>`, `<private-repo>`, `arcana`,
 `mcp-server`, `hermes-agent`) are inherently collision-prone. If a HUMMBL
 package uses an unprefixed common-word name, verify extra carefully and
 consider whether the package should be renamed to `hummbl-*` (PyPI) or
@@ -166,10 +166,10 @@ consider whether the package should be renamed to `hummbl-*` (PyPI) or
 
 This is a **public** repo. Before pushing anything, scan for:
 
-- Internal host paths: `PROJECTS/`, `hosts/anvil`, `hosts/delta`,
-  `C:\Users`, `/opt/hummbl`
-- Machine names in path context: `anvil`, `delta`, `hummbl-vps`,
-  `nodezero` (machine names as **public** GitHub repo names are fine --
+- Internal host paths: any path containing `hosts/`, `C:\Users`, `/opt/`,
+  or project root directories — replace with `<internal-path>`
+- Machine names in path context: any internal hostname or machine label
+  (machine names as **public** GitHub repo names are fine --
   they're already public; **private** repo names are still internal and
   must not be enumerated in public docs)
 - Private repo names with sensitive descriptions (e.g. "vault / Secrets",
@@ -177,7 +177,7 @@ This is a **public** repo. Before pushing anything, scan for:
   inventories of non-public infrastructure
 - Operator personal name
 - 1Password item IDs (format: `id=<20-char alphanumeric>`)
-- Tailscale topology details
+- Internal VPN topology details
 - Bus URLs and internal service paths
 
 **Scan scope: every file in the PR diff, not just the primary artifact.**

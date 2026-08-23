@@ -178,12 +178,12 @@ the standard in a self-validating way.
 
 | Repo | Current controls | Adoption action |
 |------|-----------------|----------------|
-| `hummbl-papers` | Publication gates, release validation | Map gates to maturity ladder |
-| `hummbl-bibliography` | Source registries, contradiction handling | Cross-reference prior-art discipline |
-| `claim-evidence-ledger` | Claim-evidence structures | Align claim postures |
-| `hummbl-research` | Research campaigns | Map campaigns to maturity states |
+| `<private-repo>` | Publication gates, release validation | Map gates to maturity ladder |
+| `<private-repo>` | Source registries, contradiction handling | Cross-reference prior-art discipline |
+| `<private-repo>` | Claim-evidence structures | Align claim postures |
+| `<private-repo>` | Research campaigns | Map campaigns to maturity states |
 | `hummbl-governance` | Governance, receipts, admission | This standard lives here |
-| `hummbl-tuples` | Tuple spec, publication direction | Apply before arXiv submission |
+| `<private-repo>` | Tuple spec, publication direction | Apply before arXiv submission |
 
 No project is grandfathered into compliance without evidence.
 
@@ -212,4 +212,4 @@ No project is grandfathered into compliance without evidence.
 ## References
 
 - Issue: hummbl-io/hummbl-governance#225
-- Related: hummbl-io/hummbl-papers#20 (LLL Engineering), #19 (Publication Readiness Gate)
+- Related: hummbl-io/<private-repo>#20 (LLL Engineering), #19 (Publication Readiness Gate)

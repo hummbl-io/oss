@@ -7,7 +7,7 @@
 - **Authors:** claude-code (huxley)
 - **Supersedes:** implicit pre-2026-05-14 framing of "governance score / A+ rubric"
 - **Superseded by:** none
-- **Related:** `hummbl-governance#26` (methodology issue), `feedback_no_self_grades_on_public_surface.md` (operator memory rule), `hummbl-production#241` (claim_status: hold), `hummbl-production#242` (claim_status: retired)
+- **Related:** `hummbl-governance#26` (methodology issue), `feedback_no_self_grades_on_public_surface.md` (operator memory rule), `<private-repo>#241` (claim_status: hold), `<private-repo>#242` (claim_status: retired)
 
 ---
 
@@ -150,7 +150,7 @@ The existing 5 mapping docs (`gdpr-mapping.md`, `iso27001-mapping.md`, `nist-csf
 **Migration path:**
 1. **Pilot**: build EU AI Act matrix as the template (this PR's companion artifact). Establishes row syntax, boundary-row patterns, evidence-artifact pointers.
 2. **Expand**: backfill the 5 existing mapping docs to the full surface of each framework, conforming to ADR row syntax. (~6 weeks at 1-2 frameworks per week.)
-3. **Public-surface integration**: replace residual "governance maturity" / "tier" language on hummbl.io with link to the matrix index. The compliance.json `public_claim_status` already moved `hold→retired` in hummbl-production#242.
+3. **Public-surface integration**: replace residual "governance maturity" / "tier" language on hummbl.io with link to the matrix index. The compliance.json `public_claim_status` already moved `hold→retired` in <private-repo>#242.
 4. **Marketing copy**: new headline claim is *"Every applicable control in [framework list] mapped to a HUMMBL primitive or explicit boundary statement. Read the matrix."* with a link.
 
 ---
@@ -168,8 +168,8 @@ The existing 5 mapping docs (`gdpr-mapping.md`, `iso27001-mapping.md`, `nist-csf
 
 - Methodology issue: [hummbl-governance#26](https://github.com/hummbl-io/hummbl-governance/issues/26)
 - Memory rule: `feedback_no_self_grades_on_public_surface.md` (huxley)
-- Compliance status retirement: [hummbl-production#242](https://github.com/hummbl-io/hummbl-production/pull/242)
-- Original A+ rubric shipment: [hummbl-governance@6a47ca2](https://github.com/hummbl-io/hummbl-governance/commit/6a47ca2) + [hummbl-production@9d297b2](https://github.com/hummbl-io/hummbl-production/commit/9d297b2)
+- Compliance status retirement: [<private-repo>#242](https://github.com/hummbl-io/<private-repo>/pull/242)
+- Original A+ rubric shipment: [hummbl-governance@6a47ca2](https://github.com/hummbl-io/hummbl-governance/commit/6a47ca2) + [<private-repo>@9d297b2](https://github.com/hummbl-io/<private-repo>/commit/9d297b2)
 - Bus DECISION: 2026-05-14T~09:05Z `[lane=marketing/claude/no-self-grades]`
 - Existing mapping docs: `docs/{gdpr,iso27001,nist-csf,nist-rmf,soc2}-mapping.md`
 - Pilot artifact (companion to this ADR): `docs/coverage/eu-ai-act.md` (to be added in same PR)

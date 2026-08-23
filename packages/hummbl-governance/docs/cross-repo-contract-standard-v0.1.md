@@ -11,25 +11,25 @@ Define how HUMMBL repositories create, version, publish, consume, validate, reje
 This issue formalizes the reusable contract layer connecting the research/evidence spine:
 
 ```text
-hummbl-bibliography
-→ research-source-packets
-→ hummbl-research
-→ claim-evidence-ledger
-→ hummbl-papers
+<private-repo>
+→ <private-repo>
+→ <private-repo>
+→ <private-repo>
+→ <private-repo>
 → public/release surfaces
 ```
 
 ## Existing contract/schema artifacts (10)
 
 1. `hummbl-io/docs/evidence-graph/v0.1/schema.json` — minimal completed-batch graph
-2. `research-source-packets/schemas/research-source-packets-v0.1.json` — bounded source packet
-3. `claim-evidence-ledger/schemas/claim-evidence-ledger-v0.1.json` — claim/evidence pair
-4. `knowledge-as-code/schemas/knowledge-as-code-v0.1.json` — versioned knowledge packet
-5. `ai-source-verification/schemas/ai-source-verification-v0.1.json` — provenance chain
-6. `execution-receipts/schemas/execution-receipts-v0.1.json` — execution inputs/outputs
-7. `protocol-as-code/schemas/protocol-as-code-v0.1.json` — bounded protocol contract
-8. `hummbl-bibliography/dist/scientific-grounding-map.json` — citation contract
-9. `hummbl-tuples` — EVIDENCE, ATTEST, PROMOTION_RECEIPT tuple patterns
+2. `<private-repo>/schemas/<private-repo>-v0.1.json` — bounded source packet
+3. `<private-repo>/schemas/<private-repo>-v0.1.json` — claim/evidence pair
+4. `<private-repo>/schemas/<private-repo>-v0.1.json` — versioned knowledge packet
+5. `<private-repo>/schemas/<private-repo>-v0.1.json` — provenance chain
+6. `<private-repo>/schemas/<private-repo>-v0.1.json` — execution inputs/outputs
+7. `<private-repo>/schemas/<private-repo>-v0.1.json` — bounded protocol contract
+8. `<private-repo>/dist/scientific-grounding-map.json` — citation contract
+9. `<private-repo>` — EVIDENCE, ATTEST, PROMOTION_RECEIPT tuple patterns
 10. `hummbl-governance/hummbl_governance/data/canon_registry.schema.json` — artifact promotion
 
 ## Interoperability gaps
@@ -76,23 +76,23 @@ Each repository owns its payload schema and release cadence. The shared contract
 
 ### Tier 1 — core contract spine
 
-`hummbl-bibliography`, `research-source-packets`, `hummbl-research`, `claim-evidence-ledger`, `hummbl-papers`, `hummbl-governance`, `hummbl-io/hummbl-io`
+`<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>`, `hummbl-governance`, `hummbl-io/hummbl-io`
 
 ### Tier 2 — assurance and provenance overlays
 
-`ai-source-verification`, `execution-receipts`, `hummbl-tuples`, `general-claim-validator`, `hummbl-toolkit` (evidence-gate), `arbiter`, `protocol-as-code`, `knowledge-as-code`
+`<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>` (evidence-gate), `<private-repo>`, `<private-repo>`, `<private-repo>`
 
 ### Tier 3 — semantic and scholarly consumers
 
-`hummbl-theory`, `hummbl-doctrine`, `base120`, `baseN`
+`<private-repo>`, `<private-repo>`, `<private-repo>`, `baseN`
 
 ### Tier 4 — experiment, benchmark, and runtime producers/consumers
 
-`autoresearch-pipeline`, `model-routing-as-code`, `hummbl-agent`, `agent-runtime-governance`, `hummbl-production`, `mcp-server`
+`<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>`, `mcp-server`
 
 ### Tier 5 — domain pilots and conditional consumers
 
-`hummbl-medical`, `corpus`, peptide-science work, future regulated/health/historical/product repos
+`<private-repo>`, `corpus`, peptide-science work, future regulated/health/historical/product repos
 
 ## Candidate cross-repo contract envelope
 
@@ -223,7 +223,7 @@ lifecycle:
 - `hummbl-io/hummbl-io#146` — active domain integration pilot
 - `hummbl-io/hummbl-io#153` — research-integrity master index
 - `hummbl-io/hummbl-governance#225` — research-integrity parent standard
-- `hummbl-io/hummbl-papers#19` — publication gate
+- `hummbl-io/<private-repo>#19` — publication gate
 - `hummbl-io/hummbl-io#154` — repository responsibility topology
 
 ## Fact posture

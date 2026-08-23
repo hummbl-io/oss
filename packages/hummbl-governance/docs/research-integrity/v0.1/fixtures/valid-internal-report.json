@@ -1,6 +1,6 @@
 {
   "schema_version": "research_integrity_artifact.v0.1",
-  "artifact_id": "hummbl-tuples-v2-spec",
+  "artifact_id": "<private-repo>-v2-spec",
   "title": "Typed Governance Tuples for Bounded Delegation v2",
   "maturity_state": "INTERNAL_TECHNICAL_REPORT",
   "claim_postures": [

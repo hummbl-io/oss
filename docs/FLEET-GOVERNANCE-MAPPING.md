@@ -7,7 +7,7 @@
 
 ## Purpose
 
-HUMMBL governs a 124-agent fleet with runtime primitives (kill switch,
+HUMMBL governs a multi-agent fleet with runtime primitives (kill switch,
 circuit breaker, cost governor, delegation tokens). This document maps
 those primitives to existing AI governance frameworks, identifies where
 the frameworks provide coverage and where they are silent, and positions
@@ -60,7 +60,7 @@ void ex-post with unfavorable interpretations).
 | **Circuit breaker** | Manage 1.1 (proceed/stop decision) | Clause 8 (operational controls) | Art. 9 (risk mgmt), Art. 15 (robustness) | Swiss Cheese Model (arXiv 2408.02205) | Microsoft ACS `deny`/`escalate` verdicts |
 | **Cost governor** | Govern 1.3 (risk tolerance) | Clause 6 (planning) | Art. 9 (risk mgmt) | GOVSIM commons failure (arXiv 2404.16698) | Not standardized |
 | **Delegation tokens** | Govern 2.1 (roles/responsibilities) | Annex A (accountability) | Art. 25 (value chain responsibilities) | FAccT 2024 — agent identifiers | IETF HDP, DCT, `delegation_chain` JWT |
-| **124-agent fleet as unit** | **No coverage** | **No coverage** | **No coverage** | Federated governance (emerging) | ADCS spec (agentic-control-plane) |
+| **multi-agent fleet as unit** | **No coverage** | **No coverage** | **No coverage** | Federated governance (emerging) | ADCS spec (agentic-control-plane) |
 
 ### Sources
 
@@ -140,7 +140,7 @@ wrapper; HUMMBL's runtime primitives satisfy the operational controls.
 ### 4.2 EU AI Act (custom mapping required)
 
 The EU AI Act's accountability structure is binary: "providers" vs
-"deployers." A 124-agent fleet with hierarchical delegation and peer-mesh
+"deployers." A multi-agent fleet with hierarchical delegation and peer-mesh
 communication creates a multi-dimensional accountability graph that
 Article 25 (value chain responsibilities) cannot absorb.
 
@@ -172,7 +172,7 @@ market matures.
 HUMMBL's fleet governance is novel in three dimensions:
 
 1. **Fleet-as-unit governance** — no framework or competitor governs a
-   124-agent fleet as a unit. HUMMBL's primitives (kill switch, circuit
+   multi-agent fleet as a unit. HUMMBL's primitives (kill switch, circuit
    breaker, cost governor, delegation tokens) are fleet-scoped, not
    model-scoped.
 

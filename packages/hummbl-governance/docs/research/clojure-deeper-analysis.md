@@ -271,7 +271,7 @@ The most significant finding from the first-principles report was **C2: the gove
 
 ### Comparison 2: Clojure/Hickey vs Linux/Torvalds
 
-**Linux's governance model**: Linus Torvalds is the final arbiter of all changes to the Linux kernel — the only person who can merge patches into the mainline repository. But the kernel project has a *lieutenant system*: over 100 subsystem maintainers manage their own trees, and Linus pulls from them. In the 2.6.38 kernel, only 112 of 9,500 patches (1.3%) were directly chosen by Linus ([Tier 1: kernel.org/process/2.Process.html]). The kernel has a documented succession plan: if Torvalds becomes unavailable, a meeting of Maintainer Summit invitees, chaired by the TAB chair, will select replacement(s) ([Tier 1: kernel.org/process/conclave.html]).
+**Linux's governance model**: Linus Torvalds is the final <private-repo> of all changes to the Linux kernel — the only person who can merge patches into the mainline repository. But the kernel project has a *lieutenant system*: over 100 subsystem maintainers manage their own trees, and Linus pulls from them. In the 2.6.38 kernel, only 112 of 9,500 patches (1.3%) were directly chosen by Linus ([Tier 1: kernel.org/process/2.Process.html]). The kernel has a documented succession plan: if Torvalds becomes unavailable, a meeting of Maintainer Summit invitees, chaired by the TAB chair, will select replacement(s) ([Tier 1: kernel.org/process/conclave.html]).
 
 **Key differences from Clojure**:
 | Dimension | Linux/Torvalds | Clojure/Hickey |

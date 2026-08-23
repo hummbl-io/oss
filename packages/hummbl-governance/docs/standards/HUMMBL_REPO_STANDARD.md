@@ -73,7 +73,7 @@ The global operating-environment constitution (e.g. `C:\_governance\OPERATING_EN
 Not every repo carries the same weight. Class determines which artifacts are **required (R)**, **prescribed (P)**, or **optional (O)**.
 
 ### 5.1 Spec / governance repos
-`krineia`, `base120`, `idp-spec`, `hummbl-governance`, `hummbl-doctrine`, `hummbl-theory`, `baseN`, `mtsmu`, `huaomp`
+`krineia`, `<private-repo>`, `<private-repo>`, `hummbl-governance`, `<private-repo>`, `<private-repo>`, `baseN`, `mtsmu`, `huaomp`
 
 | Artifact | Weight |
 |----------|--------|
@@ -82,7 +82,7 @@ Not every repo carries the same weight. Class determines which artifacts are **r
 | `docs/handoffs/` | P |
 
 ### 5.2 Code / library repos
-`mcp-server`, `hummbl-agent`, `arbiter`, `hummbl-governance`, `hummbl-models`, etc.
+`mcp-server`, `<private-repo>`, `<private-repo>`, `hummbl-governance`, `hummbl-models`, etc.
 
 | Artifact | Weight |
 |----------|--------|
@@ -91,7 +91,7 @@ Not every repo carries the same weight. Class determines which artifacts are **r
 | DOCTRINE, `docs/runbooks/`, `docs/handoffs/` | P |
 
 ### 5.3 Docs / research repos
-`hummbl-bibliography`, `hummbl-papers`, `hummbl-theory`, `whether-book`
+`<private-repo>`, `<private-repo>`, `<private-repo>`, `<private-repo>`
 
 | Artifact | Weight |
 |----------|--------|
@@ -182,9 +182,9 @@ Current approved non-`hummbl-` repo exceptions:
 
 | Repo | Class | Approved by | Approved on |
 |------|-------|-------------|-------------|
-| `whether-book` | `research_object` | Reuben Bowlby | 2026-06-25 |
-| `base120` | `protocol` | Reuben Bowlby | 2026-06-24 |
-| `idp-spec` | `protocol` | Reuben Bowlby | 2026-06-24 |
+| `<private-repo>` | `research_object` | Reuben Bowlby | 2026-06-25 |
+| `<private-repo>` | `protocol` | Reuben Bowlby | 2026-06-24 |
+| `<private-repo>` | `protocol` | Reuben Bowlby | 2026-06-24 |
 
 Agents must not create additional non-prefixed repositories without an operator-approved `repo.naming` exception block.
 

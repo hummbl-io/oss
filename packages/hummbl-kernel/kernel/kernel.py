@@ -65,7 +65,7 @@ class FleetConfig:
     # Service endpoints (override via env vars; do not hardcode internal IPs/URLs)
     primary_ollama: str = field(default_factory=lambda: os.environ.get("PRIMARY_OLLAMA_URL", ""))
     primary_bus: str = field(default_factory=lambda: os.environ.get("PRIMARY_BUS_URL", ""))
-    gpu_gitea: str = field(default_factory=lambda: os.environ.get("GPU_GITEA_URL", ""))
+    gpu_git: str = field(default_factory=lambda: os.environ.get("GPU_GIT_URL", ""))
     
     # Health check intervals
     heartbeat_interval_seconds: int = 30
@@ -185,7 +185,7 @@ class MissionModeKernel:
                 and self._is_http_reachable(bus_url)
             )
 
-        gpu_url = self.fleet_config.gpu_gitea
+        gpu_url = self.fleet_config.gpu_git
         if gpu_url:
             health_status[self.fleet_config.gpu_compute] = self._is_http_reachable(gpu_url)
         else:

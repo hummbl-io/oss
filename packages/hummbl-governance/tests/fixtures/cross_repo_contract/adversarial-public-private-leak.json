@@ -4,23 +4,23 @@
   "contract_version": "0.1.0",
   "contract_status": "candidate",
   "producer": {
-    "repo": "hummbl-io/research-source-packets",
-    "authority_ref": "https://github.com/hummbl-io/research-source-packets/issues/18",
-    "artifact_locator": "private://hummbl-research/source-packets"
+    "repo": "hummbl-io/<private-repo>",
+    "authority_ref": "https://github.com/hummbl-io/<private-repo>/issues/18",
+    "artifact_locator": "private://<private-repo>/source-packets"
   },
   "consumers": [
     {
-      "repo": "hummbl-io/hummbl-research",
+      "repo": "hummbl-io/<private-repo>",
       "requirement": "required"
     },
     {
-      "repo": "hummbl-io/claim-evidence-ledger",
+      "repo": "hummbl-io/<private-repo>",
       "requirement": "optional"
     }
   ],
   "interface": {
     "artifact_type": "research_source_packet",
-    "payload_schema_uri": "https://github.com/hummbl-io/research-source-packets/blob/main/schemas/research-source-packets-v0.1.json",
+    "payload_schema_uri": "https://github.com/hummbl-io/<private-repo>/blob/main/schemas/<private-repo>-v0.1.json",
     "identifier_namespace": "rsp",
     "locator_pattern": "^rsp:[a-z0-9._/-]+$"
   },
@@ -67,7 +67,7 @@
       "consumer_rejection_receipt"
     ],
     "receipt_schema_refs": [
-      "https://github.com/hummbl-io/execution-receipts/blob/main/schemas/execution-receipts-v0.1.json"
+      "https://github.com/hummbl-io/<private-repo>/blob/main/schemas/<private-repo>-v0.1.json"
     ]
   },
   "assurance": {

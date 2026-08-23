@@ -21,7 +21,7 @@ The Strategy applies continent-wide to AU Member States, the African Union Commi
 
 | Obligation | Coverage | Evidence |
 |---|---|---|
-| Establish appropriate AI governance systems and regulations at regional and national levels | ✅ Governance-kernel substrate: authority + law + doctrine engines provide policy-as-code governance scaffold | `hummbl_governance/kernel/authority_engine.py`, `hummbl_governance/kernel/law_engine.py`, `hummbl_governance/kernel/doctrine_engine.py` |
+| Establish appropriate AI governance systems and regulations at regional and national levels | ✅ Governance-kernel substrate: authority + law + doctrine engines provide <private-repo> governance scaffold | `hummbl_governance/kernel/authority_engine.py`, `hummbl_governance/kernel/law_engine.py`, `hummbl_governance/kernel/doctrine_engine.py` |
 | Adopt multi-tiered governance framework grounded in human rights, inclusion, and transparency | ✅ Layered governance: identity-engine + authority-engine + evidence-engine enforce tiered accountability | `hummbl_governance/kernel/identity_engine.py`, `hummbl_governance/kernel/authority_engine.py`, `hummbl_governance/kernel/evidence_engine.py` |
 | Develop national AI strategies aligned with continental priorities | 🟡 Partial: compliance-mapper provides strategy-template + gap-analysis; national strategy authoring is org task | `hummbl_governance/compliance_mapper.py` |
 | Create institutional mechanisms for responsible, safe, and accountable AI development | ✅ Institutional-governance substrate: admission-control + schedule-engine + receipt-engine for accountable execution | `hummbl_governance/kernel/admission_control.py`, `hummbl_governance/kernel/schedule_engine.py`, `hummbl_governance/kernel/receipt_engine.py` |

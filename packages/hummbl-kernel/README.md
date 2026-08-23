@@ -30,11 +30,11 @@ The Mission Mode Kernel is a lightweight orchestration layer that combines Condu
 - **Checkpoint Enforcement**: Mandatory approval points for critical operations
 
 ### 4. Fleet Aware
-- **Hybrid Deployment**: Seamless coordination between nodezero and Anvil
+- **Hybrid Deployment**: Seamless coordination between <fleet-node> and <fleet-node>
 - **Health Monitoring**: Continuous fleet health monitoring
 - **Automatic Fallback**: Automatic task rerouting on node failure
 - **Resource Awareness**: Task routing based on hardware capabilities
-- **Network Security**: All fleet communication over Tailscale VPN
+- **Network Security**: All fleet communication over <internal-vpn>
 
 ## Architecture
 

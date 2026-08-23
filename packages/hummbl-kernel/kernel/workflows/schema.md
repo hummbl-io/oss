@@ -236,7 +236,7 @@ requested → admitted → planned → running → completed
 ### gpu (GPU/Compliance)
 - **Role**: GPU workloads and compliance operations
 - **Hardware**: NVIDIA GPU (12GB VRAM, 270W cap)
-- **Services**: Gitea, file operations, GPU inference
+- **Services**: <internal-ci>, file operations, GPU inference
 - **Responsibility**: File operations, evidence collection, GPU-intensive tasks
 
 ### Coordination Protocol

@@ -396,7 +396,7 @@ authority change, release).
 6. If the directory will become a repo, follow §4.1.
 
 **Rules:**
-- Local directories in `~/PROJECTS/` are expected to have `.git`.
+- Local directories in `~/<internal-path>/` are expected to have `.git`.
 - Local directories in `~/` (home) that are not git repos are classified
   as "non-git content" and tracked in the fleet inventory.
 - Non-git directories should be archived or promoted to git repos.
@@ -409,8 +409,8 @@ authority change, release).
 
 1. Add an entry to `docs/standards/FLEET_INVENTORY_<date>.md` in
    `hummbl-io/hummbl-governance`.
-2. Classify the entry by surface (private GitHub+Gitea, public GitHub,
-   Gitea-only, local git, local non-git, gitignored).
+2. Classify the entry by surface (private GitHub+<internal-ci>, public GitHub,
+   <internal-ci>-only, local git, local non-git, gitignored).
 3. Record: name, description, language, dependencies, file count.
 4. Commit with `docs(governance): add <name> to fleet inventory`.
 
@@ -418,7 +418,7 @@ authority change, release).
 
 When initializing a new repo from scratch, follow this order:
 
-1. Create the repo on GitHub (and Gitea mirror if private).
+1. Create the repo on GitHub (and <internal-ci> mirror if private).
 2. Clone locally.
 3. Initialize the package (§4.2 for Python, §4.3 for TypeScript).
 4. Initialize the governance stack (§4.1).

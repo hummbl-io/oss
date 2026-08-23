@@ -44,11 +44,11 @@ menu limited to what a consumer can actually act on today.
 | Package | Version | What it is | Install |
 |---------|---------|-----------|---------|
 | `hummbl-governance` | 1.4.1 | Governance primitives — kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation | `pip install hummbl-governance` |
-| `hummbl-bus` | 0.1.0 | Secure append-only TSV coordination bus for multi-agent systems | `pip install hummbl-bus` |
-| `hummbl-cognition` | 0.1.0 | Cognitive Ledger Protocol and Open Brain server | `pip install hummbl-cognition` |
-| `hummbl-tuples` | 0.2.0 | HUMMBL Typed Tuples governance model (polyglot: also Go, Rust, TS) | `pip install hummbl-tuples` |
-| `hummbl-bif` | 1.0.1 | Batch Ingestion Framework | `pip install hummbl-bif` |
-| `base120` | 3.0.0 | 120 reasoning operators for structured thinking — stdlib-only, tuple-native | `pip install base120` |
+| `<private-repo>` | 0.1.0 | Secure append-only TSV coordination bus for multi-agent systems | `pip install <private-repo>` |
+| `<private-repo>` | 0.1.0 | Cognitive Ledger Protocol and Open Brain server | `pip install <private-repo>` |
+| `<private-repo>` | 0.2.0 | HUMMBL Typed Tuples governance model (polyglot: also Go, Rust, TS) | `pip install <private-repo>` |
+| `<private-repo>` | 1.0.1 | Batch Ingestion Framework | `pip install <private-repo>` |
+| `<private-repo>` | 3.0.0 | 120 reasoning operators for structured thinking — stdlib-only, tuple-native | `pip install <private-repo>` |
 | `governed-compression` | 0.1.0 | Governed vector + KV-cache compression (ML) — CPU reference for quantization methods | `pip install governed-compression` |
 
 ### Next to be served (2 ready for first release)

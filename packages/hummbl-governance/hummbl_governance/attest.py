@@ -10,7 +10,7 @@ Example:
 
     attest = Attest()
     result = attest.verify(
-        server="hummbl-mcp-server",
+        server="<private-repo>-server",
         policy=ALLOWLIST,
         allowed_tools=["base120_get", "base120_list"],
     )

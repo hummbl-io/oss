@@ -16,7 +16,7 @@ TOOLSET_FILES: Dict[str, str] = {
     "scripts/pr_census.py": "PR and branch drift snapshot",
     "scripts/claim_drift.py": "Claim/lineage drift detection",
     "scripts/check-dependencies.py": "Dependency drift and pinning checks",
-    "scripts/anvil_git_signing_audit.py": "Git signing / toolchain health",
+    "scripts/git_signing_audit.py": "Git signing / toolchain health",
     "scripts/audit-github-actions.py": "GitHub Actions health diagnostics",
     "scripts/financial_pulse.py": "Spend/usage telemetry",
     "scripts/ops/keepalive_fleet_loop.py": "Fleet keepalive watchdog",

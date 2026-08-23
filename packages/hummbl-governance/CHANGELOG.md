@@ -108,7 +108,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`mcp_agent_monitor.py`** — MCP server exposing `BehaviorMonitor`, `ConvergenceDetector`, `GovernanceLifecycle`, and `EvolutionLineage` as 11 tools: `behavior_record`, `behavior_snapshot_baseline`, `behavior_detect_drift`, `convergence_record`, `convergence_check`, `convergence_scores`, `lifecycle_authorize`, `lifecycle_status`, `lineage_record_variant`, `lineage_get`, `lineage_drift`.
 - **`mcp_reasoning.py`** — MCP server exposing `ReasoningEngine`, `SchemaValidator`, and `ContractNetManager` as tools: reasoning model/rule/prompt tools, `schema_validate`/`schema_validate_dict`, and `contract_net_announce`/`bid`/`evaluate`/`status`.
 - **`mcp_physical.py`** — MCP server exposing `KinematicGovernor` and `pHRISafetyMonitor` as 6 tools: `kinematic_check_motion`, `kinematic_get_limits`, `kinematic_scaled_velocity`, `phri_check_safety`, `phri_get_config`, `phri_batch_check`.
-- **4 new `[project.scripts]` entries**: `hummbl-identity-mcp`, `hummbl-agent-monitor-mcp`, `hummbl-reasoning-mcp`, `hummbl-physical-mcp`.
+- **4 new `[project.scripts]` entries**: `hummbl-identity-mcp`, `<private-repo>-monitor-mcp`, `hummbl-reasoning-mcp`, `hummbl-physical-mcp`.
 - **143 new tests** across `test_mcp_identity.py` (34), `test_mcp_agent_monitor.py`, `test_mcp_reasoning.py`, `test_mcp_physical.py`.
 
 ### Changed
@@ -124,7 +124,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`mcp_server.py`** — MCP server exposing core governance primitives as 10 JSON-RPC tools: `governance_status`, `kill_switch_status`, `kill_switch_engage`, `kill_switch_disengage`, `circuit_breaker_status`, `cost_budget_check`, `cost_record_usage`, `audit_query`, `compliance_report`, `health_check`.
 - **`mcp_compliance.py`** — MCP server for compliance analysis: `nist_map_controls`, `soc2_assess`, `iso_crosswalk`, `stride_analysis`, `compliance_evidence_export`.
 - **`mcp_sandbox.py`** — MCP server for capability sandboxing: `sandbox_create`, `sandbox_check`, `sandbox_validate_output`, `sandbox_status`, `sandbox_destroy`.
-- **`hummbl-governance-mcp`**, **`hummbl-compliance-mcp`**, **`hummbl-sandbox-mcp`** CLI entry points.
+- **`hummbl-governance-mcp`**, **`<private-repo>-mcp`**, **`hummbl-sandbox-mcp`** CLI entry points.
 - **84 new tests** covering all MCP tool handlers and protocol-level JSON-RPC round-trips.
 
 ### Changed

@@ -107,7 +107,7 @@ See `identifier-uri-policy.md` for the complete candidate policy.
 
 ## Compatibility policy
 
-Candidate v0.1 uses SemVer for the envelope contract itself, supporting exact versions such as `0.1.0` and patch wildcards such as `0.1.x`. Payload versions remain domain-owned opaque strings such as `v0.1` or `execution-receipts/v0.1`; consumers may declare an exact value or a trailing-prefix wildcard such as `v0.*`.
+Candidate v0.1 uses SemVer for the envelope contract itself, supporting exact versions such as `0.1.0` and patch wildcards such as `0.1.x`. Payload versions remain domain-owned opaque strings such as `v0.1` or `<private-repo>/v0.1`; consumers may declare an exact value or a trailing-prefix wildcard such as `v0.*`.
 
 Bare `*` is prohibited in both contract and consumer compatibility declarations because it declares no compatibility boundary.
 
