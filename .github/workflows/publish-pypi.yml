@@ -28,7 +28,7 @@ permissions:
 jobs:
   build:
     name: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
     permissions:
       contents: read
     steps:
@@ -87,7 +87,7 @@ jobs:
   publish:
     name: publish
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
     environment: pypi
     permissions:
       contents: read
