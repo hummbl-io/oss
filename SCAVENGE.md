@@ -19,7 +19,9 @@ documents where the valuable unmerged work lives.
 
 - **Status:** 1.4.1 already live on PyPI from this repo. Source migration to
   `oss` in progress (PR #1).
-- **Actions:** Disabled. Repo is inert.
+- **Actions:** Repo is **ACTIVE** (last commit: 2026-08-23). Previously marked
+  inert, but has resumed active development. Do not scavenge until confirmed
+  inert and branches are merged or archived.
 - **Valuable branches (not in main):**
 
 | Branch | PR | What's there |
@@ -41,7 +43,8 @@ documents where the valuable unmerged work lives.
 ### hummbl-agent → oss/packages/typescript/hummbl-agent/
 
 - **Status:** TypeScript agent SDK. Consolidation candidate.
-- **Actions:** Disabled.
+- **Actions:** Repo is **ACTIVE** (last commit: 2026-08-20). Previously marked
+  disabled, but has recent commits. Verify before scavenging.
 - **Valuable branches:**
 
 | Branch | PR | What's there |
@@ -56,7 +59,8 @@ documents where the valuable unmerged work lives.
 
 - **Status:** BibTeX citation corpus with 27-tier structure. Significant
   research corpus work in branches.
-- **Actions:** Disabled.
+- **Actions:** Repo is **ACTIVE** (last commit: 2026-08-23). Previously marked
+  disabled, but has recent commits. Verify before scavenging.
 - **Valuable branches (research content):**
 
 | Branch | PR | What's there |
@@ -82,14 +86,16 @@ documents where the valuable unmerged work lives.
 ### hummbl-doctrine → oss/packages/python/hummbl-doctrine/
 
 - **Status:** Governance doctrine. Low unmerged value (dependabot + SHA-pinning).
-- **Actions:** Disabled.
+- **Actions:** Repo is **ACTIVE** (last commit: 2026-08-21). Previously marked
+  disabled, but has recent commits. Verify before scavenging.
 - **Valuable branches:** None significant. `fix/devin/pin-actions-sha` (#23)
   is SHA-pinning compliance (already applied org-wide by this session).
 
 ### hummbl-risk-contracts → oss/packages/python/hummbl-risk-contracts/
 
 - **Status:** Risk contract definitions.
-- **Actions:** Disabled.
+- **Actions:** Repo is **ACTIVE** (last commit: 2026-08-20). Previously marked
+  disabled, but has recent commits. Verify before scavenging.
 - **Valuable branches:**
 
 | Branch | PR | What's there |
