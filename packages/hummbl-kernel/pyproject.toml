@@ -8,14 +8,16 @@ version = "0.1.0"
 description = "HUMMBL orchestration kernel — lightweight workflow execution with security, compliance, and fleet coordination"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "Apache-2.0"
-license-files = ["LICENSE", "NOTICE"]
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]
 authors = [
     { name = "Reuben Bowlby", email = "reuben@hummbl.io" },
     { name = "HUMMBL, LLC" },
 ]
 keywords = ["orchestration", "kernel", "agent", "compliance", "fleet", "workflow"]
 classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

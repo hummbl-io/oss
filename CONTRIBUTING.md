@@ -251,4 +251,4 @@ pushed (delete the tag in git, but the proxy caches the version forever).
 
 ## 6. License
 
-All packages in this monorepo are Apache-2.0. See [`LICENSE`](./LICENSE).
+All packages in this monorepo are dual-licensed under MIT OR Apache-2.0. See [`LICENSE`](./LICENSE), [`LICENSE-MIT`](./LICENSE-MIT), and [`LICENSE-APACHE`](./LICENSE-APACHE).

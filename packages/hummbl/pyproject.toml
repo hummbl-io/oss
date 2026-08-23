@@ -7,8 +7,8 @@ name = "hummbl"
 version = "0.1.0"
 description = "Structured reasoning framework for AI agents — turns plans, hypotheses, observations, evaluations, decisions, and reflections into durable, inspectable artifacts"
 readme = "README.md"
-license = "Apache-2.0"
-license-files = ["LICENSE"]
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE"]
 requires-python = ">=3.10"
 authors = [
     { name = "Reuben Bowlby", email = "reuben@hummbl.io" },
@@ -17,6 +17,8 @@ authors = [
 keywords = ["reasoning", "ai", "agents", "plans", "hypotheses", "evaluations", "scientific-method", "artifacts", "hummbl"]
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",

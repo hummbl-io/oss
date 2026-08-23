@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT OR Apache-2.0
 """Validation tests for the governed Evidence Readiness Review Receipt schema.
 
 The schema at ``hummbl_governance/data/evidence_readiness_review_receipt.schema.json``

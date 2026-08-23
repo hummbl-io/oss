@@ -1,6 +1,6 @@
 # Copyright 2024-2026 HUMMBL, LLC
 # Licensed under the Apache License, Version 2.0
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT OR Apache-2.0
 
 """Tests for candidate cross-repository contracts."""
 
