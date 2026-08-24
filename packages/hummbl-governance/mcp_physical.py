@@ -36,6 +36,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.physical_governor import (
     KinematicGovernor,
     pHRISafetyMonitor,
@@ -43,7 +44,7 @@ from hummbl_governance.physical_governor import (
 )
 
 SERVER_NAME = "hummbl-physical"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = _pkg_version
 PROTOCOL_VERSION = "2024-11-05"
 
 # Module-level singletons (configurable via environment or per-call args)

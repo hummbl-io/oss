@@ -1,8 +1,8 @@
 # Public Claims
 
 Status: public claim ledger
-Last updated: 2026-08-16
-Current package metadata: `pyproject.toml` version `1.4.0`
+Last updated: 2026-08-23
+Current package metadata: `pyproject.toml` version `1.4.1`
 
 This ledger keeps public claims evidence-backed. A claim should be promoted
 only when its status is `verified` or when it is explicitly framed as planned,
@@ -12,7 +12,7 @@ draft, pending, or source-candidate.
 
 | Claim                                                                   | Status           | Receipt                                                                                                                                                                                            | Promotion rule                                                                  |
 | ----------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Package version is `1.4.0`                                              | verified         | `pyproject.toml` declares `version = "1.4.0"`                                                                                                                                                      | May be stated as package metadata.                                              |
+| Package version is `1.4.1`                                              | verified         | `pyproject.toml` declares `version = "1.4.1"`                                                                                                                                                      | May be stated as package metadata.                                              |
 | Runtime dependencies are zero                                           | verified         | `pyproject.toml` has `dependencies = []`                                                                                                                                                           | May be stated as zero third-party runtime dependencies.                         |
 | CI tests Python 3.11, 3.12, and 3.13                                    | verified         | `.github/workflows/ci.yml` matrix includes 3.11, 3.12, 3.13                                                                                                                                        | May be stated as CI-tested on 3.11-3.13.                                        |
 | Python 3.14 is supported                                                | not verified     | CI matrix and `pyproject.toml` classifiers do not include 3.14 at this audit                                                                                                                       | Do not claim support until CI includes 3.14 and passes.                         |

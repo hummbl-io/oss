@@ -16,8 +16,8 @@ Thank you for considering contributing to hummbl-governance. This project is int
 
 ```bash
 # Clone
-git clone https://github.com/hummbl-io/hummbl-governance.git
-cd hummbl-governance
+git clone https://github.com/hummbl-io/oss.git
+cd oss/packages/hummbl-governance
 
 # Create virtual environment
 python -m venv .venv

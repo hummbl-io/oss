@@ -16,15 +16,7 @@ from hummbl.reasoning import (
 from hummbl.protocols import (
     ReasoningProtocol,
     ScientificMethod,
-    QualityAssessment,
     StructuredToolUse,
-)
-from hummbl.peptide_protocol import PeptideQualityProtocol
-from hummbl.peptide_rules import (
-    PEPTIDE_SPECS,
-    VENDOR_TRUST_TIERS,
-    GRADE_RECOMMENDATIONS,
-    PeptideSpec,
 )
 from hummbl.capture import AutoresearchCapture, ToolUseCapture
 from hummbl.scoring import DimensionScore, TraceScore, StructuredToolUseScorer

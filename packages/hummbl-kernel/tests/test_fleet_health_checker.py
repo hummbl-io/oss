@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
-from kernel.fleet.fleet_health_checker import (
+from hummbl_kernel.fleet.fleet_health_checker import (
     FleetHealthChecker,
     FleetMode,
     MachineStatus,

@@ -63,6 +63,7 @@ from hummbl_governance import (
     AuditLog,
     ComplianceMapper,
     HealthCollector,
+    __version__ as _pkg_version,
 )
 
 # ---------------------------------------------------------------------------
@@ -73,7 +74,7 @@ DB_PATH = os.environ.get("GOVERNANCE_DB_PATH", os.path.join(STATE_DIR, "costs.db
 AUDIT_DIR = os.environ.get("GOVERNANCE_AUDIT_DIR", os.path.join(STATE_DIR, "audit"))
 
 SERVER_NAME = "hummbl-governance"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = _pkg_version
 PROTOCOL_VERSION = "2024-11-05"
 
 # ---------------------------------------------------------------------------

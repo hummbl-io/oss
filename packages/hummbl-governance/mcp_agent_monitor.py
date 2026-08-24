@@ -45,6 +45,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.reward_monitor import BehaviorMonitor
 from hummbl_governance.convergence_guard import ConvergenceDetector
 from hummbl_governance.lifecycle import GovernanceLifecycle
@@ -55,7 +56,7 @@ from hummbl_governance.cost_governor import CostGovernor
 from hummbl_governance.identity import AgentRegistry
 
 SERVER_NAME = "hummbl-agent-monitor"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = _pkg_version
 PROTOCOL_VERSION = "2024-11-05"
 
 # Module-level singletons

@@ -10,7 +10,7 @@
 
 package:
   name: hummbl-governance
-  version: 1.4.0
+  version: 1.4.1
   license: Apache-2.0
   publisher: HUMMBL, LLC
   description: Governance primitives for AI agent orchestration
@@ -75,7 +75,7 @@ provenance:
   build_system: github-actions
   trusted_publishing: true
   testpypi_staging: true
-  source_repo: https://github.com/hummbl-io/hummbl-governance
+  source_repo: https://github.com/hummbl-io/oss
   license: Apache-2.0
   supply_chain_risk: none
   dependencies: zero

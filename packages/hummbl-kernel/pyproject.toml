@@ -42,7 +42,7 @@ Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/hummbl-kern
 Issues = "https://github.com/hummbl-io/oss/issues"
 
 [tool.setuptools.packages.find]
-include = ["kernel*"]
+include = ["hummbl_kernel*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]

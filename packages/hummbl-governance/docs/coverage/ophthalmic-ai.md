@@ -129,7 +129,6 @@ Governance gaps specific to the retinal neurodevelopmental screening domain that
 
 ## Cross-references
 
-- Case study: [`docs/trackers/healthcare-ai-watch/HAW-2026-001-retinal-neurodevelopmental-screening.md`](../trackers/healthcare-ai-watch/HAW-2026-001-retinal-neurodevelopmental-screening.md)
 - EU AI Act full matrix: [`docs/coverage/eu-ai-act.md`](./eu-ai-act.md)
 - NIST AI RMF full matrix: [`docs/coverage/nist-ai-rmf.md`](./nist-ai-rmf.md)
 - ISO 42001 full matrix: [`docs/coverage/iso-42001.md`](./iso-42001.md)

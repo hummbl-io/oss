@@ -42,6 +42,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hummbl_governance.identity import AgentRegistry
+from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.delegation import (
     DelegationTokenManager,
     DelegationToken,
@@ -50,7 +51,7 @@ from hummbl_governance.delegation import (
 from hummbl_governance.lamport_clock import LamportClock, LamportTimestamp
 
 SERVER_NAME = "hummbl-identity"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = _pkg_version
 PROTOCOL_VERSION = "2024-11-05"
 
 # Module-level singletons

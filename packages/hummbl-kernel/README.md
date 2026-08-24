@@ -1,6 +1,6 @@
-# HUMMBL/kernel
+# hummbl-kernel
 
-HUMMBL orchestration kernel - lightweight workflow execution with security and compliance enforcement.
+HUMMBL orchestration kernel — lightweight workflow execution with security and compliance enforcement.
 
 ## Overview
 
@@ -30,11 +30,10 @@ The Mission Mode Kernel is a lightweight orchestration layer that combines Condu
 - **Checkpoint Enforcement**: Mandatory approval points for critical operations
 
 ### 4. Fleet Aware
-- **Hybrid Deployment**: Seamless coordination between nodezero and Anvil
+- **Hybrid Deployment**: Seamless coordination between user-supplied compute nodes
 - **Health Monitoring**: Continuous fleet health monitoring
 - **Automatic Fallback**: Automatic task rerouting on node failure
 - **Resource Awareness**: Task routing based on hardware capabilities
-- **Network Security**: All fleet communication over Tailscale VPN
 
 ## Architecture
 
@@ -51,29 +50,50 @@ The Mission Mode Kernel is a lightweight orchestration layer that combines Condu
 ## Quick Start
 
 ```python
-from kernel import Kernel
+import asyncio
+import json
+from hummbl_kernel import MissionModeKernel
 
 # Initialize kernel
-kernel = Kernel()
+kernel = MissionModeKernel()
 
 # Define workflow
-workflow = """
-name: example_workflow
-steps:
-  - name: collect_evidence
-    capability: evidence.collect
-    action: read
-    risk_class: low
-"""
+example_workflow = {
+    "name": "example_workflow",
+    "intent": "Collect and assess compliance evidence",
+    "success_criteria": ["All controls documented"],
+    "workflow": [
+        {
+            "step": "collect_evidence",
+            "agent": "evidence_collector",
+            "outputs": {"evidence_refs": ["ev_001", "ev_002"]}
+        }
+    ]
+}
 
 # Execute workflow
-result = kernel.execute(workflow)
+async def main():
+    receipt = await kernel.execute_workflow(
+        workflow_yaml=json.dumps(example_workflow),
+        inputs={
+            "audit_period_start": "2025-01-01T00:00:00Z",
+            "audit_period_end": "2025-12-31T23:59:59Z",
+            "organization_id": "org_001"
+        }
+    )
+    print(f"Mission completed: {receipt.receipt_id}")
+    print(f"Audit trail: {receipt.audit_trail_ref}")
+
+asyncio.run(main())
 ```
 
 ## Documentation
 
-- `kernel_design.md` - Detailed architecture and design specifications
-- `IMPLEMENTATION_SUMMARY.md` - Implementation status and roadmap
+- `hummbl_kernel/audit/audit_trail_system.md` — Audit trail architecture
+- `hummbl_kernel/audit/checkpoint_system.md` — Checkpoint enforcement
+- `hummbl_kernel/adapters/adapter_interface.md` — Adapter interface specification
+- `hummbl_kernel/workflows/schema.md` — Workflow YAML schema
+- `hummbl_kernel/security/` — Capability admission policy
 
 ## License
 

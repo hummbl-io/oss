@@ -35,7 +35,9 @@ per-language publishing workflow.
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Dual-licensed at the repo level: MIT OR Apache-2.0. See [LICENSE](LICENSE),
+[LICENSE-MIT](LICENSE-MIT), and [LICENSE-APACHE](LICENSE-APACHE).
+Individual packages ship under Apache-2.0; see each package's `LICENSE` file.
 
 ## Contact
 

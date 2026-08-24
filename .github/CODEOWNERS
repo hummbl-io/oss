@@ -1,0 +1,20 @@
+# CODEOWNERS for hummbl-io/oss monorepo
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything not covered below
+* @reuben
+
+# Per-package routing
+/packages/hummbl-governance/ @reuben
+/packages/hummbl-kernel/ @reuben
+/packages/hummbl/ @reuben
+
+# CI and workflow files
+/.github/ @reuben
+/tools/ @reuben
+
+# Root docs
+/README.md @reuben
+/SECURITY.md @reuben
+/CONTRIBUTING.md @reuben
+/docs/ @reuben

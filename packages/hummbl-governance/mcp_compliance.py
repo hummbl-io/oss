@@ -52,6 +52,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from hummbl_governance import ComplianceMapper
+from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.stride_mapper import (
     StrideMapper,
     Interaction,
@@ -63,7 +64,7 @@ from hummbl_governance.stride_mapper import (
 AUDIT_DIR = os.environ.get("GOVERNANCE_AUDIT_DIR", os.path.join(tempfile.gettempdir(), "governance", "audit"))  # nosec B108 — env-overridable default, not hardcoded
 
 SERVER_NAME = "hummbl-compliance"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = _pkg_version
 PROTOCOL_VERSION = "2024-11-05"
 
 # ---------------------------------------------------------------------------

@@ -124,7 +124,7 @@ class ReasoningTrace:
         topology: How steps are organized (chain, tree, graph).
         steps: Ordered list of all reasoning steps.
         outcome: Final result — "keep", "discard", "crash", or free-form.
-        domain: The reasoning domain ("autoresearch", "peptide_qa", etc.).
+        domain: The reasoning domain ("autoresearch", "code_review", etc.).
         created_at: Unix timestamp when the trace was started.
         tags: Free-form tags for filtering and grouping traces.
     """

@@ -16,7 +16,7 @@ Your AI agent calls an API. The API starts returning errors. Your agent retries,
 
 Teams shipping AI agents can face runaway costs, cascading failures, unauthorized actions, and incomplete audit trails. General-purpose agent frameworks emphasize orchestration; their governance coverage varies by framework, version, and deployment, so teams still need to evaluate runtime controls explicitly.
 
-**hummbl-governance** is a safety and evidence layer. It provides 36 governance primitives — kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, compliance mapping, and more — as a single stdlib-only Python package. It has no third-party runtime dependencies and no required orchestration framework.
+**hummbl-governance** is a safety and evidence layer. It provides 34 governance primitives — kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, compliance mapping, and more — as a single stdlib-only Python package. It has no third-party runtime dependencies and no required orchestration framework.
 
 The package is classified **Alpha** in `pyproject.toml`. Evaluate it against your own risk, security, and production-readiness requirements.
 
@@ -111,7 +111,7 @@ graph TD
 
 ## Features
 
-- **36 governance primitives** covering safety, cost, identity, compliance, reasoning, coordination, physical-AI, execution assurance, and governance Kernel
+- **34 governance primitives** covering safety, cost, identity, compliance, reasoning, coordination, physical-AI, execution assurance, and governance Kernel
 - **2314 collected tests** across package modules, as of the latest local receipt in [docs/public-claims.md](docs/public-claims.md)
 - **Zero dependencies** -- Python stdlib only, no pip conflicts
 - **Thread-safe** -- all modules use appropriate locking primitives
@@ -262,7 +262,7 @@ The table below maps hummbl-governance primitives to the [OWASP Top 10 for Agent
 | **ASI09** Human-Agent Trust Exploitation | [`ReasoningEngine`](hummbl_governance/reasoning.py), [`ComplianceMapper`](hummbl_governance/compliance_mapper.py) | [7](tests/test_explain.py) + [112](tests/test_compliance_mapper.py) | Structured decision traces explain *why* a governance decision was made. Compliance mapping to NIST/ISO provides external validation anchor. |
 | **ASI10** Rogue Agents | [`BehaviorMonitor`](hummbl_governance/reward_monitor.py), [`GovernanceLifecycle`](hummbl_governance/lifecycle.py) | [20](tests/test_reward_monitor.py) + [17](tests/test_lifecycle.py) | Jensen-Shannon divergence detects behavioral drift from baseline. Lifecycle FSM enforces PROVISIONED → ACTIVE → SUSPENDED → DECOMMISSIONED transitions. |
 
-**Current posture:** 2314 collected tests, 36 implemented primitives, 7 MCP server entry points, and zero third-party runtime dependencies. Test-count and coverage claims require current receipts; see [docs/public-claims.md](docs/public-claims.md).
+**Current posture:** 2314 collected tests, 34 implemented primitives, 7 MCP server entry points, and zero third-party runtime dependencies. Test-count and coverage claims require current receipts; see [docs/public-claims.md](docs/public-claims.md).
 
 For the formal governance primitive underlying all 10 mitigations, see [The Governance Tuple](https://doi.org/10.5281/zenodo.19646940) (Bowlby, 2026).
 

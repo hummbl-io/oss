@@ -8,7 +8,8 @@ This is a monorepo. Each package has its own support lifecycle.
 |---------|---------|--------------------|
 | hummbl-governance | 1.4.x | Yes (current)      |
 | hummbl-governance | 1.0.x | Yes (security fixes only) |
-| hummbl-bus | 1.x   | Yes (current)      |
+| hummbl-kernel | 0.1.x | Yes (current, pre-release) |
+| hummbl | 0.1.x | Yes (current, pre-release) |
 | < 1.0 (any package) | — | No                 |
 
 ## Reporting a Vulnerability
@@ -28,7 +29,7 @@ in its respective package README and `SECURITY.md` (where present).
 
 Key security-relevant packages:
 - **hummbl-governance** — governance primitives (kill switch, circuit breaker, audit log, identity registry, capability fence, output validator)
-- **hummbl-bus** — secure append-only TSV coordination bus
+- **hummbl-kernel** — orchestration kernel with capability admission policy and audit trail
 
 ## Disclosure Policy
 

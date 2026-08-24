@@ -5,7 +5,7 @@ import tempfile
 import shutil
 import json
 from pathlib import Path
-from kernel.audit.file_persistence import AuditTrailPersistence, get_persistence
+from hummbl_kernel.audit.file_persistence import AuditTrailPersistence, get_persistence
 
 
 class TestAuditTrailPersistence(unittest.TestCase):
@@ -219,7 +219,7 @@ class TestAuditTrailPersistence(unittest.TestCase):
     def test_singleton_get_persistence(self):
         """get_persistence should return singleton instance."""
         # Reset singleton for testing
-        import kernel.audit.file_persistence as persistence_module
+        import hummbl_kernel.audit.file_persistence as persistence_module
         persistence_module._persistence_instance = None
         
         # First call creates instance

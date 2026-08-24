@@ -57,9 +57,10 @@ except ImportError:
     OutputValidator = None
 
 from hummbl_governance import AuditLog
+from hummbl_governance import __version__ as _pkg_version
 
 SERVER_NAME = "hummbl-sandbox"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = _pkg_version
 PROTOCOL_VERSION = "2024-11-05"
 
 STATE_DIR = Path(os.environ.get("SANDBOX_STATE_DIR", os.path.join(tempfile.gettempdir(), "hummbl-sandbox")))  # nosec B108 — env-overridable default, not hardcoded

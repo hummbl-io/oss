@@ -6,8 +6,8 @@ are composable — a complex reasoning process can chain multiple protocols
 together.
 
 The key insight: the autoresearch experiment loop IS a reasoning protocol.
-So is peptide quality assessment. So is code review. HUMMBL makes these
-patterns explicit, inspectable, and reusable.
+So is code review. HUMMBL makes these patterns explicit, inspectable,
+and reusable.
 """
 
 from __future__ import annotations
@@ -230,69 +230,6 @@ class ScientificMethod(ReasoningProtocol):
                         "influence the next hypothesis?"
                     ),
                     required=False,  # Not every experiment needs reflection
-                ),
-            ],
-        )
-
-
-class QualityAssessment(ReasoningProtocol):
-    """Peptide quality assessment reasoning protocol.
-
-    For evaluating peptide test results against known standards:
-    1. Observe test data (HPLC purity, mass spec, etc.)
-    2. Evaluate against pharmacopeia standards
-    3. Hypothesize likely causes of any issues
-    4. Decide on a grade and recommendation
-
-    Uses CHAIN topology — assessment is a linear evaluation process.
-    """
-
-    def __init__(self):
-        super().__init__(
-            name="quality_assessment",
-            description=(
-                "Structured quality evaluation against known standards. "
-                "Observe data, evaluate, hypothesize causes, decide."
-            ),
-            domain="peptide_qa",
-            topology=ReasoningTopology.CHAIN,
-            step_specs=[
-                StepSpec(
-                    type=StepType.OBSERVATION,
-                    name="ingest_test_data",
-                    description=(
-                        "Read and parse the raw test data: HPLC purity, "
-                        "mass spec identity, endotoxin levels, etc."
-                    ),
-                    metadata_keys=["sample_id", "test_type"],
-                ),
-                StepSpec(
-                    type=StepType.EVALUATION,
-                    name="compare_to_standards",
-                    description=(
-                        "Compare each measurement to the applicable "
-                        "pharmacopeia or industry standard thresholds."
-                    ),
-                    metadata_keys=["standard_name", "pass_fail"],
-                ),
-                StepSpec(
-                    type=StepType.HYPOTHESIS,
-                    name="root_cause",
-                    description=(
-                        "If any measurements are out of spec, hypothesize "
-                        "the likely cause: degradation, contamination, "
-                        "synthesis error, etc."
-                    ),
-                    required=False,  # Only needed when issues are found
-                ),
-                StepSpec(
-                    type=StepType.DECISION,
-                    name="grade_and_recommend",
-                    description=(
-                        "Assign a quality grade and provide a recommendation: "
-                        "safe to use, retest, discard, etc."
-                    ),
-                    metadata_keys=["grade", "recommendation"],
                 ),
             ],
         )

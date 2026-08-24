@@ -3,7 +3,7 @@
 import os
 import unittest
 from datetime import datetime, timezone
-from kernel.kernel import (
+from hummbl_kernel.kernel import (
     MissionModeKernel,
     ComplianceFramework,
     EventStatus,

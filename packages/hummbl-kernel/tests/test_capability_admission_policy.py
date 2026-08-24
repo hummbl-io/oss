@@ -2,7 +2,7 @@
 
 import unittest
 from datetime import datetime, timezone, timedelta
-from kernel.security.capability_admission_policy import (
+from hummbl_kernel.security.capability_admission_policy import (
     CapabilityAdmissionPolicy,
     RiskClass,
     ComplianceFramework,

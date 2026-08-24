@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-08-22
 
 ### Added
-- Initial PyPI release of the hummbl-kernel package
+- Initial release candidate of the hummbl-kernel package (not yet published to PyPI)
 - `MissionModeKernel` class with `async execute_workflow()` — Conductor-style YAML workflow orchestration
 - Capability admission policy (`security/capability_admission_policy.py`) — grant validation, escalation prevention, secret redaction
 - Fleet health checker (`fleet/fleet_health_checker.py`) — health monitoring, task routing, fallback
