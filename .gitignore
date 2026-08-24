@@ -7,6 +7,7 @@ build/
 .pytest_cache/
 *.egg
 *.db
+uv.lock
 
 # Generated graph reports
 reports/*.html
