@@ -1,0 +1,13 @@
+{
+  "decision": "NEEDS_REVIEW",
+  "reason_code": "scope_boundary",
+  "evidence": {
+    "task_scope": "summarize document",
+    "tool_called": "file:delete",
+    "scope_match": false,
+    "explanation": "Agent was asked to summarize a document but generated a file deletion call, which is out of scope."
+  },
+  "candidate_hash": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "timestamp": "2026-07-01T00:00:00Z",
+  "agent_identity": "agent-alpha"
+}
