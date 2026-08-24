@@ -166,12 +166,12 @@ consider whether the package should be renamed to `hummbl-*` (PyPI) or
 
 This is a **public** repo. Before pushing anything, scan for:
 
-- Internal host paths: `PROJECTS/`, `hosts/<fleet-node>`, `hosts/<fleet-node>`,
+- Internal host paths: `PROJECTS/`, `hosts/<fleet-node>`,
   `C:\Users`, `/opt/<org>`
-- Machine names in path context: `anvil`, `delta`, `hummbl-vps`,
-  `nodezero` (machine names as **public** GitHub repo names are fine --
-  they're already public; **private** repo names are still internal and
-  must not be enumerated in public docs)
+- Machine names in path context: `<fleet-node-1>`, `<fleet-node-2>`,
+  `<fleet-vps>`, `<fleet-gateway>` (machine names as **public** GitHub
+  repo names are fine -- they're already public; **private** repo names
+  are still internal and must not be enumerated in public docs)
 - Private repo names with sensitive descriptions (e.g. "vault / Secrets",
   "meeting-archive / Private transcripts") -- do not publish categorized
   inventories of non-public infrastructure
@@ -193,8 +193,9 @@ Scan each file, not just the ones you authored.
 ### 3.1 False-positive patterns
 
 The following are NOT PII and should not block a publish:
-- `delta` as a mathematical variable (not a machine name)
-- `slate` as an idiom ("clean slate")
+- Common words that overlap with internal codenames (e.g. a Greek
+  letter used as a mathematical variable, not a machine name)
+- Common English words used as idioms (e.g. "clean slate")
 - `OPENAI_API_KEY=os.getenv(...)` calls (env var references, not hardcoded
   secrets)
 - Placeholder webhook URLs (`hooks.slack.com/services/T/B/X` patterns)
