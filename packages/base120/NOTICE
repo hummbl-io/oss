@@ -1,0 +1,69 @@
+==============================================================================
+NOTICE file for base120
+==============================================================================
+
+This product includes software developed by HUMMBL, LLC
+(https://hummbl.io).
+
+Copyright 2024-2026 HUMMBL, LLC. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+------------------------------------------------------------------------------
+Third-Party Components
+------------------------------------------------------------------------------
+
+This software includes no third-party runtime dependencies.
+All code is stdlib-only Python 3.11+.
+
+Development/test dependencies (not distributed):
+- pytest (MIT License)
+- ruff (MIT License)
+
+------------------------------------------------------------------------------
+Attribution
+------------------------------------------------------------------------------
+
+Base120 mental model framework (120 models, 6 transformations:
+Perspective, Inversion, Composition, Decomposition, Recursion, Systems)
+designed and curated by Reuben Bowlby, HUMMBL Research.
+
+Mental model definitions draw from public-domain and fair-use sources
+across cognitive science, decision theory, systems thinking, philosophy,
+and mathematics. See hummbl-bibliography for provenance.
+
+MCP server implementation by HUMMBL Fleet.
+
+------------------------------------------------------------------------------
+IMPORTANT: Base120 Proprietary Content Notice
+------------------------------------------------------------------------------
+
+The Base120 mental model DEFINITIONS, NAMES, CODES, and TRANSFORMATION
+FRAMEWORK are proprietary intellectual property of HUMMBL, LLC.
+
+While the SOFTWARE (Python package, MCP server, CLI) is Apache-2.0
+licensed, the structured mental model corpus itself
+(Base120_Canonical_Model_Registry.yaml, base120/ package definitions)
+is protected by copyright and trade secret.
+
+Commercial use of the Base120 corpus beyond the Apache-2.0 software
+license requires a separate commercial license from HUMMBL, LLC.
+
+------------------------------------------------------------------------------
+Trademarks
+------------------------------------------------------------------------------
+
+HUMMBL™, BASE120™, KRINEIA™, VERUM™, BKI™, GOVERNANCE TUPLE™
+are trademarks of HUMMBL, LLC.
+
+This NOTICE file does not grant any trademark rights.

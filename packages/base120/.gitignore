@@ -1,0 +1,14 @@
+.venv/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+contract_report.json
+*.pytest_cache/
+.pytest_cache/
+dist/
+build/
+
+# Drift detection reports (keep snapshots, exclude drift reports)
+artifacts/golden_corpus_snapshots/drift-report-*.json
+*.html

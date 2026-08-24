@@ -1,0 +1,9 @@
+{
+  "version": "v1.0.0",
+  "hash_algorithm": "sha256",
+  "registries": {
+    "fm.json": "<hash_fm>",
+    "err.json": "<hash_err>",
+    "mappings.json": "<hash_map>"
+  }
+}

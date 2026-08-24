@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <rect width="800" height="200" fill="#0d1117"/>
+  <rect x="0" y="0" width="800" height="4" fill="#2da44e"/>
+  <text x="40" y="75" font-family="Segoe UI, Helvetica, sans-serif" font-size="42" font-weight="bold" fill="#ffffff">Base120</text>
+  <text x="40" y="110" font-family="Segoe UI, Helvetica, sans-serif" font-size="18" fill="#8b949e">120 mental models for structured reasoning</text>
+  <text x="40" y="140" font-family="Segoe UI, Helvetica, sans-serif" font-size="14" fill="#2da44e">6 transformations · zero dependencies · Python 3.11+</text>
+  <g transform="translate(40, 160)">
+    <rect x="0" y="0" width="60" height="24" rx="12" fill="#1f6feb"/>
+    <text x="30" y="16" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">P</text>
+    <rect x="70" y="0" width="60" height="24" rx="12" fill="#238636"/>
+    <text x="100" y="16" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">IN</text>
+    <rect x="140" y="0" width="60" height="24" rx="12" fill="#8957e5"/>
+    <text x="170" y="16" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">CO</text>
+    <rect x="210" y="0" width="60" height="24" rx="12" fill="#db6d28"/>
+    <text x="240" y="16" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">DE</text>
+    <rect x="280" y="0" width="60" height="24" rx="12" fill="#f778ba"/>
+    <text x="310" y="16" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">RE</text>
+    <rect x="350" y="0" width="60" height="24" rx="12" fill="#a371f7"/>
+    <text x="380" y="16" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">SY</text>
+  </g>
+</svg>

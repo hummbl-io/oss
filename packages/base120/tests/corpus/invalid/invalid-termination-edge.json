@@ -1,0 +1,43 @@
+{
+  "contract_version": "v1.0.0",
+  "service_name": "invalid-service",
+  "artifact_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object"
+  },
+  "failure_graph": {
+    "nodes": [
+      {
+        "id": "FM15",
+        "name": "Schema Non-Compliance",
+        "max_retries": 0,
+        "action": "escalate"
+      },
+      {
+        "id": "FM30",
+        "name": "Unrecoverable System State",
+        "max_retries": 0,
+        "action": "terminate"
+      }
+    ],
+    "edges": [
+      {
+        "from": "FM15",
+        "to": "FM30",
+        "condition": "always"
+      },
+      {
+        "from": "FM30",
+        "to": "FM15",
+        "condition": "invalid"
+      }
+    ]
+  },
+  "metadata": {
+    "created": "2026-01-03T17:00:00Z",
+    "updated": "2026-01-03T17:00:00Z",
+    "compatibility": {
+      "environments": ["production"]
+    }
+  }
+}

@@ -1,0 +1,273 @@
+# Base120 — llms.txt
+# AI-readable index of the Base120 mental model library.
+# 120 named mental models for structured reasoning across 6 cognitive domains. Last updated: 2026-08-19.
+#
+# Query API: LLMs can parse this file to understand reasoning operators
+# Package identity: base120
+# PyPI status: unpublished
+# Installation: source install only; clone https://github.com/hummbl-io/oss/tree/main/packages/base120 and run python -m pip install -e .
+# Documentation: https://github.com/hummbl-io/oss/tree/main/packages/base120
+#
+# Base120 categories:
+#   BASE120:PERSPECTIVE Viewpoints, framing, empathy (P1–P20)
+#   BASE120:INVERSION Counterfactuals, negation, proof by contradiction (IN1–IN20)
+#   BASE120:COMPOSITION Building, combining, layering (CO1–CO20)
+#   BASE120:DECOMPOSITION Breaking down, isolating, factoring (DE1–DE20)
+#   BASE120:RECURSION Self-reference, iteration, meta-reasoning (RE1–RE20)
+#   BASE120:SYSTEMS Dynamics, emergence, control (SY1–SY20)
+#   BASE120:SDK Python stdlib-only SDK for operator lookup and prompting
+#   BASE120:MCP MCP server integration for AI agents
+#   BASE120:LEDGER Append-only VERUM-aligned JSONL records
+
+## The 6 Cognitive Domains
+
+### Perspective (P) — P1–P20
+Focus: Viewpoints, framing, empathy, context
+- P1 First Principles Framing
+- P2 Stakeholder Mapping
+- P3 Identity Stack
+- P4 Lens Shifting
+- P5 Empathy Mapping
+- P6 Point-of-View Anchoring
+- P7 Perspective Switching
+- P8 Narrative Framing
+- P9 Cultural Lens Shifting
+- P10 Context Windowing
+- P11 Role Perspective-Taking
+- P12 Temporal Framing
+- P13 Spatial Framing
+- P14 Reference Class Framing
+- P15 Assumption Surfacing
+- P16 Identity-Context Reciprocity
+- P17 Frame Control & Reframing
+- P18 Boundary Object Selection
+- P19 Sensemaking Canvases
+- P20 Worldview Articulation
+
+### Inversion (IN) — IN1–IN20
+Focus: Counterfactuals, negation, proof by contradiction
+- IN1 Subtractive Thinking
+- IN2 Premortem Analysis
+- IN3 Problem Reversal
+- IN4 Contra-Logic
+- IN5 Negative Space Framing
+- IN6 Inverse/Proof by Contradiction
+- IN7 Boundary Testing
+- IN8 Contrapositive Reasoning
+- IN9 Backward Induction
+- IN10 Red Teaming
+- IN11 Devil's Advocate Protocol
+- IN12 Failure First Design
+- IN13 Opportunity Cost Focus
+- IN14 Second-Order Effects (Inverted)
+- IN15 Constraint Reversal
+- IN16 Inverse Optimization
+- IN17 Counterfactual Negation
+- IN18 Kill-Criteria & Stop Rules
+- IN19 Harm Minimization (Via Negativa)
+- IN20 Antigoals & Anti-Patterns Catalog
+
+### Composition (CO) — CO1–CO20
+Focus: Building, combining, layering
+- CO1 Synergy Principle
+- CO2 Chunking
+- CO3 Functional Composition
+- CO4 Interdisciplinary Synthesis
+- CO5 Emergence
+- CO6 Gestalt Integration
+- CO7 Network Effects
+- CO8 Layered Abstraction
+- CO9 Interface Contracts
+- CO10 Pipeline Orchestration
+- CO11 Pattern Composition (Tiling)
+- CO12 Modular Interoperability
+- CO13 Cross-Domain Analogy
+- CO14 Platformization
+- CO15 Combinatorial Design
+- CO16 System Integration Testing
+- CO17 Orchestration vs Choreography
+- CO18 Knowledge Graphing
+- CO19 Multi-Modal Integration
+- CO20 Holistic Integration
+
+### Decomposition (DE) — DE1–DE20
+Focus: Breaking down, isolating, factoring
+- DE1 Root Cause Analysis (5 Whys)
+- DE2 Factorization
+- DE3 Modularization
+- DE4 Layered Breakdown
+- DE5 Dimensional Reduction
+- DE6 Taxonomy/Classification
+- DE7 Pareto Decomposition (80/20)
+- DE8 Work Breakdown Structure
+- DE9 Signal Separation
+- DE10 Abstraction Laddering
+- DE11 Scope Delimitation
+- DE12 Constraint Isolation
+- DE13 Failure Mode Analysis (FMEA)
+- DE14 Variable Control & Isolation
+- DE15 Decision Tree Expansion
+- DE16 Hypothesis Disaggregation
+- DE17 Orthogonalization
+- DE18 Scenario Decomposition
+- DE19 Critical Path Unwinding
+- DE20 Partition-and-Conquer
+
+### Recursion (RE) — RE1–RE20
+Focus: Self-reference, iteration, meta-reasoning
+- RE1 Recursive Improvement (Kaizen)
+- RE2 Feedback Loops
+- RE3 Meta-Learning (Learn-to-Learn)
+- RE4 Nested Narratives
+- RE5 Fractal Reasoning
+- RE6 Recursive Framing
+- RE7 Self-Referential Logic
+- RE8 Bootstrapping
+- RE9 Iterative Prototyping
+- RE10 Compounding Cycles
+- RE11 Calibration Loops
+- RE12 Bayesian Updating in Practice
+- RE13 Gradient Descent Heuristic
+- RE14 Spiral Learning
+- RE15 Convergence-Divergence Cycling
+- RE16 Retrospective -> Prospective Loop
+- RE17 Versioning & Diff
+- RE18 Anti-Catastrophic Forgetting
+- RE19 Auto-Refactor
+- RE20 Recursive Governance (Guardrails that Learn)
+
+### Systems (SY) — SY1–SY20
+Focus: Dynamics, emergence, control
+- SY1 Leverage Points
+- SY2 System Boundaries
+- SY3 Stocks & Flows
+- SY4 Requisite Variety
+- SY5 Systems Archetypes
+- SY6 Feedback Structure Mapping
+- SY7 Path Dependence
+- SY8 Homeostasis/Dynamic Equilibrium
+- SY9 Phase Transitions & Tipping Points
+- SY10 Causal Loop Diagrams
+- SY11 Governance Patterns
+- SY12 Protocol/Interface Standards
+- SY13 Incentive Architecture
+- SY14 Risk & Resilience Engineering
+- SY15 Multi-Scale Alignment
+- SY16 Ecosystem Strategy
+- SY17 Policy Feedbacks
+- SY18 Measurement & Telemetry
+- SY19 Meta-Model Selection
+- SY20 Systems-of-Systems Coordination
+
+## Python SDK Usage
+
+### Lookup Operator
+```python
+from base120 import Engine
+
+engine = Engine()
+operator = engine.get("P6")
+print(operator.name)  # Point-of-View Anchoring
+```
+
+### Generate Prompt
+```python
+prompt = engine.prompt("P6", "How should we price the certification tier?")
+print(prompt)
+```
+
+### Record to Ledger
+```python
+from base120 import Engine, Ledger
+
+engine = Engine()
+result = engine.record(
+    "P6",
+    "How should we price the certification tier?",
+    "Anchor the offer to the compliance officer's risk budget.",
+    0.85,
+)
+
+ledger = Ledger("base120-ledger.jsonl")
+ledger.append(result.to_tuple())
+```
+
+## CLI Commands
+
+```bash
+# List all operators
+base120 list
+
+# Get specific operator
+base120 get P6
+
+# Generate prompt
+base120 prompt P6 "How should we price the certification tier?"
+
+# List transformation families
+base120 families
+```
+
+## MCP Integration
+
+Serve operators to AI agents via MCP:
+
+```bash
+base120-mcp
+```
+
+Exposes 120 operators as JSON-RPC tools with:
+- Operator lookup by ID
+- Prompt generation
+- Ledger recording
+- Family enumeration
+
+## Canonical Registry
+
+The canonical registry is in `Base120_Canonical_Model_Registry.yaml`:
+- 120 models with IDs, names, descriptions
+- Transformation family mappings
+- Versioned schema
+- Language-agnostic (YAML format)
+
+## Example: Structured Decision-Making
+
+**Problem**: "Should we migrate from REST to GraphQL?"
+
+```
+Step 1 — P1 (First Principles Framing):
+  What are the irreducible requirements? Latency, cacheability, client flexibility.
+
+Step 2 — IN5 (Negative Space Framing):
+  What is absent from the current architecture? What gaps does REST leave unaddressed?
+
+Step 3 — DE5 (Dimensional Reduction):
+  Which dimensions actually matter? Read paths vs write paths, client types, payload size.
+
+Step 4 — CO1 (Synergy Principle):
+  Can we support both during transition? BFF pattern, not big-bang.
+
+Step 5 — SY13 (Incentive Architecture):
+  How do we know it's working? Metrics: latency p99, error rate, client adoption.
+```
+
+## Installation
+
+```bash
+git clone https://github.com/hummbl-io/oss/tree/main/packages/base120.git
+cd base120
+python -m pip install -e .
+```
+
+No PyPI package is currently published for `base120` or `hummbl-base120`.
+
+## License
+
+Apache 2.0
+
+## Links
+
+- GitHub: https://github.com/hummbl-io/oss/tree/main/packages/base120
+- Package identity receipt: https://github.com/hummbl-io/oss/tree/main/packages/base120/blob/main/docs/PACKAGE_IDENTITY_RECEIPT.md
+- Documentation: https://github.com/hummbl-io/oss/tree/main/packages/base120/blob/main/README.md
+- Issues: https://github.com/hummbl-io/oss/tree/main/packages/base120/issues

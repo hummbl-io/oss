@@ -1,0 +1,35 @@
+program rest_to_graphql {
+  input: "Should we migrate from REST to GraphQL?"
+
+  chain {
+    step P1 "First Principles" {
+      ask "What are the irreducible constraints of our API?"
+    }
+    -> step IN5 "Negative Space Framing" {
+      ask "What is the worst outcome of each option?"
+    }
+    -> step DE5 "Dimensional Reduction" {
+      ask "Which concerns does migration touch?"
+    }
+    -> step CO1 "Synergy Principle" {
+      ask "How do concerns compose into modules?"
+    }
+    -> step SY13 "Incentive Architecture" {
+      ask "Which feedback loops reinforce migration?"
+    }
+  }
+
+  if confidence < 0.6 {
+    apply IN6 "Inverse/Proof by Contradiction" {
+      ask "Assume the migration failed. What went wrong?"
+    }
+  } else {
+    pass
+  }
+
+  output {
+    decision: recommendation
+    confidence: min(step.confidence)
+    rationale: chain
+  }
+}

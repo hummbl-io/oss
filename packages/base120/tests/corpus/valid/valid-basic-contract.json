@@ -1,0 +1,58 @@
+{
+  "contract_version": "v1.0.0",
+  "service_name": "user-authentication-service",
+  "artifact_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["id", "domain", "class", "instance", "models"],
+    "properties": {
+      "id": { "type": "string" },
+      "domain": { "type": "string" },
+      "class": { "type": "string" },
+      "instance": { "type": "string" },
+      "models": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "failure_graph": {
+    "nodes": [
+      {
+        "id": "FM15",
+        "name": "Schema Non-Compliance",
+        "max_retries": 0,
+        "action": "terminate"
+      },
+      {
+        "id": "FM17",
+        "name": "Authorization Failure",
+        "max_retries": 3,
+        "action": "escalate"
+      },
+      {
+        "id": "FM30",
+        "name": "Unrecoverable System State",
+        "max_retries": 0,
+        "action": "terminate"
+      }
+    ],
+    "edges": [
+      {
+        "from": "FM17",
+        "to": "FM30",
+        "condition": "max_retries_exceeded"
+      }
+    ]
+  },
+  "metadata": {
+    "created": "2026-01-03T17:00:00Z",
+    "updated": "2026-01-03T17:00:00Z",
+    "description": "Contract unit for user authentication service",
+    "compatibility": {
+      "environments": ["production", "staging", "development"],
+      "minimum_version": "v1.0.0"
+    },
+    "tags": ["authentication", "user-management"]
+  }
+}
