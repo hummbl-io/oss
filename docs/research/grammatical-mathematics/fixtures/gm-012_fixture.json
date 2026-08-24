@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-012",
+  "name": "Recursive evaluator governance",
+  "description": "RE20 Recursive Governance applied to the evaluator itself. Valid but requires external authorization.",
+  "models": ["RE20"],
+  "relation": "fixedpoint",
+  "expected_result": "valid_externally_authorized",
+  "expected_failure": false,
+  "semantic_finding": "Recursive governance of the evaluator is valid but cannot self-authorize. External human approval is required for ratification."
+}

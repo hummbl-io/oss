@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hummbl.io/governance-question.v1.schema.json",
+  "title": "GovernanceQuestion",
+  "description": "First-class structured research object for open AI governance questions across literature, expert surveys, and agent challenges.",
+  "type": "object",
+  "required": [
+    "question_id",
+    "question_text",
+    "provenance_type",
+    "source",
+    "category",
+    "lifecycle_status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "question_id": {
+      "type": "string",
+      "pattern": "^Q-[A-Z0-9_\\-]+$",
+      "description": "Unique deterministic identifier for the question (e.g. Q-DEEPMIND-INST-001, Q-GOVAI-VERIF-012)."
+    },
+    "question_text": {
+      "type": "string",
+      "minLength": 10,
+      "description": "The exact or normalized question text."
+    },
+    "exact_or_derived": {
+      "type": "string",
+      "enum": ["EXACT_QUOTE", "NORMALIZED_SYNTHESIS", "AGENT_GENERATED", "SURVEY_NOMINATED"],
+      "default": "EXACT_QUOTE",
+      "description": "Whether this represents an verbatim quote or a normalized synthesis."
+    },
+    "provenance_type": {
+      "type": "string",
+      "enum": [
+        "EXPLICIT_SOURCE_QUESTION",
+        "DERIVED_QUESTION",
+        "AGENT_GENERATED_QUESTION",
+        "SURVEY_NOMINATED_QUESTION"
+      ],
+      "description": "High-level provenance category."
+    },
+    "source": {
+      "type": "object",
+      "required": ["title", "citation", "published_at"],
+      "properties": {
+        "title": { "type": "string" },
+        "citation": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "authors": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "published_at": { "type": "string" },
+        "retrieved_at": { "type": "string" }
+      }
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "INSTITUTIONAL_GOVERNANCE",
+        "TECHNICAL_SAFETY_CONTAINMENT",
+        "DELEGATION_AND_AUTHORIZATION",
+        "EVIDENCE_AND_AUDITABILITY",
+        "VERIFICATION_AND_MONITORING",
+        "STRATEGIC_STABILITY_AND_RACES",
+        "ECONOMIC_AND_DEPLOYMENT_FENCING"
+      ],
+      "description": "Taxonomic category within AI governance."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Jurisdiction or standard scope (e.g. GLOBAL, EU_AI_ACT, NIST_AI_RMF, ISO_42001)."
+    },
+    "stakeholders": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Impacted stakeholders (e.g. FRONTIER_LABS, ENTERPRISE_DEPLOYERS, REGULATORS, OPERATORS)."
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": ["OPEN", "ACTIVE_RESEARCH", "ADDRESSED", "SUPERSEDED", "DISPROVEN"],
+      "default": "OPEN",
+      "description": "Current resolution status of the question."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": ["VERIFIED", "SUPPORTED", "WORKING_MODEL", "PROPOSAL", "UNVERIFIED_CLAIM", "DEPRECATED"],
+      "default": "VERIFIED"
+    },
+    "importance_claim": {
+      "type": "object",
+      "properties": {
+        "urgency": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "tractability": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "justification": { "type": "string" }
+      }
+    },
+    "grounded_primitives": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "HUMMBL runtime primitives (P1-P38, K1-K11) that provide runtime bounds or enforcement for this question."
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Question IDs that must be answered or clarified prior to this question."
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "URIs, DOI references, receipt hashes, or local filepaths providing evidence."
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

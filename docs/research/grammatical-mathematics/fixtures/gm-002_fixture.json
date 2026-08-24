@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-002",
+  "name": "Lattice correction with join",
+  "description": "CO1 Synergy -> CO5 Emergence is a parallel lattice that requires an explicit join.",
+  "models": ["CO1", "CO5"],
+  "relation": "parallel",
+  "expected_result": "valid_with_join",
+  "expected_failure": false,
+  "semantic_finding": "Parallel composition of synergy and emergence requires an explicit named join to produce a coherent composite output."
+}

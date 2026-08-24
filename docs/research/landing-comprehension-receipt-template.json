@@ -1,0 +1,28 @@
+{
+  "receipt_type": "landing-comprehension-test",
+  "schema_version": "1.0.0",
+  "status": "UNRUN",
+  "protocol": "docs/research/landing-comprehension-test-protocol.md",
+  "tested_url": "https://hummbl.io/",
+  "tested_sha": null,
+  "tested_at": null,
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "first_view_seconds": 20,
+    "full_scan_seconds": 180
+  },
+  "participants": [],
+  "aggregate": {
+    "participants_total": 0,
+    "participants_scoring_at_least_9": 0,
+    "all_boundaries_at_least_1": false,
+    "sensible_next_actions": 0,
+    "material_overclaim_detected": false,
+    "threshold_met": false
+  },
+  "limitations": [
+    "Five-person directional comprehension test; not a representative market study.",
+    "UNRUN template only; no participant evidence is claimed."
+  ]
+}

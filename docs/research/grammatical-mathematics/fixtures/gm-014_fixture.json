@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-014",
+  "name": "Reduce/search commutator",
+  "description": "DE5 Dimensional Reduction -> DE7 Pareto Decomposition vs DE7 -> DE5. Noncommutative.",
+  "models": ["DE5", "DE7"],
+  "relation": "compose",
+  "expected_result": "noncommutative",
+  "expected_failure": false,
+  "semantic_finding": "Reduce-then-Pareto and Pareto-then-reduce produce different decompositions. The commutator [DE5, DE7] is non-zero."
+}

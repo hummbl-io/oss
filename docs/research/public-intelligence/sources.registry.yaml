@@ -1,0 +1,62 @@
+{
+  "schema_version": "0.1.0",
+  "registry_status": "candidate",
+  "canonical_path": "docs/research/public-intelligence/sources.registry.yaml",
+  "parent_issue": "https://github.com/hummbl-io/hummbl-production/issues/565",
+  "format_note": "YAML-compatible flow-style JSON subset so the validator remains Python stdlib-only.",
+  "sources":
+    [
+      {
+        "id": "sec_edgar",
+        "name": "SEC EDGAR",
+        "tier": "tier_0_primary_authority",
+        "authority_class": "primary_authority",
+        "verification_status": "verified",
+        "official_docs":
+          [
+            "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+          ],
+        "access_modes": ["api", "ui", "bulk"],
+        "license_terms_status": "checked",
+        "license_terms_url": "https://www.sec.gov/privacy.htm",
+        "rate_limit_status": "explicit",
+        "rate_limit_notes": "SEC fair-access guidance limits automated requests and requires identifying request headers.",
+        "pii_sensitive_use_notes": "Public company filings can include personal names or signatures; do not treat filing presence as private-user consent.",
+        "false_authority_risks":
+          [
+            "Primary only for SEC filings and SEC-published metadata; not primary for third-party summaries or investment conclusions.",
+          ],
+        "bulk_ingestion_allowed": false,
+        "bulk_ingestion_gates":
+          {
+            "storage_gate": "not_evaluated",
+            "license_gate": "not_evaluated",
+            "privacy_gate": "not_evaluated",
+            "rate_limit_gate": "not_evaluated",
+            "cost_gate": "not_evaluated",
+          },
+        "source_trigger":
+          { "type": "official_docs", "status": "source_authority" },
+        "adapter_priority":
+          {
+            "score": 0,
+            "rationale": "Registry validation seed only; issue #565 does not authorize adapter or ingestion implementation.",
+          },
+        "receipts": ["docs/research/public-intelligence/receipts/sec-edgar.md"],
+        "required_gates":
+          {
+            "source_authority_classified": true,
+            "official_docs_linked": true,
+            "api_or_bulk_access_verified": true,
+            "license_terms_checked": true,
+            "rate_limit_checked": true,
+            "pii_or_sensitive_use_checked": true,
+            "adapter_priority_scored": true,
+            "no_false_authority_claims": true,
+            "source_trigger_marked_lead_only": true,
+            "bulk_ingestion_blocked_until_storage_license_cost_pass": true,
+            "credentials_absent_from_receipts": true,
+          },
+      },
+    ],
+}

@@ -1,0 +1,205 @@
+{
+  "schema_version": "0.1-draft",
+  "artifact_type": "hummbl_candidate_terms_ledger",
+  "status": "draft_pending_operator_review",
+  "prepared_date": "2026-06-27",
+  "week_scope": "2026-06-22_to_2026-06-27",
+  "primary_issue": {
+    "repo": "hummbl-io/hummbl-production",
+    "issue_number": 540,
+    "url": "https://github.com/hummbl-io/hummbl-production/issues/540"
+  },
+  "acs_follow_up_issue": {
+    "repo": "hummbl-io/hummbl-admission-controlled-state",
+    "issue_number": 6,
+    "url": "https://github.com/hummbl-io/hummbl-admission-controlled-state/issues/6"
+  },
+  "governance_rule": "No invented HUMMBL term enters durable state until it passes namespace audit, source-of-record preservation, and operator approval.",
+  "global_gates": [
+    "G-NAMESPACE-AUDIT",
+    "G-OPERATOR-APPROVAL",
+    "G-SOURCE-OF-RECORD",
+    "G-NO-STANDARD-CONFUSION",
+    "G-NO-ACCIDENTAL-CANONIZATION",
+    "G-PUBLIC-USE-HOLD",
+    "G-RECEIPT-EMITTED"
+  ],
+  "terms": [
+    {
+      "term": "HUMMBL Sound",
+      "status": "admit_internal_candidate",
+      "namespace": "hummbl.sound",
+      "collision_risk": "low_medium",
+      "public_risk": "medium",
+      "decision": "Admit internally as parent sound namespace; hold public sonic mark until provenance and sonic-mark review.",
+      "required_gates": [
+        "G-NAMESPACE-AUDIT",
+        "G-AUDIO-PROVENANCE",
+        "G-HUMAN-APPROVAL",
+        "G-SONIC-MARK-REVIEW",
+        "G-NO-GENERATED-ASSET-CANONIZATION-WITHOUT-RECEIPT"
+      ],
+      "public_hold": false,
+      "quarantine_public": false,
+      "notes": "Parent namespace for HUMMBL sonic identity and governed sound assets. HUAOMP remains first sonic-logo candidate, not sealed."
+    },
+    {
+      "term": "HUMMBL Breath",
+      "status": "admit_internal_candidate",
+      "namespace": "hummbl.breath",
+      "collision_risk": "medium",
+      "public_risk": "medium_high",
+      "decision": "Admit as grammar primitive / noun-object-state-signal; block clinical claims.",
+      "required_gates": [
+        "G-BREATH-BREATHE-DISTINCTION",
+        "G-NO-CLINICAL-CLAIMS",
+        "G-EVIDENCE-LEDGER",
+        "G-SAFETY-LANGUAGE",
+        "G-CONTEXT-BOUNDARY"
+      ],
+      "public_hold": true,
+      "quarantine_public": false,
+      "notes": "Breath = noun/object/state/signal/asset."
+    },
+    {
+      "term": "HUMMBL Breathe",
+      "status": "admit_internal_candidate",
+      "namespace": "hummbl.breathe",
+      "collision_risk": "medium",
+      "public_risk": "medium_high",
+      "decision": "Admit as action/protocol primitive; block clinical claims.",
+      "required_gates": [
+        "G-BREATH-BREATHE-DISTINCTION",
+        "G-NO-CLINICAL-CLAIMS",
+        "G-EVIDENCE-LEDGER",
+        "G-SAFETY-LANGUAGE",
+        "G-CONTEXT-BOUNDARY"
+      ],
+      "public_hold": true,
+      "quarantine_public": false,
+      "notes": "Breathe = verb/practice/action/protocol."
+    },
+    {
+      "term": "HUMMBL dot operator",
+      "status": "admit_internal_candidate",
+      "namespace": "hummbl.operator.dot",
+      "collision_risk": "high_generic",
+      "public_risk": "medium",
+      "decision": "Admit only as HUMMBL semantic operator; do not claim general dot/dotfile semantics.",
+      "required_gates": [
+        "G-SEMANTIC-DOT",
+        "G-NO-ACCIDENTAL-PUNCTUATION-CANONIZATION",
+        "G-DOTFILE-SAFETY",
+        "G-HIDDEN-STATE-REVIEW",
+        "G-RECEIPT-PATH"
+      ],
+      "public_hold": true,
+      "quarantine_public": false,
+      "notes": "Dot is active only when it marks meaningful namespace/boundary/composition/object-method relation."
+    },
+    {
+      "term": "HUMMBL TierShift Sounds",
+      "status": "admit_internal_candidate",
+      "namespace": "hummbl.tiershift.sound",
+      "alternate_namespace": "hummbl.sound.tiershift",
+      "collision_risk": "medium",
+      "public_risk": "medium",
+      "decision": "Admit internally as sound asset namespace; public uses should be HUMMBL-prefixed.",
+      "required_gates": [
+        "G-TIERSHIFT-PREFIX",
+        "G-AUDIO-PROVENANCE",
+        "G-ASSET-NAMING-CONSISTENCY",
+        "G-NO-SAFETY-CRITICAL-SOUND-WITHOUT-TESTING",
+        "G-HUMAN-APPROVAL"
+      ],
+      "public_hold": true,
+      "quarantine_public": false,
+      "notes": "Candidate sounds: shift-up, shift-down, ratchet-up, ratchet-down, detent-lock, seal, warning/overload, recovery/downshift."
+    },
+    {
+      "term": "Agentic Oath",
+      "status": "candidate_internal_only",
+      "namespace": "hummbl.agentic_oath",
+      "collision_risk": "medium_high",
+      "public_risk": "high",
+      "decision": "Keep as candidate governance artifact; avoid legal/medical oath claims.",
+      "required_gates": [
+        "G-PRIOR-ART-ACK",
+        "G-NO-LEGAL-INSTRUMENT-CLAIM",
+        "G-HUMAN-AUTHORITY-PRESERVED",
+        "G-AGENCY-DELEGATION-SCOPE",
+        "G-RECEIPT-OBLIGATION"
+      ],
+      "public_hold": true,
+      "quarantine_public": false,
+      "notes": "Lab-gym note preserved as raw source material only: first do no harm; then take notes; have fun."
+    },
+    {
+      "term": "OAuth / OathAuth metaphor",
+      "status": "quarantine_public",
+      "namespace": "hummbl.agentic_oath.delegation",
+      "safer_alternate_namespace": "hummbl.governed_delegation",
+      "collision_risk": "very_high",
+      "public_risk": "very_high",
+      "decision": "Quarantine from public/package/repo/CLI names; use only as explicit internal metaphor with standards distinction.",
+      "required_gates": [
+        "G-NO-STANDARD-CONFUSION",
+        "G-PRIOR-ART-ACK",
+        "G-HUMAN-AUTHORITY-PRESERVED",
+        "G-AGENCY-DELEGATION-SCOPE",
+        "G-RECEIPT-OBLIGATION"
+      ],
+      "public_hold": true,
+      "quarantine_public": true,
+      "notes": "Do not imply OAuth/OATH compatibility unless a specific standards-compatible implementation exists."
+    },
+    {
+      "term": "Admission-Controlled State",
+      "status": "strong_internal_candidate",
+      "namespace": "hummbl.admission_controlled_state",
+      "repo": "hummbl-io/hummbl-admission-controlled-state",
+      "collision_risk": "medium",
+      "public_risk": "medium",
+      "decision": "Strong internal architecture candidate; define as bounded HUMMBL governed pattern, not generic admission-control ownership.",
+      "required_gates": [
+        "G-ADMISSION-CRITERIA",
+        "G-AUTHORITY-DECLARED",
+        "G-EXECUTOR-DECLARED",
+        "G-SCOPE-DECLARED",
+        "G-DUTY-DECLARED",
+        "G-RECEIPT-EMITTED",
+        "G-SOURCE-OF-RECORD",
+        "G-STATE-TRANSITION-REPLAY"
+      ],
+      "public_hold": false,
+      "quarantine_public": false,
+      "notes": "Core invariant: no durable state without admission, authority, executor, and receipt. Expanded candidate includes scope and duty."
+    }
+  ],
+  "source_anchors": [
+    {
+      "label": "IETF RFC 6749 OAuth 2.0 Authorization Framework",
+      "url": "https://datatracker.ietf.org/doc/html/rfc6749"
+    },
+    {
+      "label": "OAuth.net OAuth 2.0",
+      "url": "https://oauth.net/2/"
+    },
+    {
+      "label": "MediaWiki Extension:OATHAuth",
+      "url": "https://www.mediawiki.org/wiki/Extension:OATHAuth"
+    },
+    {
+      "label": "Smogon Metagame Tier Shift",
+      "url": "https://www.smogon.com/forums/threads/tier-shift.3610073/"
+    },
+    {
+      "label": "Empirical study of dotfiles repositories",
+      "url": "https://arxiv.org/abs/2501.18555"
+    },
+    {
+      "label": "Admission control overview",
+      "url": "https://en.wikipedia.org/wiki/Admission_control"
+    }
+  ]
+}

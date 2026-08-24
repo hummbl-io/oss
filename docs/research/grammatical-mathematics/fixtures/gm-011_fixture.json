@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-011",
+  "name": "Generate then terminate",
+  "description": "RE8 Bootstrapping -> IN18 Kill-Criteria. Order-constrained: valid in this order only.",
+  "models": ["RE8", "IN18"],
+  "relation": "compose",
+  "expected_result": "order_constrained",
+  "expected_failure": false,
+  "semantic_finding": "Generate-then-terminate is valid. The reverse (terminate-then-generate, GM-001) is a type barrier. The order constraint is fundamental."
+}

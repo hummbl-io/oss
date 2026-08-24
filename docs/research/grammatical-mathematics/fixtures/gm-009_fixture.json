@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-009",
+  "name": "Boundary alternation",
+  "description": "IN7 Boundary Testing -> SY2 System Boundaries. Candidate relation.",
+  "models": ["IN7", "SY2"],
+  "relation": "compose",
+  "expected_result": "candidate",
+  "expected_failure": false,
+  "semantic_finding": "Testing boundaries then defining system boundaries is a valid candidate composition. The relation is hypothesis-level, not confirmed."
+}

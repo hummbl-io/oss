@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-008",
+  "name": "Governance-telemetry order",
+  "description": "SY11 Governance Patterns -> SY18 Measurement & Telemetry vs SY18 -> SY11. Noncommutative.",
+  "models": ["SY11", "SY18"],
+  "relation": "compose",
+  "expected_result": "noncommutative",
+  "expected_failure": false,
+  "semantic_finding": "Governance-then-telemetry (instrument after designing rules) and telemetry-then-governance (design rules from observed data) produce different system behaviors."
+}

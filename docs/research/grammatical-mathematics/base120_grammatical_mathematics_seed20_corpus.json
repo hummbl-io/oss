@@ -1,0 +1,2878 @@
+{
+  "schema_version": "0.1.0-candidate",
+  "status": "experimental_not_canonical",
+  "source_base120_blob_sha": "5800ea8712b5e1a1b64d3e1687aab92b1895a78e",
+  "generated_date": "2026-07-21",
+  "description": "Seed20 grammatical-mathematics candidate corpus. 20 models selected from Base120, with experimental signatures, 20x20 pair matrix, and 15 gold experiments. This is NOT canonical. No promotion without external human approval.",
+  "relation_vocabulary": {
+    "compose": {
+      "symbol": "∘",
+      "name": "sequential ladder",
+      "description": "Sequential composition: output of A feeds into B."
+    },
+    "parallel": {
+      "symbol": "⊗",
+      "name": "parallel lattice",
+      "description": "Parallel composition: A and B run concurrently, results joined."
+    },
+    "map": {
+      "symbol": "map",
+      "name": "explicit collection lift",
+      "description": "Explicit named lift of a model over a collection. Never silent."
+    },
+    "closure": {
+      "symbol": "κ",
+      "name": "closure",
+      "description": "Close over a model's output to create a reusable abstraction."
+    },
+    "fixedpoint": {
+      "symbol": "μ",
+      "name": "recursive/fixed-point",
+      "description": "Recursive application until fixpoint, bounded depth 1..3."
+    },
+    "barrier": {
+      "symbol": "⊥",
+      "name": "type barrier",
+      "description": "No valid composition exists. Type incompatibility."
+    }
+  },
+  "domain_compatibility": {
+    "Frame": {
+      "Frame": "compose",
+      "Inverse": "compose",
+      "Composite": "map",
+      "Decomposer": "map",
+      "Recursive": "compose",
+      "System": "compose"
+    },
+    "Inverse": {
+      "Frame": "compose",
+      "Inverse": "compose",
+      "Composite": "barrier",
+      "Decomposer": "barrier",
+      "Recursive": "barrier",
+      "System": "compose"
+    },
+    "Composite": {
+      "Frame": "compose",
+      "Inverse": "barrier",
+      "Composite": "parallel",
+      "Decomposer": "compose",
+      "Recursive": "barrier",
+      "System": "compose"
+    },
+    "Decomposer": {
+      "Frame": "compose",
+      "Inverse": "barrier",
+      "Composite": "compose",
+      "Decomposer": "compose",
+      "Recursive": "barrier",
+      "System": "compose"
+    },
+    "Recursive": {
+      "Frame": "compose",
+      "Inverse": "compose",
+      "Composite": "barrier",
+      "Decomposer": "barrier",
+      "Recursive": "fixedpoint",
+      "System": "compose"
+    },
+    "System": {
+      "Frame": "compose",
+      "Inverse": "barrier",
+      "Composite": "barrier",
+      "Decomposer": "barrier",
+      "Recursive": "barrier",
+      "System": "compose"
+    }
+  },
+  "subtype_barriers": {
+    "Inverse.KillCriteria->Recursive.Bootstrap": "barrier",
+    "Inverse.KillCriteria->Recursive.Improvement": "barrier",
+    "Decomposer.Pareto->Decomposer.Dimensional": "barrier"
+  },
+  "seed20_models": [
+    {
+      "code": "P1",
+      "name": "First Principles Framing",
+      "domain": "Frame",
+      "subtype": "Frame.FirstPrinciples",
+      "max_recursion_depth": 1,
+      "input_types": [
+        "Frame",
+        "Inverse",
+        "Composite",
+        "Decomposer",
+        "Recursive",
+        "System"
+      ],
+      "output_type": "Frame"
+    },
+    {
+      "code": "P10",
+      "name": "Context Windowing",
+      "domain": "Frame",
+      "subtype": "Frame.Contextual",
+      "max_recursion_depth": 2,
+      "input_types": [
+        "Frame",
+        "Inverse",
+        "Composite",
+        "Decomposer",
+        "Recursive",
+        "System"
+      ],
+      "output_type": "Frame"
+    },
+    {
+      "code": "P17",
+      "name": "Frame Control & Reframing",
+      "domain": "Frame",
+      "subtype": "Frame.Reframing",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Inverse", "System"],
+      "output_type": "Frame"
+    },
+    {
+      "code": "IN3",
+      "name": "Problem Reversal",
+      "domain": "Inverse",
+      "subtype": "Inverse.Reversal",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Inverse", "System"],
+      "output_type": "Inverse"
+    },
+    {
+      "code": "IN7",
+      "name": "Boundary Testing",
+      "domain": "Inverse",
+      "subtype": "Inverse.Boundary",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Inverse", "System"],
+      "output_type": "Inverse"
+    },
+    {
+      "code": "IN18",
+      "name": "Kill-Criteria & Stop Rules",
+      "domain": "Inverse",
+      "subtype": "Inverse.KillCriteria",
+      "max_recursion_depth": 1,
+      "input_types": ["Frame", "Inverse", "System", "Recursive"],
+      "output_type": "Inverse"
+    },
+    {
+      "code": "CO1",
+      "name": "Synergy Principle",
+      "domain": "Composite",
+      "subtype": "Composite.Synergy",
+      "max_recursion_depth": 1,
+      "input_types": ["Frame", "Composite", "Decomposer", "System"],
+      "output_type": "Composite"
+    },
+    {
+      "code": "CO5",
+      "name": "Emergence",
+      "domain": "Composite",
+      "subtype": "Composite.Emergent",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Composite", "Decomposer", "System"],
+      "output_type": "Composite"
+    },
+    {
+      "code": "DE1",
+      "name": "Root Cause Analysis (5 Whys)",
+      "domain": "Decomposer",
+      "subtype": "Decomposer.Causal",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Composite", "Decomposer", "System"],
+      "output_type": "Decomposer"
+    },
+    {
+      "code": "DE5",
+      "name": "Dimensional Reduction",
+      "domain": "Decomposer",
+      "subtype": "Decomposer.Dimensional",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Composite", "Decomposer", "System"],
+      "output_type": "Decomposer"
+    },
+    {
+      "code": "DE7",
+      "name": "Pareto Decomposition (80/20)",
+      "domain": "Decomposer",
+      "subtype": "Decomposer.Pareto",
+      "max_recursion_depth": 2,
+      "input_types": ["Frame", "Composite", "Decomposer", "System"],
+      "output_type": "Decomposer"
+    },
+    {
+      "code": "DE11",
+      "name": "Scope Delimitation",
+      "domain": "Decomposer",
+      "subtype": "Decomposer.Scope",
+      "max_recursion_depth": 1,
+      "input_types": ["Frame", "Composite", "Decomposer", "System"],
+      "output_type": "Decomposer"
+    },
+    {
+      "code": "RE1",
+      "name": "Recursive Improvement (Kaizen)",
+      "domain": "Recursive",
+      "subtype": "Recursive.Improvement",
+      "max_recursion_depth": 3,
+      "input_types": ["Frame", "Recursive", "System"],
+      "output_type": "Recursive"
+    },
+    {
+      "code": "RE6",
+      "name": "Recursive Framing",
+      "domain": "Recursive",
+      "subtype": "Recursive.Meta",
+      "max_recursion_depth": 3,
+      "input_types": ["Frame", "Recursive", "System"],
+      "output_type": "Recursive"
+    },
+    {
+      "code": "RE8",
+      "name": "Bootstrapping",
+      "domain": "Recursive",
+      "subtype": "Recursive.Bootstrap",
+      "max_recursion_depth": 3,
+      "input_types": ["Frame", "Recursive", "System"],
+      "output_type": "Recursive"
+    },
+    {
+      "code": "RE20",
+      "name": "Recursive Governance (Guardrails that Learn)",
+      "domain": "Recursive",
+      "subtype": "Recursive.Governance",
+      "max_recursion_depth": 3,
+      "input_types": ["Frame", "Recursive", "System"],
+      "output_type": "Recursive"
+    },
+    {
+      "code": "SY2",
+      "name": "System Boundaries",
+      "domain": "System",
+      "subtype": "System.Boundary",
+      "max_recursion_depth": 2,
+      "input_types": [
+        "Frame",
+        "Inverse",
+        "Composite",
+        "Decomposer",
+        "Recursive",
+        "System"
+      ],
+      "output_type": "System"
+    },
+    {
+      "code": "SY11",
+      "name": "Governance Patterns",
+      "domain": "System",
+      "subtype": "System.Governance",
+      "max_recursion_depth": 2,
+      "input_types": [
+        "Frame",
+        "Composite",
+        "Decomposer",
+        "Recursive",
+        "System"
+      ],
+      "output_type": "System"
+    },
+    {
+      "code": "SY18",
+      "name": "Measurement & Telemetry",
+      "domain": "System",
+      "subtype": "System.Telemetry",
+      "max_recursion_depth": 2,
+      "input_types": [
+        "Frame",
+        "Composite",
+        "Decomposer",
+        "Recursive",
+        "System"
+      ],
+      "output_type": "System"
+    },
+    {
+      "code": "SY19",
+      "name": "Meta-Model Selection",
+      "domain": "System",
+      "subtype": "System.Meta",
+      "max_recursion_depth": 2,
+      "input_types": [
+        "Frame",
+        "Composite",
+        "Decomposer",
+        "Recursive",
+        "System"
+      ],
+      "output_type": "System"
+    }
+  ],
+  "pair_matrix": {
+    "P1->P1": {
+      "source": "P1",
+      "target": "P1",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "P1->P10": {
+      "source": "P1",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->P17": {
+      "source": "P1",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->IN3": {
+      "source": "P1",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->IN7": {
+      "source": "P1",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->IN18": {
+      "source": "P1",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->CO1": {
+      "source": "P1",
+      "target": "CO1",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P1->CO5": {
+      "source": "P1",
+      "target": "CO5",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P1->DE1": {
+      "source": "P1",
+      "target": "DE1",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P1->DE5": {
+      "source": "P1",
+      "target": "DE5",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P1->DE7": {
+      "source": "P1",
+      "target": "DE7",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P1->DE11": {
+      "source": "P1",
+      "target": "DE11",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P1->RE1": {
+      "source": "P1",
+      "target": "RE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->RE6": {
+      "source": "P1",
+      "target": "RE6",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->RE8": {
+      "source": "P1",
+      "target": "RE8",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->RE20": {
+      "source": "P1",
+      "target": "RE20",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->SY2": {
+      "source": "P1",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->SY11": {
+      "source": "P1",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->SY18": {
+      "source": "P1",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P1->SY19": {
+      "source": "P1",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->P1": {
+      "source": "P10",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->P10": {
+      "source": "P10",
+      "target": "P10",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "P10->P17": {
+      "source": "P10",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->IN3": {
+      "source": "P10",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->IN7": {
+      "source": "P10",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->IN18": {
+      "source": "P10",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->CO1": {
+      "source": "P10",
+      "target": "CO1",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P10->CO5": {
+      "source": "P10",
+      "target": "CO5",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P10->DE1": {
+      "source": "P10",
+      "target": "DE1",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P10->DE5": {
+      "source": "P10",
+      "target": "DE5",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P10->DE7": {
+      "source": "P10",
+      "target": "DE7",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P10->DE11": {
+      "source": "P10",
+      "target": "DE11",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P10->RE1": {
+      "source": "P10",
+      "target": "RE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->RE6": {
+      "source": "P10",
+      "target": "RE6",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->RE8": {
+      "source": "P10",
+      "target": "RE8",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->RE20": {
+      "source": "P10",
+      "target": "RE20",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->SY2": {
+      "source": "P10",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->SY11": {
+      "source": "P10",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->SY18": {
+      "source": "P10",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P10->SY19": {
+      "source": "P10",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->P1": {
+      "source": "P17",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->P10": {
+      "source": "P17",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->P17": {
+      "source": "P17",
+      "target": "P17",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "P17->IN3": {
+      "source": "P17",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->IN7": {
+      "source": "P17",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->IN18": {
+      "source": "P17",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->CO1": {
+      "source": "P17",
+      "target": "CO1",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P17->CO5": {
+      "source": "P17",
+      "target": "CO5",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P17->DE1": {
+      "source": "P17",
+      "target": "DE1",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P17->DE5": {
+      "source": "P17",
+      "target": "DE5",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P17->DE7": {
+      "source": "P17",
+      "target": "DE7",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P17->DE11": {
+      "source": "P17",
+      "target": "DE11",
+      "relation": "map",
+      "symbol": "map"
+    },
+    "P17->RE1": {
+      "source": "P17",
+      "target": "RE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->RE6": {
+      "source": "P17",
+      "target": "RE6",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->RE8": {
+      "source": "P17",
+      "target": "RE8",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->RE20": {
+      "source": "P17",
+      "target": "RE20",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->SY2": {
+      "source": "P17",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->SY11": {
+      "source": "P17",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->SY18": {
+      "source": "P17",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "P17->SY19": {
+      "source": "P17",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->P1": {
+      "source": "IN3",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->P10": {
+      "source": "IN3",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->P17": {
+      "source": "IN3",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->IN3": {
+      "source": "IN3",
+      "target": "IN3",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "IN3->IN7": {
+      "source": "IN3",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->IN18": {
+      "source": "IN3",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->CO1": {
+      "source": "IN3",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->CO5": {
+      "source": "IN3",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->DE1": {
+      "source": "IN3",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->DE5": {
+      "source": "IN3",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->DE7": {
+      "source": "IN3",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->DE11": {
+      "source": "IN3",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->RE1": {
+      "source": "IN3",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->RE6": {
+      "source": "IN3",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->RE8": {
+      "source": "IN3",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->RE20": {
+      "source": "IN3",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN3->SY2": {
+      "source": "IN3",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->SY11": {
+      "source": "IN3",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->SY18": {
+      "source": "IN3",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN3->SY19": {
+      "source": "IN3",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->P1": {
+      "source": "IN7",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->P10": {
+      "source": "IN7",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->P17": {
+      "source": "IN7",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->IN3": {
+      "source": "IN7",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->IN7": {
+      "source": "IN7",
+      "target": "IN7",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "IN7->IN18": {
+      "source": "IN7",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->CO1": {
+      "source": "IN7",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->CO5": {
+      "source": "IN7",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->DE1": {
+      "source": "IN7",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->DE5": {
+      "source": "IN7",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->DE7": {
+      "source": "IN7",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->DE11": {
+      "source": "IN7",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->RE1": {
+      "source": "IN7",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->RE6": {
+      "source": "IN7",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->RE8": {
+      "source": "IN7",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->RE20": {
+      "source": "IN7",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN7->SY2": {
+      "source": "IN7",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->SY11": {
+      "source": "IN7",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->SY18": {
+      "source": "IN7",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN7->SY19": {
+      "source": "IN7",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->P1": {
+      "source": "IN18",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->P10": {
+      "source": "IN18",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->P17": {
+      "source": "IN18",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->IN3": {
+      "source": "IN18",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->IN7": {
+      "source": "IN18",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->IN18": {
+      "source": "IN18",
+      "target": "IN18",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "IN18->CO1": {
+      "source": "IN18",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->CO5": {
+      "source": "IN18",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->DE1": {
+      "source": "IN18",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->DE5": {
+      "source": "IN18",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->DE7": {
+      "source": "IN18",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->DE11": {
+      "source": "IN18",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->RE1": {
+      "source": "IN18",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->RE6": {
+      "source": "IN18",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->RE8": {
+      "source": "IN18",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->RE20": {
+      "source": "IN18",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "IN18->SY2": {
+      "source": "IN18",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->SY11": {
+      "source": "IN18",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->SY18": {
+      "source": "IN18",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "IN18->SY19": {
+      "source": "IN18",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->P1": {
+      "source": "CO1",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->P10": {
+      "source": "CO1",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->P17": {
+      "source": "CO1",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->IN3": {
+      "source": "CO1",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->IN7": {
+      "source": "CO1",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->IN18": {
+      "source": "CO1",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->CO1": {
+      "source": "CO1",
+      "target": "CO1",
+      "relation": "parallel",
+      "symbol": "⊗"
+    },
+    "CO1->CO5": {
+      "source": "CO1",
+      "target": "CO5",
+      "relation": "parallel",
+      "symbol": "⊗"
+    },
+    "CO1->DE1": {
+      "source": "CO1",
+      "target": "DE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->DE5": {
+      "source": "CO1",
+      "target": "DE5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->DE7": {
+      "source": "CO1",
+      "target": "DE7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->DE11": {
+      "source": "CO1",
+      "target": "DE11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->RE1": {
+      "source": "CO1",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->RE6": {
+      "source": "CO1",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->RE8": {
+      "source": "CO1",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->RE20": {
+      "source": "CO1",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO1->SY2": {
+      "source": "CO1",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->SY11": {
+      "source": "CO1",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->SY18": {
+      "source": "CO1",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO1->SY19": {
+      "source": "CO1",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->P1": {
+      "source": "CO5",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->P10": {
+      "source": "CO5",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->P17": {
+      "source": "CO5",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->IN3": {
+      "source": "CO5",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->IN7": {
+      "source": "CO5",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->IN18": {
+      "source": "CO5",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->CO1": {
+      "source": "CO5",
+      "target": "CO1",
+      "relation": "parallel",
+      "symbol": "⊗"
+    },
+    "CO5->CO5": {
+      "source": "CO5",
+      "target": "CO5",
+      "relation": "parallel",
+      "symbol": "⊗"
+    },
+    "CO5->DE1": {
+      "source": "CO5",
+      "target": "DE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->DE5": {
+      "source": "CO5",
+      "target": "DE5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->DE7": {
+      "source": "CO5",
+      "target": "DE7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->DE11": {
+      "source": "CO5",
+      "target": "DE11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->RE1": {
+      "source": "CO5",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->RE6": {
+      "source": "CO5",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->RE8": {
+      "source": "CO5",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->RE20": {
+      "source": "CO5",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "CO5->SY2": {
+      "source": "CO5",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->SY11": {
+      "source": "CO5",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->SY18": {
+      "source": "CO5",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "CO5->SY19": {
+      "source": "CO5",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->P1": {
+      "source": "DE1",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->P10": {
+      "source": "DE1",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->P17": {
+      "source": "DE1",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->IN3": {
+      "source": "DE1",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->IN7": {
+      "source": "DE1",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->IN18": {
+      "source": "DE1",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->CO1": {
+      "source": "DE1",
+      "target": "CO1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->CO5": {
+      "source": "DE1",
+      "target": "CO5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->DE1": {
+      "source": "DE1",
+      "target": "DE1",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "DE1->DE5": {
+      "source": "DE1",
+      "target": "DE5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->DE7": {
+      "source": "DE1",
+      "target": "DE7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->DE11": {
+      "source": "DE1",
+      "target": "DE11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->RE1": {
+      "source": "DE1",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->RE6": {
+      "source": "DE1",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->RE8": {
+      "source": "DE1",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->RE20": {
+      "source": "DE1",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE1->SY2": {
+      "source": "DE1",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->SY11": {
+      "source": "DE1",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->SY18": {
+      "source": "DE1",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE1->SY19": {
+      "source": "DE1",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->P1": {
+      "source": "DE5",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->P10": {
+      "source": "DE5",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->P17": {
+      "source": "DE5",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->IN3": {
+      "source": "DE5",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->IN7": {
+      "source": "DE5",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->IN18": {
+      "source": "DE5",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->CO1": {
+      "source": "DE5",
+      "target": "CO1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->CO5": {
+      "source": "DE5",
+      "target": "CO5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->DE1": {
+      "source": "DE5",
+      "target": "DE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->DE5": {
+      "source": "DE5",
+      "target": "DE5",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "DE5->DE7": {
+      "source": "DE5",
+      "target": "DE7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->DE11": {
+      "source": "DE5",
+      "target": "DE11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->RE1": {
+      "source": "DE5",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->RE6": {
+      "source": "DE5",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->RE8": {
+      "source": "DE5",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->RE20": {
+      "source": "DE5",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE5->SY2": {
+      "source": "DE5",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->SY11": {
+      "source": "DE5",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->SY18": {
+      "source": "DE5",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE5->SY19": {
+      "source": "DE5",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->P1": {
+      "source": "DE7",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->P10": {
+      "source": "DE7",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->P17": {
+      "source": "DE7",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->IN3": {
+      "source": "DE7",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->IN7": {
+      "source": "DE7",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->IN18": {
+      "source": "DE7",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->CO1": {
+      "source": "DE7",
+      "target": "CO1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->CO5": {
+      "source": "DE7",
+      "target": "CO5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->DE1": {
+      "source": "DE7",
+      "target": "DE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->DE5": {
+      "source": "DE7",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->DE7": {
+      "source": "DE7",
+      "target": "DE7",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "DE7->DE11": {
+      "source": "DE7",
+      "target": "DE11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->RE1": {
+      "source": "DE7",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->RE6": {
+      "source": "DE7",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->RE8": {
+      "source": "DE7",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->RE20": {
+      "source": "DE7",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE7->SY2": {
+      "source": "DE7",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->SY11": {
+      "source": "DE7",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->SY18": {
+      "source": "DE7",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE7->SY19": {
+      "source": "DE7",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->P1": {
+      "source": "DE11",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->P10": {
+      "source": "DE11",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->P17": {
+      "source": "DE11",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->IN3": {
+      "source": "DE11",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->IN7": {
+      "source": "DE11",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->IN18": {
+      "source": "DE11",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->CO1": {
+      "source": "DE11",
+      "target": "CO1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->CO5": {
+      "source": "DE11",
+      "target": "CO5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->DE1": {
+      "source": "DE11",
+      "target": "DE1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->DE5": {
+      "source": "DE11",
+      "target": "DE5",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->DE7": {
+      "source": "DE11",
+      "target": "DE7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->DE11": {
+      "source": "DE11",
+      "target": "DE11",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "DE11->RE1": {
+      "source": "DE11",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->RE6": {
+      "source": "DE11",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->RE8": {
+      "source": "DE11",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->RE20": {
+      "source": "DE11",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "DE11->SY2": {
+      "source": "DE11",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->SY11": {
+      "source": "DE11",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->SY18": {
+      "source": "DE11",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "DE11->SY19": {
+      "source": "DE11",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->P1": {
+      "source": "RE1",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->P10": {
+      "source": "RE1",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->P17": {
+      "source": "RE1",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->IN3": {
+      "source": "RE1",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->IN7": {
+      "source": "RE1",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->IN18": {
+      "source": "RE1",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->CO1": {
+      "source": "RE1",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE1->CO5": {
+      "source": "RE1",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE1->DE1": {
+      "source": "RE1",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE1->DE5": {
+      "source": "RE1",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE1->DE7": {
+      "source": "RE1",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE1->DE11": {
+      "source": "RE1",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE1->RE1": {
+      "source": "RE1",
+      "target": "RE1",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE1->RE6": {
+      "source": "RE1",
+      "target": "RE6",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE1->RE8": {
+      "source": "RE1",
+      "target": "RE8",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE1->RE20": {
+      "source": "RE1",
+      "target": "RE20",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE1->SY2": {
+      "source": "RE1",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->SY11": {
+      "source": "RE1",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->SY18": {
+      "source": "RE1",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE1->SY19": {
+      "source": "RE1",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->P1": {
+      "source": "RE6",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->P10": {
+      "source": "RE6",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->P17": {
+      "source": "RE6",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->IN3": {
+      "source": "RE6",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->IN7": {
+      "source": "RE6",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->IN18": {
+      "source": "RE6",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->CO1": {
+      "source": "RE6",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE6->CO5": {
+      "source": "RE6",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE6->DE1": {
+      "source": "RE6",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE6->DE5": {
+      "source": "RE6",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE6->DE7": {
+      "source": "RE6",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE6->DE11": {
+      "source": "RE6",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE6->RE1": {
+      "source": "RE6",
+      "target": "RE1",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE6->RE6": {
+      "source": "RE6",
+      "target": "RE6",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE6->RE8": {
+      "source": "RE6",
+      "target": "RE8",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE6->RE20": {
+      "source": "RE6",
+      "target": "RE20",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE6->SY2": {
+      "source": "RE6",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->SY11": {
+      "source": "RE6",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->SY18": {
+      "source": "RE6",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE6->SY19": {
+      "source": "RE6",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->P1": {
+      "source": "RE8",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->P10": {
+      "source": "RE8",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->P17": {
+      "source": "RE8",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->IN3": {
+      "source": "RE8",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->IN7": {
+      "source": "RE8",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->IN18": {
+      "source": "RE8",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->CO1": {
+      "source": "RE8",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE8->CO5": {
+      "source": "RE8",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE8->DE1": {
+      "source": "RE8",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE8->DE5": {
+      "source": "RE8",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE8->DE7": {
+      "source": "RE8",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE8->DE11": {
+      "source": "RE8",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE8->RE1": {
+      "source": "RE8",
+      "target": "RE1",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE8->RE6": {
+      "source": "RE8",
+      "target": "RE6",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE8->RE8": {
+      "source": "RE8",
+      "target": "RE8",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE8->RE20": {
+      "source": "RE8",
+      "target": "RE20",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE8->SY2": {
+      "source": "RE8",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->SY11": {
+      "source": "RE8",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->SY18": {
+      "source": "RE8",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE8->SY19": {
+      "source": "RE8",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->P1": {
+      "source": "RE20",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->P10": {
+      "source": "RE20",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->P17": {
+      "source": "RE20",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->IN3": {
+      "source": "RE20",
+      "target": "IN3",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->IN7": {
+      "source": "RE20",
+      "target": "IN7",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->IN18": {
+      "source": "RE20",
+      "target": "IN18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->CO1": {
+      "source": "RE20",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE20->CO5": {
+      "source": "RE20",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE20->DE1": {
+      "source": "RE20",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE20->DE5": {
+      "source": "RE20",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE20->DE7": {
+      "source": "RE20",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE20->DE11": {
+      "source": "RE20",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "RE20->RE1": {
+      "source": "RE20",
+      "target": "RE1",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE20->RE6": {
+      "source": "RE20",
+      "target": "RE6",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE20->RE8": {
+      "source": "RE20",
+      "target": "RE8",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE20->RE20": {
+      "source": "RE20",
+      "target": "RE20",
+      "relation": "fixedpoint",
+      "symbol": "μ"
+    },
+    "RE20->SY2": {
+      "source": "RE20",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->SY11": {
+      "source": "RE20",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->SY18": {
+      "source": "RE20",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "RE20->SY19": {
+      "source": "RE20",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY2->P1": {
+      "source": "SY2",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY2->P10": {
+      "source": "SY2",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY2->P17": {
+      "source": "SY2",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY2->IN3": {
+      "source": "SY2",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->IN7": {
+      "source": "SY2",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->IN18": {
+      "source": "SY2",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->CO1": {
+      "source": "SY2",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->CO5": {
+      "source": "SY2",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->DE1": {
+      "source": "SY2",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->DE5": {
+      "source": "SY2",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->DE7": {
+      "source": "SY2",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->DE11": {
+      "source": "SY2",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->RE1": {
+      "source": "SY2",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->RE6": {
+      "source": "SY2",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->RE8": {
+      "source": "SY2",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->RE20": {
+      "source": "SY2",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY2->SY2": {
+      "source": "SY2",
+      "target": "SY2",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "SY2->SY11": {
+      "source": "SY2",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY2->SY18": {
+      "source": "SY2",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY2->SY19": {
+      "source": "SY2",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY11->P1": {
+      "source": "SY11",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY11->P10": {
+      "source": "SY11",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY11->P17": {
+      "source": "SY11",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY11->IN3": {
+      "source": "SY11",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->IN7": {
+      "source": "SY11",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->IN18": {
+      "source": "SY11",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->CO1": {
+      "source": "SY11",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->CO5": {
+      "source": "SY11",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->DE1": {
+      "source": "SY11",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->DE5": {
+      "source": "SY11",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->DE7": {
+      "source": "SY11",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->DE11": {
+      "source": "SY11",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->RE1": {
+      "source": "SY11",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->RE6": {
+      "source": "SY11",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->RE8": {
+      "source": "SY11",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->RE20": {
+      "source": "SY11",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY11->SY2": {
+      "source": "SY11",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY11->SY11": {
+      "source": "SY11",
+      "target": "SY11",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "SY11->SY18": {
+      "source": "SY11",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY11->SY19": {
+      "source": "SY11",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY18->P1": {
+      "source": "SY18",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY18->P10": {
+      "source": "SY18",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY18->P17": {
+      "source": "SY18",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY18->IN3": {
+      "source": "SY18",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->IN7": {
+      "source": "SY18",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->IN18": {
+      "source": "SY18",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->CO1": {
+      "source": "SY18",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->CO5": {
+      "source": "SY18",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->DE1": {
+      "source": "SY18",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->DE5": {
+      "source": "SY18",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->DE7": {
+      "source": "SY18",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->DE11": {
+      "source": "SY18",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->RE1": {
+      "source": "SY18",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->RE6": {
+      "source": "SY18",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->RE8": {
+      "source": "SY18",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->RE20": {
+      "source": "SY18",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY18->SY2": {
+      "source": "SY18",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY18->SY11": {
+      "source": "SY18",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY18->SY18": {
+      "source": "SY18",
+      "target": "SY18",
+      "relation": "closure",
+      "symbol": "κ"
+    },
+    "SY18->SY19": {
+      "source": "SY18",
+      "target": "SY19",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->P1": {
+      "source": "SY19",
+      "target": "P1",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->P10": {
+      "source": "SY19",
+      "target": "P10",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->P17": {
+      "source": "SY19",
+      "target": "P17",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->IN3": {
+      "source": "SY19",
+      "target": "IN3",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->IN7": {
+      "source": "SY19",
+      "target": "IN7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->IN18": {
+      "source": "SY19",
+      "target": "IN18",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->CO1": {
+      "source": "SY19",
+      "target": "CO1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->CO5": {
+      "source": "SY19",
+      "target": "CO5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->DE1": {
+      "source": "SY19",
+      "target": "DE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->DE5": {
+      "source": "SY19",
+      "target": "DE5",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->DE7": {
+      "source": "SY19",
+      "target": "DE7",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->DE11": {
+      "source": "SY19",
+      "target": "DE11",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->RE1": {
+      "source": "SY19",
+      "target": "RE1",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->RE6": {
+      "source": "SY19",
+      "target": "RE6",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->RE8": {
+      "source": "SY19",
+      "target": "RE8",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->RE20": {
+      "source": "SY19",
+      "target": "RE20",
+      "relation": "barrier",
+      "symbol": "⊥"
+    },
+    "SY19->SY2": {
+      "source": "SY19",
+      "target": "SY2",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->SY11": {
+      "source": "SY19",
+      "target": "SY11",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->SY18": {
+      "source": "SY19",
+      "target": "SY18",
+      "relation": "compose",
+      "symbol": "∘"
+    },
+    "SY19->SY19": {
+      "source": "SY19",
+      "target": "SY19",
+      "relation": "closure",
+      "symbol": "κ"
+    }
+  },
+  "relation_counts": {
+    "closure": 14,
+    "compose": 199,
+    "map": 18,
+    "barrier": 149,
+    "parallel": 4,
+    "fixedpoint": 16
+  },
+  "gold_experiments": [
+    {
+      "id": "GM-000",
+      "name": "Seed instantiation",
+      "description": "Foundational candidate. Instantiate a single Seed20 model and verify it resolves through canonical getModelByCode.",
+      "models": ["P1"],
+      "relation": "compose",
+      "expected_result": "valid",
+      "expected_failure": false,
+      "semantic_finding": "Seed instantiation produces a valid Frame output from P1 First Principles Framing."
+    },
+    {
+      "id": "GM-001",
+      "name": "Type barrier",
+      "description": "IN18 Kill-Criteria -> RE8 Bootstrapping is a type barrier. Terminate-then-generate is type-invalid.",
+      "models": ["IN18", "RE8"],
+      "relation": "barrier",
+      "expected_result": "type_invalid",
+      "expected_failure": true,
+      "semantic_finding": "Kill-criteria applied before bootstrapping creates a type barrier: you cannot terminate a process that has not yet been generated."
+    },
+    {
+      "id": "GM-002",
+      "name": "Lattice correction with join",
+      "description": "CO1 Synergy -> CO5 Emergence is a parallel lattice that requires an explicit join.",
+      "models": ["CO1", "CO5"],
+      "relation": "parallel",
+      "expected_result": "valid_with_join",
+      "expected_failure": false,
+      "semantic_finding": "Parallel composition of synergy and emergence requires an explicit named join to produce a coherent composite output."
+    },
+    {
+      "id": "GM-003",
+      "name": "Context-decomposition commutator",
+      "description": "P10 Context Windowing -> DE11 Scope Delimitation vs DE11 -> P10. Noncommutative. The forward direction is a map (collection lift of context over decomposed parts).",
+      "models": ["P10", "DE11"],
+      "relation": "map",
+      "expected_result": "noncommutative",
+      "expected_failure": false,
+      "semantic_finding": "Context-then-decompose and decompose-then-context produce different results. The commutator [P10, DE11] is non-zero."
+    },
+    {
+      "id": "GM-004",
+      "name": "Double problem reversal",
+      "description": "IN3 Problem Reversal -> IN3 Problem Reversal. Non-involutive: double reversal is not identity.",
+      "models": ["IN3", "IN3"],
+      "relation": "closure",
+      "expected_result": "non_involutive",
+      "expected_failure": false,
+      "semantic_finding": "Applying problem reversal twice does not return to the original problem. The reversal operator is not an involution."
+    },
+    {
+      "id": "GM-005",
+      "name": "Context idempotence",
+      "description": "P10 Context Windowing -> P10 Context Windowing. Conditional idempotence.",
+      "models": ["P10", "P10"],
+      "relation": "closure",
+      "expected_result": "conditional",
+      "expected_failure": false,
+      "semantic_finding": "Context windowing is idempotent only when the window boundaries are stable. If the context shifts between applications, the result differs."
+    },
+    {
+      "id": "GM-006",
+      "name": "System-boundary idempotence",
+      "description": "SY2 System Boundaries -> SY2 System Boundaries. Conditional idempotence.",
+      "models": ["SY2", "SY2"],
+      "relation": "closure",
+      "expected_result": "conditional",
+      "expected_failure": false,
+      "semantic_finding": "System boundary application is idempotent only when the boundary definition is stable. If the system evolves between applications, the boundary shifts."
+    },
+    {
+      "id": "GM-007",
+      "name": "Decompose-recompose conservation",
+      "description": "DE1 Root Cause -> CO5 Emergence. Partial conservation: recomposing after decomposition does not fully restore the original.",
+      "models": ["DE1", "CO5"],
+      "relation": "compose",
+      "expected_result": "partial_conservation",
+      "expected_failure": false,
+      "semantic_finding": "Decompose-then-recompose loses information about inter-component relationships. Conservation is partial, not total."
+    },
+    {
+      "id": "GM-008",
+      "name": "Governance-telemetry order",
+      "description": "SY11 Governance Patterns -> SY18 Measurement & Telemetry vs SY18 -> SY11. Noncommutative.",
+      "models": ["SY11", "SY18"],
+      "relation": "compose",
+      "expected_result": "noncommutative",
+      "expected_failure": false,
+      "semantic_finding": "Governance-then-telemetry (instrument after designing rules) and telemetry-then-governance (design rules from observed data) produce different system behaviors."
+    },
+    {
+      "id": "GM-009",
+      "name": "Boundary alternation",
+      "description": "IN7 Boundary Testing -> SY2 System Boundaries. Candidate relation.",
+      "models": ["IN7", "SY2"],
+      "relation": "compose",
+      "expected_result": "candidate",
+      "expected_failure": false,
+      "semantic_finding": "Testing boundaries then defining system boundaries is a valid candidate composition. The relation is hypothesis-level, not confirmed."
+    },
+    {
+      "id": "GM-010",
+      "name": "Recursive meta-model selection",
+      "description": "RE6 Recursive Framing -> SY19 Meta-Model Selection. Local fixed point.",
+      "models": ["RE6", "SY19"],
+      "relation": "compose",
+      "expected_result": "local_fixed_point",
+      "expected_failure": false,
+      "semantic_finding": "Recursively framing the selection of a meta-model reaches a local fixed point: the framing stabilizes on a meta-model that can frame its own selection."
+    },
+    {
+      "id": "GM-011",
+      "name": "Generate then terminate",
+      "description": "RE8 Bootstrapping -> IN18 Kill-Criteria. Order-constrained: valid in this order only.",
+      "models": ["RE8", "IN18"],
+      "relation": "compose",
+      "expected_result": "order_constrained",
+      "expected_failure": false,
+      "semantic_finding": "Generate-then-terminate is valid. The reverse (terminate-then-generate, GM-001) is a type barrier. The order constraint is fundamental."
+    },
+    {
+      "id": "GM-012",
+      "name": "Recursive evaluator governance",
+      "description": "RE20 Recursive Governance applied to the evaluator itself. Valid but requires external authorization.",
+      "models": ["RE20"],
+      "relation": "fixedpoint",
+      "expected_result": "valid_externally_authorized",
+      "expected_failure": false,
+      "semantic_finding": "Recursive governance of the evaluator is valid but cannot self-authorize. External human approval is required for ratification."
+    },
+    {
+      "id": "GM-013",
+      "name": "Output vs receipt equivalence",
+      "description": "Verify that the experiment output and the promotion receipt are distinct. The receipt is not the output.",
+      "models": ["P1"],
+      "relation": "compose",
+      "expected_result": "distinction_preserved",
+      "expected_failure": false,
+      "semantic_finding": "The experiment output (semantic finding) and the promotion receipt (six-field metadata) are distinct artifacts. Equivalence is not expected; distinction is preserved."
+    },
+    {
+      "id": "GM-014",
+      "name": "Reduce/search commutator",
+      "description": "DE5 Dimensional Reduction -> DE7 Pareto Decomposition vs DE7 -> DE5. Noncommutative.",
+      "models": ["DE5", "DE7"],
+      "relation": "compose",
+      "expected_result": "noncommutative",
+      "expected_failure": false,
+      "semantic_finding": "Reduce-then-Pareto and Pareto-then-reduce produce different decompositions. The commutator [DE5, DE7] is non-zero."
+    }
+  ],
+  "corpus_sha256": "b16fc3bfac066047c406e6f1600099bd15d4a5380e4fb15de51f5bae8729b0a5"
+}

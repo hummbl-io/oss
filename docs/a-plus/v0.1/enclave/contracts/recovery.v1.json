@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/recovery/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "recovery_id",
+    "checkpoint",
+    "rto_seconds",
+    "rpo_seconds",
+    "separate_domain",
+    "restore_test_id"
+  ],
+  "properties": {
+    "schema_version": { "const": "recovery.v1" },
+    "recovery_id": { "type": "string" },
+    "checkpoint": { "type": "string" },
+    "rto_seconds": { "type": "integer", "minimum": 1 },
+    "rpo_seconds": { "type": "integer", "minimum": 0 },
+    "separate_domain": { "const": true },
+    "restore_test_id": { "type": "string" }
+  }
+}

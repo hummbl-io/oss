@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hummbl.io/capability-manifest.v1.schema.json",
+  "title": "CapabilityManifest",
+  "description": "Provider-neutral declarative capability discovery manifest for agent runtimes, adapters, and model providers.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "provider_id",
+    "runtime",
+    "capabilities",
+    "updated_at"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "enum": ["1.0.0"]
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "Normalized identifier (e.g. google, anthropic, openai, local_process)."
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["name", "version", "is_sandboxed", "execution_mode"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "is_sandboxed": { "type": "boolean" },
+        "execution_mode": {
+          "type": "string",
+          "enum": ["LOCAL_PROCESS", "MANAGED_REMOTE", "EDGE_ISOLATE", "AIR_GAPPED"]
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["tools", "transports", "governance"],
+      "properties": {
+        "tools": {
+          "type": "object",
+          "properties": {
+            "function_calling": { "type": "boolean" },
+            "local_mcp": { "type": "boolean" },
+            "remote_mcp": { "type": "boolean" },
+            "skills_execution": { "type": "boolean" },
+            "background_subagents": { "type": "boolean" }
+          }
+        },
+        "transports": {
+          "type": "object",
+          "properties": {
+            "stdio": { "type": "boolean" },
+            "streamable_http": { "type": "boolean" },
+            "sse": { "type": "boolean" },
+            "grpc": { "type": "boolean" }
+          }
+        },
+        "surveys": {
+          "type": "object",
+          "properties": {
+            "form_generation": { "type": "boolean" },
+            "response_streaming": { "type": "boolean" },
+            "branching_logic": { "type": "boolean" }
+          }
+        },
+        "governance": {
+          "type": "object",
+          "properties": {
+            "kill_switch_intercept": { "type": "boolean" },
+            "circuit_breaker_support": { "type": "boolean" },
+            "delegation_tokens_dct": { "type": "boolean" },
+            "append_only_receipts": { "type": "boolean" },
+            "capability_fence_enforcement": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-004",
+  "name": "Double problem reversal",
+  "description": "IN3 Problem Reversal -> IN3 Problem Reversal. Non-involutive: double reversal is not identity.",
+  "models": ["IN3", "IN3"],
+  "relation": "closure",
+  "expected_result": "non_involutive",
+  "expected_failure": false,
+  "semantic_finding": "Applying problem reversal twice does not return to the original problem. The reversal operator is not an involution."
+}

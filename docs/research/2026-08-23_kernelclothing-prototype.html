@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KERNEL — Engineered Apparel for the Post-Vanity Era</title>
+  <meta name="description" content="Zero decorative layers. Uncompromising load-bearing garments engineered for reality.">
+  <style>
+    :root {
+      --bg: #0C0C0E;
+      --card-bg: #141418;
+      --border: #27272A;
+      --text: #F4F4F5;
+      --text-muted: #A1A1AA;
+      --accent: #D97706;
+      --accent-hover: #B45309;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Nav */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    .nav-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      font-size: 1.25rem;
+      text-transform: uppercase;
+    }
+    .tagline {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: 12px;
+    }
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-left: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .hero-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: rgba(217, 119, 6, 0.1);
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+    }
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+    .cta-group {
+      display: flex;
+      gap: 16px;
+    }
+    .btn {
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--text-muted); }
+
+    .hero-display {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+    }
+    .spec-tag {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .spec-tag.top-left { top: 16px; left: 16px; }
+    .spec-tag.bottom-right { bottom: 16px; right: 16px; }
+
+    /* Philosophy Strip */
+    .doctrine {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 0;
+      margin: 40px 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .doctrine-item h3 {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .doctrine-item p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; }
+      .doctrine { grid-template-columns: 1fr; }
+      h1 { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container nav-wrap">
+      <div style="display: flex; align-items: center;">
+        <span class="logo">KERNEL</span>
+        <span class="tagline">// ZERO COMPROMISE APPAREL</span>
+      </div>
+      <nav>
+        <a href="#catalog">Catalog</a>
+        <a href="#materials">Materials</a>
+        <a href="#manifesto">Manifesto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <span class="hero-badge">[STATUS: DROP 01 IN PREPARATION]</span>
+        <h1>ENGINEERED FOR REALITY.</h1>
+        <p>Zero decorative layers. Uncompromising load-bearing garments constructed from ballistic Cordura®, seam-sealed Gore-Tex PRO, and Fidlock® magnetic hardware.</p>
+        <div class="cta-group">
+          <a href="#notify" class="btn btn-primary">Join Drop 01 Waitlist</a>
+          <a href="#specs" class="btn btn-ghost">View Material Specs</a>
+        </div>
+      </div>
+      <div class="hero-display">
+        <span class="spec-tag top-left">[SPEC: 20,000MM WP // 3L CORDURA®]</span>
+        <svg width="220" height="220" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: #52525B; margin: 40px 0;">
+          <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+        </svg>
+        <span class="spec-tag bottom-right">[SERIES: 001-SHELL]</span>
+      </div>
+    </section>
+
+    <section class="doctrine">
+      <div class="doctrine-item">
+        <h3>01 // INVARIANT CONSTRUCTION</h3>
+        <p>Every seam is structural. No superfluous patches, fake pockets, or fast-fashion synthetic blends.</p>
+      </div>
+      <div class="doctrine-item">
+        <h3>02 // CLIMATIC DEFENSE</h3>
+        <p>Engineered for high-abrasion urban environments, sub-zero downpours, and high-mobility physical execution.</p>
+      </div>
+      <div class="doctrine-item">
+        <h3>03 // THE HUMMBL LATTICE</h3>
+        <p>Physical hardware designed by software architects who demand the same zero-compromise rigor in their gear as in their code.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div>© 2026 KERNEL CLOTHING LLC. ALL RIGHTS RESERVED.</div>
+    <div>AFFILIATED WITH THE HUMMBL MESH // HOST=self-hosted-runner-2</div>
+  </footer>
+
+</body>
+</html>

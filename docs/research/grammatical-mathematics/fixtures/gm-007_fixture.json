@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-007",
+  "name": "Decompose-recompose conservation",
+  "description": "DE1 Root Cause -> CO5 Emergence. Partial conservation: recomposing after decomposition does not fully restore the original.",
+  "models": ["DE1", "CO5"],
+  "relation": "compose",
+  "expected_result": "partial_conservation",
+  "expected_failure": false,
+  "semantic_finding": "Decompose-then-recompose loses information about inter-component relationships. Conservation is partial, not total."
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/effect/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "effect_id",
+    "lease_id",
+    "operation",
+    "resource",
+    "expected_state_hash",
+    "idempotency_key",
+    "postcondition",
+    "target_count"
+  ],
+  "properties": {
+    "schema_version": { "const": "effect.v1" },
+    "effect_id": { "type": "string" },
+    "lease_id": { "type": "string" },
+    "operation": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,63}$" },
+    "resource": { "type": "string", "pattern": "^[^*?]+$" },
+    "expected_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "idempotency_key": { "type": "string" },
+    "postcondition": { "type": "string", "minLength": 1 },
+    "target_count": { "type": "integer", "minimum": 1, "maximum": 100 }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/mission/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mission_id",
+    "objective",
+    "effect_set",
+    "data_tier",
+    "budgets",
+    "review_class",
+    "issuer",
+    "issued_at",
+    "expires_at",
+    "nonce"
+  ],
+  "properties": {
+    "schema_version": { "const": "mission.v1" },
+    "mission_id": { "type": "string" },
+    "objective": { "type": "string", "minLength": 1 },
+    "effect_set": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "data_tier": {
+      "enum": ["public", "synthetic", "sensitive", "confidential", "secret"]
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_actions", "max_targets", "max_cost"],
+      "properties": {
+        "max_actions": { "type": "integer", "minimum": 0 },
+        "max_targets": { "type": "integer", "minimum": 0 },
+        "max_cost": { "type": "number", "minimum": 0 }
+      }
+    },
+    "review_class": {
+      "enum": ["routine", "consequential", "human_required", "prohibited"]
+    },
+    "issuer": { "type": "string" },
+    "issued_at": { "type": "string" },
+    "expires_at": { "type": "string" },
+    "nonce": { "type": "string" }
+  }
+}

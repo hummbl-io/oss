@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-006",
+  "name": "System-boundary idempotence",
+  "description": "SY2 System Boundaries -> SY2 System Boundaries. Conditional idempotence.",
+  "models": ["SY2", "SY2"],
+  "relation": "closure",
+  "expected_result": "conditional",
+  "expected_failure": false,
+  "semantic_finding": "System boundary application is idempotent only when the boundary definition is stable. If the system evolves between applications, the boundary shifts."
+}

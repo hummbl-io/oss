@@ -1,0 +1,240 @@
+# Machine-readable receipt for the BaseN x Levin crosswalk v0.1
+# Links source claims, crosswalk rows, and downstream issues.
+
+schema_version: levin-crosswalk-receipt.v1
+crosswalk_issue:
+  repo: hummbl-io/hummbl-production
+  number: 751
+  url: https://github.com/hummbl-io/hummbl-production/issues/751
+  title: "BaseN x Levin crosswalk v0.1"
+  status: APPROVED_RESEARCH_CROSSWALK_NOT_CANON
+  approved_by: Operator-bowlby
+  approved_date: 2026-07-11
+
+parent_research_packet:
+  repo: hummbl-io/hummbl-research
+  number: 65
+  url: https://github.com/hummbl-io/hummbl-research/issues/65
+
+prior_art_record:
+  repo: hummbl-io/hummbl-bibliography
+  number: 91
+  url: https://github.com/hummbl-io/hummbl-bibliography/issues/91
+  status: OPEN
+  note: "Attribution postures in this crosswalk are provisional until the prior-art record closes."
+
+source_artifacts:
+  hummbl_base120_canon:
+    path: api/src/base120.ts
+    sha: 5800ea8712b5e1a1b64d3e1687aab92b1895a78e
+    verified_date: 2026-07-21
+    verified_by: devin-research-lane
+
+  hummbl_glossary_pages:
+    pages:
+      - web/glossary/base120.html
+      - web/glossary/basen.html
+      - web/glossary/domain120.html
+    verified_date: 2026-07-21
+
+  hummbl_primitives_pages:
+    pages:
+      - web/primitives/kill-switch.html
+      - web/primitives/circuit-breaker.html
+      - web/primitives/delegation-tokens.html
+      - web/primitives/delegation-context.html
+      - web/primitives/governance-bus.html
+      - web/primitives/mcp-attestation.html
+    verified_date: 2026-07-21
+
+levin_primary_sources:
+  - id: LEVIN-TALK-2026
+    type: video_lecture
+    locator: https://youtu.be/-elegwQQOww
+    access_date: 2026-07-11
+    transcript_status: PENDING
+
+  - id: LEVIN-TAME-2022
+    type: peer_reviewed_paper
+    locator: https://arxiv.org/abs/2201.10346
+    access_date: 2026-07-11
+
+  - id: LEVIN-PEZZULO-2026
+    type: preprint
+    locator: https://arxiv.org/abs/2602.08079
+    access_date: 2026-07-11
+
+crosswalk_rows:
+  - id: CW-001
+    levin_construct: "Multi-scale competency architecture"
+    hummbl_constructs: ["SY15", "CO5", "SY20"]
+    disposition: STRUCTURAL_ANALOGY
+    proposed_action: RESEARCH_NOTE_ONLY
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-002
+    levin_construct: "Cognitive light cone"
+    hummbl_constructs: ["P10", "DE11", "P6"]
+    disposition: PARTIAL_MATCH
+    proposed_action: RESEARCH_NOTE_WITH_CANDIDATE
+    candidate_flagged: CAND-001
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-003
+    levin_construct: "Basal cognition"
+    hummbl_constructs: []
+    disposition: NO_EQUIVALENT
+    proposed_action: NO_ACTION
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-004
+    levin_construct: "Anatomical homeostasis / morphogenetic goal states"
+    hummbl_constructs: ["SY8", "KillSwitch"]
+    disposition: STRUCTURAL_ANALOGY
+    proposed_action: RESEARCH_NOTE_ONLY
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-005
+    levin_construct: "Developmental bioelectric coupling"
+    hummbl_constructs: ["GovernanceBus", "DelegationContext"]
+    disposition: STRUCTURAL_ANALOGY
+    proposed_action: NO_ACTION
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-006
+    levin_construct: "Nested or composite agency"
+    hummbl_constructs: ["CO5", "DelegationTokens", "SY20"]
+    disposition: PARTIAL_MATCH
+    proposed_action: RESEARCH_NOTE_ONLY
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-007
+    levin_construct: "Perturbation and goal persistence"
+    hummbl_constructs: ["SY8", "SY14", "CircuitBreaker"]
+    disposition: PARTIAL_MATCH
+    proposed_action: RESEARCH_NOTE_ONLY
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-008
+    levin_construct: "Persuadability spectrum"
+    hummbl_constructs: ["FrugalActivation", "IN19", "KillSwitch"]
+    disposition: PARTIAL_MATCH
+    proposed_action: RESEARCH_NOTE_WITH_CANDIDATE
+    candidate_flagged: CAND-002
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-009
+    levin_construct: "Disease as altered scope/coupling/memory"
+    hummbl_constructs: ["AgentLifecycle", "CircuitBreaker", "IN16"]
+    disposition: STRUCTURAL_ANALOGY
+    proposed_action: RESEARCH_NOTE_ONLY
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-010
+    levin_construct: "Novel synthetic or hybrid beings"
+    hummbl_constructs: ["SY2", "DE11", "AgentAdmission"]
+    disposition: STRUCTURAL_ANALOGY
+    proposed_action: NO_ACTION
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-011
+    levin_construct: "Moral-status and treatment uncertainty"
+    hummbl_constructs: []
+    disposition: OUT_OF_SCOPE
+    proposed_action: NO_ACTION
+    canon_posture: NOT_PROMOTED
+
+  - id: CW-012
+    levin_construct: "TAME"
+    hummbl_constructs: ["Base120", "BaseN"]
+    disposition: TERMINOLOGY_COLLISION
+    proposed_action: NO_ACTION
+    canon_posture: NOT_PROMOTED
+
+disposition_summary:
+  MATCH: 0
+  PARTIAL_MATCH: 4
+  STRUCTURAL_ANALOGY: 5
+  TERMINOLOGY_COLLISION: 1
+  TENSION: 0
+  NO_EQUIVALENT: 1
+  INSUFFICIENT_EVIDENCE: 0
+  OUT_OF_SCOPE: 1
+
+candidates_flagged:
+  - id: CAND-001
+    description: "Delegation moral-scope field"
+    source_row: CW-002
+    promotion_gate_status: BLOCKED
+
+  - id: CAND-002
+    description: "Agent persuadability assessment"
+    source_row: CW-008
+    promotion_gate_status: BLOCKED
+
+rejected_mappings:
+  - id: RM-001
+    temptation: "Cognitive light cone -> P10 as MATCH"
+    reason: "Moral-variable dimension dropped"
+    final_disposition: PARTIAL_MATCH
+
+  - id: RM-002
+    temptation: "Persuadability -> Kill Switch ladder as MATCH"
+    reason: "System property vs intervention property"
+    final_disposition: PARTIAL_MATCH
+
+  - id: RM-003
+    temptation: "Basal cognition -> Base120 as STRUCTURAL_ANALOGY"
+    reason: "Prescriptive tool vs descriptive claim"
+    final_disposition: NO_EQUIVALENT
+
+  - id: RM-004
+    temptation: "Disease -> Circuit Breaker OPEN as PARTIAL_MATCH"
+    reason: "Protective vs pathological state"
+    final_disposition: STRUCTURAL_ANALOGY
+
+  - id: RM-005
+    temptation: "Novel beings -> Agent admission as PARTIAL_MATCH"
+    reason: "Moral status vs authority scope"
+    final_disposition: STRUCTURAL_ANALOGY
+
+  - id: RM-006
+    temptation: "TAME -> Base120 as STRUCTURAL_ANALOGY"
+    reason: "Descriptive science vs prescriptive engineering"
+    final_disposition: TERMINOLOGY_COLLISION
+
+namespace_audit:
+  new_terms_proposed: 0
+  existing_terms_renamed: 0
+  verdict: NO_NAMESPACE_CHANGES_REQUIRED
+
+promotion_gates:
+  gate_1_exact_source_locator: "PASS for 10 rows; PARTIAL for CW-002, CW-008 (attribution pending)"
+  gate_2_hummbl_authority_locator: "PASS for all rows with HUMMBL constructs"
+  gate_3_non_equivalence_documented: "PASS for all 12 rows"
+  gate_4_no_misattribution: "PASS — attribution obligations documented in collision report"
+  gate_5_testable_operational_value: "FAIL for all rows — no row produces testable operational value beyond existing constructs"
+  gate_6_adversarial_review: "PENDING — not yet performed"
+  gate_7_separate_approval: "FAIL — no separate approval requested or granted"
+  overall: "NO ROW SATISFIES ALL SEVEN GATES. No promotion."
+
+review_status:
+  scientific_grounding_review: PENDING
+  hummbl_semantic_integrity_review: PENDING
+  closure_approval: PENDING
+  overall: DRAFT_NOT_PROMOTED
+
+deliverable_files:
+  - docs/research/levin-crosswalk/README.md
+  - docs/research/levin-crosswalk/hummbl-source-inventory.md
+  - docs/research/levin-crosswalk/levin-source-inventory.md
+  - docs/research/levin-crosswalk/crosswalk-matrix.md
+  - docs/research/levin-crosswalk/collision-attribution-report.md
+  - docs/research/levin-crosswalk/rejected-mappings.md
+  - docs/research/levin-crosswalk/namespace-audit.yaml
+  - docs/research/levin-crosswalk/receipt.yaml
+
+created:
+  date: 2026-07-21
+  by: devin-research-lane
+  branch: research/opencode/levin-crosswalk-v01

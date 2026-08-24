@@ -1,0 +1,19 @@
+{
+  "total_entries": 400,
+  "relation_counts": {
+    "closure": 14,
+    "compose": 199,
+    "map": 18,
+    "barrier": 149,
+    "parallel": 4,
+    "fixedpoint": 16
+  },
+  "symbols": {
+    "compose": "\u2218",
+    "parallel": "\u2297",
+    "map": "map",
+    "closure": "\u03ba",
+    "fixedpoint": "\u03bc",
+    "barrier": "\u22a5"
+  }
+}

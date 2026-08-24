@@ -1,0 +1,54 @@
+{
+  "schema_version": "0.1.0",
+  "schema_status": "candidate",
+  "title": "Federal entity registry schema",
+  "parent_issue": "https://github.com/hummbl-io/hummbl-production/issues/764",
+  "format_note": "YAML-compatible flow-style JSON subset. scripts/validate_federal_entities.py is the enforcement path.",
+  "registry_required_fields":
+    [
+      "schema_version",
+      "registry_status",
+      "snapshot_date",
+      "verified_through",
+      "last_verified_at",
+      "authority_sources",
+      "receipts",
+      "unresolved_entities",
+      "entities",
+    ],
+  "entity_required_fields":
+    [
+      "id",
+      "canonical_name",
+      "entity_type",
+      "branch",
+      "parent_entity_id",
+      "relationship_to_parent",
+      "status",
+      "record_status",
+      "controlling_evidence",
+      "unresolved_fields",
+      "last_verified_at",
+    ],
+  "entity_type_values":
+    ["executive_department", "independent_regulatory_commission"],
+  "relationship_to_parent_values":
+    ["none", "subordinate", "independent_within"],
+  "status_values":
+    [
+      "active",
+      "reorganizing",
+      "transferred",
+      "abolished",
+      "superseded",
+      "historical",
+      "uncertain",
+    ],
+  "record_status_values": ["candidate"],
+  "phase_0_1_constraints":
+    {
+      "executive_department_count": 15,
+      "nondepartment_control_count": 1,
+      "nondepartment_control_id": "securities_exchange_commission",
+    },
+}

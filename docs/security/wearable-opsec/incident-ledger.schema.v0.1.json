@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wearable OPSEC Incident Ledger v0.1",
+  "type": "object",
+  "required": [
+    "incident_id",
+    "short_name",
+    "date_event_or_reported",
+    "source_url",
+    "source_type",
+    "source_reliability_notes",
+    "actors_or_population",
+    "device_or_platform",
+    "exposed_data_types",
+    "protective_intelligence_surface",
+    "reported_impact",
+    "official_response",
+    "product_implication",
+    "consulting_implication",
+    "federal_defense_relevance",
+    "what_can_be_inferred",
+    "what_must_not_be_inferred",
+    "public_claim_safe",
+    "source_packet_path"
+  ],
+  "properties": {
+    "incident_id": {
+      "type": "string"
+    },
+    "short_name": {
+      "type": "string"
+    },
+    "date_event_or_reported": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "incident report",
+        "official policy",
+        "agency statement",
+        "investigative report",
+        "incident summary"
+      ]
+    },
+    "source_reliability_notes": {
+      "type": "string"
+    },
+    "actors_or_population": {
+      "type": "string"
+    },
+    "device_or_platform": {
+      "type": "string"
+    },
+    "exposed_data_types": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "protective_intelligence_surface": {
+      "type": "string"
+    },
+    "reported_impact": {
+      "type": "string"
+    },
+    "official_response": {
+      "type": "string"
+    },
+    "product_implication": {
+      "type": "string"
+    },
+    "consulting_implication": {
+      "type": "string"
+    },
+    "federal_defense_relevance": {
+      "type": "string",
+      "enum": ["high", "medium", "low", "uncertain"]
+    },
+    "what_can_be_inferred": {
+      "type": "string"
+    },
+    "what_must_not_be_inferred": {
+      "type": "string"
+    },
+    "public_claim_safe": {
+      "type": "string",
+      "enum": ["yes", "no", "qualified"]
+    },
+    "source_packet_path": {
+      "type": "string"
+    },
+    "receipt_hash_optional": {
+      "type": ["string", "null"]
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1.0",
+  "schema_status": "candidate",
+  "title": "Public intelligence source registry schema",
+  "parent_issue": "https://github.com/hummbl-io/hummbl-production/issues/565",
+  "format_note": "YAML-compatible flow-style JSON subset. This file documents the registry contract; scripts/validate_public_intelligence_sources.py is the enforcement path.",
+  "source_required_fields":
+    [
+      "id",
+      "name",
+      "tier",
+      "authority_class",
+      "adapter_priority",
+      "access_modes",
+      "license_terms_status",
+      "rate_limit_status",
+      "pii_sensitive_use_notes",
+      "false_authority_risks",
+      "bulk_ingestion_allowed",
+      "source_trigger",
+      "required_gates",
+      "receipts",
+    ],
+  "tier_values":
+    [
+      "tier_0_primary_authority",
+      "tier_1_broad_substrate",
+      "tier_2_provenance_aggregator",
+      "tier_3_source_discovery",
+      "tier_4_lead_only",
+      "rejected",
+    ],
+  "authority_class_values":
+    [
+      "primary_authority",
+      "official_distributor",
+      "official_index",
+      "broad_substrate",
+      "provenance_aggregator",
+      "source_discovery",
+      "lead_only",
+      "rejected",
+    ],
+  "access_mode_values": ["api", "bulk", "ui", "dump", "unknown"],
+  "license_terms_status_values":
+    ["checked", "unchecked", "unknown", "not_applicable"],
+  "rate_limit_status_values":
+    ["explicit", "unpublished", "account_tiered", "unknown", "not_applicable"],
+  "bulk_ingestion_gate_values": ["pass", "fail", "not_evaluated"],
+  "required_gates":
+    [
+      "source_authority_classified",
+      "official_docs_linked",
+      "api_or_bulk_access_verified",
+      "license_terms_checked",
+      "rate_limit_checked",
+      "pii_or_sensitive_use_checked",
+      "adapter_priority_scored",
+      "no_false_authority_claims",
+      "source_trigger_marked_lead_only",
+      "bulk_ingestion_blocked_until_storage_license_cost_pass",
+      "credentials_absent_from_receipts",
+    ],
+}

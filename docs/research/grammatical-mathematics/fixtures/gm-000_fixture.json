@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-000",
+  "name": "Seed instantiation",
+  "description": "Foundational candidate. Instantiate a single Seed20 model and verify it resolves through canonical getModelByCode.",
+  "models": ["P1"],
+  "relation": "compose",
+  "expected_result": "valid",
+  "expected_failure": false,
+  "semantic_finding": "Seed instantiation produces a valid Frame output from P1 First Principles Framing."
+}
