@@ -22,6 +22,7 @@ name: Publish to PyPI
       - "python/hummbl/v*"
       - "python/hummbl-kernel/v*"
       - "python/base120/v*"
+      - "python/governed-compression/v*"
       - "python/hummbl-bif/v*"
       - "python/hummbl-bus/v*"
       - "python/hummbl-cognition/v*"

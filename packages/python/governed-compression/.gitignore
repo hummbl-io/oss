@@ -1,0 +1,29 @@
+# Virtual environments
+.venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# Test / lint caches
+.pytest_cache/
+.ruff_cache/
+
+# Credentials and secrets
+.env
+.env.*
+!.env.example
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+id_ecdsa

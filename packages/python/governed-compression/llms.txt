@@ -1,0 +1,54 @@
+# governed-compression — llms.txt
+# AI-readable index of governed-compression.
+# Private research implementation surface for governed vector and KV-cache compression. Last updated: 2026-06-14.
+#
+# Query API: LLMs can parse this file to understand compression research capabilities
+# Installation: git clone https://github.com/hummbl-io/governed-compression.git
+# Documentation: https://github.com/hummbl-io/governed-compression
+#
+# governed-compression categories:
+#   HUMMBL:COMPRESSION Governed vector and KV-cache compression
+#   HUMMBL:RESEARCH Private research implementation surface
+#   HUMMBL:BENCHMARKS Reproducible benchmarks for compression methods
+
+## Overview
+
+Private research implementation surface for governed vector and KV-cache compression.
+
+## Purpose
+
+This repo exists to provide a better implementation surface than the current fragmented TurboQuant-adjacent landscape.
+
+Core goals:
+- CPU reference implementation first
+- reproducible benchmarks
+- Windows via WSL2 first
+- tuple-based experiment logging from day one
+- method comparison across TurboQuant-style, QJL, and simple baselines
+
+## Initial Scope
+
+- vector encode / decode
+- approximate dot product
+- method comparison (TurboQuant-style, QJL, baselines)
+- reproducible benchmarks
+- tuple-based experiment logging
+
+## Usage
+
+```bash
+# Run benchmarks
+python benchmarks/run.py
+
+# Compare methods
+python tools/compare.py --method turboquant --method qjl
+```
+
+## License
+
+Apache 2.0
+
+## Links
+
+- GitHub: https://github.com/hummbl-io/governed-compression
+- HUMMBL Research Institute: https://hummbl.io
