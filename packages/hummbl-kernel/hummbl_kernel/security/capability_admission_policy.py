@@ -6,8 +6,8 @@ Agents must request capabilities before execution; high-risk capabilities requir
 """
 
 import json
-import hashlib
 import logging
+import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass, field
@@ -134,7 +134,7 @@ class CapabilityAdmissionPolicy:
     def _generate_id(self, prefix: str) -> str:
         """Generate unique identifier"""
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        random_suffix = hashlib.md5(timestamp.encode()).hexdigest()[:8]
+        random_suffix = secrets.token_hex(4)
         return f"{prefix}_{timestamp}_{random_suffix}"
     
     def _register_standard_capabilities(self):
