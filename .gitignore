@@ -53,7 +53,6 @@ packages/hummbl-governance/scripts/runner-isolation/
 
 # PII-containing docs -- machine hostnames, operator names, internal paths
 packages/hummbl-governance/docs/benchmarks/
-packages/hummbl-governance/docs/ecosystem/
 packages/hummbl-governance/docs/standards/runner-isolation-policy-v0.1.md
 packages/hummbl-governance/docs/standards/AUDIT_2026-06-25.md
 packages/hummbl-governance/docs/standards/PHASE7_TRACKING.md
@@ -63,4 +62,3 @@ packages/hummbl-governance/docs/MEMORY_SYSTEM_REGISTRY.md
 packages/hummbl-governance/docs/REPO_HEALTH.md
 packages/hummbl-governance/docs/MAXIMALLY_PROMOTABLE_SURFACE_DOCTRINE.md
 packages/hummbl-governance/docs/aar-20260530-setup-python-ci-fix.md
-packages/hummbl-governance/docs/memory_system_registry.candidate.json
