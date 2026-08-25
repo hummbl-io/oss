@@ -1,0 +1,11 @@
+{
+  "tuple_type": "CONTROL_MODE_SET",
+  "id": "aebdf9be-6cb",
+  "time": "2026-04-17T23:42:13Z",
+  "run_id": "comparison-001",
+  "tuple_data": {
+    "issued_by": "nodezero",
+    "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+    "rationale": "Use AI path generation with human checkpointing for publication-oriented work."
+  }
+}

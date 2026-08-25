@@ -1,0 +1,9 @@
+HUMMBL Tuples
+Copyright 2026 HUMMBL LLC
+
+This product includes software developed at HUMMBL LLC (https://hummbl.io).
+
+The governance tuple specification (schemas/, docs/, examples/) is intended
+for broad adoption as an open standard for AI governance primitives. The
+specification is not a product — HUMMBL's commercial platform implements
+additional proprietary capabilities on top of this open specification.

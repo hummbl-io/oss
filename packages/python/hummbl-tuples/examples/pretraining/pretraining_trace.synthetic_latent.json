@@ -1,0 +1,33 @@
+{
+  "id": "pretrain-trace-001",
+  "time": "2026-07-01T00:00:00Z",
+  "artifact_type": "reasoning_trace",
+  "lifecycle_stage": "pretraining",
+  "trace_source": "synthetic",
+  "trace_visibility": "latent",
+  "governance_status": "provisional",
+  "payload": {
+    "objective": "Learn to predict next token in scientific text corpus with safety-aligned latent representations",
+    "corpus_role": "pretraining_mixture_scientific",
+    "generator": "synthetic-pipeline-v1",
+    "filtering_notes": "Filtered for PII, toxic content, and copyright violations. Retained scientific reasoning patterns.",
+    "provenance_uri": "https://example.com/corpus/scientific-v1",
+    "safety_notes": "Latent reasoning signals are synthetic. No human reasoning traces were used. Safety classification applied to all generated content before inclusion.",
+    "latent_signals": {
+      "reasoning_depth_estimate": 0.72,
+      "factual_grounding_score": 0.85,
+      "safety_alignment_score": 0.91,
+      "hallucination_risk_score": 0.15,
+      "corpus_contamination_flags": []
+    },
+    "training_stage": "pretraining_phase_1",
+    "model_checkpoint_ref": "ckpt-pretrain-001",
+    "data_mix_proportions": {
+      "scientific_papers": 0.40,
+      "textbooks": 0.25,
+      "code": 0.15,
+      "general_web": 0.10,
+      "synthetic_reasoning": 0.10
+    }
+  }
+}

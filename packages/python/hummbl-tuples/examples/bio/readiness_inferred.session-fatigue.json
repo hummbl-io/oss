@@ -1,0 +1,17 @@
+{
+  "tuple_type": "READINESS_INFERRED",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "readiness_score": 0.42,
+    "inference_basis": [
+      "session_rpe_high",
+      "long_continuous_work_block",
+      "self_reported_eye_strain"
+    ],
+    "time_horizon": "next_90_minutes",
+    "confidence": 0.78,
+    "review_required": true
+  }
+}

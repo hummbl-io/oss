@@ -1,0 +1,3 @@
+[run]
+omit =
+    hummbl_tuples/simulation/*

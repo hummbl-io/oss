@@ -1,0 +1,23 @@
+{
+  "tuple_type": "ATTEST",
+  "id": "attest-sg-001",
+  "time": "2026-07-01T00:01:00Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "agent-verifier",
+  "tool": "scientific-grounding-verifier",
+  "intent_id": "intent-sg-001",
+  "task_id": "task-sg-001",
+  "tuple_data": {
+    "event": "source_verification",
+    "evidence_hash": "sha256:placeholder-hash-for-scientific-grounding-evidence",
+    "verifier_id": "agent-verifier",
+    "passed": true,
+    "attestation_type": "source_verification",
+    "verdict": "verified",
+    "evidence_id": "evidence-sg-001",
+    "verification_method": "citation_check",
+    "verifier_notes": "Citation confirmed in PubMed. Source type matches."
+  }
+}

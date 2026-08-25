@@ -1,0 +1,27 @@
+{
+  "tuple_type": "EVIDENCE",
+  "id": "lc-e3eb8fcc0872db58b5ea38fa",
+  "time": "2026-05-03T15:50:08Z",
+  "state": "ok",
+  "drift": 0,
+  "tier": 1,
+  "agent": "langchain",
+  "tool": "stream-events",
+  "intent_id": "intent-portable-interface-demo",
+  "task_id": "task-langchain-emitter-demo",
+  "tuple_data": {
+    "event": "on_chain_end",
+    "adapter": "langchain",
+    "runnable_name": "auditability_experiment_chain",
+    "source_run_id": "lc-run-001",
+    "source_parent_ids": [],
+    "metadata": {
+      "control_mode": "AI_AUTONOMOUS"
+    },
+    "data": {
+      "output": {
+        "result": "typed tuple trace and untyped log comparison defined"
+      }
+    }
+  }
+}

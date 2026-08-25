@@ -1,0 +1,29 @@
+{
+  "tuple_type": "COALITION_DISSOLVED",
+  "id": "dissolved",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-007",
+  "principal": "user-007",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-007",
+    "represented_principal": "user-007",
+    "owner": "org-007",
+    "receipted_by": "receipt-012",
+    "actor_regime": "organization_plus_agents",
+    "evidence_links": [],
+    "receipt_link": "receipt-dissolved",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "coalition_id": "coal-001",
+    "dissolution_reason": "Investigation complete, expiry reached",
+    "dissolution_receipt": "receipt-012"
+  }
+}

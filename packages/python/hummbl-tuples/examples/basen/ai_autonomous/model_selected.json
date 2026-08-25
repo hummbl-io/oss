@@ -1,0 +1,16 @@
+{
+  "tuple_type": "MODEL_SELECTED",
+  "id": "30c44b21-874",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-autonomous-001",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "transformation_id": "synthesis",
+    "mental_model_id": "systems-thinking",
+    "selected_by": "model:gpt",
+    "selection_rationale": "The question spans pre-training, post-training, and governance, requiring whole-system framing.",
+    "candidate_count": 5,
+    "confidence": 0.81
+  }
+}

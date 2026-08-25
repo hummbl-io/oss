@@ -1,0 +1,14 @@
+{
+  "tuple_type": "EXPERIMENT_RUN_ASSIGNED",
+  "id": "366df528-ac1",
+  "time": "2026-04-17T23:42:13Z",
+  "problem_id": "research-trace-001",
+  "run_id": "comparison-001",
+  "tuple_data": {
+    "issued_by": "nodezero",
+    "assignee": "gemini-windows-desktop",
+    "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+    "base_profile": "BaseN-medium",
+    "notes": "Run the same problem under confirmed AI path selection for comparison against autonomous and HITL-constrained regimes."
+  }
+}

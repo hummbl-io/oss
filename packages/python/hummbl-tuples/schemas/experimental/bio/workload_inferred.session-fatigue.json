@@ -1,0 +1,18 @@
+{
+  "tuple_type": "WORKLOAD_INFERRED",
+  "id": "00467fae-942",
+  "time": "2026-04-17T23:42:13Z",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "workload_state": "overload_risk",
+    "drivers": [
+      "prolonged_focus_window",
+      "high_notification_density",
+      "self_reported_fatigue"
+    ],
+    "confidence": 0.8,
+    "review_required": true
+  }
+}

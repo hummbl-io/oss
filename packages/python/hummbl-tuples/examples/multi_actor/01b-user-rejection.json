@@ -1,0 +1,29 @@
+{
+  "tuple_type": "USER_REJECTION",
+  "id": "rejection",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-001",
+  "principal": "user-001",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-001",
+    "represented_principal": "user-001",
+    "owner": "user-001",
+    "receipted_by": "receipt-002",
+    "actor_regime": "user_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-rejection",
+    "visibility_class": "private",
+    "epistemic_permission": "challenge",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "rejected_claim": "User appears to prefer morning meetings",
+    "rejected_fragment_ref": "umf-001",
+    "rejection_reason": "I don't prefer morning meetings; the data was from a week with early deadlines"
+  }
+}

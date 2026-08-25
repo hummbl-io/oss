@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/extensions/hash_chaining.schema.json",
+  "title": "Hash Chaining Layer Extension v0.1",
+  "description": "Optional Layer 4 extension adding previous_hash field for tuple accountability chains.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "previous_hash": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the previous tuple in the chain. null or absent if this is the first tuple."
+    },
+    "args_hash": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of tool call arguments, for replay verification."
+    },
+    "signature": {
+      "type": ["string", "null"],
+      "description": "Cryptographic signature over the tuple content (excluding integrity fields)."
+    }
+  },
+  "required": []
+}

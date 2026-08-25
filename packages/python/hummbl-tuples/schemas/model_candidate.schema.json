@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/model_candidate.schema.json",
+  "title": "BaseN MODEL_CANDIDATE Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "time",
+    "id",
+    "problem_id",
+    "run_id",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "MODEL_CANDIDATE"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "problem_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "AI_AUTONOMOUS",
+        "AI_PROPOSE_HUMAN_CONFIRM",
+        "HITL_INFLUENCED",
+        "HITL_CONTROLLED",
+        "HOTL_SUPERVISED"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "transformation_id",
+        "mental_model_id",
+        "candidate_rank",
+        "proposed_by"
+      ],
+      "properties": {
+        "transformation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mental_model_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "proposed_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selection_rationale": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

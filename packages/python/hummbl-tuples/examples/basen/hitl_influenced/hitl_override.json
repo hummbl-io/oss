@@ -1,0 +1,14 @@
+{
+  "tuple_type": "HITL_OVERRIDE",
+  "id": "9019ea1d-731",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-influenced-001",
+  "control_mode": "HITL_INFLUENCED",
+  "tuple_data": {
+    "overridden_tuple_id": "candidate-transformation-002",
+    "override_type": "PATH_PRUNE",
+    "human_actor": "human:operator",
+    "override_reason": "Removed speculative exploratory transformations to keep the run publication-oriented."
+  }
+}

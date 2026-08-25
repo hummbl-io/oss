@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/action_selection.schema.json",
+  "title": "World-Model ACTION_SELECTION Tuple",
+  "description": "Records selection of an action based on a model.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "ACTION_SELECTION"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "target_model", "selected_action", "selection_rationale",
+        "evidence_links", "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "target_model": {"type": "string"},
+        "selected_action": {"type": "string"},
+        "selection_rationale": {"type": "string"},
+        "evidence_links": {"type": "array", "items": {"type": "string"}},
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "tuple_type": "BIO_OUTCOME_OBSERVED",
+  "id": "4be58949-646",
+  "time": "2026-04-17T23:42:12Z",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "action_id": "bio-action-001",
+    "outcome_type": "operator_state_improved",
+    "observed_change": "self_reported_eye_strain_decreased_and_work_pace_stabilized",
+    "measurement_basis": [
+      "followup_self_report",
+      "reduced_error_rate",
+      "lower_perceived_workload"
+    ],
+    "confidence": 0.66
+  }
+}

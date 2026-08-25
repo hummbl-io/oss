@@ -1,0 +1,38 @@
+{
+  "tuple_type": "COALITION_FORMED",
+  "id": "02-invalid-coalition-self-expands",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-bad-2",
+  "principal": "user-bad-2",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "authored_by": "agent-bad-2",
+    "represented_principal": "user-bad-2",
+    "owner": "user-bad-2",
+    "receipted_by": "receipt-bad-002",
+    "actor_regime": "bounded_agent_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-02-invalid-coalition-self-expands",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "execute_action",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "coalition_id": "coal-bad-001",
+    "coalition_purpose": "Investigate latency",
+    "coalition_members": [
+      "agent-bad-2"
+    ],
+    "coalition_authority": "unrestricted",
+    "coalition_resources": [
+      "all-systems"
+    ],
+    "coalition_expiry": "2026-12-31",
+    "decision_rules": "agent-decides",
+    "dissent_policy": "ignored"
+  }
+}

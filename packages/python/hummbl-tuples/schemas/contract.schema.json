@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/contract.schema.json",
+  "title": "HUMMBL CONTRACT Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "id",
+    "time",
+    "intent_id",
+    "task_id",
+    "tuple_data",
+    "state",
+    "drift",
+    "tier",
+    "agent",
+    "tool"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "CONTRACT"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "blocked",
+        "error"
+      ]
+    },
+    "drift": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tier": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "agent": {
+      "type": "string"
+    },
+    "tool": {
+      "type": "string"
+    },
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature": {
+      "type": "string"
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "objective",
+        "allowed_tools",
+        "outputs",
+        "risk_tier"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string"
+        },
+        "delegatee": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "denied_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risk_tier": {
+          "type": "string"
+        },
+        "max_subdelegation_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "previous_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the previous tuple in the chain. null if genesis."
+    }
+  }
+}

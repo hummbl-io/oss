@@ -1,0 +1,15 @@
+{
+  "tuple_type": "TRANSFORMATION_SELECTED",
+  "id": "1feaeea8-eec",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-influenced-001",
+  "control_mode": "HITL_INFLUENCED",
+  "tuple_data": {
+    "transformation_id": "comparison",
+    "selected_by": "model:gpt",
+    "selection_rationale": "AI selected comparison after the human constrained the run to analytic transformations.",
+    "candidate_count": 3,
+    "confidence": 0.76
+  }
+}

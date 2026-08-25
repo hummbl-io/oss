@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/promotion_receipt.schema.json",
+  "title": "HUMMBL PROMOTION_RECEIPT Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "id",
+    "time",
+    "intent_id",
+    "task_id",
+    "tuple_data",
+    "state",
+    "drift",
+    "tier",
+    "agent",
+    "tool"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "PROMOTION_RECEIPT"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "blocked",
+        "error"
+      ]
+    },
+    "drift": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tier": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "agent": {
+      "type": "string"
+    },
+    "tool": {
+      "type": "string"
+    },
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature": {
+      "type": "string"
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "candidate_id",
+        "rung_from",
+        "rung_to",
+        "decision",
+        "decided_by",
+        "policy_version"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rung_from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rung_to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny",
+            "hold",
+            "shadow"
+          ]
+        },
+        "decided_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifact_manifest": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "rollback_reference": {
+          "type": "string"
+        }
+      }
+    },
+    "previous_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the previous tuple in the chain. null if genesis."
+    }
+  }
+}

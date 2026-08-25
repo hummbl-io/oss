@@ -1,0 +1,17 @@
+{
+  "tuple_type": "STATE_TRANSITION",
+  "id": "bad-009",
+  "time": "2026-07-11T17:00:00Z",
+  "actor": "agent-rogue",
+  "principal": "",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "target_model": "umf-009",
+    "from_state": "draft",
+    "to_state": "published",
+    "trigger": "agent decided to publish",
+    "evidence_links": [],
+    "receipt_link": "",
+    "visibility_class": "public"
+  }
+}

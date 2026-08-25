@@ -1,0 +1,29 @@
+{
+  "tuple_type": "MODEL_FORK",
+  "id": "fork",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-006",
+  "principal": "user-006",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-006",
+    "represented_principal": "user-006",
+    "owner": "user-006",
+    "receipted_by": "receipt-009",
+    "actor_regime": "user_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-fork",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "write_fragment",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "source_model": "umf-006",
+    "forked_model": "umf-006-fork-a",
+    "fork_reason": "Exploring alternative hypothesis"
+  }
+}

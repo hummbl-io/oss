@@ -1,0 +1,19 @@
+{
+  "tuple_type": "PREDICTION_EVENT",
+  "id": "pred-004",
+  "time": "2026-07-11T13:00:00Z",
+  "actor": "agent-predictor-y",
+  "principal": "user-004",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "target_model": "umf-004-revised-v2",
+    "predicted_outcome": "Reducing review turnaround by 50% will increase merge rate by 20%",
+    "horizon": "3 months",
+    "conditions": ["Reviewer capacity remains stable", "No major tooling changes"],
+    "uncertainty_posture": "moderate",
+    "evaluation_method": "Compare merge rate before and after intervention",
+    "related_model_version": "umf-004-revised-v2",
+    "receipt_link": "receipt-006",
+    "visibility_class": "public"
+  }
+}

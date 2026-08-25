@@ -1,0 +1,33 @@
+[project]
+name = "hummbl-tuples"
+version = "0.2.0"
+description = "HUMMBL Typed Tuples governance model"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+keywords = ["tuples", "governance", "ai", "agents", "hummbl", "delegation", "evidence", "audit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["hummbl_tuples"]
+
+[tool.setuptools.package-data]
+hummbl_tuples = ["governance.yml"]

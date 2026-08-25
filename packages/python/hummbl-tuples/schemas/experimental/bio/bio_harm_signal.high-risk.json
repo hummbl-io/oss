@@ -1,0 +1,14 @@
+{
+  "tuple_type": "BIO_HARM_SIGNAL",
+  "id": "89f47147-5e9",
+  "time": "2026-04-17T23:42:12Z",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-003",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "harm_type": "adaptation_disruption",
+    "severity": "low",
+    "triggering_action_id": "bio-action-003",
+    "escalation_required": false
+  }
+}

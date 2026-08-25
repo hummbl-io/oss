@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/path_comparison.schema.json",
+  "title": "BaseN PATH_COMPARISON Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "time",
+    "id",
+    "problem_id",
+    "run_id",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "PATH_COMPARISON"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "problem_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "AI_AUTONOMOUS",
+        "AI_PROPOSE_HUMAN_CONFIRM",
+        "HITL_INFLUENCED",
+        "HITL_CONTROLLED",
+        "HOTL_SUPERVISED"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "path_a_id",
+        "path_b_id",
+        "comparison_basis",
+        "preferred_path",
+        "decided_by"
+      ],
+      "properties": {
+        "path_a_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path_b_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparison_basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preferred_path": {
+          "type": "string",
+          "enum": [
+            "A",
+            "B",
+            "TIE",
+            "INCONCLUSIVE"
+          ]
+        },
+        "decided_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

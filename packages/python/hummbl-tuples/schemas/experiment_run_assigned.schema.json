@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/experiment_run_assigned.schema.json",
+  "title": "Nodezero EXPERIMENT_RUN_ASSIGNED Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "time",
+    "id",
+    "problem_id",
+    "run_id",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "EXPERIMENT_RUN_ASSIGNED"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "problem_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "issued_by",
+        "assignee",
+        "control_mode"
+      ],
+      "properties": {
+        "issued_by": {
+          "type": "string",
+          "const": "nodezero"
+        },
+        "assignee": {
+          "type": "string",
+          "minLength": 1
+        },
+        "control_mode": {
+          "type": "string",
+          "enum": [
+            "AI_AUTONOMOUS",
+            "AI_PROPOSE_HUMAN_CONFIRM",
+            "HITL_INFLUENCED",
+            "HITL_CONTROLLED",
+            "HOTL_SUPERVISED"
+          ]
+        },
+        "base_profile": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

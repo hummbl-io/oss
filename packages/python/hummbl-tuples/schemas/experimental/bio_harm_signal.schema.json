@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/bio_harm_signal.schema.json",
+  "title": "BIO_HARM_SIGNAL Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "time",
+    "id",
+    "subject_id",
+    "run_id",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "BIO_HARM_SIGNAL"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "AI_AUTONOMOUS",
+        "AI_PROPOSE_HUMAN_CONFIRM",
+        "HITL",
+        "HOTL",
+        "HUMAN_CONTROLLED"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "harm_type",
+        "severity",
+        "triggering_action_id",
+        "escalation_required"
+      ],
+      "properties": {
+        "harm_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "triggering_action_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "escalation_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

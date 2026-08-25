@@ -1,0 +1,19 @@
+{
+  "tuple_type": "TRACE_EVIDENCE",
+  "id": "3154b975-795",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-governance-001",
+  "run_id": "run-hotl-001",
+  "control_mode": "HOTL_SUPERVISED",
+  "tuple_data": {
+    "path_id": "path-hotl-001",
+    "claim": "HOTL supervision preserved exploration while allowing operator interrupt authority.",
+    "metric_bundle": {
+      "task_success": 0.84,
+      "token_cost": 15400,
+      "human_interrupts": 0,
+      "operator_review_required": true
+    },
+    "evidence_status": "PENDING"
+  }
+}

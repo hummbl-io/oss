@@ -1,0 +1,19 @@
+{
+  "tuple_type": "OBSERVATION_EVENT",
+  "id": "obs-001",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-001",
+  "principal": "user-001",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "original_expression": "My team's standup ran 35 minutes today",
+    "normalized_observation": "standup_duration=35min on Monday",
+    "system_interpretation": "Meeting exceeded typical 20min target",
+    "user_approved_interpretation": "Yes, this was longer than usual",
+    "context": "Distributed engineering team standup",
+    "evidence_links": ["calendar-001"],
+    "uncertainty_posture": "low",
+    "receipt_link": "receipt-001",
+    "visibility_class": "private"
+  }
+}

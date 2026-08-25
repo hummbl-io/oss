@@ -1,0 +1,15 @@
+{
+  "tuple_type": "TRANSFORMATION_SELECTED",
+  "id": "a649ec64-b64",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-autonomous-001",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "transformation_id": "synthesis",
+    "selected_by": "model:gpt",
+    "selection_rationale": "Open-ended research synthesis benefits from broad aggregation before narrowing.",
+    "candidate_count": 4,
+    "confidence": 0.84
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "tuple_type": "BIO_ACTION_BLOCKED",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-002",
+  "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+  "tuple_data": {
+    "action_id": "bio-action-002",
+    "blocked_by": "operator-001",
+    "block_reason": "insufficient_signal_quality_for_aggressive_adaptation",
+    "policy_basis": "bio-governance-v0"
+  }
+}

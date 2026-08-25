@@ -1,0 +1,21 @@
+{
+  "tuple_type": "TRACE_EVIDENCE",
+  "id": "c57f01f9-fa0",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-confirm-001",
+  "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+  "tuple_data": {
+    "path_id": "path-ai-confirm-001",
+    "claim": "Human confirmation improved trust while preserving most of the AI-selected reasoning path.",
+    "evidence_status": "SUPPORTED",
+    "metric_bundle": {
+      "task_success": 0.9,
+      "human_rating": 4.7,
+      "token_cost": 19100,
+      "runtime_s": 54.8,
+      "override_count": 0
+    },
+    "notes": "Slightly slower than autonomy, stronger acceptance signal."
+  }
+}

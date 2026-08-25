@@ -1,0 +1,31 @@
+{
+  "tuple_type": "MODEL_MERGE_PROPOSAL",
+  "id": "01-invalid-merge-hides-dissent",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-bad-1",
+  "principal": "user-bad-1",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-bad-1",
+    "represented_principal": "user-bad-1",
+    "owner": "user-bad-1",
+    "receipted_by": "receipt-bad-001",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-01-invalid-merge-hides-dissent",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "write_fragment",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "source_model_a": "umf-bad-1",
+    "source_model_b": "umf-bad-1-fork",
+    "proposed_merged_model": "umf-bad-1-merged",
+    "merge_rationale": "Merge without acknowledging dissent",
+    "unresolved_dissent_acknowledged": false
+  }
+}

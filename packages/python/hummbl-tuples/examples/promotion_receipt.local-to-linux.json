@@ -1,0 +1,30 @@
+{
+  "tuple_type": "PROMOTION_RECEIPT",
+  "id": "promo-cand-xsa2-v17",
+  "time": "2026-04-20T23:10:00Z",
+  "state": "ok",
+  "drift": 0,
+  "tier": 2,
+  "agent": "governor",
+  "tool": "promotion-gate",
+  "intent_id": "parameter-golf-20260420",
+  "task_id": "cand-xsa2-v17",
+  "tuple_data": {
+    "candidate_id": "cand-xsa2-v17",
+    "rung_from": "anvil-local",
+    "rung_to": "linux-1gpu",
+    "decision": "allow",
+    "decided_by": "governor",
+    "policy_version": "promo-v1",
+    "reason_codes": [
+      "local_win",
+      "artifact_complete",
+      "stable_eval"
+    ],
+    "artifact_manifest": {
+      "results": "r2://pg/cand-xsa2-v17/results.json",
+      "checkpoint": "r2://pg/cand-xsa2-v17/checkpoint.pt"
+    },
+    "rollback_reference": "rollback-cand-xsa2-v17"
+  }
+}
