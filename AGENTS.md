@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts 4 Python packages: `base120`, `hummbl`, `hummbl-governance`, `hummbl-kernel`.
+Currently hosts 9 Python packages under `packages/python/<name>/`.
 
 ## Packages
 
@@ -13,13 +13,18 @@ Currently hosts 4 Python packages: `base120`, `hummbl`, `hummbl-governance`, `hu
 | base120 | `packages/python/base120/` | Published (3.0.0) | 120 reasoning operators for structured thinking |
 | hummbl-kernel | `packages/python/hummbl-kernel/` | Pre-release (0.1.0) | Orchestration kernel with security and compliance enforcement |
 | hummbl | `packages/python/hummbl/` | Pre-release (0.1.0) | Structured reasoning framework for AI agents |
+| hummbl-bif | `packages/python/hummbl-bif/` | Published (1.0.1) | Batch Ingestion Framework for technical knowledge acquisition |
+| hummbl-tuples | `packages/python/hummbl-tuples/` | Published (0.2.0) | HUMMBL Typed Tuples governance model |
+| hummbl-bus | `packages/python/hummbl-bus/` | Published (0.1.0) | Secure append-only TSV coordination bus for multi-agent systems |
+| hummbl-cognition | `packages/python/hummbl-cognition/` | Published (0.1.0) | Cognitive Ledger Protocol (CLP) and Open Brain server |
+| governed-compression | `packages/python/governed-compression/` | Published (0.1.0) | Governed compression experiments (numpy dependency exception) |
 
 ## Setup
 
 Each package has its own `pyproject.toml` and test suite. Install a package for development:
 
 ```bash
-cd packages/<package-name>
+cd packages/python/<package-name>
 pip install -e ".[test]"
 ```
 
@@ -31,6 +36,11 @@ cd packages/python/hummbl-governance && python -m pytest tests/ -v
 cd packages/python/hummbl-kernel && python -m pytest tests/ -v
 cd packages/python/hummbl && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
+cd packages/python/hummbl-bif && python -m pytest tests/ -v
+cd packages/python/hummbl-tuples && python -m pytest tests/ -v
+cd packages/python/hummbl-bus && python -m pytest tests/ -v
+cd packages/python/hummbl-cognition && python -m pytest tests/ -v
+cd packages/python/governed-compression && python -m pytest tests/ -v
 ```
 
 ## CI
@@ -43,6 +53,7 @@ cd packages/python/base120 && python -m pytest tests/ -v
 
 - Python 3.11+ required
 - Zero third-party runtime dependencies (stdlib only in production code)
+  - **Exception**: `governed-compression` requires `numpy>=1.26` for array operations (documented in its `pyproject.toml`)
 - Test dependencies in `[test]` extras only
 - Apache 2.0 license (packages); MIT OR Apache-2.0 (repo level)
 - Commit format: Conventional Commits
