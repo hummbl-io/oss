@@ -324,7 +324,7 @@ site: hummbl.io     # hummbl.io | operator.com | both
 - **Accent:** `#C2410C` (terracotta / burnt orange)
 - **Typography:** Serif + sans pairing (editorial, warm, intellectual)
 - **Tone:** Humanistic, approachable, credible
-- **Mockup:** `<repo-root>/.gemini\antigravity-cli\brain\1372b0f4-d179-44ef-8671-99fc161fca6d\reuben_io_design_1787499633132.jpg`
+- **Mockup:** `<repo-root>/.gemini/antigravity-cli/brain/<session-id>/public_sites_design_<timestamp>.jpg`
 
 ---
 
