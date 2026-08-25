@@ -9,10 +9,10 @@ Currently hosts 4 Python packages: `base120`, `hummbl`, `hummbl-governance`, `hu
 
 | Package | Path | PyPI status | Description |
 |---------|------|-------------|-------------|
-| hummbl-governance | `packages/hummbl-governance/` | Published (1.4.1) | Governance primitives for AI agent orchestration |
-| base120 | `packages/base120/` | Published (2.0.0) | 120 reasoning operators for structured thinking |
-| hummbl-kernel | `packages/hummbl-kernel/` | Pre-release (0.1.0) | Orchestration kernel with security and compliance enforcement |
-| hummbl | `packages/hummbl/` | Pre-release (0.1.0) | Structured reasoning framework for AI agents |
+| hummbl-governance | `packages/python/hummbl-governance/` | Published (1.4.2) | Governance primitives for AI agent orchestration |
+| base120 | `packages/python/base120/` | Published (3.0.0) | 120 reasoning operators for structured thinking |
+| hummbl-kernel | `packages/python/hummbl-kernel/` | Pre-release (0.1.0) | Orchestration kernel with security and compliance enforcement |
+| hummbl | `packages/python/hummbl/` | Pre-release (0.1.0) | Structured reasoning framework for AI agents |
 
 ## Setup
 
@@ -27,9 +27,10 @@ pip install -e ".[test]"
 
 ```bash
 # Per-package
-cd packages/hummbl-governance && python -m pytest tests/ -v
-cd packages/hummbl-kernel && python -m pytest tests/ -v
-cd packages/hummbl && python -m pytest tests/ -v
+cd packages/python/hummbl-governance && python -m pytest tests/ -v
+cd packages/python/hummbl-kernel && python -m pytest tests/ -v
+cd packages/python/hummbl && python -m pytest tests/ -v
+cd packages/python/base120 && python -m pytest tests/ -v
 ```
 
 ## CI

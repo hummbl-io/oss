@@ -12,6 +12,7 @@ Public monorepo for HUMMBL open-source packages. Consolidation in progress.
 | `hummbl-tuples` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-tuples)](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
 | `hummbl-bif` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-bif)](https://pypi.org/project/hummbl-bif/) | Live — Batch Ingestion Framework |
 | `base120` | Python | [![PyPI](https://img.shields.io/pypi/v/base120)](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
+| `governed-compression` | Python | [![PyPI](https://img.shields.io/pypi/v/governed-compression)](https://pypi.org/project/governed-compression/) | Live — governed vector and KV-cache compression |
 | `hummbl` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl)](https://pypi.org/project/hummbl/) | Pending first release — structured reasoning framework for AI agents |
 | `hummbl-kernel` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-kernel)](https://pypi.org/project/hummbl-kernel/) | Pending first release — orchestration kernel for workflow execution |
 
