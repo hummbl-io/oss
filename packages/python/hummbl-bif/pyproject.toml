@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=82.0.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-bif"
+version = "1.0.1"
+description = "Batch Ingestion Framework - systematic methodology for technical knowledge acquisition using AI assistants"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+keywords = ["bif", "batch-ingestion", "knowledge-acquisition", "ai", "agents", "hummbl", "mcp", "methodology"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=9.1.0"]
+
+[project.scripts]
+bif = "bif_cli:main"
+
+[tool.setuptools]
+py-modules = ["bif_cli", "mcp_server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
