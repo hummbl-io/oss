@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/route_event_receipt.schema.json",
+  "title": "Route Event Receipt",
+  "description": "Telemetry receipt for a single route health event, tracked by vendor × model × surface × error code. Feeds the route admission registry (hummbl-admission-controlled-state#5) by making recurrence patterns visible at the model × surface granularity that vendor-level status pages hide. Motivated by the Claude elevated-error recurrence (10+ incidents Jun 2 - Jul 4 2026) where Opus 4.8 was disproportionately affected but the pattern was invisible at vendor-level status granularity, and by the Anthropic error docs distinction between 529 overloaded_error (capacity, retry with backoff) and 429 rate_limit_error (quota, do not retry aggressively).",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "vendor",
+    "model",
+    "surface",
+    "event_class",
+    "status_code",
+    "error_type",
+    "retry_policy",
+    "failover_policy",
+    "occurrence_count",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^route-evt-[a-f0-9-]+$",
+      "description": "Unique receipt identifier (e.g. route-evt-<uuid4>)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of this event observation."
+    },
+    "vendor": {
+      "type": "string",
+      "enum": ["openai", "anthropic", "google", "aws", "azure", "github", "other"],
+      "description": "Vendor providing the route."
+    },
+    "model": {
+      "type": "string",
+      "description": "Model identifier (e.g. claude-sonnet-5, claude-opus-4-8, gpt-5, gemini-3-pro). Free string — model names change frequently."
+    },
+    "surface": {
+      "type": "string",
+      "enum": ["api", "chat", "code", "cowork", "github-agent", "bedrock", "vertex", "foundry", "other"],
+      "description": "Product surface where the event was observed."
+    },
+    "event_class": {
+      "type": "string",
+      "enum": ["incident", "health_check", "degradation", "recovery"],
+      "description": "incident = observed error; health_check = periodic probe; degradation = vendor-acknowledged degradation; recovery = vendor-acknowledged resolution."
+    },
+    "status_code": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "HTTP status code (0 for non-HTTP events)."
+    },
+    "error_type": {
+      "type": "string",
+      "enum": ["none", "overloaded_error", "rate_limit_error", "api_error", "timeout", "silent_drop", "auth_error", "not_found", "other"],
+      "description": "Error type. overloaded_error = 529 (capacity saturation); rate_limit_error = 429 (quota); api_error = 500/502/503; timeout = request timed out; silent_drop = action reported success but produced nothing (false-green)."
+    },
+    "retry_policy": {
+      "type": "string",
+      "enum": ["none", "retry_with_backoff", "retry_once", "fail_fast", "circuit_breaker_open"],
+      "description": "Retry policy that should be applied for this error type. 529 → retry_with_backoff (capacity is transient); 429 → retry_once or fail_fast (don't burn quota); silent_drop → circuit_breaker_open (fundamental breakage)."
+    },
+    "failover_policy": {
+      "type": "string",
+      "enum": ["none", "switch_model", "switch_vendor", "queue_and_wait", "escalate"],
+      "description": "Failover policy for this error type. switch_model = failover to another model from same vendor; switch_vendor = failover to another vendor; queue_and_wait = queue the request; escalate = require operator decision."
+    },
+    "incident_ref": {
+      "type": "string",
+      "description": "Reference to upstream incident (status page URL, incident ID). Required for degradation and recovery events."
+    },
+    "first_seen_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this error signature (vendor × model × surface × error_type) was first observed. Required when occurrence_count > 1."
+    },
+    "last_seen_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this error signature was last observed. Required when occurrence_count > 1."
+    },
+    "occurrence_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many times this error signature has been observed. 1 = first observation. >1 = recurrence."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to evidence (status page URL, log line, GitHub issue, bus receipt). Ephemeral sources must be marked."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional context (e.g. 'Fable 5 relaunch contributed to load')."
+    },
+    "receipt_hash": {
+      "type": "string",
+      "description": "SHA-256 of the canonical receipt (excluding the hash field). Tamper detection."
+    }
+  },
+  "additionalProperties": false
+}

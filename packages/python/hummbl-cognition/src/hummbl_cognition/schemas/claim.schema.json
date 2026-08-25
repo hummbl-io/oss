@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cognition/claim.schema.json",
+  "title": "Atomic Claim and Evidence Distance Schema",
+  "description": "Schema for validating Atomic Claims, evidence distance tags (D1-D5), and risk levels (R0-R4).",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^clm-[a-f0-9]{8,12}$",
+      "description": "Unique identifier for the atomic claim"
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 5,
+      "description": "Declarative assertion of atomic fact or hypothesis"
+    },
+    "evidence_distance": {
+      "type": "string",
+      "enum": ["D1", "D2", "D3", "D4", "D5"],
+      "description": "Evidence distance taxonomy: D1 (Empirical/Primary) to D5 (Speculative)"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["R0", "R1", "R2", "R3", "R4"],
+      "description": "Risk matrix classification: R0 (Negligible) to R4 (Critical Fail-Closed)"
+    },
+    "assurance_level": {
+      "type": "string",
+      "enum": ["SELF", "PEER_REVIEWED", "VERIFIED", "AUDITED"],
+      "description": "Assurance level for claim verification"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Domain tagging metadata"
+    },
+    "rehydration_source": {
+      "type": "string",
+      "description": "Terminal source URI for rehydration"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp"
+    }
+  },
+  "required": [
+    "claim_id",
+    "statement",
+    "evidence_distance",
+    "risk_level"
+  ],
+  "additionalProperties": true
+}

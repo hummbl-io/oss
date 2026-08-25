@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "issueops_run_receipt.schema.json",
+  "title": "IssueOps Run Receipt Schema",
+  "description": "Structured receipt for each IssueOps run, recording what GitHub issues were generated, closed, or commented on, when the run executed, and what evidence supports the actions.",
+  "type": "object",
+  "required": [
+    "run_id",
+    "timestamp",
+    "source",
+    "issues_created",
+    "issues_closed",
+    "issues_commented",
+    "total_issues_processed",
+    "agent",
+    "evidence_refs"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "pattern": "^issueops-[a-zA-Z0-9-]+$",
+      "description": "Unique identifier for this IssueOps run, prefixed with 'issueops-'."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "ISO 8601 UTC timestamp when the IssueOps run completed."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["chatgpt-connector", "arbiter-audit", "manual", "scheduled", "webhook"],
+      "description": "The origin that triggered this IssueOps run."
+    },
+    "issues_created": {
+      "type": "array",
+      "description": "GitHub issues created by this run.",
+      "items": {
+        "type": "object",
+        "required": ["repo", "number", "title", "category", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full repository name (owner/repo)."
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "GitHub issue number."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Issue title."
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Audit finding category (e.g., security, performance, governance)."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Severity of the finding that produced this issue."
+          }
+        }
+      }
+    },
+    "issues_closed": {
+      "type": "array",
+      "description": "GitHub issues closed by this run.",
+      "items": {
+        "type": "object",
+        "required": ["repo", "number", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full repository name (owner/repo)."
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "GitHub issue number."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Reason the issue was closed (e.g., resolved, duplicate, wontfix)."
+          }
+        }
+      }
+    },
+    "issues_commented": {
+      "type": "array",
+      "description": "GitHub issues commented on by this run.",
+      "items": {
+        "type": "object",
+        "required": ["repo", "number"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full repository name (owner/repo)."
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "GitHub issue number."
+          }
+        }
+      }
+    },
+    "total_issues_processed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of issues touched by this run (created + closed + commented, deduplicated)."
+    },
+    "agent": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical agent identity that executed the IssueOps run."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "Links to audit reports, bus receipts, or other supporting evidence.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "skipped_duplicate_candidates": {
+      "type": "array",
+      "description": "Candidate issues that were skipped because a duplicate already exists.",
+      "items": {
+        "type": "object",
+        "required": ["repo", "proposed_title", "duplicate_of"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full repository name (owner/repo) where the duplicate was found."
+          },
+          "proposed_title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The title that would have been used for the new issue."
+          },
+          "duplicate_of": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Issue number of the existing duplicate issue."
+          },
+          "match_reason": {
+            "type": "string",
+            "description": "How the duplicate was detected (e.g., 'title-similarity', 'exact-match')."
+          }
+        }
+      }
+    },
+    "read_only_candidates": {
+      "type": "array",
+      "description": "Candidate issues that were not created because the repo is outside the write boundary.",
+      "items": {
+        "type": "object",
+        "required": ["repo", "proposed_title", "category", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full repository name (owner/repo) that is read-only."
+          },
+          "proposed_title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The title that would have been used."
+          },
+          "category": {
+            "type": "string",
+            "description": "Audit finding category."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Severity of the finding."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the candidate was not created (e.g., 'outside-write-boundary')."
+          }
+        }
+      }
+    },
+    "access_limits": {
+      "type": "array",
+      "description": "Access-limit decisions encountered during the run.",
+      "items": {
+        "type": "object",
+        "required": ["repo", "limit_type", "details"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full repository name (owner/repo)."
+          },
+          "limit_type": {
+            "type": "string",
+            "enum": ["read-only", "rate-limited", "permission-denied", "auth-failed", "other"],
+            "description": "Type of access limit encountered."
+          },
+          "details": {
+            "type": "string",
+            "description": "Human-readable details about the access limit."
+          }
+        }
+      }
+    },
+    "write_boundary": {
+      "type": "array",
+      "description": "List of repos where issue creation is authorized for this run.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "quality_scores": {
+      "type": "object",
+      "description": "Quality scores for issues created during this run.",
+      "additionalProperties": false,
+      "properties": {
+        "avg_quality_score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Average quality score across all created issues (0-100)."
+        },
+        "min_quality_score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum quality score among created issues."
+        },
+        "max_quality_score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum quality score among created issues."
+        },
+        "rubric_version": {
+          "type": "string",
+          "description": "Version of the quality rubric used for scoring."
+        }
+      }
+    },
+    "run_disposition": {
+      "type": "string",
+      "enum": ["created", "no-op", "skipped-all", "partial", "blocked", "error"],
+      "description": "Overall disposition of the run."
+    },
+    "backpressure_notes": {
+      "type": "string",
+      "description": "Notes about backpressure or throttling applied during the run."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional free-form notes about the run."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the canonical receipt (excluding this field) for tamper detection."
+    }
+  },
+  "additionalProperties": false
+}

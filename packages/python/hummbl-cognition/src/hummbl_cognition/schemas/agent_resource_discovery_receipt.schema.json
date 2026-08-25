@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/agent_resource_discovery_receipt.schema.json",
+  "title": "Agent Resource Discovery Receipt",
+  "description": "Receipt emitted when a resource is discovered, evaluated, and admitted (or rejected) into the Agent Resource Registry. Defines the governed discovery-to-admission flow per issue #1686. Each receipt binds a discovery event to evidence, an admission decision, a reviewer, and a timestamp. Receipts are append-only and referenced by registry entries via the discovery_receipts field.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "resource_id",
+    "discovery_source",
+    "evidence",
+    "admission_decision",
+    "reviewer",
+    "timestamp",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^dr-[a-z0-9-]+$",
+      "description": "Unique receipt identifier (e.g. dr-github-mcp-20260704)."
+    },
+    "resource_id": {
+      "type": "string",
+      "pattern": "^res-[a-z0-9-]+$",
+      "description": "The registry entry this receipt applies to (must match an existing resource_id)."
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": ["mcp-server-registry", "internal", "vertex-ai-extensions-catalog", "skill-registry", "tool-discovery", "manual", "other"],
+      "description": "Where the resource was discovered."
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["url", "commit", "pr", "issue", "doc", "test", "log", "other"],
+            "description": "Type of evidence."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Reference to the evidence (URL, commit SHA, PR number, doc path, test name, log line, etc.)."
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional context about what this evidence proves."
+          }
+        }
+      },
+      "description": "Evidence supporting the discovery and admission decision. At least one item required."
+    },
+    "admission_decision": {
+      "type": "string",
+      "enum": ["admit", "reject", "hold", "retire"],
+      "description": "The decision made during this discovery event. admit = promote to namespace_status=admitted; reject = set namespace_status=rejected; hold = keep as candidate; retire = set namespace_status=retired."
+    },
+    "reviewer": {
+      "type": "string",
+      "enum": ["operator", "steward", "trusted", "active"],
+      "description": "Who performed the review and made the admission decision. Must be an authorized authority class."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of the admission decision (RFC3339, e.g. 2026-07-04T00:00:00Z)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional context about the discovery or decision rationale."
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Required when admission_decision is reject or retire. Explains why the resource was not admitted."
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the canonical receipt (excluding the receipt_hash field) for tamper detection."
+    }
+  },
+  "additionalProperties": false
+}

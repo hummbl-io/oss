@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/agent_resource_registry_entry.schema.json",
+  "title": "Agent Resource Registry Entry",
+  "description": "Registry entry for an agent-discoverable resource (tool, MCP server, skill, agent, canvas, connector, script, or other). Governs discovery, installation, invocation, and publication authority. Sensitive resources are disabled by default unless explicitly admitted. Motivated by issue #1116: as the agent fleet gains more MCP servers, skills, tools, and connectors, discovery becomes an authority surface — agents need to know what they may discover, install, invoke, and cite without ambient expansion of authority. The Vertex AI Extensions inventory is one resource class tracked by this registry.",
+  "type": "object",
+  "required": [
+    "resource_id",
+    "resource_type",
+    "resource_owner",
+    "namespace_status",
+    "install_authority",
+    "invoke_authority",
+    "risk_class",
+    "privacy_class",
+    "receipt_required",
+    "last_reviewed_at",
+    "entry_hash"
+  ],
+  "properties": {
+    "resource_id": {
+      "type": "string",
+      "pattern": "^res-[a-z0-9-]+$",
+      "description": "Unique resource identifier (e.g. res-vertex-ai-extensions, res-github-mcp-server)."
+    },
+    "resource_type": {
+      "type": "string",
+      "enum": ["tool", "mcp_server", "skill", "agent", "canvas", "connector", "script", "vertex-extension", "other"],
+      "description": "Category of resource. vertex-extension is a Vertex AI Extension (GCP AI agent extension)."
+    },
+    "resource_name": {
+      "type": "string",
+      "description": "Human-readable name (e.g. 'Vertex AI Extensions', 'GitHub MCP Server')."
+    },
+    "resource_owner": {
+      "type": "string",
+      "description": "Owner identity (agent, operator, or org)."
+    },
+    "source_registry": {
+      "type": "string",
+      "description": "Where this resource was discovered (e.g. 'vertex-ai-extensions-catalog', 'mcp-server-registry', 'internal')."
+    },
+    "namespace_status": {
+      "type": "string",
+      "enum": ["candidate", "admitted", "rejected", "retired"],
+      "description": "candidate = under review; admitted = approved for use; rejected = denied; retired = was admitted but now withdrawn. Rejected/retired entries persist for audit trail."
+    },
+    "install_authority": {
+      "type": "string",
+      "enum": ["operator_only", "steward", "trusted", "active", "probationary", "disabled"],
+      "description": "Who may install this resource. disabled = no one may install (sensitive resource not yet admitted)."
+    },
+    "invoke_authority": {
+      "type": "string",
+      "enum": ["operator_only", "steward", "trusted", "active", "probationary", "disabled"],
+      "description": "Who may invoke this resource. disabled = no one may invoke (sensitive resource not yet admitted)."
+    },
+    "publish_authority": {
+      "type": "string",
+      "enum": ["operator_only", "steward", "trusted", "active", "probationary", "disabled"],
+      "description": "Who may publish/cite this resource in external-facing artifacts. disabled = no one may publish."
+    },
+    "allowed_contexts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["development", "testing", "production", "research", "briefing", "governance", "external_facing"]
+      },
+      "description": "Contexts where this resource may be used."
+    },
+    "blocked_contexts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["development", "testing", "production", "research", "briefing", "governance", "external_facing"]
+      },
+      "description": "Contexts where this resource must NOT be used."
+    },
+    "secrets_required": {
+      "type": "boolean",
+      "description": "Whether this resource requires secrets/credentials to operate."
+    },
+    "network_required": {
+      "type": "boolean",
+      "description": "Whether this resource requires network access."
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Risk classification. low = read-only/no side effects; medium = local side effects; high = network/external side effects; critical = production mutation or credential use."
+    },
+    "privacy_class": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"],
+      "description": "Privacy classification. public = may appear in external artifacts; internal = HUMMBL only; confidential = named agents only; restricted = operator only."
+    },
+    "receipt_required": {
+      "type": "boolean",
+      "description": "Whether a discovery receipt must be emitted when this resource is discovered/invoked."
+    },
+    "discovery_receipts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to discovery receipts emitted for this resource."
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason for rejection or retirement. Required when namespace_status is rejected or retired."
+    },
+    "admission_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Conditions that must be met before a candidate resource can be admitted."
+    },
+    "migration_decision": {
+      "type": "string",
+      "enum": ["none", "inventory_only", "migrate", "hold", "reject_migration"],
+      "description": "Migration decision for resources being evaluated for migration from prompt-packed to registry-admitted. none = not a migration candidate; inventory_only = catalogued but no migration; migrate = approved for migration; hold = migration pending; reject_migration = migration explicitly rejected."
+    },
+    "migration_target": {
+      "type": "string",
+      "description": "Target registry entry ID this resource migrates to (if migrate)."
+    },
+    "last_reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of last review."
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Who performed the last review (agent or operator identity)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional context."
+    },
+    "entry_hash": {
+      "type": "string",
+      "description": "SHA-256 of the canonical entry (excluding the hash field). Tamper detection."
+    }
+  },
+  "additionalProperties": false
+}

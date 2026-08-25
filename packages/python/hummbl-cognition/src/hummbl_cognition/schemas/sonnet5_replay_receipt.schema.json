@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/sonnet5_replay_receipt.schema.json",
+  "title": "Sonnet 5 Replay Receipt",
+  "description": "Receipt for the controlled replay of a representative prompt corpus under Claude Sonnet 5 tokenization, capturing token-count delta, cost delta, eval-score delta, and behavior-change scan results. Required before Sonnet 5 can be admitted as a default route. Motivated by the Anthropic release notes (Jun 30 2026) stating Sonnet 5 uses a new tokenizer that produces roughly 30% more tokens for the same text, with per-token pricing unchanged at standard $3/$15 per million tokens — meaning a real ~30% effective cost increase after introductory pricing expires Aug 31 2026. Also captures the 3 migration-breaking behavior changes: adaptive thinking default-on, manual extended thinking returning 400, and non-default sampling parameters returning 400.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "prompt_corpus_ref",
+    "replay_methodology",
+    "sonnet_46_token_count",
+    "sonnet_5_token_count",
+    "token_delta_ratio",
+    "token_delta_pct",
+    "standard_pricing_per_1m_input_usd",
+    "standard_pricing_per_1m_output_usd",
+    "sonnet_46_cost_usd",
+    "sonnet_5_cost_usd",
+    "cost_delta_pct",
+    "behavior_changes_detected",
+    "max_tokens_truncation_observed",
+    "prompt_cache_invalidated",
+    "admission_recommendation",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^sonnet5-replay-[a-f0-9-]+$",
+      "description": "Unique receipt identifier (e.g. sonnet5-replay-<uuid4>)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of replay execution."
+    },
+    "prompt_corpus_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the prompt corpus replayed (path, URL, or corpus ID). Must be non-empty and replayable."
+    },
+    "replay_methodology": {
+      "type": "string",
+      "enum": ["token_counting_api", "side_by_side_eval", "full_replay", "sampled_replay"],
+      "description": "token_counting_api = used /v1/messages/count_tokens with model=claude-sonnet-5; side_by_side_eval = ran evals on both models; full_replay = replayed entire corpus with outputs; sampled_replay = replayed a representative sample."
+    },
+    "corpus_size_prompts": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of prompts in the replayed corpus."
+    },
+    "sonnet_46_token_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total token count under Sonnet 4.6 tokenization."
+    },
+    "sonnet_5_token_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total token count under Sonnet 5 tokenization."
+    },
+    "token_delta_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "description": "sonnet_5_token_count / sonnet_46_token_count. Expected ~1.0-1.35 per Anthropic; community measurements show 1.27-1.47 for code/English."
+    },
+    "token_delta_pct": {
+      "type": "number",
+      "description": "Percentage token increase: (sonnet_5 - sonnet_46) / sonnet_46 * 100. Positive = Sonnet 5 uses more tokens."
+    },
+    "standard_pricing_per_1m_input_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Standard per-million-input-token pricing in USD. $3 for both Sonnet 4.6 and Sonnet 5."
+    },
+    "standard_pricing_per_1m_output_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Standard per-million-output-token pricing in USD. $15 for both Sonnet 4.6 and Sonnet 5."
+    },
+    "introductory_pricing_per_1m_input_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Introductory per-million-input-token pricing in USD. $2 for Sonnet 5 through Aug 31 2026."
+    },
+    "introductory_pricing_per_1m_output_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Introductory per-million-output-token pricing in USD. $10 for Sonnet 5 through Aug 31 2026."
+    },
+    "introductory_pricing_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When introductory pricing expires. 2026-08-31T23:59:59Z for Sonnet 5."
+    },
+    "sonnet_46_cost_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total cost under Sonnet 4.6 at standard pricing."
+    },
+    "sonnet_5_cost_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total cost under Sonnet 5 at standard pricing (NOT introductory — standard is the durable cost)."
+    },
+    "cost_delta_pct": {
+      "type": "number",
+      "description": "Percentage cost increase at standard pricing: (sonnet_5 - sonnet_46) / sonnet_46 * 100."
+    },
+    "sonnet_5_cost_introductory_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total cost under Sonnet 5 at introductory pricing (temporary, for comparison only)."
+    },
+    "eval_scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["eval_name", "sonnet_46_score", "sonnet_5_score"],
+        "properties": {
+          "eval_name": {
+            "type": "string",
+            "description": "Name of the evaluation (e.g. BrowseComp, HumanEval, MMLU)."
+          },
+          "sonnet_46_score": {
+            "type": "number",
+            "description": "Sonnet 4.6 score on this eval."
+          },
+          "sonnet_5_score": {
+            "type": "number",
+            "description": "Sonnet 5 score on this eval."
+          },
+          "score_delta": {
+            "type": "number",
+            "description": "sonnet_5_score - sonnet_46_score. Positive = Sonnet 5 better."
+          },
+          "methodology_note": {
+            "type": "string",
+            "description": "Note on eval methodology (e.g. 'replayed with 10M token budget per Anthropic guidance')."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Side-by-side eval scores. Required when replay_methodology is side_by_side_eval or full_replay."
+    },
+    "behavior_changes_detected": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "adaptive_thinking_default_on",
+          "manual_extended_thinking_returns_400",
+          "non_default_sampling_returns_400",
+          "prompt_cache_invalidated_on_model_switch",
+          "context_window_holds_less_text",
+          "other"
+        ]
+      },
+      "description": "Behavior changes detected during replay. adaptive_thinking_default_on = thinking is now on by default; manual_extended_thinking_returns_400 = thinking:{type:enabled,budget_tokens:N} returns 400; non_default_sampling_returns_400 = non-default temperature/top_p/top_k return 400; prompt_cache_invalidated_on_model_switch = cached prefixes invalidated; context_window_holds_less_text = 1M window holds less text due to tokenizer."
+    },
+    "max_tokens_truncation_observed": {
+      "type": "boolean",
+      "description": "Whether any output was truncated due to max_tokens limits tuned for Sonnet 4.6 being too low for Sonnet 5."
+    },
+    "prompt_cache_invalidated": {
+      "type": "boolean",
+      "description": "Whether prompt cache was invalidated by the model switch (expected true on first switch)."
+    },
+    "content_type_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["content_type", "sonnet_46_tokens", "sonnet_5_tokens", "delta_ratio"],
+        "properties": {
+          "content_type": {
+            "type": "string",
+            "enum": ["english", "spanish", "chinese", "python", "javascript", "json", "markdown", "other"],
+            "description": "Content type of the prompt subset."
+          },
+          "sonnet_46_tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sonnet_5_tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "delta_ratio": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Token delta broken down by content type. Anthropic states 1.0-1.35x; community shows English 1.42x, Spanish 1.33x, Chinese 1.01x, Python 1.27x."
+    },
+    "admission_recommendation": {
+      "type": "string",
+      "enum": ["admit", "conditional", "hold", "reject"],
+      "description": "admit = safe to admit as default route; conditional = admit with documented conditions; hold = do not admit yet, more replay needed; reject = do not admit (cost/quality/behavior breakage too severe)."
+    },
+    "admission_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Conditions that must be met if admission_recommendation=conditional (e.g. 'recount all prompts with token counting API', 'revise max_tokens to 1.3x Sonnet 4.6 values', 'disable adaptive thinking for tool-use routes')."
+    },
+    "operator_approval_ref": {
+      "type": "string",
+      "description": "Reference to operator approval if admission_recommendation=admit or conditional (e.g. PR comment URL, risk acceptance ID). Required for admit and conditional."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to evidence (Anthropic blog URL, token counting API output, eval results)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional context."
+    },
+    "receipt_hash": {
+      "type": "string",
+      "description": "SHA-256 of the canonical receipt (excluding the hash field). Tamper detection."
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "replay_methodology": { "const": "side_by_side_eval" } },
+        "required": ["replay_methodology"]
+      },
+      "then": {
+        "required": ["eval_scores"],
+        "properties": {
+          "eval_scores": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "replay_methodology": { "const": "full_replay" } },
+        "required": ["replay_methodology"]
+      },
+      "then": {
+        "required": ["eval_scores"],
+        "properties": {
+          "eval_scores": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "admission_recommendation": { "const": "admit" } },
+        "required": ["admission_recommendation"]
+      },
+      "then": {
+        "required": ["operator_approval_ref"],
+        "properties": {
+          "operator_approval_ref": { "minLength": 1 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "admission_recommendation": { "const": "conditional" } },
+        "required": ["admission_recommendation"]
+      },
+      "then": {
+        "required": ["operator_approval_ref", "admission_conditions"],
+        "properties": {
+          "operator_approval_ref": { "minLength": 1 },
+          "admission_conditions": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "max_tokens_truncation_observed": { "const": true } },
+        "required": ["max_tokens_truncation_observed"]
+      },
+      "then": {
+        "not": {
+          "properties": { "admission_recommendation": { "const": "admit" } },
+          "required": ["admission_recommendation"]
+        }
+      }
+    }
+  ]
+}

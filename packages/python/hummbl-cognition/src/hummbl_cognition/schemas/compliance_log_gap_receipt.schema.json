@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/compliance_log_gap_receipt.schema.json",
+  "title": "Compliance Log Gap Receipt",
+  "description": "Receipt for tracking compliance-log export availability and gaps for regulated workspaces. Captures provider, workspace class, endpoint health, retention window, last successful export, and any detected gap with its fallback capture path or risk acceptance. Motivated by the OpenAI FedRAMP incident (2026-06-30 onward) where the Compliance Log Platform download endpoint was degraded in FedRAMP workspaces with 30-day retention, risking unrecoverable audit-trail gaps for regulated customers.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "provider",
+    "workspace_class",
+    "endpoint",
+    "endpoint_status",
+    "retention_days",
+    "last_successful_export_at",
+    "oldest_required_timestamp",
+    "gap_detected",
+    "monitoring_mode",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^compliance-gap-[a-f0-9-]+$",
+      "description": "Unique receipt identifier (e.g. compliance-gap-<uuid4>)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of probe execution."
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["openai", "anthropic", "google", "aws", "azure", "github", "other"],
+      "description": "Compliance log provider."
+    },
+    "workspace_class": {
+      "type": "string",
+      "enum": ["fedramp", "commercial", "enterprise", "team", "individual", "other"],
+      "description": "Workspace class for which compliance logs are being tracked."
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "Compliance log export endpoint URL or identifier being probed."
+    },
+    "endpoint_status": {
+      "type": "string",
+      "enum": ["healthy", "degraded", "down", "unknown"],
+      "description": "Current health of the compliance log export endpoint."
+    },
+    "retention_days": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Provider-stated retention window in days. Logs older than this are unrecoverable."
+    },
+    "export_window_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the export window currently being attempted."
+    },
+    "export_window_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of the export window currently being attempted."
+    },
+    "last_successful_export_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of the most recent successful compliance log export. Empty string if never successfully exported."
+    },
+    "oldest_required_timestamp": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of the oldest compliance-relevant event HUMMBL still needs to be able to export. Used to compute gap risk against retention."
+    },
+    "gap_detected": {
+      "type": "boolean",
+      "description": "Whether a gap in the audit trail has been detected (logs that should exist but cannot be exported or have been lost)."
+    },
+    "gap_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the detected gap. Required when gap_detected=true."
+    },
+    "gap_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of the detected gap (or 'present' if ongoing). Required when gap_detected=true."
+    },
+    "fallback_capture_path": {
+      "type": "string",
+      "description": "Path or method used to capture compliance-relevant events when the primary endpoint is degraded. Empty if no fallback exists."
+    },
+    "fallback_capture_status": {
+      "type": "string",
+      "enum": ["active", "inactive", "not_configured", "failed"],
+      "description": "Status of the fallback capture path."
+    },
+    "risk_acceptance_ref": {
+      "type": "string",
+      "description": "Reference to operator-approved risk acceptance if a gap is being tolerated (e.g. risk-acceptance-<id>, PR comment URL)."
+    },
+    "monitoring_mode": {
+      "type": "string",
+      "enum": ["monitor_only", "fallback_required", "risk_accepted", "escalate"],
+      "description": "monitor_only = no HUMMBL regulated dependency; fallback_required = HUMMBL has regulated dependency and must capture via fallback; risk_accepted = operator has accepted the gap; escalate = gap exceeds retention window and no fallback exists."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Owner of this compliance log gap tracking (operator or agent identity)."
+    },
+    "incident_ref": {
+      "type": "string",
+      "description": "Reference to the upstream provider incident causing the gap (e.g. status page URL, incident ID)."
+    },
+    "receipt_hash": {
+      "type": "string",
+      "description": "SHA-256 of the canonical receipt (excluding the hash field). Tamper detection."
+    }
+  },
+  "additionalProperties": false
+}
