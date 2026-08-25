@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/bio_adaptation_executed.schema.json",
+  "title": "BIO_ADAPTATION_EXECUTED Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "subject_id",
+    "run_id",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": { "const": "BIO_ADAPTATION_EXECUTED" },
+    "subject_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "AI_AUTONOMOUS",
+        "AI_PROPOSE_HUMAN_CONFIRM",
+        "HITL",
+        "HOTL",
+        "HUMAN_CONTROLLED"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "action_id",
+        "executed_action",
+        "execution_actor",
+        "execution_time",
+        "expected_effect"
+      ],
+      "properties": {
+        "action_id": { "type": "string", "minLength": 1 },
+        "executed_action": { "type": "string", "minLength": 1 },
+        "execution_actor": { "type": "string", "minLength": 1 },
+        "execution_time": { "type": "string", "minLength": 1 },
+        "expected_effect": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

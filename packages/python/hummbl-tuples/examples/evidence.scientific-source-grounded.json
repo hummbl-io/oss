@@ -1,0 +1,24 @@
+{
+  "tuple_type": "EVIDENCE",
+  "id": "sg-evidence-001",
+  "time": "2026-06-25T23:45:00Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "research-agent",
+  "tool": "scientific-grounding.linker",
+  "intent_id": "scientific-grounding-bki",
+  "task_id": "claim-c6-grounding",
+  "tuple_data": {
+    "event": "scientific_source_grounded",
+    "evidence_id": "sg-claim-c6-001",
+    "source_kind": "bibliography_key",
+    "source_ref": "Walton2011BelongingUncertainty",
+    "claim_ref": "hummbl-theory:C6",
+    "grounding_status": "linked",
+    "notes": [
+      "Bibliography key linked to theory claim for belonging-adoption proposition.",
+      "This tuple proves linkage occurred; it does not prove the claim is independently validated."
+    ]
+  }
+}

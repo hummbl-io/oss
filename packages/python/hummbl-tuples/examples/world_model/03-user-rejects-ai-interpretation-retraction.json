@@ -1,0 +1,15 @@
+{
+  "tuple_type": "MODEL_RETRACTION",
+  "id": "retract-003",
+  "time": "2026-07-11T12:05:00Z",
+  "actor": "user-003",
+  "principal": "user-003",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "target_model": "umf-burnout-hypothesis-003",
+    "retraction_reason": "User rejects burnout interpretation — low productivity was due to external distractions, not burnout",
+    "user_approval_posture": "approved",
+    "receipt_link": "receipt-005",
+    "visibility_class": "private"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/trace_evidence_tuple.schema.json",
+  "title": "BaseN TRACE_EVIDENCE Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "time",
+    "id",
+    "problem_id",
+    "run_id",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "TRACE_EVIDENCE"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "problem_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "AI_AUTONOMOUS",
+        "AI_PROPOSE_HUMAN_CONFIRM",
+        "HITL_INFLUENCED",
+        "HITL_CONTROLLED",
+        "HOTL_SUPERVISED"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "path_id",
+        "claim",
+        "evidence_status",
+        "metric_bundle"
+      ],
+      "properties": {
+        "path_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "SUPPORTED",
+            "UNSUPPORTED",
+            "MIXED",
+            "PENDING"
+          ]
+        },
+        "metric_bundle": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "task_success": {
+              "type": "number"
+            },
+            "human_rating": {
+              "type": "number"
+            },
+            "token_cost": {
+              "type": "number"
+            },
+            "runtime_s": {
+              "type": "number"
+            },
+            "override_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "human_interrupts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "operator_review_required": {
+              "type": "boolean"
+            }
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

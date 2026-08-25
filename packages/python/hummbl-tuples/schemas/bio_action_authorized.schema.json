@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/bio_action_authorized.schema.json",
+  "title": "BIO_ACTION_AUTHORIZED Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "subject_id",
+    "run_id",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": { "const": "BIO_ACTION_AUTHORIZED" },
+    "subject_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "AI_AUTONOMOUS",
+        "AI_PROPOSE_HUMAN_CONFIRM",
+        "HITL",
+        "HOTL",
+        "HUMAN_CONTROLLED"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "action_id",
+        "authorized_by",
+        "authority_type",
+        "policy_basis"
+      ],
+      "properties": {
+        "action_id": { "type": "string", "minLength": 1 },
+        "authorized_by": { "type": "string", "minLength": 1 },
+        "authority_type": { "type": "string", "minLength": 1 },
+        "policy_basis": { "type": "string", "minLength": 1 },
+        "approval_notes": { "type": "string" }
+      }
+    }
+  }
+}

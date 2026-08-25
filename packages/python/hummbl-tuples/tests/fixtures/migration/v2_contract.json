@@ -1,0 +1,21 @@
+{
+  "tuple_type": "CONTRACT",
+  "id": "v2-test-001",
+  "time": "2026-07-01T00:00:00Z",
+  "previous_hash": null,
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "test-agent",
+  "tool": "test-tool",
+  "intent_id": "test-001",
+  "task_id": "task-001",
+  "tuple_data": {
+    "contract_id": "v2-test",
+    "delegatee": "test-service",
+    "objective": "V2 tuple with previous_hash",
+    "allowed_tools": ["test:run"],
+    "outputs": ["result"],
+    "evidence_requirements": ["EVIDENCE:test_completed"]
+  }
+}

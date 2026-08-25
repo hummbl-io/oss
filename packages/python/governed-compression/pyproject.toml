@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "governed-compression"
+version = "0.1.0"
+description = "Governed compression experiments — quantization and approximation primitives with governance receipts"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+keywords = ["compression", "quantization", "governance", "numpy", "hummbl", "ai", "research"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# NOTE: numpy is a required runtime dependency — this is an intentional
+# exception to the monorepo's "zero third-party runtime dependencies" convention.
+# The package performs array operations that fundamentally require numpy.
+dependencies = [
+  "numpy>=1.26",
+  "hummbl-governance>=1.1.0",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=7",
+  "ruff>=0.4",
+]
+
+[project.scripts]
+governed-compression = "governed_compression.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["governed_compression*"]
+
+[tool.setuptools.package-data]
+governed_compression = ["governance.yml"]

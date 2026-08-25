@@ -1,0 +1,41 @@
+{
+  "tuple_type": "AGENT_INFERENCE",
+  "id": "corroboration",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-d1",
+  "principal": "user-004",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-d1",
+    "represented_principal": "user-004",
+    "owner": "user-004",
+    "receipted_by": "receipt-006",
+    "actor_regime": "user_plus_agent_team",
+    "evidence_links": [],
+    "receipt_link": "receipt-corroboration",
+    "visibility_class": "private",
+    "epistemic_permission": "infer",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "inference_content": "Customer satisfaction improved after redesign",
+    "target_model": "umf-004",
+    "inference_basis": [
+      "survey-001",
+      "nps-001"
+    ],
+    "model_provider": "provider-a",
+    "source_lineage": [
+      "survey-data"
+    ],
+    "retrieval_lineage": [
+      "direct-1"
+    ],
+    "evaluator_lineage": "evaluator-x",
+    "independence_class": "independent"
+  }
+}

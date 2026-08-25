@@ -1,0 +1,64 @@
+# governance.yml — HUMMBL package governance metadata
+#
+# This file is the first-class governance artifact shipped with every HUMMBL
+# package. It declares the package's governance posture: safety controls, cost
+# limits, compliance frameworks, and build provenance.
+#
+# hummbl-tuples is a spec and reference implementation for typed governance
+# tuples. It does not run agents or call external APIs, so its runtime
+# governance needs are minimal. The tuples themselves ARE governance artifacts.
+
+package:
+  name: hummbl-tuples
+  version: 0.2.0
+  license: Apache-2.0
+  publisher: HUMMBL, LLC
+  description: Governed IDP tuples for the HUMMBL reasoning mesh
+
+safety:
+  kill_switch:
+    supported: false
+    reason: "Spec repo — no runtime agent execution"
+  circuit_breaker:
+    supported: false
+    reason: "Spec repo — no external API calls"
+  output_validation:
+    supported: true
+    pii_detection: false
+    injection_detection: false
+    blocklist_filtering: false
+    reason: "Example sanitization — no real credentials in fixtures"
+  capability_fence:
+    supported: false
+
+cost:
+  cost_governor:
+    supported: false
+    reason: "Spec repo — no API costs"
+
+identity:
+  delegation_tokens:
+    supported: false
+    reason: "Tuples describe delegation; library does not issue tokens at runtime"
+  agent_registry:
+    supported: false
+
+audit:
+  audit_log:
+    supported: false
+    reason: "Spec repo — no runtime events to audit"
+  compliance_mapping:
+    frameworks:
+      - NIST-AI-RMF
+    coverage: partial
+    reason: "Tuple taxonomy maps to NIST GOVERN function"
+
+provenance:
+  build_system: github-actions
+  trusted_publishing: true
+  testpypi_staging: true
+  source_repo: https://github.com/hummbl-dev/hummbl-tuples
+  license: Apache-2.0
+  supply_chain_risk: none
+  dependencies: zero
+  tests: 30

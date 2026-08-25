@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/contradiction_event.schema.json",
+  "title": "World-Model CONTRADICTION_EVENT Tuple",
+  "description": "Records a contradiction between competing claims without forcing immediate consensus.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "CONTRADICTION_EVENT"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "competing_claims", "supporting_contexts",
+        "resolution_posture", "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "competing_claims": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 2
+        },
+        "supporting_contexts": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "suspected_missing_variables": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "resolution_posture": {
+          "type": "string",
+          "enum": ["unresolved", "partially_resolved", "resolved"]
+        },
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

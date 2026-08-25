@@ -1,0 +1,21 @@
+{
+  "tuple_type": "CONTRACT",
+  "id": "chain-001",
+  "time": "2026-07-01T00:00:00Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "agent-alpha",
+  "tool": "task-delegator",
+  "intent_id": "intent-chain-001",
+  "task_id": "task-chain-001",
+  "tuple_data": {
+    "contract_id": "chain-demo",
+    "delegatee": "agent-beta",
+    "objective": "Chain demo step 1",
+    "allowed_tools": ["demo:step1"],
+    "outputs": ["result-1"],
+    "risk_tier": "low"
+  },
+  "previous_hash": null
+}

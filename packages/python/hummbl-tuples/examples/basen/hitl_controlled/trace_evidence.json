@@ -1,0 +1,21 @@
+{
+  "tuple_type": "TRACE_EVIDENCE",
+  "id": "96d89fb4-ac5",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-controlled-001",
+  "control_mode": "HITL_CONTROLLED",
+  "tuple_data": {
+    "path_id": "path-hitl-controlled-001",
+    "claim": "Full human control produced a highly legible path but reduced exploration breadth.",
+    "evidence_status": "SUPPORTED",
+    "metric_bundle": {
+      "task_success": 0.83,
+      "human_rating": 4.9,
+      "token_cost": 12100,
+      "runtime_s": 37.1,
+      "override_count": 2
+    },
+    "notes": "Highest trust, lowest novelty."
+  }
+}

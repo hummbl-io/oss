@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/post_merge_evidence.v0.1.json",
+  "title": "Post-Merge Evidence Receipt",
+  "type": "object",
+  "required": [
+    "schema",
+    "repo",
+    "pr",
+    "sensitive_path_classes",
+    "expected_checks",
+    "check_observations",
+    "execution_plane_status",
+    "owner_lane",
+    "close_condition",
+    "restoration_revalidation_status",
+    "evidence_states",
+    "missing_evidence",
+    "replacement_evidence_required",
+    "disposition",
+    "validation_errors",
+    "authority_boundary"
+  ],
+  "properties": {
+    "schema": { "const": "post_merge_evidence.v0.1" },
+    "repo": { "type": "string", "pattern": "^[^/]+/[^/]+$" },
+    "pr": { "type": "integer", "minimum": 1 },
+    "merge_sha": { "type": ["string", "null"] },
+    "head_sha": { "type": ["string", "null"] },
+    "sensitive_path_classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "security_scanner",
+          "auth_permissions_secrets",
+          "bus_agent_execution",
+          "workflow_release",
+          "public_claim_generation",
+          "authority_claim_documentation"
+        ]
+      }
+    },
+    "expected_checks": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "check_observations": { "type": "array", "items": { "type": "object" } },
+    "execution_plane_status": { "enum": ["normal", "degraded", "unavailable", "unknown"] },
+    "owner_lane": { "type": "string", "minLength": 1 },
+    "close_condition": { "type": "string", "minLength": 1 },
+    "restoration_revalidation_status": { "enum": ["not_required", "pending", "complete", "unrecoverable"] },
+    "evidence_states": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "missing_evidence": { "type": "array", "items": { "type": "string" } },
+    "replacement_evidence_required": { "type": "boolean" },
+    "disposition": { "enum": ["evidence_complete", "gap_open", "blocked", "unknown"] },
+    "validation_errors": { "type": "array", "items": { "type": "string" } },
+    "authority_boundary": { "type": "string", "minLength": 1 }
+  },
+  "anyOf": [
+    { "required": ["merge_sha"] },
+    { "required": ["head_sha"] }
+  ],
+  "additionalProperties": true
+}

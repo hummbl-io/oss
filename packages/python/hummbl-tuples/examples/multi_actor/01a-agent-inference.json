@@ -1,0 +1,32 @@
+{
+  "tuple_type": "AGENT_INFERENCE",
+  "id": "inference",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-a",
+  "principal": "user-001",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-a",
+    "represented_principal": "user-001",
+    "owner": "user-001",
+    "receipted_by": "receipt-001",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-inference",
+    "visibility_class": "private",
+    "epistemic_permission": "infer",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "inference_content": "User appears to prefer morning meetings",
+    "target_model": "umf-001",
+    "inference_basis": [
+      "obs-001",
+      "obs-002"
+    ]
+  }
+}

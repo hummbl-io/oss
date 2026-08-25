@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/model_revision.schema.json",
+  "title": "World-Model MODEL_REVISION Tuple",
+  "description": "Records revision of a model with supersession semantics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "MODEL_REVISION"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "target_model", "prior_model_version", "new_model_version",
+        "triggering_evidence", "changed_fields",
+        "user_approval_posture", "supersession_semantics",
+        "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "target_model": {"type": "string"},
+        "prior_model_version": {"type": "string"},
+        "new_model_version": {"type": "string"},
+        "triggering_evidence": {"type": "string"},
+        "changed_fields": {"type": "array", "items": {"type": "string"}},
+        "user_approval_posture": {
+          "type": "string",
+          "enum": ["approved", "pending", "rejected", "not_required"]
+        },
+        "supersession_semantics": {
+          "type": "string",
+          "enum": ["full_supersede", "partial_supersede", "branch"]
+        },
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

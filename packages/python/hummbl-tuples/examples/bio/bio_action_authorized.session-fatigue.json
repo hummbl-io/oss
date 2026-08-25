@@ -1,0 +1,13 @@
+{
+  "tuple_type": "BIO_ACTION_AUTHORIZED",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "action_id": "bio-action-001",
+    "authorized_by": "operator-001",
+    "authority_type": "human_supervisor",
+    "policy_basis": "bio-governance-v0",
+    "approval_notes": "Apply low-risk pacing change only; no hard stop."
+  }
+}

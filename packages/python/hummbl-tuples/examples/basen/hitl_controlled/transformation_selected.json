@@ -1,0 +1,15 @@
+{
+  "tuple_type": "TRANSFORMATION_SELECTED",
+  "id": "4926a9b9-2cc",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-controlled-001",
+  "control_mode": "HITL_CONTROLLED",
+  "tuple_data": {
+    "transformation_id": "evaluation",
+    "selected_by": "human:operator",
+    "selection_rationale": "Human forced an evaluation-first framing to test whether the AI would remain disciplined.",
+    "candidate_count": 1,
+    "confidence": 1.0
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "accepted": [
+    {"schema":"hummbl_bus.event.v1","timestamp":"2026-05-08T23:40:00Z","sender":"codex","recipient":"all","type":"STATUS","content":"standalone"},
+    {"schema":"hummbl_governance.bus.event.v1","timestamp":"2026-05-08T23:40:00Z","sender":"codex","recipient":"all","type":"STATUS","content":"founder legacy"}
+  ],
+  "rejected": [
+    "not json",
+    "[]",
+    "{\"schema\":\"unknown.event.v1\"}",
+    "{\"schema\":\"hummbl_bus.event.v1\"",
+    ""
+  ]
+}

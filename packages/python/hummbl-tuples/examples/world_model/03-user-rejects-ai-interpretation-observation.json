@@ -1,0 +1,19 @@
+{
+  "tuple_type": "OBSERVATION_EVENT",
+  "id": "obs-003",
+  "time": "2026-07-11T12:00:00Z",
+  "actor": "agent-interpreter-x",
+  "principal": "user-003",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "original_expression": "User reported feeling unproductive",
+    "normalized_observation": "self_reported_productivity=low",
+    "system_interpretation": "User is experiencing burnout based on low productivity self-report",
+    "user_approved_interpretation": "",
+    "context": "Weekly check-in",
+    "evidence_links": ["checkin-003"],
+    "uncertainty_posture": "high",
+    "receipt_link": "receipt-004",
+    "visibility_class": "private"
+  }
+}

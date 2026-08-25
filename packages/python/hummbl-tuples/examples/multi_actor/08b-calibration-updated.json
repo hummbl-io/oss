@@ -1,0 +1,36 @@
+{
+  "tuple_type": "AGENT_CALIBRATION_UPDATED",
+  "id": "updated",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-008",
+  "principal": "user-008",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-008",
+    "represented_principal": "user-008",
+    "owner": "user-008",
+    "receipted_by": "receipt-014",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-updated",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "agent_id": "agent-h1",
+    "calibration_domain": "code-review",
+    "calibration_task": "merge-prediction",
+    "calibration_version": "v2.0-cal-001",
+    "evaluated_predictions": [
+      "pred-001",
+      "pred-002"
+    ],
+    "abstention_behavior": "abstains on >3 file changes",
+    "correction_behavior": "self-corrects on outcome mismatch"
+  }
+}

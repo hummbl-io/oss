@@ -1,0 +1,30 @@
+{
+  "tuple_type": "AGENT_VERSION_CHANGED",
+  "id": "changed",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-h1",
+  "principal": "user-008",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-h1",
+    "represented_principal": "user-008",
+    "owner": "user-008",
+    "receipted_by": "receipt-013",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-changed",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "agent_id": "agent-h1",
+    "previous_version": "v1.2",
+    "new_version": "v2.0",
+    "change_reason": "Model upgrade"
+  }
+}

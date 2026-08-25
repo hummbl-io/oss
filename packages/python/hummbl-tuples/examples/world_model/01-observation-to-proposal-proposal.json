@@ -1,0 +1,16 @@
+{
+  "tuple_type": "MODEL_PROPOSAL",
+  "id": "prop-001",
+  "time": "2026-07-11T10:05:00Z",
+  "actor": "agent-compiler-a",
+  "principal": "user-001",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "fragment_ref": "umf-001-simple-observation",
+    "source_observations": ["obs-001"],
+    "proposed_by": "agent-compiler-a",
+    "evidence_links": ["calendar-001"],
+    "receipt_link": "receipt-002",
+    "visibility_class": "private"
+  }
+}

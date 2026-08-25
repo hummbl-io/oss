@@ -1,0 +1,15 @@
+{
+  "tuple_type": "TRANSFORMATION_SELECTED",
+  "id": "5fdd1cf4-094",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-governance-001",
+  "run_id": "run-hotl-001",
+  "control_mode": "HOTL_SUPERVISED",
+  "tuple_data": {
+    "transformation_id": "decision-framing",
+    "selected_by": "gpt-5.4",
+    "selection_rationale": "Autonomous selection was allowed under active supervision because the task was exploratory and low-risk.",
+    "candidate_count": 4,
+    "confidence": 0.78
+  }
+}

@@ -1,0 +1,245 @@
+{
+  "registry_version": "0.1.0",
+  "updated_at": "2026-07-04T00:30:21Z",
+  "schema_count": 34,
+  "schemas": [
+    {
+      "schema_id": "attest.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/attest.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL ATTEST Tuple",
+      "tuple_type": "ATTEST"
+    },
+    {
+      "schema_id": "base_profile_issued.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/base_profile_issued.schema.json",
+      "version": "unknown",
+      "title": "Nodezero BASE_PROFILE_ISSUED Tuple",
+      "tuple_type": "BASE_PROFILE_ISSUED"
+    },
+    {
+      "schema_id": "bio_action_authorized.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_action_authorized.schema.json",
+      "version": "unknown",
+      "title": "BIO_ACTION_AUTHORIZED Tuple",
+      "tuple_type": "BIO_ACTION_AUTHORIZED"
+    },
+    {
+      "schema_id": "bio_action_blocked.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_action_blocked.schema.json",
+      "version": "unknown",
+      "title": "BIO_ACTION_BLOCKED Tuple",
+      "tuple_type": "BIO_ACTION_BLOCKED"
+    },
+    {
+      "schema_id": "bio_adaptation_executed.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_adaptation_executed.schema.json",
+      "version": "unknown",
+      "title": "BIO_ADAPTATION_EXECUTED Tuple",
+      "tuple_type": "BIO_ADAPTATION_EXECUTED"
+    },
+    {
+      "schema_id": "bio_adaptation_proposed.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_adaptation_proposed.schema.json",
+      "version": "unknown",
+      "title": "BIO_ADAPTATION_PROPOSED Tuple",
+      "tuple_type": "BIO_ADAPTATION_PROPOSED"
+    },
+    {
+      "schema_id": "bio_harm_signal.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_harm_signal.schema.json",
+      "version": "unknown",
+      "title": "BIO_HARM_SIGNAL Tuple",
+      "tuple_type": "BIO_HARM_SIGNAL"
+    },
+    {
+      "schema_id": "bio_outcome_observed.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_outcome_observed.schema.json",
+      "version": "unknown",
+      "title": "BIO_OUTCOME_OBSERVED Tuple",
+      "tuple_type": "BIO_OUTCOME_OBSERVED"
+    },
+    {
+      "schema_id": "bio_override.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_override.schema.json",
+      "version": "unknown",
+      "title": "BIO_OVERRIDE Tuple",
+      "tuple_type": "BIO_OVERRIDE"
+    },
+    {
+      "schema_id": "bio_signal_captured.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/bio_signal_captured.schema.json",
+      "version": "unknown",
+      "title": "BIO_SIGNAL_CAPTURED Tuple",
+      "tuple_type": "BIO_SIGNAL_CAPTURED"
+    },
+    {
+      "schema_id": "contract.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/contract.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL CONTRACT Tuple",
+      "tuple_type": "CONTRACT"
+    },
+    {
+      "schema_id": "control_mode_set.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/control_mode_set.schema.json",
+      "version": "unknown",
+      "title": "Nodezero CONTROL_MODE_SET Tuple",
+      "tuple_type": "CONTROL_MODE_SET"
+    },
+    {
+      "schema_id": "dct.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/dct.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL DCT Tuple",
+      "tuple_type": "DCT"
+    },
+    {
+      "schema_id": "dctx.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/dctx.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL DCTX Tuple",
+      "tuple_type": "DCTX"
+    },
+    {
+      "schema_id": "evidence.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/evidence.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL EVIDENCE Tuple",
+      "tuple_type": "EVIDENCE"
+    },
+    {
+      "schema_id": "experiment_run_assigned.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/experiment_run_assigned.schema.json",
+      "version": "unknown",
+      "title": "Nodezero EXPERIMENT_RUN_ASSIGNED Tuple",
+      "tuple_type": "EXPERIMENT_RUN_ASSIGNED"
+    },
+    {
+      "schema_id": "hitl_override.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/hitl_override.schema.json",
+      "version": "unknown",
+      "title": "BaseN HITL_OVERRIDE Tuple",
+      "tuple_type": "HITL_OVERRIDE"
+    },
+    {
+      "schema_id": "model_candidate.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/model_candidate.schema.json",
+      "version": "unknown",
+      "title": "BaseN MODEL_CANDIDATE Tuple",
+      "tuple_type": "MODEL_CANDIDATE"
+    },
+    {
+      "schema_id": "model_selected.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/model_selected.schema.json",
+      "version": "unknown",
+      "title": "BaseN MODEL_SELECTED Tuple",
+      "tuple_type": "MODEL_SELECTED"
+    },
+    {
+      "schema_id": "path_comparison.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/path_comparison.schema.json",
+      "version": "unknown",
+      "title": "BaseN PATH_COMPARISON Tuple",
+      "tuple_type": "PATH_COMPARISON"
+    },
+    {
+      "schema_id": "posttraining_trace.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/posttraining_trace.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL Post-Training Trace Artifact",
+      "tuple_type": null
+    },
+    {
+      "schema_id": "pretraining_trace.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/pretraining_trace.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL Pretraining Trace Artifact",
+      "tuple_type": null
+    },
+    {
+      "schema_id": "promotion_receipt.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/promotion_receipt.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL PROMOTION_RECEIPT Tuple",
+      "tuple_type": "PROMOTION_RECEIPT"
+    },
+    {
+      "schema_id": "readiness_inferred.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/readiness_inferred.schema.json",
+      "version": "unknown",
+      "title": "READINESS_INFERRED Tuple",
+      "tuple_type": "READINESS_INFERRED"
+    },
+    {
+      "schema_id": "reasoning_path.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/reasoning_path.schema.json",
+      "version": "unknown",
+      "title": "BaseN REASONING_PATH Tuple",
+      "tuple_type": "REASONING_PATH"
+    },
+    {
+      "schema_id": "registry_version_pinned.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/registry_version_pinned.schema.json",
+      "version": "unknown",
+      "title": "Nodezero REGISTRY_VERSION_PINNED Tuple",
+      "tuple_type": "REGISTRY_VERSION_PINNED"
+    },
+    {
+      "schema_id": "revocation.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/revocation.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL REVOCATION Tuple",
+      "tuple_type": "REVOCATION"
+    },
+    {
+      "schema_id": "strain_flagged.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/strain_flagged.schema.json",
+      "version": "unknown",
+      "title": "STRAIN_FLAGGED Tuple",
+      "tuple_type": "STRAIN_FLAGGED"
+    },
+    {
+      "schema_id": "system.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/system.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL SYSTEM Tuple",
+      "tuple_type": "SYSTEM"
+    },
+    {
+      "schema_id": "trace_evidence_record.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/trace_evidence_record.schema.json",
+      "version": "unknown",
+      "title": "HUMMBL Trace Evidence Record",
+      "tuple_type": null
+    },
+    {
+      "schema_id": "trace_evidence_tuple.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/trace_evidence_tuple.schema.json",
+      "version": "unknown",
+      "title": "BaseN TRACE_EVIDENCE Tuple",
+      "tuple_type": "TRACE_EVIDENCE"
+    },
+    {
+      "schema_id": "transformation_candidate.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/transformation_candidate.schema.json",
+      "version": "unknown",
+      "title": "BaseN TRANSFORMATION_CANDIDATE Tuple",
+      "tuple_type": "TRANSFORMATION_CANDIDATE"
+    },
+    {
+      "schema_id": "transformation_selected.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/transformation_selected.schema.json",
+      "version": "unknown",
+      "title": "BaseN TRANSFORMATION_SELECTED Tuple",
+      "tuple_type": "TRANSFORMATION_SELECTED"
+    },
+    {
+      "schema_id": "workload_inferred.schema.json",
+      "url": "https://hummbl.dev/schemas/tuples/workload_inferred.schema.json",
+      "version": "unknown",
+      "title": "WORKLOAD_INFERRED Tuple",
+      "tuple_type": "WORKLOAD_INFERRED"
+    }
+  ]
+}

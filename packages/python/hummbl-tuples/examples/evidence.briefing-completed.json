@@ -1,0 +1,20 @@
+{
+  "tuple_type": "EVIDENCE",
+  "id": "01ac5801-174",
+  "time": "2026-03-16T20:36:07.314859Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "claude-code",
+  "tool": "governance.tuple",
+  "intent_id": "briefing-20260316-203538",
+  "task_id": "0263d2f5-9cb0-4ff7-8acf-7497b352761b",
+  "tuple_data": {
+    "event": "briefing_completed",
+    "evidence_id": "66d41ec8-a8e3-4571-92bb-0f2b2a5ae48f",
+    "duration_s": 28.44,
+    "warnings_count": 0,
+    "agents_ready": false,
+    "budget_exceeded": false
+  }
+}

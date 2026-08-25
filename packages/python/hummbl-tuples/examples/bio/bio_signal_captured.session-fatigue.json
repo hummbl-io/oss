@@ -1,0 +1,14 @@
+{
+  "tuple_type": "BIO_SIGNAL_CAPTURED",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "signal_type": "session_rpe",
+    "value": 8.0,
+    "unit": "rpe_10",
+    "source": "self_report",
+    "timestamp": "2026-03-27T16:20:00Z",
+    "quality_score": 0.92
+  }
+}

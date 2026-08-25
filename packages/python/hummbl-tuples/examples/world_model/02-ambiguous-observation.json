@@ -1,0 +1,19 @@
+{
+  "tuple_type": "OBSERVATION_EVENT",
+  "id": "obs-002",
+  "time": "2026-07-11T11:00:00Z",
+  "actor": "user-002",
+  "principal": "user-002",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "original_expression": "The deploy succeeded but latency went up",
+    "normalized_observation": "deploy=success, latency_increase=observed",
+    "system_interpretation": "Deploy may have introduced a performance regression",
+    "user_approved_interpretation": "",
+    "context": "Production deploy of v2.3",
+    "evidence_links": ["deploy-log-002", "metrics-002"],
+    "uncertainty_posture": "moderate",
+    "receipt_link": "receipt-003",
+    "visibility_class": "shared"
+  }
+}

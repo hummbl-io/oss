@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+
+  - repo: local
+    hooks:
+      - id: check-anthropic-keys
+        name: Check for Anthropic API keys
+        entry: >-
+          bash -c 'if [ "$#" -eq 0 ]; then exit 0; fi; if grep -nH "sk-ant-" "$@"; then exit 1; fi' --
+        language: system
+        files: '.*'
+        always_run: true
+
+      - id: check-openai-keys
+        name: Check for OpenAI API keys
+        entry: >-
+          bash -c 'if [ "$#" -eq 0 ]; then exit 0; fi; if grep -nHE "sk-[a-zA-Z0-9]{48}" "$@"; then exit 1; fi' --
+        language: system
+        files: '.*'
+        always_run: true
+
+      - id: no-commit-to-branch
+        name: No commit to main/master
+        entry: bash -c 'BRANCH=$(git rev-parse --abbrev-ref HEAD); if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then echo "Direct commits to $BRANCH are prohibited."; exit 1; fi'
+        language: system
+        pass_filenames: false
+        always_run: true

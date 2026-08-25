@@ -1,0 +1,19 @@
+{
+  "tuple_type": "MODEL_REVISION",
+  "id": "bad-010",
+  "time": "2026-07-11T18:00:00Z",
+  "actor": "agent-author-d",
+  "principal": "user-010",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "target_model": "umf-010",
+    "prior_model_version": "umf-010-v1",
+    "new_model_version": "umf-010-v2",
+    "triggering_evidence": "agent observed new data",
+    "changed_fields": ["prediction"],
+    "user_approval_posture": "pending",
+    "supersession_semantics": "full_supersede",
+    "receipt_link": "",
+    "visibility_class": "public"
+  }
+}

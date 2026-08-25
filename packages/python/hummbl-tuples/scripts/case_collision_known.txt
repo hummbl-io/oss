@@ -1,0 +1,11 @@
+# Known pre-existing case collisions in hummbl-tuples
+# These are grandfathered in — the guard will skip them.
+# Any NEW collision not listed here will fail the check.
+#
+# Format: lowercase path (the collision key)
+# Lines starting with # are comments.
+#
+# The docs/ vs DOCS/ collision was resolved in the path-casing
+# consolidation. The allowlist is now empty.
+# If new collisions are discovered, add them here temporarily
+# and fix them as soon as possible.

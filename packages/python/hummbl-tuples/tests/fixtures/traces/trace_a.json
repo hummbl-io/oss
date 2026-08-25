@@ -1,0 +1,40 @@
+[
+  {
+    "tuple_type": "CONTRACT",
+    "id": "trace-a-001",
+    "time": "2026-07-01T00:00:00Z",
+    "state": "ok",
+    "drift": 0.0,
+    "tier": 1,
+    "agent": "agent-alpha",
+    "tool": "test-tool",
+    "intent_id": "intent-001",
+    "task_id": "task-001",
+    "tuple_data": {
+      "contract_id": "trace-test",
+      "delegatee": "service-a",
+      "objective": "Trace A test objective",
+      "allowed_tools": ["tool:run"],
+      "outputs": ["result"],
+      "evidence_requirements": ["EVIDENCE:completed"]
+    }
+  },
+  {
+    "tuple_type": "EVIDENCE",
+    "id": "trace-a-002",
+    "time": "2026-07-01T00:00:01Z",
+    "state": "ok",
+    "drift": 0.0,
+    "tier": 1,
+    "agent": "agent-alpha",
+    "tool": "test-tool",
+    "intent_id": "intent-001",
+    "task_id": "task-001",
+    "tuple_data": {
+      "evidence_type": "completion",
+      "evidence_id": "ev-a-002",
+      "description": "Evidence in trace A",
+      "artifacts": ["result.json"]
+    }
+  }
+]

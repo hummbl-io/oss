@@ -1,0 +1,25 @@
+{
+  "tuple_type": "EVIDENCE",
+  "id": "evidence-sg-001",
+  "time": "2026-07-01T00:00:00Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "agent-research",
+  "tool": "scientific-grounding-collector",
+  "intent_id": "intent-sg-001",
+  "task_id": "task-sg-001",
+  "tuple_data": {
+    "event": "scientific_grounding_collected",
+    "evidence_type": "scientific_grounding",
+    "evidence_data": {
+      "claim": "Mitochondrial function affects executive performance under stress.",
+      "source_type": "peer_reviewed_article",
+      "source_citation": "Picard et al., 2018",
+      "source_url": "https://doi.org/10.1016/j.bbi.2018.01.010",
+      "claim_class": "physiological_hypothesis",
+      "population_scope": "adults with chronic stress",
+      "transcript_status": "not_applicable"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+# TSV fixtures must use LF line endings, not CRLF.
+# core.autocrlf=true on Windows converts these otherwise, breaking byte-exact
+# conformance tests. Origin: test_conformance_fixtures failure on Windows.
+*.tsv text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf

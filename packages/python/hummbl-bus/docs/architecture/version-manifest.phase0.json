@@ -1,0 +1,86 @@
+{
+  "schema": "hummbl.bus.version-manifest.v1",
+  "status": "proposed",
+  "captured_utc": "2026-08-09T00:28:51Z",
+  "standalone_ref": "e9cdee8",
+  "production_reference": "hummbl-governance bus working snapshot; commit plus overlay hash required before implementation",
+  "versions": {
+    "package_version": "0.1.0",
+    "wire_version": "legacy-tsv-v1-implicit",
+    "event_schemas": [
+      "hummbl_governance.bus.event.v1",
+      "hummbl_bus.event.v1"
+    ],
+    "envelope_version": "hmac-cns-v1-implicit",
+    "bridge_api_versions": [
+      "standalone-unfrozen",
+      "deployed-health-1.3"
+    ],
+    "replay_schema": "founder-only-unversioned",
+    "delivery_schemas": [
+      "hummbl_governance.bus.spool.v1",
+      "hummbl_governance.bus_outage_queue.v1"
+    ],
+    "config_schema": "divergent-unversioned",
+    "deployment_revision": "unversioned"
+  },
+  "compatibility": [
+    {
+      "surface": "five-column TSV",
+      "from": "founder-current",
+      "to": "standalone-0.1.0",
+      "class": "backward_read",
+      "evidence": "shared durable column layout; golden corpus still required"
+    },
+    {
+      "surface": "HMAC canonical string and c-n-s envelope",
+      "from": "founder-current",
+      "to": "standalone-0.1.0",
+      "class": "exact_candidate",
+      "evidence": "source comparison; golden vectors still required"
+    },
+    {
+      "surface": "structured event",
+      "from": "hummbl_governance.bus.event.v1",
+      "to": "hummbl_bus.event.v1",
+      "class": "incompatible",
+      "evidence": "schema discriminator mismatch"
+    },
+    {
+      "surface": "bridge delivery and security",
+      "from": "founder-current",
+      "to": "standalone-0.1.0",
+      "class": "incompatible",
+      "evidence": "freshness, replay, identity, privilege, spool, and read-control gaps"
+    },
+    {
+      "surface": "public facade names",
+      "from": "founder-current",
+      "to": "standalone-0.1.0",
+      "class": "adapter",
+      "evidence": "15 names align; defaults and behavior differ"
+    }
+  ],
+  "planned_releases": [
+    {
+      "package": "0.2.0",
+      "purpose": "compatibility core",
+      "production_cutover_allowed": false
+    },
+    {
+      "package": "0.3.0",
+      "purpose": "reliable delivery candidate",
+      "production_cutover_allowed": false
+    },
+    {
+      "package": "0.4.0",
+      "purpose": "optional governance adapters",
+      "production_cutover_allowed": false
+    },
+    {
+      "package": "1.0.0",
+      "purpose": "stable canonical contract candidate",
+      "production_cutover_allowed": "requires separate exact-ref operator approval"
+    }
+  ]
+}

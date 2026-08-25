@@ -1,0 +1,17 @@
+{
+  "tuple_type": "CONSENT_CHANGE",
+  "id": "consent-008",
+  "time": "2026-07-11T16:00:00Z",
+  "actor": "user-006",
+  "principal": "user-006",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "target_model": "umf-006-personal-model",
+    "consent_type": "model_training",
+    "previous_consent": "granted",
+    "new_consent": "denied",
+    "change_reason": "User revoked consent for model training use",
+    "receipt_link": "receipt-010",
+    "visibility_class": "private"
+  }
+}

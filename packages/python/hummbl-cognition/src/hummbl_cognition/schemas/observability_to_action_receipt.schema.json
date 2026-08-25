@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/observability_to_action_receipt.schema.json",
+  "title": "Observability-to-Action Receipt",
+  "description": "Receipt for agentic SRE workflows that move from telemetry observation to proposed or executed action. Distinguishes telemetry, hypothesis, recommendation, approval, execution, and validation.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "incident_id",
+    "telemetry_source",
+    "query_path",
+    "time_window",
+    "agent_hypothesis",
+    "confidence",
+    "proposed_action",
+    "authority_required",
+    "human_approval_status",
+    "mode",
+    "redacted",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "description": "Unique receipt identifier (e.g. obs-action-<uuid4>)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of receipt creation"
+    },
+    "incident_id": {
+      "type": "string",
+      "description": "Incident identifier this receipt relates to"
+    },
+    "telemetry_source": {
+      "type": "string",
+      "description": "Source of telemetry (e.g. prometheus, datadog, cloudwatch, local-logs)"
+    },
+    "query_path": {
+      "type": "string",
+      "description": "Query or path used to retrieve telemetry data"
+    },
+    "time_window": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Time window of the telemetry observation"
+    },
+    "incident_context": {
+      "type": "string",
+      "description": "Contextual description of the incident"
+    },
+    "agent_hypothesis": {
+      "type": "string",
+      "description": "Agent's hypothesis about the cause or nature of the incident"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to evidence (logs, metrics, screenshots, bus receipts). Ephemeral sources must be marked."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["none", "weak", "moderate", "strong", "unknown"],
+      "description": "Agent's confidence in the hypothesis"
+    },
+    "proposed_action": {
+      "type": "string",
+      "description": "Action proposed by the agent"
+    },
+    "authority_required": {
+      "type": "boolean",
+      "description": "Whether human authority is required before executing the action"
+    },
+    "human_approval_status": {
+      "type": "string",
+      "enum": ["not_required", "pending", "approved", "rejected", "expired"],
+      "description": "Human approval status for the proposed action"
+    },
+    "human_approval_by": {
+      "type": "string",
+      "description": "Identity of the human who approved/rejected (if applicable)"
+    },
+    "human_approval_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of human approval/rejection"
+    },
+    "executed_action": {
+      "type": "string",
+      "description": "Action that was actually executed (if any)"
+    },
+    "execution_actor": {
+      "type": "string",
+      "description": "Who or what executed the action (agent, human, automated-system)"
+    },
+    "execution_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of action execution"
+    },
+    "rollback_route": {
+      "type": "string",
+      "description": "Rollback route for the executed action (required if action was executed)"
+    },
+    "post_action_validation": {
+      "type": "object",
+      "properties": {
+        "validated": {
+          "type": "boolean"
+        },
+        "method": {
+          "type": "string",
+          "description": "How validation was performed"
+        },
+        "result": {
+          "type": "string",
+          "description": "Validation result"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Post-action validation result"
+    },
+    "post_incident_learning": {
+      "type": "string",
+      "description": "Lessons learned from the incident"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["advisory_only", "human_approved_execution"],
+      "description": "Receipt mode — advisory only, or human-approved execution"
+    },
+    "redacted": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether sensitive logs/secrets have been redacted before persistence"
+    },
+    "receipt_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the receipt content (excluding the hash field itself)"
+    }
+  },
+  "additionalProperties": false
+}

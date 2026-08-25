@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/base_profile_issued.schema.json",
+  "title": "Nodezero BASE_PROFILE_ISSUED Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "time",
+    "id",
+    "run_id",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "BASE_PROFILE_ISSUED"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "issued_by",
+        "base_profile"
+      ],
+      "properties": {
+        "issued_by": {
+          "type": "string",
+          "const": "nodezero"
+        },
+        "base_profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

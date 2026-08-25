@@ -1,0 +1,22 @@
+{
+  "tuple_type": "CONTRADICTION_EVENT",
+  "id": "contradict-007",
+  "time": "2026-07-11T15:00:00Z",
+  "actor": "agent-challenger-b",
+  "principal": "user-005",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "competing_claims": [
+      "Remote workers report higher satisfaction",
+      "In-office workers report higher satisfaction"
+    ],
+    "supporting_contexts": [
+      "Tech industry, post-2024 hybrid transition",
+      "Manufacturing teams with strong in-person culture"
+    ],
+    "suspected_missing_variables": ["industry", "team_culture", "commute_length"],
+    "resolution_posture": "unresolved",
+    "receipt_link": "receipt-009",
+    "visibility_class": "public"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/outcome_observation.schema.json",
+  "title": "World-Model OUTCOME_OBSERVATION Tuple",
+  "description": "Records observation of an outcome from an action or prediction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "OUTCOME_OBSERVATION"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "related_prediction", "observed_outcome",
+        "confirms_prediction", "evidence_links",
+        "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "related_prediction": {"type": "string"},
+        "observed_outcome": {"type": "string"},
+        "confirms_prediction": {"type": "boolean"},
+        "evidence_links": {"type": "array", "items": {"type": "string"}},
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

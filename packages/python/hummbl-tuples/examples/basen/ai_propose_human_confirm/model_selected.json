@@ -1,0 +1,16 @@
+{
+  "tuple_type": "MODEL_SELECTED",
+  "id": "d87c967b-ca4",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-confirm-001",
+  "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+  "tuple_data": {
+    "transformation_id": "synthesis",
+    "mental_model_id": "systems-thinking",
+    "selected_by": "human:operator",
+    "selection_rationale": "Accepted the AI's top-ranked model because it best matched the problem scope.",
+    "candidate_count": 5,
+    "confidence": 0.92
+  }
+}

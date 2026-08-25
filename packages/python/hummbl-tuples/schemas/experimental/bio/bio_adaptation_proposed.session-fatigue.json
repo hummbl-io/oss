@@ -1,0 +1,20 @@
+{
+  "tuple_type": "BIO_ADAPTATION_PROPOSED",
+  "id": "d5c0058e-75a",
+  "time": "2026-04-17T23:42:12Z",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "action_id": "bio-action-001",
+    "proposed_action": "reduce_interface_density_and_prompt_break",
+    "target_context": "research_session",
+    "reasoning_basis": [
+      "readiness_below_threshold",
+      "operator_workload_risk",
+      "ergonomic_recovery_recommended"
+    ],
+    "selector": "nodezero",
+    "confidence": 0.74
+  }
+}

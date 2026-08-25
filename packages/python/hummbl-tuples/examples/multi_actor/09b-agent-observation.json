@@ -1,0 +1,29 @@
+{
+  "tuple_type": "AGENT_OBSERVATION",
+  "id": "observation",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-i1",
+  "principal": "user-009",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "authored_by": "agent-i1",
+    "represented_principal": "user-009",
+    "owner": "user-009",
+    "receipted_by": "receipt-016",
+    "actor_regime": "bounded_agent_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-observation",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "not_required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "observation_content": "CPU usage at 80%",
+    "target_model": "umf-009",
+    "delegation_id": "deleg-001"
+  }
+}

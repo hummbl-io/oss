@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/hibp_breach_exposure_receipt.schema.json",
+  "title": "HIBP Breach Exposure Receipt",
+  "description": "Receipt for Have I Been Pwned (HIBP) breach-exposure intelligence checks. Governs which actions are safe, which require human approval, and which are forbidden.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "query_type",
+    "query_subject",
+    "operator_approval",
+    "mode",
+    "findings_count",
+    "query_subject_redacted",
+    "api_key_used",
+    "redacted",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "description": "Unique receipt identifier (e.g. hibp-<uuid4>)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query_type": {
+      "type": "string",
+      "enum": ["breachedaccount", "breaches", "breachname", "dataclasses", "pwnedpassword", "pwnedpasswordsrange"],
+      "description": "Type of HIBP query performed"
+    },
+    "query_subject": {
+      "type": "string",
+      "description": "Subject of the query (email, domain, password hash prefix, breach name). Sensitive — must be redacted if a personal email."
+    },
+    "query_subject_redacted": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the query_subject has been redacted before persistence"
+    },
+    "api_key_used": {
+      "type": "boolean",
+      "description": "Whether an HIBP API key was used (key itself must never be in the receipt)"
+    },
+    "operator_approval": {
+      "type": "string",
+      "enum": ["not_required", "approved", "denied", "pending"],
+      "description": "Operator approval status for this query"
+    },
+    "operator_approval_by": {
+      "type": "string",
+      "description": "Identity of the operator who approved/denied"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["advisory_only", "approved_lookup", "forbidden"],
+      "description": "Receipt mode — advisory only, approved lookup, or forbidden (query was rejected)"
+    },
+    "findings_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of breach findings returned"
+    },
+    "findings_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "breach_name": {"type": "string"},
+          "breach_date": {"type": "string"},
+          "data_classes": {"type": "array", "items": {"type": "string"}},
+          "is_verified": {"type": "boolean"},
+          "is_sensitive": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "description": "Summary of breach findings (no PII)"
+    },
+    "actions_taken": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Actions taken based on findings (e.g. 'notified operator', 'recommended password rotation')"
+    },
+    "forbidden_actions_avoided": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Actions that were considered but correctly avoided (e.g. 'did not store raw passwords', 'did not expose breach details publicly')"
+    },
+    "redacted": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether sensitive data has been redacted before persistence"
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the receipt content (excluding the hash field itself)"
+    }
+  },
+  "additionalProperties": false
+}

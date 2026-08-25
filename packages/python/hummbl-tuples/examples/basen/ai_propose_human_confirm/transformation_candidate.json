@@ -1,0 +1,15 @@
+{
+  "tuple_type": "TRANSFORMATION_CANDIDATE",
+  "id": "bae8f7b7-0c7",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-confirm-001",
+  "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+  "tuple_data": {
+    "transformation_id": "synthesis",
+    "candidate_rank": 1,
+    "proposed_by": "model:gpt",
+    "selection_rationale": "Synthesis should precede comparison for this research question.",
+    "confidence": 0.82
+  }
+}

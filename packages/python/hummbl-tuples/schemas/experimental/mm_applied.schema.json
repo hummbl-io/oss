@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/experimental/mm_applied.schema.json",
+  "title": "HUMMBL Tuple_MM_Applied — Mental Model Application Record",
+  "description": "Governance receipt for a single Base120 operator application. Records which MM operator was invoked, over which WM state, by whom, under what delegation authority, and what the outcome was. Implements the Apply protocol: Apply : MM_Operator × WM_State × MM_Context → (WM_State' × GovernanceTuple × Justification). Status: EXPERIMENTAL — promoted to core when G8 Apply protocol reaches [VALIDATED].",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "id",
+    "time",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "MM_APPLIED",
+      "description": "Discriminator for this tuple class"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique tuple identifier (UUIDv4)"
+    },
+    "time": {
+      "type": "string",
+      "description": "ISO8601 UTC timestamp of operator application"
+    },
+    "previous_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the previous tuple in this governance chain (Layer 4)"
+    },
+    "args_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of tuple_data for integrity verification (Layer 4)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "HMAC-SHA256 signature over canonical JSON of tuple_data (Layer 4)"
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "invoker",
+        "wm_state_before",
+        "justification"
+      ],
+      "properties": {
+        "operator": {
+          "type": "object",
+          "description": "The Base120 operator that was applied",
+          "required": ["code", "family", "mutates"],
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "type": "string",
+              "pattern": "^(P|IN|CO|DE|RE|SY)\\.[0-9]{2}$",
+              "description": "Operator code in FAMILY.NN format (e.g. RE.04, DE.07)",
+              "examples": ["RE.04", "DE.07", "P.01", "IN.03", "CO.05", "SY.02"]
+            },
+            "family": {
+              "type": "string",
+              "enum": ["P", "IN", "CO", "DE", "RE", "SY"],
+              "description": "Base120 family: P=Perspective, IN=Inversion, CO=Composition, DE=Decomposition, RE=Recursion, SY=Meta-Systems"
+            },
+            "arity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of WM state inputs consumed"
+            },
+            "mutates": {
+              "type": "boolean",
+              "description": "Whether this operator mutates WM state (false = read-only analysis). Conditional: when true, tuple_data.wm_state_after MUST be present and invoker.dct_id MUST be present; when false, wm_state_after MUST be omitted (wm_state_before is the unchanged-state convention)."
+            }
+          }
+        },
+        "invoker": {
+          "type": "object",
+          "description": "Context of who/what invoked this operator. Note: dct_id is conditionally required when operator.mutates=true (enforced by tuple_data.allOf below).",
+          "required": ["agent_id"],
+          "additionalProperties": false,
+          "properties": {
+            "agent_id": {
+              "type": "string",
+              "description": "Canonical agent identity (e.g. claude-code, codex)"
+            },
+            "task_id": {
+              "type": "string",
+              "description": "Task this operator invocation belongs to"
+            },
+            "contract_id": {
+              "type": "string",
+              "description": "Contract authorizing this operator invocation"
+            },
+            "dct_id": {
+              "type": "string",
+              "description": "DCT token_id authorizing this invocation. Conditionally required when operator.mutates=true."
+            },
+            "parent_tuple_id": {
+              "type": "string",
+              "description": "ID of the tuple that triggered this operator application"
+            },
+            "invocation_depth": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Recursive invocation depth (0 = direct human request). Bounded by G3 DEPTH_BOUND per op class."
+            },
+            "belonging_score": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "BKI belonging score at invocation time (optional; used for BKI-gated operators)"
+            }
+          }
+        },
+        "wm_state_before": {
+          "type": "object",
+          "description": "Snapshot of WM state before operator application (Layer 3: WM snapshot reference)",
+          "required": ["version"],
+          "additionalProperties": true,
+          "properties": {
+            "version": {
+              "type": "string",
+              "description": "WM state version identifier (monotonic)"
+            },
+            "snapshot_ref": {
+              "type": "string",
+              "description": "Reference to full WM state snapshot (hash or ID). Full state stored externally."
+            }
+          }
+        },
+        "wm_state_after": {
+          "type": "object",
+          "description": "Snapshot of WM state after operator application. Conditionally required when operator.mutates=true; MUST be omitted when operator.mutates=false (wm_state_before serves as the unchanged-state record).",
+          "required": ["version"],
+          "additionalProperties": true,
+          "properties": {
+            "version": {
+              "type": "string",
+              "description": "WM state version identifier after mutation (must be > wm_state_before.version)"
+            },
+            "snapshot_ref": {
+              "type": "string",
+              "description": "Reference to full WM state snapshot after mutation"
+            },
+            "delta_summary": {
+              "type": "string",
+              "description": "Human-readable summary of what changed in WM state"
+            }
+          }
+        },
+        "justification": {
+          "type": "object",
+          "description": "Why this operator was applied and what it produced",
+          "required": ["reason", "output_summary"],
+          "additionalProperties": false,
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 10,
+              "description": "Why this specific MM operator was selected for this WM state"
+            },
+            "output_summary": {
+              "type": "string",
+              "description": "What the operator produced (structured output, not prose)"
+            },
+            "alternatives_considered": {
+              "type": "array",
+              "items": {"type": "string", "pattern": "^(P|IN|CO|DE|RE|SY)\\.[0-9]{2}$"},
+              "description": "Other operators considered but not applied"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Invoking agent's confidence in operator selection (0.0–1.0)"
+            }
+          }
+        },
+        "trust_at_invocation": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Trust score τ at invocation time (G3 trust-decay model). Used to verify invocation_depth did not exceed DEPTH_BOUND."
+        },
+        "depth_bound_used": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The DEPTH_BOUND value that applied to this operator class at invocation trust. Logged for audit."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["operator"],
+            "properties": {"operator": {"required": ["mutates"], "properties": {"mutates": {"const": true}}}}
+          },
+          "then": {
+            "required": ["wm_state_after"],
+            "properties": {
+              "invoker": {"required": ["agent_id", "dct_id"]}
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["operator"],
+            "properties": {"operator": {"required": ["mutates"], "properties": {"mutates": {"const": false}}}}
+          },
+          "then": {
+            "not": {"required": ["wm_state_after"]}
+          }
+        }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "tuple_type": "MM_APPLIED",
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "time": "2026-04-19T14:30:00Z",
+      "tuple_data": {
+        "operator": {
+          "code": "RE.04",
+          "family": "RE",
+          "arity": 1,
+          "mutates": true
+        },
+        "invoker": {
+          "agent_id": "claude-code",
+          "task_id": "task-arch-sprint-g8",
+          "contract_id": "contract-hummbl-governance",
+          "dct_id": "dct-uuid-here",
+          "invocation_depth": 1
+        },
+        "wm_state_before": {
+          "version": "wm-v42",
+          "snapshot_ref": "sha256:abc123"
+        },
+        "wm_state_after": {
+          "version": "wm-v43",
+          "snapshot_ref": "sha256:def456",
+          "delta_summary": "Applied recursive decomposition to governance tuple spec; extracted 3 sub-schemas from monolithic contract schema"
+        },
+        "justification": {
+          "reason": "Contract schema had grown to 47 fields; RE.04 (recursive decomposition) was selected to identify natural compositional layers",
+          "output_summary": "3-layer envelope model identified: universal (id/time), governance (state/drift/tier), domain (per-family). Validated against 26 existing examples.",
+          "alternatives_considered": ["DE.07", "CO.03"],
+          "confidence": 0.85
+        },
+        "trust_at_invocation": 0.9,
+        "depth_bound_used": 4
+      }
+    }
+  ]
+}

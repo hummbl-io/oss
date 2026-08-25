@@ -1,0 +1,87 @@
+{
+  "benchmark": "tuples_vs_untyped_logs",
+  "date": "2026-07-01",
+  "scales": [
+    {
+      "scale": "small",
+      "n_events": 100,
+      "tuples": {
+        "validation_time_s": 3e-05,
+        "storage_bytes": 26079,
+        "storage_kb": 25.47,
+        "query_scope_violations_s": 7e-06,
+        "scope_violations_found": 10,
+        "query_by_agent_s": 5e-06,
+        "agent_events_found": 10
+      },
+      "untyped_logs": {
+        "validation_time_s": 4e-06,
+        "storage_bytes": 23350,
+        "storage_kb": 22.8,
+        "query_scope_violations_s": 5e-06,
+        "scope_violations_found": 10,
+        "query_by_agent_s": 4e-06,
+        "agent_events_found": 10
+      },
+      "delta": {
+        "validation_time_ratio": 7.95,
+        "storage_ratio": 1.12,
+        "query_violations_ratio": 1.43
+      }
+    },
+    {
+      "scale": "medium",
+      "n_events": 1000,
+      "tuples": {
+        "validation_time_s": 0.00024,
+        "storage_bytes": 263670,
+        "storage_kb": 257.49,
+        "query_scope_violations_s": 5.6e-05,
+        "scope_violations_found": 100,
+        "query_by_agent_s": 3.6e-05,
+        "agent_events_found": 100
+      },
+      "untyped_logs": {
+        "validation_time_s": 3.3e-05,
+        "storage_bytes": 236380,
+        "storage_kb": 230.84,
+        "query_scope_violations_s": 4.4e-05,
+        "scope_violations_found": 100,
+        "query_by_agent_s": 3e-05,
+        "agent_events_found": 100
+      },
+      "delta": {
+        "validation_time_ratio": 7.19,
+        "storage_ratio": 1.12,
+        "query_violations_ratio": 1.27
+      }
+    },
+    {
+      "scale": "large",
+      "n_events": 10000,
+      "tuples": {
+        "validation_time_s": 0.002415,
+        "storage_bytes": 2666580,
+        "storage_kb": 2604.08,
+        "query_scope_violations_s": 0.001028,
+        "scope_violations_found": 1000,
+        "query_by_agent_s": 0.000489,
+        "agent_events_found": 1000
+      },
+      "untyped_logs": {
+        "validation_time_s": 0.000355,
+        "storage_bytes": 2393680,
+        "storage_kb": 2337.58,
+        "query_scope_violations_s": 0.000337,
+        "scope_violations_found": 1000,
+        "query_by_agent_s": 0.000314,
+        "agent_events_found": 1000
+      },
+      "delta": {
+        "validation_time_ratio": 6.81,
+        "storage_ratio": 1.11,
+        "query_violations_ratio": 3.05
+      }
+    }
+  ]
+}

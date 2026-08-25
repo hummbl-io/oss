@@ -1,0 +1,19 @@
+{
+  "tuple_type": "MODEL_REVISION",
+  "id": "rev-006",
+  "time": "2026-10-11T14:00:00Z",
+  "actor": "user-004",
+  "principal": "user-004",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "target_model": "umf-004-revised-v2",
+    "prior_model_version": "umf-004-revised-v2",
+    "new_model_version": "umf-004-revised-v3",
+    "triggering_evidence": "outcome-005: predicted 20% increase, observed only 5%",
+    "changed_fields": ["prediction", "mechanism_posture"],
+    "user_approval_posture": "approved",
+    "supersession_semantics": "full_supersede",
+    "receipt_link": "receipt-008",
+    "visibility_class": "public"
+  }
+}

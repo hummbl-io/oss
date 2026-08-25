@@ -1,0 +1,31 @@
+{
+  "tuple_type": "MODEL_MERGE_PROPOSAL",
+  "id": "proposal",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-f1",
+  "principal": "user-006",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-f1",
+    "represented_principal": "user-006",
+    "owner": "user-006",
+    "receipted_by": "receipt-010",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-proposal",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "write_fragment",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "source_model_a": "umf-006",
+    "source_model_b": "umf-006-fork-a",
+    "proposed_merged_model": "umf-006-merged",
+    "merge_rationale": "Both branches converged on same conclusion",
+    "unresolved_dissent_acknowledged": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "tuple_type": "BASE_PROFILE_ISSUED",
+  "id": "72f1a7b9-e83",
+  "time": "2026-04-17T23:42:13Z",
+  "run_id": "comparison-001",
+  "tuple_data": {
+    "issued_by": "nodezero",
+    "base_profile": "BaseN-medium",
+    "description": "Enable moderate exploration while keeping the transformation and mental model surface bounded."
+  }
+}
