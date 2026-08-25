@@ -17,16 +17,8 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-try:
-    import fcntl  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover - exercised on Windows
-    fcntl = None
-
-try:
-    import msvcrt  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover - exercised on POSIX
-    msvcrt = None
-
+from hummbl_cognition._exceptions import ConcurrencyError
+from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
 from hummbl_cognition.models import SharedState
 
 logger = logging.getLogger(__name__)
@@ -36,36 +28,6 @@ logger = logging.getLogger(__name__)
 # outside repos and is inconsistent with the ledger path resolution).
 DEFAULT_COGNITION_DIR = Path(__file__).resolve().parent.parent / "_state" / "cognition"
 DEFAULT_STATE_PATH = DEFAULT_COGNITION_DIR / "state.json"
-_WINDOWS_LOCK_SPAN = 1
-
-
-class ConcurrencyError(Exception):
-    """Raised when optimistic concurrency check fails."""
-
-
-def _lock_file(file_obj) -> None:
-    """Acquire an exclusive advisory lock for the current file object."""
-    if fcntl is not None:
-        fcntl.flock(file_obj, fcntl.LOCK_EX)
-        return
-    if msvcrt is not None:
-        file_obj.flush()
-        file_obj.seek(0)
-        msvcrt.locking(file_obj.fileno(), msvcrt.LK_LOCK, _WINDOWS_LOCK_SPAN)
-        return
-    logger.warning("No advisory file locking backend available; proceeding unlocked")
-
-
-def _unlock_file(file_obj) -> None:
-    """Release the advisory lock for the current file object."""
-    if fcntl is not None:
-        fcntl.flock(file_obj, fcntl.LOCK_UN)
-        return
-    if msvcrt is not None:
-        file_obj.flush()
-        file_obj.seek(0)
-        msvcrt.locking(file_obj.fileno(), msvcrt.LK_UNLCK, _WINDOWS_LOCK_SPAN)
-        return
 
 
 def _resolve_state_path(override: str | Path | None = None) -> Path:
@@ -162,7 +124,7 @@ def write_state(
 
     lock_path = path.with_suffix(".lock")
 
-    with open(lock_path, "a") as lock_file:
+    with open(lock_path, "a", encoding="utf-8") as lock_file:
         _lock_file(lock_file)
         try:
             # Optimistic concurrency check -- read UNDER lock to prevent
@@ -197,7 +159,7 @@ def _locked_read_modify_write(
 
     lock_path = path.with_suffix(".lock")
 
-    with open(lock_path, "a") as lock_file:
+    with open(lock_path, "a", encoding="utf-8") as lock_file:
         _lock_file(lock_file)
         try:
             state = _read_state_from_path(path)

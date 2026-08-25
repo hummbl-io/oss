@@ -59,7 +59,7 @@ from hummbl_cognition.models import LedgerEntry
 # Constants
 # ---------------------------------------------------------------------------
 
-_AGENT = "operator"
+_AGENT = "reuben"
 _VENDOR = "human"
 _MODEL = "homo-temporalis-v0"
 _TYPE = "convention"

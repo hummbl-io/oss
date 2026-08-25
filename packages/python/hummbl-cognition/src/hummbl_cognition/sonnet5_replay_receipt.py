@@ -56,8 +56,11 @@ import hashlib
 import json
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
+
+from hummbl_cognition._json_utils import canonical_json as _canonical_json
+from hummbl_cognition._timeutils import utc_now as _utc_now
 
 __all__ = [
     "Sonnet5ReplayError",
@@ -121,16 +124,8 @@ class Sonnet5ReplayError(Exception):
     """Raised when Sonnet 5 replay receipt validation fails."""
 
 
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 def _new_receipt_id() -> str:
     return f"sonnet5-replay-{uuid.uuid4()}"
-
-
-def _canonical_json(obj: dict[str, Any]) -> str:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
 
 
 def _is_valid_iso8601(value: str) -> bool:

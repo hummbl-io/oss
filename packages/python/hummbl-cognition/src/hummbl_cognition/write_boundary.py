@@ -27,17 +27,15 @@ __all__ = [
     "BoundaryResult",
     "WriteBoundaryEnforcer",
     "DEFAULT_AUTHORIZED_REPOS",
-    "check_repo",
-    "filter_candidates",
 ]
 
 # Canonical default from GITHUB_ACTIONS_AGENTIC_VOCABULARY.md §5.3
 DEFAULT_AUTHORIZED_REPOS: list[str] = [
-    "hummbl-dev/arbiter",
+    "hummbl-io/arbiter",
     "hummbl-io/hummbl-cognition",
-    "hummbl-dev/hummbl-agent",
-    "hummbl-dev/hummbl-governance",
-    "hummbl-dev/hummbl-production",
+    "hummbl-io/hummbl-agent",
+    "hummbl-io/hummbl-governance",
+    "hummbl-io/hummbl-production",
 ]
 
 
@@ -119,17 +117,3 @@ class WriteBoundaryEnforcer:
                 candidate_copy["_skip_reason"] = check.reason
                 result.skipped.append(candidate_copy)
         return result
-
-
-def check_repo(repo_full_name: str, authorized_repos: list[str] | None = None) -> BoundaryResult:
-    """Convenience function: check a single repo against the boundary."""
-    enforcer = WriteBoundaryEnforcer(authorized_repos)
-    return enforcer.check_repo(repo_full_name)
-
-
-def filter_candidates(
-    candidates: list[dict[str, Any]], authorized_repos: list[str] | None = None
-) -> FilterResult:
-    """Convenience function: filter candidates against the boundary."""
-    enforcer = WriteBoundaryEnforcer(authorized_repos)
-    return enforcer.filter_candidates(candidates)

@@ -310,7 +310,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         try:
             entries = []
             if LEDGER_FILE.exists():
-                with open(LEDGER_FILE) as f:
+                with open(LEDGER_FILE, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if line:
@@ -363,7 +363,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             # Fallback: return recent entries
             entries = []
             if LEDGER_FILE.exists():
-                with open(LEDGER_FILE) as f:
+                with open(LEDGER_FILE, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if line:
@@ -396,7 +396,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 
             entries = []
             if LEDGER_FILE.exists():
-                with open(LEDGER_FILE) as f:
+                with open(LEDGER_FILE, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if line:

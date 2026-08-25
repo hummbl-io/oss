@@ -42,6 +42,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+from hummbl_cognition._json_utils import canonical_json as _canonical_json
+from hummbl_cognition._timeutils import utc_now as _utc_now
+
 __all__ = [
     "RouteEventError",
     "create_route_event_receipt",
@@ -87,16 +90,8 @@ class RouteEventError(Exception):
     """Raised when route event receipt validation fails."""
 
 
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 def _new_receipt_id() -> str:
     return f"route-evt-{uuid.uuid4()}"
-
-
-def _canonical_json(obj: dict[str, Any]) -> str:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
 
 
 def compute_receipt_hash(receipt: dict[str, Any]) -> str:

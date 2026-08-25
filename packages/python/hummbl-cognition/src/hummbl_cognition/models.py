@@ -10,9 +10,10 @@ import hashlib
 import json
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
+
+from hummbl_cognition._timeutils import utc_now as _utc_now_iso
 
 
 class LedgerEntryType(str, Enum):
@@ -161,11 +162,6 @@ VALID_INTEL_TYPES = frozenset({e.value for e in IntelType})
 def _generate_entry_id() -> str:
     """Generate a CLP entry ID: clp-<12 hex chars>."""
     return f"clp-{uuid.uuid4().hex[:12]}"
-
-
-def _utc_now_iso() -> str:
-    """Return current UTC time as ISO 8601 string with Z suffix."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _is_valid_id(entry_id: str) -> bool:

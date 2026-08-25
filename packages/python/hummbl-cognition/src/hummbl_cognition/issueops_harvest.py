@@ -113,7 +113,7 @@ def load_candidates(candidates_path: str | Path) -> list[dict[str, Any]]:
     """Load candidate issues from a JSON file.
 
     Expected format: list of objects with at least:
-      - repo: str (full repo name, e.g. "hummbl-dev/arbiter")
+      - repo: str (full repo name, e.g. "hummbl-io/arbiter")
       - title: str
       - body: str (optional)
       - labels: list[str] (optional)

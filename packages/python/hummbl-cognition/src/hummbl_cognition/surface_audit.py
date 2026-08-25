@@ -23,9 +23,10 @@ import logging
 import os
 import threading
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from hummbl_cognition._timeutils import utc_now_micros as _utc_now
 
 try:
     import fcntl  # type: ignore[attr-defined]
@@ -82,10 +83,6 @@ VALID_RESULTS = ["success", "failure", "denied", "error"]
 
 class SurfaceAuditError(Exception):
     """Raised when surface audit receipt operations fail."""
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def _generate_action_id() -> str:

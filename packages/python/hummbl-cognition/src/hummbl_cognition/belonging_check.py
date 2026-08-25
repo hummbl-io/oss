@@ -44,7 +44,7 @@ def _load(path: Path = BASELINE_PATH) -> list[dict]:
     if not path.exists():
         return []
     entries = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
@@ -56,7 +56,7 @@ def _save(entries: list[dict], path: Path = BASELINE_PATH) -> None:
     """Rewrite the baseline file from the full entry list (atomic write)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    with open(tmp, "w") as f:
+    with open(tmp, "w", encoding="utf-8") as f:
         for entry in entries:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     tmp.replace(path)

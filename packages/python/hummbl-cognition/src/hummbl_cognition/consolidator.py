@@ -321,8 +321,6 @@ def run_consolidation(
             break
 
         source_ids = tuple(e.id for e in group)
-        {e.type for e in group}
-        {e.agent for e in group}
 
         if dry_run:
             logger.info(

@@ -25,9 +25,11 @@ import os
 import threading
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from hummbl_cognition._json_utils import canonical_json_ascii_safe as _canonical_json
+from hummbl_cognition._timeutils import utc_now_micros as _utc_now
 
 try:
     import fcntl  # type: ignore[attr-defined]
@@ -96,20 +98,10 @@ class PodReceipt:
         return d
 
 
-def _canonical_json(data: dict[str, Any]) -> str:
-    """Produce canonical JSON for hashing (sorted keys, no whitespace)."""
-    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-
-
 def _content_hash(receipt: dict[str, Any]) -> str:
     """Compute SHA-256 of the canonical receipt (excluding the hash field)."""
     stripped = {k: v for k, v in receipt.items() if k != "content_hash"}
     return hashlib.sha256(_canonical_json(stripped).encode("utf-8")).hexdigest()
-
-
-def _utc_now() -> str:
-    """Return ISO 8601 UTC timestamp with Z suffix."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def _validate_receipt_structure(receipt: dict[str, Any]) -> list[str]:

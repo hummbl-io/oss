@@ -1,6 +1,6 @@
 """Autoresearch Bridge -- ingests findings from autoresearch-reports into Open Brain.
 
-Pulls the hummbl-dev/autoresearch-reports GitHub repo, parses markdown reports
+Pulls the hummbl-io/autoresearch-reports GitHub repo, parses markdown reports
 and findings, converts them to ledger entries, and ingests them into the Open
 Brain server (local or remote).
 
@@ -31,7 +31,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_REPO_URL = "https://github.com/hummbl-dev/autoresearch-reports.git"
+DEFAULT_REPO_URL = "https://github.com/hummbl-io/autoresearch-reports.git"
 DEFAULT_REPO_DIR = "_state/autoresearch-reports"
 DEFAULT_STATE_FILE = "_state/cognition/autoresearch_bridge_state.json"
 DEFAULT_OPEN_BRAIN_URL = "http://127.0.0.1:11435"

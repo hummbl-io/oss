@@ -19,16 +19,7 @@ import threading
 import unicodedata
 from pathlib import Path
 
-try:
-    import fcntl  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover - exercised on Windows
-    fcntl = None
-
-try:
-    import msvcrt  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover - exercised on POSIX
-    msvcrt = None
-
+from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
 from hummbl_cognition.models import (
     CANONICAL_LEDGER_SCOPES,
     CANONICAL_LEDGER_TYPES,
@@ -48,33 +39,8 @@ DEFAULT_LEDGER_PATH = DEFAULT_COGNITION_DIR / "ledger.jsonl"
 
 # Maximum entry content size (4 KB -- matches schema maxLength)
 MAX_CONTENT_BYTES = 4096
-_WINDOWS_LOCK_SPAN = 0x7FFFFFFF
 _THREAD_WRITE_LOCK = threading.Lock()
 
-
-def _lock_file(file_obj) -> None:
-    """Acquire an exclusive advisory lock for the current file object."""
-    if fcntl is not None:
-        fcntl.flock(file_obj, fcntl.LOCK_EX)
-        return
-    if msvcrt is not None:
-        file_obj.flush()
-        file_obj.seek(0)
-        msvcrt.locking(file_obj.fileno(), msvcrt.LK_LOCK, _WINDOWS_LOCK_SPAN)
-        return
-    logger.warning("No advisory file locking backend available; proceeding unlocked")
-
-
-def _unlock_file(file_obj) -> None:
-    """Release the advisory lock for the current file object."""
-    if fcntl is not None:
-        fcntl.flock(file_obj, fcntl.LOCK_UN)
-        return
-    if msvcrt is not None:
-        file_obj.flush()
-        file_obj.seek(0)
-        msvcrt.locking(file_obj.fileno(), msvcrt.LK_UNLCK, _WINDOWS_LOCK_SPAN)
-        return
 
 # ---------------------------------------------------------------------------
 # Content scanning -- reject poisoned entries before they reach the ledger
@@ -677,6 +643,25 @@ def post_entry(
         entry.scope,
         entry.agent,
     )
+
+    # Fire post-write hooks (prior-art discovery, open-question extraction).
+    # Hooks enqueue research queries to the research_processor queue; the
+    # existing cron picks them up and posts results back linked to this entry.
+    # Fired in a daemon thread so post_entry never blocks on queue I/O.
+    # Hooks are opt-out via CLP_POST_WRITE_HOOKS=off and never break the post.
+    try:
+        import threading
+        from hummbl_cognition.post_write_hooks import fire_post_write_hooks
+
+        def _safe_hook(e=entry) -> None:
+            try:
+                fire_post_write_hooks(e)
+            except Exception as exc:
+                logger.warning("Post-write hooks failed for %s: %s", e.id, exc)
+
+        threading.Thread(target=_safe_hook, daemon=True).start()
+    except Exception as exc:
+        logger.warning("Post-write hook dispatch failed for %s: %s", entry.id, exc)
 
     return entry
 

@@ -47,8 +47,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
+
+from hummbl_cognition._json_utils import canonical_json as _canonical_json
+from hummbl_cognition._timeutils import utc_now as _utc_now
 
 __all__ = [
     "AgentResourceRegistryError",
@@ -100,14 +103,6 @@ ALLOWED_FIELDS = {
 
 class AgentResourceRegistryError(Exception):
     """Raised when agent resource registry entry validation fails."""
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def _canonical_json(obj: dict[str, Any]) -> str:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
 
 
 def _is_valid_iso8601(value: str) -> bool:

@@ -414,6 +414,23 @@ def _ingest_finding(
     if len(content) > 4000:
         content = content[:4000] + "\n[truncated]"
 
+    # If this query was triggered by a post-write hook, link the result
+    # back to the triggering entry so the ledger shows prior-art / open-question
+    # context automatically when the trigger entry is retrieved.
+    trigger_entry_id = question.get("trigger_entry_id")
+    hook = question.get("hook")
+    links: tuple[str, ...] = (trigger_entry_id,) if trigger_entry_id else ()
+    tags = [
+        "research",
+        f"domain:{question['domain']}",
+        f"rq:{question['id'].lower()}",
+        f"tier:{question.get('tier', 3)}",
+    ]
+    if hook:
+        tags.append(f"hook:{hook}")
+    if trigger_entry_id:
+        tags.append("auto-triggered")
+
     entry = LedgerEntry.create(
         content=content,
         agent="research-processor",
@@ -421,13 +438,9 @@ def _ingest_finding(
         model=DEFAULT_MODEL,
         entry_type="discovery",
         scope="project",
-        tags=[
-            "research",
-            f"domain:{question['domain']}",
-            f"rq:{question['id'].lower()}",
-            f"tier:{question.get('tier', 3)}",
-        ],
+        tags=tags,
         confidence=0.6,  # Local LLM research = moderate confidence
+        links=links,
     )
 
     parsed = urlparse(brain_url)

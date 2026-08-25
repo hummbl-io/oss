@@ -22,19 +22,12 @@ import logging
 import os
 import threading
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-try:
-    import fcntl  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover - exercised on Windows
-    fcntl = None
-
-try:
-    import msvcrt  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover - exercised on POSIX
-    msvcrt = None
+from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
+from hummbl_cognition._json_utils import canonical_json as _canonical_json
+from hummbl_cognition._timeutils import utc_now as _utc_now
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +58,6 @@ VALID_SOURCES = frozenset(
 VALID_SEVERITIES = frozenset({"low", "medium", "high", "critical"})
 
 _THREAD_WRITE_LOCK = threading.Lock()
-_WINDOWS_LOCK_SPAN = 0x7FFFFFFF
 
 
 class IssueOpsReceiptError(ValueError):
@@ -77,39 +69,9 @@ class IssueOpsReceiptError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-def _utc_now() -> str:
-    """Return current UTC timestamp in ISO 8601 Z format."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 def _new_run_id() -> str:
     """Generate a unique run id: issueops-<uuid4>."""
     return f"issueops-{uuid.uuid4()}"
-
-
-def _lock_file(file_obj) -> None:
-    """Acquire an exclusive advisory lock for the current file object."""
-    if fcntl is not None:
-        fcntl.flock(file_obj, fcntl.LOCK_EX)
-        return
-    if msvcrt is not None:
-        file_obj.flush()
-        file_obj.seek(0)
-        msvcrt.locking(file_obj.fileno(), msvcrt.LK_LOCK, _WINDOWS_LOCK_SPAN)
-        return
-    logger.warning("No advisory file locking backend available; proceeding unlocked")
-
-
-def _unlock_file(file_obj) -> None:
-    """Release the advisory lock for the current file object."""
-    if fcntl is not None:
-        fcntl.flock(file_obj, fcntl.LOCK_UN)
-        return
-    if msvcrt is not None:
-        file_obj.flush()
-        file_obj.seek(0)
-        msvcrt.locking(file_obj.fileno(), msvcrt.LK_UNLCK, _WINDOWS_LOCK_SPAN)
-        return
 
 
 def _resolve_log_path(override: str | Path | None = None) -> Path:
@@ -144,11 +106,6 @@ def _resolve_log_path(override: str | Path | None = None) -> Path:
 def _load_schema() -> dict[str, Any]:
     """Load the IssueOps run receipt JSON schema from disk."""
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-
-
-def _canonical_json(obj: dict[str, Any]) -> str:
-    """Serialize dict to canonical JSON (sorted keys, compact)."""
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
 
 
 def _content_hash(receipt: dict[str, Any]) -> str:

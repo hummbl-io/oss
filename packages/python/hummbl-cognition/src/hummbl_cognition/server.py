@@ -11,8 +11,6 @@ Endpoints:
     POST /consolidate           -- run ledger consolidation (with file lock)
     POST /bus/post        -- append message to coordination bus via bus_writer
     GET  /health                -- simple health check
-    GET  /base120/transformations -- list 6 Base120 domain categories
-    POST /base120/recommend     -- CLP-boosted Base120 model recommendations
     POST /arbiter/evaluate      -- pre-execution risk gate (requires ENABLE_ARBITER)
 
 Usage:
@@ -218,28 +216,6 @@ class OpenBrainState:
             "errors": errors[:10],  # Cap error reporting
         }
 
-    def recommend_base120(self, params: dict[str, Any]) -> dict[str, Any]:
-        """Return CLP-boosted Base120 model recommendations."""
-        from hummbl_cognition.lattice_advisor import Base120Advisor
-
-        advisor = Base120Advisor(ledger_path=self.ledger_path)
-        query = params.get("query", "")
-        results = advisor.recommend(
-            query,
-            agent_id=params.get("agent_id"),
-            limit=int(params.get("limit", 5)),
-            difficulty=params.get("difficulty"),
-            domain=params.get("domain"),
-        )
-        return {"models": results, "count": len(results), "query": query}
-
-    def list_base120_domains(self) -> dict[str, Any]:
-        """Return the 6 Base120 transformation domains."""
-        from hummbl_cognition.lattice_advisor import Base120Advisor
-
-        advisor = Base120Advisor(ledger_path=self.ledger_path)
-        return {"domains": advisor.list_domains()}
-
     def evaluate_arbiter(self, params: dict[str, Any]) -> dict[str, Any]:
         """Run a pre-execution risk gate evaluation via SecurityArbiter."""
         _enabled = os.environ.get("ENABLE_ARBITER", "").lower() in ("true", "1", "yes")
@@ -314,7 +290,7 @@ class OpenBrainState:
 
         lock_fd = None
         try:
-            lock_fd = open(lock_path, "w")
+            lock_fd = open(lock_path, "w", encoding="utf-8")
             if fcntl is not None:
                 fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
             elif msvcrt is not None:
@@ -386,10 +362,6 @@ def _make_handler(state: OpenBrainState, *, auth_token: str | None = None) -> ty
                 if not self._check_auth():
                     return
                 self._send_json(state.status())
-            elif self.path == "/base120/transformations":
-                if not self._check_auth():
-                    return
-                self._send_json(state.list_base120_domains())
             elif self.path.startswith("/lineage/"):
                 if not self._check_auth():
                     return
@@ -435,13 +407,6 @@ def _make_handler(state: OpenBrainState, *, auth_token: str | None = None) -> ty
             elif self.path == "/consolidate":
                 dry_run = params.get("dry_run", False)
                 result = state.consolidate(dry_run=dry_run)
-                self._send_json(result)
-
-            elif self.path == "/base120/recommend":
-                if "query" not in params:
-                    self._send_json({"error": "missing 'query' field"}, 400)
-                    return
-                result = state.recommend_base120(params)
                 self._send_json(result)
 
             elif self.path == "/bus/post":

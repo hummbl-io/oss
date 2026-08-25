@@ -36,12 +36,14 @@ try:
 except ImportError:  # pragma: no cover - POSIX
     msvcrt = None  # type: ignore[assignment]
 
+from hummbl_cognition._exceptions import ConcurrencyError
 from hummbl_cognition.ledger_writer import (
     ContentScanError,  # noqa: F401 — re-exported for tests
 )
 from hummbl_cognition.ledger_writer import (
     scan_content as _scan_content,
 )
+from hummbl_cognition._timeutils import utc_now as _utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -74,10 +76,6 @@ _KEY_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+:[a-zA-Z0-9_.-]+$")
 # blocklist + NFC normalization). See ledger_writer.scan_content().
 
 
-class ConcurrencyError(Exception):
-    """Raised when optimistic concurrency check fails."""
-
-
 def _scan_value(value: Any) -> None:
     """Recursively scan a JSON-serializable value for dangerous content."""
     if isinstance(value, str):
@@ -89,11 +87,6 @@ def _scan_value(value: Any) -> None:
     elif isinstance(value, (list, tuple)):
         for item in value:
             _scan_value(item)
-
-
-def _utc_now_iso() -> str:
-    """Return current UTC time as ISO 8601 string with Z suffix."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _parse_iso(s: str) -> datetime:
