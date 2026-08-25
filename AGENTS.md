@@ -3,13 +3,14 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts 3 Python packages: `hummbl`, `hummbl-governance`, `hummbl-kernel`.
+Currently hosts 4 Python packages: `base120`, `hummbl`, `hummbl-governance`, `hummbl-kernel`.
 
 ## Packages
 
 | Package | Path | PyPI status | Description |
 |---------|------|-------------|-------------|
 | hummbl-governance | `packages/hummbl-governance/` | Published (1.4.1) | Governance primitives for AI agent orchestration |
+| base120 | `packages/base120/` | Published (2.0.0) | 120 reasoning operators for structured thinking |
 | hummbl-kernel | `packages/hummbl-kernel/` | Pre-release (0.1.0) | Orchestration kernel with security and compliance enforcement |
 | hummbl | `packages/hummbl/` | Pre-release (0.1.0) | Structured reasoning framework for AI agents |
 

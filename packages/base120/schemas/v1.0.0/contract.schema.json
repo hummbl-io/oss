@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://base120.org/schemas/v1.0.0/contract.schema.json",
+  "title": "Base120 Contract Unit",
+  "description": "Contract unit schema encapsulating schemas, failure graphs, and version metadata",
+  "type": "object",
+  "required": ["contract_version", "service_name", "artifact_schema", "failure_graph", "metadata"],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "description": "Version of the contract unit specification",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Name of the service this contract governs",
+      "minLength": 1
+    },
+    "artifact_schema": {
+      "type": "object",
+      "description": "JSON Schema for artifacts validated by this contract",
+      "required": ["$schema", "type"],
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "failure_graph": {
+      "type": "object",
+      "description": "Failure mode graph with retry, escalation, and termination rules",
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "description": "Failure mode nodes in the graph",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "max_retries", "action"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^FM[0-9]+$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "max_retries": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "action": {
+                "type": "string",
+                "enum": ["retry", "escalate", "terminate"]
+              }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "description": "Edges between failure mode nodes (escalation paths)",
+          "items": {
+            "type": "object",
+            "required": ["from", "to", "condition"],
+            "properties": {
+              "from": {
+                "type": "string",
+                "pattern": "^FM[0-9]+$"
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^FM[0-9]+$"
+              },
+              "condition": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Contract metadata including versioning and environment compatibility",
+      "required": ["created", "updated", "compatibility"],
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "compatibility": {
+          "type": "object",
+          "required": ["environments"],
+          "properties": {
+            "environments": {
+              "type": "array",
+              "description": "List of validated environments",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "minimum_version": {
+              "type": "string",
+              "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+            }
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
