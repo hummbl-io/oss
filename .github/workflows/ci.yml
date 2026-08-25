@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [hummbl, hummbl-governance, hummbl-kernel]
+        package: [base120, hummbl, hummbl-governance, hummbl-kernel]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -36,9 +36,9 @@ jobs:
           python-version: "3.13"
 
       - name: Install package and test dependencies
-        working-directory: packages/${{ matrix.package }}
+        working-directory: packages/python/${{ matrix.package }}
         run: pip install -e ".[test]"
 
       - name: Run tests
-        working-directory: packages/${{ matrix.package }}
+        working-directory: packages/python/${{ matrix.package }}
         run: python -m pytest tests/ -q

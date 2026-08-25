@@ -8,19 +8,20 @@ name: Publish to PyPI
 #   1. Configure the trusted publisher on pypi.org for that package
 #      (owner: hummbl-io, repo: oss, workflow: publish-pypi.yml, environment: pypi)
 #   2. Merge the version bump to main
-#   3. Tag the merge commit: git tag hummbl-governance/v1.4.2 && git push origin hummbl-governance/v1.4.2
+#   3. Tag the merge commit: git tag python/hummbl-governance/v1.4.2 && git push origin python/hummbl-governance/v1.4.2
 #
 # To add a new Python package:
 #   1. Add its tag pattern to the `tags` filter below
-#   2. Add its source under packages/<name>/
+#   2. Add its source under packages/python/<name>/
 #   3. Configure the trusted publisher on pypi.org
 
 "on":
   push:
     tags:
-      - "hummbl-governance/v*"
-      - "hummbl/v*"
-      - "hummbl-kernel/v*"
+      - "python/hummbl-governance/v*"
+      - "python/hummbl/v*"
+      - "python/hummbl-kernel/v*"
+      - "python/base120/v*"
 
 
 concurrency:
@@ -44,12 +45,13 @@ jobs:
       - name: Extract package name and version from tag
         id: pkg
         run: |
-          # tag format: <package-name>/v<version>
-          pkg="${GITHUB_REF_NAME%%/v*}"
-          ver="${GITHUB_REF_NAME#*/v}"
+          # tag format: python/<package-name>/v<version>
+          rest="${GITHUB_REF_NAME#python/}"
+          pkg="${rest%%/v*}"
+          ver="${rest#*/v}"
           echo "name=$pkg" >> "$GITHUB_OUTPUT"
           echo "version=$ver" >> "$GITHUB_OUTPUT"
-          echo "path=packages/$pkg" >> "$GITHUB_OUTPUT"
+          echo "path=packages/python/$pkg" >> "$GITHUB_OUTPUT"
 
       - name: Verify tag is on main
         run: |
