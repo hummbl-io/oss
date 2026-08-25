@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 
 from hummbl_governance.lsp_registry import (
@@ -138,18 +140,18 @@ class TestWorkspaceUtils:
         root, gated = resolve_workspace_for_file(__file__)
         assert gated is True
         assert root is not None
-        # In monorepo, root is hummbl-oss (local) or oss (CI checkout);
-        # in standalone, it's hummbl-governance
-        assert "hummbl-governance" in root or "hummbl-oss" in root or root.endswith("oss")
+        # Name-agnostic: a real workspace root has a .git marker (dir or file).
+        # This works regardless of checkout directory name (hummbl-oss, oss, etc.)
+        assert os.path.exists(os.path.join(root, ".git"))
 
     def test_nearest_root(self) -> None:
         """Should find nearest marker file."""
         # This file is in tests/, nearest pyproject.toml is at repo root
         root = nearest_root(__file__, ["pyproject.toml"])
         assert root is not None
-        # In monorepo, root is hummbl-oss (local) or oss (CI checkout);
-        # in standalone, it's hummbl-governance
-        assert "hummbl-governance" in root or "hummbl-oss" in root or root.endswith("oss")
+        # Name-agnostic: the nearest pyproject.toml root is the package or
+        # monorepo root; verify it actually contains the marker file.
+        assert os.path.exists(os.path.join(root, "pyproject.toml"))
 
     def test_nearest_root_excludes(self) -> None:
         """Excludes should gate off server."""
