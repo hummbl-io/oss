@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.signing_identity_registry.v1.json",
+  "title": "Signing Identity Registry v1",
+  "description": "Schema for the fleet-wide signing identity registry. Each agent that authors commits, receipts, or review attestations has its own GPG key and registry entry. Agent author keys and human reviewer keys are separate trust classes. Implements #241 — fleet agent GPG keys and signing identity registry.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "identities"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this registry file."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this registry was generated or updated."
+    },
+    "identities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/identity"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "identity_class",
+        "key_status",
+        "allowed_uses",
+        "max_tier"
+      ],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique identifier for the signing identity (e.g., 'devin', 'codex', 'operator')."
+        },
+        "identity_class": {
+          "type": "string",
+          "enum": [
+            "human_reviewer",
+            "agent_author",
+            "agent_reviewer"
+          ],
+          "description": "The trust class of this identity. Agent signatures prove agent authorship only; they do not satisfy human final review."
+        },
+        "public_gpg_fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9A-F]{40}$",
+          "description": "The 40-character GPG key fingerprint. Empty string or null means key not yet generated (status must be 'pending')."
+        },
+        "allowed_uses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "commit_signing",
+              "receipt_authoring",
+              "review_attestation",
+              "human_final_review"
+            ]
+          },
+          "minItems": 1,
+          "description": "What this identity is permitted to sign."
+        },
+        "max_tier": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Maximum governance tier this identity can act at. Tier 3+ final review must resolve to a verified human reviewer key unless explicitly waived by the operator."
+        },
+        "key_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "active",
+            "revoked"
+          ],
+          "description": "Lifecycle status of the GPG key. Pending = key not yet generated. Active = key in use. Revoked = key no longer valid."
+        },
+        "key_created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the GPG key was created."
+        },
+        "key_rotated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the GPG key was last rotated."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes about this identity."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "key_status": { "const": "active" }
+            },
+            "required": ["key_status"]
+          },
+          "then": {
+            "required": ["public_gpg_fingerprint"],
+            "properties": {
+              "public_gpg_fingerprint": {
+                "minLength": 40
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "identity_class": { "const": "human_reviewer" }
+            },
+            "required": ["identity_class"]
+          },
+          "then": {
+            "properties": {
+              "allowed_uses": {
+                "contains": { "const": "human_final_review" }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "identity_class": { "enum": ["agent_author", "agent_reviewer"] }
+            },
+            "required": ["identity_class"]
+          },
+          "then": {
+            "properties": {
+              "allowed_uses": {
+                "not": { "contains": { "const": "human_final_review" } }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

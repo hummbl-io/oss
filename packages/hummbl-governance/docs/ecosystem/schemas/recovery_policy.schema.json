@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/recovery-policy.schema.json",
+  "title": "Runtime Recovery Policy",
+  "description": "Advisory schema mapping failure classes to bounded recovery, forbidden recovery, budgets, verifiers, escalation, and receipts. Draft only; not canon.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "policy_id",
+    "failure_class",
+    "detector",
+    "allowed_recovery",
+    "forbidden_recovery",
+    "budget",
+    "verifier",
+    "side_effect_mode",
+    "escalation",
+    "receipt_required"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "pattern": "^1\\.0\\.0$"},
+    "policy_id": {"type": "string", "pattern": "^rp-[a-z0-9-]+$"},
+    "failure_class": {"type": "string", "enum": ["timeout", "schema_violation", "tool_failure", "state_divergence", "policy_denial", "unsafe_output"]},
+    "detector": {"type": "string", "minLength": 1},
+    "allowed_recovery": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "forbidden_recovery": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "budget": {
+      "type": "object",
+      "required": ["max_attempts", "max_seconds"],
+      "properties": {
+        "max_attempts": {"type": "integer", "minimum": 0, "maximum": 5},
+        "max_seconds": {"type": "integer", "minimum": 0, "maximum": 3600}
+      },
+      "additionalProperties": false
+    },
+    "verifier": {"type": "string", "minLength": 1},
+    "side_effect_mode": {"type": "string", "enum": ["none", "dry_run", "idempotent_only", "human_approved"]},
+    "escalation": {"type": "string", "enum": ["none", "human_review", "halt", "incident"]},
+    "receipt_required": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

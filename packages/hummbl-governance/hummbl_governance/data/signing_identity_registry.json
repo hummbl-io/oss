@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-22T07:00:00Z",
+  "identities": [
+    {
+      "identity": "operator",
+      "identity_class": "human_reviewer",
+      "public_gpg_fingerprint": "",
+      "allowed_uses": ["commit_signing", "receipt_authoring", "review_attestation", "human_final_review"],
+      "max_tier": 5,
+      "key_status": "pending",
+      "notes": "Operator's personal GPG key. Remains a human/operator key only — agents must not use, cache, export, or proxy it."
+    },
+    {
+      "identity": "devin",
+      "identity_class": "agent_author",
+      "public_gpg_fingerprint": "",
+      "allowed_uses": ["commit_signing", "receipt_authoring", "review_attestation"],
+      "max_tier": 2,
+      "key_status": "pending",
+      "notes": "Devin CLI agent. Key generation pending operator action."
+    },
+    {
+      "identity": "codex",
+      "identity_class": "agent_author",
+      "public_gpg_fingerprint": "",
+      "allowed_uses": ["commit_signing", "receipt_authoring", "review_attestation"],
+      "max_tier": 2,
+      "key_status": "pending",
+      "notes": "Codex CLI agent. Key generation pending operator action."
+    },
+    {
+      "identity": "claude-code",
+      "identity_class": "agent_author",
+      "public_gpg_fingerprint": "",
+      "allowed_uses": ["commit_signing", "receipt_authoring", "review_attestation"],
+      "max_tier": 2,
+      "key_status": "pending",
+      "notes": "Claude Code agent. Key generation pending operator action."
+    },
+    {
+      "identity": "opencode",
+      "identity_class": "agent_author",
+      "public_gpg_fingerprint": "",
+      "allowed_uses": ["commit_signing", "receipt_authoring", "review_attestation"],
+      "max_tier": 2,
+      "key_status": "pending",
+      "notes": "OpenCode agent. Key generation pending operator action."
+    },
+    {
+      "identity": "gemini",
+      "identity_class": "agent_author",
+      "public_gpg_fingerprint": "",
+      "allowed_uses": ["commit_signing", "receipt_authoring", "review_attestation"],
+      "max_tier": 2,
+      "key_status": "pending",
+      "notes": "Gemini agent. Key generation pending operator action."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tiershift-declaration.schema.json",
+  "title": "TierShift Declaration",
+  "type": "object",
+  "required": [
+    "selected_tier",
+    "consequence_surface",
+    "rationale",
+    "receipts_required",
+    "downgrade_allowed",
+    "escalation_conditions",
+    "source_of_record",
+    "review_route"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "selected_tier": {
+      "type": "string",
+      "enum": ["Instant", "Medium", "High", "XHigh", "Hold"]
+    },
+    "consequence_surface": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "public_docs",
+          "namespace",
+          "schema",
+          "package_metadata",
+          "security",
+          "release",
+          "source_of_record",
+          "agent_routing_policy",
+          "clinical_legal_financial_claim"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipts_required": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "source_of_record",
+          "operator_approval",
+          "peer_review",
+          "validation",
+          "merge_receipt"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "downgrade_allowed": {
+      "type": "boolean"
+    },
+    "escalation_conditions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "source_of_record": {
+      "type": "string",
+      "minLength": 1
+    },
+    "review_route": {
+      "type": "string",
+      "minLength": 1
+    },
+    "no_self_approval": {
+      "type": "boolean",
+      "const": true
+    },
+    "residual_risk": {
+      "type": "string"
+    }
+  }
+}

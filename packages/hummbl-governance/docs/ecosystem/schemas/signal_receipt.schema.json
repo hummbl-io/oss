@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/signal_receipt.schema.json",
+  "title": "HUMMBL Signal Command Receipt",
+  "description": "Receipt for a Signal CLI communication event — outbound notify, inbound candidate command, or agent coordination. Draft status, not canon until namespace review.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "surface",
+    "lane",
+    "actor_or_agent",
+    "recipient_alias",
+    "event_class",
+    "risk_class",
+    "message_hash",
+    "message_summary",
+    "admission_decision",
+    "durable_uri"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "description": "Unique receipt identifier."
+    },
+    "surface": {
+      "const": "signal",
+      "description": "Communication surface."
+    },
+    "lane": {
+      "type": "string",
+      "enum": ["notify", "ack", "candidate_command", "agent_coordination"],
+      "description": "Communication lane classification."
+    },
+    "actor_or_agent": {
+      "type": "string",
+      "description": "Agent or human actor initiating or receiving the message."
+    },
+    "recipient_alias": {
+      "type": "string",
+      "description": "Allowlisted recipient alias (not raw phone number or identifier)."
+    },
+    "group_alias": {
+      "type": ["string", "null"],
+      "description": "Group alias if group message, null if direct."
+    },
+    "event_class": {
+      "type": "string",
+      "description": "Event classification (e.g., digest, health_summary, run_blocked, inbound_instruction)."
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": ["notify_read_only", "ack_only", "candidate_command", "write_pending_approval", "forbidden"],
+      "description": "Risk classification per policy."
+    },
+    "message_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of message content."
+    },
+    "message_summary": {
+      "type": "string",
+      "maxLength": 280,
+      "description": "Redacted summary of message content."
+    },
+    "admission_decision": {
+      "type": "string",
+      "enum": ["admitted", "denied", "pending_approval", "dry_run"],
+      "description": "Admission gate decision."
+    },
+    "executor": {
+      "type": ["string", "null"],
+      "description": "Executor that handled the message (e.g., signal-cli) or null if denied before execution."
+    },
+    "transport_mode": {
+      "type": "string",
+      "enum": ["json_rpc", "cli", "daemon", "dry_run"],
+      "description": "Transport mode used."
+    },
+    "sent_timestamp": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When message was sent, or null for inbound/denied."
+    },
+    "received_timestamp": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When message was received, or null for outbound."
+    },
+    "durable_uri": {
+      "type": "string",
+      "description": "URI to durable receipt storage."
+    },
+    "redactions_applied": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "List of redaction types applied (e.g., phone_number, api_key, hostname)."
+    }
+  },
+  "additionalProperties": false
+}
