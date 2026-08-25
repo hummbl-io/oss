@@ -1,0 +1,27 @@
+{
+  "algorithm": "HMAC-SHA256",
+  "canonical_format": "timestamp|sender|recipient|type|canonical_json_payload|nonce",
+  "secret_utf8": "0123456789abcdef0123456789abcdef",
+  "vectors": [
+    {
+      "name": "ascii",
+      "timestamp": "2026-05-08T23:40:00Z",
+      "sender": "codex",
+      "recipient": "all",
+      "type": "STATUS",
+      "payload": {"message": "hello"},
+      "nonce": "1746747600000-nonce123",
+      "signature": "cc04cdd55e67bbffdf24a4fb01c5a83eb0bf88a12a6b3f5ac1818cdcc2973771"
+    },
+    {
+      "name": "unicode",
+      "timestamp": "2026-05-09T03:40:00Z",
+      "sender": "devin",
+      "recipient": "codex",
+      "type": "SITREP",
+      "payload": {"message": "Café ☕ — 東京"},
+      "nonce": "1746762000000-unicode",
+      "signature": "8693beff50f035ff895e6a1513acedbb362190e742964cf2d0f6330fe4ba652b"
+    }
+  ]
+}
