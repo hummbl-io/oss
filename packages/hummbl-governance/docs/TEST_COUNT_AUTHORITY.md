@@ -17,7 +17,7 @@ site, security, and health surfaces should describe the values.
 
 | Metric | Canonical authority | Verification command or source | Current observed value |
 |---|---|---|---|
-| Package version | `pyproject.toml` `[project].version` | inspect `pyproject.toml` | `1.4.1` |
+| Package version | `pyproject.toml` `[project].version` | inspect `pyproject.toml` | `1.4.2` |
 | Implemented package primitives | `PRIMITIVES.md` implemented inventory | count "Existing primitives" plus "Implemented expansion primitives"; exclude proposed/candidate primitives | `34` implemented primitives |
 | Core historical primitives | `PRIMITIVES.md` "Existing primitives (P1-P26)" | use only when explicitly describing core or historical scope | `26` existing primitives |
 | Package-level dedicated test collection | `pytest` collection on the release candidate working tree | `python -m pytest --collect-only -q tests` | `2314 tests collected` on 2026-08-17 from the tree based on commit `bc56261` |
