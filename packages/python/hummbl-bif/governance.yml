@@ -1,0 +1,70 @@
+# governance.yml — HUMMBL package governance metadata
+#
+# This file is the first-class governance artifact shipped with every HUMMBL
+# package. It declares the package's governance posture: safety controls, cost
+# limits, compliance frameworks, and build provenance.
+#
+# bif is a methodology and MCP server for structured knowledge acquisition.
+# It does not run autonomous agents but does make LLM API calls during
+# ingestion sessions. Cost governance applies to those calls.
+
+package:
+  name: hummbl-bif
+  version: 1.0.0
+  license: Apache-2.0
+  publisher: HUMMBL, LLC
+  description: Batch Ingestion Framework for structured technical knowledge acquisition
+
+safety:
+  kill_switch:
+    supported: false
+    reason: "Interactive tool — user initiates and terminates sessions manually"
+  circuit_breaker:
+    supported: false
+    reason: "Single-session tool — no long-running external service dependencies"
+  output_validation:
+    supported: true
+    pii_detection: false
+    injection_detection: false
+    blocklist_filtering: false
+    reason: "Session content is user-provided documentation, not untrusted input"
+  capability_fence:
+    supported: false
+
+cost:
+  cost_governor:
+    supported: true
+    soft_cap_usd: 10.0
+    hard_cap_usd: 25.0
+    alert_threshold_pct: 80
+    currency: USD
+    reason: "LLM API calls during ingestion sessions — Anthropic Claude"
+
+identity:
+  delegation_tokens:
+    supported: false
+    reason: "Single-user interactive tool — no multi-agent delegation"
+  agent_registry:
+    supported: false
+
+audit:
+  audit_log:
+    supported: true
+    format: JSONL
+    append_only: true
+    rotation: false
+    retention_days: 30
+    reason: "Session logs track ingestion progress and batch completion"
+  compliance_mapping:
+    frameworks: []
+    coverage: none
+
+provenance:
+  build_system: github-actions
+  trusted_publishing: true
+  testpypi_staging: true
+  source_repo: https://github.com/hummbl-dev/bif
+  license: Apache-2.0
+  supply_chain_risk: none
+  dependencies: zero
+  tests: 96
