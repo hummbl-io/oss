@@ -1,0 +1,16 @@
+{
+  "tuple_type": "PATH_COMPARISON",
+  "id": "051aa3e8-983",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "comparison-001",
+  "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+  "tuple_data": {
+    "path_a_id": "path-ai-autonomous-001",
+    "path_b_id": "path-hitl-influenced-001",
+    "comparison_basis": "publication usefulness and trace quality",
+    "preferred_path": "B",
+    "decided_by": "human:operator",
+    "notes": "The HITL-influenced path was less exploratory but materially easier to trust and publish."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/counterfactual_event.schema.json",
+  "title": "World-Model COUNTERFACTUAL_EVENT Tuple",
+  "description": "Records counterfactual reasoning about what would have happened under different conditions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "COUNTERFACTUAL_EVENT"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "target_model", "counterfactual_condition",
+        "predicted_counterfactual_outcome", "actual_outcome",
+        "evidence_links", "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "target_model": {"type": "string"},
+        "counterfactual_condition": {"type": "string"},
+        "predicted_counterfactual_outcome": {"type": "string"},
+        "actual_outcome": {"type": "string"},
+        "evidence_links": {"type": "array", "items": {"type": "string"}},
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "tuple_type": "BIO_OVERRIDE",
+  "id": "23ebd94c-02a",
+  "time": "2026-04-17T23:42:12Z",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-002",
+  "control_mode": "AI_PROPOSE_HUMAN_CONFIRM",
+  "tuple_data": {
+    "target_action_id": "bio-action-002",
+    "override_actor": "operator-001",
+    "override_reason": "prefer_manual_break_over_system_initiated_task_switch",
+    "replacement_action": "prompt_optional_break_only"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "tuple_type": "AGENT_INFERENCE",
+  "id": "inference",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-b",
+  "principal": "user-002",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-b",
+    "represented_principal": "user-002",
+    "owner": "user-002",
+    "receipted_by": "receipt-003",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-inference",
+    "visibility_class": "private",
+    "epistemic_permission": "infer",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "inference_content": "Code review bottleneck is slowing merges",
+    "target_model": "umf-002",
+    "inference_basis": [
+      "metrics-001"
+    ]
+  }
+}

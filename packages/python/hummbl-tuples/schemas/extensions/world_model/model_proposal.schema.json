@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/model_proposal.schema.json",
+  "title": "World-Model MODEL_PROPOSAL Tuple",
+  "description": "Proposes a candidate model from observations. References candidate-model-fragment.v0.1.json via fragment_ref.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "MODEL_PROPOSAL"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "fragment_ref", "source_observations", "proposed_by",
+        "evidence_links", "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "fragment_ref": {"type": "string"},
+        "source_observations": {"type": "array", "items": {"type": "string"}},
+        "proposed_by": {"type": "string"},
+        "evidence_links": {"type": "array", "items": {"type": "string"}},
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "tuple_type": "AGENT_INFERENCE",
+  "id": "agents",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-c1",
+  "principal": "user-003",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-c1",
+    "represented_principal": "user-003",
+    "owner": "user-003",
+    "receipted_by": "receipt-005",
+    "actor_regime": "user_plus_agent_team",
+    "evidence_links": [],
+    "receipt_link": "receipt-agents",
+    "visibility_class": "private",
+    "epistemic_permission": "infer",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "inference_content": "Latency increased after deploy v2.3",
+    "target_model": "umf-003",
+    "inference_basis": [
+      "metrics-002"
+    ],
+    "model_provider": "same-provider",
+    "source_lineage": [
+      "shared-source"
+    ],
+    "independence_class": "correlated"
+  }
+}

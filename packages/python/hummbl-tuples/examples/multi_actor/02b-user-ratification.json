@@ -1,0 +1,29 @@
+{
+  "tuple_type": "USER_RATIFICATION",
+  "id": "ratification",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-002",
+  "principal": "user-002",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-002",
+    "represented_principal": "user-002",
+    "owner": "user-002",
+    "receipted_by": "receipt-004",
+    "actor_regime": "user_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-ratification",
+    "visibility_class": "private",
+    "epistemic_permission": "claim",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "ratified_claim": "Code review bottleneck is slowing merges",
+    "ratified_fragment_ref": "umf-002",
+    "ratification_reason": "Confirmed by merge rate data"
+  }
+}

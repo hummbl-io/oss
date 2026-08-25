@@ -1,0 +1,40 @@
+[
+  {
+    "tuple_type": "CONTRACT",
+    "id": "conv-test-001",
+    "time": "2026-07-01T00:00:00Z",
+    "state": "ok",
+    "drift": 0.0,
+    "tier": 1,
+    "agent": "test-agent",
+    "tool": "test-tool",
+    "intent_id": "conv-test",
+    "task_id": "task-001",
+    "tuple_data": {
+      "contract_id": "conv-test",
+      "delegatee": "service",
+      "objective": "Converter test",
+      "allowed_tools": ["tool:run"],
+      "outputs": ["result"],
+      "evidence_requirements": ["EVIDENCE:done"]
+    }
+  },
+  {
+    "tuple_type": "EVIDENCE",
+    "id": "conv-test-002",
+    "time": "2026-07-01T00:00:01Z",
+    "state": "ok",
+    "drift": 0.0,
+    "tier": 1,
+    "agent": "test-agent",
+    "tool": "test-tool",
+    "intent_id": "conv-test",
+    "task_id": "task-001",
+    "tuple_data": {
+      "evidence_type": "completion",
+      "evidence_id": "ev-001",
+      "description": "Converter test evidence",
+      "artifacts": ["result.json"]
+    }
+  }
+]

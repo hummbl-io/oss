@@ -1,0 +1,20 @@
+[package]
+name = "hummbl-tuples"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "HUMMBL Typed Tuple reference implementation — canonical serialization and SHA-256 hashing"
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+sha2 = "0.10"
+
+[lib]
+name = "hummbl_tuples"
+path = "src/lib.rs"
+
+[[bin]]
+name = "conformance_test"
+path = "src/bin/conformance_test.rs"

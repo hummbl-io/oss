@@ -1,0 +1,25 @@
+{
+  "tuple_type": "REASONING_PATH",
+  "id": "6d36eefa-c10",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-autonomous-001",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "path_id": "path-ai-autonomous-001",
+    "constructed_by": "model:gpt",
+    "path_steps": [
+      {
+        "step_index": 1,
+        "transformation_id": "synthesis",
+        "mental_model_id": "systems-thinking"
+      },
+      {
+        "step_index": 2,
+        "transformation_id": "evaluation",
+        "mental_model_id": "second-order-effects"
+      }
+    ],
+    "path_depth": 2
+  }
+}

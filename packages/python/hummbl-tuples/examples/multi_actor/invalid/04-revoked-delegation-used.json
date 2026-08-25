@@ -1,0 +1,29 @@
+{
+  "tuple_type": "AGENT_OBSERVATION",
+  "id": "04-revoked-delegation-used",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-bad-4",
+  "principal": "user-bad-4",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "authored_by": "agent-bad-4",
+    "represented_principal": "user-bad-4",
+    "owner": "user-bad-4",
+    "receipted_by": "receipt-bad-004",
+    "actor_regime": "bounded_agent_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-04-revoked-delegation-used",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "not_required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "revoked",
+    "observation_content": "observed data",
+    "target_model": "umf-bad-4",
+    "delegation_id": "deleg-revoked-001"
+  }
+}

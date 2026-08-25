@@ -1,0 +1,16 @@
+{
+  "tuple_type": "OUTCOME_OBSERVATION",
+  "id": "outcome-005",
+  "time": "2026-10-11T13:00:00Z",
+  "actor": "agent-evaluator-z",
+  "principal": "user-004",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "related_prediction": "pred-004",
+    "observed_outcome": "Merge rate increased by only 5%, not 20%",
+    "confirms_prediction": false,
+    "evidence_links": ["merge-rate-metrics-005"],
+    "receipt_link": "receipt-007",
+    "visibility_class": "public"
+  }
+}

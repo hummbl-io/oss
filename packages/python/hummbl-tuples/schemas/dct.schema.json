@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/dct.schema.json",
+  "title": "HUMMBL DCT Tuple",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "id",
+    "time",
+    "intent_id",
+    "task_id",
+    "tuple_data",
+    "state",
+    "drift",
+    "tier",
+    "agent",
+    "tool"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "DCT"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "blocked",
+        "error"
+      ]
+    },
+    "drift": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tier": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "agent": {
+      "type": "string"
+    },
+    "tool": {
+      "type": "string"
+    },
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature": {
+      "type": "string"
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "issuer",
+        "subject",
+        "ops_allowed"
+      ],
+      "properties": {
+        "event": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ops_allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "token_id": {
+          "type": "string"
+        }
+      }
+    },
+    "previous_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the previous tuple in the chain. null if genesis."
+    }
+  }
+}

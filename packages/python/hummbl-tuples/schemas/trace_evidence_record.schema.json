@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/trace_evidence_record.schema.json",
+  "title": "HUMMBL Trace Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "time",
+    "id",
+    "claim",
+    "evidence_kind",
+    "measurement"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_kind": {
+      "type": "string",
+      "enum": [
+        "benchmark_gain",
+        "ablation",
+        "failure_case",
+        "safety_check",
+        "lineage_record",
+        "publishable_result"
+      ]
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "metric": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "baseline": {
+          "type": "number"
+        },
+        "delta": {
+          "type": "number"
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

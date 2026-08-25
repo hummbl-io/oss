@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/multi_actor/agent_version_changed.schema.json",
+  "title": "Multi-Actor AGENT_VERSION_CHANGED Tuple",
+  "description": "Records a change in agent version, which may invalidate stale calibration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type",
+    "id",
+    "time",
+    "actor",
+    "principal",
+    "control_mode",
+    "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {
+      "const": "AGENT_VERSION_CHANGED"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "USER_DIRECT",
+        "AI_PROPOSE_USER_CONFIRM",
+        "AI_AUTONOMOUS"
+      ]
+    },
+    "tuple_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authored_by",
+        "represented_principal",
+        "owner",
+        "receipted_by",
+        "actor_regime",
+        "receipt_link",
+        "visibility_class",
+        "agent_id",
+        "new_version"
+      ],
+      "properties": {
+        "authored_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "represented_principal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_by": {
+          "type": "string"
+        },
+        "challenged_by": {
+          "type": "string"
+        },
+        "executed_by": {
+          "type": "string"
+        },
+        "receipted_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_version": {
+          "type": "string"
+        },
+        "delegation_id": {
+          "type": "string"
+        },
+        "actor_regime": {
+          "type": "string",
+          "enum": [
+            "user_only",
+            "user_plus_agent",
+            "user_plus_agent_team",
+            "organization_plus_agents",
+            "bounded_agent_only",
+            "agent_society_sandbox"
+          ]
+        },
+        "epistemic_permission": {
+          "type": "string",
+          "enum": [
+            "observe",
+            "infer",
+            "claim",
+            "challenge"
+          ]
+        },
+        "durable_write_permission": {
+          "type": "string",
+          "enum": [
+            "write_fragment",
+            "revise_fragment",
+            "retire_fragment",
+            "none"
+          ]
+        },
+        "action_permission": {
+          "type": "string",
+          "enum": [
+            "propose_action",
+            "authorize_action",
+            "execute_action",
+            "none"
+          ]
+        },
+        "approval_requirement": {
+          "type": "string",
+          "enum": [
+            "required",
+            "not_required",
+            "waived"
+          ]
+        },
+        "authority_source": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "revocation_state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "revoked",
+            "expired"
+          ]
+        },
+        "model_provider": {
+          "type": "string"
+        },
+        "source_lineage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "retrieval_lineage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tool_lineage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "environment_lineage": {
+          "type": "string"
+        },
+        "evaluator_lineage": {
+          "type": "string"
+        },
+        "independence_class": {
+          "type": "string",
+          "enum": [
+            "independent",
+            "correlated",
+            "single_lineage",
+            "unknown"
+          ]
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "receipt_link": {
+          "type": "string",
+          "minLength": 1
+        },
+        "visibility_class": {
+          "type": "string",
+          "enum": [
+            "private",
+            "shared",
+            "public"
+          ]
+        },
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous_version": {
+          "type": "string"
+        },
+        "new_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change_reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "tuple_type": "REGISTRY_VERSION_PINNED",
+  "id": "71254a96-8a5",
+  "time": "2026-04-17T23:42:13Z",
+  "run_id": "comparison-001",
+  "tuple_data": {
+    "issued_by": "nodezero",
+    "transformation_registry_version": "tr-2026-03-27-a",
+    "mental_model_registry_version": "mm-2026-03-27-a",
+    "evaluation_rubric_version": "rubric-2026-03-27-a"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "tuple_type": "EVIDENCE",
+  "id": "v1-test-002",
+  "time": "2026-01-01T00:00:01Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "test-agent",
+  "tool": "test-tool",
+  "intent_id": "test-001",
+  "task_id": "task-001",
+  "tuple_data": {
+    "evidence_type": "completion",
+    "evidence_id": "ev-001",
+    "description": "V1 evidence tuple",
+    "artifacts": ["result.json"]
+  }
+}

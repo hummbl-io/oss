@@ -1,0 +1,13 @@
+{
+  "tuple_type": "BIO_ADAPTATION_EXECUTED",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "action_id": "bio-action-001",
+    "executed_action": "reduced_interface_density_and_prompted_break",
+    "execution_actor": "nodezero",
+    "execution_time": "2026-03-27T16:25:00Z",
+    "expected_effect": "lower_workload_and_improve_short_horizon_readiness"
+  }
+}

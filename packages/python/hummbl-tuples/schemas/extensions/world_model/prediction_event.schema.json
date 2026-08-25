@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/extensions/world_model/prediction_event.schema.json",
+  "title": "World-Model PREDICTION_EVENT Tuple",
+  "description": "Records a prediction with horizon, conditions, uncertainty, and evaluation method.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tuple_type", "id", "time", "actor", "principal",
+    "control_mode", "tuple_data"
+  ],
+  "properties": {
+    "tuple_type": {"const": "PREDICTION_EVENT"},
+    "id": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "principal": {"type": "string", "minLength": 1},
+    "control_mode": {
+      "type": "string",
+      "enum": ["USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"]
+    },
+    "tuple_data": {
+      "type": "object",
+      "required": [
+        "target_model", "predicted_outcome", "horizon",
+        "conditions", "uncertainty_posture", "evaluation_method",
+        "related_model_version", "receipt_link", "visibility_class"
+      ],
+      "properties": {
+        "target_model": {"type": "string"},
+        "predicted_outcome": {"type": "string"},
+        "horizon": {"type": "string"},
+        "conditions": {"type": "array", "items": {"type": "string"}},
+        "uncertainty_posture": {
+          "type": "string",
+          "enum": ["low", "moderate", "high", "unknown"]
+        },
+        "evaluation_method": {"type": "string"},
+        "related_model_version": {"type": "string"},
+        "receipt_link": {"type": "string"},
+        "visibility_class": {
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "tuple_type": "CONTRACT",
+  "id": "b9830ed7-b38",
+  "time": "2026-03-16T20:33:44.724840Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "claude-code",
+  "tool": "governance.tuple",
+  "intent_id": "briefing-20260316-203344",
+  "task_id": "f1c4e4ba-4daf-4d90-af27-3f474902aad6",
+  "tuple_data": {
+    "contract_id": "morning-briefing",
+    "delegatee": "briefing_service",
+    "objective": "Generate the morning briefing and persist the result for founder review.",
+    "allowed_tools": [
+      "briefing:generate",
+      "calendar:read",
+      "github:read",
+      "linear:read"
+    ],
+    "outputs": [
+      "briefing content",
+      "written briefing markdown",
+      "governance evidence"
+    ],
+    "evidence_requirements": [
+      "EVIDENCE:briefing_completed",
+      "ATTEST:verified"
+    ],
+    "risk_tier": "LOW",
+    "max_subdelegation_depth": 1
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/pretraining_trace.schema.json",
+  "title": "HUMMBL Pretraining Trace Artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "time",
+    "id",
+    "artifact_type",
+    "lifecycle_stage",
+    "trace_source",
+    "trace_visibility",
+    "governance_status",
+    "payload"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "reasoning_trace"
+    },
+    "lifecycle_stage": {
+      "const": "pretraining"
+    },
+    "trace_source": {
+      "type": "string",
+      "enum": [
+        "human",
+        "teacher_model",
+        "execution_derived",
+        "synthetic",
+        "latent",
+        "distilled"
+      ]
+    },
+    "trace_visibility": {
+      "type": "string",
+      "enum": [
+        "explicit",
+        "compressed",
+        "latent",
+        "reconstructed"
+      ]
+    },
+    "governance_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "trusted",
+        "provisional",
+        "sanitized",
+        "publishable",
+        "restricted"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "objective",
+        "corpus_role"
+      ],
+      "properties": {
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "corpus_role": {
+          "type": "string"
+        },
+        "generator": {
+          "type": "string"
+        },
+        "filtering_notes": {
+          "type": "string"
+        },
+        "provenance_uri": {
+          "type": "string"
+        },
+        "safety_notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

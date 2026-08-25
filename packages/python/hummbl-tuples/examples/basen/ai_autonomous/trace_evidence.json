@@ -1,0 +1,21 @@
+{
+  "tuple_type": "TRACE_EVIDENCE",
+  "id": "be28a081-b9a",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-ai-autonomous-001",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "path_id": "path-ai-autonomous-001",
+    "claim": "Autonomous path produced a broad but coherent framing of HUMMBL across the ML lifecycle.",
+    "evidence_status": "SUPPORTED",
+    "metric_bundle": {
+      "task_success": 0.88,
+      "human_rating": 4.1,
+      "token_cost": 18200,
+      "runtime_s": 41.2,
+      "override_count": 0
+    },
+    "notes": "Strong on breadth, weaker on operator trust due to no human checkpoint."
+  }
+}

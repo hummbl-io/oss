@@ -1,0 +1,16 @@
+{
+  "tuple_type": "MODEL_SELECTED",
+  "id": "ba42f634-705",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-influenced-001",
+  "control_mode": "HITL_INFLUENCED",
+  "tuple_data": {
+    "transformation_id": "comparison",
+    "mental_model_id": "tradeoff-analysis",
+    "selected_by": "model:gpt",
+    "selection_rationale": "Chosen within human-imposed bounds favoring explicit tradeoff evaluation.",
+    "candidate_count": 4,
+    "confidence": 0.79
+  }
+}

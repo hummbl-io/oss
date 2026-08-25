@@ -1,0 +1,21 @@
+{
+  "tuple_type": "DCT",
+  "id": "28ed91fc-a17",
+  "time": "2026-03-16T20:33:44.727780Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "claude-code",
+  "tool": "governance.tuple",
+  "intent_id": "briefing-20260316-203344",
+  "task_id": "6e38a622-dd2e-498d-88c4-fbf3adc57907",
+  "tuple_data": {
+    "event": "child_created",
+    "issuer": "scheduler",
+    "subject": "agent_health",
+    "ops_allowed": [
+      "briefing:generate"
+    ],
+    "token_id": "dct_demo_child_token_001"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "tuple_type": "REVOCATION",
+  "id": "revoke-token-abc",
+  "time": "2026-04-20T23:12:00Z",
+  "state": "blocked",
+  "drift": 0,
+  "tier": 3,
+  "agent": "kill-switch",
+  "tool": "emergency-halt",
+  "intent_id": "parameter-golf-20260420",
+  "task_id": "cand-xsa2-v17",
+  "tuple_data": {
+    "token_id": "token-abc",
+    "subject": "agent-789",
+    "revoked_by": "kill-switch",
+    "reason": "manual emergency halt",
+    "cascade": true,
+    "terminal_state": "REVOKED"
+  }
+}

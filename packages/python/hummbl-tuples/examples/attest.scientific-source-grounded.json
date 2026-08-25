@@ -1,0 +1,24 @@
+{
+  "tuple_type": "ATTEST",
+  "id": "sg-attest-001",
+  "time": "2026-06-25T23:50:00Z",
+  "state": "ok",
+  "drift": 0.0,
+  "tier": 1,
+  "agent": "review-agent",
+  "tool": "scientific-grounding.review",
+  "intent_id": "scientific-grounding-bki",
+  "task_id": "claim-c6-grounding",
+  "tuple_data": {
+    "event": "scientific_source_attested",
+    "evidence_hash": "sha256:7d8a6ee4a0e6b2876f7f2b45aa056f2e6a4f5e5db8026c7c4f0e9d2a8d6aef01",
+    "verifier_id": "review-agent",
+    "passed": true,
+    "claim_ref": "hummbl-theory:C6",
+    "attestation_scope": "source_linkage_only",
+    "findings": [
+      "Source reference exists and matches intended claim surface.",
+      "Attestation covers linkage quality, not empirical truth of the claim."
+    ]
+  }
+}

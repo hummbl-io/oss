@@ -1,0 +1,31 @@
+{
+  "tuple_type": "DELEGATION_GRANTED",
+  "id": "granted",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-009",
+  "principal": "user-009",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-009",
+    "represented_principal": "user-009",
+    "owner": "user-009",
+    "receipted_by": "receipt-015",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-granted",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "delegation_id": "deleg-001",
+    "delegated_to": "agent-i1",
+    "delegated_by": "user-009",
+    "delegation_scope": "read-only-metrics",
+    "delegation_expiry": "2026-09-01"
+  }
+}

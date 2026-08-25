@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/tuples/posttraining_trace.schema.json",
+  "title": "HUMMBL Post-Training Trace Artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "time",
+    "id",
+    "artifact_type",
+    "lifecycle_stage",
+    "trace_source",
+    "trace_visibility",
+    "governance_status",
+    "payload"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "reasoning_trace"
+    },
+    "lifecycle_stage": {
+      "type": "string",
+      "enum": [
+        "sft",
+        "preference_optimization",
+        "rl",
+        "eval",
+        "test_time"
+      ]
+    },
+    "trace_source": {
+      "type": "string",
+      "enum": [
+        "human",
+        "teacher_model",
+        "execution_derived",
+        "synthetic",
+        "latent",
+        "distilled",
+        "sampled"
+      ]
+    },
+    "trace_visibility": {
+      "type": "string",
+      "enum": [
+        "explicit",
+        "compressed",
+        "latent",
+        "reconstructed"
+      ]
+    },
+    "governance_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "trusted",
+        "provisional",
+        "sanitized",
+        "publishable",
+        "restricted"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "objective",
+        "trace_role"
+      ],
+      "properties": {
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_role": {
+          "type": "string",
+          "enum": [
+            "supervision",
+            "reward_signal",
+            "debug",
+            "evidence",
+            "safety",
+            "publication"
+          ]
+        },
+        "judge": {
+          "type": "string"
+        },
+        "selected": {
+          "type": "boolean"
+        },
+        "score": {
+          "type": "number"
+        },
+        "selection_rationale": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

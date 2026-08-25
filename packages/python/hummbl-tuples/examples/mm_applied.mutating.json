@@ -1,0 +1,37 @@
+{
+  "tuple_type": "MM_APPLIED",
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "time": "2026-04-19T14:30:00Z",
+  "tuple_data": {
+    "operator": {
+      "code": "RE.04",
+      "family": "RE",
+      "arity": 1,
+      "mutates": true
+    },
+    "invoker": {
+      "agent_id": "claude-code",
+      "task_id": "task-arch-sprint-g8",
+      "contract_id": "contract-hummbl-governance",
+      "dct_id": "dct-uuid-here",
+      "invocation_depth": 1
+    },
+    "wm_state_before": {
+      "version": "wm-v42",
+      "snapshot_ref": "sha256:abc123"
+    },
+    "wm_state_after": {
+      "version": "wm-v43",
+      "snapshot_ref": "sha256:def456",
+      "delta_summary": "Applied recursive decomposition to governance tuple spec; extracted 3 sub-schemas from monolithic contract schema"
+    },
+    "justification": {
+      "reason": "Contract schema had grown to 47 fields; RE.04 (recursive decomposition) was selected to identify natural compositional layers",
+      "output_summary": "3-layer envelope model identified: universal (id/time), governance (state/drift/tier), domain (per-family). Validated against 26 existing examples.",
+      "alternatives_considered": ["DE.07", "CO.03"],
+      "confidence": 0.85
+    },
+    "trust_at_invocation": 0.9,
+    "depth_bound_used": 4
+  }
+}

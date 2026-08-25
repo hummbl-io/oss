@@ -1,0 +1,31 @@
+{
+  "tuple_type": "ACTION_AUTHORIZED",
+  "id": "authorized",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-005",
+  "principal": "user-005",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-005",
+    "represented_principal": "user-005",
+    "owner": "user-005",
+    "receipted_by": "receipt-008",
+    "actor_regime": "user_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-authorized",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "authorize_action",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "authorized_action": "Proceed with redesign rollout",
+    "authorized_by": "user-005",
+    "authorization_reason": "Bounded action accepted despite dissent",
+    "authorization_scope": "rollout-phase-1",
+    "authorization_expiry": "2026-09-01"
+  }
+}

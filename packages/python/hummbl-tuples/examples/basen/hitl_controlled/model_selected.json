@@ -1,0 +1,16 @@
+{
+  "tuple_type": "MODEL_SELECTED",
+  "id": "d296a6db-3e1",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-controlled-001",
+  "control_mode": "HITL_CONTROLLED",
+  "tuple_data": {
+    "transformation_id": "evaluation",
+    "mental_model_id": "inversion",
+    "selected_by": "human:operator",
+    "selection_rationale": "Human forced inversion to surface failure modes before optimization.",
+    "candidate_count": 1,
+    "confidence": 1.0
+  }
+}

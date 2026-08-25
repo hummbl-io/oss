@@ -1,0 +1,29 @@
+{
+  "tuple_type": "ACTION_EXECUTED",
+  "id": "03-authority-laundering",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-bad-3",
+  "principal": "user-bad-3",
+  "control_mode": "AI_AUTONOMOUS",
+  "tuple_data": {
+    "authored_by": "agent-bad-3",
+    "represented_principal": "user-bad-3",
+    "owner": "user-bad-3",
+    "receipted_by": "receipt-bad-003",
+    "actor_regime": "bounded_agent_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-03-authority-laundering",
+    "visibility_class": "private",
+    "epistemic_permission": "observe",
+    "durable_write_permission": "none",
+    "action_permission": "execute_action",
+    "approval_requirement": "not_required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "executed_action": "Deploy to production",
+    "authorization_ref": "auth-bad-001",
+    "execution_result": "deployed"
+  }
+}

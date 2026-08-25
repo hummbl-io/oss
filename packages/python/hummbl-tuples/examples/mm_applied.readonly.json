@@ -1,0 +1,29 @@
+{
+  "tuple_type": "MM_APPLIED",
+  "id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+  "time": "2026-04-19T15:00:00Z",
+  "tuple_data": {
+    "operator": {
+      "code": "P.01",
+      "family": "P",
+      "arity": 1,
+      "mutates": false
+    },
+    "invoker": {
+      "agent_id": "codex",
+      "task_id": "task-perspective-shift-analysis",
+      "invocation_depth": 0
+    },
+    "wm_state_before": {
+      "version": "wm-v50",
+      "snapshot_ref": "sha256:readonly-snapshot"
+    },
+    "justification": {
+      "reason": "Read-only perspective shift to surface alternative framings of the contract; no WM mutation required",
+      "output_summary": "Identified 2 alternative framings: contract-as-grammar vs contract-as-receipt. Recommended grammar framing for downstream Apply path.",
+      "confidence": 0.7
+    },
+    "trust_at_invocation": 0.85,
+    "depth_bound_used": 3
+  }
+}

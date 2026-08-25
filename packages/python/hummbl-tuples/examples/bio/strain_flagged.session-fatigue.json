@@ -1,0 +1,15 @@
+{
+  "tuple_type": "STRAIN_FLAGGED",
+  "subject_id": "operator-001",
+  "run_id": "bio-run-001",
+  "control_mode": "HOTL",
+  "tuple_data": {
+    "flag_type": "visual_and_cognitive_strain",
+    "severity": "moderate",
+    "threshold_basis": [
+      "eye_strain_report_above_threshold",
+      "continuous_focus_duration_exceeded"
+    ],
+    "recommended_response": "reduce_visual_density_and_take_break"
+  }
+}

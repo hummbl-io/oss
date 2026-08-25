@@ -1,0 +1,20 @@
+{
+  "tuple_type": "REASONING_PATH",
+  "id": "dd12318a-6e8",
+  "time": "2026-04-17T23:42:12Z",
+  "problem_id": "research-trace-001",
+  "run_id": "run-hitl-controlled-001",
+  "control_mode": "HITL_CONTROLLED",
+  "tuple_data": {
+    "path_id": "path-hitl-controlled-001",
+    "constructed_by": "human:operator",
+    "path_steps": [
+      {
+        "step_index": 1,
+        "transformation_id": "evaluation",
+        "mental_model_id": "inversion"
+      }
+    ],
+    "path_depth": 1
+  }
+}
