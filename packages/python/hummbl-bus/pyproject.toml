@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-bus"
+version = "0.1.0"
+description = "Secure append-only TSV coordination bus for multi-agent systems"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+keywords = ["bus", "coordination", "multi-agent", "append-only", "tsv", "hummbl", "governance"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "hummbl-governance>=1.2.2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "coverage>=7.0",
+    "cryptography>=42.0",
+    "mypy>=1.8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["hummbl_bus*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[project.scripts]
+hummbl-bus-writer = "hummbl_bus.bus_writer:main"
+hummbl-bus-verifier = "hummbl_bus.bus_verifier:main"
+hummbl-bus-bridge = "hummbl_bus.bridge_server:run_server"
+hummbl-bus-cli = "hummbl_bus.bus_writer_cli:main"
+
+[tool.ruff.lint]
+ignore = [
+    "BLE001",  # Blind exception catch — legitimate in CLI error handlers
+    "S110",    # try-except-pass — intentional best-effort error handling
+    "S112",    # try-except-continue — skip unparseable lines
+    "PLW1510", # subprocess.run without check — explicit error handling follows
+    "FURB162", # timezone .replace("Z", "+00:00") — compatible with Python 3.11 fromisoformat
+    "RUF012",  # Mutable class attr — COLUMNS is a constant, not mutated
+]
+
+[tool.mypy]
+# Extraction in progress from hummbl-governance — pre-existing type issues not yet resolved.
+# TODO: tighten once drift reconciliation is complete (see docs/DRIFT_RECONCILIATION).
+disable_error_code = [
+    "attr-defined",    # JSONEncodeError, binascii — pre-existing API issues
+    "var-annotated",   # Missing type annotations on local variables
+    "arg-type",        # Type mismatches in function calls (str | bool | None)
+    "assignment",      # Type mismatches in assignments (set[str] | None)
+    "call-arg",        # API drift — verify_bus_message signature changed
+    "method-assign",   # Test mocking pattern — assigns to methods
+]
