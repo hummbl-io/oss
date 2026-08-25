@@ -129,6 +129,53 @@ filter and path extraction are updated in the same PR.
 Never `git mv` from a private repo into this public monorepo without
 scanning the full history for PII first.
 
+### Package graduation lifecycle
+
+Packages follow a three-stage graduation from internal prototype to
+public monorepo import:
+
+```
+Stage 1: Internal prototype          Stage 2: Private standalone       Stage 3: Public monorepo
+_internal/research/<name>/     -->   hummbl-io/<name> (private)  -->   oss/packages/<lang>/<name>/
+  - developed in sandbox             - pyproject.toml + packaging       - PII-scanned clean snapshot
+  - gitignored in host repo          - README, LICENSE, NOTICE          - no history carried over
+  - tests verify correctness         - tests pass from package root     - published to PyPI/npm/etc
+  - no packaging yet                 - pushed to private GitHub repo    - CI runs on oss monorepo
+```
+
+**Stage 1 -> Stage 2** (prototype to private package):
+1. Create `hummbl-io/<name>` as a **private** GitHub repo
+2. Copy source files into a proper package layout (`<name>/__init__.py`,
+   `pyproject.toml`, `README.md`, `LICENSE`, `NOTICE`, `.gitattributes`,
+   `.gitignore`)
+3. Fix test imports for the new package structure (e.g., `GO_DIR` paths
+   in cross-language tests)
+4. Run `pip install -e ".[test]"` and verify all tests pass from the
+   package root
+5. Commit and push to `main` on the private repo
+
+**Stage 2 -> Stage 3** (private package to public monorepo):
+1. Run `python scripts/scan-untracked-pii.py` on the private repo
+2. Create a **clean snapshot** (no git history) -- never `git mv` from
+   a private repo without PII-scanning the full history first
+3. Copy the package into `oss/packages/<lang>/<name>/`
+4. Update `docs/PACKAGES.md` inventory and the root `README.md` package
+   table
+5. Update CI workflow path filters and tag conventions for the new
+   package
+6. Open a PR to oss with the package addition
+
+**When to graduate:**
+- Stage 1 -> 2: when the prototype has stable tests and the API is
+  settled enough to package
+- Stage 2 -> 3: when the package is ready for public consumption (PII
+  scrubbed, docs written, license chosen)
+
+Origin: 2026-08-25 -- `wags` was the first package to follow this path
+explicitly. Developed in `hummbl-governance/_internal/research/wags/`,
+graduated to private `hummbl-io/wags` repo, pending import to
+`oss/packages/python/wags/` when ready for public release.
+
 ---
 
 ## 2. Tag conventions
