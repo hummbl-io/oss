@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/reviewer/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_id",
+    "identity",
+    "scopes",
+    "data_tiers",
+    "expires_at",
+    "conflicted"
+  ],
+  "properties": {
+    "schema_version": { "const": "reviewer.v1" },
+    "registry_id": { "type": "string" },
+    "identity": { "type": "string" },
+    "scopes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "data_tiers": { "type": "array", "items": { "type": "string" } },
+    "expires_at": { "type": "string" },
+    "conflicted": { "const": false }
+  }
+}

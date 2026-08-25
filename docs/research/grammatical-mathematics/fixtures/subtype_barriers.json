@@ -1,0 +1,5 @@
+{
+  "Inverse.KillCriteria->Recursive.Bootstrap": "barrier",
+  "Inverse.KillCriteria->Recursive.Improvement": "barrier",
+  "Decomposer.Pareto->Decomposer.Dimensional": "barrier"
+}

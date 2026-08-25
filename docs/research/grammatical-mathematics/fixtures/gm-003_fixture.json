@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-003",
+  "name": "Context-decomposition commutator",
+  "description": "P10 Context Windowing -> DE11 Scope Delimitation vs DE11 -> P10. Noncommutative. The forward direction is a map (collection lift of context over decomposed parts).",
+  "models": ["P10", "DE11"],
+  "relation": "map",
+  "expected_result": "noncommutative",
+  "expected_failure": false,
+  "semantic_finding": "Context-then-decompose and decompose-then-context produce different results. The commutator [P10, DE11] is non-zero."
+}

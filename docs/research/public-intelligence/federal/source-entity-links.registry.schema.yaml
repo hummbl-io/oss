@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "schema_status": "candidate",
+  "title": "Public-intelligence source-to-federal-entity link registry schema",
+  "parent_issue": "https://github.com/hummbl-io/hummbl-production/issues/764",
+  "format_note": "YAML-compatible flow-style JSON subset. Source access and risk metadata remains canonical in sources.registry.yaml.",
+  "registry_required_fields":
+    [
+      "schema_version",
+      "registry_status",
+      "snapshot_date",
+      "verified_through",
+      "last_verified_at",
+      "source_registry",
+      "entity_registry",
+      "evidence_sources",
+      "receipts",
+      "links",
+    ],
+  "link_required_fields":
+    [
+      "id",
+      "source_id",
+      "entity_id",
+      "role",
+      "authority_scope",
+      "evidence_refs",
+      "record_status",
+      "last_verified_at",
+    ],
+  "role_values": ["data_api"],
+  "record_status_values": ["candidate"],
+}

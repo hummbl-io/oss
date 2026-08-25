@@ -1,0 +1,171 @@
+[
+  { "name": "valid-effect", "kind": "valid", "file": "effect.v1.json" },
+  {
+    "name": "unknown-field",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "patch": { "unknown": true },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "wildcard-resource",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "patch": { "resource": "repo/*" },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "stale-target",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "patch": { "expected_state_hash": "bad" },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "over-cardinality",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "patch": { "target_count": 101 },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "nonrevocable",
+    "kind": "invalid",
+    "file": "lease.v1.json",
+    "patch": { "revocable": false },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "attestation-drift",
+    "kind": "invalid",
+    "file": "attestation.v1.json",
+    "patch": { "image_digest": "drift" },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "secret-unrestricted-output",
+    "kind": "invalid",
+    "file": "mission.v1.json",
+    "patch": { "data_tier": "secret", "review_class": "prohibited" },
+    "expected_error": "data.secret_unrestricted"
+  },
+  {
+    "name": "conflicted-reviewer",
+    "kind": "invalid",
+    "file": "reviewer.v1.json",
+    "patch": { "conflicted": true },
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "missing-required",
+    "kind": "invalid",
+    "file": "mission.v1.json",
+    "remove": "objective",
+    "expected_error": "schema.invalid"
+  },
+  {
+    "name": "expired-lease",
+    "kind": "invalid",
+    "file": "lease.v1.json",
+    "patch": { "expires_at": "2026-01-01T06:00:00Z" },
+    "expected_error": "lease.expired"
+  },
+  {
+    "name": "replayed-lease",
+    "kind": "invalid",
+    "file": "lease.v1.json",
+    "state": { "nonce_seen": true },
+    "expected_error": "replay.nonce_seen"
+  },
+  {
+    "name": "invalid-delegation",
+    "kind": "invalid",
+    "file": "lease.v1.json",
+    "state": { "delegation_graph_valid": false },
+    "expected_error": "delegation.invalid_graph"
+  },
+  {
+    "name": "over-budget-effect",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "state": { "aggregate_actions": 11, "aggregate_action_budget": 10 },
+    "expected_error": "budget.aggregate_exceeded"
+  },
+  {
+    "name": "expired-reviewer",
+    "kind": "invalid",
+    "file": "reviewer.v1.json",
+    "patch": { "expires_at": "2025-12-31T00:00:00Z" },
+    "expected_error": "reviewer.v1.expired"
+  },
+  {
+    "name": "evidence-sequence-failure",
+    "kind": "invalid",
+    "file": "evidence.v1.json",
+    "state": { "evidence_sequence_valid": false },
+    "expected_error": "evidence.sequence_invalid"
+  },
+  {
+    "name": "active-revocation",
+    "kind": "invalid",
+    "file": "revocation.v1.json",
+    "state": { "revoked": true },
+    "expected_error": "authority.revoked"
+  },
+  {
+    "name": "partition-deny",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "state": { "partitioned": true },
+    "expected_error": "partition.fail_closed"
+  },
+  {
+    "name": "clock-failure",
+    "kind": "invalid",
+    "file": "lease.v1.json",
+    "state": { "clock_valid": false },
+    "expected_error": "time.untrusted_clock"
+  },
+  {
+    "name": "colluding-capabilities",
+    "kind": "invalid",
+    "file": "lease.v1.json",
+    "state": { "aggregate_actions": 11, "aggregate_action_budget": 10 },
+    "expected_error": "budget.aggregate_exceeded"
+  },
+  {
+    "name": "contradictory-classification",
+    "kind": "invalid",
+    "file": "review.v1.json",
+    "state": { "classifier_consistent": false },
+    "expected_error": "review.classifier_inconsistent"
+  },
+  {
+    "name": "malformed-state",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "state": "not-an-object",
+    "expected_error": "state.invalid"
+  },
+  {
+    "name": "non-finite-state",
+    "kind": "invalid",
+    "file": "effect.v1.json",
+    "state": { "aggregate_actions": "non-finite-number" },
+    "expected_error": "state.invalid"
+  },
+  {
+    "name": "expired-attestation",
+    "kind": "invalid",
+    "file": "attestation.v1.json",
+    "patch": { "expires_at": "2025-12-31T00:00:00Z" },
+    "expected_error": "attestation.v1.expired"
+  },
+  {
+    "name": "effective-revocation",
+    "kind": "invalid",
+    "file": "revocation.v1.json",
+    "patch": { "effective_at": "2025-12-31T00:00:00Z" },
+    "expected_error": "revocation.v1.expired"
+  }
+]

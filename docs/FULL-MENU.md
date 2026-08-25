@@ -7,7 +7,7 @@ complete spread of everything the world deserves to install.
 
 **Status:** Active
 **Date:** 2026-08-22
-**Authors:** Reuben Bowlby, HUMMBL fleet
+**Authors:** Operator, HUMMBL fleet
 
 ---
 

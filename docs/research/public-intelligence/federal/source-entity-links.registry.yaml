@@ -1,0 +1,34 @@
+{
+  "schema_version": "0.1.0",
+  "registry_status": "candidate",
+  "canonical_path": "docs/research/public-intelligence/federal/source-entity-links.registry.yaml",
+  "parent_issue": "https://github.com/hummbl-io/hummbl-production/issues/764",
+  "snapshot_date": "2026-07-18",
+  "verified_through": "2026-07-18",
+  "last_verified_at": "2026-07-18T00:00:00Z",
+  "source_registry": "docs/research/public-intelligence/sources.registry.yaml",
+  "entity_registry": "docs/research/public-intelligence/federal/entities.registry.yaml",
+  "evidence_sources":
+    [
+      {
+        "id": "sec_edgar_receipt",
+        "receipt": "docs/research/public-intelligence/receipts/sec-edgar.md",
+        "authority_scope": "SEC filings and SEC-published filing metadata only.",
+      },
+    ],
+  "receipts":
+    ["docs/research/public-intelligence/federal/receipts/phase-0-1.md"],
+  "links":
+    [
+      {
+        "id": "sec_edgar_to_securities_exchange_commission",
+        "source_id": "sec_edgar",
+        "entity_id": "securities_exchange_commission",
+        "role": "data_api",
+        "authority_scope": "SEC filings and SEC-published filing metadata only.",
+        "evidence_refs": ["sec_edgar_receipt"],
+        "record_status": "candidate",
+        "last_verified_at": "2026-07-18T00:00:00Z",
+      },
+    ],
+}

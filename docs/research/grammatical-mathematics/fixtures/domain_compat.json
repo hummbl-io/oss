@@ -1,0 +1,50 @@
+{
+  "Frame": {
+    "Frame": "compose",
+    "Inverse": "compose",
+    "Composite": "map",
+    "Decomposer": "map",
+    "Recursive": "compose",
+    "System": "compose"
+  },
+  "Inverse": {
+    "Frame": "compose",
+    "Inverse": "compose",
+    "Composite": "barrier",
+    "Decomposer": "barrier",
+    "Recursive": "barrier",
+    "System": "compose"
+  },
+  "Composite": {
+    "Frame": "compose",
+    "Inverse": "barrier",
+    "Composite": "parallel",
+    "Decomposer": "compose",
+    "Recursive": "barrier",
+    "System": "compose"
+  },
+  "Decomposer": {
+    "Frame": "compose",
+    "Inverse": "barrier",
+    "Composite": "compose",
+    "Decomposer": "compose",
+    "Recursive": "barrier",
+    "System": "compose"
+  },
+  "Recursive": {
+    "Frame": "compose",
+    "Inverse": "compose",
+    "Composite": "barrier",
+    "Decomposer": "barrier",
+    "Recursive": "fixedpoint",
+    "System": "compose"
+  },
+  "System": {
+    "Frame": "compose",
+    "Inverse": "barrier",
+    "Composite": "barrier",
+    "Decomposer": "barrier",
+    "Recursive": "barrier",
+    "System": "compose"
+  }
+}

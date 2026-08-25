@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/revocation/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revocation_id",
+    "subject",
+    "reason",
+    "issued_at",
+    "effective_at",
+    "manual_reset_required"
+  ],
+  "properties": {
+    "schema_version": { "const": "revocation.v1" },
+    "revocation_id": { "type": "string" },
+    "subject": { "type": "string" },
+    "reason": { "type": "string", "minLength": 1 },
+    "issued_at": { "type": "string" },
+    "effective_at": { "type": "string" },
+    "manual_reset_required": { "type": "boolean" }
+  }
+}

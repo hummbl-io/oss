@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-010",
+  "name": "Recursive meta-model selection",
+  "description": "RE6 Recursive Framing -> SY19 Meta-Model Selection. Local fixed point.",
+  "models": ["RE6", "SY19"],
+  "relation": "compose",
+  "expected_result": "local_fixed_point",
+  "expected_failure": false,
+  "semantic_finding": "Recursively framing the selection of a meta-model reaches a local fixed point: the framing stabilizes on a meta-model that can frame its own selection."
+}

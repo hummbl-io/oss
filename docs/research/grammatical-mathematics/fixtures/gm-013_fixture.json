@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-013",
+  "name": "Output vs receipt equivalence",
+  "description": "Verify that the experiment output and the promotion receipt are distinct. The receipt is not the output.",
+  "models": ["P1"],
+  "relation": "compose",
+  "expected_result": "distinction_preserved",
+  "expected_failure": false,
+  "semantic_finding": "The experiment output (semantic finding) and the promotion receipt (six-field metadata) are distinct artifacts. Equivalence is not expected; distinction is preserved."
+}

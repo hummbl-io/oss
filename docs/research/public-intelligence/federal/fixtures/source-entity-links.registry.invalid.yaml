@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1.0",
+  "registry_status": "candidate",
+  "snapshot_date": "2026-07-18",
+  "verified_through": "2026-07-18",
+  "last_verified_at": "2026-07-18T00:00:00Z",
+  "source_registry": "docs/research/public-intelligence/sources.registry.yaml",
+  "entity_registry": "docs/research/public-intelligence/federal/fixtures/entities.registry.invalid.yaml",
+  "evidence_sources":
+    [
+      {
+        "id": "sec_edgar_receipt",
+        "receipt": "docs/research/public-intelligence/receipts/sec-edgar.md",
+        "authority_scope": "SEC filings and SEC-published filing metadata only.",
+      },
+    ],
+  "receipts":
+    ["docs/research/public-intelligence/federal/receipts/phase-0-1.md"],
+  "links":
+    [
+      {
+        "id": "missing_source_link",
+        "source_id": "missing_source",
+        "entity_id": "securities_exchange_commission",
+        "role": "data_api",
+        "authority_scope": "SEC filings and SEC-published filing metadata only.",
+        "evidence_refs": ["sec_edgar_receipt"],
+        "record_status": "candidate",
+        "last_verified_at": "2026-07-18T00:00:00Z",
+      },
+      {
+        "id": "overbroad_sec_link",
+        "source_id": "sec_edgar",
+        "entity_id": "securities_exchange_commission",
+        "role": "data_api",
+        "authority_scope": "All investment and market conclusions.",
+        "evidence_refs": ["sec_edgar_receipt"],
+        "record_status": "candidate",
+        "last_verified_at": "2026-07-18T00:00:00Z",
+      },
+    ],
+}

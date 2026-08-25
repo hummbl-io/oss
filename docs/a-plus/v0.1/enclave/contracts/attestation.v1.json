@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/attestation/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "workload_id",
+    "image_digest",
+    "runtime_digest",
+    "tool_digests",
+    "policy_digest",
+    "issued_at",
+    "expires_at",
+    "verifier"
+  ],
+  "properties": {
+    "schema_version": { "const": "attestation.v1" },
+    "workload_id": { "type": "string" },
+    "image_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "runtime_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "tool_digests": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+    },
+    "policy_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "issued_at": { "type": "string" },
+    "expires_at": { "type": "string" },
+    "verifier": { "type": "string" }
+  }
+}

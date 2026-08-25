@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hummbl://enclave/review/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "reviewer_registry_id",
+    "reviewer_class",
+    "dimensions",
+    "decision",
+    "expires_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "review.v1" },
+    "artifact_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewer_registry_id": { "type": "string" },
+    "reviewer_class": { "enum": ["agent", "human"] },
+    "dimensions": { "type": "object", "minProperties": 1 },
+    "decision": {
+      "enum": ["approve", "approve_with_conditions", "request_changes", "block"]
+    },
+    "expires_at": { "type": "string" }
+  }
+}

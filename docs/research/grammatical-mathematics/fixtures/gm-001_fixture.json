@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-001",
+  "name": "Type barrier",
+  "description": "IN18 Kill-Criteria -> RE8 Bootstrapping is a type barrier. Terminate-then-generate is type-invalid.",
+  "models": ["IN18", "RE8"],
+  "relation": "barrier",
+  "expected_result": "type_invalid",
+  "expected_failure": true,
+  "semantic_finding": "Kill-criteria applied before bootstrapping creates a type barrier: you cannot terminate a process that has not yet been generated."
+}

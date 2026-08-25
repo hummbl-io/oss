@@ -1,0 +1,74 @@
+# Namespace audit for any proposed new term
+# Status: NO_NEW_TERMS_PROPOSED
+# This crosswalk does not propose any new HUMMBL/Base120/BaseN term.
+# Two candidates are flagged for future work but are NOT proposed here.
+
+schema_version: levin-crosswalk-namespace-audit.v1
+crosswalk_issue: hummbl-production#751
+date: 2026-07-21
+auditor: devin (research lane)
+
+proposed_new_terms: []
+
+flagged_candidates_not_proposed:
+  - candidate_id: CAND-001
+    source_row: CW-002
+    description: "Delegation moral-scope field"
+    origin: "Moral-variable dimension of Levin's cognitive light cone"
+    why_not_proposed: |
+      Requires a new field on delegation tokens or context windowing.
+      No operational specification exists. No evidence that agents
+      can or should represent moral variables. Would expand HUMMBL
+      scope into moral reasoning, which requires operator approval.
+    namespace_collision_check:
+      base120: "No collision. P10 Context Windowing does not have a moral-scope field."
+      basen: "No collision. BaseN does not generate moral-scope lattices."
+      governance_primitives: "No collision. Delegation Tokens carry scope/expiry/receipt, not moral variables."
+    promotion_gate_status: "BLOCKED at gate 5 (testable operational value) and gate 7 (separate approval)"
+
+  - candidate_id: CAND-002
+    source_row: CW-008
+    description: "Agent persuadability assessment"
+    origin: "Persuadability as a system property (Levin), applied to kill-switch escalation"
+    why_not_proposed: |
+      Requires a new assessment dimension on agents (can behavior be
+      changed without restart?). No measurement methodology exists.
+      The term 'persuadability' carries biological connotations that
+      would mislead in an engineering context. 'Intervention
+      invasiveness' or 'restoration routability' would be better
+      names if the concept is developed.
+    namespace_collision_check:
+      base120: "No collision. No existing model addresses system persuadability."
+      basen: "No collision."
+      governance_primitives: "No collision. Kill Switch has modes but no persuadability assessment."
+    promotion_gate_status: "BLOCKED at gate 1 (exact primary-source locator — attribution pending) and gate 5 (testable operational value)"
+
+existing_terms_verified_clean:
+  - term: "Multi-Scale Alignment (SY15)"
+    collision_risk: "Low. Qualified as organizational, not biological."
+    action: "No rename needed. Always qualify scale type when discussing alongside Levin."
+
+  - term: "Homeostasis/Dynamic Equilibrium (SY8)"
+    collision_risk: "Low. Standard cybernetics term."
+    action: "No rename needed. Cite Cannon (1932) as common antecedent."
+
+  - term: "Emergence (CO5)"
+    collision_risk: "None. Standard complex-systems term."
+    action: "No action."
+
+  - term: "Context Windowing (P10)"
+    collision_risk: "Low. 'Context window' is a standard ML/LLM term unrelated to Levin."
+    action: "No rename needed."
+
+  - term: "Frugal Activation (internal)"
+    collision_risk: "None. Not publicly documented; no external collision possible."
+    action: "If documented publicly, distinguish from Levin's persuadability."
+
+audit_verdict: "NO_NAMESPACE_CHANGES_REQUIRED"
+audit_notes: |
+  This crosswalk introduces zero new terms into the HUMMBL/Base120/BaseN
+  namespace. Two candidates are flagged for future consideration but are
+  explicitly NOT proposed. No existing term requires renaming. No existing
+  term has a collision that would impair understanding. The crosswalk
+  recommends citation hygiene (cite Levin where Levin's constructs are
+  referenced) but no namespace mutations.

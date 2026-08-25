@@ -1,0 +1,10 @@
+{
+  "experiment_id": "GM-005",
+  "name": "Context idempotence",
+  "description": "P10 Context Windowing -> P10 Context Windowing. Conditional idempotence.",
+  "models": ["P10", "P10"],
+  "relation": "closure",
+  "expected_result": "conditional",
+  "expected_failure": false,
+  "semantic_finding": "Context windowing is idempotent only when the window boundaries are stable. If the context shifts between applications, the result differs."
+}
