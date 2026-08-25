@@ -138,16 +138,18 @@ class TestWorkspaceUtils:
         root, gated = resolve_workspace_for_file(__file__)
         assert gated is True
         assert root is not None
-        # In monorepo, root is hummbl-oss; in standalone, it's hummbl-governance
-        assert "hummbl-governance" in root or "hummbl-oss" in root
+        # In monorepo, root is hummbl-oss (local) or oss (CI checkout);
+        # in standalone, it's hummbl-governance
+        assert "hummbl-governance" in root or "hummbl-oss" in root or root.endswith("oss")
 
     def test_nearest_root(self) -> None:
         """Should find nearest marker file."""
         # This file is in tests/, nearest pyproject.toml is at repo root
         root = nearest_root(__file__, ["pyproject.toml"])
         assert root is not None
-        # In monorepo, root is hummbl-oss; in standalone, it's hummbl-governance
-        assert "hummbl-governance" in root or "hummbl-oss" in root
+        # In monorepo, root is hummbl-oss (local) or oss (CI checkout);
+        # in standalone, it's hummbl-governance
+        assert "hummbl-governance" in root or "hummbl-oss" in root or root.endswith("oss")
 
     def test_nearest_root_excludes(self) -> None:
         """Excludes should gate off server."""
