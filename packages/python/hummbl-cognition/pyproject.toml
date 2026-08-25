@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-cognition"
+version = "0.1.0"
+description = "Cognitive Ledger Protocol (CLP) and Open Brain server for HUMMBL agent reasoning"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+keywords = ["cognition", "ledger", "clp", "open-brain", "reasoning", "hummbl", "ai", "agents"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "hummbl-bus>=0.1.0",
+]
+
+[project.optional-dependencies]
+governance = [
+    "hummbl-governance>=1.2.2",
+]
+test = [
+    "pytest>=7.0",
+    "coverage>=7.0",
+    "mypy>=1.8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["hummbl_cognition*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+hummbl_cognition = ["schemas/*.json", "seed_registries/*.jsonl", "data/*.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[project.scripts]
+hummbl-cognition = "hummbl_cognition.__main__:main"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]

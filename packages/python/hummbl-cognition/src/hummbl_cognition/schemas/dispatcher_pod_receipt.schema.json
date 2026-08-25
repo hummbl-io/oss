@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dispatcher_pod_receipt.schema.json",
+  "title": "Dispatcher Pod Receipt Schema",
+  "description": "Cryptographic receipt chain for dispatch pod claim/release lifecycle. Each receipt links to the previous via parent_receipt_hash, creating a tamper-evident chain per pod.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "pod_id",
+    "operation",
+    "agent",
+    "correlation_id",
+    "timestamp",
+    "content_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "description": "UUID v4 unique identifier for this receipt."
+    },
+    "pod_id": {
+      "type": "string",
+      "pattern": "^pod-[a-zA-Z0-9-]+$",
+      "description": "Pod identifier, prefixed with 'pod-'."
+    },
+    "operation": {
+      "type": "string",
+      "enum": ["claim", "release", "policy_block", "setup_failure", "launch", "writeback"],
+      "description": "The pod lifecycle operation this receipt records."
+    },
+    "agent": {
+      "type": "string",
+      "description": "Canonical agent identity claiming or releasing the pod."
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Binds all receipts in a single dispatch chain."
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "ISO 8601 UTC timestamp."
+    },
+    "parent_receipt_hash": {
+      "type": ["string", "null"],
+      "description": "SHA-256 hash of the previous receipt in this pod's chain. Null only for the first (claim) receipt."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the receipt content (excluding this field)."
+    },
+    "lane_id": {
+      "type": ["string", "null"],
+      "description": "Lane identifier if the pod is bound to a coordination lane."
+    },
+    "tracker_id": {
+      "type": ["string", "null"],
+      "description": "Tracker adapter identifier (e.g., GitHub issue number)."
+    },
+    "issue_id": {
+      "type": ["string", "null"],
+      "description": "Issue or task identifier from the tracker."
+    },
+    "worktree_path": {
+      "type": ["string", "null"],
+      "description": "Path to the git worktree for this pod (launch operations)."
+    },
+    "worktree_head": {
+      "type": ["string", "null"],
+      "description": "SHA of the worktree HEAD commit."
+    },
+    "runtime": {
+      "type": ["string", "null"],
+      "description": "Agent runtime identifier (e.g., 'claude-code', 'codex')."
+    },
+    "process_id": {
+      "type": ["integer", "null"],
+      "description": "OS process ID of the agent subprocess."
+    },
+    "agent_evidence_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to agent evidence (bus message hash, commit SHA, etc.)."
+    },
+    "status": {
+      "type": ["string", "null"],
+      "enum": ["complete", "partial", "failed", "blocked", null],
+      "description": "Final status (writeback/release operations only)."
+    },
+    "notes": {
+      "type": "string",
+      "default": "",
+      "description": "Optional free-form notes."
+    }
+  },
+  "additionalProperties": false
+}

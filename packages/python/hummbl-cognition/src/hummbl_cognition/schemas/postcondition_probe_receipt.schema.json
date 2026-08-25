@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/postcondition_probe_receipt.schema.json",
+  "title": "Postcondition Probe Receipt",
+  "description": "Receipt for recording whether an agent or CI action's declared side effect was observed, rather than relying on process exit code alone. Detects false-green execution where a job exits 0 but an expected file write, PR, bus append, or issue comment is absent.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "claimed_action",
+    "declared_side_effect",
+    "expected_artifact",
+    "evidence_locator",
+    "verification_command",
+    "verification_result",
+    "before_state",
+    "after_state",
+    "negative_check",
+    "failure_class",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^postcond-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Unique receipt identifier (e.g. postcond-<uuid4>)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of probe execution."
+    },
+    "claimed_action": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "What the agent/CI job claimed to do (e.g. 'open PR', 'append bus message', 'write file')."
+    },
+    "declared_side_effect": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "The observable side effect the action should produce (e.g. 'PR exists in repo', 'bus file grew by one line', 'file exists with expected content marker')."
+    },
+    "expected_artifact": {
+      "type": "object",
+      "required": ["kind", "locator"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["file", "pr", "issue-comment", "bus-message", "workflow-run", "tag", "commit", "ledger-entry", "other"],
+          "description": "Category of artifact expected to exist after the action."
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Concrete locator (path, URL, PR number, message ID, run ID)."
+        },
+        "content_marker": {
+          "type": "string",
+          "description": "Optional substring or hash expected in the artifact (e.g. receipt marker, SHA-256 of expected content)."
+        }
+      },
+      "description": "The artifact the probe expects to find as proof the side effect occurred."
+    },
+    "evidence_locator": {
+      "type": "string",
+      "description": "Where the probe found (or failed to find) the evidence (URL, path, API response field)."
+    },
+    "verification_command": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "The exact command or API call used to verify the side effect. Must be replayable."
+    },
+    "verification_result": {
+      "type": "object",
+      "required": ["status", "observed_state"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["verified", "not_verified", "contradicted"],
+          "description": "verified = side effect confirmed; not_verified = could not confirm (probe inconclusive); contradicted = evidence shows side effect did NOT occur (false-green)."
+        },
+        "observed_state": {
+          "type": "string",
+          "description": "What the probe actually observed (raw or summarized)."
+        },
+        "exit_code": {
+          "type": "integer",
+          "description": "Exit code of the verification command (if applicable)."
+        },
+        "latency_ms": {
+          "type": "integer",
+          "description": "Probe execution latency in milliseconds."
+        }
+      },
+      "description": "Result of running the verification command."
+    },
+    "before_state": {
+      "type": "object",
+      "properties": {
+        "snapshot": {
+          "type": "string",
+          "description": "State before the action (e.g. file hash, PR count, bus line count)."
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the before-state was captured."
+        }
+      },
+      "description": "State snapshot before the action ran, for delta verification."
+    },
+    "after_state": {
+      "type": "object",
+      "properties": {
+        "snapshot": {
+          "type": "string",
+          "description": "State after the action (e.g. file hash, PR count, bus line count)."
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the after-state was captured."
+        }
+      },
+      "description": "State snapshot after the action ran, for delta verification."
+    },
+    "negative_check": {
+      "type": "object",
+      "required": ["checked", "result"],
+      "properties": {
+        "checked": {
+          "type": "boolean",
+          "description": "Whether a negative check was performed (e.g. 'no duplicate PR opened', 'no secret leaked in the artifact')."
+        },
+        "result": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_applicable"],
+          "description": "passed = negative condition did not occur; failed = negative condition DID occur (side effect over-produced or leaked)."
+        },
+        "description": {
+          "type": "string",
+          "description": "What negative condition was checked."
+        }
+      },
+      "description": "Check that the action did not produce unintended side effects."
+    },
+    "failure_class": {
+      "type": "string",
+      "enum": ["none", "false_green", "partial", "silent_drop", "wrong_artifact", "negative_violation", "probe_error"],
+      "description": "none = side effect verified; false_green = job exited 0 but side effect absent; partial = side effect partially occurred; silent_drop = action reported success but produced nothing; wrong_artifact = artifact exists but wrong content/locator; negative_violation = unintended side effect occurred; probe_error = probe itself failed to run."
+    },
+    "operator_override_ref": {
+      "type": "string",
+      "description": "Reference to operator approval if a failed probe was overridden (e.g. risk acceptance ID, PR comment URL). Required if failure_class != 'none' and the pipeline was not failed."
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of the canonical receipt (excluding the hash field). Tamper detection."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_result": {
+            "properties": {"status": {"const": "verified"}},
+            "required": ["status"]
+          }
+        }
+      },
+      "then": {"properties": {"failure_class": {"const": "none"}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_result": {
+            "properties": {"status": {"const": "contradicted"}},
+            "required": ["status"]
+          }
+        }
+      },
+      "then": {"properties": {"failure_class": {"not": {"const": "none"}}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_result": {
+            "properties": {"status": {"const": "not_verified"}},
+            "required": ["status"]
+          }
+        }
+      },
+      "then": {"properties": {"failure_class": {"not": {"const": "none"}}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "negative_check": {
+            "properties": {"result": {"const": "failed"}},
+            "required": ["result"]
+          }
+        }
+      },
+      "then": {"properties": {"failure_class": {"const": "negative_violation"}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "negative_check": {
+            "properties": {
+              "result": {"const": "failed"},
+              "checked": {"const": false}
+            },
+            "required": ["result", "checked"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "negative_check": {
+            "properties": {
+              "checked": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"failure_class": {"not": {"const": "none"}}}},
+      "then": {
+        "required": ["operator_override_ref"],
+        "properties": {"operator_override_ref": {"minLength": 1, "pattern": "\\S"}}
+      }
+    }
+  ],
+  "additionalProperties": false
+}

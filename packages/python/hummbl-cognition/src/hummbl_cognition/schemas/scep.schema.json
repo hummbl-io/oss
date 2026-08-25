@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cognition/scep.schema.json",
+  "title": "Self-Contained Execution Packet (SCEP) Schema",
+  "description": "Schema for validating Self-Contained Execution Packets across 5 control regimes.",
+  "type": "object",
+  "properties": {
+    "packet_id": {
+      "type": "string",
+      "pattern": "^scep-[a-f0-9]{8,12}$",
+      "description": "Unique packet identifier"
+    },
+    "control_regime": {
+      "type": "string",
+      "enum": [
+        "HUMAN",
+        "SUPERVISED",
+        "SEMI_AUTONOMOUS",
+        "LATENCY_TOLERANT",
+        "AI_AUTONOMOUS"
+      ],
+      "description": "Autonomous control regime classification"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Originating agent identity"
+    },
+    "target_environment": {
+      "type": "string",
+      "description": "Target execution environment or node"
+    },
+    "latency_budget_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Maximum allowed latency in milliseconds"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "arguments": {
+          "type": "object"
+        },
+        "nonce": {
+          "type": "string"
+        },
+        "checksum": {
+          "type": "string"
+        }
+      },
+      "required": ["command"],
+      "additionalProperties": true
+    },
+    "fail_closed_interlock": {
+      "type": "boolean",
+      "description": "Enforce local fail-closed safety interlock"
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Execution timeout in seconds"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO 8601 creation timestamp"
+    }
+  },
+  "required": [
+    "packet_id",
+    "control_regime",
+    "agent_id",
+    "target_environment",
+    "payload",
+    "fail_closed_interlock"
+  ],
+  "additionalProperties": true
+}

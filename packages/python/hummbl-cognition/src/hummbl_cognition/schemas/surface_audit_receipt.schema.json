@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "surface_audit_receipt.schema.json",
+  "title": "Surface Audit Receipt Schema",
+  "description": "Structured receipt for every agentic action on a GitHub surface, recording who acted, with what authority, and what result.",
+  "type": "object",
+  "required": [
+    "action_id",
+    "timestamp",
+    "surface_id",
+    "actor",
+    "authority_level",
+    "action",
+    "result"
+  ],
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "pattern": "^surf-[a-f0-9]+$",
+      "description": "Unique identifier for this surface action."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "ISO 8601 UTC timestamp when the action occurred."
+    },
+    "surface_id": {
+      "type": "string",
+      "enum": [
+        "code-ui",
+        "issues-ui",
+        "prs-ui",
+        "actions-ui",
+        "projects-ui",
+        "security-ui",
+        "insights-ui",
+        "settings-ui",
+        "gh-cli",
+        "api",
+        "tui",
+        "ide"
+      ],
+      "description": "The GitHub surface where the action occurred."
+    },
+    "actor": {
+      "type": "string",
+      "description": "Agent or human identity that performed the action."
+    },
+    "authority_level": {
+      "type": "string",
+      "enum": [
+        "operator-only",
+        "steward",
+        "trusted",
+        "active",
+        "probationary",
+        "candidate"
+      ],
+      "description": "Authority level of the actor at time of action."
+    },
+    "action": {
+      "type": "string",
+      "description": "The action performed (e.g., 'create-issue', 'comment', 'close-issue', 'merge-pr')."
+    },
+    "result": {
+      "type": "string",
+      "enum": ["success", "failure", "denied", "error"],
+      "description": "Outcome of the action."
+    },
+    "evidence_ref": {
+      "type": "string",
+      "description": "Link to evidence (PR URL, issue URL, receipt hash, etc.)."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository full name (e.g., hummbl-io/hummbl-cognition)."
+    },
+    "issue_number": {
+      "type": "integer",
+      "description": "GitHub issue number if applicable."
+    },
+    "pr_number": {
+      "type": "integer",
+      "description": "GitHub PR number if applicable."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional context."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of receipt content (excluding the hash itself)."
+    }
+  },
+  "additionalProperties": false
+}
