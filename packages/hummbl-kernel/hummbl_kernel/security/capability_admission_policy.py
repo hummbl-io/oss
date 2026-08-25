@@ -5,11 +5,9 @@ Implements risk-based capability admission for security and compliance enforceme
 Agents must request capabilities before execution; high-risk capabilities require explicit approval.
 """
 
-import json
 import hashlib
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Tuple, Set
+from datetime import datetime, timedelta, UTC
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -49,9 +47,9 @@ class Capability:
     name: str
     description: str
     risk_class: RiskClass
-    actions: List[str]
+    actions: list[str]
     adapter_id: str
-    compliance_frameworks: List[ComplianceFramework]
+    compliance_frameworks: list[ComplianceFramework]
     evidence_quality: str  # "artifact", "synthetic", "observation"
     registered_at: str
     registered_by: str
@@ -69,11 +67,11 @@ class Grant:
     granted_at: str
     granted_by: str
     expires_at: str
-    constraints: Dict[str, any] = field(default_factory=dict)
+    constraints: dict[str, any] = field(default_factory=dict)
     status: AdmissionStatus = AdmissionStatus.ADMITTED
-    revoked_at: Optional[str] = None
-    revoked_by: Optional[str] = None
-    revocation_reason: Optional[str] = None
+    revoked_at: str | None = None
+    revoked_by: str | None = None
+    revocation_reason: str | None = None
 
 
 @dataclass
@@ -87,8 +85,8 @@ class AdmissionRequest:
     compliance_framework: ComplianceFramework
     requested_at: str
     justification: str
-    target: Optional[str] = None
-    arguments: Dict[str, any] = field(default_factory=dict)
+    target: str | None = None
+    arguments: dict[str, any] = field(default_factory=dict)
 
 
 @dataclass
@@ -100,9 +98,9 @@ class AdmissionDecision:
     decision_at: str
     decided_by: str
     reason: str
-    grant_id: Optional[str] = None
-    expires_at: Optional[str] = None
-    constraints: Dict[str, any] = field(default_factory=dict)
+    grant_id: str | None = None
+    expires_at: str | None = None
+    constraints: dict[str, any] = field(default_factory=dict)
 
 
 class CapabilityAdmissionPolicy:
@@ -116,30 +114,30 @@ class CapabilityAdmissionPolicy:
     - Automatic admission for low-risk capabilities
     - Explicit approval for high-risk capabilities
     """
-    
+
     def __init__(self):
-        self.capabilities: Dict[str, Capability] = {}
-        self.grants: Dict[str, Grant] = {}
-        self.admission_requests: Dict[str, AdmissionRequest] = {}
-        self.admission_decisions: Dict[str, AdmissionDecision] = {}
-        
+        self.capabilities: dict[str, Capability] = {}
+        self.grants: dict[str, Grant] = {}
+        self.admission_requests: dict[str, AdmissionRequest] = {}
+        self.admission_decisions: dict[str, AdmissionDecision] = {}
+
         # Default grant duration
         self.default_grant_duration_minutes = 60
-        
+
         # Pre-register standard capabilities
         self._register_standard_capabilities()
-        
+
         logger.info("Capability Admission Policy initialized")
-    
+
     def _generate_id(self, prefix: str) -> str:
         """Generate unique identifier"""
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
         random_suffix = hashlib.md5(timestamp.encode()).hexdigest()[:8]
         return f"{prefix}_{timestamp}_{random_suffix}"
-    
+
     def _register_standard_capabilities(self):
         """Pre-register standard capabilities for common operations"""
-        
+
         # Evidence collection capabilities
         self.register_capability(
             capability_id="evidence.collect",
@@ -152,7 +150,7 @@ class CapabilityAdmissionPolicy:
             evidence_quality="artifact",
             registered_by="system"
         )
-        
+
         # Document generation capabilities
         self.register_capability(
             capability_id="document.generate",
@@ -165,7 +163,7 @@ class CapabilityAdmissionPolicy:
             evidence_quality="synthetic",
             registered_by="system"
         )
-        
+
         # Control assessment capabilities
         self.register_capability(
             capability_id="control.assess",
@@ -178,7 +176,7 @@ class CapabilityAdmissionPolicy:
             evidence_quality="observation",
             registered_by="system"
         )
-        
+
         # System configuration capabilities (HIGH RISK)
         self.register_capability(
             capability_id="system.configure",
@@ -191,7 +189,7 @@ class CapabilityAdmissionPolicy:
             evidence_quality="artifact",
             registered_by="system"
         )
-        
+
         # Credential access capabilities (CRITICAL RISK)
         self.register_capability(
             capability_id="credential.access",
@@ -204,12 +202,12 @@ class CapabilityAdmissionPolicy:
             evidence_quality="synthetic",
             registered_by="system"
         )
-        
+
         logger.info(f"Registered {len(self.capabilities)} standard capabilities")
-    
+
     def register_capability(self, capability_id: str, name: str, description: str,
-                          risk_class: RiskClass, actions: List[str], adapter_id: str,
-                          compliance_frameworks: List[ComplianceFramework],
+                          risk_class: RiskClass, actions: list[str], adapter_id: str,
+                          compliance_frameworks: list[ComplianceFramework],
                           evidence_quality: str, registered_by: str) -> bool:
         """
         Register a new capability
@@ -231,7 +229,7 @@ class CapabilityAdmissionPolicy:
         if capability_id in self.capabilities:
             logger.warning(f"Capability {capability_id} already registered")
             return False
-        
+
         capability = Capability(
             capability_id=capability_id,
             name=name,
@@ -241,19 +239,19 @@ class CapabilityAdmissionPolicy:
             adapter_id=adapter_id,
             compliance_frameworks=compliance_frameworks,
             evidence_quality=evidence_quality,
-            registered_at=datetime.now(timezone.utc).isoformat(),
+            registered_at=datetime.now(UTC).isoformat(),
             registered_by=registered_by,
             is_active=True
         )
-        
+
         self.capabilities[capability_id] = capability
         logger.info(f"Registered capability: {capability_id} (risk: {risk_class.value})")
         return True
-    
+
     def request_admission(self, mission_id: str, agent: str, capability: str,
                        action: str, compliance_framework: ComplianceFramework,
-                       justification: str, target: Optional[str] = None,
-                       arguments: Optional[Dict[str, any]] = None) -> AdmissionDecision:
+                       justification: str, target: str | None = None,
+                       arguments: dict[str, any] | None = None) -> AdmissionDecision:
         """
         Request admission for a capability
         
@@ -271,7 +269,7 @@ class CapabilityAdmissionPolicy:
             Admission decision
         """
         request_id = self._generate_id("req")
-        
+
         # Create admission request
         request = AdmissionRequest(
             request_id=request_id,
@@ -280,118 +278,118 @@ class CapabilityAdmissionPolicy:
             capability=capability,
             action=action,
             compliance_framework=compliance_framework,
-            requested_at=datetime.now(timezone.utc).isoformat(),
+            requested_at=datetime.now(UTC).isoformat(),
             justification=justification,
             target=target,
             arguments=arguments or {}
         )
-        
+
         self.admission_requests[request_id] = request
-        
+
         # Make admission decision
         decision = self._make_admission_decision(request)
         self.admission_decisions[decision.decision_id] = decision
-        
+
         logger.info(f"Admission decision for {capability}: {decision.status.value} - {decision.reason}")
         return decision
-    
+
     def _make_admission_decision(self, request: AdmissionRequest) -> AdmissionDecision:
         """Make admission decision based on policy"""
         decision_id = self._generate_id("dec")
-        
+
         # Check if capability exists
         if request.capability not in self.capabilities:
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.DENIED,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"Capability {request.capability} not registered"
             )
-        
+
         capability = self.capabilities[request.capability]
-        
+
         # Check if capability is active
         if not capability.is_active:
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.DENIED,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"Capability {request.capability} is not active"
             )
-        
+
         # Check if action is supported
         if request.action not in capability.actions:
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.DENIED,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"Action {request.action} not supported by capability {request.capability}"
             )
-        
+
         # Check framework compatibility
         if request.compliance_framework not in capability.compliance_frameworks:
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.DENIED,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"Capability {request.capability} not supported for {request.compliance_framework.value}"
             )
-        
+
         # Risk-based admission
         if capability.risk_class == RiskClass.LOW:
             # Auto-admit low-risk capabilities
             return self._grant_capability(request, capability)
-        
+
         elif capability.risk_class == RiskClass.MEDIUM:
             # Auto-admit medium-risk capabilities if framework-compatible
             return self._grant_capability(request, capability)
-        
+
         elif capability.risk_class == RiskClass.HIGH:
             # High-risk capabilities require explicit approval
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.PENDING_APPROVAL,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"High-risk capability {request.capability} requires explicit approval"
             )
-        
+
         elif capability.risk_class == RiskClass.CRITICAL:
             # Critical capabilities require explicit approval + operator confirmation
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.PENDING_APPROVAL,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"Critical-risk capability {request.capability} requires explicit approval + operator confirmation"
             )
-        
+
         else:
             return AdmissionDecision(
                 decision_id=decision_id,
                 request_id=request.request_id,
                 status=AdmissionStatus.DENIED,
-                decision_at=datetime.now(timezone.utc).isoformat(),
+                decision_at=datetime.now(UTC).isoformat(),
                 decided_by="policy",
                 reason=f"Unknown risk class: {capability.risk_class}"
             )
-    
+
     def _grant_capability(self, request: AdmissionRequest, capability: Capability) -> AdmissionDecision:
         """Grant a capability request"""
         grant_id = self._generate_id("grant")
-        expires_at = (datetime.now(timezone.utc) + 
+        expires_at = (datetime.now(UTC) +
                     timedelta(minutes=self.default_grant_duration_minutes)).isoformat()
-        
+
         # Create grant
         grant = Grant(
             grant_id=grant_id,
@@ -399,7 +397,7 @@ class CapabilityAdmissionPolicy:
             capability=request.capability,
             action=request.action,
             risk_class=capability.risk_class,
-            granted_at=datetime.now(timezone.utc).isoformat(),
+            granted_at=datetime.now(UTC).isoformat(),
             granted_by="policy",
             expires_at=expires_at,
             constraints={
@@ -409,22 +407,22 @@ class CapabilityAdmissionPolicy:
             },
             status=AdmissionStatus.ADMITTED
         )
-        
+
         self.grants[grant_id] = grant
-        
+
         return AdmissionDecision(
             decision_id=self._generate_id("dec"),
             request_id=request.request_id,
             status=AdmissionStatus.ADMITTED,
-            decision_at=datetime.now(timezone.utc).isoformat(),
+            decision_at=datetime.now(UTC).isoformat(),
             decided_by="policy",
             reason=f"Capability {request.capability} admitted",
             grant_id=grant_id,
             expires_at=expires_at,
             constraints=grant.constraints
         )
-    
-    def _get_allowed_targets(self, request: AdmissionRequest, capability: Capability) -> List[str]:
+
+    def _get_allowed_targets(self, request: AdmissionRequest, capability: Capability) -> list[str]:
         """Get allowed targets for a capability grant.
 
         Fail closed: a request must explicitly specify a target.
@@ -435,9 +433,9 @@ class CapabilityAdmissionPolicy:
             f"Capability {request.capability} requires an explicit target. "
             "Wildcard ('*') grants are not allowed by default."
         )
-    
-    def approve_request(self, request_id: str, approved_by: str, 
-                       expires_in_minutes: Optional[int] = None) -> AdmissionDecision:
+
+    def approve_request(self, request_id: str, approved_by: str,
+                       expires_in_minutes: int | None = None) -> AdmissionDecision:
         """
         Approve a pending admission request
         
@@ -452,26 +450,26 @@ class CapabilityAdmissionPolicy:
         if request_id not in self.admission_requests:
             logger.error(f"Request {request_id} not found")
             raise ValueError(f"Request {request_id} not found")
-        
+
         request = self.admission_requests[request_id]
         capability = self.capabilities.get(request.capability)
-        
+
         if not capability:
             logger.error(f"Capability {request.capability} not found")
             raise ValueError(f"Capability {request.capability} not found")
-        
+
         # Grant the capability
         grant_id = self._generate_id("grant")
-        expires_at = (datetime.now(timezone.utc) + 
+        expires_at = (datetime.now(UTC) +
                     timedelta(minutes=expires_in_minutes or self.default_grant_duration_minutes)).isoformat()
-        
+
         grant = Grant(
             grant_id=grant_id,
             mission_id=request.mission_id,
             capability=request.capability,
             action=request.action,
             risk_class=capability.risk_class,
-            granted_at=datetime.now(timezone.utc).isoformat(),
+            granted_at=datetime.now(UTC).isoformat(),
             granted_by=approved_by,
             expires_at=expires_at,
             constraints={
@@ -481,29 +479,29 @@ class CapabilityAdmissionPolicy:
             },
             status=AdmissionStatus.ADMITTED
         )
-        
+
         self.grants[grant_id] = grant
-        
+
         # Update admission decision
         decision_id = self._generate_id("dec")
         decision = AdmissionDecision(
             decision_id=decision_id,
             request_id=request_id,
             status=AdmissionStatus.ADMITTED,
-            decision_at=datetime.now(timezone.utc).isoformat(),
+            decision_at=datetime.now(UTC).isoformat(),
             decided_by=approved_by,
             reason=f"Request approved by {approved_by}",
             grant_id=grant_id,
             expires_at=expires_at,
             constraints=grant.constraints
         )
-        
+
         self.admission_decisions[decision_id] = decision
-        
+
         logger.info(f"Request {request_id} approved by {approved_by}")
         return decision
-    
-    def validate_grant(self, grant_id: str, capability: str, action: str) -> Tuple[bool, str]:
+
+    def validate_grant(self, grant_id: str, capability: str, action: str) -> tuple[bool, str]:
         """
         Validate a grant for capability execution
         
@@ -517,27 +515,27 @@ class CapabilityAdmissionPolicy:
         """
         if grant_id not in self.grants:
             return False, f"Grant {grant_id} not found"
-        
+
         grant = self.grants[grant_id]
-        
+
         # Check if grant is active
         if grant.status != AdmissionStatus.ADMITTED:
             return False, f"Grant {grant_id} is not active (status: {grant.status.value})"
-        
+
         # Check if grant is expired
-        if datetime.now(timezone.utc) > datetime.fromisoformat(grant.expires_at):
+        if datetime.now(UTC) > datetime.fromisoformat(grant.expires_at):
             return False, f"Grant {grant_id} is expired"
-        
+
         # Check if grant matches capability
         if grant.capability != capability:
             return False, f"Grant {grant_id} is for capability {grant.capability}, not {capability}"
-        
+
         # Check if grant matches action
         if grant.action != action:
             return False, f"Grant {grant_id} is for action {grant.action}, not {action}"
-        
+
         return True, "Grant valid"
-    
+
     def revoke_grant(self, grant_id: str, revoked_by: str, reason: str) -> bool:
         """
         Revoke a grant
@@ -553,17 +551,17 @@ class CapabilityAdmissionPolicy:
         if grant_id not in self.grants:
             logger.error(f"Grant {grant_id} not found")
             return False
-        
+
         grant = self.grants[grant_id]
         grant.status = AdmissionStatus.REVOKED
-        grant.revoked_at = datetime.now(timezone.utc).isoformat()
+        grant.revoked_at = datetime.now(UTC).isoformat()
         grant.revoked_by = revoked_by
         grant.revocation_reason = reason
-        
+
         logger.info(f"Grant {grant_id} revoked by {revoked_by}: {reason}")
         return True
-    
-    def get_active_grants(self, mission_id: Optional[str] = None) -> List[Grant]:
+
+    def get_active_grants(self, mission_id: str | None = None) -> list[Grant]:
         """
         Get active grants, optionally filtered by mission
         
@@ -574,36 +572,36 @@ class CapabilityAdmissionPolicy:
             List of active grants
         """
         active_grants = []
-        
+
         for grant in self.grants.values():
             if grant.status == AdmissionStatus.ADMITTED:
                 # Check if expired
-                if datetime.now(timezone.utc) <= datetime.fromisoformat(grant.expires_at):
+                if datetime.now(UTC) <= datetime.fromisoformat(grant.expires_at):
                     # Filter by mission if provided
                     if mission_id is None or grant.mission_id == mission_id:
                         active_grants.append(grant)
-        
+
         return active_grants
-    
+
     def cleanup_expired_grants(self) -> int:
         """Clean up expired grants and return count of cleaned grants"""
         cleaned_count = 0
-        now = datetime.now(timezone.utc)
-        
+        now = datetime.now(UTC)
+
         for grant in self.grants.values():
             if grant.status == AdmissionStatus.ADMITTED:
                 if now > datetime.fromisoformat(grant.expires_at):
                     grant.status = AdmissionStatus.EXPIRED
                     cleaned_count += 1
-        
+
         logger.info(f"Cleaned up {cleaned_count} expired grants")
         return cleaned_count
 
 
-async def main():
+def main():
     """Example usage of capability admission policy"""
     policy = CapabilityAdmissionPolicy()
-    
+
     # Request admission for a low-risk capability
     decision = policy.request_admission(
         mission_id="mission_001",
@@ -614,11 +612,11 @@ async def main():
         justification="Need to collect evidence for control CC1.1",
         target="s3://evidence-bucket/control-cc1.1"
     )
-    
+
     print(f"Decision: {decision.status.value}")
     print(f"Reason: {decision.reason}")
     print(f"Grant ID: {decision.grant_id}")
-    
+
     # Request admission for a high-risk capability
     decision = policy.request_admission(
         mission_id="mission_001",
@@ -629,10 +627,10 @@ async def main():
         justification="Need to configure system for compliance",
         target="/etc/security/limits.conf"
     )
-    
+
     print(f"\nDecision: {decision.status.value}")
     print(f"Reason: {decision.reason}")
-    
+
     # Approve the high-risk request
     if decision.status == AdmissionStatus.PENDING_APPROVAL:
         decision = policy.approve_request(
@@ -642,7 +640,7 @@ async def main():
         )
         print(f"\nApproved: {decision.status.value}")
         print(f"Grant ID: {decision.grant_id}")
-        
+
         # Validate the grant
         is_valid, reason = policy.validate_grant(
             grant_id=decision.grant_id,
@@ -650,15 +648,16 @@ async def main():
             action="modify"
         )
         print(f"Grant valid: {is_valid} - {reason}")
-    
+
     # Get active grants
     active_grants = policy.get_active_grants(mission_id="mission_001")
     print(f"\nActive grants for mission_001: {len(active_grants)}")
-    
+
     # Cleanup expired grants
     cleaned = policy.cleanup_expired_grants()
     print(f"Cleaned {cleaned} expired grants")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
+

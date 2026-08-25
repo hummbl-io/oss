@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/receipt-bundle.schema.json",
+  "title": "HUMMBL Receipt Bundle",
+  "description": "Tier 1 Governance Core: AuditReceipt. Regeneratable from underlying receipts, but regeneration produces a meta-receipt (OQ-6). Individual receipts are immutable append-only. Phase 0 schema seed — draft status, not canon.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "hummbl_object_envelope.schema.json" }
+  ],
+  "required": ["object_type", "receipts"],
+  "properties": {
+    "object_type": { "const": "ReceiptBundle" },
+    "tier": { "const": "tier1_governance_core" },
+    "receipts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["receipt_id", "receipt_type", "timestamp", "actor", "action", "fingerprint"],
+        "properties": {
+          "receipt_id": {
+            "type": "string",
+            "pattern": "^receipt-[0-9]+$"
+          },
+          "receipt_type": {
+            "type": "string",
+            "enum": ["create", "update", "promote", "demote", "archive", "review", "approve", "reject", "meta_receipt", "regeneration"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "type": "string",
+            "description": "Agent or human identity that performed the action"
+          },
+          "action": {
+            "type": "string",
+            "description": "What was done"
+          },
+          "target_object_ref": {
+            "type": "string",
+            "pattern": "^hummbl:[a-z0-9-]+:[a-f0-9-]+$"
+          },
+          "fingerprint": {
+            "type": "string",
+            "description": "SHA-256 hash of the receipt content. Immutable.",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "is_immutable": {
+            "type": "boolean",
+            "const": true,
+            "description": "Individual receipts are always immutable (append-only, never edited or deleted)."
+          }
+        }
+      }
+    },
+    "meta_receipts": {
+      "type": "array",
+      "description": "OQ-6: Regeneration produces meta-receipts. Each records what was regenerated, when, by whom, source receipts used, and fingerprint of original bundle.",
+      "items": {
+        "type": "object",
+        "required": ["meta_receipt_id", "regenerated_at", "regenerated_by", "source_receipt_refs", "original_bundle_fingerprint"],
+        "properties": {
+          "meta_receipt_id": {
+            "type": "string",
+            "pattern": "^meta-receipt-[0-9]+$"
+          },
+          "regenerated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "regenerated_by": {
+            "type": "string"
+          },
+          "source_receipt_refs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^receipt-[0-9]+$" }
+          },
+          "original_bundle_fingerprint": {
+            "type": "string",
+            "description": "SHA-256 fingerprint of the original bundle, if known.",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why regeneration was needed (e.g., data loss, additional receipts discovered)"
+          }
+        }
+      }
+    },
+    "bundle_fingerprint": {
+      "type": "string",
+      "description": "SHA-256 fingerprint of the entire bundle contents.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "is_regenerated": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this bundle has been regenerated. If true, meta_receipts must be non-empty."
+    }
+  },
+  "additionalProperties": true
+}

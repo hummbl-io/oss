@@ -14,14 +14,11 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Optional
 
 from hummbl.reasoning import (
-    ReasoningStep,
     ReasoningTopology,
     ReasoningTrace,
     StepType,
-    make_step,
     make_trace,
 )
 
@@ -65,7 +62,7 @@ class ReasoningProtocol:
     topology: ReasoningTopology = ReasoningTopology.CHAIN
     domain: str = ""
 
-    def create_trace(self, tags: Optional[list[str]] = None) -> ReasoningTrace:
+    def create_trace(self, tags: list[str] | None = None) -> ReasoningTrace:
         """Create an empty trace bound to this protocol's domain and topology."""
         return make_trace(
             domain=self.domain or self.name,

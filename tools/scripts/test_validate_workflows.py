@@ -13,7 +13,6 @@ repo or the WORKFLOW_VALIDATOR_PATH environment variable.
 
 import importlib.util
 import os
-import sys
 import tempfile
 import textwrap
 import types

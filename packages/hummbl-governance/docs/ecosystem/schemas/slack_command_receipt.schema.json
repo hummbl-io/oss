@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/slack_command_receipt.schema.json",
+  "title": "HUMMBL Slack Command Receipt",
+  "description": "Receipt for a Slack-originated mobile command — read-only, draft, write-pending-approval, destructive, or forbidden. Draft status, not canon until namespace review.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "surface",
+    "workspace_id_hash",
+    "channel_id_hash",
+    "actor_id_hash",
+    "received_at",
+    "command_text_hash",
+    "parsed_intent",
+    "risk_class",
+    "authority",
+    "admission_decision",
+    "output_policy",
+    "durable_receipt_uri"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "description": "Unique receipt identifier."
+    },
+    "surface": {
+      "const": "slack",
+      "description": "Command surface."
+    },
+    "workspace_id_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of workspace ID (never raw workspace ID)."
+    },
+    "channel_id_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of channel ID (never raw channel ID)."
+    },
+    "thread_ts": {
+      "type": ["string", "null"],
+      "description": "Slack thread timestamp, or null if not in a thread."
+    },
+    "actor_id_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of actor ID (never raw actor ID)."
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when command was received."
+    },
+    "command_text_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of command text (never raw command text in receipt)."
+    },
+    "parsed_intent": {
+      "type": "string",
+      "description": "Parsed intent classification (e.g., status_check, draft_issue, create_pr, raw_shell)."
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": ["read_only", "draft_only", "write_pending_approval", "destructive", "forbidden"],
+      "description": "Risk classification per policy."
+    },
+    "requested_repo": {
+      "type": ["string", "null"],
+      "description": "Repository targeted by command, or null if not repo-specific."
+    },
+    "requested_tool": {
+      "type": ["string", "null"],
+      "description": "Tool requested for execution, or null if not tool-specific."
+    },
+    "authority": {
+      "type": "string",
+      "description": "Authority level of actor (e.g., operator, steward, viewer)."
+    },
+    "executor": {
+      "type": ["string", "null"],
+      "description": "Executor that handled the command, or null if denied before execution."
+    },
+    "admission_decision": {
+      "type": "string",
+      "enum": ["admitted", "denied", "pending_approval"],
+      "description": "Admission gate decision."
+    },
+    "approval_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to approval record, or null if not required or denied."
+    },
+    "output_policy": {
+      "type": "string",
+      "enum": ["summarized", "redacted", "link_only"],
+      "description": "Output policy applied to Slack response."
+    },
+    "slack_response_ts": {
+      "type": ["string", "null"],
+      "description": "Slack response message timestamp, or null if not posted."
+    },
+    "durable_receipt_uri": {
+      "type": "string",
+      "description": "URI to durable receipt storage."
+    },
+    "redactions_applied": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "List of redaction types applied (e.g., api_key, hostname, channel_name)."
+    }
+  },
+  "additionalProperties": false
+}

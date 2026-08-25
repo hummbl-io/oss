@@ -45,6 +45,10 @@ Issues = "https://github.com/hummbl-io/oss/issues"
 include = ["hummbl_kernel*"]
 exclude = ["tests*"]
 
+[tool.setuptools.package-data]
+hummbl_kernel = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+

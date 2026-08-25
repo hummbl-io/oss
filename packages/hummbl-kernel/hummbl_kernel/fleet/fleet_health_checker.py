@@ -7,12 +7,10 @@ and implements fallback strategy for hybrid fleet deployment.
 No internal fleet names, IPs, URLs, or ports are hardcoded."""
 
 import subprocess
-import json
 import asyncio
 import logging
-import os
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple, Any
+from datetime import datetime, UTC
+from typing import Any
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -41,8 +39,8 @@ class MachineHealth:
     name: str
     status: MachineStatus
     timestamp: str
-    details: Dict[str, Any] = field(default_factory=dict)
-    services: Dict[str, bool] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
+    services: dict[str, bool] = field(default_factory=dict)
 
 
 @dataclass
@@ -50,9 +48,9 @@ class FleetHealth:
     """Overall fleet health status"""
     timestamp: str
     mode: FleetMode
-    machines: Dict[str, MachineHealth] = field(default_factory=dict)
+    machines: dict[str, MachineHealth] = field(default_factory=dict)
     overall_status: MachineStatus = MachineStatus.UNKNOWN
-    routing_recommendations: Dict[str, str] = field(default_factory=dict)
+    routing_recommendations: dict[str, str] = field(default_factory=dict)
 
 
 class FleetHealthChecker:
@@ -62,8 +60,8 @@ class FleetHealthChecker:
     Monitors a user-supplied fleet, provides task routing recommendations,
     and implements fallback strategy.
     """
-    
-    def __init__(self, mode: FleetMode = FleetMode.HYBRID, fleet_config: Optional[Dict] = None, task_routing: Optional[Dict] = None):
+
+    def __init__(self, mode: FleetMode = FleetMode.HYBRID, fleet_config: dict | None = None, task_routing: dict | None = None):
         self.mode = mode
         if not fleet_config:
             raise ValueError(
@@ -88,8 +86,8 @@ class FleetHealthChecker:
                 )
 
         logger.info(f"Fleet health checker initialized in {mode.value} mode")
-    
-    def _check_http_endpoint(self, url: str, timeout: int = 5) -> Tuple[bool, str]:
+
+    def _check_http_endpoint(self, url: str, timeout: int = 5) -> tuple[bool, str]:
         """Check if HTTP endpoint is reachable"""
         try:
             result = subprocess.run(
@@ -104,8 +102,8 @@ class FleetHealthChecker:
             return False, "timeout"
         except Exception as e:
             return False, str(e)
-    
-    def _check_ssh_connectivity(self, ssh_alias: str, timeout: int = 5) -> Tuple[bool, str]:
+
+    def _check_ssh_connectivity(self, ssh_alias: str, timeout: int = 5) -> tuple[bool, str]:
         """Check if SSH connectivity works"""
         try:
             result = subprocess.run(
@@ -119,7 +117,7 @@ class FleetHealthChecker:
             return False, "timeout"
         except Exception as e:
             return False, str(e)
-    
+
     def _check_machine(self, machine_name: str) -> MachineHealth:
         """Check health of a specific machine"""
         config = self.fleet_config.get(machine_name)
@@ -127,60 +125,60 @@ class FleetHealthChecker:
             return MachineHealth(
                 name=machine_name,
                 status=MachineStatus.UNKNOWN,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 details={"error": "Machine not in fleet config"}
             )
-        
+
         services_status = {}
         details = {}
-        
+
         # Check each service
         for service_name, service_url in config["services"].items():
             is_healthy, status_msg = self._check_http_endpoint(service_url)
             services_status[service_name] = is_healthy
             details[service_name] = status_msg
-        
+
         # Check SSH connectivity
         ssh_healthy, ssh_msg = self._check_ssh_connectivity(config["ssh_alias"])
         services_status["ssh"] = ssh_healthy
         details["ssh"] = ssh_msg
-        
+
         # Determine overall status
         # Machine is healthy if SSH and at least one service is healthy
         is_healthy = ssh_healthy and any(services_status.values())
         status = MachineStatus.HEALTHY if is_healthy else MachineStatus.UNHEALTHY
-        
+
         return MachineHealth(
             name=machine_name,
             status=status,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             details=details,
             services=services_status
         )
-    
+
     def check_fleet_health(self) -> FleetHealth:
         """Check health of entire fleet"""
-        timestamp = datetime.now(timezone.utc).isoformat()
-        
+        timestamp = datetime.now(UTC).isoformat()
+
         # Check each machine
         machines = {}
         for machine_name in self.fleet_config.keys():
             machines[machine_name] = self._check_machine(machine_name)
-        
+
         # Determine overall status
         all_healthy = all(m.status == MachineStatus.HEALTHY for m in machines.values())
         any_healthy = any(m.status == MachineStatus.HEALTHY for m in machines.values())
-        
+
         if all_healthy:
             overall_status = MachineStatus.HEALTHY
         elif any_healthy:
             overall_status = MachineStatus.UNHEALTHY
         else:
             overall_status = MachineStatus.UNHEALTHY
-        
+
         # Generate routing recommendations based on mode and health
         routing_recommendations = self._generate_routing_recommendations(machines)
-        
+
         return FleetHealth(
             timestamp=timestamp,
             mode=self.mode,
@@ -188,8 +186,8 @@ class FleetHealthChecker:
             overall_status=overall_status,
             routing_recommendations=routing_recommendations
         )
-    
-    def _generate_routing_recommendations(self, machines: Dict[str, MachineHealth]) -> Dict[str, str]:
+
+    def _generate_routing_recommendations(self, machines: dict[str, MachineHealth]) -> dict[str, str]:
         """Generate task routing recommendations based on fleet health.
 
         Routes each task to its default machine. If that machine is unhealthy,
@@ -214,7 +212,7 @@ class FleetHealthChecker:
 
         return recommendations
 
-    def get_optimal_compute(self, task_type: str, fleet_health: Optional[FleetHealth] = None) -> str:
+    def get_optimal_compute(self, task_type: str, fleet_health: FleetHealth | None = None) -> str:
         """
         Get optimal compute node for a task type.
 
@@ -235,76 +233,76 @@ class FleetHealthChecker:
         if first_machine is None:
             raise ValueError("fleet_config contains no machines")
         return first_machine
-    
+
     async def monitor_fleet_health(self, interval_seconds: int = 30):
         """Continuously monitor fleet health at specified interval"""
         logger.info(f"Starting fleet health monitoring (interval: {interval_seconds}s)")
-        
+
         while True:
             try:
                 fleet_health = self.check_fleet_health()
-                
+
                 # Log health status
                 logger.info(f"Fleet health at {fleet_health.timestamp}:")
                 logger.info(f"  Overall: {fleet_health.overall_status.value}")
                 logger.info(f"  Mode: {fleet_health.mode.value}")
-                
+
                 for machine_name, machine_health in fleet_health.machines.items():
                     logger.info(f"  {machine_name}: {machine_health.status.value}")
                     for service, status in machine_health.services.items():
                         logger.info(f"    {service}: {status}")
-                
+
                 # Log routing recommendations
                 logger.info("  Routing recommendations:")
                 for task, machine in fleet_health.routing_recommendations.items():
                     logger.info(f"    {task}: {machine}")
-                
+
                 # Alert if any machine is unhealthy
                 for machine_name, machine_health in fleet_health.machines.items():
                     if machine_health.status == MachineStatus.UNHEALTHY:
                         logger.warning(f"ALERT: {machine_name} is unhealthy!")
-                
+
             except Exception as e:
                 logger.error(f"Error checking fleet health: {e}")
-            
+
             # Wait for next interval
             await asyncio.sleep(interval_seconds)
-    
+
     def print_health_report(self, fleet_health: FleetHealth):
         """Print a formatted health report"""
         print(f"\n{'='*60}")
-        print(f"Fleet Health Report")
+        print("Fleet Health Report")
         print(f"{'='*60}")
         print(f"Timestamp: {fleet_health.timestamp}")
         print(f"Mode: {fleet_health.mode.value}")
         print(f"Overall Status: {fleet_health.overall_status.value}")
-        print(f"\nMachine Status:")
-        
+        print("\nMachine Status:")
+
         for machine_name, machine_health in fleet_health.machines.items():
             print(f"  {machine_name}: {machine_health.status.value}")
             for service, status in machine_health.services.items():
                 print(f"    {service}: {status}")
-        
-        print(f"\nRouting Recommendations:")
+
+        print("\nRouting Recommendations:")
         for task, machine in fleet_health.routing_recommendations.items():
             print(f"  {task}: {machine}")
-        
+
         print(f"{'='*60}\n")
 
 
 async def main():
     """Example usage of fleet health checker"""
     checker = FleetHealthChecker(mode=FleetMode.HYBRID)
-    
+
     # Check fleet health once
     fleet_health = checker.check_fleet_health()
     checker.print_health_report(fleet_health)
-    
+
     # Get optimal compute for a task
     task_type = "inference"
     optimal_compute = checker.get_optimal_compute(task_type, fleet_health)
     print(f"Optimal compute for {task_type}: {optimal_compute}")
-    
+
     # Optionally start continuous monitoring
     # await checker.monitor_fleet_health(interval_seconds=30)
 

@@ -18,7 +18,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from hummbl.reasoning import (
     ReasoningStep,
@@ -65,9 +65,9 @@ class AutoresearchCapture:
             raise FileNotFoundError(f"results.tsv not found: {path}")
 
         traces: list[ReasoningTrace] = []
-        best_bpb: Optional[float] = None
+        best_bpb: float | None = None
 
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter="\t")
             for row_num, row in enumerate(reader):
                 trace = self._row_to_trace(row, row_num, best_bpb)
@@ -86,7 +86,7 @@ class AutoresearchCapture:
         self,
         row: dict,
         experiment_num: int,
-        best_bpb: Optional[float],
+        best_bpb: float | None,
     ) -> ReasoningTrace:
         """Convert a single results.tsv row into a reasoning trace."""
         commit = row.get("commit", "unknown").strip()
@@ -316,8 +316,8 @@ class ToolUseCapture:
         messages: list[dict[str, Any]],
         *,
         system_prompt: str = "",
-        tags: Optional[list[str]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> ReasoningTrace:
         """Capture a tool-use trace from generic transcript messages.
 
@@ -341,7 +341,7 @@ class ToolUseCapture:
             tags=(tags or []) + ["structured_tool_use"],
         )
 
-        parent_id: Optional[str] = None
+        parent_id: str | None = None
         if system_prompt or metadata:
             context = make_step(
                 StepType.REFLECTION,
@@ -355,7 +355,7 @@ class ToolUseCapture:
             parent_id = context.id
 
         pending_actions: list[dict[str, Any]] = []
-        pending_result: Optional[dict[str, Any]] = None
+        pending_result: dict[str, Any] | None = None
 
         for message in normalized:
             role = message["role"]
@@ -544,7 +544,7 @@ class ToolUseCapture:
         *,
         thought: str,
         tool_call: dict[str, Any],
-        parent_id: Optional[str],
+        parent_id: str | None,
     ) -> tuple[ReasoningStep, ReasoningStep, ReasoningStep]:
         tool_name = tool_call["name"]
         arguments = tool_call["arguments"]
@@ -620,7 +620,7 @@ class ToolUseCapture:
         return evaluation, decision
 
     def _build_answer_context_steps(
-        self, *, thought: str, parent_id: Optional[str]
+        self, *, thought: str, parent_id: str | None
     ) -> tuple[ReasoningStep, ReasoningStep]:
         observation = make_step(
             StepType.OBSERVATION,

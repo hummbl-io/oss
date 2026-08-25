@@ -25,6 +25,9 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
+# Monorepo-wide
+python tools/scripts/test_all.py
+
 # Per-package
 cd packages/hummbl-governance && python -m pytest tests/ -v
 cd packages/hummbl-kernel && python -m pytest tests/ -v
@@ -33,8 +36,9 @@ cd packages/hummbl && python -m pytest tests/ -v
 
 ## CI
 
-- **GitHub Actions** (primary): `.github/workflows/ci.yml`, self-hosted runner, Python 3.11/3.12/3.13 matrix
+- **GitHub Actions** (primary): `.github/workflows/ci.yml`, `ubuntu-latest` runner, Python 3.11/3.12/3.13 matrix
 - **Workflow validator**: `.github/workflows/validate-workflows.yml` — enforces SHA-pinning
+
 - SHA-pinning is required (`sha_pinning_required: true`). Tag refs (`@v4`, `@main`) cause `startup_failure`.
 
 ## Conventions

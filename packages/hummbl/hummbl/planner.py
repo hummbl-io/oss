@@ -13,11 +13,8 @@ Planning strategies:
 
 from __future__ import annotations
 
-import json
 import uuid
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Optional
 
 from hummbl.analyzer import (
     AnalysisResult,
@@ -294,7 +291,7 @@ class TracePlanner:
 
     def __init__(self, analyzer: TraceAnalyzer):
         self.analyzer = analyzer
-        self._result: Optional[AnalysisResult] = None
+        self._result: AnalysisResult | None = None
 
     @property
     def result(self) -> AnalysisResult:

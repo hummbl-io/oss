@@ -126,7 +126,7 @@ def _handle_plan(analyzer: TraceAnalyzer, extra_args: list[str]) -> int:
         if not tp.exists():
             print(f"Error: file not found: {tp}")
             return 1
-        with open(tp, "r", encoding="utf-8") as f:
+        with open(tp, encoding="utf-8") as f:
             hypotheses = json.load(f)
         plan = planner.plan_from_transfer(hypotheses)
     else:

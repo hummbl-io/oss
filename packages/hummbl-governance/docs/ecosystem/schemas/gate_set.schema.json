@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/gate-set.schema.json",
+  "title": "HUMMBL Gate Set",
+  "description": "Tier 1 Governance Core: ExceptionPath + Rollback. Both templates AND instances (OQ-5): GateTemplate (reusable) + GateInstance (artifact-specific). Phase 0 schema seed — draft status, not canon.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "hummbl_object_envelope.schema.json" }
+  ],
+  "required": ["object_type", "gate_kind", "gates"],
+  "properties": {
+    "object_type": { "const": "GateSet" },
+    "tier": { "const": "tier1_governance_core" },
+    "gate_kind": {
+      "type": "string",
+      "enum": ["template", "instance"],
+      "description": "OQ-5: GateTemplate (reusable definition) or GateInstance (artifact-specific, parameterized from template)."
+    },
+    "template_ref": {
+      "type": "string",
+      "pattern": "^hummbl:gate-set:[a-f0-9-]+$",
+      "description": "For instances: reference to the GateTemplate this instance was parameterized from."
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["gate_id", "gate_name", "check_type", "severity"],
+        "properties": {
+          "gate_id": {
+            "type": "string",
+            "pattern": "^gate-[0-9]+$"
+          },
+          "gate_name": {
+            "type": "string"
+          },
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "separation",
+              "overlap_detection",
+              "relationship_completeness",
+              "promotion_authorization",
+              "prompt_centrism",
+              "schema_validation",
+              "evidence_requirement",
+              "receipt_requirement",
+              "counterexample_existence",
+              "independent_review",
+              "disclosure_handling",
+              "scan_authorization",
+              "eval_suite_attachment",
+              "context_pack_presence",
+              "anti_laundering"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["hard_block", "soft_warn", "advisory"]
+          },
+          "parameters": {
+            "type": "object",
+            "description": "For instances: concrete values bound to template parameters.",
+            "additionalProperties": true
+          },
+          "target_object_ref": {
+            "type": "string",
+            "description": "For instances: the object this gate is checking.",
+            "pattern": "^hummbl:[a-z0-9-]+:[a-f0-9-]+$"
+          },
+          "result": {
+            "type": "string",
+            "enum": ["pass", "fail", "skipped", "pending"],
+            "description": "For instances: the result of evaluating this gate."
+          },
+          "result_recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "phase_0_hard_gates": {
+      "type": "array",
+      "description": "References to Phase 0 hard gates (§19) enforced by this GateSet.",
+      "items": {
+        "type": "string",
+        "enum": ["G-P0-1", "G-P0-2", "G-P0-3", "G-P0-4", "G-P0-5", "G-P0-6"]
+      }
+    }
+  },
+  "additionalProperties": true
+}

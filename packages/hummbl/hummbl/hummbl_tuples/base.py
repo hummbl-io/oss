@@ -2,8 +2,8 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, asdict, field
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Type, TypeVar
+from datetime import datetime, UTC
+from typing import Any, TypeVar
 
 T = TypeVar("T", bound="TypedTuple")
 
@@ -15,10 +15,10 @@ class TypedTuple:
     of their content for cryptographic integrity and chaining.
     """
     tuple_type: str
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     version: str = "v1"
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert tuple to a dictionary, ensuring all values are serializable."""
         return asdict(self)
 
@@ -32,6 +32,6 @@ class TypedTuple:
         return hashlib.sha256(self.to_json().encode("utf-8")).hexdigest()
 
     @classmethod
-    def from_dict(cls: Type[T], data: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], data: dict[str, Any]) -> T:
         """Create a tuple from a dictionary."""
         return cls(**data)

@@ -14,9 +14,8 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Optional
 
-from hummbl.analyzer import TraceAnalyzer, categorize_experiment, get_top_category
+from hummbl.analyzer import TraceAnalyzer, categorize_experiment
 
 
 # ---------------------------------------------------------------------------
@@ -64,7 +63,7 @@ class _Glyphs:
 
 
 # Singleton, initialized lazily
-_glyphs: Optional[_Glyphs] = None
+_glyphs: _Glyphs | None = None
 
 
 def _g() -> _Glyphs:
@@ -81,7 +80,7 @@ def _g() -> _Glyphs:
 def _load_raw_traces(path: str | Path) -> list[dict]:
     """Load raw trace dicts from a HUMMBL JSON file."""
     path = Path(path)
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
     return data.get("traces", [])
 
@@ -132,8 +131,8 @@ def _extract_trace_info(trace: dict, index: int) -> dict:
 # View 1: Single trace view
 # ---------------------------------------------------------------------------
 
-def render_single_trace(path: str | Path, trace_id: Optional[str] = None,
-                        trace_index: Optional[int] = None) -> str:
+def render_single_trace(path: str | Path, trace_id: str | None = None,
+                        trace_index: int | None = None) -> str:
     """Render a single trace as a step chain diagram."""
     g = _g()
     traces = _load_raw_traces(path)
@@ -395,7 +394,7 @@ def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
     traces = _load_raw_traces(path)
 
     # Resolve IDs -- accept either trace ID or numeric index
-    def find_trace(identifier: str) -> tuple[Optional[dict], int]:
+    def find_trace(identifier: str) -> tuple[dict | None, int]:
         # Try numeric index first
         try:
             idx = int(identifier)
@@ -455,7 +454,7 @@ def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
     delta_a = info_a.get("delta_bpb")
     delta_b = info_b.get("delta_bpb")
 
-    def fmt_delta(d: Optional[float], bpb: float, baseline: Optional[float]) -> str:
+    def fmt_delta(d: float | None, bpb: float, baseline: float | None) -> str:
         if d is None:
             return "N/A (baseline)"
         pct = abs(d / baseline * 100) if baseline else 0

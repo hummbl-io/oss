@@ -33,6 +33,16 @@ but point here for documentation and issues.
 See `docs/MONOREPO-DESIGN.md` for the full structure, migration plan, and
 per-language publishing workflow.
 
+## Development
+
+```bash
+# Run tests across all packages
+python tools/scripts/test_all.py
+
+# Run tests for a specific package
+cd packages/hummbl && python -m pytest tests/ -v
+```
+
 ## License
 
 Dual-licensed at the repo level: MIT OR Apache-2.0. See [LICENSE](LICENSE),
@@ -40,6 +50,7 @@ Dual-licensed at the repo level: MIT OR Apache-2.0. See [LICENSE](LICENSE),
 Individual packages ship under Apache-2.0; see each package's `LICENSE` file.
 
 ## Contact
+
 
 - Web: [hummbl.io](https://hummbl.io)
 - Issues: [github.com/hummbl-io/oss/issues](https://github.com/hummbl-io/oss/issues)

@@ -2,14 +2,12 @@
 
 import os
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from hummbl_kernel.kernel import (
     MissionModeKernel,
     ComplianceFramework,
-    EventStatus,
     RiskClass,
     AuditEvent,
-    MissionReceipt,
     FleetConfig,
 )
 
@@ -126,7 +124,7 @@ class TestMissionModeKernel(unittest.TestCase):
             mission_id="test_mission",
             workflow_id="test_workflow",
             step_id="step_1",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             agent="test_agent",
             event_type="capability_request",
             actor="system",
@@ -208,7 +206,7 @@ class TestMissionModeKernel(unittest.TestCase):
             mission_id="mission_001",
             workflow_id="workflow_001",
             step_id="step_1",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             agent="test_agent",
             event_type="test_event",
             actor="system",

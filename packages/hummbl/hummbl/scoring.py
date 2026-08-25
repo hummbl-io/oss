@@ -14,7 +14,7 @@ the built-in StructuredToolUse protocol so HUMMBL can benchmark:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from hummbl.protocols import StructuredToolUse
 from hummbl.reasoning import ReasoningStep, ReasoningTrace, StepType
@@ -52,7 +52,7 @@ class TraceScore:
     max_score: int
     normalized_score: float
     protocol_violations: list[str] = field(default_factory=list)
-    outcome: Optional[str] = None
+    outcome: str | None = None
     tags: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
@@ -80,12 +80,12 @@ class ToolUseEpisode:
     """One tool-use cycle within a structured tool-use trace."""
 
     index: int
-    context_observation: Optional[ReasoningStep]
-    hypothesis: Optional[ReasoningStep]
+    context_observation: ReasoningStep | None
+    hypothesis: ReasoningStep | None
     action: ReasoningStep
-    tool_observation: Optional[ReasoningStep]
-    evaluation: Optional[ReasoningStep]
-    decision: Optional[ReasoningStep]
+    tool_observation: ReasoningStep | None
+    evaluation: ReasoningStep | None
+    decision: ReasoningStep | None
 
 
 class StructuredToolUseScorer:
@@ -96,7 +96,7 @@ class StructuredToolUseScorer:
         "Evidence that reduces uncertainty.",
     }
 
-    def __init__(self, protocol: Optional[StructuredToolUse] = None):
+    def __init__(self, protocol: StructuredToolUse | None = None):
         self.protocol = protocol or StructuredToolUse()
 
     def score_trace(self, trace: ReasoningTrace) -> TraceScore:
@@ -531,9 +531,9 @@ class StructuredToolUseScorer:
     @staticmethod
     def _find_ancestor_of_type(
         trace: ReasoningTrace,
-        step: Optional[ReasoningStep],
+        step: ReasoningStep | None,
         step_type: StepType,
-    ) -> Optional[ReasoningStep]:
+    ) -> ReasoningStep | None:
         current = step
         while current is not None and current.parent_id is not None:
             parent = trace.get_step(current.parent_id)
@@ -545,9 +545,9 @@ class StructuredToolUseScorer:
     @staticmethod
     def _find_direct_child_of_type(
         trace: ReasoningTrace,
-        step: Optional[ReasoningStep],
+        step: ReasoningStep | None,
         step_type: StepType,
-    ) -> Optional[ReasoningStep]:
+    ) -> ReasoningStep | None:
         if step is None:
             return None
         for child_id in step.children_ids:
@@ -557,7 +557,7 @@ class StructuredToolUseScorer:
         return None
 
     @staticmethod
-    def _has_value(step: Optional[ReasoningStep], key: str) -> bool:
+    def _has_value(step: ReasoningStep | None, key: str) -> bool:
         if step is None:
             return False
         value = step.metadata.get(key)
@@ -570,13 +570,13 @@ class StructuredToolUseScorer:
         return True
 
     @staticmethod
-    def _string_value(step: Optional[ReasoningStep], key: str) -> str:
+    def _string_value(step: ReasoningStep | None, key: str) -> str:
         if step is None:
             return ""
         value = step.metadata.get(key, "")
         return str(value).strip()
 
-    def _normalize_support(self, step: Optional[ReasoningStep]) -> str:
+    def _normalize_support(self, step: ReasoningStep | None) -> str:
         value = self._string_value(step, "supports_hypothesis").lower()
         if value in {"true", "yes", "supported"}:
             return "yes"

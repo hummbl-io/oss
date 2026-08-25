@@ -2,7 +2,7 @@
 
 import unittest
 from unittest.mock import patch, MagicMock
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from hummbl_kernel.fleet.fleet_health_checker import (
     FleetHealthChecker,
     FleetMode,
@@ -159,7 +159,7 @@ class TestFleetHealthChecker(unittest.TestCase):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             mock_check.side_effect = mock
 
@@ -175,13 +175,13 @@ class TestFleetHealthChecker(unittest.TestCase):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             else:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.UNHEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
 
         with patch.object(self.checker, '_check_machine', side_effect=mock_check_machine):
@@ -195,7 +195,7 @@ class TestFleetHealthChecker(unittest.TestCase):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             mock_check.side_effect = mock
 
@@ -210,13 +210,13 @@ class TestFleetHealthChecker(unittest.TestCase):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.UNHEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             else:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
 
         with patch.object(self.checker, '_check_machine', side_effect=mock_check_machine):
@@ -254,7 +254,7 @@ class TestFleetHealthChecker(unittest.TestCase):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             mock_check.side_effect = mock
 
@@ -275,7 +275,7 @@ class TestFleetHealthChecker(unittest.TestCase):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             mock_check.side_effect = mock
 
@@ -286,18 +286,18 @@ class TestFleetHealthChecker(unittest.TestCase):
     def test_print_health_report(self):
         """Health report should print without errors."""
         fleet_health = FleetHealth(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             mode=FleetMode.HYBRID,
             machines={
                 self.primary_name: MachineHealth(
                     name=self.primary_name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 ),
                 self.gpu_name: MachineHealth(
                     name=self.gpu_name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
             },
             overall_status=MachineStatus.HEALTHY,

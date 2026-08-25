@@ -33,6 +33,9 @@ test = [
     "pytest>=9,<10",
 ]
 
+[project.scripts]
+hummbl = "hummbl.cli:main"
+
 [project.urls]
 Homepage = "https://hummbl.io"
 Repository = "https://github.com/hummbl-io/oss"
@@ -42,3 +45,7 @@ Issues = "https://github.com/hummbl-io/oss/issues"
 [tool.setuptools.packages.find]
 include = ["hummbl*"]
 exclude = ["tests*", "traces*"]
+
+[tool.setuptools.package-data]
+hummbl = ["py.typed"]
+

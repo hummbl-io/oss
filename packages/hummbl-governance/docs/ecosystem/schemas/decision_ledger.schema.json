@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/decision-ledger.schema.json",
+  "title": "HUMMBL Decision Ledger",
+  "description": "Tier 1 Governance Core: Authority. 4-layer scope matching ADR-FM-057 Graph of Graphs (L1 Artifact, L2 Category, L3 Tier, L4 Fleet). Phase 0 schema seed — draft status, not canon.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "hummbl_object_envelope.schema.json" }
+  ],
+  "required": ["object_type", "scope_layer", "decisions"],
+  "properties": {
+    "object_type": { "const": "DecisionLedger" },
+    "tier": { "const": "tier1_governance_core" },
+    "scope_layer": {
+      "type": "string",
+      "enum": ["L1_artifact", "L2_category", "L3_tier", "L4_fleet"],
+      "description": "ADR-FM-057 Graph of Graphs layer (OQ-4): L1=repo-local, L2=project-local (ADRs), L3=cross-project tier escalations, L4=fleet-global (Constitution/Krineia)."
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["decision_id", "decision_type", "decided_by", "decided_at", "rationale", "status"],
+        "properties": {
+          "decision_id": {
+            "type": "string",
+            "pattern": "^decision-[0-9]+$"
+          },
+          "decision_type": {
+            "type": "string",
+            "enum": ["implementation", "architecture", "tier_escalation", "governance", "canon_promotion", "agent_promotion", "policy_change"]
+          },
+          "decided_by": {
+            "type": "string",
+            "description": "Agent or human identity that made the decision"
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["proposed", "accepted", "rejected", "superseded", "deferred"]
+          },
+          "alternatives_considered": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "cross_layer_edges": {
+            "type": "array",
+            "description": "ADR-FM-057 edge types connecting this decision across layers",
+            "items": {
+              "type": "object",
+              "properties": {
+                "edge_type": {
+                  "type": "string",
+                  "enum": ["artifact_has_tier", "tier_escalates_to", "tier_downgrades_to", "category_maps_to_tier", "agent_owns_category"]
+                },
+                "target_decision_ref": { "type": "string" }
+              }
+            }
+          },
+          "independent_review_required": {
+            "type": "boolean",
+            "default": false,
+            "description": "G-P0-4: Canon promotion requires independent review. No Arbiter/self-scoring loop."
+          },
+          "receipt_ref": {
+            "type": "string",
+            "pattern": "^hummbl:receipt-bundle:[a-f0-9-]+$"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

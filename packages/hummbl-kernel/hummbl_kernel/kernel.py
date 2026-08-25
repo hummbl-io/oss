@@ -10,12 +10,11 @@ import hashlib
 import hmac
 import logging
 import os
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from datetime import datetime, UTC
+from typing import Any
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 import asyncio
-import subprocess
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -57,16 +56,16 @@ class FleetConfig:
     primary_compute: str = "primary"
     gpu_compute: str = "gpu"
     fallback_compute: str = "primary"
-    
+
     # Machine capabilities flags are user-supplied; no internal hardware defaults.
     primary_apple_silicon: bool = False
     gpu_nvidia: bool = False
-    
+
     # Service endpoints (override via env vars; do not hardcode internal IPs/URLs)
     primary_ollama: str = field(default_factory=lambda: os.environ.get("PRIMARY_OLLAMA_URL", ""))
     primary_bus: str = field(default_factory=lambda: os.environ.get("PRIMARY_BUS_URL", ""))
     gpu_gitea: str = field(default_factory=lambda: os.environ.get("GPU_GITEA_URL", ""))
-    
+
     # Health check intervals
     heartbeat_interval_seconds: int = 30
 
@@ -83,11 +82,11 @@ class AuditEvent:
     agent: str
     event_type: str
     actor: str
-    payload: Dict[str, Any]
-    compliance_metadata: Dict[str, Any]
-    evidence_refs: List[str]
-    prev_event_id: Optional[str] = None
-    signature: Optional[str] = None
+    payload: dict[str, Any]
+    compliance_metadata: dict[str, Any]
+    evidence_refs: list[str]
+    prev_event_id: str | None = None
+    signature: str | None = None
 
 
 @dataclass
@@ -102,9 +101,9 @@ class MissionReceipt:
     completed_at: str
     final_event_id: str
     audit_trail_ref: str
-    compliance_report_ref: Optional[str] = None
-    evidence_refs: List[str] = field(default_factory=list)
-    bus_receipt: Dict[str, Any] = field(default_factory=dict)
+    compliance_report_ref: str | None = None
+    evidence_refs: list[str] = field(default_factory=list)
+    bus_receipt: dict[str, Any] = field(default_factory=dict)
 
 
 class MissionModeKernel:
@@ -117,14 +116,14 @@ class MissionModeKernel:
     - Fleet coordination between user-supplied primary and GPU compute
     - Immutable audit trail generation for compliance frameworks
     """
-    
-    def __init__(self, fleet_config: Optional[FleetConfig] = None):
+
+    def __init__(self, fleet_config: FleetConfig | None = None):
         if fleet_config is None:
             fleet_config = FleetConfig()
         self.fleet_config = fleet_config
-        self.active_missions: Dict[str, Dict] = {}
-        self.audit_trails: Dict[str, List[AuditEvent]] = {}
-        self.capability_registry: Dict[str, Dict] = {}
+        self.active_missions: dict[str, dict] = {}
+        self.audit_trails: dict[str, list[AuditEvent]] = {}
+        self.capability_registry: dict[str, dict] = {}
 
         # Initialize fleet health monitoring with generic machine names.
         self.fleet_health = {
@@ -136,14 +135,14 @@ class MissionModeKernel:
         logger.info(f"Fleet config: primary={self.fleet_config.primary_compute}, "
                    f"gpu={self.fleet_config.gpu_compute}, "
                    f"fallback={self.fleet_config.fallback_compute}")
-    
+
     def _generate_id(self, prefix: str) -> str:
         """Generate unique identifier"""
         import secrets
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
         random_suffix = secrets.token_hex(4)
         return f"{prefix}_{timestamp}_{random_suffix}"
-    
+
     def _compute_hash(self, data: str) -> str:
         """Compute SHA-256 hash"""
         return hashlib.sha256(data.encode()).hexdigest()
@@ -165,8 +164,8 @@ class MissionModeKernel:
             event_data.encode(),
             hashlib.sha256,
         ).hexdigest()
-    
-    async def check_fleet_health(self) -> Dict[str, bool]:
+
+    async def check_fleet_health(self) -> dict[str, bool]:
         """Check health of user-supplied fleet endpoints using stdlib urllib."""
         health_status = {}
 
@@ -204,7 +203,7 @@ class MissionModeKernel:
         except (URLError, OSError) as e:
             logger.warning(f"Health check failed for {url}: {e}")
             return False
-    
+
     def get_optimal_compute(self, task_type: str) -> str:
         """
         Determine optimal compute node for task type.
@@ -234,19 +233,19 @@ class MissionModeKernel:
         }
 
         return routing_rules.get(task_type, self.fleet_config.primary_compute)
-    
-    def register_capability(self, capability: str, risk_class: RiskClass, 
-                          adapter_id: str, compliance_frameworks: List[ComplianceFramework]):
+
+    def register_capability(self, capability: str, risk_class: RiskClass,
+                          adapter_id: str, compliance_frameworks: list[ComplianceFramework]):
         """Register a capability with the kernel"""
         self.capability_registry[capability] = {
             "risk_class": risk_class,
             "adapter_id": adapter_id,
             "compliance_frameworks": compliance_frameworks,
-            "registered_at": datetime.now(timezone.utc).isoformat()
+            "registered_at": datetime.now(UTC).isoformat()
         }
         logger.info(f"Registered capability: {capability} (risk: {risk_class}, adapter: {adapter_id})")
-    
-    def admit_capability(self, capability: str, agent: str, 
+
+    def admit_capability(self, capability: str, agent: str,
                        compliance_framework: ComplianceFramework) -> tuple[bool, str]:
         """
         Admit or deny a capability request based on risk and compliance framework
@@ -256,27 +255,27 @@ class MissionModeKernel:
         """
         if capability not in self.capability_registry:
             return False, f"Capability {capability} not registered"
-        
+
         cap_info = self.capability_registry[capability]
-        
+
         # Check if capability is supported for compliance framework
         if compliance_framework not in cap_info["compliance_frameworks"]:
             return False, f"Capability {capability} not supported for {compliance_framework}"
-        
+
         # High-risk capabilities require explicit approval
         if cap_info["risk_class"] in [RiskClass.HIGH, RiskClass.CRITICAL]:
             return False, f"High-risk capability {capability} requires explicit approval"
-        
+
         logger.info(f"Capability admitted: {capability} for agent {agent}")
         return True, "Capability admitted"
-    
-    def create_audit_trail(self, mission_id: str, workflow_id: str, 
+
+    def create_audit_trail(self, mission_id: str, workflow_id: str,
                          compliance_framework: ComplianceFramework,
                          audit_period_start: str, audit_period_end: str,
                          organization_id: str) -> str:
         """Create new audit trail for a mission"""
         audit_trail_id = self._generate_id("at")
-        
+
         audit_trail = {
             "schema_version": "mission_mode.audit_trail.v1",
             "audit_trail_id": audit_trail_id,
@@ -286,29 +285,29 @@ class MissionModeKernel:
             "audit_period_start": audit_period_start,
             "audit_period_end": audit_period_end,
             "organization_id": organization_id,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "created_by": "mission_mode_kernel",
             "status": "in_progress",
             "finalized_at": None,
             "events": []
         }
-        
+
         self.audit_trails[audit_trail_id] = audit_trail
         logger.info(f"Created audit trail: {audit_trail_id} for mission {mission_id}")
-        
+
         return audit_trail_id
-    
+
     def append_audit_event(self, audit_trail_id: str, event: AuditEvent) -> bool:
         """Append event to audit trail (append-only, immutable)"""
         if audit_trail_id not in self.audit_trails:
             logger.error(f"Audit trail {audit_trail_id} not found")
             return False
-        
+
         audit_trail = self.audit_trails[audit_trail_id]
-        
+
         # Sign the event
         event.signature = self._sign_event(event)
-        
+
         # Append event (append-only)
         audit_trail["events"].append({
             "event_id": event.event_id,
@@ -326,34 +325,34 @@ class MissionModeKernel:
             "prev_event_id": event.prev_event_id,
             "signature": event.signature
         })
-        
+
         logger.info(f"Appended event {event.event_type} to audit trail {audit_trail_id}")
         return True
-    
+
     def finalize_audit_trail(self, audit_trail_id: str) -> bool:
         """Finalize audit trail (immutable after finalization)"""
         if audit_trail_id not in self.audit_trails:
             logger.error(f"Audit trail {audit_trail_id} not found")
             return False
-        
+
         audit_trail = self.audit_trails[audit_trail_id]
         audit_trail["status"] = "finalized"
-        audit_trail["finalized_at"] = datetime.now(timezone.utc).isoformat()
-        
+        audit_trail["finalized_at"] = datetime.now(UTC).isoformat()
+
         logger.info(f"Finalized audit trail {audit_trail_id}")
         return True
-    
+
     def generate_receipt(self, mission_id: str, workflow_id: str, final_status: str,
-                      agent: str, audit_trail_id: str, 
-                      evidence_refs: List[str]) -> MissionReceipt:
+                      agent: str, audit_trail_id: str,
+                      evidence_refs: list[str]) -> MissionReceipt:
         """Generate mission completion receipt"""
         receipt_id = self._generate_id("rcpt")
-        
+
         # Get final event from audit trail
         audit_trail = self.audit_trails.get(audit_trail_id, {})
         events = audit_trail.get("events", [])
         final_event_id = events[-1]["event_id"] if events else None
-        
+
         receipt = MissionReceipt(
             receipt_id=receipt_id,
             mission_id=mission_id,
@@ -361,7 +360,7 @@ class MissionModeKernel:
             final_status=final_status,
             agent=agent,
             started_at=audit_trail.get("created_at", ""),
-            completed_at=datetime.now(timezone.utc).isoformat(),
+            completed_at=datetime.now(UTC).isoformat(),
             final_event_id=final_event_id,
             audit_trail_ref=audit_trail_id,
             evidence_refs=evidence_refs,
@@ -370,11 +369,11 @@ class MissionModeKernel:
                 "message_ref": None
             }
         )
-        
+
         logger.info(f"Generated receipt {receipt_id} for mission {mission_id}")
         return receipt
-    
-    async def execute_workflow(self, workflow_yaml: str, inputs: Dict[str, Any]) -> MissionReceipt:
+
+    async def execute_workflow(self, workflow_yaml: str, inputs: dict[str, Any]) -> MissionReceipt:
         """
         Execute a Conductor-style YAML workflow
         
@@ -388,15 +387,15 @@ class MissionModeKernel:
         # Parse YAML workflow
         try:
             workflow = json.loads(workflow_yaml) if workflow_yaml.startswith('{') else {}
-        except:
+        except Exception:
             # In production, use proper YAML parser
             workflow = {}
-        
+
         workflow_id = workflow.get("workflow_id", "unknown")
         mission_id = self._generate_id("mission")
-        
+
         logger.info(f"Executing workflow {workflow_id} as mission {mission_id}")
-        
+
         # Create audit trail
         compliance_framework = ComplianceFramework(workflow.get("compliance_framework", "SOC_2"))
         audit_trail_id = self.create_audit_trail(
@@ -407,7 +406,7 @@ class MissionModeKernel:
             audit_period_end=inputs.get("audit_period_end", ""),
             organization_id=inputs.get("organization_id", "org_001")
         )
-        
+
         # Initialize mission event
         init_event = AuditEvent(
             event_id=self._generate_id("evt"),
@@ -415,7 +414,7 @@ class MissionModeKernel:
             mission_id=mission_id,
             workflow_id=workflow_id,
             step_id="step_000",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             agent="mission_mode_kernel",
             event_type="mission.initialized",
             actor="system",
@@ -433,20 +432,20 @@ class MissionModeKernel:
             prev_event_id=None
         )
         self.append_audit_event(audit_trail_id, init_event)
-        
+
         # Execute workflow steps (simplified for MVP)
         # In production, this would be a full Conductor-style executor
         evidence_refs = []
-        
+
         # Simulate workflow execution
         for step in workflow.get("workflow", []):
             step_id = step.get("step", "unknown")
             agent = step.get("agent", "unknown")
-            
+
             # Determine optimal compute for this step
             task_type = self._infer_task_type(step)
             compute_node = self.get_optimal_compute(task_type)
-            
+
             # Create step event
             step_event = AuditEvent(
                 event_id=self._generate_id("evt"),
@@ -454,7 +453,7 @@ class MissionModeKernel:
                 mission_id=mission_id,
                 workflow_id=workflow_id,
                 step_id=step_id,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 agent=agent,
                 event_type="step.started",
                 actor="mission_mode_kernel",
@@ -472,16 +471,16 @@ class MissionModeKernel:
                 prev_event_id=init_event.event_id
             )
             self.append_audit_event(audit_trail_id, step_event)
-            
+
             # Simulate step completion
             # In production, this would call the actual agent
             if "outputs" in step:
                 if "evidence_refs" in step["outputs"]:
                     evidence_refs.extend(step["outputs"]["evidence_refs"])
-        
+
         # Finalize audit trail
         self.finalize_audit_trail(audit_trail_id)
-        
+
         # Generate receipt
         receipt = self.generate_receipt(
             mission_id=mission_id,
@@ -491,13 +490,13 @@ class MissionModeKernel:
             audit_trail_id=audit_trail_id,
             evidence_refs=evidence_refs
         )
-        
+
         return receipt
-    
-    def _infer_task_type(self, step: Dict[str, Any]) -> str:
+
+    def _infer_task_type(self, step: dict[str, Any]) -> str:
         """Infer task type from step definition"""
         agent = step.get("agent", "")
-        
+
         # Simple inference based on agent type
         if "collector" in agent.lower():
             return "file_ops"
@@ -513,11 +512,11 @@ class MissionModeKernel:
 async def main():
     """Example kernel execution"""
     kernel = MissionModeKernel()
-    
+
     # Check fleet health
     health = await kernel.check_fleet_health()
     print(f"Fleet health: {health}")
-    
+
     # Example workflow (simplified)
     example_workflow = {
         "schema_version": "mission_mode.workflow.v1",
@@ -548,7 +547,7 @@ async def main():
             }
         ]
     }
-    
+
     # Execute workflow
     receipt = await kernel.execute_workflow(
         workflow_yaml=json.dumps(example_workflow),
@@ -558,7 +557,7 @@ async def main():
             "organization_id": "org_001"
         }
     )
-    
+
     print(f"Mission completed: {receipt.receipt_id}")
     print(f"Audit trail: {receipt.audit_trail_ref}")
 

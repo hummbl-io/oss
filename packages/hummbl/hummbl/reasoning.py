@@ -13,7 +13,6 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 
 class ReasoningTopology(Enum):
@@ -77,11 +76,11 @@ class ReasoningStep:
     id: str
     type: StepType
     content: str
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     children_ids: list[str] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
-    confidence: Optional[float] = None
+    confidence: float | None = None
 
     def to_dict(self) -> dict:
         """Serialize to a plain dictionary."""
@@ -131,7 +130,7 @@ class ReasoningTrace:
     id: str
     topology: ReasoningTopology
     steps: list[ReasoningStep] = field(default_factory=list)
-    outcome: Optional[str] = None
+    outcome: str | None = None
     domain: str = ""
     created_at: float = field(default_factory=time.time)
     tags: list[str] = field(default_factory=list)
@@ -200,7 +199,7 @@ class ReasoningTrace:
             KeyError: If step_id is not found in the trace.
         """
         path = []
-        current_id: Optional[str] = step_id
+        current_id: str | None = step_id
 
         while current_id is not None:
             step = self.get_step(current_id)
@@ -266,9 +265,9 @@ class ReasoningTrace:
 def make_step(
     step_type: StepType,
     content: str,
-    parent_id: Optional[str] = None,
-    metadata: Optional[dict] = None,
-    confidence: Optional[float] = None,
+    parent_id: str | None = None,
+    metadata: dict | None = None,
+    confidence: float | None = None,
 ) -> ReasoningStep:
     """Convenience factory for creating a reasoning step with a UUID."""
     return ReasoningStep(
@@ -284,7 +283,7 @@ def make_step(
 def make_trace(
     domain: str,
     topology: ReasoningTopology = ReasoningTopology.CHAIN,
-    tags: Optional[list[str]] = None,
+    tags: list[str] | None = None,
 ) -> ReasoningTrace:
     """Convenience factory for creating an empty reasoning trace with a UUID."""
     return ReasoningTrace(

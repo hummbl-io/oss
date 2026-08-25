@@ -23,11 +23,39 @@ from hummbl.scoring import DimensionScore, TraceScore, StructuredToolUseScorer
 from hummbl.analyzer import TraceAnalyzer
 from hummbl.planner import TracePlanner, ExperimentPlan, PlannedExperiment
 from hummbl.hummbl_tuples import (
-    TypedTuple,
+    AttestTuple,
     ContractTuple,
     DCTTuple,
     DCTXTuple,
     EvidenceTuple,
-    AttestTuple,
     SystemTuple,
+    TypedTuple,
 )
+
+__all__ = [
+    "__version__",
+    "ReasoningTopology",
+    "StepType",
+    "ReasoningStep",
+    "ReasoningTrace",
+    "ReasoningProtocol",
+    "ScientificMethod",
+    "StructuredToolUse",
+    "AutoresearchCapture",
+    "ToolUseCapture",
+    "DimensionScore",
+    "TraceScore",
+    "StructuredToolUseScorer",
+    "TraceAnalyzer",
+    "TracePlanner",
+    "ExperimentPlan",
+    "PlannedExperiment",
+    "TypedTuple",
+    "ContractTuple",
+    "DCTTuple",
+    "DCTXTuple",
+    "EvidenceTuple",
+    "AttestTuple",
+    "SystemTuple",
+]
+

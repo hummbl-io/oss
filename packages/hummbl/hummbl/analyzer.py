@@ -14,10 +14,9 @@ from __future__ import annotations
 
 import json
 import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +89,7 @@ class ExperimentRecord:
     outcome: str  # keep / discard / crash
     val_bpb: float
     peak_vram_gb: float
-    delta_bpb: Optional[float]
+    delta_bpb: float | None
     category: str
     top_category: str
 
@@ -103,10 +102,10 @@ class CategoryStats:
     keeps: int = 0
     discards: int = 0
     crashes: int = 0
-    best_bpb: Optional[float] = None
-    worst_bpb: Optional[float] = None
+    best_bpb: float | None = None
+    worst_bpb: float | None = None
     avg_bpb: float = 0.0
-    best_delta: Optional[float] = None
+    best_delta: float | None = None
 
     @property
     def keep_rate(self) -> float:
@@ -141,8 +140,8 @@ class AnalysisResult:
     total_discards: int = 0
     total_crashes: int = 0
     keep_rate: float = 0.0
-    best_bpb: Optional[float] = None
-    best_experiment: Optional[str] = None
+    best_bpb: float | None = None
+    best_experiment: str | None = None
 
     # Trajectory
     bpb_trajectory: list[float] = field(default_factory=list)
@@ -189,7 +188,7 @@ class TraceAnalyzer:
     def load_traces_json(self, path: str | Path) -> list[ExperimentRecord]:
         """Load traces from a JSON file exported by HUMMBL capture."""
         path = Path(path)
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
         traces = data.get("traces", [])
