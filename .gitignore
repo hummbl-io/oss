@@ -29,3 +29,20 @@ _state/
 id_rsa
 id_ed25519
 id_ecdsa
+
+# Internal docs -- never commit to public repo (PII / fleet operations)
+# These directories contain operator names, machine hostnames, internal
+# session details, and fleet topology that must not be public.
+packages/hummbl-governance/docs/research/
+packages/hummbl-governance/docs/operations/
+packages/hummbl-governance/docs/handoffs/
+packages/hummbl-governance/docs/trackers/
+packages/hummbl-governance/docs/receipts/
+packages/hummbl-governance/docs/proposals/
+packages/hummbl-governance/docs/policies/
+packages/hummbl-governance/docs/runbooks/
+packages/hummbl-governance/docs/standards/FLEET_INVENTORY*
+docs/OSS_HEALTH_ACTION_PLAN.md
+packages/hummbl-governance/docs/GITEA_MIGRATION_PLAYBOOK.md
+packages/hummbl-governance/docs/OSS_HEALTH_AUDIT_20260823.md
+packages/hummbl-governance/docs/AUDIT-2026-08-23.md
