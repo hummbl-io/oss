@@ -1,0 +1,68 @@
+# governance.yml — HUMMBL package governance metadata
+#
+# This file is the first-class governance artifact shipped with every HUMMBL
+# package. It declares the package's governance posture: safety controls, cost
+# limits, compliance frameworks, and build provenance.
+#
+# governed-compression is a research implementation for vector and KV-cache
+# compression experiments. It depends on hummbl-governance for experiment
+# logging and uses numpy for numerical operations. It does not run autonomous
+# agents but does use hummbl-governance primitives for experiment governance.
+
+package:
+  name: governed-compression
+  version: 0.1.0
+  license: Apache-2.0
+  publisher: HUMMBL, LLC
+  description: Governed vector and KV-cache compression experiments
+
+safety:
+  kill_switch:
+    supported: true
+    default_mode: DISENGAGED
+    modes_available: [DISENGAGED, HALT_NONCRITICAL, HALT_ALL, EMERGENCY]
+    reason: "Inherited from hummbl-governance dependency — used to halt runaway experiments"
+  circuit_breaker:
+    supported: true
+    failure_threshold: 5
+    recovery_timeout_seconds: 30
+    reason: "Wraps benchmark runs to prevent infinite loops on bad input"
+  output_validation:
+    supported: false
+    reason: "Outputs are numerical metrics, not agent actions"
+  capability_fence:
+    supported: false
+
+cost:
+  cost_governor:
+    supported: false
+    reason: "Local computation only — no LLM API calls"
+
+identity:
+  delegation_tokens:
+    supported: false
+    reason: "Single-user research tool — no multi-agent delegation"
+  agent_registry:
+    supported: false
+
+audit:
+  audit_log:
+    supported: true
+    format: JSONL
+    append_only: true
+    rotation: false
+    retention_days: 90
+    reason: "Experiment logs via hummbl-governance AuditLog — tuple-based experiment tracking"
+  compliance_mapping:
+    frameworks: []
+    coverage: none
+
+provenance:
+  build_system: github-actions
+  trusted_publishing: true
+  testpypi_staging: true
+  source_repo: https://github.com/hummbl-io/governed-compression
+  license: Apache-2.0
+  supply_chain_risk: low
+  dependencies: [numpy, hummbl-governance]
+  tests: 14
