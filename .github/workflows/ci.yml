@@ -63,7 +63,7 @@ jobs:
           set -e
           # Most packages are stdlib-only (zero runtime deps).
           # Only audit packages that declare runtime dependencies.
-          for pkg_dir in packages/python/governed-compression packages/python/hummbl-bus packages/python/hummbl-cognition; do
+          for pkg_dir in packages/python/governed-compression packages/python/hummbl-bus packages/python/hummbl-cognition packages/python/hummbl-rubric-templates packages/python/hummbl-free-models; do
             echo "::group::Auditing $(basename $pkg_dir)"
             cd "$pkg_dir"
             pip install -e . -q 2>/dev/null
