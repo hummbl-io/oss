@@ -1,0 +1,174 @@
+# Agent Coordination Evaluation Template
+# Version: 1.0
+# Context: Multi-agent coordination and fleet operations evaluation
+
+template_metadata:
+  template_name: "Agent Coordination Evaluation"
+  template_version: "1.0"
+  template_type: "coordination_evaluation"
+  base_schema: "hummbl-rubric-master.yaml"
+  created_date: "2026-05-28"
+  last_updated: "2026-05-28"
+  author: "HUMMBL Governance Team"
+  
+parameters:
+  context_name: "agent_coordination"
+  framework_reference: "HUMMBL Multi-Agent Coordination Framework v1.0"
+  evaluation_scope: "fleet_wide"
+  artifact_types: ["coordination_log", "bus_receipt", "state_object"]
+  governance_level: "fleet"
+  stakeholder_type: "operator"
+  risk_profile: "high"
+  compliance_criticality: "required"
+  
+hard_gates:
+  framework_compliance:
+    fail_condition: "Does not follow HUMMBL coordination framework or missing required coordination patterns"
+    max_score_if_failed: 50
+    severity: "critical"
+    
+  governance_process:
+    fail_condition: "No evidence of coordination process or missing required coordination steps"
+    max_score_if_failed: 60
+    severity: "critical"
+    
+  evidence_quality:
+    fail_condition: "No coordination log entries or missing bus receipts for critical decisions"
+    max_score_if_failed: 70
+    severity: "high"
+    
+  scope_completion:
+    fail_condition: "Missing coordination across required agents or incomplete coordination flow"
+    max_score_if_failed: 80
+    severity: "high"
+    
+  risk_containment:
+    fail_condition: "No coordination failure handling or missing escalation procedures"
+    max_score_if_failed: 70
+    severity: "high"
+    
+  artifact_presence:
+    fail_condition: "Missing coordination artifacts (bus receipts, state objects, coordination logs)"
+    max_score_if_failed: 65
+    severity: "medium"
+    
+  stakeholder_control:
+    fail_condition: "No operator oversight or missing approval for critical coordination decisions"
+    max_score_if_failed: 70
+    severity: "medium"
+    
+weighted_dimensions:
+  # Core dimensions (40% total)
+  framework_fidelity:
+    weight: 20
+    description: "How faithfully the coordination follows HUMMBL framework patterns and agent interaction protocols"
+    scoring_anchors:
+      "0-5": "Does not follow HUMMBL coordination framework, no standard patterns, missing required protocols"
+      "6-10": "Partial HUMMBL framework compliance, some standard patterns, incomplete protocol coverage"
+      "11-13": "Complete HUMMBL framework compliance, full standard patterns, all protocols covered"
+      "14-15": "Complete HUMMBL framework compliance with precise pattern application, demonstrates deep coordination understanding"
+      "16-20": "Complete HUMMBL framework compliance with nuanced pattern adaptation, shows coordination mastery and optimization"
+      
+  applied_transformation:
+    weight: 15
+    description: "How well coordination patterns are transformed into effective agent interactions"
+    scoring_anchors:
+      "0-5": "No transformation from patterns to interactions, abstract coordination only, no effective agent collaboration"
+      "6-10": "Partial transformation, some patterns applied but not effective, limited agent collaboration"
+      "11-13": "Complete transformation to effective agent interactions, clear collaboration patterns, coordination well-applied"
+      "14-15": "Complete transformation with sophisticated agent interactions, highly effective collaboration, coordination mastery demonstrated"
+      
+  evidence_quality:
+    weight: 15
+    description: "Quality, completeness, and traceability of coordination evidence (bus receipts, logs, state objects)"
+    scoring_anchors:
+      "0-3": "No coordination evidence or placeholder logs, no traceability, critical decisions missing receipts"
+      "4-6": "Partial evidence coverage, weak traceability, some critical decisions with insufficient receipts"
+      "7-8": "Complete evidence coverage for all coordination events, strong traceability, evidence clearly linked to decisions"
+      "9-10": "Complete evidence coverage with strong traceability, evidence quality validated, includes evidence collection procedures"
+      
+  # Governance dimensions (30% total)
+  governance_process:
+    weight: 15
+    description: "Evidence of proper coordination process and stakeholder engagement"
+    scoring_anchors:
+      "0-3": "No governance process evidence, no stakeholder review, no coordination process documentation"
+      "4-6": "Partial governance process evidence, limited stakeholder review, some coordination process documentation"
+      "7-8": "Complete governance process evidence, full stakeholder review, coordination process documented with bus receipts"
+      "9-10": "Complete governance process with documented coordination workflow, stakeholder sign-off, governance receipts with decision rationale"
+      
+  stakeholder_control:
+    weight: 10
+    description: "Degree of stakeholder control and oversight over the coordination process"
+    scoring_anchors:
+      "0-3": "No stakeholder control, no approval mechanisms, no oversight"
+      "4-6": "Limited stakeholder control, basic approval mechanisms, minimal oversight"
+      "7-8": "Strong stakeholder control, clear approval mechanisms, documented oversight"
+      "9-10": "Complete stakeholder control with documented escalation paths, approval workflows, and oversight procedures"
+      
+  risk_containment:
+    weight: 15
+    description: "Identification, assessment, and mitigation of coordination risks and failures"
+    scoring_anchors:
+      "0-3": "No failure mode analysis, unmitigated critical risks, no risk assessment"
+      "4-6": "Partial failure mode analysis, some critical risks unmitigated, basic risk assessment"
+      "7-8": "Complete failure mode analysis, all critical risks mitigated, comprehensive risk assessment"
+      "9-10": "Complete failure mode analysis with risk scoring, mitigation plans, and residual risk assessment"
+      
+  # Quality dimensions (20% total)
+  useful_density:
+    weight: 10
+    description: "Density of effective coordination vs. unnecessary agent interactions"
+    scoring_anchors:
+      "0-3": "Mostly unnecessary interactions, minimal effective coordination, high noise-to-signal ratio"
+      "4-6": "Mixed unnecessary and effective interactions, moderate noise-to-signal ratio"
+      "7-8": "Primarily effective coordination, minimal unnecessary interactions, low noise-to-signal ratio"
+      "9-10": "Highly effective coordination throughout, no unnecessary interactions, excellent signal-to-noise ratio"
+      
+  artifact_utility:
+    weight: 10
+    description: "Utility of coordination artifacts for fleet operations and decision-making"
+    scoring_anchors:
+      "0-3": "Artifacts not useful for fleet operations, require significant rework"
+      "4-6": "Artifacts partially useful, require moderate rework for fleet operations"
+      "7-8": "Artifacts highly useful, minimal rework required for fleet operations"
+      "9-10": "Artifacts immediately usable, no rework required, integrate seamlessly with fleet operations"
+      
+  # Epistemic dimensions (10% total)
+  truth_seeking:
+    weight: 10
+    description: "Evidence of truth-seeking behavior vs. coordination theater"
+    scoring_anchors:
+      "0-2": "Clear coordination theater, no evidence of genuine collaboration, box-checking approach"
+      "3-5": "Mixed coordination theater and genuine collaboration, partial truth-seeking"
+      "6-7": "Genuine collaboration with evidence of truth-seeking, minimal coordination theater"
+      "8": "Strong truth-seeking throughout, evidence of critical self-assessment, no coordination theater"
+      
+  # External validity dimensions (10% total)
+  external_validity:
+    weight: 10
+    description: "Evidence that coordination produces valid external outcomes and operational results"
+    scoring_anchors:
+      "0-2": "No external validity evidence, coordination produces no operational results"
+      "3-4": "Limited external validity evidence, coordination produces partial operational results"
+      "5": "Good external validity evidence, coordination produces clear operational results"
+      "6": "Excellent external validity evidence, coordination produces validated operational outcomes"
+      
+required_outputs:
+  numeric_score: 0
+  hard_gate_status: ""
+  weighted_breakdown: {}
+  top_3_strengths: []
+  top_3_weaknesses: []
+  score_caps_triggered: []
+  next_validation_test: "Operational validation of coordination outcomes in production environment"
+  limitations: "Single coordination event evaluation, requires multiple events for pattern validation"
+  
+usage_notes:
+  - "This template is designed for HUMMBL multi-agent coordination evaluations"
+  - "Hard gates focus on framework compliance, coordination evidence, and stakeholder oversight"
+  - "Weighted dimensions emphasize framework fidelity and governance process"
+  - "Truth-seeking dimension detects coordination theater vs. genuine collaboration"
+  - "External validity dimension assesses operational outcomes of coordination"
+  - "Template assumes fleet-level governance with operator stakeholder perspective"
+  - "Multiple coordination events are recommended for pattern validation and consistency assessment"

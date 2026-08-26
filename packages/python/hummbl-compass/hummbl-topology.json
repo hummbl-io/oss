@@ -1,0 +1,954 @@
+{
+  "schema_version": "1.1.0",
+  "generated": "2026-05-11T10:00:00Z",
+  "generated_by": "devin",
+  "description": "Canonical topology of the hummbl-* experimental repo ecosystem. v1.1.0 reflects Option D Hybrid execution: 3 new repos, 1 merge.",
+  "schema": {
+    "repo_fields": {
+      "name": "repo directory name (hummbl-<X>)",
+      "primary_base120": "The single Base120 model that best captures the repo's core intent",
+      "secondary_base120s": "Additional models that apply (max 3)",
+      "layer": "Architectural layer (L0 Meta, L1 Safety, L2 Technical, L3 Coordination, L4 Strategy, L5 Human, L6 Operations)",
+      "layer_name": "Human-readable layer description",
+      "description": "One-line purpose statement",
+      "bridges": "Array of repo names this repo explicitly connects to (cross-layer or cross-domain)",
+      "status": "active | stale | deprecated | experimental",
+      "size_category": "tiny (<1MB), small (<50MB), medium (<500MB), large (>500MB)",
+      "git_host": "gitea | github | local-only"
+    }
+  },
+  "layers": {
+    "L0": {
+      "name": "Meta",
+      "description": "Cross-cutting shared infrastructure, intelligence, and taxonomy"
+    },
+    "L1": {
+      "name": "Safety",
+      "description": "Governance, compliance, adversarial testing, and risk"
+    },
+    "L2": {
+      "name": "Technical",
+      "description": "ML, AI kernels, alignment, and learning mechanics"
+    },
+    "L3": {
+      "name": "Coordination",
+      "description": "Bus, mesh, agent orchestration, and shared memory"
+    },
+    "L4": {
+      "name": "Strategy",
+      "description": "Positioning, intelligence, benchmarks, and evidence"
+    },
+    "L5": {
+      "name": "Human",
+      "description": "Belonging, cognition, health, and founder support"
+    },
+    "L6": {
+      "name": "Operations",
+      "description": "Production, runtime, live services, and tooling"
+    }
+  },
+  "repos": [
+    {
+      "name": "hummbl-library",
+      "primary_base120": "CO12",
+      "secondary_base120s": [
+        "CO14",
+        "SY20"
+      ],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Cross-project shared library - governance primitives, ML helpers, bus extensions",
+      "bridges": [
+        "hummbl-governance",
+        "hummbl-bus",
+        "hummbl-kernel-forge"
+      ],
+      "status": "active",
+      "size_category": "tiny",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-taxonomy",
+      "primary_base120": "DE6",
+      "secondary_base120s": [
+        "P4",
+        "CO18"
+      ],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Classification schemas, ontologies, and naming conventions for the ecosystem",
+      "bridges": [
+        "hummbl-strategy",
+        "hummbl-governance",
+        "hummbl-intel"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-rsi",
+      "primary_base120": "RE10",
+      "secondary_base120s": [
+        "RE3",
+        "SY9"
+      ],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Recursive self-improvement metrics and system compounding signals",
+      "bridges": [
+        "hummbl-production",
+        "hummbl-mtsmu",
+        "hummbl-benchmarks"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-governance",
+      "primary_base120": "SY11",
+      "secondary_base120s": [
+        "SY13",
+        "SY14"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "AI governance frameworks, maturity models, and control catalogs",
+      "bridges": [
+        "hummbl-compliance",
+        "hummbl-contracts",
+        "hummbl-library"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-compliance",
+      "primary_base120": "SY14",
+      "secondary_base120s": [
+        "SY11",
+        "IN10"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "NIST, ISO, SOC 2, EU AI Act readiness assessments and gap analysis",
+      "bridges": [
+        "hummbl-governance",
+        "hummbl-legal",
+        "hummbl-contracts"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-contracts",
+      "primary_base120": "CO9",
+      "secondary_base120s": [
+        "SY12",
+        "CO12"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "ARCHIVED 2026-05-11: Merged into hummbl-governance. See hummbl-governance/_migrated/hummbl-contracts/",
+      "bridges": [
+        "hummbl-governance"
+      ],
+      "status": "archived",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-legal",
+      "primary_base120": "SY11",
+      "secondary_base120s": [
+        "DE6",
+        "P9"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Legal document generation - NDAs, MSAs, ToS, Privacy Policy",
+      "bridges": [
+        "hummbl-compliance",
+        "hummbl-paralegal",
+        "hummbl-governance"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-adversarial",
+      "primary_base120": "IN10",
+      "secondary_base120s": [
+        "IN12",
+        "SY14"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Adversarial testing for LLM agents and non-LLM agent fleets",
+      "bridges": [
+        "hummbl-alignment",
+        "hummbl-kernel-forge",
+        "hummbl-redteam"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-caes",
+      "primary_base120": "SY14",
+      "secondary_base120s": [
+        "IN2",
+        "SY11"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Continuous adversarial evaluation system - ongoing red-team automation",
+      "bridges": [
+        "hummbl-adversarial",
+        "hummbl-benchmarks",
+        "hummbl-production"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-alignment",
+      "primary_base120": "SY13",
+      "secondary_base120s": [
+        "SY11",
+        "P16"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "AI alignment research - goal drift detection, specification gaming prevention",
+      "bridges": [
+        "hummbl-adversarial",
+        "hummbl-agi",
+        "hummbl-governance"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-agi",
+      "primary_base120": "CO5",
+      "secondary_base120s": [
+        "SY9",
+        "RE10"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "General intelligence research and capability forecasting",
+      "bridges": [
+        "hummbl-alignment",
+        "hummbl-jepa",
+        "hummbl-benchmarks"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-jepa",
+      "primary_base120": "CO5",
+      "secondary_base120s": [
+        "DE3",
+        "RE3"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "Joint Embedding Predictive Architecture experiments",
+      "bridges": [
+        "hummbl-agi",
+        "hummbl-kernel-forge",
+        "hummbl-learning-mechanics"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-kernel-forge",
+      "primary_base120": "DE3",
+      "secondary_base120s": [
+        "CO5",
+        "RE1"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "GPU kernel optimization, Metal/CUDA benchmarks, and hackathon submissions",
+      "bridges": [
+        "hummbl-jepa",
+        "hummbl-benchmarks",
+        "hummbl-library"
+      ],
+      "status": "active",
+      "size_category": "medium",
+      "git_host": "gitea"
+    },
+    {
+      "name": "hummbl-physical-ai",
+      "primary_base120": "CO5",
+      "secondary_base120s": [
+        "SY9",
+        "DE3"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "Physical world AI - robotics, embodiment, sensorimotor integration",
+      "bridges": [
+        "hummbl-kernel-forge",
+        "hummbl-mesh",
+        "hummbl-production"
+      ],
+      "status": "experimental",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-learning-mechanics",
+      "primary_base120": "RE3",
+      "secondary_base120s": [
+        "RE1",
+        "CO5"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "How learning works - meta-learning, curriculum design, skill acquisition",
+      "bridges": [
+        "hummbl-jepa",
+        "hummbl-professor",
+        "hummbl-bki"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-brainstorm",
+      "primary_base120": "CO4",
+      "secondary_base120s": [
+        "P4",
+        "CO5"
+      ],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "Design-first exploration tools - no code until design is approved",
+      "bridges": [
+        "hummbl-strategy",
+        "hummbl-huaomp",
+        "hummbl-taxonomy"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-bus",
+      "primary_base120": "SY20",
+      "secondary_base120s": [
+        "CO10",
+        "SY12"
+      ],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Coordination bus - append-only TSV message log for agent coordination",
+      "bridges": [
+        "hummbl-mesh",
+        "hummbl-clp",
+        "hummbl-mtsmu"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-mesh",
+      "primary_base120": "SY20",
+      "secondary_base120s": [
+        "SY15",
+        "CO10"
+      ],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Multi-machine mesh topology - Tailscale, SSH, service discovery",
+      "bridges": [
+        "hummbl-bus",
+        "hummbl-spacetime",
+        "hummbl-production"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-mtsmu",
+      "primary_base120": "CO10",
+      "secondary_base120s": [
+        "SY20",
+        "RE1"
+      ],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "MTSMU orchestration - evidence-first coding, debugging, review, and operations",
+      "bridges": [
+        "hummbl-bus",
+        "hummbl-crucible",
+        "hummbl-rsi"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-clp",
+      "primary_base120": "SY20",
+      "secondary_base120s": [
+        "RE7",
+        "CO18"
+      ],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Cognitive Ledger Protocol - shared memory, intent, and decision persistence",
+      "bridges": [
+        "hummbl-bus",
+        "hummbl-crucible",
+        "hummbl-bki"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-crucible",
+      "primary_base120": "SY20",
+      "secondary_base120s": [
+        "SY14",
+        "SY11"
+      ],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Agent lifecycle metrics, guardrail violations, and fleet health monitoring",
+      "bridges": [
+        "hummbl-mtsmu",
+        "hummbl-clp",
+        "hummbl-governance"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-spacetime",
+      "primary_base120": "SY20",
+      "secondary_base120s": [
+        "SY15",
+        "P12"
+      ],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Cross-machine state sync, temporal reasoning, and distributed clock management",
+      "bridges": [
+        "hummbl-mesh",
+        "hummbl-clp",
+        "hummbl-bus"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-strategy",
+      "primary_base120": "P4",
+      "secondary_base120s": [
+        "P8",
+        "DE18"
+      ],
+      "layer": "L4",
+      "layer_name": "Strategy",
+      "description": "Governance charter, org structure, partnership materials, category positioning",
+      "bridges": [
+        "hummbl-intel",
+        "hummbl-taxonomy",
+        "hummbl-governance"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "gitea"
+    },
+    {
+      "name": "hummbl-intel",
+      "primary_base120": "P4",
+      "secondary_base120s": [
+        "DE18",
+        "SY18"
+      ],
+      "layer": "L4",
+      "layer_name": "Strategy",
+      "description": "Research intelligence - sweep, ingest, synthesize, dispatch",
+      "bridges": [
+        "hummbl-strategy",
+        "hummbl-benchmarks",
+        "hummbl-evidence-flywheel"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-benchmarks",
+      "primary_base120": "SY18",
+      "secondary_base120s": [
+        "DE14",
+        "RE11"
+      ],
+      "layer": "L4",
+      "layer_name": "Strategy",
+      "description": "Reproducible benchmarks with N iterations, stats, and regression detection",
+      "bridges": [
+        "hummbl-kernel-forge",
+        "hummbl-intel",
+        "hummbl-rsi"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-huaomp",
+      "primary_base120": "P4",
+      "secondary_base120s": [
+        "CO4",
+        "P20"
+      ],
+      "layer": "L4",
+      "layer_name": "Strategy",
+      "description": "Maximum epistemic breadth - 6 analytical lenses for intent-to-spec generation",
+      "bridges": [
+        "hummbl-brainstorm",
+        "hummbl-strategy",
+        "hummbl-taxonomy"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-fractional-bench",
+      "primary_base120": "SY18",
+      "secondary_base120s": [
+        "CO14",
+        "RE11"
+      ],
+      "layer": "L4",
+      "layer_name": "Strategy",
+      "description": "Fractional CTO/executive benchmarking and capability assessment",
+      "bridges": [
+        "hummbl-benchmarks",
+        "hummbl-strategy",
+        "hummbl-production"
+      ],
+      "status": "experimental",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-bki",
+      "primary_base120": "P3",
+      "secondary_base120s": [
+        "P5",
+        "P9"
+      ],
+      "layer": "L5",
+      "layer_name": "Human",
+      "description": "Belonging, Knowledge, Identity - the core HUMMBL human thesis",
+      "bridges": [
+        "hummbl-hrsi",
+        "hummbl-professor",
+        "hummbl-learning-mechanics"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-hrsi",
+      "primary_base120": "P5",
+      "secondary_base120s": [
+        "P3",
+        "RE2"
+      ],
+      "layer": "L5",
+      "layer_name": "Human",
+      "description": "Human Recursive Self-Improvement - belonging baseline checks and somatic reframes",
+      "bridges": [
+        "hummbl-bki",
+        "hummbl-ani",
+        "hummbl-aspi"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-ani",
+      "primary_base120": "P5",
+      "secondary_base120s": [
+        "P3",
+        "RE3"
+      ],
+      "layer": "L5",
+      "layer_name": "Human",
+      "description": "Agent narrative intelligence - storytelling for human-agent collaboration",
+      "bridges": [
+        "hummbl-hrsi",
+        "hummbl-professor",
+        "hummbl-bki"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-aspi",
+      "primary_base120": "P3",
+      "secondary_base120s": [
+        "P5",
+        "SY13"
+      ],
+      "layer": "L5",
+      "layer_name": "Human",
+      "description": "Aspiration mapping - goal-setting, identity-driven motivation, future-self design",
+      "bridges": [
+        "hummbl-bki",
+        "hummbl-hrsi",
+        "hummbl-strategy"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-professor",
+      "primary_base120": "RE3",
+      "secondary_base120s": [
+        "P5",
+        "RE1"
+      ],
+      "layer": "L5",
+      "layer_name": "Human",
+      "description": "Personal AI professor - dissertation-advisor mode for AI/ML/DL math",
+      "bridges": [
+        "hummbl-learning-mechanics",
+        "hummbl-bki",
+        "hummbl-ani"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-medical",
+      "primary_base120": "P5",
+      "secondary_base120s": [
+        "DE1",
+        "SY18"
+      ],
+      "layer": "L5",
+      "layer_name": "Human",
+      "description": "Medical research and experimental tooling - evidence-first health research",
+      "bridges": [
+        "hummbl-bki",
+        "hummbl-benchmarks",
+        "hummbl-taxonomy"
+      ],
+      "status": "active",
+      "size_category": "large",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-production",
+      "primary_base120": "CO10",
+      "secondary_base120s": [
+        "SY14",
+        "RE1"
+      ],
+      "layer": "L6",
+      "layer_name": "Operations",
+      "description": "Production deployment patterns, canary verification, and rollback automation",
+      "bridges": [
+        "hummbl-live",
+        "hummbl-mesh",
+        "hummbl-governance"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-live",
+      "primary_base120": "CO10",
+      "secondary_base120s": [
+        "SY14",
+        "SY18"
+      ],
+      "layer": "L6",
+      "layer_name": "Operations",
+      "description": "Live service runtime - real-time agent orchestration and health monitoring",
+      "bridges": [
+        "hummbl-production",
+        "hummbl-crucible",
+        "hummbl-bus"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-gaas",
+      "primary_base120": "CO14",
+      "secondary_base120s": [
+        "SY11",
+        "CO10"
+      ],
+      "layer": "L6",
+      "layer_name": "Operations",
+      "description": "Governance-as-a-Service - packaged governance primitives for external deployment",
+      "bridges": [
+        "hummbl-governance",
+        "hummbl-production",
+        "hummbl-library"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-paralegal",
+      "primary_base120": "CO10",
+      "secondary_base120s": [
+        "DE6",
+        "SY13"
+      ],
+      "layer": "L6",
+      "layer_name": "Operations",
+      "description": "Automated legal workflow execution - contract review, compliance checks",
+      "bridges": [
+        "hummbl-legal",
+        "hummbl-contracts",
+        "hummbl-production"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-tuples",
+      "primary_base120": "CO3",
+      "secondary_base120s": [
+        "CO9",
+        "DE2"
+      ],
+      "layer": "L6",
+      "layer_name": "Operations",
+      "description": "Typed tuple contracts and structured data pipelines for agent outputs",
+      "bridges": [
+        "hummbl-contracts",
+        "hummbl-library",
+        "hummbl-bus"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-premortem",
+      "primary_base120": "IN2",
+      "secondary_base120s": [
+        "IN12",
+        "IN18"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Failure-first design catalog and automated premortem generator (Base120 IN2)",
+      "bridges": [
+        "hummbl-governance",
+        "hummbl-worstcase",
+        "hummbl-production"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-worstcase",
+      "primary_base120": "IN16",
+      "secondary_base120s": [
+        "IN7",
+        "IN10"
+      ],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Inverse optimization and stress testing scaffold (Base120 IN16)",
+      "bridges": [
+        "hummbl-premortem",
+        "hummbl-adversarial",
+        "hummbl-kernel-forge"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    },
+    {
+      "name": "hummbl-telemetry",
+      "primary_base120": "SY18",
+      "secondary_base120s": [
+        "RE11",
+        "SY6"
+      ],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Cross-repo health, usage, and drift monitoring (Base120 SY18)",
+      "bridges": [
+        "hummbl-compass",
+        "hummbl-crucible",
+        "hummbl-rsi"
+      ],
+      "status": "active",
+      "size_category": "small",
+      "git_host": "local-only"
+    }
+  ],
+  "cross_cutting_concerns": [
+    {
+      "name": "stdlib-only",
+      "description": "Zero third-party runtime dependencies in production code",
+      "repos_affected": [
+        "hummbl-library",
+        "hummbl-kernel-forge",
+        "hummbl-medical",
+        "hummbl-tuples",
+        "hummbl-bus",
+        "hummbl-mtsmu"
+      ],
+      "base120": "SY12"
+    },
+    {
+      "name": "evidence-first",
+      "description": "All claims backed by citations, benchmarks, or reproducible artifacts",
+      "repos_affected": [
+        "hummbl-intel",
+        "hummbl-benchmarks",
+        "hummbl-medical",
+        "hummbl-kernel-forge",
+        "hummbl-mtsmu"
+      ],
+      "base120": "DE1"
+    },
+    {
+      "name": "multi-agent",
+      "description": "Designed for coordination between 2+ AI agents",
+      "repos_affected": [
+        "hummbl-bus",
+        "hummbl-mesh",
+        "hummbl-clp",
+        "hummbl-crucible",
+        "hummbl-mtsmu",
+        "hummbl-spacetime"
+      ],
+      "base120": "SY20"
+    },
+    {
+      "name": "founder-focused",
+      "description": "Directly serves founder productivity, wellbeing, or decision-making",
+      "repos_affected": [
+        "hummbl-bki",
+        "hummbl-hrsi",
+        "hummbl-strategy",
+        "hummbl-professor",
+        "hummbl-aspi",
+        "hummbl-ani"
+      ],
+      "base120": "P2"
+    }
+  ],
+  "gaps": [
+    {
+      "repo_name": "hummbl-contracts",
+      "primary_base120": "CO9",
+      "layer": "L1",
+      "description": "Merged into hummbl-governance 2026-05-11. No longer a standalone repo.",
+      "justification": "80% overlap with governance; archive per Repo Lifecycle Policy v1.0",
+      "priority": 0
+    },
+    {
+      "repo_name": "hummbl-emergence",
+      "primary_base120": "CO5",
+      "layer": "L2",
+      "description": "Swarm behavior, spontaneous order, and complex adaptive systems",
+      "justification": "CO5 is claimed by agi/jepa/physical-ai but none focus on emergence per se",
+      "priority": 3
+    },
+    {
+      "repo_name": "hummbl-analogy",
+      "primary_base120": "CO13",
+      "layer": "L0",
+      "description": "Cross-domain analogy engine for creative problem solving",
+      "justification": "CO13 unrepresented; bridges technical and strategy layers",
+      "priority": 3
+    },
+    {
+      "repo_name": "hummbl-homeo",
+      "primary_base120": "SY8",
+      "layer": "L3",
+      "description": "Self-regulating systems - auto-scaling, self-healing, homeostatic orchestration",
+      "justification": "SY8 unrepresented; coordination layer needs self-regulation",
+      "priority": 2
+    },
+    {
+      "repo_name": "hummbl-selector",
+      "primary_base120": "SY19",
+      "layer": "L0",
+      "description": "Meta-model selection - pick the right mental model for the job",
+      "justification": "SY19 unrepresented; compass handles repos, selector handles models",
+      "priority": 3
+    }
+  ],
+  "statistics": {
+    "total_repos": 41,
+    "active_repos": 38,
+    "archived_repos": 1,
+    "by_layer": {
+      "L0": 4,
+      "L1": 8,
+      "L2": 7,
+      "L3": 6,
+      "L4": 5,
+      "L5": 6,
+      "L6": 5
+    },
+    "by_base120_domain": {
+      "CO": 12,
+      "DE": 2,
+      "IN": 3,
+      "P": 8,
+      "RE": 3,
+      "SY": 13
+    },
+    "by_status": {
+      "active": 38,
+      "archived": 1,
+      "experimental": 2
+    },
+    "bridges_per_repo_avg": 3.0,
+    "orphan_repos": [],
+    "overconnected_repos": []
+  }
+}
