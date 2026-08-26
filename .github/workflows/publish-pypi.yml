@@ -108,21 +108,71 @@ jobs:
           name: dist
           path: ${{ steps.pkg.outputs.path }}/dist/
 
+      - name: Generate SBOM
+        working-directory: ${{ steps.pkg.outputs.path }}
+        run: |
+          pip install "cyclonedx-bom>=5.0" --quiet
+          cyclonedx-py environment --output-reproducible --outfile sbom.json
+          # ponytail: cyclonedx-py environment captures installed packages;
+          # for a stdlib-only package this is small but still a valid SBOM.
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.1
+        with:
+          name: sbom
+          path: ${{ steps.pkg.outputs.path }}/sbom.json
+
   publish:
     name: publish
     needs: build
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      contents: read
-      id-token: write  # OIDC for trusted publishing
+      contents: write   # create GitHub Release
+      id-token: write   # OIDC for trusted publishing + sigstore + provenance
+      attestations: write  # attest-build-provenance
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: dist
           path: dist/
 
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: sbom
+          path: .
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # release/v1
         with:
           packages-dir: dist/
+
+      - name: Sign artifacts with Sigstore
+        uses: sigstore/gh-action-sigstore-python@f514d46b907ebcd5bedc05145c03b69c1edd8b46 # v3.0.0
+        with:
+          inputs: dist/*.whl dist/*.tar.gz
+          upload-signing-artifacts: true
+
+      - name: Generate build provenance attestation
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+        with:
+          subject-path: dist/*.whl dist/*.tar.gz
+
+      - name: Generate checksums
+        id: checksums
+        working-directory: dist
+        run: |
+          sha256sum *.whl *.tar.gz > checksums-sha256.txt
+          echo "path=dist/checksums-sha256.txt" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/checksums-sha256.txt
+            sbom.json
