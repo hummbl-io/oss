@@ -12,6 +12,10 @@ Usage:
     python tools/scripts/pypi_download_tracker.py --report  # print trend report
     python tools/scripts/pypi_download_tracker.py --check   # flag anomalies (exit 1 if found)
 
+Anomaly detection requires at least 3 days of data to begin producing
+signals, and 7+ days for the sustained-growth rule to activate. With
+fewer entries, --check reports "No anomalies detected" without error.
+
 Data file: tools/data/pypi-downloads.csv
 """
 from __future__ import annotations
@@ -23,6 +27,8 @@ import json
 import os
 import statistics
 import sys
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -48,6 +54,8 @@ PYPISTATS_OVERALL = "https://pypistats.org/api/packages/{pkg}/overall?mirrors=fa
 
 REQUEST_TIMEOUT = 15
 RATE_LIMIT_SLEEP = 2.5  # seconds between API calls (pypistats rate limits)
+MAX_RETRIES = 3
+RETRY_BACKOFF_BASE = 5.0  # seconds; doubled each retry (5, 10, 20)
 
 CSV_HEADERS = [
     "date",
@@ -61,13 +69,42 @@ CSV_HEADERS = [
 
 
 def _fetch_json(url: str) -> dict:
-    """Fetch JSON from a URL using stdlib urllib."""
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "hummbl-oss-pypi-tracker/1.0"},
-    )
-    with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
-        return json.loads(resp.read())
+    """Fetch JSON from a URL using stdlib urllib with retry on 429/5xx.
+
+    Retries up to MAX_RETRIES times with exponential backoff
+    (5s, 10s, 20s) on HTTP 429 (rate limited) or 5xx errors.
+    Other errors raise immediately.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(MAX_RETRIES + 1):
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "hummbl-oss-pypi-tracker/1.0"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            if e.code == 429 or 500 <= e.code < 600:
+                last_exc = e
+                if attempt < MAX_RETRIES:
+                    wait = RETRY_BACKOFF_BASE * (2 ** attempt)
+                    print(f"    (retry {attempt + 1}/{MAX_RETRIES} after {wait:.0f}s)", end="", flush=True)
+                    time.sleep(wait)
+                    continue
+            raise
+        except urllib.error.URLError as e:
+            last_exc = e
+            if attempt < MAX_RETRIES:
+                wait = RETRY_BACKOFF_BASE * (2 ** attempt)
+                print(f"    (retry {attempt + 1}/{MAX_RETRIES} after {wait:.0f}s)", end="", flush=True)
+                time.sleep(wait)
+                continue
+            raise
+    # Should not reach here, but just in case
+    if last_exc:
+        raise last_exc
+    raise RuntimeError(f"Exhausted retries for {url}")
 
 
 def fetch_recent(pkg: str) -> tuple[int, int]:
@@ -161,8 +198,6 @@ def collect_today() -> None:
             d7, d30 = -1, -1
 
         # Rate limit pause before total fetch
-        import time
-
         time.sleep(RATE_LIMIT_SLEEP)
 
         try:
@@ -209,23 +244,36 @@ def report() -> None:
         total = latest["downloads_total"]
         entries = len(pkg_rows)
 
-        # Calculate 30-day trend: compare last entry vs first entry
-        if len(pkg_rows) >= 2:
-            first_d30 = int(pkg_rows[0]["downloads_30day"])
-            last_d30 = int(d30)
+        # Calculate 30-day trend: compare last valid entry vs first valid entry
+        valid_rows = [r for r in pkg_rows if r["downloads_30day"] != "-1"]
+        if len(valid_rows) >= 2:
+            first_d30 = int(valid_rows[0]["downloads_30day"])
+            last_d30 = int(valid_rows[-1]["downloads_30day"])
             if first_d30 > 0:
                 pct = ((last_d30 - first_d30) / first_d30) * 100
                 trend = f"{pct:+.0f}%"
             else:
                 trend = "new"
+        elif len(valid_rows) == 1:
+            trend = "baseline"
         else:
-            trend = "—"
+            trend = "no data"
 
         print(f"{pkg:30s} {d7:>10s} {d30:>11s} {total:>10s} {entries:>8d} {trend:>10s}")
 
     # Summary
-    total_30d = sum(int(r["downloads_30day"]) for r in rows if r["date"] == rows[-1]["date"])
+    latest_date = rows[-1]["date"]
+    total_30d = sum(
+        int(r["downloads_30day"])
+        for r in rows
+        if r["date"] == latest_date and r["downloads_30day"] != "-1"
+    )
+    skipped = sum(
+        1 for r in rows if r["date"] == latest_date and r["downloads_30day"] == "-1"
+    )
     print(f"\nTotal 30-day downloads (latest snapshot): {total_30d}")
+    if skipped:
+        print(f"  ({skipped} package(s) skipped due to fetch errors)")
     print(f"Data file: {DATA_FILE}")
     print(f"Entries: {len(rows)} rows across {len(by_pkg)} packages")
 

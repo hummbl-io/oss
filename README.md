@@ -35,6 +35,24 @@ but point here for documentation and issues.
 See `docs/MONOREPO-DESIGN.md` for the full structure, migration plan, and
 per-language publishing workflow.
 
+## Adoption tracking
+
+Daily PyPI download stats are collected automatically by
+[`tools/scripts/pypi_download_tracker.py`](tools/scripts/pypi_download_tracker.py)
+and stored in [`tools/data/pypi-downloads.csv`](tools/data/pypi-downloads.csv).
+A GitHub Actions workflow runs daily at 12:00 UTC, appends a snapshot, and
+auto-creates an issue labeled `adoption-signal` if download patterns deviate
+from the established baseline (spikes, sustained growth, or new activity on
+previously quiet packages).
+
+Run locally:
+
+```bash
+python tools/scripts/pypi_download_tracker.py          # collect today's stats
+python tools/scripts/pypi_download_tracker.py --report  # print trend table
+python tools/scripts/pypi_download_tracker.py --check   # flag anomalies
+```
+
 ## License
 
 Dual-licensed at the repo level: MIT OR Apache-2.0. See [LICENSE](LICENSE),
