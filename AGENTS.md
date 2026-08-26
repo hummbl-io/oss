@@ -45,7 +45,7 @@ cd packages/python/governed-compression && python -m pytest tests/ -v
 
 ## CI
 
-- **GitHub Actions** (primary): `.github/workflows/ci.yml`, self-hosted runner, Python 3.11/3.12/3.13 matrix
+- **GitHub Actions** (primary): `.github/workflows/ci.yml`, GitHub-hosted `ubuntu-latest` runner, Python 3.13 (3.11/3.12 support declared by packages but not yet in the CI matrix)
 - **Workflow validator**: `.github/workflows/validate-workflows.yml` — enforces SHA-pinning
 - SHA-pinning is required (`sha_pinning_required: true`). Tag refs (`@v4`, `@main`) cause `startup_failure`.
 

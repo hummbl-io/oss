@@ -8,12 +8,12 @@ All packages in this monorepo must follow this release process. No exceptions.
 
 2. **No releases from unmerged branches.** The source being released must be on `main`. The workflow enforces this with a `git merge-base --is-ancestor` check — a tag not on main will fail the build. Merge the feature branch to `main` before tagging.
 
-3. **Tag the merge commit, not the feature branch commit.** After merging, tag the resulting merge commit on `main`:
+3. **Tag the merge commit, not the feature branch commit.** After merging, tag the resulting merge commit on `main`. The tag namespace is `python/<package>/v<version>` (the publish workflow triggers only on `python/<package>/v*`):
    ```
-   git tag hummbl-governance/v1.4.2
-   git push origin hummbl-governance/v1.4.2
+   git tag python/hummbl-governance/v1.4.2
+   git push origin python/hummbl-governance/v1.4.2
    ```
-   The tag push triggers the publish workflow.
+   The tag push triggers the publish workflow. A tag without the `python/` prefix (e.g. `hummbl-governance/v1.4.2`) will NOT trigger the workflow.
 
 4. **Version must match.** The version in `pyproject.toml` on the tagged commit must match the version in the tag name. The workflow enforces this with a comparison step — a mismatch will fail the build. All version sources must be kept in sync: `pyproject.toml`, `hummbl_governance/__init__.py`, `hummbl_governance/governance.yml`.
 
@@ -32,8 +32,8 @@ All packages in this monorepo must follow this release process. No exceptions.
 2. `CHANGELOG.md` updated with a `## [<version>]` section
 3. Feature branch merged to `main`
 4. `main` is green (CI passing)
-5. Tag created on the merge commit: `git tag <package>/v<version>`
-6. Tag pushed: `git push origin <package>/v<version>`
+5. Tag created on the merge commit: `git tag python/<package>/v<version>`
+6. Tag pushed: `git push origin python/<package>/v<version>`
 7. Workflow triggered and completed — both `build` and `publish` jobs pass
 8. Verify on PyPI: artifact exists, version matches, "Uploaded using Trusted Publishing? Yes"
 
@@ -69,11 +69,11 @@ If a release is bad:
 
 ## Pre-releases (alpha/beta/rc)
 
-Pre-release tags follow the same convention: `hummbl-governance/v1.5.0a1`, `hummbl-governance/v1.5.0b1`, `hummbl-governance/v1.5.0rc1`. The workflow triggers on any `hummbl-governance/v*` tag. Use PyPI's pre-release handling — consumers must opt in with `--pre`.
+Pre-release tags follow the same convention: `python/hummbl-governance/v1.5.0a1`, `python/hummbl-governance/v1.5.0b1`, `python/hummbl-governance/v1.5.0rc1`. The workflow triggers on any `python/hummbl-governance/v*` tag. Use PyPI's pre-release handling — consumers must opt in with `--pre`.
 
 ## Adding a new package
 
-1. Create `packages/<name>/` with source and `pyproject.toml`
-2. Add the tag pattern to `.github/workflows/publish-pypi.yml` under `tags:`
+1. Create `packages/python/<name>/` with source and `pyproject.toml`
+2. Add the tag pattern to `.github/workflows/publish-pypi.yml` under `tags:` (format: `python/<name>/v*`)
 3. Configure the trusted publisher on pypi.org (owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`)
-4. Document the package in `packages/<name>/README.md`
+4. Document the package in `packages/python/<name>/README.md`

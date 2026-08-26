@@ -5,9 +5,9 @@
 * @reuben
 
 # Per-package routing
-/packages/hummbl-governance/ @reuben
-/packages/hummbl-kernel/ @reuben
-/packages/hummbl/ @reuben
+/packages/python/hummbl-governance/ @reuben
+/packages/python/hummbl-kernel/ @reuben
+/packages/python/hummbl/ @reuben
 
 # CI and workflow files
 /.github/ @reuben

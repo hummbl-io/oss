@@ -63,5 +63,5 @@ These are kernel sub-primitives added after the initial 26.
 ## Verification
 
 ```bash
-python -c "import pathlib,re; t=pathlib.Path('PRIMITIVES.md').read_text(); a=t.split('## Existing primitives',1)[1].split('## Expansion primitives',1)[0]; b=t.split('## Implemented expansion',1)[1].split('## Count',1)[0]; print(sum(len(re.findall(r'^\| P\d+ \|', s, re.M)) for s in (a,b)))"
+python -c "import pathlib,re; t=pathlib.Path('PRIMITIVES.md').read_text(); a=t.split('## Existing primitives',1)[1].split('## Implemented expansion primitives',1)[0]; b=t.split('## Implemented expansion primitives',1)[1].split('## Count',1)[0]; ids=[int(x) for x in re.findall(r'^\| P(\d+) \|', a+b, re.M)]; assert len(ids)==34, f'count={len(ids)}'; assert len(ids)==len(set(ids)), f'duplicates={ids}'; assert set(ids)==set(range(1,35)), f'missing/extra={set(range(1,35))^set(ids)}'; print('34 primitives verified: unique, complete P1-P34')"
 ```

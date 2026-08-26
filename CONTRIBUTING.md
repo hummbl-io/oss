@@ -1,10 +1,14 @@
 # Contributing to hummbl-io/oss
 
-This monorepo publishes HUMMBL packages to public registries (PyPI, npm,
-crates.io, Go proxy, Maven Central, Nix, arXiv/Zenodo). Public visibility
-raises the stakes on two things: workflow correctness (broken CI blocks
-every release) and inventory accuracy (false ownership claims confuse
-users and can look like name-squatting). This document covers both.
+This monorepo publishes HUMMBL packages to public registries. **PyPI is
+the active registry today.** npm, crates.io, Go proxy, Maven Central,
+Nix, and arXiv/Zenodo are planned targets (see
+[`docs/MONOREPO-DESIGN.md`](./docs/MONOREPO-DESIGN.md)) but have no
+published packages yet; the registry-verification protocol in section 2
+applies to them once they go live. Public visibility raises the stakes
+on two things: workflow correctness (broken CI blocks every release) and
+inventory accuracy (false ownership claims confuse users and can look
+like name-squatting). This document covers both.
 
 For the full monorepo architecture, directory structure, and per-language
 publishing workflows, see [`docs/MONOREPO-DESIGN.md`](./docs/MONOREPO-DESIGN.md).
@@ -253,3 +257,48 @@ pushed (delete the tag in git, but the proxy caches the version forever).
 ## 6. License
 
 All packages in this monorepo are Apache-2.0. See [`LICENSE`](./LICENSE).
+
+---
+
+## 7. AI-assisted contributions
+
+AI agents may assist with research, review, patch preparation, and
+operational coordination. The policy on AI attribution in commit metadata
+is defined in [`AGENTS.md`](./AGENTS.md) and is restated here for
+contributors who do not read that file:
+
+**Do not add `Co-authored-by`, `Generated-by`, `Authored-with`, or
+equivalent AI/vendor/agent attribution to Git commit authorship metadata
+or commit-message trailers.**
+
+### Rationale
+
+This policy is a deliberate choice, not an oversight. The reasoning:
+
+- **We attribute humans, not tools.** A commit authored by a human using
+  an AI assistant is a human commit. We do not credit the compiler, the
+  linter, or the IDE in commit metadata either; an AI assistant is
+  treated the same way.
+- **Commit metadata is for provenance of authorship responsibility, not
+  for tool inventory.** The person who decided what to commit is the
+  author and is accountable for it, regardless of what tools they used.
+
+### Acknowledged objection
+
+A reviewer can reasonably argue that for a project whose brand includes
+provenance and audit integrity, deliberately omitting AI attribution
+reduces authorship traceability. We accept that trade-off: we preserve
+**artifact** provenance (every PyPI release traces to an exact git commit
+via tags and OIDC trusted publishing) while attributing **authorship** to
+the human who made the commit decision. If community norms converge on
+mandatory AI disclosure in commit metadata, this policy will be
+revisited.
+
+### What this policy does NOT forbid
+
+- Mentioning AI assistance in PR descriptions, code comments, or
+  documentation is fine.
+- The policy is about Git commit metadata specifically (author/committer
+  fields and commit-message trailers), not about prose disclosure in
+  other surfaces.
+
