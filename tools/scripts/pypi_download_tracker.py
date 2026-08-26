@@ -47,7 +47,7 @@ PYPISTATS_RECENT = "https://pypistats.org/api/packages/{pkg}/recent"
 PYPISTATS_OVERALL = "https://pypistats.org/api/packages/{pkg}/overall?mirrors=false"
 
 REQUEST_TIMEOUT = 15
-RATE_LIMIT_SLEEP = 1.5  # seconds between API calls
+RATE_LIMIT_SLEEP = 2.5  # seconds between API calls (pypistats rate limits)
 
 CSV_HEADERS = [
     "date",
