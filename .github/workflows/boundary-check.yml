@@ -37,7 +37,7 @@ jobs:
           gitleaks version
 
       - name: Run gitleaks
-        run: gitleaks detect --source . --no-banner --redact --verbose
+        run: gitleaks detect --source . --config .gitleaks.toml --no-banner --redact --verbose
 
   pattern-denylist:
     name: pattern-denylist
