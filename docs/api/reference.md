@@ -27,7 +27,7 @@ request body. 429 on exceedance.
 
 ---
 
-## Governance-Augmented Generation (GAG) APIs
+## HUMMBL Governed APIs (HGA)
 
 The core reasoning surface: 120 governed mental models with semantic search,
 recommendation, and multi-step workflow matching.
