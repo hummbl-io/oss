@@ -65,7 +65,7 @@ from base120.engine import FAMILIES, FAMILY_NAMES, Engine
 from base120.ledger import Ledger
 from base120.models import ApplyResult, Operator, OperatorTuple
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 __all__ = [
     "FAMILIES",
