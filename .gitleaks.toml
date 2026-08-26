@@ -1,0 +1,29 @@
+# gitleaks configuration for hummbl-io/oss
+#
+# Extends the default gitleaks rules. Allowlists test fixtures and
+# documentation that contain dummy/example secrets for testing
+# security primitives (HMAC signing, token validation, etc.).
+
+title = "hummbl-io/oss gitleaks config"
+
+[extend]
+useDefault = true
+
+# Global allowlist: skip test fixtures and documentation
+[allowlist]
+description = "Allow test fixtures and documentation with dummy secrets"
+paths = [
+    '''packages/python/.*/tests/.*''',
+    '''packages/python/.*/docs/.*''',
+    '''packages/python/.*/examples/.*''',
+    '''packages/python/.*/hummbl_.*/data/.*\.schema\.json$''',
+]
+# Allow common test/dummy secret markers
+regexes = [
+    '''(?i)example\.com''',
+    '''(?i)test[_-]?token''',
+    '''(?i)dummy[_-]?key''',
+    '''(?i)fake[_-]?secret''',
+    '''(?i)pragma:\s*allowlist''',
+    '''(?i)gitleaks:allow''',
+]
