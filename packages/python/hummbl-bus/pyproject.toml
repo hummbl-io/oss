@@ -25,6 +25,13 @@ dependencies = [
     "hummbl-governance>=1.2.2",
 ]
 
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-bus/"
+
 [project.optional-dependencies]
 test = [
     "pytest>=7.0",

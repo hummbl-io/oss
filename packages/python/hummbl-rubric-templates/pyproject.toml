@@ -9,8 +9,26 @@ description = "HUMMBL Standard Evaluation Rubric Templates & Automated Validator
 readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
 authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 requires-python = ">=3.11"
 dependencies = ["pyyaml>=6.0"]
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-rubric-templates/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-rubric-templates/"
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
