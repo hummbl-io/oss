@@ -5,7 +5,7 @@
 
 **120 named mental models for structured reasoning — a stdlib-only Python library.**
 
-**Version 2.0.0** · [Changelog](CHANGELOG.md) · [PyPI](https://pypi.org/project/base120/) · [Documentation](docs/) · [Examples](examples/) · [Contributing](CONTRIBUTING.md)
+**Version 3.0.0** · [Changelog](CHANGELOG.md) · [PyPI](https://pypi.org/project/base120/) · [Documentation](docs/) · [Examples](examples/) · [Contributing](CONTRIBUTING.md)
 
 Use them to analyze problems, design systems, and make decisions — whether you are a human, an AI agent, or a fleet of both.
 
