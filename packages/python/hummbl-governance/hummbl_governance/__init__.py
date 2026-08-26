@@ -46,7 +46,7 @@ from hummbl_governance.kernel import (
     Stage,
 )
 
-from hummbl_governance.kill_switch import KillSwitch, KillSwitchMode
+from hummbl_governance.kill_switch import KillSwitch, KillSwitchMode, KillSwitchReason
 from hummbl_governance.circuit_breaker import CircuitBreaker, CircuitBreakerState
 from hummbl_governance.cost_governor import CostGovernor
 from hummbl_governance.approval import (
@@ -83,6 +83,15 @@ except ImportError:
     BusWriter = None  # fcntl not available on Windows
     PolicyLevel = None
 from hummbl_governance.compliance_mapper import ComplianceMapper, ComplianceReport
+from hummbl_governance.compliance_frameworks import (
+    FrameworkSpec,
+    ControlSpec,
+    MappingRule,
+    register_framework,
+    get_framework,
+    list_frameworks,
+    framework_count,
+)
 from hummbl_governance.health_probe import HealthCollector, HealthProbe, HealthReport, ProbeResult
 from hummbl_governance.lamport_clock import LamportClock, LamportTimestamp
 from hummbl_governance.stride_mapper import StrideMapper, StrideReport, Interaction, ThreatFinding
@@ -236,6 +245,7 @@ __all__ = [
     "Stage",
     "KillSwitch",
     "KillSwitchMode",
+    "KillSwitchReason",
     "CircuitBreaker",
     "CircuitBreakerState",
     "CostGovernor",
@@ -272,6 +282,13 @@ __all__ = [
     "PolicyLevel",
     "ComplianceMapper",
     "ComplianceReport",
+    "FrameworkSpec",
+    "ControlSpec",
+    "MappingRule",
+    "register_framework",
+    "get_framework",
+    "list_frameworks",
+    "framework_count",
     "HealthCollector",
     "HealthProbe",
     "HealthReport",
