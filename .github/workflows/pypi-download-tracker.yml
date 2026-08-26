@@ -1,0 +1,73 @@
+name: PyPI Download Tracker
+
+"on":
+  schedule:
+    # Run daily at 12:00 UTC (07:00 EST)
+    - cron: "0 12 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pypi-download-tracker
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: Collect daily PyPI stats
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Collect today's download stats
+        run: python tools/scripts/pypi_download_tracker.py
+
+      - name: Check for anomalies
+        id: anomalies
+        continue-on-error: true
+        run: |
+          output=$(python tools/scripts/pypi_download_tracker.py --check 2>&1)
+          echo "report<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$output" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          if echo "$output" | grep -q "ANOMALIES DETECTED"; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tools/data/pypi-downloads.csv
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: daily PyPI download stats $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Print trend report
+        run: python tools/scripts/pypi_download_tracker.py --report
+
+      - name: Create issue on anomaly
+        if: steps.anomalies.outputs.found == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1282ab1e1e # v7
+        with:
+          script: |
+            const report = `${{ steps.anomalies.outputs.report }}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `PyPI download anomaly detected (${new Date().toISOString().split('T')[0]})`,
+              body: report,
+              labels: ['adoption-signal']
+            });
