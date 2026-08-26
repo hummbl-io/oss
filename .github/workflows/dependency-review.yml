@@ -31,7 +31,3 @@ jobs:
         uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9
         with:
           fail-on-severity: moderate
-        # Non-blocking until Dependency Graph is enabled in repo settings:
-        # Settings -> Code & automation -> Actions -> Dependency graph
-        # Once enabled, remove continue-on-error to make this a hard gate.
-        continue-on-error: true
