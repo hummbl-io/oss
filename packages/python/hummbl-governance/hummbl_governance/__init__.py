@@ -64,6 +64,7 @@ from hummbl_governance.transition_receipt import (
 )
 from hummbl_governance.delegation import DelegationToken, DelegationTokenManager
 from hummbl_governance.audit_log import AuditLog
+from hummbl_governance.key_derivation import derive_key, hkdf_expand, hkdf_extract
 from hummbl_governance.tool_audit import ToolCallAuditor
 from hummbl_governance.attest import Attest, AttestResult, ALLOWLIST, BLOCKLIST, CAPABILITY_FENCE
 from hummbl_governance.delegation_context import DelegationContext, DelegationContextManager
@@ -252,6 +253,9 @@ __all__ = [
     "DelegationToken",
     "DelegationTokenManager",
     "AuditLog",
+    "derive_key",
+    "hkdf_expand",
+    "hkdf_extract",
     "ToolCallAuditor",
     "AgentRegistry",
     "TrustTier",
