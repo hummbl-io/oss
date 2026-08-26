@@ -1,0 +1,174 @@
+# Base120 Protocol Run Evaluation Template
+# Version: 1.0
+# Context: Base120 mental model protocol run evaluation
+
+template_metadata:
+  template_name: "Base120 Protocol Run Evaluation"
+  template_version: "1.0"
+  template_type: "protocol_evaluation"
+  base_schema: "hummbl-rubric-master.yaml"
+  created_date: "2026-05-28"
+  last_updated: "2026-05-28"
+  author: "HUMMBL Governance Team"
+  
+parameters:
+  context_name: "base120_protocol_run"
+  framework_reference: "Base120 Mental Model Protocol v1.0"
+  evaluation_scope: "single_document"
+  artifact_types: ["protocol_artifact", "coordination_log", "bus_receipt"]
+  governance_level: "individual"
+  stakeholder_type: "operator"
+  risk_profile: "medium"
+  compliance_criticality: "recommended"
+  
+hard_gates:
+  framework_compliance:
+    fail_condition: "Does not follow Base120 protocol structure or missing required mental model dimensions"
+    max_score_if_failed: 60
+    severity: "critical"
+    
+  governance_process:
+    fail_condition: "No evidence of protocol execution or missing required protocol steps"
+    max_score_if_failed: 70
+    severity: "high"
+    
+  evidence_quality:
+    fail_condition: "No supporting evidence for mental model application or missing reasoning trace"
+    max_score_if_failed: 75
+    severity: "high"
+    
+  scope_completion:
+    fail_condition: "Missing required Base120 dimensions or incomplete protocol execution"
+    max_score_if_failed: 80
+    severity: "high"
+    
+  risk_containment:
+    fail_condition: "No failure mode analysis or missing critical edge cases"
+    max_score_if_failed: 70
+    severity: "medium"
+    
+  artifact_presence:
+    fail_condition: "Missing protocol execution artifact or coordination log"
+    max_score_if_failed: 65
+    severity: "medium"
+    
+  stakeholder_control:
+    fail_condition: "No stakeholder validation or operator approval of protocol run"
+    max_score_if_failed: 70
+    severity: "medium"
+    
+weighted_dimensions:
+  # Core dimensions (40% total)
+  framework_fidelity:
+    weight: 15
+    description: "How faithfully the protocol run follows Base120 structure and applies mental models"
+    scoring_anchors:
+      "0-5": "Does not follow Base120 structure, no mental model application, missing required dimensions"
+      "6-10": "Partial Base120 structure, some mental model application, incomplete dimension coverage"
+      "11-13": "Complete Base120 structure, full mental model application, all dimensions covered"
+      "14-15": "Complete Base120 structure with precise mental model application, demonstrates deep protocol understanding"
+      "16-20": "Complete Base120 structure with nuanced mental model application, shows protocol mastery and adaptation"
+      
+  applied_transformation:
+    weight: 10
+    description: "How well mental models are transformed into concrete analysis and actionable insights"
+    scoring_anchors:
+      "0-5": "No transformation from mental models to analysis, abstract application only, no actionable insights"
+      "6-10": "Partial transformation, some mental models applied but not actionable, limited insights"
+      "11-13": "Complete transformation to concrete analysis, clear actionable insights, mental models well-applied"
+      "14-15": "Complete transformation with sophisticated analysis, highly actionable insights, mental model mastery demonstrated"
+      
+  evidence_quality:
+    weight: 10
+    description: "Quality, completeness, and traceability of evidence supporting mental model application"
+    scoring_anchors:
+      "0-3": "No evidence or placeholder evidence, no traceability, critical applications missing evidence"
+      "4-6": "Partial evidence coverage, weak traceability, some critical applications with insufficient evidence"
+      "7-8": "Complete evidence coverage for all mental model applications, strong traceability, evidence clearly linked to analysis"
+      "9-10": "Complete evidence coverage with strong traceability, evidence quality validated, includes evidence collection procedures"
+      
+  # Governance dimensions (30% total)
+  governance_process:
+    weight: 10
+    description: "Evidence of proper protocol execution and stakeholder engagement"
+    scoring_anchors:
+      "0-3": "No governance process evidence, no stakeholder review, no protocol execution documentation"
+      "4-6": "Partial governance process evidence, limited stakeholder review, some protocol execution documentation"
+      "7-8": "Complete governance process evidence, full stakeholder review, protocol execution documented with coordination log"
+      "9-10": "Complete governance process with documented protocol execution workflow, stakeholder sign-off, governance receipts with decision rationale"
+      
+  stakeholder_control:
+    weight: 5
+    description: "Degree of stakeholder control and oversight over the protocol run"
+    scoring_anchors:
+      "0-3": "No stakeholder control, no approval mechanisms, no oversight"
+      "4-6": "Limited stakeholder control, basic approval mechanisms, minimal oversight"
+      "7-8": "Strong stakeholder control, clear approval mechanisms, documented oversight"
+      "9-10": "Complete stakeholder control with documented escalation paths, approval workflows, and oversight procedures"
+      
+  risk_containment:
+    weight: 10
+    description: "Identification, assessment, and mitigation of protocol execution risks"
+    scoring_anchors:
+      "0-3": "No failure mode analysis, unmitigated critical risks, no risk assessment"
+      "4-6": "Partial failure mode analysis, some critical risks unmitigated, basic risk assessment"
+      "7-8": "Complete failure mode analysis, all critical risks mitigated, comprehensive risk assessment"
+      "9-10": "Complete failure mode analysis with risk scoring, mitigation plans, and residual risk assessment"
+      
+  # Quality dimensions (20% total)
+  useful_density:
+    weight: 10
+    description: "Density of actionable insights vs. boilerplate in protocol output"
+    scoring_anchors:
+      "0-3": "Mostly boilerplate, minimal actionable insights, high noise-to-signal ratio"
+      "4-6": "Mixed boilerplate and actionable insights, moderate noise-to-signal ratio"
+      "7-8": "Primarily actionable insights, minimal boilerplate, low noise-to-signal ratio"
+      "9-10": "Highly actionable insights throughout, no boilerplate, excellent signal-to-noise ratio"
+      
+  artifact_utility:
+    weight: 10
+    description: "Utility of protocol artifacts for downstream decision-making"
+    scoring_anchors:
+      "0-3": "Artifacts not useful for downstream decisions, require significant rework"
+      "4-6": "Artifacts partially useful, require moderate rework for downstream decisions"
+      "7-8": "Artifacts highly useful, minimal rework required for downstream decisions"
+      "9-10": "Artifacts immediately usable, no rework required, integrate seamlessly with downstream decision-making"
+      
+  # Epistemic dimensions (10% total)
+  truth_seeking:
+    weight: 10
+    description: "Evidence of truth-seeking behavior vs. protocol theater"
+    scoring_anchors:
+      "0-2": "Clear protocol theater, no evidence of genuine analysis, box-checking approach"
+      "3-5": "Mixed protocol theater and genuine analysis, partial truth-seeking"
+      "6-7": "Genuine analysis with evidence of truth-seeking, minimal protocol theater"
+      "8": "Strong truth-seeking throughout, evidence of critical self-assessment, no protocol theater"
+      
+  # Adaptability dimensions (10% total)
+  adaptability_resilience:
+    weight: 10
+    description: "Ability to adapt mental models to context and handle edge cases"
+    scoring_anchors:
+      "0-2": "No adaptability, rigid mental model application, fails on edge cases"
+      "3-4": "Limited adaptability, some mental model adaptation, struggles with edge cases"
+      "5": "Good adaptability, mental models adapted to context, handles most edge cases"
+      "6": "Excellent adaptability, mental models dynamically adapted, handles all edge cases gracefully"
+      
+required_outputs:
+  numeric_score: 0
+  hard_gate_status: ""
+  weighted_breakdown: {}
+  top_3_strengths: []
+  top_3_weaknesses: []
+  score_caps_triggered: []
+  next_validation_test: "Apply protocol to similar context and compare results for consistency"
+  limitations: "Single protocol run evaluation, requires multiple runs for pattern validation"
+  
+usage_notes:
+  - "This template is designed for Base120 mental model protocol run evaluations"
+  - "Hard gates focus on protocol structure, execution evidence, and mental model application"
+  - "Weighted dimensions emphasize framework fidelity and governance process"
+  - "Truth-seeking dimension detects protocol theater vs. genuine analysis"
+  - "Adaptability dimension assesses mental model flexibility and edge case handling"
+  - "Template assumes individual-level governance with operator stakeholder perspective"
+  - "Multiple protocol runs are recommended for pattern validation and consistency assessment"

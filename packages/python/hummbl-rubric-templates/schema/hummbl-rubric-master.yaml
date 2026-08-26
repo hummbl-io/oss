@@ -1,0 +1,580 @@
+# HUMMBL Rubric Master Template Schema
+# Version: 1.0
+# This is the canonical schema for all HUMMBL rubric templates
+
+template_schema:
+  version: "1.0"
+  template_type: "evaluation_rubric"
+  
+  # Template parameters (customizable per context)
+  parameters:
+    context_name: 
+      type: "string"
+      required: true
+      description: "Name of the evaluation context (e.g., governance_compliance, risk_assessment)"
+      
+    framework_reference: 
+      type: "string"
+      required: true
+      description: "Framework being evaluated against (e.g., NIST AI RMF v1.0, Base120 v1.0)"
+      
+    evaluation_scope: 
+      type: "string"
+      required: true
+      enum: ["single_document", "multi_phase", "fleet_wide", "cross_repo"]
+      description: "Scope of the evaluation"
+      
+    artifact_types: 
+      type: "array"
+      required: true
+      items:
+        type: "string"
+        enum: ["ADR", "policy", "evidence_pack", "risk_assessment", "compliance_report", "protocol_artifact", "state_object", "bus_receipt", "coordination_log"]
+      description: "Types of artifacts being evaluated"
+      
+    governance_level: 
+      type: "string"
+      required: false
+      enum: ["individual", "team", "fleet", "external"]
+      description: "Governance level of the evaluation"
+      
+    stakeholder_type: 
+      type: "string"
+      required: false
+      enum: ["operator", "maintainer", "auditor", "regulator"]
+      description: "Primary stakeholder type"
+      
+    risk_profile: 
+      type: "string"
+      required: false
+      enum: ["low", "medium", "high", "critical"]
+      description: "Risk profile of the evaluation context"
+      
+    compliance_criticality: 
+      type: "string"
+      required: false
+      enum: ["informational", "recommended", "required", "mandatory"]
+      description: "Compliance criticality level"
+      
+  # Layer 1: Hard Gates (fatal correctness → score caps)
+  hard_gates:
+    # Framework compliance gate
+    framework_compliance:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+    # Governance process gate
+    governance_process:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+    # Evidence quality gate
+    evidence_quality:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+    # Scope completion gate
+    scope_completion:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+    # Risk containment gate
+    risk_containment:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+    # Artifact presence gate
+    artifact_presence:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+    # Stakeholder control gate
+    stakeholder_control:
+      fail_condition: 
+        type: "string"
+        required: true
+        description: "Condition that triggers this hard gate"
+      max_score_if_failed: 
+        type: "integer"
+        required: true
+        minimum: 0
+        maximum: 100
+        description: "Maximum possible score if this gate fails"
+      severity: 
+        type: "string"
+        required: true
+        enum: ["critical", "high", "medium", "low"]
+        description: "Severity level of this gate"
+        
+  # Layer 2: Weighted Dimensions (0-100 scale)
+  weighted_dimensions:
+    # Core dimensions (40% total)
+    framework_fidelity:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 25
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-5": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-5 score range"
+        "6-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 6-10 score range"
+        "11-13": 
+          type: string
+          required: true
+          description: "Behavioral definition for 11-13 score range"
+        "14-15": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 14-15 score range"
+        "16-20": 
+          type: "string"
+          required: false
+          description: "Behavioral definition for 16-20 score range (for high-weight dimensions)"
+          
+    applied_transformation:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 25
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-5": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-5 score range"
+        "6-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 6-10 score range"
+        "11-13": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 11-13 score range"
+        "14-15": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 14-15 score range"
+        "16-20": 
+          type: "string"
+          required: false
+          description: "Behavioral definition for 16-20 score range (for high-weight dimensions)"
+          
+    evidence_quality:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 20
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-3": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-3 score range"
+        "4-6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 4-6 score range"
+        "7-8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 7-8 score range"
+        "9-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 9-10 score range"
+          
+    # Governance dimensions (30% total)
+    governance_process:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 20
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-3": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-3 score range"
+        "4-6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 4-6 score range"
+        "7-8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 7-8 score range"
+        "9-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 9-10 score range"
+          
+    stakeholder_control:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 20
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-3": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-3 score range"
+        "4-6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 4-6 score range"
+        "7-8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 7-8 score range"
+        "9-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 9-10 score range"
+          
+    risk_containment:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 20
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-3": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-3 score range"
+        "4-6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 4-6 score range"
+        "7-8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 7-8 score range"
+        "9-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 9-10 score range"
+          
+    # Quality dimensions (20% total)
+    useful_density:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 15
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-3": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-3 score range"
+        "4-6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 4-6 score range"
+        "7-8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 7-8 score range"
+        "9-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 9-10 score range"
+          
+    artifact_utility:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 15
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-3": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-3 score range"
+        "4-6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 4-6 score range"
+        "7-8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 7-8 score range"
+        "9-10": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 9-10 score range"
+          
+    # Epistemic dimensions (10% total)
+    truth_seeking:
+      weight: 
+        type: "integer"
+        required: true
+        minimum: 5
+        maximum: 10
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-2": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-2 score range"
+        "3-5": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 3-5 score range"
+        "6-7": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 6-7 score range"
+        "8": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 8 score range"
+          
+    # Adaptability dimensions (optional, for interactive contexts)
+    adaptability_resilience:
+      weight: 
+        type: "integer"
+        required: false
+        minimum: 0
+        maximum: 10
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-2": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-2 score range"
+        "3-4": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 3-4 score range"
+        "5": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 5 score range"
+        "6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 6 score range"
+          
+    # External validity dimensions (optional, for operational contexts)
+    external_validity:
+      weight: 
+        type: "integer"
+        required: false
+        minimum: 0
+        maximum: 10
+        description: "Weight of this dimension in total score (0-100)"
+      description: 
+        type: "string"
+        required: true
+        description: "What this dimension measures"
+      scoring_anchors:
+        "0-2": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 0-2 score range"
+        "3-4": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 3-4 score range"
+        "5": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 5 score range"
+        "6": 
+          type: "string"
+          required: true
+          description: "Behavioral definition for 6 score range"
+          
+  # Layer 3: Required Final Outputs
+  required_outputs:
+    numeric_score: 
+      type: "integer"
+      required: true
+      minimum: 0
+      maximum: 100
+      description: "Final evaluation score (0-100)"
+      
+    hard_gate_status: 
+      type: "string"
+      required: true
+      description: "Pass/fail status with triggered gates listed"
+      
+    weighted_breakdown: 
+      type: "object"
+      required: true
+      description: "Dimension-by-dimension scores with evidence"
+      
+    top_3_strengths: 
+      type: "array"
+      required: true
+      items:
+        type: "string"
+      description: "Top 3 strengths with specific evidence"
+      
+    top_3_weaknesses: 
+      type: "array"
+      required: true
+      items:
+        type: "string"
+      description: "Top 3 weaknesses with specific evidence"
+      
+    score_caps_triggered: 
+      type: "array"
+      required: true
+      items:
+        type: "string"
+      description: "List of hard gates that failed (if any)"
+      
+    next_validation_test: 
+      type: "string"
+      required: true
+      description: "Concrete downstream test requirement"
+      
+    limitations: 
+      type: "string"
+      required: true
+      description: "What aspects remain unproven or require further validation"
+      
+  # Template usage notes
+  usage_notes:
+    - "Hard gates are binary pass/fail and cap the maximum possible score"
+    - "Weighted dimensions should sum to 100 for consistent scoring"
+    - "Scoring anchors provide behavioral definitions for each score range"
+    - "Required outputs ensure consistent evaluation reporting"
+    - "Adaptability and external validity dimensions are optional for non-interactive contexts"
+    - "Template version must be specified in the template header"
+    - "All templates must follow this master schema to be valid"
