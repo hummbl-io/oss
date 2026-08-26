@@ -49,6 +49,35 @@ class KillSwitchMode(Enum):
     EMERGENCY = auto()
 
 
+class KillSwitchReason(Enum):
+    """Machine-actionable failure classification for kill switch engagement.
+
+    Per Ashby's Law of Requisite Variety: the regulator's variety must match
+    the system's variety. The kill switch's 4 modes (~3 bits) cannot
+    distinguish 15+ failure classes (~4 bits) without this dimension.
+
+    Phase 1 (this enum): machine-actionable reasons replace free-text.
+    Phase 2: ``check_task_allowed`` branches on ``(mode, failure_class, is_critical)``.
+    Phase 3: per-class circuit breakers consult ``failure_modes.py`` (FM1-FM30).
+    """
+
+    BUDGET = "budget"
+    BUDGET_CREEP = "budget_creep"
+    CAPABILITY_MISUSE = "capability_misuse"
+    IDENTITY = "identity"
+    DRIFT = "drift"
+    INJECTION = "injection"
+    EXFIL = "exfiltration"
+    REGRESSION = "regression"
+    DEPENDENCY = "dependency"
+    LEGAL = "legal"
+    OPERATOR = "operator"
+    DEGRADATION = "degradation"
+    TAMPER = "tamper"
+    RUNAWAY = "runaway"
+    KERNEL_VIOLATION = "kernel_violation"
+
+
 # ---------------------------------------------------------------------------
 # Circuit breaker
 # ---------------------------------------------------------------------------

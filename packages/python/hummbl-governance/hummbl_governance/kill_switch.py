@@ -23,10 +23,15 @@ Four modes:
     EMERGENCY: Immediate halt, preserve state.
 
 Usage:
-    from hummbl_governance import KillSwitch, KillSwitchMode
+    from hummbl_governance import KillSwitch, KillSwitchMode, KillSwitchReason
 
     ks = KillSwitch()
-    ks.engage(KillSwitchMode.HALT_ALL, reason="Budget exceeded", triggered_by="cost_governor")
+    ks.engage(
+        KillSwitchMode.HALT_ALL,
+        reason="Budget exceeded",
+        triggered_by="cost_governor",
+        failure_class=KillSwitchReason.BUDGET,
+    )
 
     result = ks.check_task_allowed("briefing_generation")
     if not result["allowed"]:
@@ -48,7 +53,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from hummbl_governance._types import KillSwitchMode
+from hummbl_governance._types import KillSwitchMode, KillSwitchReason
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +67,7 @@ class KillSwitchEvent:
     reason: str
     triggered_by: str
     affected_tasks: int = 0
+    failure_class: KillSwitchReason | None = None
 
 
 class KillSwitchEngagedError(Exception):
@@ -229,6 +235,15 @@ class KillSwitch:
             mode_str = data.get("mode", "DISENGAGED")
             ks._mode = KillSwitchMode[mode_str]
 
+            # Restore failure_class if present (Phase 1 — backward compatible)
+            failure_class = None
+            fc_str = data.get("failure_class")
+            if fc_str:
+                try:
+                    failure_class = KillSwitchReason[fc_str]
+                except KeyError:
+                    logger.warning("Unknown failure_class in state file: %s", fc_str)
+
             if ks._mode != KillSwitchMode.DISENGAGED:
                 event = KillSwitchEvent(
                     timestamp=data.get("engaged_at", datetime.now(timezone.utc).isoformat()),
@@ -236,6 +251,7 @@ class KillSwitch:
                     reason=data.get("reason", "Restored from file"),
                     triggered_by=data.get("triggered_by", "system"),
                     affected_tasks=0,
+                    failure_class=failure_class,
                 )
                 ks._history.append(event)
         except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
@@ -252,12 +268,14 @@ class KillSwitch:
     def _build_state_data(self) -> dict[str, Any]:
         """Build state dict from current mode and last event."""
         last_event = self._history[-1] if self._history else None
-        data = {
+        data: dict[str, Any] = {
             "mode": self._mode.name,
             "engaged_at": last_event.timestamp if last_event else None,
             "reason": last_event.reason if last_event else None,
             "triggered_by": last_event.triggered_by if last_event else None,
         }
+        if last_event and last_event.failure_class is not None:
+            data["failure_class"] = last_event.failure_class.name
         secret = self._get_signing_secret()
         if secret:
             data["signature"] = self._compute_signature(
@@ -297,6 +315,7 @@ class KillSwitch:
         reason: str,
         triggered_by: str,
         affected_tasks: int = 0,
+        failure_class: KillSwitchReason | None = None,
     ) -> KillSwitchEvent:
         """Engage the kill switch.
 
@@ -305,6 +324,9 @@ class KillSwitch:
             reason: Human-readable explanation.
             triggered_by: Component or user triggering engagement.
             affected_tasks: Estimated number of tasks affected.
+            failure_class: Machine-actionable failure classification
+                (Phase 1 — optional, defaults to None for backward compatibility).
+                See ``KillSwitchReason`` enum for the 15 standard values.
 
         Returns:
             KillSwitchEvent record.
@@ -318,9 +340,12 @@ class KillSwitch:
             ...     KillSwitchMode.HALT_ALL,
             ...     reason="Budget exceeded",
             ...     triggered_by="cost_governor",
+            ...     failure_class=KillSwitchReason.BUDGET,
             ... )
             >>> event.mode
             <KillSwitchMode.HALT_ALL: 3>
+            >>> event.failure_class
+            <KillSwitchReason.BUDGET: 'budget'>
             >>> ks.engaged
             True
         """
@@ -335,6 +360,7 @@ class KillSwitch:
                 reason=reason,
                 triggered_by=triggered_by,
                 affected_tasks=affected_tasks,
+                failure_class=failure_class,
             )
             self._history.append(event)
             self._notify(event)
@@ -440,6 +466,8 @@ class KillSwitch:
                     "reason": event.reason,
                     "triggered_by": event.triggered_by,
                 }
+                if event.failure_class is not None:
+                    last_engagement["failure_class"] = event.failure_class.name
                 break
 
         return {
