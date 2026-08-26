@@ -1,0 +1,44 @@
+name: CodeQL
+
+# Semantic code analysis for Python packages.
+# Runs on PRs and weekly on main.
+
+"on":
+  push:
+    branches: [main]
+    paths:
+      - "packages/**/*.py"
+  pull_request:
+    paths:
+      - "packages/**/*.py"
+  schedule:
+    - cron: "22 4 * * 1"
+  workflow_dispatch:
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: analyze (python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@3599b3baa15b485a2e49ef411a7a4bb2452e7f93
+        with:
+          languages: python
+          build-mode: none
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@3599b3baa15b485a2e49ef411a7a4bb2452e7f93
+        with:
+          category: "/language:python"
