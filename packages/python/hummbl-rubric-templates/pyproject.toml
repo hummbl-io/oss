@@ -33,5 +33,12 @@ PyPI = "https://pypi.org/project/hummbl-rubric-templates/"
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hummbl_rubric_templates*"]
+
+[tool.setuptools.package-data]
+hummbl_rubric_templates = ["../schema/*.yaml", "../templates/*.yaml"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
