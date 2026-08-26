@@ -99,7 +99,7 @@ class Repo:
     bridges: tuple[str, ...]
     status: str
     size_category: str
-    git_host: str
+    git_host: str = "github"
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Repo:
@@ -113,7 +113,7 @@ class Repo:
             bridges=tuple(d.get("bridges", [])),
             status=d["status"],
             size_category=d["size_category"],
-            git_host=d["git_host"],
+            git_host=d.get("git_host", "github"),
         )
 
 

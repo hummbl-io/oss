@@ -9,11 +9,11 @@ description = "HUMMBL Standard Evaluation Rubric Templates & Automated Validator
 readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
 authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["pyyaml>=6.0"]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
+test = ["pytest>=7.0"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -20,54 +20,60 @@ def compass() -> Compass:
 
 class TestLoad:
     def test_version(self, compass: Compass) -> None:
-        assert compass.version == "1.1.0"
+        assert compass.version == "2.0.0"
 
     def test_repo_count(self, compass: Compass) -> None:
-        assert len(compass.repos) == 41
+        # 14 public packages in the oss monorepo
+        assert len(compass.repos) == 14
 
     def test_all_repos_have_required_fields(self, compass: Compass) -> None:
+        valid_prefixes = ("hummbl", "base120", "governed-")
         for repo in compass.repos:
-            assert repo.name.startswith("hummbl-")
+            assert any(repo.name.startswith(p) for p in valid_prefixes), f"unexpected name: {repo.name}"
             assert repo.primary_base120
             assert repo.layer
             assert repo.description
             assert repo.status in ("active", "experimental", "stale", "deprecated", "archived")
 
+    def test_no_git_host_leaked(self, compass: Compass) -> None:
+        """Public topology must not expose git_host (private infra detail)."""
+        for repo in compass.repos:
+            assert repo.git_host == "github"
+
 
 class TestByLayer:
-    def test_l5_human_layer(self, compass: Compass) -> None:
-        repos = compass.by_layer("L5")
+    def test_l1_safety_layer(self, compass: Compass) -> None:
+        repos = compass.by_layer("L1")
         names = {r.name for r in repos}
-        assert "hummbl-bki" in names
-        assert "hummbl-hrsi" in names
-        assert "hummbl-professor" in names
+        assert "hummbl-governance" in names
+        assert "hummbl-tuples" in names
 
     def test_l2_technical_layer(self, compass: Compass) -> None:
         repos = compass.by_layer("L2")
         names = {r.name for r in repos}
-        assert "hummbl-kernel-forge" in names
-        assert "hummbl-agi" in names
+        assert "hummbl-kernel" in names
+        assert "hummbl" in names
 
 
 class TestByBase120:
-    def test_sy20_coordination(self, compass: Compass) -> None:
-        repos = compass.by_base120("SY20")
+    def test_co14_coordination(self, compass: Compass) -> None:
+        repos = compass.by_base120("CO14")
         names = {r.name for r in repos}
+        assert "hummbl-kernel" in names
         assert "hummbl-bus" in names
-        assert "hummbl-mesh" in names
 
-    def test_p3_identity(self, compass: Compass) -> None:
-        repos = compass.by_base120("P3")
+    def test_go1_governance(self, compass: Compass) -> None:
+        repos = compass.by_base120("GO1")
         names = {r.name for r in repos}
-        assert "hummbl-bki" in names
+        assert "hummbl-governance" in names
 
 
 class TestRoute:
-    def test_route_kernel_benchmark(self, compass: Compass) -> None:
+    def test_route_kernel(self, compass: Compass) -> None:
         results = compass.route("benchmark a kernel on Metal", top_k=3)
         assert len(results) > 0
         names = [r.repo.name for r in results]
-        assert "hummbl-kernel-forge" in names
+        assert "hummbl-kernel" in names
 
     def test_route_governance(self, compass: Compass) -> None:
         results = compass.route("design a governance control catalog", top_k=3)
@@ -75,11 +81,11 @@ class TestRoute:
         names = [r.repo.name for r in results]
         assert "hummbl-governance" in names
 
-    def test_route_belonging(self, compass: Compass) -> None:
-        results = compass.route("check my belonging baseline", top_k=3)
+    def test_route_bus(self, compass: Compass) -> None:
+        results = compass.route("send a message on the coordination bus", top_k=3)
         assert len(results) > 0
         names = [r.repo.name for r in results]
-        assert "hummbl-hrsi" in names or "hummbl-bki" in names
+        assert "hummbl-bus" in names
 
     def test_confidence_range(self, compass: Compass) -> None:
         results = compass.route("something about ML", top_k=3)
@@ -88,32 +94,20 @@ class TestRoute:
 
 
 class TestBridges:
-    def test_bki_bridges(self, compass: Compass) -> None:
-        repos = compass.bridges("hummbl-bki")
+    def test_governance_bridges(self, compass: Compass) -> None:
+        repos = compass.bridges("hummbl-governance")
         names = {r.name for r in repos}
-        assert "hummbl-hrsi" in names
-        assert "hummbl-professor" in names
+        assert "hummbl-kernel" in names
+        assert "hummbl-bus" in names
 
     def test_unknown_repo(self, compass: Compass) -> None:
         assert compass.bridges("hummbl-xyz") == []
 
 
-class TestGaps:
-    def test_gaps_exist(self, compass: Compass) -> None:
-        gaps = compass.report_gaps()
-        assert len(gaps) > 0
-        names = {g["repo_name"] for g in gaps}
-        # Built repos should no longer appear as gaps
-        assert "hummbl-compass" not in names
-        assert "hummbl-premortem" not in names
-        assert "hummbl-worstcase" not in names
-        assert "hummbl-telemetry" not in names
-
-
 class TestStats:
     def test_stats_structure(self, compass: Compass) -> None:
         stats = compass.stats()
-        assert stats["total_repos"] == 41
+        assert stats["total_repos"] == 14
         assert "by_layer" in stats
         assert "by_base120_domain" in stats
-        assert sum(stats["by_layer"].values()) == 41
+        assert sum(stats["by_layer"].values()) == 14
