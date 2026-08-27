@@ -51,7 +51,7 @@ Do NOT use this playbook for:
 1. Confirm Python 3.11+ is installed
 2. Confirm git is installed and authenticated
 3. Confirm the machine has a stable hostname (not a DHCP rotating name)
-4. Confirm the machine has a `_state/coordination/` directory (or will create one)
+4. Confirm the machine has a `the coordination bus directory` directory (or will create one)
 5. Confirm the machine has a `_receipts/krineia/` directory (or will create one)
 
 **Rollout sequence:**
@@ -70,7 +70,7 @@ Do NOT use this playbook for:
 **Verification:**
 
 - `python -m hummbl_governance.services.health` returns 8 probes green
-- `cat _state/coordination/messages.tsv | tail -1` shows the initialization STATUS
+- `cat the coordination bus log | tail -1` shows the initialization STATUS
 - `python -c "import hummbl_governance; print(hummbl_governance.__version__)"` returns the version
 - The KRINEIA receipt chain is intact (run the chain verification from the evidence pack E1)
 
@@ -151,7 +151,7 @@ Do NOT use this playbook for:
 **Rollout sequence:**
 
 1. The customer installs `hummbl-governance` via `pip install hummbl-governance`
-2. The customer creates a `_state/coordination/` directory for the coordination bus
+2. The customer creates a `the coordination bus directory` directory for the coordination bus
 3. The customer creates a `_receipts/krineia/` directory for the receipt chain
 4. The customer initializes the receipt chain (first receipt: `governance.fleet_rollout.customer_initialized`)
 5. The customer configures the agent guardrails (per the customer's agents)
@@ -193,7 +193,7 @@ Before starting any rollout, confirm:
 The generic sequence, applicable to all 4 scenarios:
 
 1. **Install** — `pip install hummbl-governance`
-2. **Initialize** — create `_state/coordination/` and `_receipts/krineia/`
+2. **Initialize** — create `the coordination bus directory` and `_receipts/krineia/`
 3. **Configure** — agent guardrails, roster, model tiers
 4. **Verify** — run the verification commands (§6)
 5. **Receipt** — emit a KRINEIA receipt for the rollout event
@@ -225,7 +225,7 @@ Should return 8 probes green (or the customer's equivalent).
 ### V3: Coordination bus
 
 ```bash
-tail -5 _state/coordination/messages.tsv
+tail -5 the coordination bus log
 ```
 
 Should show the initialization STATUS and any subsequent messages.
@@ -375,7 +375,7 @@ If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`
 - hummbl-governance: https://github.com/hummbl-io/hummbl-governance
 - CONSTITUTION: `CONSTITUTION.md` (§3.6 receipt integrity, §6 receipt-triggering changes)
 - KRINEIA receipt chain: `_receipts/krineia/primary.jsonl`
-- Coordination bus: `_state/coordination/messages.tsv`
+- Coordination bus: `the coordination bus log`
 
 ---
 
