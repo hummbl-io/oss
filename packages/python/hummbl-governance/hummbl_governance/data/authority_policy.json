@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-27T10:57:00Z",
+  "description": "Structured authority policy for HUMMBL agent fleet. Replaces heuristic markdown charter parsing in AuthorityEngine. Gap-9 (issue #414), NIST 800-53 AC-2, AC-5, CM-3.",
+  "roles": {
+    "operator": {
+      "trust_tier": 5,
+      "identity_class": "human_reviewer",
+      "authorities": {
+        "github_mutation": {
+          "scope": "All repos, all operations",
+          "limit": "None (full authority)",
+          "max_severity": "CRITICAL",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "key_management": {
+          "scope": "Signing identity registry, GPG key generation",
+          "limit": "None (operator-only authority)",
+          "max_severity": "CRITICAL",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "authority_revocation": {
+          "scope": "Revoke agent authorities, suspend agents",
+          "limit": "Must post REVOCATION or SUSPENSION notice to bus",
+          "max_severity": "CRITICAL",
+          "requires_receipt": false,
+          "revoked": false
+        }
+      }
+    },
+    "devin": {
+      "trust_tier": 2,
+      "identity_class": "agent_author",
+      "authorities": {
+        "github_mutation": {
+          "scope": "Assigned repos, operations within authority charter",
+          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
+          "max_severity": "HIGH",
+          "requires_receipt": true,
+          "revoked": false
+        },
+        "receipt_authoring": {
+          "scope": "Bus receipts, SITREP, STATUS messages",
+          "limit": "Cannot post DECISION type (requires operator principal proof)",
+          "max_severity": "LOW",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "review_attestation": {
+          "scope": "Code review, evidence review",
+          "limit": "Attestation is advisory; does not satisfy human final review",
+          "max_severity": "MEDIUM",
+          "requires_receipt": false,
+          "revoked": false
+        }
+      }
+    },
+    "codex": {
+      "trust_tier": 2,
+      "identity_class": "agent_author",
+      "authorities": {
+        "github_mutation": {
+          "scope": "Assigned repos, operations within authority charter",
+          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
+          "max_severity": "HIGH",
+          "requires_receipt": true,
+          "revoked": false
+        },
+        "receipt_authoring": {
+          "scope": "Bus receipts, SITREP, STATUS messages",
+          "limit": "Cannot post DECISION type (requires operator principal proof)",
+          "max_severity": "LOW",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "review_attestation": {
+          "scope": "Code review, evidence review",
+          "limit": "Attestation is advisory; does not satisfy human final review",
+          "max_severity": "MEDIUM",
+          "requires_receipt": false,
+          "revoked": false
+        }
+      }
+    },
+    "claude-code": {
+      "trust_tier": 2,
+      "identity_class": "agent_author",
+      "authorities": {
+        "github_mutation": {
+          "scope": "Assigned repos, operations within authority charter",
+          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
+          "max_severity": "HIGH",
+          "requires_receipt": true,
+          "revoked": false
+        },
+        "receipt_authoring": {
+          "scope": "Bus receipts, SITREP, STATUS messages",
+          "limit": "Cannot post DECISION type (requires operator principal proof)",
+          "max_severity": "LOW",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "review_attestation": {
+          "scope": "Code review, evidence review",
+          "limit": "Attestation is advisory; does not satisfy human final review",
+          "max_severity": "MEDIUM",
+          "requires_receipt": false,
+          "revoked": false
+        }
+      }
+    },
+    "opencode": {
+      "trust_tier": 2,
+      "identity_class": "agent_author",
+      "authorities": {
+        "github_mutation": {
+          "scope": "Assigned repos, operations within authority charter",
+          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
+          "max_severity": "HIGH",
+          "requires_receipt": true,
+          "revoked": false
+        },
+        "receipt_authoring": {
+          "scope": "Bus receipts, SITREP, STATUS messages",
+          "limit": "Cannot post DECISION type (requires operator principal proof)",
+          "max_severity": "LOW",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "review_attestation": {
+          "scope": "Code review, evidence review",
+          "limit": "Attestation is advisory; does not satisfy human final review",
+          "max_severity": "MEDIUM",
+          "requires_receipt": false,
+          "revoked": false
+        }
+      }
+    },
+    "gemini": {
+      "trust_tier": 2,
+      "identity_class": "agent_author",
+      "authorities": {
+        "github_mutation": {
+          "scope": "Assigned repos, operations within authority charter",
+          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
+          "max_severity": "HIGH",
+          "requires_receipt": true,
+          "revoked": false
+        },
+        "receipt_authoring": {
+          "scope": "Bus receipts, SITREP, STATUS messages",
+          "limit": "Cannot post DECISION type (requires operator principal proof)",
+          "max_severity": "LOW",
+          "requires_receipt": false,
+          "revoked": false
+        },
+        "review_attestation": {
+          "scope": "Code review, evidence review",
+          "limit": "Attestation is advisory; does not satisfy human final review",
+          "max_severity": "MEDIUM",
+          "requires_receipt": false,
+          "revoked": false
+        }
+      }
+    }
+  }
+}
