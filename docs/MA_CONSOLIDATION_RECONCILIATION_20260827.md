@@ -24,7 +24,7 @@ The original M&A consolidation plan proposed a phased migration of ~100 HUMMBL p
 | Create `docs/PACKAGES.md` | DONE |
 | Move to `packages/python/<name>/` layout | DONE |
 | Update `publish-pypi.yml` tag filter | DONE |
-| Update README.md package table | DONE |
+| Update README.md package table | PARTIALLY DONE (9 of 14 tracked packages listed; missing `hummbl-compass`, `hummbl-free-models`, `hummbl-rubric-templates`, `hummbl-taxonomy`, `hummbl-validation`) |
 
 ### Phase 1: Migrate live PyPI packages — COMPLETE (7/7)
 
@@ -50,18 +50,18 @@ No `packages/node/` directory exists in oss yet. The `@hummbl` npm scope is reta
 |-----------------|---------|-----------|
 | `hummbl-validation` | YES | — |
 | `hummbl-lattice` | NO | — |
-| `hummbl-eval` | NO | `hummbl-eval` (archived) |
+| `hummbl-eval` | IN WORKING TREE (untracked) | `hummbl-eval` (archived) |
 | `hummbl-clp` | NO | — |
 | `hummbl-contracts` | NO | — |
 | `hummbl-axis` | NO | — |
 | `hummbl-crucible` | NO | `hummbl-crucible` (archived) |
 | `hummbl-intel` | NO | — |
-| `hummbl-dashboard` | NO | — |
+| `hummbl-dashboard` | IN WORKING TREE (untracked) | — |
 | `hummbl-lint-config` | NO | — |
 
-### Phase 4: Publish new-language packages — NOT STARTED
+### Phase 4: Publish new-language packages — PARTIALLY DONE
 
-No `packages/rust/`, `packages/go/`, `packages/jvm/`, or `packages/nix/` directories exist yet.
+`packages/lean/hummbl-formalization/` exists and is tracked (Lean 4, `lakefile.toml`, 4 `.lean` source files, README). No `packages/rust/`, `packages/go/`, `packages/jvm/`, or `packages/nix/` directories exist yet.
 
 ### Phase 5: Papers, docs, sites, CLI manifests — NOT STARTED
 
@@ -73,8 +73,8 @@ No `papers/`, `sites/`, or `cli/` directories exist yet.
 - `hummbl-governance` → `packages/python/hummbl-governance/`
 - `hummbl` (old root) → `packages/python/hummbl/`
 
-Archived repos without clear oss counterparts (may need investigation):
-- `hummbl-eval`, `hummbl-crucible`, `hummbl-library`, `hummbl-scripts`, `hummbl-security`, `hummbl-wiki`, `hummbl-audit`, `hummbl-scheduler`, `hummbl-alerts`, `hummbl-paralegal`, `hummbl-py`, `founder-mode`, `hermes-agent`
+Archived repos without clear oss counterparts (partial list — 15 of 23 archived repos named here; the remaining 8 are infrastructure/tooling repos):
+- `hummbl-eval` (note: untracked `packages/python/hummbl-eval/` exists in working tree), `hummbl-crucible`, `hummbl-library`, `hummbl-scripts`, `hummbl-security`, `hummbl-wiki`, `hummbl-audit`, `hummbl-scheduler`, `hummbl-alerts`, `hummbl-paralegal`, `hummbl-py`, `founder-mode`, `hermes-agent`
 
 ---
 
@@ -86,7 +86,7 @@ Archived repos without clear oss counterparts (may need investigation):
 
 3. **Repo-specific consolidation proposals** — Many repos that had individual `docs/consolidation-plan.md` files (hummbl-framework-crosswalks, hummbl-crosswalk-engine, hummbl-response-objects, hummbl-repo-factory, etc.) have been superseded by the monorepo migration. Their per-repo plans are stale.
 
-4. **`hummbl-governance` as a standalone repo** — Archived 2026-08-27. All future development goes to `oss/packages/python/hummbl-governance/`. The 10 gap PRs (#419-#427) that were blocked by archival have been ported to oss as PR #65.
+4. **`hummbl-governance` as a standalone repo** — Archived 2026-08-27. All future development goes to `oss/packages/python/hummbl-governance/`. The 9 gap PRs (#419-#427) that were blocked by archival have been ported to oss as PR #65 (porting 9 of 10 security gap commits; the gap-2 CI workflow was skipped as monorepo-specific).
 
 ---
 
@@ -94,7 +94,7 @@ Archived repos without clear oss counterparts (may need investigation):
 
 1. **Phase 2 (npm)** — Still needs to be done. No npm packages in oss yet.
 2. **Phase 3 (not-yet-live packages)** — Partially done. ~20+ packages still need migration.
-3. **Phase 4 (new languages)** — Rust, Go, JVM, Nix packages not started.
+3. **Phase 4 (new languages)** — Lean 4 package exists; Rust, Go, JVM, Nix not started.
 4. **Phase 5 (papers, sites, CLI)** — Not started.
 5. **Phase 6 (archive legacy)** — Ongoing. 23 done, ~20+ remaining candidates.
 
@@ -112,6 +112,6 @@ Archived repos without clear oss counterparts (may need investigation):
 
 ## Open Questions for Operator
 
-1. Should the 10 gap commits (PR #65) be merged before or after the `hummbl-governance` archival is fully reconciled?
+1. Should the 9 gap commits (PR #65) be merged before or after the `hummbl-governance` archival is fully reconciled?
 2. Are the archived repos without oss counterparts (hummbl-eval, hummbl-crucible, etc.) intentionally dropped, or do they need migration?
 3. Should Phase 2 (npm) be prioritized now that Phase 1 is complete?
