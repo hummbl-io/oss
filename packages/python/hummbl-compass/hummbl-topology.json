@@ -1,0 +1,206 @@
+{
+  "schema_version": "2.0.0",
+  "generated": "2026-08-26T00:00:00Z",
+  "description": "Public package topology for the hummbl-io/oss monorepo. Contains only packages published from this public repo — no private repo names, infrastructure details, or fleet inventory.",
+  "schema": {
+    "repo_fields": {
+      "name": "package directory name (hummbl-<X>)",
+      "primary_base120": "The single Base120 model that best captures the package's core intent",
+      "secondary_base120s": "Additional models that apply (max 3)",
+      "layer": "Architectural layer (L0 Meta, L1 Safety, L2 Technical, L3 Coordination, L4 Strategy, L5 Human, L6 Operations)",
+      "layer_name": "Human-readable layer description",
+      "description": "One-line purpose statement",
+      "bridges": "Array of package names this package explicitly connects to (cross-layer or cross-domain)",
+      "status": "active | stale | deprecated | experimental",
+      "size_category": "tiny (<1MB), small (<50MB), medium (<500MB), large (>500MB)"
+    }
+  },
+  "layers": {
+    "L0": {
+      "name": "Meta",
+      "description": "Cross-cutting shared infrastructure, intelligence, and taxonomy"
+    },
+    "L1": {
+      "name": "Safety",
+      "description": "Governance, compliance, adversarial testing, and risk"
+    },
+    "L2": {
+      "name": "Technical",
+      "description": "ML, AI kernels, alignment, and learning mechanics"
+    },
+    "L3": {
+      "name": "Coordination",
+      "description": "Bus, mesh, agent orchestration, and shared memory"
+    },
+    "L4": {
+      "name": "Strategy",
+      "description": "Positioning, intelligence, benchmarks, and evidence"
+    },
+    "L5": {
+      "name": "Human",
+      "description": "Belonging, cognition, health, and founder support"
+    },
+    "L6": {
+      "name": "Operations",
+      "description": "Production, runtime, live services, and tooling"
+    }
+  },
+  "repos": [
+    {
+      "name": "hummbl-governance",
+      "primary_base120": "GO1",
+      "secondary_base120s": ["GO3", "CO12"],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Governance primitives for AI agent orchestration",
+      "bridges": ["hummbl-kernel", "hummbl-bus", "hummbl-tuples"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "base120",
+      "primary_base120": "CO12",
+      "secondary_base120s": ["DE6", "SY20"],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "120 reasoning operators for structured thinking",
+      "bridges": ["hummbl", "hummbl-kernel"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-kernel",
+      "primary_base120": "CO14",
+      "secondary_base120s": ["GO1", "SY20"],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "Orchestration kernel with security and compliance enforcement",
+      "bridges": ["hummbl-governance", "hummbl-bus", "base120"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl",
+      "primary_base120": "CO12",
+      "secondary_base120s": ["DE6", "RE10"],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "Structured reasoning framework for AI agents",
+      "bridges": ["base120", "hummbl-kernel"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-bif",
+      "primary_base120": "IN18",
+      "secondary_base120s": ["CO12", "DE6"],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Batch Ingestion Framework for technical knowledge acquisition",
+      "bridges": ["hummbl", "hummbl-cognition"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-tuples",
+      "primary_base120": "GO3",
+      "secondary_base120s": ["CO12", "DE6"],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "HUMMBL Typed Tuples governance model",
+      "bridges": ["hummbl-governance", "hummbl-bus"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-bus",
+      "primary_base120": "CO14",
+      "secondary_base120s": ["GO1", "SY9"],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Secure append-only TSV coordination bus for multi-agent systems",
+      "bridges": ["hummbl-governance", "hummbl-kernel", "hummbl-tuples"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-cognition",
+      "primary_base120": "RE10",
+      "secondary_base120s": ["CO12", "SY20"],
+      "layer": "L3",
+      "layer_name": "Coordination",
+      "description": "Cognitive Ledger Protocol (CLP) and Open Brain server",
+      "bridges": ["hummbl-bus", "hummbl"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "governed-compression",
+      "primary_base120": "DE5",
+      "secondary_base120s": ["RE10", "CO12"],
+      "layer": "L2",
+      "layer_name": "Technical",
+      "description": "Governed compression experiments",
+      "bridges": ["hummbl-governance"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-compass",
+      "primary_base120": "DE6",
+      "secondary_base120s": ["CO12", "P4"],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Package topology router for the hummbl-io/oss monorepo",
+      "bridges": ["base120", "hummbl-governance"],
+      "status": "active",
+      "size_category": "tiny"
+    },
+    {
+      "name": "hummbl-free-models",
+      "primary_base120": "IN18",
+      "secondary_base120s": ["CO12", "DE6"],
+      "layer": "L4",
+      "layer_name": "Strategy",
+      "description": "Free and open LLM model registry and discovery tools",
+      "bridges": ["hummbl", "hummbl-kernel"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-rubric-templates",
+      "primary_base120": "GO3",
+      "secondary_base120s": ["CO12", "DE6"],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Reusable rubric templates for AI evaluation and compliance",
+      "bridges": ["hummbl-governance", "hummbl-tuples"],
+      "status": "active",
+      "size_category": "tiny"
+    },
+    {
+      "name": "hummbl-taxonomy",
+      "primary_base120": "DE6",
+      "secondary_base120s": ["P4", "CO18"],
+      "layer": "L0",
+      "layer_name": "Meta",
+      "description": "Classification schemas and ontologies for the ecosystem",
+      "bridges": ["hummbl-governance", "base120"],
+      "status": "active",
+      "size_category": "small"
+    },
+    {
+      "name": "hummbl-validation",
+      "primary_base120": "GO1",
+      "secondary_base120s": ["CO12", "DE6"],
+      "layer": "L1",
+      "layer_name": "Safety",
+      "description": "Shared validation primitives for HUMMBL packages",
+      "bridges": ["hummbl-governance", "hummbl-bus"],
+      "status": "active",
+      "size_category": "tiny"
+    }
+  ],
+  "gaps": [],
+  "cross_cutting_concerns": []
+}

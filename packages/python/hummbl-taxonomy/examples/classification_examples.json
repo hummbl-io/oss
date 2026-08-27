@@ -1,0 +1,20 @@
+[
+  {
+    "name": "spam_filter",
+    "expected_tier": "ANI",
+    "expected_governance_status": "partially-governed",
+    "notes": "Single task with some controls but no independent review or rollback."
+  },
+  {
+    "name": "governed_coding_agent",
+    "expected_tier": "ASPI",
+    "expected_governance_status": "governed",
+    "notes": "Domain-bounded agent with mission authority, evidence receipts, review, and stop rules."
+  },
+  {
+    "name": "cross_domain_strategic_operator",
+    "expected_tier": "AGI",
+    "expected_governance_status": "governed",
+    "notes": "AGI review trigger, not a current deployment claim."
+  }
+]

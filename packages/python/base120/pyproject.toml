@@ -4,18 +4,31 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "base120"
-version = "2.0.0"
+version = "3.0.0"
 description = "120 reasoning operators for structured thinking — stdlib-only, tuple-native"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 dependencies = []
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 
 [project.urls]
 Homepage = "https://hummbl.io"
-Repository = "https://github.com/hummbl-io/oss/tree/main/packages/base120"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/base120/README.md"
+Repository = "https://github.com/hummbl-io/oss/tree/main/packages/python/base120"
 Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/base120/"
 
 [project.optional-dependencies]
 test = [

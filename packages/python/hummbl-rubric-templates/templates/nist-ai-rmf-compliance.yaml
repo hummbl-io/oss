@@ -1,0 +1,163 @@
+# NIST AI RMF Compliance Evaluation Template
+# Version: 1.0
+# Context: Governance compliance evaluation for AI systems
+
+template_metadata:
+  template_name: "NIST AI RMF Compliance Evaluation"
+  template_version: "1.0"
+  template_type: "governance_compliance"
+  base_schema: "hummbl-rubric-master.yaml"
+  created_date: "2026-05-28"
+  last_updated: "2026-05-28"
+  author: "HUMMBL Governance Team"
+  
+parameters:
+  context_name: "nist_ai_rmf_compliance"
+  framework_reference: "NIST AI Risk Management Framework v1.0"
+  evaluation_scope: "single_document"
+  artifact_types: ["compliance_report", "risk_assessment", "evidence_pack"]
+  governance_level: "fleet"
+  stakeholder_type: "auditor"
+  risk_profile: "high"
+  compliance_criticality: "mandatory"
+  
+hard_gates:
+  framework_compliance:
+    fail_condition: "Does not map controls to all four NIST AI RMF functions (GOVERN, MAP, MEASURE, MANAGE)"
+    max_score_if_failed: 50
+    severity: "critical"
+    
+  governance_process:
+    fail_condition: "No evidence of governance process adoption or stakeholder review"
+    max_score_if_failed: 60
+    severity: "critical"
+    
+  evidence_quality:
+    fail_condition: "Missing critical evidence for high-risk controls or no evidence traceability"
+    max_score_if_failed: 70
+    severity: "high"
+    
+  scope_completion:
+    fail_condition: "Missing controls from any of the four NIST AI RMF functions"
+    max_score_if_failed: 80
+    severity: "high"
+    
+  risk_containment:
+    fail_condition: "No risk register or unmitigated critical risks identified"
+    max_score_if_failed: 75
+    severity: "high"
+    
+  artifact_presence:
+    fail_condition: "Missing required compliance artifacts (risk assessment, control catalog, evidence pack)"
+    max_score_if_failed: 65
+    severity: "medium"
+    
+  stakeholder_control:
+    fail_condition: "No stakeholder approval or governance receipt posted"
+    max_score_if_failed: 70
+    severity: "medium"
+    
+weighted_dimensions:
+  # Core dimensions (40% total)
+  framework_fidelity:
+    weight: 15
+    description: "How faithfully the evaluation maps to NIST AI RMF structure and terminology"
+    scoring_anchors:
+      "0-5": "Does not follow NIST AI RMF structure, uses non-standard terminology, missing function mapping"
+      "6-10": "Partial mapping to NIST AI RMF functions, some non-standard terminology, incomplete control coverage"
+      "11-13": "Complete mapping to all four NIST AI RMF functions, standard terminology, comprehensive control coverage"
+      "14-15": "Complete mapping with precise NIST AI RMF terminology, includes subcategory-level alignment, demonstrates deep framework understanding"
+      "16-20": "Complete mapping with subcategory-level alignment, includes reference to NIST AI RMF Playbook, demonstrates implementation guidance"
+      
+  applied_transformation:
+    weight: 10
+    description: "How well the framework is transformed into concrete controls and evidence requirements"
+    scoring_anchors:
+      "0-5": "No transformation from framework to controls, abstract requirements only, no implementation guidance"
+      "6-10": "Partial transformation, some controls defined but not actionable, limited implementation guidance"
+      "11-13": "Complete transformation to actionable controls, clear implementation guidance, evidence requirements specified"
+      "14-15": "Complete transformation with clear control implementation steps, evidence collection procedures, and verification methods"
+      
+  evidence_quality:
+    weight: 10
+    description: "Quality, completeness, and traceability of evidence for each control"
+    scoring_anchors:
+      "0-3": "No evidence or placeholder evidence, no traceability, critical controls missing evidence"
+      "4-6": "Partial evidence coverage, weak traceability, some critical controls with insufficient evidence"
+      "7-8": "Complete evidence coverage for all controls, strong traceability, evidence clearly linked to control requirements"
+      "9-10": "Complete evidence coverage with strong traceability, evidence quality validated, includes evidence collection procedures"
+      
+  # Governance dimensions (30% total)
+  governance_process:
+    weight: 10
+    description: "Evidence of governance process adoption and stakeholder engagement"
+    scoring_anchors:
+      "0-3": "No governance process evidence, no stakeholder review, no governance receipts"
+      "4-6": "Partial governance process evidence, limited stakeholder review, some governance receipts"
+      "7-8": "Complete governance process evidence, full stakeholder review, governance receipts posted to bus"
+      "9-10": "Complete governance process with documented approval workflow, stakeholder sign-off, governance receipts with decision rationale"
+      
+  stakeholder_control:
+    weight: 10
+    description: "Degree of stakeholder control and oversight over the compliance process"
+    scoring_anchors:
+      "0-3": "No stakeholder control, no approval mechanisms, no oversight"
+      "4-6": "Limited stakeholder control, basic approval mechanisms, minimal oversight"
+      "7-8": "Strong stakeholder control, clear approval mechanisms, documented oversight"
+      "9-10": "Complete stakeholder control with documented escalation paths, approval workflows, and oversight procedures"
+      
+  risk_containment:
+    weight: 15
+    description: "Identification, assessment, and mitigation of compliance risks"
+    scoring_anchors:
+      "0-3": "No risk register, unmitigated critical risks, no risk assessment"
+      "4-6": "Partial risk register, some critical risks unmitigated, basic risk assessment"
+      "7-8": "Complete risk register, all critical risks mitigated, comprehensive risk assessment"
+      "9-10": "Complete risk register with risk scoring, mitigation plans, and residual risk assessment"
+      
+  # Quality dimensions (20% total)
+  useful_density:
+    weight: 10
+    description: "Density of actionable information vs. boilerplate"
+    scoring_anchors:
+      "0-3": "Mostly boilerplate, minimal actionable information, high noise-to-signal ratio"
+      "4-6": "Mixed boilerplate and actionable information, moderate noise-to-signal ratio"
+      "7-8": "Primarily actionable information, minimal boilerplate, low noise-to-signal ratio"
+      "9-10": "Highly actionable information throughout, no boilerplate, excellent signal-to-noise ratio"
+      
+  artifact_utility:
+    weight: 10
+    description: "Utility of generated artifacts for downstream governance processes"
+    scoring_anchors:
+      "0-3": "Artifacts not useful for downstream processes, require significant rework"
+      "4-6": "Artifacts partially useful, require moderate rework for downstream processes"
+      "7-8": "Artifacts highly useful, minimal rework required for downstream processes"
+      "9-10": "Artifacts immediately usable, no rework required, integrate seamlessly with downstream processes"
+      
+  # Epistemic dimensions (10% total)
+  truth_seeking:
+    weight: 10
+    description: "Evidence of truth-seeking behavior vs. compliance theater"
+    scoring_anchors:
+      "0-2": "Clear compliance theater, no evidence of actual risk assessment, box-checking approach"
+      "3-5": "Mixed compliance theater and genuine assessment, partial truth-seeking"
+      "6-7": "Genuine risk assessment with evidence of truth-seeking, minimal compliance theater"
+      "8": "Strong truth-seeking throughout, evidence of critical self-assessment, no compliance theater"
+      
+required_outputs:
+  numeric_score: 0
+  hard_gate_status: ""
+  weighted_breakdown: {}
+  top_3_strengths: []
+  top_3_weaknesses: []
+  score_caps_triggered: []
+  next_validation_test: "External audit or third-party review of compliance artifacts"
+  limitations: "Self-assessment only, requires external validation for regulatory purposes"
+  
+usage_notes:
+  - "This template is designed for NIST AI RMF v1.0 compliance evaluations"
+  - "Hard gates focus on framework mapping, governance process, and evidence quality"
+  - "Weighted dimensions emphasize framework fidelity and governance process"
+  - "Truth-seeking dimension detects compliance theater vs. genuine assessment"
+  - "External validation is required for regulatory-grade compliance assessments"
+  - "Template assumes fleet-level governance with auditor stakeholder perspective"

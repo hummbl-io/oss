@@ -25,6 +25,7 @@ import pytest
 from hummbl_governance.kill_switch import (
     KillSwitch,
     KillSwitchMode,
+    KillSwitchReason,
     KillSwitchEngagedError,
     KillSwitchTamperError,
 )
@@ -322,3 +323,89 @@ class TestConcurrencyToctou:
         assert not hasattr(ks, "add_critical_task")
         assert not hasattr(ks, "remove_critical_task")
         assert not hasattr(ks, "set_critical_tasks")
+
+
+class TestKillSwitchReasonEnum:
+    """Tests for the KillSwitchReason enum (Phase 1 -- issue #321)."""
+
+    def test_enum_has_15_values(self):
+        """Per Ashby's Law: the enum must cover >=15 failure classes."""
+        reasons = list(KillSwitchReason)
+        assert len(reasons) == 15
+
+    def test_enum_values_are_strings(self):
+        """Enum values are machine-actionable strings, not auto() ints."""
+        for reason in KillSwitchReason:
+            assert isinstance(reason.value, str)
+
+    def test_all_expected_values_present(self):
+        """Verify the 15 standard failure classes from issue #321."""
+        expected = {
+            "BUDGET", "BUDGET_CREEP", "CAPABILITY_MISUSE", "IDENTITY",
+            "DRIFT", "INJECTION", "EXFIL", "REGRESSION", "DEPENDENCY",
+            "LEGAL", "OPERATOR", "DEGRADATION", "TAMPER",
+            "RUNAWAY", "KERNEL_VIOLATION",
+        }
+        actual = {r.name for r in KillSwitchReason}
+        assert actual == expected
+
+    def test_engage_with_failure_class(self):
+        """engage() accepts failure_class and stores it on the event."""
+        ks = KillSwitch()
+        event = ks.engage(
+            KillSwitchMode.HALT_ALL,
+            reason="Budget exceeded",
+            triggered_by="cost_governor",
+            failure_class=KillSwitchReason.BUDGET,
+        )
+        assert event.failure_class == KillSwitchReason.BUDGET
+
+    def test_engage_without_failure_class_defaults_none(self):
+        """engage() without failure_class defaults to None (backward compatible)."""
+        ks = KillSwitch()
+        event = ks.engage(
+            KillSwitchMode.HALT_ALL,
+            reason="test",
+            triggered_by="tester",
+        )
+        assert event.failure_class is None
+
+    def test_failure_class_in_status(self):
+        """get_status() includes failure_class when set."""
+        ks = KillSwitch()
+        ks.engage(
+            KillSwitchMode.EMERGENCY,
+            reason="Prompt injection detected",
+            triggered_by="output_validator",
+            failure_class=KillSwitchReason.INJECTION,
+        )
+        status = ks.get_status()
+        assert status["last_engagement"]["failure_class"] == "INJECTION"
+
+    def test_failure_class_absent_from_status_when_none(self):
+        """get_status() omits failure_class when not set (backward compatible)."""
+        ks = KillSwitch()
+        ks.engage(
+            KillSwitchMode.HALT_ALL,
+            reason="test",
+            triggered_by="tester",
+        )
+        status = ks.get_status()
+        assert "failure_class" not in status["last_engagement"]
+
+    def test_failure_class_persisted_and_restored(self, tmp_path):
+        """failure_class survives save/load cycle."""
+        ks = KillSwitch(state_dir=tmp_path, require_hmac=False)
+        ks.engage(
+            KillSwitchMode.HALT_ALL,
+            reason="Identity spoofing",
+            triggered_by="identity_registry",
+            failure_class=KillSwitchReason.IDENTITY,
+        )
+
+        # Load from file
+        ks2 = KillSwitch.load_from_file(tmp_path, require_hmac=False)
+        assert ks2.mode == KillSwitchMode.HALT_ALL
+        history = ks2.get_history()
+        assert len(history) == 1
+        assert history[0].failure_class == KillSwitchReason.IDENTITY

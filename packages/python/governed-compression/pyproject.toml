@@ -30,6 +30,13 @@ dependencies = [
   "hummbl-governance>=1.1.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/governed-compression/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/governed-compression/"
+
 [project.optional-dependencies]
 test = [
   "pytest>=7",
