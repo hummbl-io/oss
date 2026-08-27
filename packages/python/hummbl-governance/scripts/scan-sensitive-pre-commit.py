@@ -184,7 +184,7 @@ PATTERNS: list[PatternDef] = [
     (MEDIUM, "domain", "personal domain 'rpbx.net'",
      re.compile(r"\brpbx\.net\b")),
     (MEDIUM, "pii", "email address",
-     re.compile(r"\b[A-Za-z0-9._%+-]+@(?!example\.(com|net|org|edu)\b)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")),
+     re.compile(r"\b(?!git@github\.com\b)[A-Za-z0-9._%+-]+@(?!example\.(com|net|org|edu)\b)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")),
     (MEDIUM, "pii", "US phone number",
      re.compile(r"\b\d{3}[-.]\d{3}[-.]\d{4}\b")),
 

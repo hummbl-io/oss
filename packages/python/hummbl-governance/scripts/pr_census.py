@@ -165,7 +165,7 @@ def resolve_repo(explicit: str | None) -> str:
     if proc.returncode != 0:
         return os.getcwd()
     raw = proc.stdout.strip()
-    if raw.startswith("git" + "@" + "github.com:"):
+    if raw.startswith("git@github.com:"):
         raw = raw.split(":", 1)[1]
     if raw.startswith("https://github.com/"):
         raw = raw.split("https://github.com/", 1)[1]

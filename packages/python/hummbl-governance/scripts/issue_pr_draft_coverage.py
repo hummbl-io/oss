@@ -38,7 +38,7 @@ def resolve_repo(explicit: str | None = None) -> tuple[str | None, bool]:
         return None, False
 
     remote_url = remote_proc.stdout.strip()
-    if remote_url.startswith("git" + "@" + "github.com:"):
+    if remote_url.startswith("git@github.com:"):
         remote_url = remote_url.split(":", 1)[1]
     if remote_url.startswith("https://github.com/"):
         remote_url = remote_url.split("https://github.com/", 1)[1]

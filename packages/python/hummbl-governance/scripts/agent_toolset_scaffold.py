@@ -59,8 +59,8 @@ def repo_default_name(repo_path: Path) -> str:
         if not line.startswith("url = "):
             continue
         url = line.split("=", 1)[1].strip().rstrip("/")
-        if url.startswith("git" + "@" + "github.com:"):
-            repo_name = url.removeprefix("git" + "@" + "github.com:")
+        if url.startswith("git@github.com:"):
+            repo_name = url.removeprefix("git@github.com:")
         else:
             parsed = urlparse(url)
             if parsed.hostname != "github.com":

@@ -247,6 +247,12 @@ class TestMediumPatterns:
         severities = [f[0] for f in findings]
         assert scan_sensitive.MEDIUM not in severities
 
+    def test_email_address_git_github_excluded(self):
+        """git@github.com is an SSH protocol string, not an email address."""
+        findings = scan_sensitive.scan_line("if raw.startswith(\"git@github.com:\"):")
+        severities = [f[0] for f in findings]
+        assert scan_sensitive.MEDIUM not in severities
+
     def test_phone_number(self):
         findings = scan_sensitive.scan_line("call 555-123-4567")
         severities = [f[0] for f in findings]
