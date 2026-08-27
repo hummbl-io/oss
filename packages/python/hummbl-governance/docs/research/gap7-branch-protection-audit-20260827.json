@@ -1,0 +1,11 @@
+{
+  "total": 285,
+  "summary": {
+    "protected": 264,
+    "unprotected": 20,
+    "no-main-branch": 1
+  },
+  "repos": [],
+  "redacted": "Per-repo fleet inventory removed for public repo publication. Full audit retained in private governance repo.",
+  "note": "Summary counts only. Repo names are fleet inventory and not publishable to the public oss repo per AGENTS.md public/private boundary."
+}

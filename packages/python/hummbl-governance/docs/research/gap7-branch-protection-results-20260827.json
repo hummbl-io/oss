@@ -1,0 +1,9 @@
+{
+  "total": 20,
+  "success": 19,
+  "failed": 1,
+  "results": [],
+  "manual_investigation_count": 1,
+  "redacted": "Per-repo result list removed for public repo publication. Full results retained in private governance repo.",
+  "note": "Summary counts only. Repo names are fleet inventory and not publishable to the public oss repo per AGENTS.md public/private boundary."
+}
