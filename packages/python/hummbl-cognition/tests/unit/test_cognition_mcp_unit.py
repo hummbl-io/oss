@@ -1,4 +1,5 @@
 """Tests for the Cognitive Ledger MCP server."""
+
 from hummbl_cognition.mcp_server import (
     PROTOCOL_VERSION,
     SERVER_NAME,

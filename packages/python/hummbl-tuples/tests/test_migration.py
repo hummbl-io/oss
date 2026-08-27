@@ -10,11 +10,11 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from migrate_tuples import (
+    MIGRATIONS,
     detect_version,
     find_migration_path,
     migrate_tuple,
     migrate_v1_to_v2,
-    MIGRATIONS,
 )
 
 

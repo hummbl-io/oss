@@ -1,4 +1,4 @@
-﻿"""Push/Pull work loop for the coordination bus.
+"""Push/Pull work loop for the coordination bus.
 
 Component 3 of PROPOSAL-012: Autonomous Agent Orchestration.
 
@@ -270,10 +270,7 @@ def complete_task(
     """
     from hummbl_bus.bus_writer import post_message
 
-    body = (
-        f"task_id={task_id}; outcome={outcome}; completed_by={from_id}; "
-        f"host={host}"
-    )
+    body = f"task_id={task_id}; outcome={outcome}; completed_by={from_id}; host={host}"
     if lane:
         body += f"; lane={lane}"
     if artifact:
@@ -302,4 +299,3 @@ def _tier_leq(tier_a: str, tier_b: str) -> bool:
     a = order.get(tier_a.strip().upper(), 99)
     b = order.get(tier_b.strip().upper(), 99)
     return a <= b
-

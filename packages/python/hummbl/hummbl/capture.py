@@ -42,9 +42,7 @@ class AutoresearchCapture:
     The capture reconstructs these steps and links them into traces.
     """
 
-    def capture_from_results_tsv(
-        self, path: str | Path
-    ) -> list[ReasoningTrace]:
+    def capture_from_results_tsv(self, path: str | Path) -> list[ReasoningTrace]:
         """Convert results.tsv history into structured reasoning traces.
 
         Each row becomes one trace with the following steps:
@@ -122,9 +120,7 @@ class AutoresearchCapture:
         if status == "crash":
             obs_content = f"Experiment crashed (commit {commit})"
         else:
-            obs_content = (
-                f"val_bpb={val_bpb:.6f}, peak_vram={memory_gb:.1f} GB"
-            )
+            obs_content = f"val_bpb={val_bpb:.6f}, peak_vram={memory_gb:.1f} GB"
         observation = make_step(
             StepType.OBSERVATION,
             content=obs_content,
@@ -149,9 +145,7 @@ class AutoresearchCapture:
                 f"Best was {best_bpb:.6f}, this is {val_bpb:.6f}."
             )
         else:
-            eval_content = (
-                f"Baseline establishment: val_bpb={val_bpb:.6f}"
-            )
+            eval_content = f"Baseline establishment: val_bpb={val_bpb:.6f}"
             delta = None
 
         evaluation = make_step(
@@ -177,9 +171,7 @@ class AutoresearchCapture:
         trace.outcome = status
         return trace
 
-    def capture_from_strategy_md(
-        self, path: str | Path
-    ) -> ReasoningTrace:
+    def capture_from_strategy_md(self, path: str | Path) -> ReasoningTrace:
         """Extract meta-reasoning from strategy.md or program.md.
 
         Strategy documents contain reflection-level reasoning:
@@ -275,9 +267,7 @@ class AutoresearchCapture:
         for line in lines:
             if line.startswith("#"):
                 if current_heading:
-                    sections.append(
-                        (current_heading, "\n".join(current_body))
-                    )
+                    sections.append((current_heading, "\n".join(current_body)))
                 current_heading = line.lstrip("#").strip()
                 current_body = []
             else:
@@ -297,19 +287,13 @@ class ToolUseCapture:
     aligned with the StructuredToolUse protocol.
     """
 
-    _THINK_RE = re.compile(
-        r"<think>\s*(.*?)\s*</think>", re.IGNORECASE | re.DOTALL
-    )
-    _TOOL_CALL_RE = re.compile(
-        r"<tool_call>\s*(.*?)\s*</tool_call>", re.IGNORECASE | re.DOTALL
-    )
+    _THINK_RE = re.compile(r"<think>\s*(.*?)\s*</think>", re.IGNORECASE | re.DOTALL)
+    _TOOL_CALL_RE = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.IGNORECASE | re.DOTALL)
     _TOOL_RESPONSE_RE = re.compile(
         r"<tool_response>\s*(.*?)\s*</tool_response>",
         re.IGNORECASE | re.DOTALL,
     )
-    _ANSWER_RE = re.compile(
-        r"<answer>\s*(.*?)\s*</answer>", re.IGNORECASE | re.DOTALL
-    )
+    _ANSWER_RE = re.compile(r"<answer>\s*(.*?)\s*</answer>", re.IGNORECASE | re.DOTALL)
 
     def capture_from_messages(
         self,
@@ -383,12 +367,10 @@ class ToolUseCapture:
 
                 if tool_calls:
                     for call in tool_calls:
-                        observation, hypothesis, action = (
-                            self._build_pre_tool_steps(
-                                thought=thought,
-                                tool_call=call,
-                                parent_id=parent_id,
-                            )
+                        observation, hypothesis, action = self._build_pre_tool_steps(
+                            thought=thought,
+                            tool_call=call,
+                            parent_id=parent_id,
                         )
                         trace.add_step(observation)
                         trace.add_step(hypothesis)
@@ -435,9 +417,7 @@ class ToolUseCapture:
                     trace.outcome = "finalize"
 
             elif role in {"user", "human", "tool"}:
-                tool_response = self._extract_text_blocks(
-                    self._TOOL_RESPONSE_RE, content
-                )
+                tool_response = self._extract_text_blocks(self._TOOL_RESPONSE_RE, content)
                 if tool_response and pending_actions:
                     action_ctx = pending_actions.pop(0)
                     obs = make_step(
@@ -491,9 +471,7 @@ class ToolUseCapture:
 
         return trace
 
-    def capture_from_spotagenticcot_row(
-        self, row: dict[str, Any]
-    ) -> ReasoningTrace:
+    def capture_from_spotagenticcot_row(self, row: dict[str, Any]) -> ReasoningTrace:
         """Capture a trace from a SpotAgenticCoT dataset row."""
         row_id = str(row.get("id", "unknown"))
         images = row.get("images", []) or []
@@ -565,9 +543,7 @@ class ToolUseCapture:
             parent_id=observation.id,
             metadata={
                 "candidate": self._extract_candidate(thought),
-                "information_target": self._extract_information_target(
-                    tool_name, arguments
-                ),
+                "information_target": self._extract_information_target(tool_name, arguments),
             },
         )
         action = make_step(
@@ -577,9 +553,7 @@ class ToolUseCapture:
             metadata={
                 "tool_name": tool_name,
                 "why_now": self._extract_why_now(thought),
-                "expected_signal": self._infer_expected_signal(
-                    tool_name, arguments
-                ),
+                "expected_signal": self._infer_expected_signal(tool_name, arguments),
                 "arguments": arguments,
             },
         )
@@ -688,9 +662,7 @@ class ToolUseCapture:
 
     @staticmethod
     def _extract_string_field(raw: str, field: str) -> str:
-        match = re.search(
-            rf'"{re.escape(field)}"\s*:\s*"([^"]+)"', raw, re.IGNORECASE
-        )
+        match = re.search(rf'"{re.escape(field)}"\s*:\s*"([^"]+)"', raw, re.IGNORECASE)
         return match.group(1) if match else ""
 
     def _build_observation_metadata(
@@ -728,7 +700,8 @@ class ToolUseCapture:
             "not confirmed",
         ]
         matches = [
-            s for s in self._split_sentences(cleaned)
+            s
+            for s in self._split_sentences(cleaned)
             if any(marker in s.lower() for marker in markers)
         ]
         return " ".join(matches) if matches else "Not explicitly separated."
@@ -748,9 +721,7 @@ class ToolUseCapture:
         sentences = self._split_sentences(cleaned)
         return self._shorten(sentences[0]) if sentences else self._shorten(cleaned)
 
-    def _extract_information_target(
-        self, tool_name: str, arguments: dict[str, Any]
-    ) -> str:
+    def _extract_information_target(self, tool_name: str, arguments: dict[str, Any]) -> str:
         for key in ("query", "address", "path", "bbox_2d"):
             if key in arguments:
                 return self._shorten(str(arguments[key]))
@@ -760,9 +731,7 @@ class ToolUseCapture:
         return self._shorten(self._strip_tags(thought), limit=280)
 
     @staticmethod
-    def _infer_expected_signal(
-        tool_name: str, arguments: dict[str, Any]
-    ) -> str:
+    def _infer_expected_signal(tool_name: str, arguments: dict[str, Any]) -> str:
         lowered = tool_name.lower()
         if "zoom" in lowered or "crop" in lowered:
             return "Higher-resolution local evidence from a discriminative region."

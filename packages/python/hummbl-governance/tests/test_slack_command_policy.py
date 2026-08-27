@@ -13,9 +13,18 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures" / "slack"
 SCHEMA_PATH = Path(__file__).parent.parent / "docs" / "ecosystem" / "schemas" / "slack_command_receipt.schema.json"
 
 REQUIRED_FIELDS = [
-    "receipt_id", "surface", "workspace_id_hash", "channel_id_hash",
-    "actor_id_hash", "received_at", "command_text_hash", "parsed_intent",
-    "risk_class", "authority", "admission_decision", "output_policy",
+    "receipt_id",
+    "surface",
+    "workspace_id_hash",
+    "channel_id_hash",
+    "actor_id_hash",
+    "received_at",
+    "command_text_hash",
+    "parsed_intent",
+    "risk_class",
+    "authority",
+    "admission_decision",
+    "output_policy",
     "durable_receipt_uri",
 ]
 
@@ -35,14 +44,17 @@ def schema() -> dict:
         return json.load(f)
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "valid_read_only.json",
-    "valid_draft_only.json",
-    "invalid_write_without_approval.json",
-    "invalid_raw_shell.json",
-    "invalid_secret_exposure.json",
-    "invalid_unknown_verb.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "valid_read_only.json",
+        "valid_draft_only.json",
+        "invalid_write_without_approval.json",
+        "invalid_raw_shell.json",
+        "invalid_secret_exposure.json",
+        "invalid_unknown_verb.json",
+    ],
+)
 def test_fixture_has_all_required_fields(fixture_name):
     """Every fixture must have all required receipt fields."""
     data = _load_fixture(fixture_name)
@@ -50,42 +62,51 @@ def test_fixture_has_all_required_fields(fixture_name):
         assert field in data, f"{fixture_name} missing required field: {field}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "valid_read_only.json",
-    "valid_draft_only.json",
-    "invalid_write_without_approval.json",
-    "invalid_raw_shell.json",
-    "invalid_secret_exposure.json",
-    "invalid_unknown_verb.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "valid_read_only.json",
+        "valid_draft_only.json",
+        "invalid_write_without_approval.json",
+        "invalid_raw_shell.json",
+        "invalid_secret_exposure.json",
+        "invalid_unknown_verb.json",
+    ],
+)
 def test_fixture_surface_is_slack(fixture_name):
     """Every fixture must have surface=slack."""
     data = _load_fixture(fixture_name)
     assert data["surface"] == "slack"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "valid_read_only.json",
-    "valid_draft_only.json",
-    "invalid_write_without_approval.json",
-    "invalid_raw_shell.json",
-    "invalid_secret_exposure.json",
-    "invalid_unknown_verb.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "valid_read_only.json",
+        "valid_draft_only.json",
+        "invalid_write_without_approval.json",
+        "invalid_raw_shell.json",
+        "invalid_secret_exposure.json",
+        "invalid_unknown_verb.json",
+    ],
+)
 def test_fixture_valid_risk_class(fixture_name):
     """Every fixture must have a valid risk_class."""
     data = _load_fixture(fixture_name)
     assert data["risk_class"] in VALID_RISK_CLASSES, f"{fixture_name} has invalid risk_class: {data['risk_class']}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "valid_read_only.json",
-    "valid_draft_only.json",
-    "invalid_write_without_approval.json",
-    "invalid_raw_shell.json",
-    "invalid_secret_exposure.json",
-    "invalid_unknown_verb.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "valid_read_only.json",
+        "valid_draft_only.json",
+        "invalid_write_without_approval.json",
+        "invalid_raw_shell.json",
+        "invalid_secret_exposure.json",
+        "invalid_unknown_verb.json",
+    ],
+)
 def test_fixture_valid_admission_decision(fixture_name):
     """Every fixture must have a valid admission_decision."""
     data = _load_fixture(fixture_name)
@@ -93,14 +114,17 @@ def test_fixture_valid_admission_decision(fixture_name):
     assert decision in VALID_ADMISSION_DECISIONS, f"{fixture_name} invalid admission_decision: {decision}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "valid_read_only.json",
-    "valid_draft_only.json",
-    "invalid_write_without_approval.json",
-    "invalid_raw_shell.json",
-    "invalid_secret_exposure.json",
-    "invalid_unknown_verb.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "valid_read_only.json",
+        "valid_draft_only.json",
+        "invalid_write_without_approval.json",
+        "invalid_raw_shell.json",
+        "invalid_secret_exposure.json",
+        "invalid_unknown_verb.json",
+    ],
+)
 def test_fixture_valid_output_policy(fixture_name):
     """Every fixture must have a valid output_policy."""
     data = _load_fixture(fixture_name)
@@ -108,14 +132,17 @@ def test_fixture_valid_output_policy(fixture_name):
     assert policy in VALID_OUTPUT_POLICIES, f"{fixture_name} invalid output_policy: {policy}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "valid_read_only.json",
-    "valid_draft_only.json",
-    "invalid_write_without_approval.json",
-    "invalid_raw_shell.json",
-    "invalid_secret_exposure.json",
-    "invalid_unknown_verb.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "valid_read_only.json",
+        "valid_draft_only.json",
+        "invalid_write_without_approval.json",
+        "invalid_raw_shell.json",
+        "invalid_secret_exposure.json",
+        "invalid_unknown_verb.json",
+    ],
+)
 def test_fixture_no_raw_identifiers(fixture_name):
     """Fixtures must use hashed identifiers, not raw workspace/channel/actor IDs."""
     data = _load_fixture(fixture_name)

@@ -1,5 +1,5 @@
 """Tests for bif_get_template tool."""
-import pytest
+
 from mcp_server import tool_bif_get_template
 
 
@@ -27,9 +27,18 @@ class TestGetTemplate:
     def test_returns_all_required_keys(self):
         result = tool_bif_get_template({"phase": 1, "batch_number": 1})
         required = {
-            "phase", "phase_name", "phase_description", "batch_number",
-            "batch_name", "what_to_capture", "priority", "exit_criteria",
-            "execution_steps", "quality_checks", "file_naming", "prompt",
+            "phase",
+            "phase_name",
+            "phase_description",
+            "batch_number",
+            "batch_name",
+            "what_to_capture",
+            "priority",
+            "exit_criteria",
+            "execution_steps",
+            "quality_checks",
+            "file_naming",
+            "prompt",
             "knowledge_file_header",
         }
         assert required.issubset(set(result.keys()))

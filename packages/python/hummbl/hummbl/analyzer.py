@@ -14,11 +14,10 @@ from __future__ import annotations
 
 import json
 import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
-
 
 # ---------------------------------------------------------------------------
 # Category extraction — the key to pattern analysis
@@ -82,9 +81,11 @@ def get_top_category(category: str) -> str:
 # Data structures for analysis results
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ExperimentRecord:
     """Flattened record from a trace, optimized for analysis."""
+
     index: int
     description: str
     outcome: str  # keep / discard / crash
@@ -98,6 +99,7 @@ class ExperimentRecord:
 @dataclass
 class CategoryStats:
     """Aggregated statistics for an experiment category."""
+
     category: str
     total: int = 0
     keeps: int = 0
@@ -126,6 +128,7 @@ class CategoryStats:
 @dataclass
 class StreakInfo:
     """Information about consecutive outcome streaks."""
+
     outcome: str
     length: int
     start_index: int
@@ -135,6 +138,7 @@ class StreakInfo:
 @dataclass
 class AnalysisResult:
     """Complete analysis of a trace set."""
+
     # Basic stats
     total_experiments: int = 0
     total_keeps: int = 0
@@ -180,6 +184,7 @@ class AnalysisResult:
 # Core analyzer
 # ---------------------------------------------------------------------------
 
+
 class TraceAnalyzer:
     """Analyzes reasoning traces for patterns, dead ends, and opportunities."""
 
@@ -204,7 +209,7 @@ class TraceAnalyzer:
             hyp_content = steps[0].get("content", "")
             # Strip "Experiment N: " prefix
             prefix = f"Experiment {i}: "
-            desc = hyp_content[len(prefix):] if hyp_content.startswith(prefix) else hyp_content
+            desc = hyp_content[len(prefix) :] if hyp_content.startswith(prefix) else hyp_content
 
             obs_meta = steps[2].get("metadata", {}) if len(steps) > 2 else {}
             eval_meta = steps[3].get("metadata", {}) if len(steps) > 3 else {}
@@ -323,24 +328,25 @@ class TraceAnalyzer:
             first_best = result.bpb_trajectory[0]
             result.total_improvement = first_best - result.best_bpb
 
-            # Compare first half vs second half improvement
-            mid = len(result.bpb_trajectory) // 2
-            first_half_best = min(result.bpb_trajectory[:mid])
-            second_half_best = min(result.bpb_trajectory[mid:])
-            first_half_improvement = first_best - first_half_best
-            second_half_improvement = first_half_best - second_half_best
+            # Compare first half vs second half improvement if enough data points
+            if len(result.bpb_trajectory) >= 2:
+                mid = len(result.bpb_trajectory) // 2
+                first_half_best = min(result.bpb_trajectory[:mid])
+                second_half_best = min(result.bpb_trajectory[mid:])
+                first_half_improvement = first_best - first_half_best
+                second_half_improvement = first_half_best - second_half_best
 
-            if first_half_improvement > 0:
-                result.recent_improvement_rate = (
-                    second_half_improvement / first_half_improvement
+                if first_half_improvement > 0:
+                    result.recent_improvement_rate = second_half_improvement / first_half_improvement
+                result.diminishing_returns = (
+                    result.recent_improvement_rate < 0.25 and result.total_experiments > 20
                 )
-            result.diminishing_returns = (
-                result.recent_improvement_rate < 0.25 and result.total_experiments > 20
-            )
 
             # Last 10 experiments improvement
             last_10_best = min(result.bpb_trajectory[-10:])
-            prior_best = min(result.bpb_trajectory[:-10]) if len(result.bpb_trajectory) > 10 else first_best
+            prior_best = (
+                min(result.bpb_trajectory[:-10]) if len(result.bpb_trajectory) > 10 else first_best
+            )
             result.last_10_improvement = prior_best - last_10_best
 
         # --- Exhausted and promising categories ---
@@ -371,21 +377,25 @@ class TraceAnalyzer:
 
         for i in range(1, len(outcomes)):
             if outcomes[i] != current_outcome:
-                streaks.append(StreakInfo(
-                    outcome=current_outcome,
-                    length=i - start,
-                    start_index=start,
-                    end_index=i - 1,
-                ))
+                streaks.append(
+                    StreakInfo(
+                        outcome=current_outcome,
+                        length=i - start,
+                        start_index=start,
+                        end_index=i - 1,
+                    )
+                )
                 current_outcome = outcomes[i]
                 start = i
 
-        streaks.append(StreakInfo(
-            outcome=current_outcome,
-            length=len(outcomes) - start,
-            start_index=start,
-            end_index=len(outcomes) - 1,
-        ))
+        streaks.append(
+            StreakInfo(
+                outcome=current_outcome,
+                length=len(outcomes) - start,
+                start_index=start,
+                end_index=len(outcomes) - 1,
+            )
+        )
         return streaks
 
     def _generate_suggestions(
@@ -430,7 +440,8 @@ class TraceAnalyzer:
 
         # 5. Combination suggestions based on successful categories
         successful_cats = [
-            cat for cat, stats in result.category_stats.items()
+            cat
+            for cat, stats in result.category_stats.items()
             if stats.keeps > 0 and cat != "baseline"
         ]
         top_cats = set(get_top_category(c) for c in successful_cats)
@@ -494,7 +505,9 @@ class TraceAnalyzer:
         lines.append("OUTCOME PATTERNS")
         lines.append("-" * 40)
         if result.keep_indices:
-            lines.append(f"  Avg experiments between keeps: {result.avg_distance_between_keeps:.1f}")
+            lines.append(
+                f"  Avg experiments between keeps: {result.avg_distance_between_keeps:.1f}"
+            )
         lines.append(f"  Longest discard streak:        {result.longest_discard_streak}")
         lines.append(f"  Current discard streak:        {result.current_discard_streak}")
         lines.append("")
@@ -506,10 +519,14 @@ class TraceAnalyzer:
 
         # Cluster analysis: keeps tend to cluster?
         if result.keep_after_keep + result.keep_after_discard > 0:
-            cluster_ratio = result.keep_after_keep / (result.keep_after_keep + result.keep_after_discard)
+            cluster_ratio = result.keep_after_keep / (
+                result.keep_after_keep + result.keep_after_discard
+            )
             lines.append(f"  P(keep|prev=keep):  {cluster_ratio:.2f}")
         if result.discard_after_keep + result.discard_after_discard > 0:
-            persist_ratio = result.discard_after_discard / (result.discard_after_keep + result.discard_after_discard)
+            persist_ratio = result.discard_after_discard / (
+                result.discard_after_keep + result.discard_after_discard
+            )
             lines.append(f"  P(disc|prev=disc):  {persist_ratio:.2f}")
 
         # --- Diminishing returns ---
@@ -518,14 +535,18 @@ class TraceAnalyzer:
         lines.append("-" * 40)
         lines.append(f"  First-half vs second-half ratio: {result.recent_improvement_rate:.2f}")
         lines.append(f"  Last 10 experiments improvement:  {result.last_10_improvement:.6f} bpb")
-        lines.append(f"  Diminishing returns detected:     {'YES' if result.diminishing_returns else 'No'}")
+        lines.append(
+            f"  Diminishing returns detected:     {'YES' if result.diminishing_returns else 'No'}"
+        )
 
         # --- Category breakdown ---
         lines.append("")
         lines.append("CATEGORY PERFORMANCE")
         lines.append("-" * 70)
-        lines.append(f"  {'Category':<30s} {'Total':>5s} {'Keep':>4s} {'Rate':>6s} {'Best BPB':>10s}")
-        lines.append(f"  {'-'*30} {'-'*5} {'-'*4} {'-'*6} {'-'*10}")
+        lines.append(
+            f"  {'Category':<30s} {'Total':>5s} {'Keep':>4s} {'Rate':>6s} {'Best BPB':>10s}"
+        )
+        lines.append(f"  {'-' * 30} {'-' * 5} {'-' * 4} {'-' * 6} {'-' * 10}")
 
         sorted_cats = sorted(
             result.category_stats.items(),
@@ -543,8 +564,7 @@ class TraceAnalyzer:
         lines.append("WINNING PATTERNS (categories with keeps)")
         lines.append("-" * 40)
         winners = [
-            (cat, stats) for cat, stats in sorted_cats
-            if stats.keeps > 0 and cat != "baseline"
+            (cat, stats) for cat, stats in sorted_cats if stats.keeps > 0 and cat != "baseline"
         ]
         for cat, stats in winners:
             lines.append(f"  {cat}: {stats.keeps}/{stats.total} kept")

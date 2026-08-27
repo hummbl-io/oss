@@ -41,7 +41,6 @@ the upstream compliance-log telemetry that feeds the obs-action chain.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import uuid
 from datetime import datetime, timezone
@@ -60,10 +59,22 @@ __all__ = [
 
 
 VALID_PROVIDERS = {"openai", "anthropic", "google", "aws", "azure", "github", "other"}
-VALID_WORKSPACE_CLASS = {"fedramp", "commercial", "enterprise", "team", "individual", "other"}
+VALID_WORKSPACE_CLASS = {
+    "fedramp",
+    "commercial",
+    "enterprise",
+    "team",
+    "individual",
+    "other",
+}
 VALID_ENDPOINT_STATUS = {"healthy", "degraded", "down", "unknown"}
 VALID_FALLBACK_STATUS = {"active", "inactive", "not_configured", "failed"}
-VALID_MONITORING_MODE = {"monitor_only", "fallback_required", "risk_accepted", "escalate"}
+VALID_MONITORING_MODE = {
+    "monitor_only",
+    "fallback_required",
+    "risk_accepted",
+    "escalate",
+}
 
 # receipt_id must match the schema pattern ^compliance-gap-[a-f0-9-]+$
 _RECEIPT_ID_RE = re.compile(r"^compliance-gap-[a-f0-9-]+$")
@@ -172,7 +183,9 @@ def gap_exceeds_retention(
     return (now - start).days > retention_days
 
 
-def validate_compliance_log_gap_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]]:
+def validate_compliance_log_gap_receipt(
+    receipt: dict[str, Any],
+) -> tuple[bool, list[str]]:
     """Validate a receipt dict against the compliance log gap schema.
 
     Returns (is_valid, errors).
@@ -222,7 +235,9 @@ def validate_compliance_log_gap_receipt(receipt: dict[str, Any]) -> tuple[bool, 
         errors.append("endpoint must be a non-empty string")
     if not isinstance(receipt.get("last_successful_export_at"), str):
         errors.append("last_successful_export_at must be a string (may be empty)")
-    elif receipt["last_successful_export_at"] and not _is_valid_iso8601(receipt["last_successful_export_at"]):
+    elif receipt["last_successful_export_at"] and not _is_valid_iso8601(
+        receipt["last_successful_export_at"]
+    ):
         errors.append(
             f"last_successful_export_at must be an RFC3339 date-time string when non-empty (got {receipt['last_successful_export_at']!r})"
         )
@@ -261,7 +276,9 @@ def validate_compliance_log_gap_receipt(receipt: dict[str, Any]) -> tuple[bool, 
 
     fcs = receipt.get("fallback_capture_status")
     if fcs is not None and fcs not in VALID_FALLBACK_STATUS:
-        errors.append(f"fallback_capture_status: {fcs!r} not in {sorted(VALID_FALLBACK_STATUS)}")
+        errors.append(
+            f"fallback_capture_status: {fcs!r} not in {sorted(VALID_FALLBACK_STATUS)}"
+        )
 
     # gap_detected=true requires gap_start and gap_end (both must be valid RFC3339)
     if receipt.get("gap_detected") is True:
@@ -277,9 +294,7 @@ def validate_compliance_log_gap_receipt(receipt: dict[str, Any]) -> tuple[bool, 
         if not ge:
             errors.append("gap_end is required when gap_detected=true")
         elif not _is_valid_iso8601(ge):
-            errors.append(
-                f"gap_end must be an RFC3339 date-time string (got {ge!r})"
-            )
+            errors.append(f"gap_end must be an RFC3339 date-time string (got {ge!r})")
     elif receipt.get("gap_detected") is False:
         if receipt.get("gap_start"):
             errors.append("gap_start must be empty when gap_detected=false")
@@ -320,7 +335,9 @@ def validate_compliance_log_gap_receipt(receipt: dict[str, Any]) -> tuple[bool, 
     # Hash verification
     expected_hash = compute_receipt_hash(receipt)
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 

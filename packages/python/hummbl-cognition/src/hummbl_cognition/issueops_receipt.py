@@ -16,6 +16,7 @@ Design:
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import logging
@@ -25,7 +26,8 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
+from hummbl_cognition._filelock import lock_file as _lock_file
+from hummbl_cognition._filelock import unlock_file as _unlock_file
 from hummbl_cognition._json_utils import canonical_json as _canonical_json
 from hummbl_cognition._timeutils import utc_now as _utc_now
 
@@ -47,9 +49,7 @@ __all__ = [
 DEFAULT_RECEIPT_LOG_PATH = "_state/cognition/issueops_receipts.jsonl"
 
 SCHEMA_PATH = (
-    Path(__file__).resolve().parent
-    / "schemas"
-    / "issueops_run_receipt.schema.json"
+    Path(__file__).resolve().parent / "schemas" / "issueops_run_receipt.schema.json"
 )
 
 VALID_SOURCES = frozenset(
@@ -97,7 +97,11 @@ def _resolve_log_path(override: str | Path | None = None) -> Path:
         ).strip()
         if root:
             return Path(root) / DEFAULT_RECEIPT_LOG_PATH
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
 
     return Path(DEFAULT_RECEIPT_LOG_PATH)
@@ -151,7 +155,7 @@ def validate_receipt(
         return False, errors
 
     # Type checks
-    props = schema.get("properties", {})
+    schema.get("properties", {})
     type_map = {
         "run_id": str,
         "timestamp": str,
@@ -172,9 +176,7 @@ def validate_receipt(
                 )
 
     if receipt.get("source") and receipt["source"] not in VALID_SOURCES:
-        errors.append(
-            f"source: {receipt['source']!r} not in {sorted(VALID_SOURCES)}"
-        )
+        errors.append(f"source: {receipt['source']!r} not in {sorted(VALID_SOURCES)}")
 
     if receipt.get("total_issues_processed") is not None:
         tip = receipt["total_issues_processed"]
@@ -320,9 +322,7 @@ def create_receipt(
     # Validate before hashing
     is_valid, errors = validate_receipt(receipt)
     if not is_valid:
-        raise IssueOpsReceiptError(
-            "receipt failed validation: " + "; ".join(errors)
-        )
+        raise IssueOpsReceiptError("receipt failed validation: " + "; ".join(errors))
 
     # Append content hash for tamper detection
     receipt["content_hash"] = _content_hash(receipt)
@@ -464,7 +464,7 @@ def _build_parser() -> "argparse.ArgumentParser":  # type: ignore[name-defined]
     p_list.add_argument("--limit", type=int, default=20, help="Max receipts")
 
     # validate
-    p_validate = subparsers.add_parser(
+    subparsers.add_parser(
         "validate", help="Validate all receipts in the log"
     )
 
@@ -478,9 +478,7 @@ def _parse_json_array(raw: str | None, field_name: str) -> list[dict[str, Any]]:
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise IssueOpsReceiptError(
-            f"{field_name}: invalid JSON: {exc}"
-        ) from exc
+        raise IssueOpsReceiptError(f"{field_name}: invalid JSON: {exc}") from exc
     if not isinstance(parsed, list):
         raise IssueOpsReceiptError(f"{field_name}: expected JSON array")
     return parsed
@@ -523,7 +521,6 @@ def cmd_create(args: "argparse.Namespace") -> int:  # type: ignore[name-defined]
 
 def cmd_list(args: "argparse.Namespace") -> int:  # type: ignore[name-defined]
     """List recent receipts."""
-    import sys
 
     receipts = read_receipts(log_path=args.log, limit=args.limit)
     if not receipts:

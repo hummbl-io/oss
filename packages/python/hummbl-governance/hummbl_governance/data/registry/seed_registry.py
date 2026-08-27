@@ -1,4 +1,5 @@
 """Seed the model registry with public scaling-law example artifacts."""
+
 from __future__ import annotations
 
 import sys

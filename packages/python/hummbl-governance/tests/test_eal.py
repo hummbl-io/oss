@@ -29,13 +29,12 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.eal import (
-    EAL_PRECEDENCE_INDEX,
     COMPAT_PRECEDENCE_INDEX,
-    evaluate_validation,
-    evaluate_temporal_validation,
+    EAL_PRECEDENCE_INDEX,
     evaluate_compat,
+    evaluate_temporal_validation,
+    evaluate_validation,
     sha256_hex,
 )
 
@@ -146,9 +145,11 @@ def test_compat_fixture(name: str, fixture: dict) -> None:
 
 # --- Unit tests for core functions ---
 
+
 def test_precedence_completeness() -> None:
     """All EAL codes appear in precedence list exactly once."""
     from hummbl_governance.eal import EAL_CODE_CLASS
+
     for code in EAL_CODE_CLASS:
         assert code in EAL_PRECEDENCE_INDEX, f"{code} missing from EAL_PRECEDENCE"
 

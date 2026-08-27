@@ -29,9 +29,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_governance.kernel import ReceiptEngine
-
 
 ENV_VAR = "RECEIPTENGINE_HMAC_KEY"
 FALLBACK_ENV_VAR = "HUMMBL_SIGNING_SECRET"

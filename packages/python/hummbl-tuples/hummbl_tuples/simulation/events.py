@@ -15,7 +15,6 @@ tier, agent, tool) fields since simulation events are IDP governance tuples.
 
 from __future__ import annotations
 
-import uuid
 from typing import Any, Iterable
 
 # Counter for deterministic ID generation in simulation context.

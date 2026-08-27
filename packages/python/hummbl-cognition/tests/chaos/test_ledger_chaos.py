@@ -5,12 +5,12 @@ import time
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.ledger_writer import post_entry, validate_integrity
 from hummbl_cognition.models import LedgerEntry, LedgerEntryType, LedgerScope
 
 # This module tests ledger writing directly — allow real writes.
 pytestmark = pytest.mark.allow_ledger_writes
+
 
 def test_ledger_concurrency():
     ledger_path = Path("tests/chaos/ledger_chaos.jsonl")
@@ -30,7 +30,7 @@ def test_ledger_concurrency():
                     model="chaos-model",
                     entry_type=LedgerEntryType.DISCOVERY,
                     scope=LedgerScope.PROJECT,
-                    content=f"Chaos content from thread {thread_id} iteration {i}"
+                    content=f"Chaos content from thread {thread_id} iteration {i}",
                 )
                 post_entry(entry, ledger_path=ledger_path)
                 if random.random() < 0.05:
@@ -67,6 +67,7 @@ def test_ledger_concurrency():
 
     print(f"Ledger Chaos Passed: {valid_count} entries written safely.")
     return True
+
 
 if __name__ == "__main__":
     success = test_ledger_concurrency()

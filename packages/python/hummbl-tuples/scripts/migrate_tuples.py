@@ -18,16 +18,19 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
-
 # Migration registry: (source_version, target_version) -> migration function
 MIGRATIONS: dict[tuple[str, str], Callable[[dict[str, Any]], dict[str, Any]]] = {}
 
 
 def register_migration(source: str, target: str):
     """Decorator to register a migration function."""
-    def decorator(func: Callable[[dict[str, Any]], dict[str, Any]]) -> Callable[[dict[str, Any]], dict[str, Any]]:
+
+    def decorator(
+        func: Callable[[dict[str, Any]], dict[str, Any]],
+    ) -> Callable[[dict[str, Any]], dict[str, Any]]:
         MIGRATIONS[(source, target)] = func
         return func
+
     return decorator
 
 
@@ -84,7 +87,9 @@ def find_migration_path(source: str, target: str) -> list[str] | None:
     return None
 
 
-def migrate_tuple(tuple_dict: dict[str, Any], target_version: str) -> tuple[dict[str, Any], list[str]]:
+def migrate_tuple(
+    tuple_dict: dict[str, Any], target_version: str
+) -> tuple[dict[str, Any], list[str]]:
     """Migrate a single tuple to the target version.
 
     Returns (migrated_tuple, migration_path).
@@ -116,7 +121,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input-dir", help="Input directory of tuple JSON files")
     parser.add_argument("--output-dir", help="Output directory for migrated files")
     parser.add_argument("--target-version", required=True, help="Target schema version (e.g., v2)")
-    parser.add_argument("--dry-run", action="store_true", help="Print changes without writing files")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print changes without writing files"
+    )
     args = parser.parse_args(argv)
 
     if args.input and args.output:

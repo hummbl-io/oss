@@ -8,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from audit_surface import audit_tuple, audit_trace, MINIMUM_FIELDS, RECOMMENDED_FIELDS, FULL_FIELDS
+from audit_surface import FULL_FIELDS, MINIMUM_FIELDS, RECOMMENDED_FIELDS, audit_trace, audit_tuple
 
 
 def test_minimum_fields_count():
@@ -79,10 +79,26 @@ def test_audit_tuple_defaulted_fields():
 def test_audit_trace():
     """audit_trace should aggregate results correctly."""
     trace = [
-        {"tuple_type": "CONTRACT", "id": "1", "time": "t1", "state": "ok",
-         "agent": "a", "intent_id": "i", "task_id": "t", "tuple_data": {}},
-        {"tuple_type": "EVIDENCE", "id": "2", "time": "t2", "state": "ok",
-         "agent": "a", "intent_id": "i", "task_id": "t", "tuple_data": {}},
+        {
+            "tuple_type": "CONTRACT",
+            "id": "1",
+            "time": "t1",
+            "state": "ok",
+            "agent": "a",
+            "intent_id": "i",
+            "task_id": "t",
+            "tuple_data": {},
+        },
+        {
+            "tuple_type": "EVIDENCE",
+            "id": "2",
+            "time": "t2",
+            "state": "ok",
+            "agent": "a",
+            "intent_id": "i",
+            "task_id": "t",
+            "tuple_data": {},
+        },
     ]
     report = audit_trace(trace, "minimum")
     assert report["total_tuples"] == 2
@@ -93,8 +109,16 @@ def test_audit_trace():
 def test_audit_trace_with_failure():
     """audit_trace should count failures correctly."""
     trace = [
-        {"tuple_type": "CONTRACT", "id": "1", "time": "t1", "state": "ok",
-         "agent": "a", "intent_id": "i", "task_id": "t", "tuple_data": {}},
+        {
+            "tuple_type": "CONTRACT",
+            "id": "1",
+            "time": "t1",
+            "state": "ok",
+            "agent": "a",
+            "intent_id": "i",
+            "task_id": "t",
+            "tuple_data": {},
+        },
         {"tuple_type": "EVIDENCE", "id": "2", "tuple_data": {}},
     ]
     report = audit_trace(trace, "minimum")

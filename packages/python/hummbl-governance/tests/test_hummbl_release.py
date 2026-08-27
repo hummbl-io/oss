@@ -14,7 +14,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-
 from scripts.hummbl_release import (
     PHASE_TAG_RE,
     RELEASE_TAG_RE,
@@ -34,8 +33,8 @@ from scripts.hummbl_release import (
     validate_tag,
 )
 
-
 # ── calver_date ──────────────────────────────────────────────────────
+
 
 @pytest.mark.parametrize(
     ("dt", "expected"),
@@ -52,6 +51,7 @@ def test_calver_date_no_zero_padding(dt, expected):
 
 
 # ── base_tag ─────────────────────────────────────────────────────────
+
 
 def test_base_tag_release_format():
     assert base_tag("2026.8.11", phase=None) == "v2026.8.11"
@@ -72,6 +72,7 @@ def test_base_tag_phase_zero():
 
 # ── next_available_tag ───────────────────────────────────────────────
 
+
 def test_next_available_tag_first_release(monkeypatch):
     """First release of the day has no suffix."""
     monkeypatch.setattr("scripts.hummbl_release.git_tag_exists", lambda t: False)
@@ -80,8 +81,10 @@ def test_next_available_tag_first_release(monkeypatch):
 
 def test_next_available_tag_second_release(monkeypatch):
     """Second release same day gets .2 suffix (per standard §4)."""
+
     def fake_exists(tag):
         return tag == "v2026.8.11"
+
     monkeypatch.setattr("scripts.hummbl_release.git_tag_exists", fake_exists)
     assert next_available_tag("v2026.8.11") == "v2026.8.11.2"
 
@@ -89,19 +92,23 @@ def test_next_available_tag_second_release(monkeypatch):
 def test_next_available_tag_third_release(monkeypatch):
     def fake_exists(tag):
         return tag in ("v2026.8.11", "v2026.8.11.2")
+
     monkeypatch.setattr("scripts.hummbl_release.git_tag_exists", fake_exists)
     assert next_available_tag("v2026.8.11") == "v2026.8.11.3"
 
 
 def test_next_available_tag_phase_scoped(monkeypatch):
     """Phase-gated suffixes are independent per phase."""
+
     def fake_exists(tag):
         return tag == "phase-1.v2026.8.11"
+
     monkeypatch.setattr("scripts.hummbl_release.git_tag_exists", fake_exists)
     assert next_available_tag("phase-1.v2026.8.11") == "phase-1.v2026.8.11.2"
 
 
 # ── validate_tag ─────────────────────────────────────────────────────
+
 
 def test_validate_tag_release_format_accepts_valid():
     validate_tag("v2026.8.11", phase=None)
@@ -148,6 +155,7 @@ def test_validate_tag_phase_mismatch_rejects():
 
 # ── bump_semver ──────────────────────────────────────────────────────
 
+
 @pytest.mark.parametrize(
     ("current", "part", "expected"),
     [
@@ -183,6 +191,7 @@ def test_bump_semver_rejects_unknown_part():
 
 
 # ── regex sanity ─────────────────────────────────────────────────────
+
 
 @pytest.mark.parametrize(
     "tag",
@@ -220,6 +229,7 @@ def test_phase_tag_regex_rejects_invalid(tag):
 
 # ── get_last_tag ─────────────────────────────────────────────────────
 
+
 def test_get_last_tag_empty_returns_none(monkeypatch):
     monkeypatch.setattr("scripts.hummbl_release.git", lambda *a, **k: "")
     assert get_last_tag("proj", None) is None
@@ -253,6 +263,7 @@ def test_get_last_tag_phase_gated(monkeypatch):
 
 # ── get_commits_since ────────────────────────────────────────────────
 
+
 def test_get_commits_since_with_tag(monkeypatch):
     monkeypatch.setattr(
         "scripts.hummbl_release.git",
@@ -279,6 +290,7 @@ def test_get_commits_since_no_tag(monkeypatch):
 
 # ── generate_changelog ───────────────────────────────────────────────
 
+
 def test_generate_changelog_with_semver_and_commits():
     cl = generate_changelog("proj", "v2026.8.11", "0.18.0", ["- fix (abc)"], "v2026.8.10", False)
     assert cl.startswith("# proj v2026.8.11")
@@ -304,9 +316,11 @@ def test_generate_changelog_no_semver_with_commits():
 
 # ── post_bus_status ──────────────────────────────────────────────────
 
+
 def test_post_bus_status_missing_script(monkeypatch, capsys):
     # Point Path.home() to a tmp dir with no bin/bus-global.py
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod.Path, "home", lambda: Path("/nonexistent-test-path"))
     post_bus_status("proj", "proj", "v2026.8.11", published=True)
     captured = capsys.readouterr()
@@ -315,6 +329,7 @@ def test_post_bus_status_missing_script(monkeypatch, capsys):
 
 def test_post_bus_status_calls_subprocess(monkeypatch):
     import scripts.hummbl_release as mod
+
     calls = []
     monkeypatch.setattr(mod.Path, "home", lambda: Path("/tmp"))
     # Create a fake bus script
@@ -322,7 +337,8 @@ def test_post_bus_status_calls_subprocess(monkeypatch):
     fake_script.parent.mkdir(parents=True, exist_ok=True)
     fake_script.write_text("# fake", encoding="utf-8")
     monkeypatch.setattr(
-        mod.subprocess, "run",
+        mod.subprocess,
+        "run",
         lambda *a, **k: calls.append((a, k)) or type("R", (), {"returncode": 0})(),
     )
     try:
@@ -338,8 +354,10 @@ def test_post_bus_status_calls_subprocess(monkeypatch):
 
 # ── version file updates ─────────────────────────────────────────────
 
+
 def test_update_pyproject_version(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text('[project]\nversion = "1.2.2"\n', encoding="utf-8")
@@ -349,6 +367,7 @@ def test_update_pyproject_version(tmp_path, monkeypatch):
 
 def test_update_pyproject_version_noop(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text('[project]\nversion = "1.2.2"\n', encoding="utf-8")
@@ -358,12 +377,14 @@ def test_update_pyproject_version_noop(tmp_path, monkeypatch):
 
 def test_update_pyproject_version_missing_file(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     assert update_pyproject_version("1.3.0") is False
 
 
 def test_update_package_json_version(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     pkg = tmp_path / "package.json"
     pkg.write_text('{"name": "test", "version": "1.2.2"}', encoding="utf-8")
@@ -373,6 +394,7 @@ def test_update_package_json_version(tmp_path, monkeypatch):
 
 def test_update_init_version_updates_all(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     pkg_a = tmp_path / "pkg_a"
     pkg_b = tmp_path / "pkg_b"
@@ -388,8 +410,10 @@ def test_update_init_version_updates_all(tmp_path, monkeypatch):
 
 # ── read_pyproject_version (tomllib) ─────────────────────────────────
 
+
 def test_read_pyproject_version_tomllib(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text('[project]\nname = "test"\nversion = "1.2.2"\n', encoding="utf-8")
@@ -398,23 +422,35 @@ def test_read_pyproject_version_tomllib(tmp_path, monkeypatch):
 
 def test_read_pyproject_version_missing(tmp_path, monkeypatch):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
     assert read_pyproject_version() is None
 
 
 # ── main() CLI ───────────────────────────────────────────────────────
 
+
 def test_main_dry_run_first_release(monkeypatch, capsys):
     """Dry run with --first-release prints the tag and returns 0."""
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "git_tag_exists", lambda t: False)
     monkeypatch.setattr(mod, "get_last_tag", lambda *a, **k: None)
     monkeypatch.setattr(mod, "get_commits_since", lambda *a, **k: [])
     monkeypatch.setattr(mod, "read_pyproject_version", lambda: None)
     monkeypatch.setattr(mod, "read_init_version", lambda: None)
-    monkeypatch.setattr(sys, "argv", [
-        "hummbl_release.py", "--project", "test", "--first-release", "--date", "2026.8.11",
-    ])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "hummbl_release.py",
+            "--project",
+            "test",
+            "--first-release",
+            "--date",
+            "2026.8.11",
+        ],
+    )
     rc = main()
     assert rc == 0
     out = capsys.readouterr().out
@@ -448,6 +484,7 @@ def test_main_rejects_bad_timezone(monkeypatch, capsys):
 
 def test_main_no_previous_tags_without_first_release(monkeypatch, capsys):
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "git_tag_exists", lambda t: False)
     monkeypatch.setattr(mod, "get_last_tag", lambda *a, **k: None)
     monkeypatch.setattr(sys, "argv", ["hummbl_release.py", "--project", "test", "--date", "2026.8.11"])
@@ -460,15 +497,25 @@ def test_main_no_previous_tags_without_first_release(monkeypatch, capsys):
 def test_main_bump_rejects_calver_version(monkeypatch, capsys):
     """If pyproject.toml has a CalVer-shaped version, --bump must refuse."""
     import scripts.hummbl_release as mod
+
     monkeypatch.setattr(mod, "git_tag_exists", lambda t: False)
     monkeypatch.setattr(mod, "get_last_tag", lambda *a, **k: "v2026.8.10")
     monkeypatch.setattr(mod, "get_commits_since", lambda *a, **k: ["- fix (abc)"])
     monkeypatch.setattr(mod, "read_pyproject_version", lambda: "2026.8.11")
     monkeypatch.setattr(mod, "read_init_version", lambda: None)
-    monkeypatch.setattr(sys, "argv", [
-        "hummbl_release.py", "--project", "test", "--bump", "minor",
-        "--date", "2026.8.11",
-    ])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "hummbl_release.py",
+            "--project",
+            "test",
+            "--bump",
+            "minor",
+            "--date",
+            "2026.8.11",
+        ],
+    )
     rc = main()
     assert rc == 2
     out = capsys.readouterr().out

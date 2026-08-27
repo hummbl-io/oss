@@ -47,8 +47,6 @@ class Violation:
     severity: str  # "low", "medium", "high", "critical"
 
 
-
-
 def _luhn_checksum(card_number: str) -> bool:
     """Validate a credit card number using the Luhn algorithm (ISO/IEC 7812).
 
@@ -82,9 +80,7 @@ class PIIDetector:
             ("email", re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "high"),
             (
                 "phone",
-                re.compile(
-                    r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
-                ),
+                re.compile(r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"),
                 "medium",
             ),
             (
@@ -232,9 +228,7 @@ class BlocklistFilter:
         self._patterns: list[tuple[str, re.Pattern[str]]] = []
         for term in terms:
             flags = 0 if case_sensitive else re.IGNORECASE
-            self._patterns.append(
-                (term, re.compile(re.escape(term), flags))
-            )
+            self._patterns.append((term, re.compile(re.escape(term), flags)))
 
     def check(self, text: str) -> list[Violation]:
         """Check text for blocked terms."""
@@ -271,9 +265,7 @@ class ProvenanceCheck:
             r"|it\s+is\s+(?:well\s+)?known\s+that|evidence\s+suggests)\b",
             re.IGNORECASE,
         )
-        self._citation_pattern = re.compile(
-            r"(?:\[\d+\]|\([A-Z][a-z]+(?:\s+et\s+al\.?)?,?\s*\d{4}\)|https?://)"
-        )
+        self._citation_pattern = re.compile(r"(?:\[\d+\]|\([A-Z][a-z]+(?:\s+et\s+al\.?)?,?\s*\d{4}\)|https?://)")
 
     @property
     def enabled(self) -> bool:
@@ -306,9 +298,19 @@ class ProvenanceCheck:
 
 # Leetspeak normalization map for decoding obfuscated text
 _LEETSPEAK_MAP = {
-    "0": "o", "1": "i", "3": "e", "4": "a", "5": "s",
-    "7": "t", "8": "b", "9": "g", "@": "a", "$": "s",
-    "|": "l", "+": "t", "!": "i",
+    "0": "o",
+    "1": "i",
+    "3": "e",
+    "4": "a",
+    "5": "s",
+    "7": "t",
+    "8": "b",
+    "9": "g",
+    "@": "a",
+    "$": "s",
+    "|": "l",
+    "+": "t",
+    "!": "i",
 }
 
 
@@ -405,9 +407,7 @@ class JailbreakPatternDetector:
                         detail = f"{label} at position {match.start()}"
                         if is_normalized:
                             detail += " (detected via leetspeak normalization)"
-                        violations.append(
-                            Violation(rule="jailbreak", detail=detail, severity=severity)
-                        )
+                        violations.append(Violation(rule="jailbreak", detail=detail, severity=severity))
         return violations
 
 
@@ -447,37 +447,42 @@ class SteganographyDetector:
         violations: list[Violation] = []
 
         for match in self._zero_width.finditer(text):
-            violations.append(Violation(
-                rule="steganography",
-                detail=f"zero-width character U+{ord(match.group()):04X} at position {match.start()}",
-                severity="high",
-            ))
+            violations.append(
+                Violation(
+                    rule="steganography",
+                    detail=f"zero-width character U+{ord(match.group()):04X} at position {match.start()}",
+                    severity="high",
+                )
+            )
 
         for match in self._variation_selectors.finditer(text):
-            violations.append(Violation(
-                rule="steganography",
-                detail=f"variation selector U+{ord(match.group()):04X} at position {match.start()}",
-                severity="medium",
-            ))
+            violations.append(
+                Violation(
+                    rule="steganography",
+                    detail=f"variation selector U+{ord(match.group()):04X} at position {match.start()}",
+                    severity="medium",
+                )
+            )
 
         for match in self._tag_block.finditer(text):
             char_code = f"U+{ord(match.group()):05X}"
-            violations.append(Violation(
-                rule="steganography",
-                detail=(
-                    f"tag-block character {char_code} at position "
-                    f"{match.start()} (tokenizer covert channel)"
-                ),
-                severity="critical",
-            ))
+            violations.append(
+                Violation(
+                    rule="steganography",
+                    detail=(f"tag-block character {char_code} at position {match.start()} (tokenizer covert channel)"),
+                    severity="critical",
+                )
+            )
 
         if self._flag_pua:
             for match in self._pua.finditer(text):
-                violations.append(Violation(
-                    rule="steganography",
-                    detail=f"private-use character U+{ord(match.group()):04X} at position {match.start()}",
-                    severity="low",
-                ))
+                violations.append(
+                    Violation(
+                        rule="steganography",
+                        detail=f"private-use character U+{ord(match.group()):04X} at position {match.start()}",
+                        severity="low",
+                    )
+                )
 
         return violations
 
@@ -503,9 +508,7 @@ class EncodingBypassDetector:
         # Runic block (Elder Futhark and extensions)
         self._runic_pattern = re.compile(r"[\u16a0-\u16ff]")
         # High emoji density in short text (hyper-token-efficient attacks)
-        self._emoji_pattern = re.compile(
-            r"[\U0001f300-\U0001f9ff\U0001fa00-\U0001faff\u2600-\u27bf]"
-        )
+        self._emoji_pattern = re.compile(r"[\U0001f300-\U0001f9ff\U0001fa00-\U0001faff\u2600-\u27bf]")
 
     def check(self, text: str) -> list[Violation]:
         """Check text for encoding bypass patterns."""
@@ -513,30 +516,36 @@ class EncodingBypassDetector:
 
         # Binary encoding
         for match in self._binary_pattern.finditer(text):
-            violations.append(Violation(
-                rule="encoding_bypass",
-                detail=f"binary-encoded string ({len(match.group())} bits) at position {match.start()}",
-                severity="high",
-            ))
+            violations.append(
+                Violation(
+                    rule="encoding_bypass",
+                    detail=f"binary-encoded string ({len(match.group())} bits) at position {match.start()}",
+                    severity="high",
+                )
+            )
 
         # Runic encoding
         runic_matches = self._runic_pattern.findall(text)
         if len(runic_matches) >= 3:
-            violations.append(Violation(
-                rule="encoding_bypass",
-                detail=f"runic encoding detected ({len(runic_matches)} runic characters)",
-                severity="high",
-            ))
+            violations.append(
+                Violation(
+                    rule="encoding_bypass",
+                    detail=f"runic encoding detected ({len(runic_matches)} runic characters)",
+                    severity="high",
+                )
+            )
 
         # Hyper-token-efficient emoji attack: short text with emoji
         if len(text) <= 20:
             emoji_count = len(self._emoji_pattern.findall(text))
             if emoji_count >= 1 and len(text) <= 10:
-                violations.append(Violation(
-                    rule="encoding_bypass",
-                    detail=f"hyper-token-efficient emoji attack ({emoji_count} emoji in {len(text)} chars)",
-                    severity="high",
-                ))
+                violations.append(
+                    Violation(
+                        rule="encoding_bypass",
+                        detail=f"hyper-token-efficient emoji attack ({emoji_count} emoji in {len(text)} chars)",
+                        severity="high",
+                    )
+                )
 
         return violations
 
@@ -576,14 +585,16 @@ class OutputValidator:
         jailbreak pattern detection, steganography detection, and encoding
         bypass detection.
         """
-        return cls(rules=[
-            PIIDetector(),
-            InjectionDetector(),
-            LengthBounds(max_chars=10000),
-            JailbreakPatternDetector(),
-            SteganographyDetector(),
-            EncodingBypassDetector(),
-        ])
+        return cls(
+            rules=[
+                PIIDetector(),
+                InjectionDetector(),
+                LengthBounds(max_chars=10000),
+                JailbreakPatternDetector(),
+                SteganographyDetector(),
+                EncodingBypassDetector(),
+            ]
+        )
 
     def validate(self, text: str) -> dict[str, Any]:
         """Validate text against all configured rules.
@@ -606,8 +617,5 @@ class OutputValidator:
             return {"valid": True}
         return {
             "valid": False,
-            "violations": [
-                {"rule": v.rule, "detail": v.detail, "severity": v.severity}
-                for v in all_violations
-            ],
+            "violations": [{"rule": v.rule, "detail": v.detail, "severity": v.severity} for v in all_violations],
         }

@@ -8,7 +8,6 @@ and operator approval.
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.trust_adjuster import (
     build_adjustment,
     compute_proposed_tier,

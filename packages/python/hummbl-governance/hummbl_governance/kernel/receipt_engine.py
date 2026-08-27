@@ -74,9 +74,7 @@ class Receipt:
 
     def verify_signature(self, secret: bytes) -> bool:
         """Verify HMAC-SHA256 signature."""
-        expected = hmac.new(
-            secret, self.canonical_json().encode("utf-8"), hashlib.sha256
-        ).hexdigest()
+        expected = hmac.new(secret, self.canonical_json().encode("utf-8"), hashlib.sha256).hexdigest()
         return hmac.compare_digest(self.signature, expected)
 
 
@@ -149,8 +147,7 @@ class ReceiptEngine:
             username = os.environ.get("USERNAME") or os.environ.get("USER", "")
             if not username:
                 logger.warning(
-                    "Could not determine username for Windows ACL on %s; "
-                    "file may be accessible to other users",
+                    "Could not determine username for Windows ACL on %s; file may be accessible to other users",
                     path,
                 )
                 return
@@ -169,8 +166,7 @@ class ReceiptEngine:
                 )
             except Exception:
                 logger.warning(
-                    "Could not set Windows ACL on %s; file may be accessible "
-                    "to other users",
+                    "Could not set Windows ACL on %s; file may be accessible to other users",
                     path,
                     exc_info=True,
                 )
@@ -310,7 +306,8 @@ class ReceiptEngine:
             except (json.JSONDecodeError, TypeError) as exc:
                 logger.error(
                     "Corrupted receipt line in %s: %s",
-                    receipt_file, line[:100],
+                    receipt_file,
+                    line[:100],
                 )
                 raise KernelPanic(
                     KernelInvariant.RECEIPT,

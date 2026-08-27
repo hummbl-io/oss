@@ -143,7 +143,8 @@ class DoctrineEngine:
 
         # Check for fleet writes
         fleet_writes = [
-            p for p in write_paths
+            p
+            for p in write_paths
             if not p.startswith("playground/") and not p.startswith("/tmp/")  # nosec B108 — path prefix check, not a hardcoded temp dir
         ]
         if fleet_writes:
@@ -163,9 +164,7 @@ class DoctrineEngine:
 
         return ValidationResult(valid=True)
 
-    def assert_playground_isolated(
-        self, agent_id: str, write_paths: list[str], bus_enabled: bool
-    ) -> None:
+    def assert_playground_isolated(self, agent_id: str, write_paths: list[str], bus_enabled: bool) -> None:
         """Hard gate: raise KernelPanic if playground leaks to fleet."""
         result = self.validate_playground_context(agent_id, write_paths, bus_enabled=bus_enabled)
         if not result.valid:
@@ -209,9 +208,7 @@ class DoctrineEngine:
 
         # Check for tautological hypotheses
         hypothesis = str(candidate.get("hypothesis", "")).lower()
-        tautology_markers = [
-            "by definition", "is true because", "always", "never", "self-evident"
-        ]
+        tautology_markers = ["by definition", "is true because", "always", "never", "self-evident"]
         for marker in tautology_markers:
             if marker in hypothesis:
                 return ValidationResult(
@@ -304,11 +301,9 @@ class DoctrineEngine:
 
         # Check for fleet path writes
         fleet_targets = [
-            p for p in target_paths
-            if any(
-                p.startswith(prefix)
-                for prefix in ("fleet/", "rules/", "skills/", "agents/", "services/")
-            )
+            p
+            for p in target_paths
+            if any(p.startswith(prefix) for prefix in ("fleet/", "rules/", "skills/", "agents/", "services/"))
         ]
         if fleet_targets:
             violations.append(f"fleet_target:{fleet_targets}")
@@ -389,9 +384,7 @@ class DoctrineEngine:
         if open_contests:
             blocking_statuses = {"flagged", "under_review"}
             blocking_contests = [
-                c for c in open_contests
-                if isinstance(c, dict)
-                and c.get("contest_status", "") in blocking_statuses
+                c for c in open_contests if isinstance(c, dict) and c.get("contest_status", "") in blocking_statuses
             ]
             if blocking_contests:
                 contest_ids = [c.get("contest_id", "?") for c in blocking_contests]
@@ -480,10 +473,7 @@ class DoctrineEngine:
             return ValidationResult(
                 valid=False,
                 invariant=DoctrineInvariant.DOCTRINE_AMENDMENT,
-                detail=(
-                    "D7 DOCTRINE_AMENDMENT violated: evidence.evidence_refs "
-                    "must have at least one entry"
-                ),
+                detail=("D7 DOCTRINE_AMENDMENT violated: evidence.evidence_refs must have at least one entry"),
             )
 
         receipt = amendment_record.get("receipt", {})
@@ -491,10 +481,7 @@ class DoctrineEngine:
             return ValidationResult(
                 valid=False,
                 invariant=DoctrineInvariant.DOCTRINE_AMENDMENT,
-                detail=(
-                    "D7 DOCTRINE_AMENDMENT violated: amendment requires a "
-                    "recorded receipt with receipt_hash"
-                ),
+                detail=("D7 DOCTRINE_AMENDMENT violated: amendment requires a recorded receipt with receipt_hash"),
             )
 
         return ValidationResult(valid=True)
@@ -527,9 +514,7 @@ class DoctrineEngine:
         If the artifact is an invariant amendment (has 'amendment_type' field),
         also enforces D7 (DOCTRINE_AMENDMENT) via assert_invariant_change_gated().
         """
-        self.assert_promotion_valid(
-            from_stage, to_stage, operator_receipt, open_contests
-        )
+        self.assert_promotion_valid(from_stage, to_stage, operator_receipt, open_contests)
 
         # D7 gate: if this artifact is an invariant amendment, enforce the
         # doctrine amendment gate (operator approval + evidence + receipt).
@@ -558,14 +543,10 @@ class DoctrineEngine:
         open_contests: list[dict[str, Any]] | None = None,
     ) -> None:
         """Hard gate: raise KernelPanic if promotion is invalid."""
-        result = self.validate_promotion(
-            from_stage, to_stage, operator_receipt, open_contests
-        )
+        result = self.validate_promotion(from_stage, to_stage, operator_receipt, open_contests)
         if not result.valid:
             inv_label = (
-                f"{result.invariant.value} {result.invariant.name}"
-                if result.invariant
-                else "D5 NO_AUTO_PROMOTION"
+                f"{result.invariant.value} {result.invariant.name}" if result.invariant else "D5 NO_AUTO_PROMOTION"
             )
             raise KernelPanic(
                 KernelInvariant.RECEIPT,
@@ -625,6 +606,7 @@ class DoctrineEngine:
     def _now(self) -> str:
         """Return ISO timestamp."""
         from datetime import datetime, timezone
+
         return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def get_stage_capabilities(self, stage: Stage | str) -> dict[str, bool]:

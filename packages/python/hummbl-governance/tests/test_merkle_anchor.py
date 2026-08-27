@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from hummbl_governance.primitives.merkle_anchor import (
     MerkleTree,
     SignedTreeHead,
@@ -34,6 +33,7 @@ from hummbl_governance.primitives.merkle_anchor import (
 # so the import succeeds even without cryptography — we must probe directly.
 try:
     import cryptography  # noqa: F401
+
     _HAS_CRYPTO = True
 except ImportError:
     _HAS_CRYPTO = False
@@ -307,9 +307,7 @@ class TestConsistencyProof:
         new = MerkleTree.from_entries(_make_entry_hashes(4))
         proof = consistency_proof(old, new)
         assert proof == []
-        assert verify_consistency_proof(
-            old.root_hash(), old.size(), new.root_hash(), new.size(), proof
-        ) is True
+        assert verify_consistency_proof(old.root_hash(), old.size(), new.root_hash(), new.size(), proof) is True
 
     def test_consistency_identical_trees(self):
         """Identical trees: empty proof, roots must match."""
@@ -318,36 +316,28 @@ class TestConsistencyProof:
         new = MerkleTree.from_entries(entries)
         proof = consistency_proof(old, new)
         assert proof == []
-        assert verify_consistency_proof(
-            old.root_hash(), old.size(), new.root_hash(), new.size(), proof
-        ) is True
+        assert verify_consistency_proof(old.root_hash(), old.size(), new.root_hash(), new.size(), proof) is True
 
     def test_consistency_power_of_2_extension(self):
         """4-leaf tree extended to 8 leaves: consistency proof verifies."""
         old = MerkleTree.from_entries(_make_entry_hashes(4))
         new = MerkleTree.from_entries(_make_entry_hashes(8))
         proof = consistency_proof(old, new)
-        assert verify_consistency_proof(
-            old.root_hash(), old.size(), new.root_hash(), new.size(), proof
-        ) is True
+        assert verify_consistency_proof(old.root_hash(), old.size(), new.root_hash(), new.size(), proof) is True
 
     def test_consistency_non_power_of_2_extension(self):
         """3-leaf tree extended to 7 leaves: consistency proof verifies."""
         old = MerkleTree.from_entries(_make_entry_hashes(3))
         new = MerkleTree.from_entries(_make_entry_hashes(7))
         proof = consistency_proof(old, new)
-        assert verify_consistency_proof(
-            old.root_hash(), old.size(), new.root_hash(), new.size(), proof
-        ) is True
+        assert verify_consistency_proof(old.root_hash(), old.size(), new.root_hash(), new.size(), proof) is True
 
     def test_consistency_one_to_many(self):
         """1-leaf tree extended to 5 leaves: consistency proof verifies."""
         old = MerkleTree.from_entries(_make_entry_hashes(1))
         new = MerkleTree.from_entries(_make_entry_hashes(5))
         proof = consistency_proof(old, new)
-        assert verify_consistency_proof(
-            old.root_hash(), old.size(), new.root_hash(), new.size(), proof
-        ) is True
+        assert verify_consistency_proof(old.root_hash(), old.size(), new.root_hash(), new.size(), proof) is True
 
     def test_consistency_detects_fork(self):
         """Forked tree (different entries) fails consistency verification."""
@@ -357,9 +347,7 @@ class TestConsistencyProof:
         proof = consistency_proof(old, forked)
         # The proof may generate, but verification should fail because
         # the old root doesn't match the forked tree's prefix
-        result = verify_consistency_proof(
-            old.root_hash(), old.size(), forked.root_hash(), forked.size(), proof
-        )
+        result = verify_consistency_proof(old.root_hash(), old.size(), forked.root_hash(), forked.size(), proof)
         # If the fork changes the early entries, consistency fails.
         # If it only appends different entries, the old prefix is preserved.
         # Here we changed ALL entries, so the old root won't match.
@@ -378,9 +366,7 @@ class TestConsistencyProof:
         new = MerkleTree.from_entries(_make_entry_hashes(8))
         proof = consistency_proof(old, new)
         wrong_old_root = f"{777:064x}"
-        assert verify_consistency_proof(
-            wrong_old_root, old.size(), new.root_hash(), new.size(), proof
-        ) is False
+        assert verify_consistency_proof(wrong_old_root, old.size(), new.root_hash(), new.size(), proof) is False
 
 
 # ---------------------------------------------------------------------------

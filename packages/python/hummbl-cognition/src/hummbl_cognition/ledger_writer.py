@@ -19,7 +19,8 @@ import threading
 import unicodedata
 from pathlib import Path
 
-from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
+from hummbl_cognition._filelock import lock_file as _lock_file
+from hummbl_cognition._filelock import unlock_file as _unlock_file
 from hummbl_cognition.models import (
     CANONICAL_LEDGER_SCOPES,
     CANONICAL_LEDGER_TYPES,
@@ -60,33 +61,30 @@ _INJECTION_PATTERNS: list[re.Pattern[str]] = [
 
 # Credential patterns
 _CREDENTIAL_PATTERNS: list[re.Pattern[str]] = [
-    re.compile(r"sk-[a-zA-Z0-9]{20,}"),          # OpenAI keys
-    re.compile(r"sk-ant-[a-zA-Z0-9-]{20,}"),      # Anthropic keys
-    re.compile(r"ghp_[a-zA-Z0-9]{36,}"),           # GitHub PATs
-    re.compile(r"gho_[a-zA-Z0-9]{36,}"),           # GitHub OAuth
-    re.compile(r"glpat-[a-zA-Z0-9_-]{20,}"),       # GitLab PATs
-    re.compile(r"xoxb-[a-zA-Z0-9-]{20,}"),         # Slack bot tokens
-    re.compile(r"xoxp-[a-zA-Z0-9-]{20,}"),         # Slack user tokens
-    re.compile(r"AIza[a-zA-Z0-9_-]{35}"),           # Google API keys
-    re.compile(r"AKIA[A-Z0-9]{16}"),                # AWS access keys
+    re.compile(r"sk-[a-zA-Z0-9]{20,}"),  # OpenAI keys
+    re.compile(r"sk-ant-[a-zA-Z0-9-]{20,}"),  # Anthropic keys
+    re.compile(r"ghp_[a-zA-Z0-9]{36,}"),  # GitHub PATs
+    re.compile(r"gho_[a-zA-Z0-9]{36,}"),  # GitHub OAuth
+    re.compile(r"glpat-[a-zA-Z0-9_-]{20,}"),  # GitLab PATs
+    re.compile(r"xoxb-[a-zA-Z0-9-]{20,}"),  # Slack bot tokens
+    re.compile(r"xoxp-[a-zA-Z0-9-]{20,}"),  # Slack user tokens
+    re.compile(r"AIza[a-zA-Z0-9_-]{35}"),  # Google API keys
+    re.compile(r"AKIA[A-Z0-9]{16}"),  # AWS access keys
     re.compile(r"-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----"),  # PEM keys
 ]
 
 # PII patterns — detect personal data that should not enter append-only logs.
 # Used by scan_pii() to warn/block, and by scrub_pii() to hash-replace.
 _PII_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
-    ("email", re.compile(
-        r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
-    )),
-    ("phone_us", re.compile(
-        r"\b(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
-    )),
-    ("ssn", re.compile(
-        r"\b\d{3}-\d{2}-\d{4}\b"
-    )),
-    ("ip_address", re.compile(
-        r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b"
-    )),
+    ("email", re.compile(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b")),
+    ("phone_us", re.compile(r"\b(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b")),
+    ("ssn", re.compile(r"\b\d{3}-\d{2}-\d{4}\b")),
+    (
+        "ip_address",
+        re.compile(
+            r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b"
+        ),
+    ),
 ]
 
 # Known safe patterns that match PII regexes but are not actual PII.
@@ -131,7 +129,8 @@ def scan_pii(text: str, *, strict: bool = False) -> list[tuple[str, str]]:
                 raise PIIDetectedError(
                     pii_type,
                     f"Found {pii_type} pattern: {value[:4]}...{value[-4:]}"
-                    if len(value) > 8 else f"Found {pii_type} pattern"
+                    if len(value) > 8
+                    else f"Found {pii_type} pattern",
                 )
     return findings
 
@@ -144,12 +143,14 @@ def scrub_pii(text: str) -> str:
     """
     result = text
     for pii_type, pattern in _PII_PATTERNS:
+
         def _replace(m: re.Match[str], _type: str = pii_type) -> str:
             value = m.group()
             if any(allow.search(value) for allow in _PII_ALLOWLIST):
                 return value  # Keep allowlisted values
             pseudonym = hashlib.sha256(value.encode()).hexdigest()[:12]
             return f"[{_type}:{pseudonym}]"
+
         result = pattern.sub(_replace, result)
     return result
 
@@ -168,8 +169,10 @@ def scrub_pii_from_dict(data: dict) -> dict:
             result[key] = scrub_pii_from_dict(value)
         elif isinstance(value, list):
             result[key] = [
-                scrub_pii_from_dict(item) if isinstance(item, dict)
-                else scrub_pii(item) if isinstance(item, str)
+                scrub_pii_from_dict(item)
+                if isinstance(item, dict)
+                else scrub_pii(item)
+                if isinstance(item, str)
                 else item
                 for item in value
             ]
@@ -184,112 +187,118 @@ _EXFILTRATION_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"wget\s+.*\$\{?\w*(KEY|TOKEN|SECRET|PASSWORD)", re.IGNORECASE),
     re.compile(r"curl\s+-[^s]*d\s+.*\$\{?\w*", re.IGNORECASE),
     # Red-team 2026-04-17: URL-based exfiltration with sensitive query params
-    re.compile(r"https?://[^\s]+[?&](data|token|key|secret|password|cred)=", re.IGNORECASE),
+    re.compile(
+        r"https?://[^\s]+[?&](data|token|key|secret|password|cred)=", re.IGNORECASE
+    ),
 ]
 
 # Invisible Unicode characters used for steganographic attacks.
 # Covers: zero-width chars, bidi controls, format chars, unusual whitespace,
 # variation selectors, and tag characters. Expanded after pre-mortem found
 # U+1680 (Ogham Space) bypass.
-_INVISIBLE_CODEPOINTS = frozenset({
-    # Zero-width characters
-    "\u200b",  # Zero-width space
-    "\u200c",  # Zero-width non-joiner
-    "\u200d",  # Zero-width joiner
-    "\u2060",  # Word joiner
-    "\ufeff",  # Zero-width no-break space (BOM)
-    # Bidi controls
-    "\u200e",  # Left-to-right mark
-    "\u200f",  # Right-to-left mark
-    "\u202a",  # Left-to-right embedding
-    "\u202b",  # Right-to-left embedding
-    "\u202c",  # Pop directional formatting
-    "\u202d",  # Left-to-right override
-    "\u202e",  # Right-to-left override
-    "\u2066",  # Left-to-right isolate
-    "\u2067",  # Right-to-left isolate
-    "\u2068",  # First strong isolate
-    "\u2069",  # Pop directional isolate
-    # Unusual whitespace (pre-mortem finding: Ogham Space bypass)
-    "\u00a0",  # Non-breaking space
-    "\u1680",  # Ogham Space Mark
-    "\u2000",  # En Quad
-    "\u2001",  # Em Quad
-    "\u2002",  # En Space
-    "\u2003",  # Em Space
-    "\u2004",  # Three-per-em space
-    "\u2005",  # Four-per-em space
-    "\u2006",  # Six-per-em space
-    "\u2007",  # Figure space
-    "\u2008",  # Punctuation space
-    "\u2009",  # Thin space
-    "\u200a",  # Hair space
-    "\u205f",  # Medium mathematical space
-    "\u3000",  # Ideographic space
-    # Invisible separators / formatting (red-team 2026-04-17: U+2063 bypass)
-    "\u2062",  # Invisible times
-    "\u2063",  # Invisible separator
-    "\u2064",  # Invisible plus
-    # Format characters
-    "\u00ad",  # Soft hyphen
-    "\u034f",  # Combining grapheme joiner
-    "\u061c",  # Arabic letter mark
-    "\u180e",  # Mongolian vowel separator
-    # Variation selectors (can alter glyph rendering)
-    "\ufe00",  # Variation Selector-1
-    "\ufe0f",  # Variation Selector-16 (emoji presentation)
-    # Interlinear annotation anchors
-    "\ufff9",  # Interlinear annotation anchor
-    "\ufffa",  # Interlinear annotation separator
-    "\ufffb",  # Interlinear annotation terminator
-})
+_INVISIBLE_CODEPOINTS = frozenset(
+    {
+        # Zero-width characters
+        "\u200b",  # Zero-width space
+        "\u200c",  # Zero-width non-joiner
+        "\u200d",  # Zero-width joiner
+        "\u2060",  # Word joiner
+        "\ufeff",  # Zero-width no-break space (BOM)
+        # Bidi controls
+        "\u200e",  # Left-to-right mark
+        "\u200f",  # Right-to-left mark
+        "\u202a",  # Left-to-right embedding
+        "\u202b",  # Right-to-left embedding
+        "\u202c",  # Pop directional formatting
+        "\u202d",  # Left-to-right override
+        "\u202e",  # Right-to-left override
+        "\u2066",  # Left-to-right isolate
+        "\u2067",  # Right-to-left isolate
+        "\u2068",  # First strong isolate
+        "\u2069",  # Pop directional isolate
+        # Unusual whitespace (pre-mortem finding: Ogham Space bypass)
+        "\u00a0",  # Non-breaking space
+        "\u1680",  # Ogham Space Mark
+        "\u2000",  # En Quad
+        "\u2001",  # Em Quad
+        "\u2002",  # En Space
+        "\u2003",  # Em Space
+        "\u2004",  # Three-per-em space
+        "\u2005",  # Four-per-em space
+        "\u2006",  # Six-per-em space
+        "\u2007",  # Figure space
+        "\u2008",  # Punctuation space
+        "\u2009",  # Thin space
+        "\u200a",  # Hair space
+        "\u205f",  # Medium mathematical space
+        "\u3000",  # Ideographic space
+        # Invisible separators / formatting (red-team 2026-04-17: U+2063 bypass)
+        "\u2062",  # Invisible times
+        "\u2063",  # Invisible separator
+        "\u2064",  # Invisible plus
+        # Format characters
+        "\u00ad",  # Soft hyphen
+        "\u034f",  # Combining grapheme joiner
+        "\u061c",  # Arabic letter mark
+        "\u180e",  # Mongolian vowel separator
+        # Variation selectors (can alter glyph rendering)
+        "\ufe00",  # Variation Selector-1
+        "\ufe0f",  # Variation Selector-16 (emoji presentation)
+        # Interlinear annotation anchors
+        "\ufff9",  # Interlinear annotation anchor
+        "\ufffa",  # Interlinear annotation separator
+        "\ufffb",  # Interlinear annotation terminator
+    }
+)
 
 
 # Cross-script homoglyph map: Cyrillic/Greek lookalikes → Latin equivalents.
 # This defeats attacks where Cyrillic 'о' (U+043E) replaces Latin 'o' (U+006F)
 # to bypass regex-based injection detection. Only maps characters commonly
 # used in confusable attacks against English-language patterns.
-_CONFUSABLE_MAP = str.maketrans({
-    "\u0430": "a",  # Cyrillic а → Latin a
-    "\u0435": "e",  # Cyrillic е → Latin e
-    "\u0456": "i",  # Cyrillic і → Latin i
-    "\u043e": "o",  # Cyrillic о → Latin o
-    "\u0440": "p",  # Cyrillic р → Latin p
-    "\u0441": "c",  # Cyrillic с → Latin c
-    "\u0443": "y",  # Cyrillic у → Latin y (visual match)
-    "\u0445": "x",  # Cyrillic х → Latin x
-    "\u04bb": "h",  # Cyrillic һ → Latin h
-    "\u0458": "j",  # Cyrillic ј → Latin j
-    "\u0455": "s",  # Cyrillic ѕ → Latin s
-    "\u0454": "e",  # Cyrillic є → Latin e (approximate)
-    "\u0457": "i",  # Cyrillic ї → Latin i (approximate)
-    "\u0491": "g",  # Cyrillic ґ → Latin g (approximate)
-    # Red-team expansion (2026-04-17): missing confusables that bypass cred patterns
-    "\u043a": "k",  # Cyrillic к → Latin k (bypass: sк-ant- evaded cred scan)
-    "\u0442": "t",  # Cyrillic т → Latin t
-    "\u0434": "d",  # Cyrillic д → Latin d
-    "\u043d": "n",  # Cyrillic н → Latin n
-    "\u0432": "v",  # Cyrillic в → Latin v
-    "\u043c": "m",  # Cyrillic м → Latin m
-    "\u0436": "zh", # Cyrillic ж → Latin zh (approximate)
-    "\u043b": "l",  # Cyrillic л → Latin l (approximate)
-    # Greek lookalikes
-    "\u03bf": "o",  # Greek ο → Latin o
-    "\u03b1": "a",  # Greek α → Latin a
-    "\u03b5": "e",  # Greek ε → Latin e
-    "\u03b9": "i",  # Greek ι → Latin i
-    "\u03c1": "p",  # Greek ρ → Latin p
-    "\u03c4": "t",  # Greek τ → Latin t
-    "\u03ba": "k",  # Greek κ → Latin k
-    "\u03bd": "v",  # Greek ν → Latin v
-    # Full-width Latin (sometimes used to bypass)
-    "\uff49": "i",  # Fullwidth i
-    "\uff4f": "o",  # Fullwidth o
-    "\uff47": "g",  # Fullwidth g
-    "\uff4e": "n",  # Fullwidth n
-    "\uff52": "r",  # Fullwidth r
-    "\uff45": "e",  # Fullwidth e
-})
+_CONFUSABLE_MAP = str.maketrans(
+    {
+        "\u0430": "a",  # Cyrillic а → Latin a
+        "\u0435": "e",  # Cyrillic е → Latin e
+        "\u0456": "i",  # Cyrillic і → Latin i
+        "\u043e": "o",  # Cyrillic о → Latin o
+        "\u0440": "p",  # Cyrillic р → Latin p
+        "\u0441": "c",  # Cyrillic с → Latin c
+        "\u0443": "y",  # Cyrillic у → Latin y (visual match)
+        "\u0445": "x",  # Cyrillic х → Latin x
+        "\u04bb": "h",  # Cyrillic һ → Latin h
+        "\u0458": "j",  # Cyrillic ј → Latin j
+        "\u0455": "s",  # Cyrillic ѕ → Latin s
+        "\u0454": "e",  # Cyrillic є → Latin e (approximate)
+        "\u0457": "i",  # Cyrillic ї → Latin i (approximate)
+        "\u0491": "g",  # Cyrillic ґ → Latin g (approximate)
+        # Red-team expansion (2026-04-17): missing confusables that bypass cred patterns
+        "\u043a": "k",  # Cyrillic к → Latin k (bypass: sк-ant- evaded cred scan)
+        "\u0442": "t",  # Cyrillic т → Latin t
+        "\u0434": "d",  # Cyrillic д → Latin d
+        "\u043d": "n",  # Cyrillic н → Latin n
+        "\u0432": "v",  # Cyrillic в → Latin v
+        "\u043c": "m",  # Cyrillic м → Latin m
+        "\u0436": "zh",  # Cyrillic ж → Latin zh (approximate)
+        "\u043b": "l",  # Cyrillic л → Latin l (approximate)
+        # Greek lookalikes
+        "\u03bf": "o",  # Greek ο → Latin o
+        "\u03b1": "a",  # Greek α → Latin a
+        "\u03b5": "e",  # Greek ε → Latin e
+        "\u03b9": "i",  # Greek ι → Latin i
+        "\u03c1": "p",  # Greek ρ → Latin p
+        "\u03c4": "t",  # Greek τ → Latin t
+        "\u03ba": "k",  # Greek κ → Latin k
+        "\u03bd": "v",  # Greek ν → Latin v
+        # Full-width Latin (sometimes used to bypass)
+        "\uff49": "i",  # Fullwidth i
+        "\uff4f": "o",  # Fullwidth o
+        "\uff47": "g",  # Fullwidth g
+        "\uff4e": "n",  # Fullwidth n
+        "\uff52": "r",  # Fullwidth r
+        "\uff45": "e",  # Fullwidth e
+    }
+)
 
 
 def _transliterate_confusables(text: str) -> str:
@@ -406,9 +415,7 @@ def _resolve_signing_secret() -> bytes | None:
 
 def _sign_entry(entry_jsonl: str, secret: bytes) -> str:
     """Compute HMAC-SHA256 signature of a JSONL line."""
-    return hmac.new(
-        secret, entry_jsonl.encode("utf-8"), hashlib.sha256
-    ).hexdigest()
+    return hmac.new(secret, entry_jsonl.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 def _harden_file_permissions(path: Path) -> None:
@@ -435,19 +442,32 @@ def _validate_entry_schema(entry: "LedgerEntry") -> None:
     d = entry.to_dict()
 
     # Required fields
-    for field in ("id", "timestamp", "agent", "vendor", "model", "type", "scope",
-                  "content", "content_hash"):
+    for field in (
+        "id",
+        "timestamp",
+        "agent",
+        "vendor",
+        "model",
+        "type",
+        "scope",
+        "content",
+        "content_hash",
+    ):
         if field not in d or d[field] is None:
             raise ValueError(f"ledger entry missing required field: {field}")
 
     # ID format: clp-<12 hex chars>
     if not _re.match(r"^clp-[a-f0-9]{12}$", d["id"]):
-        raise ValueError(f"ledger entry id format invalid: {d['id']!r} (expected clp-<12hex>)")
+        raise ValueError(
+            f"ledger entry id format invalid: {d['id']!r} (expected clp-<12hex>)"
+        )
 
     # Vendor enum
     valid_vendors = {"anthropic", "google", "human", "local", "moonshot", "openai"}
     if d["vendor"] not in valid_vendors:
-        raise ValueError(f"ledger entry vendor {d['vendor']!r} not in {sorted(valid_vendors)}")
+        raise ValueError(
+            f"ledger entry vendor {d['vendor']!r} not in {sorted(valid_vendors)}"
+        )
 
     # Type enum — canonical values only; historical aliases parse for read
     # but are rejected at write time to prevent schema drift accumulation.
@@ -466,11 +486,15 @@ def _validate_entry_schema(entry: "LedgerEntry") -> None:
 
     # Content length
     if len(d["content"]) > 4096:
-        raise ValueError(f"ledger entry content too long: {len(d['content'])} chars (max 4096)")
+        raise ValueError(
+            f"ledger entry content too long: {len(d['content'])} chars (max 4096)"
+        )
 
     # Content hash format: SHA-256 hex = 64 chars
     if not _re.match(r"^[a-f0-9]{64}$", d["content_hash"]):
-        raise ValueError(f"ledger entry content_hash format invalid (expected 64 hex chars)")
+        raise ValueError(
+            "ledger entry content_hash format invalid (expected 64 hex chars)"
+        )
 
     # Tags max count
     tags = d.get("tags") or []
@@ -480,7 +504,9 @@ def _validate_entry_schema(entry: "LedgerEntry") -> None:
     # Confidence range
     confidence = d.get("confidence")
     if confidence is not None and not (0.0 <= confidence <= 1.0):
-        raise ValueError(f"ledger entry confidence {confidence} out of range [0.0, 1.0]")
+        raise ValueError(
+            f"ledger entry confidence {confidence} out of range [0.0, 1.0]"
+        )
 
     # Assurance level enum
     assurance = d.get("assurance_level")
@@ -491,7 +517,9 @@ def _validate_entry_schema(entry: "LedgerEntry") -> None:
     claim = d.get("claim")
     if claim is not None:
         if not isinstance(claim, dict):
-            raise ValueError(f"ledger entry claim must be a dict, got {type(claim).__name__}")
+            raise ValueError(
+                f"ledger entry claim must be a dict, got {type(claim).__name__}"
+            )
         claim_json = json.dumps(claim, separators=(",", ":"))
         if len(claim_json) > 8192:
             raise ValueError(
@@ -589,7 +617,11 @@ def post_entry(
                         # Find the last newline that precedes the final line.
                         # If file ends with \n, rfind gives the boundary before
                         # the (empty) trailing segment; we want the one before that.
-                        nl_idx = chunk.rfind("\n", 0, len(chunk) - 1) if chunk.endswith("\n") else chunk.rfind("\n")
+                        nl_idx = (
+                            chunk.rfind("\n", 0, len(chunk) - 1)
+                            if chunk.endswith("\n")
+                            else chunk.rfind("\n")
+                        )
                         if nl_idx >= 0 or pos == 0:
                             # Found a newline boundary (or reached BOF) — the
                             # final record starts right after it.
@@ -603,7 +635,9 @@ def post_entry(
                             read_size = file_size
 
                     if last_line:
-                        expected_prev_h = hashlib.sha256(last_line.encode("utf-8")).hexdigest()
+                        expected_prev_h = hashlib.sha256(
+                            last_line.encode("utf-8")
+                        ).hexdigest()
                         if entry.previous_hash is None:
                             d = entry.to_dict()
                             d["previous_hash"] = expected_prev_h
@@ -651,6 +685,7 @@ def post_entry(
     # Hooks are opt-out via CLP_POST_WRITE_HOOKS=off and never break the post.
     try:
         import threading
+
         from hummbl_cognition.post_write_hooks import fire_post_write_hooks
 
         def _safe_hook(e=entry) -> None:
@@ -666,7 +701,9 @@ def post_entry(
     return entry
 
 
-def _verify_entry_signature(entry: "LedgerEntry", raw_line: str, signing_key: bytes) -> bool:
+def _verify_entry_signature(
+    entry: "LedgerEntry", raw_line: str, signing_key: bytes
+) -> bool:
     """Verify the HMAC-SHA256 signature of a ledger entry.
 
     Reconstructs the unsigned JSONL from the entry and compares the expected
@@ -777,7 +814,9 @@ def read_entries(
     # Resolve HMAC key once if verification is requested
     _signing_key: bytes | None = None
     if verify_signatures:
-        _signing_key = signing_key if signing_key is not None else _resolve_signing_secret()
+        _signing_key = (
+            signing_key if signing_key is not None else _resolve_signing_secret()
+        )
 
     entries: list[LedgerEntry] = []
 
@@ -897,6 +936,7 @@ def validate_integrity(
 
             # Verify content hash (skip for grandfathered non-hex hashes)
             import re as _re
+
             if _re.match(r"^[a-f0-9]{64}$", entry.content_hash):
                 if not entry.verify_hash():
                     errors.append(
@@ -914,9 +954,7 @@ def validate_integrity(
                 unsigned_jsonl = unsigned_entry.to_jsonl()
                 expected_sig = _sign_entry(unsigned_jsonl, secret)
                 if not hmac.compare_digest(entry.signature, expected_sig):
-                    errors.append(
-                        f"Line {line_num}: signature mismatch for {entry.id}"
-                    )
+                    errors.append(f"Line {line_num}: signature mismatch for {entry.id}")
                     continue
 
             # Verify previous_hash chain continuity if present
@@ -995,7 +1033,12 @@ def validate_integrity_report(
 
     # Classify and group
     by_class: dict[str, dict[str, object]] = {}
-    for cls_name in ("signature_mismatch", "content_hash_mismatch", "parse_error", "other"):
+    for cls_name in (
+        "signature_mismatch",
+        "content_hash_mismatch",
+        "parse_error",
+        "other",
+    ):
         by_class[cls_name] = {"count": 0, "lines": [], "samples": []}
 
     for idx, error in enumerate(errors):
@@ -1003,6 +1046,7 @@ def validate_integrity_report(
         by_class[cls_name]["count"] += 1  # type: ignore[operator]
         # Parse line number from error string
         import re as _re
+
         m = _re.match(r"Line (\d+):", error)
         if m:
             by_class[cls_name]["lines"].append(int(m.group(1)))  # type: ignore[attr-defined]

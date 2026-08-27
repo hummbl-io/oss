@@ -56,13 +56,15 @@ from pathlib import Path
 # Governance imports
 # ---------------------------------------------------------------------------
 from hummbl_governance import (
+    AuditLog,
+    CircuitBreaker,
+    ComplianceMapper,
+    CostGovernor,
+    HealthCollector,
     KillSwitch,
     KillSwitchMode,
-    CircuitBreaker,
-    CostGovernor,
-    AuditLog,
-    ComplianceMapper,
-    HealthCollector,
+)
+from hummbl_governance import (
     __version__ as _pkg_version,
 )
 
@@ -180,8 +182,7 @@ TOOLS = [
     {
         "name": "cost_budget_check",
         "description": (
-            "Check current daily spend against budget caps."
-            " Returns ALLOW, WARN, or DENY decision with rationale."
+            "Check current daily spend against budget caps. Returns ALLOW, WARN, or DENY decision with rationale."
         ),
         "inputSchema": {"type": "object", "properties": {}, "required": []},
     },
@@ -216,8 +217,7 @@ TOOLS = [
     {
         "name": "compliance_report",
         "description": (
-            "Generate compliance evidence mapped to SOC2, GDPR, and OWASP"
-            " controls from governance audit trail."
+            "Generate compliance evidence mapped to SOC2, GDPR, and OWASP controls from governance audit trail."
         ),
         "inputSchema": {
             "type": "object",
@@ -430,10 +430,7 @@ def _handle_health_check(arguments):
     report = collector.check_all()
     return {
         "overall_healthy": report.overall_healthy,
-        "probes": [
-            {"name": p.name, "healthy": p.healthy, "message": p.message}
-            for p in report.probes
-        ],
+        "probes": [{"name": p.name, "healthy": p.healthy, "message": p.message} for p in report.probes],
     }
 
 
@@ -503,14 +500,17 @@ def main():
 
         try:
             if method == "initialize":
-                send_response(msg_id, {
-                    "protocolVersion": PROTOCOL_VERSION,
-                    "capabilities": {"tools": {}},
-                    "serverInfo": {
-                        "name": SERVER_NAME,
-                        "version": SERVER_VERSION,
+                send_response(
+                    msg_id,
+                    {
+                        "protocolVersion": PROTOCOL_VERSION,
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {
+                            "name": SERVER_NAME,
+                            "version": SERVER_VERSION,
+                        },
                     },
-                })
+                )
 
             elif method == "notifications/initialized":
                 # Client acknowledgment, no response needed
@@ -523,11 +523,12 @@ def main():
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
                 result = handle_tool(tool_name, arguments)
-                send_response(msg_id, {
-                    "content": [
-                        {"type": "text", "text": json.dumps(result, indent=2, default=str)}
-                    ],
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
+                    },
+                )
 
             elif method == "ping":
                 send_response(msg_id, {})

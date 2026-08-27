@@ -4,7 +4,7 @@
 **Owner:** Operator  
 **Date:** August 23, 2026  
 **Status:** Active Strategic Pursuit  
-**Canonical Anchors:** [`krineia`](file:///<repo-root>/PROJECTS/krineia), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`oss`](file:///<repo-root>/PROJECTS/oss), [`hummbl-production`](file:///<repo-root>/PROJECTS/hummbl-production)  
+**Canonical Anchors:** [`krineia`](https://github.com/hummbl-io/krineia), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`oss`](https://github.com/hummbl-io/oss), [`hummbl-production`](https://github.com/hummbl-io/hummbl-production)  
 
 ---
 
@@ -43,7 +43,7 @@ To continue pursuing this novelty quest without diluting our core rigor, our exe
 ### FRONT 1: Formal Mathematical Theory & Academic Preprints
 - **Objective:** Establish unshakeable academic priority and formal mathematical credibility for KRINEIA and the Governance Tuple $T = (C, D, E)$.
 - **Immediate Deliverables:**
-  1. Finalize and deposit the LaTeX preprints in [`krineia/papers/krineia-invariants/`](file:///<repo-root>/PROJECTS/krineia/papers/krineia-invariants) to arXiv and Zenodo (securing permanent DOIs).
+  1. Finalize and deposit the LaTeX preprints in [`krineia/papers/krineia-invariants/`](https://github.com/hummbl-io/krineiapapers/krineia-invariants) to arXiv and Zenodo (securing permanent DOIs).
   2. Author a dedicated paper on *The Governance Tuple as Proof-of-Governance in Stochastic Swarms*.
   3. Formalize the non-malleability and anti-forgery invariants in Lean 4 alongside the existing TLA+ specifications.
 
@@ -73,7 +73,7 @@ To continue pursuing this novelty quest without diluting our core rigor, our exe
 - **Immediate Deliverables:**
   1. Publish the `hummbl-governance` MCP server to the official Model Context Protocol registry with `uvx` zero-install support.
   2. Launch the Generative Engine Optimization (GEO) campaign by indexing `llms.txt` and `llms-full.txt` across major LLM crawler networks.
-  3. Submit the HUMMBL Boundary Honesty Framework ([ADR-001](file:///<repo-root>/PROJECTS/hummbl-governance/docs/adr/ADR-001-coverage-matrix-not-self-grade.md)) as an open contribution to emerging NIST AI RMF and EU AI Act compliance consortia.
+  3. Submit the HUMMBL Boundary Honesty Framework ([ADR-001](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/adr/ADR-001-coverage-matrix-not-self-grade.md)) as an open contribution to emerging NIST AI RMF and EU AI Act compliance consortia.
 
 ---
 

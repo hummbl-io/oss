@@ -52,7 +52,9 @@ def main():
         failure_threshold=3,
         recovery_timeout=2.0,
         on_state_change=lambda old, new: bus.post(
-            "agent-runner", "all", "STATUS",
+            "agent-runner",
+            "all",
+            "STATUS",
             f"Circuit breaker: {old.name} -> {new.name}",
         ),
     )

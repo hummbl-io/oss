@@ -16,18 +16,16 @@
 
 """Tests for hummbl_governance.delegation."""
 
-
-
 from hummbl_governance.delegation import (
+    E_BINDING_MISMATCH,
+    E_DCT_VIOLATION,
+    E_TOKEN_EXPIRED,
+    E_TOKEN_INVALID,
     Caveat,
     DelegationToken,
     DelegationTokenManager,
     ResourceSelector,
     TokenBinding,
-    E_BINDING_MISMATCH,
-    E_DCT_VIOLATION,
-    E_TOKEN_EXPIRED,
-    E_TOKEN_INVALID,
 )
 
 
@@ -50,7 +48,8 @@ class TestDelegationTokenCreation:
     def test_token_has_expiry(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
             expiry_minutes=60,
@@ -60,7 +59,8 @@ class TestDelegationTokenCreation:
     def test_token_no_expiry(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
             expiry_minutes=None,
@@ -71,7 +71,8 @@ class TestDelegationTokenCreation:
     def test_token_with_resources(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
             resource_selectors=[ResourceSelector("database", "db-1")],
@@ -82,7 +83,8 @@ class TestDelegationTokenCreation:
     def test_token_with_caveats(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
             caveats=[Caveat("c1", "TIME_BOUND", {"max_hours": 2})],
@@ -96,7 +98,8 @@ class TestDelegationTokenValidation:
     def test_valid_token(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
         )
@@ -107,7 +110,8 @@ class TestDelegationTokenValidation:
     def test_invalid_signature(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
         )
@@ -127,7 +131,8 @@ class TestDelegationTokenValidation:
     def test_expired_token(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
             expiry_minutes=-1,  # Already expired
@@ -139,7 +144,8 @@ class TestDelegationTokenValidation:
     def test_binding_validation(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("task-1", "contract-1"),
         )
@@ -154,12 +160,14 @@ class TestDelegationTokenValidation:
     def test_binding_mismatch(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("task-1", "contract-1"),
         )
         valid, error = mgr.validate_token(
-            token, expected_task_id="wrong-task",
+            token,
+            expected_task_id="wrong-task",
         )
         assert valid is False
         assert error == E_BINDING_MISMATCH
@@ -168,7 +176,8 @@ class TestDelegationTokenValidation:
         mgr1 = DelegationTokenManager(secret=b"secret-1")
         mgr2 = DelegationTokenManager(secret=b"secret-2")
         token = mgr1.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
         )
@@ -183,7 +192,8 @@ class TestLeastPrivilege:
     def test_allowed_op(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read", "write"],
             binding=TokenBinding("t1", "c1"),
         )
@@ -193,7 +203,8 @@ class TestLeastPrivilege:
     def test_denied_op(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
         )
@@ -204,12 +215,15 @@ class TestLeastPrivilege:
     def test_denied_tools_override(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read", "delete"],
             binding=TokenBinding("t1", "c1"),
         )
         allowed, error = mgr.check_least_privilege(
-            token, "delete", denied_tools=["delete"],
+            token,
+            "delete",
+            denied_tools=["delete"],
         )
         assert allowed is False
         assert error == E_DCT_VIOLATION
@@ -217,12 +231,15 @@ class TestLeastPrivilege:
     def test_allowed_tools_constraint(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read", "write"],
             binding=TokenBinding("t1", "c1"),
         )
         allowed, error = mgr.check_least_privilege(
-            token, "write", allowed_tools=["read"],
+            token,
+            "write",
+            allowed_tools=["read"],
         )
         assert allowed is False
 
@@ -308,7 +325,8 @@ class TestTokenSerialization:
     def test_to_dict_round_trip(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="orch", subject="worker",
+            issuer="orch",
+            subject="worker",
             ops_allowed=["read"],
             binding=TokenBinding("t1", "c1"),
             resource_selectors=[ResourceSelector("api", "endpoint-1")],

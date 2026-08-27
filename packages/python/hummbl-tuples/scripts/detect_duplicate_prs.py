@@ -59,10 +59,15 @@ def fetch_open_prs() -> list[dict]:
     """Fetch open PRs via gh CLI."""
     result = subprocess.run(
         [
-            "gh", "pr", "list",
-            "--state", "open",
-            "--limit", "100",
-            "--json", "number,title,headRefName",
+            "gh",
+            "pr",
+            "list",
+            "--state",
+            "open",
+            "--limit",
+            "100",
+            "--json",
+            "number,title,headRefName",
         ],
         capture_output=True,
         text=True,
@@ -79,9 +84,7 @@ def find_duplicates(prs: list[dict]) -> list[dict]:
         - draft_prs: list of draft PRs for that issue
         - feat_prs: list of non-draft/issue-linked PRs for that issue
     """
-    by_issue: dict[int, dict[str, list[dict]]] = defaultdict(
-        lambda: {"draft": [], "candidate": []}
-    )
+    by_issue: dict[int, dict[str, list[dict]]] = defaultdict(lambda: {"draft": [], "candidate": []})
 
     for pr in prs:
         branch = pr.get("headRefName", "")
@@ -96,18 +99,22 @@ def find_duplicates(prs: list[dict]) -> list[dict]:
     for issue, groups in sorted(by_issue.items()):
         # Duplicate if both a draft and a non-draft issue-linked branch exist
         if groups["draft"] and groups["candidate"]:
-            duplicates.append({
-                "issue": issue,
-                "draft_prs": groups["draft"],
-                "feat_prs": groups["candidate"],
-            })
+            duplicates.append(
+                {
+                    "issue": issue,
+                    "draft_prs": groups["draft"],
+                    "feat_prs": groups["candidate"],
+                }
+            )
         # Also flag if multiple drafts exist for the same issue
         elif len(groups["draft"]) > 1:
-            duplicates.append({
-                "issue": issue,
-                "draft_prs": groups["draft"],
-                "feat_prs": [],
-            })
+            duplicates.append(
+                {
+                    "issue": issue,
+                    "draft_prs": groups["draft"],
+                    "feat_prs": [],
+                }
+            )
 
     return duplicates
 

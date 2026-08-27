@@ -35,10 +35,10 @@ def read_config(key: str) -> str:
 
 
 def detect_gpg_binary() -> bool:
-    return any(
-        run(["where", "gpg"], cwd=None).returncode == 0 for _ in [None]
-    ) if os.name == "nt" else any(
-        run(["which", "gpg"], cwd=None).returncode == 0 for _ in [None]
+    return (
+        any(run(["where", "gpg"], cwd=None).returncode == 0 for _ in [None])
+        if os.name == "nt"
+        else any(run(["which", "gpg"], cwd=None).returncode == 0 for _ in [None])
     )
 
 
@@ -115,10 +115,7 @@ def build_report(strict: bool) -> tuple[list[AuditEntry], str]:
 def to_payload(report: list[AuditEntry], status: str) -> dict[str, object]:
     return {
         "status": status,
-        "entries": [
-            {"name": item.name, "status": item.status, "detail": item.detail}
-            for item in report
-        ],
+        "entries": [{"name": item.name, "status": item.status, "detail": item.detail} for item in report],
     }
 
 

@@ -43,9 +43,9 @@ from hummbl_governance.kernel.invariants import KernelPanic
 
 
 def banner(title: str) -> None:
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {title}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 def ok(msg: str) -> None:
@@ -426,10 +426,7 @@ def main() -> int:
     ok(f"Schedules: {final_health['schedules_active']}")
 
     # Count total receipts
-    total_receipts = sum(
-        len(kernel.receipt.list_for_agent(agent))
-        for agent in agents_for_stress
-    )
+    total_receipts = sum(len(kernel.receipt.list_for_agent(agent)) for agent in agents_for_stress)
     ok(f"Total receipts stored: {total_receipts}")
 
     # Count authority exercises
@@ -459,4 +456,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

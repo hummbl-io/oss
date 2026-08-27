@@ -107,6 +107,7 @@ def ingest(temp_ledger: Path):
 # Tests
 # ---------------------------------------------------------------------------
 
+
 class TestSuccessfulIngest:
     """Happy-path tests — entry written, ID returned."""
 
@@ -145,8 +146,10 @@ class TestSuccessfulIngest:
         """--type and --scope flags are respected."""
         code, out, err = ingest(
             "A lesson learned",
-            "--type", "lesson",
-            "--scope", "module",
+            "--type",
+            "lesson",
+            "--scope",
+            "module",
         )
         assert code == 0, f"stderr: {err}"
         data = json.loads(temp_ledger.read_text().strip())
@@ -186,7 +189,10 @@ class TestTagsHandling:
         """--tags flag stores tags on the entry."""
         code, out, err = ingest(
             "Tagged discovery",
-            "--tags", "alpha", "beta", "gamma",
+            "--tags",
+            "alpha",
+            "beta",
+            "gamma",
         )
         assert code == 0, f"stderr: {err}"
         data = json.loads(temp_ledger.read_text().strip())
@@ -215,6 +221,7 @@ class TestMissingContentArgument:
         """Calling with no arguments exits with a non-zero code."""
         mod = _load_script()
         import io
+
         old_err = sys.stderr
         sys.stderr = io.StringIO()
         try:
@@ -228,6 +235,7 @@ class TestMissingContentArgument:
         """Missing content argument prints an error to stderr."""
         mod = _load_script()
         import io
+
         old_err = sys.stderr
         sys.stderr = captured = io.StringIO()
         try:
@@ -246,8 +254,9 @@ class TestConfidenceValidation:
         code, out, err = ingest("Too confident", "--confidence", "1.5")
         assert code != 0, "Expected non-zero exit for confidence > 1.0"
         assert "error" in err.lower() or "error" in out.lower()
-        assert out.strip() == "" or not out.startswith("ingested:"), \
+        assert out.strip() == "" or not out.startswith("ingested:"), (
             "Should not print an entry ID when confidence is invalid"
+        )
 
     def test_confidence_below_zero_exits_nonzero(self, ingest):
         """Confidence < 0.0 must exit with code 1."""

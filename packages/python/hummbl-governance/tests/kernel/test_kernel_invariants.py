@@ -37,7 +37,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel import (
     IdentityEngine,
     Kernel,
@@ -57,6 +56,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # ===========================================================================
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
+
 
 class TestInvariantEnforcement:
     """Every invariant must have a test verifying panic on violation."""

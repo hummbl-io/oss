@@ -49,28 +49,40 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Extensions that indicate a repo-relative file path
 _FILE_EXTENSIONS = {
-    ".md", ".json", ".py", ".yml", ".yaml", ".txt", ".rst",
-    ".schema.json", ".toml", ".cfg", ".ini", ".sh", ".js", ".ts",
+    ".md",
+    ".json",
+    ".py",
+    ".yml",
+    ".yaml",
+    ".txt",
+    ".rst",
+    ".schema.json",
+    ".toml",
+    ".cfg",
+    ".ini",
+    ".sh",
+    ".js",
+    ".ts",
 }
 
 # Pattern: paths that look like repo-relative file references
 # Must contain at least one path separator or have a known extension
 _PATH_PATTERN = re.compile(
-    r'(?:^|[\s`\(\["\'])'          # boundary: start, space, backtick, paren, bracket, quote
-    r'((?:[a-zA-Z0-9_.-]+/)+[a-zA-Z0-9_.-]+\.[a-zA-Z0-9]+)'  # path/to/file.ext
-    r'(?=[\s`\)\]"\'.,;:!?]|$)',   # boundary: end, space, backtick, paren, bracket, quote, punct
+    r'(?:^|[\s`\(\["\'])'  # boundary: start, space, backtick, paren, bracket, quote
+    r"((?:[a-zA-Z0-9_.-]+/)+[a-zA-Z0-9_.-]+\.[a-zA-Z0-9]+)"  # path/to/file.ext
+    r'(?=[\s`\)\]"\'.,;:!?]|$)',  # boundary: end, space, backtick, paren, bracket, quote, punct
     re.MULTILINE,
 )
 
 # Fenced code block: ``` or ~~~ at start of line, until matching fence
 _FENCED_CODE_RE = re.compile(
-    r'^(?:```|~~~).*?\n(?:```|~~~)',
+    r"^(?:```|~~~).*?\n(?:```|~~~)",
     re.MULTILINE | re.DOTALL,
 )
 
 # Inline code: `...` (single backticks, not triple)
 _INLINE_CODE_RE = re.compile(
-    r'`[^`\n]+`',
+    r"`[^`\n]+`",
 )
 
 
@@ -96,10 +108,21 @@ def extract_file_paths(text: str) -> list[str]:
         ext = Path(path).suffix
         if ext in _FILE_EXTENSIONS or any(
             path.startswith(prefix)
-            for prefix in ("docs/", "schemas/", "examples/", "scripts/",
-                           "tests/", "hummbl_tuples/", "reference_impl/",
-                           ".github/", "conformance/", "registry/",
-                           "research_notes/", "adrs/", "comparisons/")
+            for prefix in (
+                "docs/",
+                "schemas/",
+                "examples/",
+                "scripts/",
+                "tests/",
+                "hummbl_tuples/",
+                "reference_impl/",
+                ".github/",
+                "conformance/",
+                "registry/",
+                "research_notes/",
+                "adrs/",
+                "comparisons/",
+            )
         ):
             candidates.append(path)
     return candidates

@@ -35,10 +35,10 @@ from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Any, Literal
 
-
 # ---------------------------------------------------------------------------
 # Kill switch
 # ---------------------------------------------------------------------------
+
 
 class KillSwitchMode(Enum):
     """Kill switch engagement modes."""
@@ -82,6 +82,7 @@ class KillSwitchReason(Enum):
 # Circuit breaker
 # ---------------------------------------------------------------------------
 
+
 class CircuitBreakerState(Enum):
     """Circuit breaker states."""
 
@@ -93,6 +94,7 @@ class CircuitBreakerState(Enum):
 # ---------------------------------------------------------------------------
 # Coordination bus
 # ---------------------------------------------------------------------------
+
 
 class PolicyLevel(Enum):
     """Security policy levels for bus message validation.
@@ -128,6 +130,7 @@ class PolicyLevel(Enum):
 # ---------------------------------------------------------------------------
 # HITL approvals (human-in-the-loop)
 # ---------------------------------------------------------------------------
+
 
 class ApprovalStatus(Enum):
     """Approval request lifecycle states."""
@@ -243,6 +246,7 @@ class ApprovalRequest:
 # Audit log
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class AuditEntry:
     """Single entry in the governance audit log."""
@@ -302,6 +306,7 @@ class AuditEntry:
 # Delegation tokens
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class ResourceSelector:
     """Resource selector specifying accessible resources."""
@@ -360,15 +365,10 @@ class DelegationToken:
                 for r in self.resource_selectors
             ],
             "ops_allowed": list(self.ops_allowed),
-            "caveats": [
-                {"caveat_id": c.caveat_id, "type": c.type, "parameters": c.parameters}
-                for c in self.caveats
-            ],
+            "caveats": [{"caveat_id": c.caveat_id, "type": c.type, "parameters": c.parameters} for c in self.caveats],
             "expiry": self.expiry,
             "binding": (
-                {"task_id": self.binding.task_id, "contract_id": self.binding.contract_id}
-                if self.binding
-                else None
+                {"task_id": self.binding.task_id, "contract_id": self.binding.contract_id} if self.binding else None
             ),
         }
 
@@ -393,16 +393,13 @@ class DelegationToken:
         """Validate token is bound to expected task/contract/subject."""
         if self.binding is None:
             return False
-        return (
-            self.binding.task_id == task_id
-            and self.binding.contract_id == contract_id
-            and self.subject == subject
-        )
+        return self.binding.task_id == task_id and self.binding.contract_id == contract_id and self.subject == subject
 
 
 # ---------------------------------------------------------------------------
 # Cost governor
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True, slots=True)
 class UsageRecord:

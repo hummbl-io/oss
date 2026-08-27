@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tests for trace replay debugger (issue #34)."""
 
-import json
 import sys
 from pathlib import Path
 
@@ -9,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from trace_replay import TraceReplay, load_trace
+from trace_replay import TraceReplay
 
 
 def test_replay_init():
@@ -138,7 +137,13 @@ def test_summary():
 
 def test_format_event():
     """format_event should produce a readable string."""
-    event = {"tuple_type": "CONTRACT", "id": "test-001", "state": "ok", "agent": "alpha", "time": "2026-07-01"}
+    event = {
+        "tuple_type": "CONTRACT",
+        "id": "test-001",
+        "state": "ok",
+        "agent": "alpha",
+        "time": "2026-07-01",
+    }
     r = TraceReplay([])
     formatted = r.format_event(event, 0)
     assert "CONTRACT" in formatted

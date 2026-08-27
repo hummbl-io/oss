@@ -15,17 +15,16 @@ Origin: hummbl-io/hummbl-governance#94
 import sys
 from pathlib import Path
 
-
 TOOLS_DIR = Path(__file__).parent.parent.parent / "tools"
 sys.path.insert(0, str(TOOLS_DIR))
 
 from adr_lint import (  # noqa: E402
+    lint_adr_file,
+    lint_directory,
     lint_filename,
     lint_header_fields,
     lint_status_format,
     lint_superseded_refs,
-    lint_adr_file,
-    lint_directory,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures" / "adr_lint"
@@ -70,21 +69,14 @@ class TestHeaderFields:
     def test_valid_adr_all_fields_present(self):
         """ADR with all required fields in standard format should pass."""
         content = (
-            "- **Status:** accepted\n"
-            "- **Date:** 2026-01-15\n"
-            "- **Decision owner:** devin\n"
-            "- **Steward:** operator\n"
+            "- **Status:** accepted\n- **Date:** 2026-01-15\n- **Decision owner:** devin\n- **Steward:** operator\n"
         )
         v = lint_header_fields("ADR-001-test.md", content)
         assert v == []
 
     def test_missing_steward(self):
         """ADR missing Steward field should fail."""
-        content = (
-            "- **Status:** accepted\n"
-            "- **Date:** 2026-01-15\n"
-            "- **Decision owner:** devin\n"
-        )
+        content = "- **Status:** accepted\n- **Date:** 2026-01-15\n- **Decision owner:** devin\n"
         v = lint_header_fields("ADR-004-test.md", content)
         assert any(x.rule == "H001" and "Steward" in x.message for x in v)
 
@@ -170,8 +162,7 @@ class TestLintDirectory:
         for r in results:
             all_violations.extend(r.violations)
         assert all_violations == [], (
-            f"Expected no violations for valid ADRs, got: "
-            f"{[(v.file, v.rule, v.message) for v in all_violations]}"
+            f"Expected no violations for valid ADRs, got: {[(v.file, v.rule, v.message) for v in all_violations]}"
         )
 
     def test_invalid_directory_has_violations(self):
@@ -191,8 +182,7 @@ class TestLintDirectory:
             if "ADR-FM-004" in r.file:
                 ref_violations = [v for v in r.violations if v.rule == "REF001"]
                 assert ref_violations == [], (
-                    f"Domain-prefixed superseded ref should not false-positive: "
-                    f"{[v.message for v in ref_violations]}"
+                    f"Domain-prefixed superseded ref should not false-positive: {[v.message for v in ref_violations]}"
                 )
 
 
@@ -226,6 +216,5 @@ class TestLintAdrFile:
         result = lint_adr_file(filepath, all_adr_numbers={"001", "FM-001", "FM-004"})
         ref_violations = [v for v in result.violations if v.rule == "REF001"]
         assert ref_violations == [], (
-            f"Domain-prefixed superseded ref should not false-positive: "
-            f"{[v.message for v in ref_violations]}"
+            f"Domain-prefixed superseded ref should not false-positive: {[v.message for v in ref_violations]}"
         )

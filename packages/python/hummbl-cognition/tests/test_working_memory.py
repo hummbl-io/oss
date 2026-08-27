@@ -9,12 +9,12 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.working_memory import (
     MAX_CONTENT_LENGTH,
     MAX_ITEMS,
@@ -223,7 +223,9 @@ class TestTTL:
 
     def test_ttl_exceeds_max_raises(self, tmp_store):
         with pytest.raises(ValueError, match="ttl_seconds must be <="):
-            tmp_store.put("alice:topic", "val", "alice", ttl_seconds=MAX_TTL_SECONDS + 1)
+            tmp_store.put(
+                "alice:topic", "val", "alice", ttl_seconds=MAX_TTL_SECONDS + 1
+            )
 
     def test_expire_stale_removes_expired(self, tmp_store):
         tmp_store.put("alice:fresh", "val", "alice", ttl_seconds=3600)
@@ -456,12 +458,14 @@ class TestContentScanning:
 class TestAtomicWrite:
     """Test atomic write behavior and file permissions."""
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="POSIX permissions not supported on Windows")
     def test_file_created_with_0600(self, tmp_store_path):
         store = WorkingMemoryStore(store_path=tmp_store_path)
         store.put("alice:topic", "val", "alice")
         mode = os.stat(tmp_store_path).st_mode & 0o777
         assert mode == 0o600
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="POSIX permissions not supported on Windows")
     def test_file_permissions_maintained_after_update(self, tmp_store):
         tmp_store.put("alice:a", "v1", "alice")
         tmp_store.put("alice:a", "v2", "alice")
@@ -616,9 +620,7 @@ class TestConcurrency:
         store = tmp_store._read_store()
         version = store["version"]
 
-        item = tmp_store.put(
-            "alice:b", "v2", "alice", expected_version=version
-        )
+        item = tmp_store.put("alice:b", "v2", "alice", expected_version=version)
         assert item.key == "alice:b"
 
     def test_put_with_wrong_version_raises(self, tmp_store):

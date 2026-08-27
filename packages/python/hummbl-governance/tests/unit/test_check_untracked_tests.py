@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -35,17 +34,22 @@ def _git_init(repo: Path) -> None:
 # _is_test_file
 # ---------------------------------------------------------------------------
 
+
 def test_is_test_file_test_prefix():
     assert _is_test_file(Path("test_foo.py")) is True
+
 
 def test_is_test_file_test_suffix():
     assert _is_test_file(Path("foo_test.py")) is True
 
+
 def test_is_test_file_not_a_test():
     assert _is_test_file(Path("foo.py")) is False
 
+
 def test_is_test_file_conftest():
     assert _is_test_file(Path("conftest.py")) is False
+
 
 def test_is_test_file_non_py():
     assert _is_test_file(Path("test_foo.txt")) is False
@@ -54,6 +58,7 @@ def test_is_test_file_non_py():
 # ---------------------------------------------------------------------------
 # check_repo
 # ---------------------------------------------------------------------------
+
 
 def test_check_repo_no_untracked(tmp_path: Path):
     _git_init(tmp_path)
@@ -104,6 +109,7 @@ def test_check_repo_not_a_git_repo(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # main (CLI)
 # ---------------------------------------------------------------------------
+
 
 def test_main_clean_returns_0(tmp_path: Path):
     _git_init(tmp_path)

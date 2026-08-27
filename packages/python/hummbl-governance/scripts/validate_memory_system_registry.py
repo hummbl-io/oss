@@ -4,6 +4,7 @@ This is intentionally stdlib-only. It validates the JSON contract, checks path
 existence claims, and ensures the Markdown companion mentions each registry ID
 and reserved repo candidate.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -11,7 +12,6 @@ import json
 import sys
 from pathlib import Path
 from typing import Any
-
 
 DEFAULT_REGISTRY = Path("docs/memory_system_registry.candidate.json")
 DEFAULT_MARKDOWN = Path("docs/MEMORY_SYSTEM_REGISTRY.md")

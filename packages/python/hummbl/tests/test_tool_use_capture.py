@@ -28,9 +28,7 @@ class ToolUseCaptureTests(unittest.TestCase):
             {
                 "role": "user",
                 "content": (
-                    "<tool_response>"
-                    '{"matches":["config.py: FEATURE_X = False"]}'
-                    "</tool_response>"
+                    '<tool_response>{"matches":["config.py: FEATURE_X = False"]}</tool_response>'
                 ),
             },
             {
@@ -46,11 +44,7 @@ class ToolUseCaptureTests(unittest.TestCase):
             },
             {
                 "role": "user",
-                "content": (
-                    "<tool_response>"
-                    '{"content":"FEATURE_X = True"}'
-                    "</tool_response>"
-                ),
+                "content": ('<tool_response>{"content":"FEATURE_X = True"}</tool_response>'),
             },
             {
                 "role": "assistant",
@@ -115,7 +109,7 @@ class ToolUseCaptureTests(unittest.TestCase):
                     "value": (
                         "<think>The search result confirms the landmark and "
                         "provides coordinates.</think>"
-                        "<answer>{\"latitude\":55.57,\"longitude\":12.91}</answer>"
+                        '<answer>{"latitude":55.57,"longitude":12.91}</answer>'
                     ),
                 },
             ],

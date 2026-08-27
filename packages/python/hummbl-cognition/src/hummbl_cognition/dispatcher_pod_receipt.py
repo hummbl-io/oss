@@ -21,10 +21,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
 import threading
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -47,13 +46,21 @@ _SCHEMA_PATH = Path(__file__).parent / "schemas" / "dispatcher_pod_receipt.schem
 _DEFAULT_LOG = Path("_state/cognition/dispatcher_pod_receipts.jsonl")
 _THREAD_WRITE_LOCK = threading.Lock()
 
-VALID_OPERATIONS = {"claim", "release", "policy_block", "setup_failure", "launch", "writeback"}
+VALID_OPERATIONS = {
+    "claim",
+    "release",
+    "policy_block",
+    "setup_failure",
+    "launch",
+    "writeback",
+}
 VALID_STATUSES = {"complete", "partial", "failed", "blocked"}
 
 
 @dataclass(frozen=True, slots=True)
 class PodReceipt:
     """Immutable dispatcher pod receipt."""
+
     receipt_id: str
     pod_id: str
     operation: str
@@ -108,8 +115,15 @@ def _validate_receipt_structure(receipt: dict[str, Any]) -> list[str]:
     """Validate receipt against required fields and constraints. Returns error list."""
     errors: list[str] = []
 
-    required = {"receipt_id", "pod_id", "operation", "agent", "correlation_id",
-                "timestamp", "content_hash"}
+    required = {
+        "receipt_id",
+        "pod_id",
+        "operation",
+        "agent",
+        "correlation_id",
+        "timestamp",
+        "content_hash",
+    }
     for field_name in required:
         if field_name not in receipt:
             errors.append(f"Missing required field: {field_name}")
@@ -127,7 +141,9 @@ def _validate_receipt_structure(receipt: dict[str, Any]) -> list[str]:
     if "content_hash" in receipt:
         expected = _content_hash(receipt)
         if receipt["content_hash"] != expected:
-            errors.append(f"content_hash mismatch: expected {expected}, got {receipt['content_hash']}")
+            errors.append(
+                f"content_hash mismatch: expected {expected}, got {receipt['content_hash']}"
+            )
 
     return errors
 
@@ -286,7 +302,12 @@ def append_receipt(
                     pass
             f.write(line + "\n")
 
-    logger.info("Appended pod receipt %s for pod %s (%s)", receipt.receipt_id, receipt.pod_id, receipt.operation)
+    logger.info(
+        "Appended pod receipt %s for pod %s (%s)",
+        receipt.receipt_id,
+        receipt.pod_id,
+        receipt.operation,
+    )
     return log_path
 
 
@@ -309,7 +330,9 @@ def read_receipts(log_path: Path | None = None) -> list[dict[str, Any]]:
                 receipt = json.loads(line)
                 receipts.append(receipt)
             except json.JSONDecodeError as e:
-                logger.warning("Invalid JSON at line %d in %s: %s", line_num, log_path, e)
+                logger.warning(
+                    "Invalid JSON at line %d in %s: %s", line_num, log_path, e
+                )
     return receipts
 
 
@@ -336,7 +359,7 @@ def get_pod_chain(pod_id: str, log_path: Path | None = None) -> list[dict[str, A
 
     # Build chain by following parent_receipt_hash
     chain = [claim]
-    by_hash = {r.get("content_hash"): r for r in pod_receipts if r.get("content_hash")}
+    {r.get("content_hash"): r for r in pod_receipts if r.get("content_hash")}
     current_hash = claim.get("content_hash")
 
     while current_hash:
@@ -398,6 +421,7 @@ def is_pod_claimed(pod_id: str, log_path: Path | None = None) -> bool:
 
 # --- CLI ---
 
+
 def _cli() -> None:
     """CLI entry point for dispatcher pod receipt operations."""
     import argparse
@@ -409,7 +433,9 @@ def _cli() -> None:
 
     # claim
     claim_p = sub.add_parser("claim", help="Create and append a claim receipt")
-    claim_p.add_argument("--pod-id", required=True, help="Pod ID (e.g., pod-issueops-abc123)")
+    claim_p.add_argument(
+        "--pod-id", required=True, help="Pod ID (e.g., pod-issueops-abc123)"
+    )
     claim_p.add_argument("--agent", required=True, help="Agent identity")
     claim_p.add_argument("--correlation-id", required=True, help="Correlation ID")
     claim_p.add_argument("--lane-id", help="Lane ID")
@@ -423,7 +449,9 @@ def _cli() -> None:
     release_p.add_argument("--pod-id", required=True, help="Pod ID")
     release_p.add_argument("--agent", required=True, help="Agent identity")
     release_p.add_argument("--correlation-id", required=True, help="Correlation ID")
-    release_p.add_argument("--status", choices=list(VALID_STATUSES), help="Final status")
+    release_p.add_argument(
+        "--status", choices=list(VALID_STATUSES), help="Final status"
+    )
     release_p.add_argument("--notes", default="", help="Notes")
     release_p.add_argument("--log-path", help="Custom log path")
 
@@ -456,7 +484,16 @@ def _cli() -> None:
             notes=args.notes,
         )
         path = append_receipt(receipt, log_path)
-        print(json.dumps({"receipt_id": receipt.receipt_id, "content_hash": receipt.content_hash, "log_path": str(path)}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "receipt_id": receipt.receipt_id,
+                    "content_hash": receipt.content_hash,
+                    "log_path": str(path),
+                },
+                indent=2,
+            )
+        )
 
     elif args.command == "release":
         chain = get_pod_chain(args.pod_id, log_path)
@@ -474,7 +511,16 @@ def _cli() -> None:
             notes=args.notes,
         )
         path = append_receipt(receipt, log_path)
-        print(json.dumps({"receipt_id": receipt.receipt_id, "content_hash": receipt.content_hash, "log_path": str(path)}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "receipt_id": receipt.receipt_id,
+                    "content_hash": receipt.content_hash,
+                    "log_path": str(path),
+                },
+                indent=2,
+            )
+        )
 
     elif args.command == "validate":
         errors = validate_chain(args.pod_id, log_path)

@@ -66,10 +66,11 @@ example_workflow = {
         {
             "step": "collect_evidence",
             "agent": "evidence_collector",
-            "outputs": {"evidence_refs": ["ev_001", "ev_002"]}
+            "outputs": {"evidence_refs": ["ev_001", "ev_002"]},
         }
-    ]
+    ],
 }
+
 
 # Execute workflow
 async def main():
@@ -78,11 +79,12 @@ async def main():
         inputs={
             "audit_period_start": "2025-01-01T00:00:00Z",
             "audit_period_end": "2025-12-31T23:59:59Z",
-            "organization_id": "org_001"
-        }
+            "organization_id": "org_001",
+        },
     )
     print(f"Mission completed: {receipt.receipt_id}")
     print(f"Audit trail: {receipt.audit_trail_ref}")
+
 
 asyncio.run(main())
 ```

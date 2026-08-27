@@ -9,17 +9,15 @@ Tests:
 - Attest module (ALLOWLIST, BLOCKLIST, CAPABILITY_FENCE)
 """
 
-
 import pytest
-
 from hummbl_governance import (
-    Attest,
     ALLOWLIST,
     BLOCKLIST,
     CAPABILITY_FENCE,
-    BusWriter,
     DCT,
     DCTX,
+    Attest,
+    BusWriter,
     DelegationContext,
     DelegationTokenManager,
     b120,

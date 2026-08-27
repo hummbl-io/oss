@@ -31,7 +31,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -138,9 +137,7 @@ def _wheel_names(wheel: Path) -> set[str]:
 
 def _entry_points(wheel: Path) -> dict[str, str]:
     with zipfile.ZipFile(wheel) as archive:
-        entry_points_name = next(
-            name for name in archive.namelist() if name.endswith(".dist-info/entry_points.txt")
-        )
+        entry_points_name = next(name for name in archive.namelist() if name.endswith(".dist-info/entry_points.txt"))
         parser = configparser.ConfigParser()
         parser.read_string(archive.read(entry_points_name).decode("utf-8"))
     return dict(parser["console_scripts"])

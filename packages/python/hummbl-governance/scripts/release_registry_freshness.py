@@ -30,8 +30,7 @@ import urllib.request
 from pathlib import Path
 
 DEFAULT_MANIFEST_URL = (
-    "https://raw.githubusercontent.com/hummbl-io/hummbl-production/main/"
-    "web/manifest/public-release-state.json"
+    "https://raw.githubusercontent.com/hummbl-io/hummbl-production/main/web/manifest/public-release-state.json"
 )
 PYPI_JSON_URL = "https://pypi.org/pypi/hummbl-governance/json"
 PYPROJECT_PATH = "pyproject.toml"
@@ -61,27 +60,30 @@ def fetch_manifest_version(manifest_url: str) -> dict:
     """
     data: dict
     try:
-        req = urllib.request.Request(
-            manifest_url, headers={"User-Agent": "release-freshness-check/1.0"}
-        )
+        req = urllib.request.Request(manifest_url, headers={"User-Agent": "release-freshness-check/1.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         if e.code == 404:
             # Private repo — fall back to gh api
             import subprocess
+
             result = subprocess.run(
                 [
-                    "gh", "api",
-                    "repos/hummbl-io/hummbl-production/contents/"
-                    "web/manifest/public-release-state.json",
-                    "--jq", ".content",
+                    "gh",
+                    "api",
+                    "repos/hummbl-io/hummbl-production/contents/web/manifest/public-release-state.json",
+                    "--jq",
+                    ".content",
                 ],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 raise RuntimeError(f"gh api failed: {result.stderr.strip()}")
             import base64
+
             content = base64.b64decode(result.stdout.strip()).decode("utf-8")
             data = json.loads(content)
         else:
@@ -154,7 +156,8 @@ def main() -> int:
         "in_parity": in_parity,
         "manifest_stale": manifest_stale,
         "drift_detail": (
-            None if in_parity
+            None
+            if in_parity
             else f"pyproject={pyproject_version}, pypi={pypi_version}, manifest={manifest['latest_version']}"
         ),
     }

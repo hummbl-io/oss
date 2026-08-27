@@ -135,6 +135,7 @@ def enforce_checkpoint(checkpoint: Checkpoint, context: Dict) -> CheckpointStatu
 ```python
 class CheckpointStatus(Enum):
     """Checkpoint status"""
+
     PENDING = "pending"
     APPROVED = "approved"
     BLOCKED = "blocked"
@@ -221,15 +222,21 @@ workflow:
 ### Checkpoint Creation
 
 ```python
-def create_checkpoint(workflow_id: str, step_id: str, checkpoint_type: str,
-                    name: str, description: str, preconditions: List[Dict],
-                    required_approvals: Optional[List[Dict]] = None,
-                    timeout_seconds: Optional[int] = None,
-                    timeout_action: Optional[str] = None) -> Checkpoint:
+def create_checkpoint(
+    workflow_id: str,
+    step_id: str,
+    checkpoint_type: str,
+    name: str,
+    description: str,
+    preconditions: List[Dict],
+    required_approvals: Optional[List[Dict]] = None,
+    timeout_seconds: Optional[int] = None,
+    timeout_action: Optional[str] = None,
+) -> Checkpoint:
     """Create a new checkpoint"""
-    
+
     checkpoint_id = generate_id("cp")
-    
+
     checkpoint = Checkpoint(
         checkpoint_id=checkpoint_id,
         mission_id=extract_mission_id(workflow_id),
@@ -247,43 +254,44 @@ def create_checkpoint(workflow_id: str, step_id: str, checkpoint_type: str,
         compliance_metadata={
             "framework": extract_framework(workflow_id),
             "control_id": extract_control_id(step_id),
-            "checkpoint_criticality": determine_criticality(checkpoint_type)
+            "checkpoint_criticality": determine_criticality(checkpoint_type),
         },
-        created_by="kernel"
+        created_by="kernel",
     )
-    
+
     return checkpoint
 ```
 
 ### Checkpoint Approval
 
 ```python
-def approve_checkpoint(checkpoint_id: str, approved_by: str, 
-                     approval_notes: Optional[str] = None) -> bool:
+def approve_checkpoint(
+    checkpoint_id: str, approved_by: str, approval_notes: Optional[str] = None
+) -> bool:
     """Approve a checkpoint"""
-    
+
     if checkpoint_id not in checkpoints:
         logger.error(f"Checkpoint {checkpoint_id} not found")
         return False
-    
+
     checkpoint = checkpoints[checkpoint_id]
-    
+
     # Check if checkpoint can be approved
     if checkpoint.status != CheckpointStatus.PENDING:
         logger.error(f"Checkpoint {checkpoint_id} is not pending (status: {checkpoint.status})")
         return False
-    
+
     # Check if approver has required role
     if not has_required_role(approved_by, checkpoint.required_approvals):
         logger.error(f"Approver {approved_by} does not have required role")
         return False
-    
+
     # Approve checkpoint
     checkpoint.status = CheckpointStatus.APPROVED
     checkpoint.approved_at = datetime.now(timezone.utc).isoformat()
     checkpoint.approved_by = approved_by
     checkpoint.approval_notes = approval_notes
-    
+
     logger.info(f"Checkpoint {checkpoint_id} approved by {approved_by}")
     return True
 ```
@@ -291,25 +299,26 @@ def approve_checkpoint(checkpoint_id: str, approved_by: str,
 ### Checkpoint Escalation
 
 ```python
-def escalate_checkpoint(checkpoint_id: str, escalated_to: str = "operator",
-                      escalation_reason: Optional[str] = None) -> bool:
+def escalate_checkpoint(
+    checkpoint_id: str, escalated_to: str = "operator", escalation_reason: Optional[str] = None
+) -> bool:
     """Escalate a checkpoint to operator"""
-    
+
     if checkpoint_id not in checkpoints:
         logger.error(f"Checkpoint {checkpoint_id} not found")
         return False
-    
+
     checkpoint = checkpoints[checkpoint_id]
-    
+
     # Escalate checkpoint
     checkpoint.status = CheckpointStatus.ESCALATED
     checkpoint.escalated_at = datetime.now(timezone.utc).isoformat()
     checkpoint.escalated_to = escalated_to
     checkpoint.escalation_reason = escalation_reason or "Checkpoint escalation required"
-    
+
     # Send escalation notification
     send_escalation_notification(checkpoint)
-    
+
     logger.info(f"Checkpoint {checkpoint_id} escalated to {escalated_to}")
     return True
 ```
@@ -352,7 +361,7 @@ def monitor_checkpoints(interval_seconds: int = 60):
 ```python
 def send_escalation_notification(checkpoint: Checkpoint):
     """Send escalation notification for a checkpoint"""
-    
+
     notification = {
         "type": "checkpoint_escalation",
         "checkpoint_id": checkpoint.checkpoint_id,
@@ -366,12 +375,12 @@ def send_escalation_notification(checkpoint: Checkpoint):
         "escalation_reason": checkpoint.escalation_reason,
         "escalated_at": checkpoint.escalated_at,
         "required_approvals": checkpoint.required_approvals,
-        "compliance_metadata": checkpoint.compliance_metadata
+        "compliance_metadata": checkpoint.compliance_metadata,
     }
-    
+
     # Send notification via coordination bus
     send_bus_message("kernel", checkpoint.escalated_to, "ESCALATION", json.dumps(notification))
-    
+
     logger.info(f"Escalation notification sent for checkpoint {checkpoint.checkpoint_id}")
 ```
 
@@ -382,17 +391,25 @@ def send_escalation_notification(checkpoint: Checkpoint):
 ```python
 def generate_checkpoint_report(mission_id: str) -> Dict:
     """Generate checkpoint status report for a mission"""
-    
+
     mission_checkpoints = get_checkpoints_by_mission(mission_id)
-    
+
     report = {
         "mission_id": mission_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "total_checkpoints": len(mission_checkpoints),
-        "pending_checkpoints": len([c for c in mission_checkpoints if c.status == CheckpointStatus.PENDING]),
-        "approved_checkpoints": len([c for c in mission_checkpoints if c.status == CheckpointStatus.APPROVED]),
-        "blocked_checkpoints": len([c for c in mission_checkpoints if c.status == CheckpointStatus.BLOCKED]),
-        "escalated_checkpoints": len([c for c in mission_checkpoints if c.status == CheckpointStatus.ESCALATED]),
+        "pending_checkpoints": len(
+            [c for c in mission_checkpoints if c.status == CheckpointStatus.PENDING]
+        ),
+        "approved_checkpoints": len(
+            [c for c in mission_checkpoints if c.status == CheckpointStatus.APPROVED]
+        ),
+        "blocked_checkpoints": len(
+            [c for c in mission_checkpoints if c.status == CheckpointStatus.BLOCKED]
+        ),
+        "escalated_checkpoints": len(
+            [c for c in mission_checkpoints if c.status == CheckpointStatus.ESCALATED]
+        ),
         "checkpoints": [
             {
                 "checkpoint_id": c.checkpoint_id,
@@ -404,12 +421,12 @@ def generate_checkpoint_report(mission_id: str) -> Dict:
                 "approved_at": c.approved_at,
                 "approved_by": c.approved_by,
                 "escalated_at": c.escalated_at,
-                "escalated_to": c.escalated_to
+                "escalated_to": c.escalated_to,
             }
             for c in mission_checkpoints
-        ]
+        ],
     }
-    
+
     return report
 ```
 

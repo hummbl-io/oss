@@ -14,7 +14,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.schema_validator import (
     ValidationError,
     validate,
@@ -29,23 +28,45 @@ from hummbl_cognition.schema_validator import (
 
 _LEDGER_SCHEMA = {
     "type": "object",
-    "required": ["id", "timestamp", "agent", "vendor", "model", "type", "scope", "content", "content_hash"],
+    "required": [
+        "id",
+        "timestamp",
+        "agent",
+        "vendor",
+        "model",
+        "type",
+        "scope",
+        "content",
+        "content_hash",
+    ],
     "additionalProperties": False,
     "properties": {
         "id": {"type": "string", "pattern": "^clp-[a-f0-9]{12}$"},
         "timestamp": {"type": "string"},
         "agent": {"type": "string", "minLength": 1},
-        "vendor": {"type": "string", "enum": ["anthropic", "google", "human", "local", "moonshot", "openai"]},
+        "vendor": {
+            "type": "string",
+            "enum": ["anthropic", "google", "human", "local", "moonshot", "openai"],
+        },
         "model": {"type": "string", "minLength": 1},
-        "type": {"type": "string", "enum": ["lesson", "decision", "discovery", "correction", "convention"]},
-        "scope": {"type": "string", "enum": ["project", "module", "file", "convention", "process"]},
+        "type": {
+            "type": "string",
+            "enum": ["lesson", "decision", "discovery", "correction", "convention"],
+        },
+        "scope": {
+            "type": "string",
+            "enum": ["project", "module", "file", "convention", "process"],
+        },
         "content": {"type": "string", "minLength": 1, "maxLength": 4096},
         "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
         "evidence": {"type": ["string", "null"]},
         "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},
         "supersedes": {"type": ["string", "null"], "pattern": "^clp-[a-f0-9]{12}$"},
         "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 10},
-        "assurance_level": {"type": ["string", "null"], "enum": ["SELF", "PEER", "VERIFIED", None]},
+        "assurance_level": {
+            "type": ["string", "null"],
+            "enum": ["SELF", "PEER", "VERIFIED", None],
+        },
         "signature": {"type": ["string", "null"]},
     },
 }
@@ -114,6 +135,7 @@ _STATE_SCHEMA = {
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _valid_ledger_entry(**overrides) -> dict:
     """Return a minimal valid CLP ledger entry."""
     entry = {
@@ -145,6 +167,7 @@ def _valid_shared_state(**overrides) -> dict:
 # ===================================================================
 # Core validate() -- type keyword
 # ===================================================================
+
 
 class TestTypeKeyword:
     def test_string_valid(self):
@@ -196,6 +219,7 @@ class TestTypeKeyword:
 # const keyword
 # ===================================================================
 
+
 class TestConstKeyword:
     def test_const_match(self):
         assert validate("fixed", {"const": "fixed"}) == []
@@ -217,6 +241,7 @@ class TestConstKeyword:
 # enum keyword
 # ===================================================================
 
+
 class TestEnumKeyword:
     def test_enum_valid(self):
         schema = {"enum": ["a", "b", "c"]}
@@ -232,6 +257,7 @@ class TestEnumKeyword:
 # ===================================================================
 # pattern keyword
 # ===================================================================
+
 
 class TestPatternKeyword:
     def test_pattern_match(self):
@@ -252,6 +278,7 @@ class TestPatternKeyword:
 # ===================================================================
 # minLength / maxLength
 # ===================================================================
+
 
 class TestStringLength:
     def test_minlength_valid(self):
@@ -274,6 +301,7 @@ class TestStringLength:
 # ===================================================================
 # minimum / maximum
 # ===================================================================
+
 
 class TestNumericBounds:
     def test_minimum_valid(self):
@@ -302,6 +330,7 @@ class TestNumericBounds:
 # ===================================================================
 # Object: required, properties, additionalProperties
 # ===================================================================
+
 
 class TestObjectKeywords:
     def test_required_present(self):
@@ -363,6 +392,7 @@ class TestObjectKeywords:
 # Array: minItems, maxItems, items
 # ===================================================================
 
+
 class TestArrayKeywords:
     def test_minitems_valid(self):
         assert validate([1, 2], {"type": "array", "minItems": 1}) == []
@@ -391,6 +421,7 @@ class TestArrayKeywords:
 # ===================================================================
 # oneOf / anyOf
 # ===================================================================
+
 
 class TestCompositionKeywords:
     def test_oneof_single_match(self):
@@ -451,6 +482,7 @@ class TestCompositionKeywords:
 # Path prefix propagation
 # ===================================================================
 
+
 class TestPathPropagation:
     def test_root_path_empty(self):
         errs = validate(42, {"type": "string"})
@@ -464,6 +496,7 @@ class TestPathPropagation:
 # ===================================================================
 # ValidationError
 # ===================================================================
+
 
 class TestValidationError:
     def test_with_path(self):
@@ -481,14 +514,19 @@ class TestValidationError:
 # validate_file
 # ===================================================================
 
+
 class TestValidateFile:
     def test_valid_file(self, tmp_path):
         schema_file = tmp_path / "schema.json"
-        schema_file.write_text(json.dumps({
-            "type": "object",
-            "required": ["name"],
-            "properties": {"name": {"type": "string"}},
-        }))
+        schema_file.write_text(
+            json.dumps(
+                {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {"name": {"type": "string"}},
+                }
+            )
+        )
         instance_file = tmp_path / "data.json"
         instance_file.write_text(json.dumps({"name": "test"}))
 
@@ -498,10 +536,14 @@ class TestValidateFile:
 
     def test_invalid_file(self, tmp_path):
         schema_file = tmp_path / "schema.json"
-        schema_file.write_text(json.dumps({
-            "type": "object",
-            "required": ["name"],
-        }))
+        schema_file.write_text(
+            json.dumps(
+                {
+                    "type": "object",
+                    "required": ["name"],
+                }
+            )
+        )
         instance_file = tmp_path / "data.json"
         instance_file.write_text(json.dumps({}))
 
@@ -523,6 +565,7 @@ class TestValidateFile:
 # ===================================================================
 # validate_entry_dict -- CLP ledger entry
 # ===================================================================
+
 
 class TestValidateEntryDict:
     def test_valid_entry(self):
@@ -639,6 +682,7 @@ class TestValidateEntryDict:
 # validate_state_dict -- CLP shared state
 # ===================================================================
 
+
 class TestValidateStateDict:
     def test_valid_state(self):
         state = _valid_shared_state()
@@ -664,38 +708,44 @@ class TestValidateStateDict:
         assert any("minimum" in e for e in errors)
 
     def test_active_agents(self):
-        state = _valid_shared_state(active_agents={
-            "claude-code": {
-                "status": "active",
-                "capabilities": ["code", "review"],
-                "last_seen": "2026-03-04T12:00:00Z",
-                "vendor": "anthropic",
-                "model": "claude-opus-4-6",
+        state = _valid_shared_state(
+            active_agents={
+                "claude-code": {
+                    "status": "active",
+                    "capabilities": ["code", "review"],
+                    "last_seen": "2026-03-04T12:00:00Z",
+                    "vendor": "anthropic",
+                    "model": "claude-opus-4-6",
+                }
             }
-        })
+        )
         ok, errors = validate_state_dict(state, schema=_STATE_SCHEMA)
         assert ok is True, errors
 
     def test_claimed_files(self):
-        state = _valid_shared_state(claimed_files={
-            "services/health.py": {
-                "agent": "claude-code",
-                "claimed_at": "2026-03-04T12:00:00Z",
-                "purpose": "health probe update",
+        state = _valid_shared_state(
+            claimed_files={
+                "services/health.py": {
+                    "agent": "claude-code",
+                    "claimed_at": "2026-03-04T12:00:00Z",
+                    "purpose": "health probe update",
+                }
             }
-        })
+        )
         ok, errors = validate_state_dict(state, schema=_STATE_SCHEMA)
         assert ok is True, errors
 
     def test_active_decisions(self):
-        state = _valid_shared_state(active_decisions=[
-            {
-                "decision_id": "d-001",
-                "question": "Which auth flow?",
-                "proposed_by": "claude-code",
-                "resolved": False,
-            }
-        ])
+        state = _valid_shared_state(
+            active_decisions=[
+                {
+                    "decision_id": "d-001",
+                    "question": "Which auth flow?",
+                    "proposed_by": "claude-code",
+                    "resolved": False,
+                }
+            ]
+        )
         ok, errors = validate_state_dict(state, schema=_STATE_SCHEMA)
         assert ok is True, errors
 
@@ -720,6 +770,7 @@ class TestValidateStateDict:
 # _load_default_schema
 # ===================================================================
 
+
 class TestLoadDefaultSchema:
     def test_schema_not_found_raises(self):
         """FileNotFoundError when schema doesn't exist."""
@@ -732,6 +783,7 @@ class TestLoadDefaultSchema:
     def test_git_not_available_fallback(self):
         """Falls back to relative path when git is unavailable."""
         import subprocess
+
         with patch(
             "subprocess.check_output",
             side_effect=subprocess.CalledProcessError(1, "git"),
@@ -745,6 +797,7 @@ class TestLoadDefaultSchema:
 # ===================================================================
 # Multiple errors accumulated
 # ===================================================================
+
 
 class TestMultipleErrors:
     def test_accumulates_errors(self):

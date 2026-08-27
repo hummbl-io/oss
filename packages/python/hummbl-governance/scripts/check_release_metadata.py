@@ -9,7 +9,6 @@ import tomllib
 from pathlib import Path
 from zipfile import ZipFile
 
-
 EXPECTED_PRIMITIVES = "36"
 EXPECTED_TESTS = "2430"
 
@@ -30,9 +29,7 @@ def read_text(path: Path) -> str:
 
 def wheel_metadata(path: Path) -> str:
     with ZipFile(path) as zf:
-        metadata_name = next(
-            name for name in zf.namelist() if name.endswith(".dist-info/METADATA")
-        )
+        metadata_name = next(name for name in zf.namelist() if name.endswith(".dist-info/METADATA"))
         return zf.read(metadata_name).decode("utf-8", errors="replace")
 
 

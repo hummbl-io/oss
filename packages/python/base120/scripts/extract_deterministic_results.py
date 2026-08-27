@@ -33,22 +33,22 @@ def extract_deterministic_fields(input_path: str, output_path: str) -> None:
 
     # Extract deterministic fields only (no timing, no duration)
     results = {
-        'summary': data['summary'],
-        'tests': [
+        "summary": data["summary"],
+        "tests": [
             {
-                'nodeid': t['nodeid'],
-                'outcome': t['outcome'],
-                'call': t.get('call', {}).get('longrepr', '')
+                "nodeid": t["nodeid"],
+                "outcome": t["outcome"],
+                "call": t.get("call", {}).get("longrepr", ""),
             }
-            for t in data['tests']
-        ]
+            for t in data["tests"]
+        ],
     }
 
-    with open(output_path, 'w', encoding="utf-8") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, sort_keys=True, indent=2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <input.json> <output.json>", file=sys.stderr)
         sys.exit(1)

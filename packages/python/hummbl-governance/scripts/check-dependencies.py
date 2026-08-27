@@ -53,10 +53,7 @@ def handler_catches_import_error(handler: ast.ExceptHandler) -> bool:
     if isinstance(handler.type, ast.Name) and handler.type.id == "ImportError":
         return True
     if isinstance(handler.type, ast.Tuple):
-        return any(
-            isinstance(item, ast.Name) and item.id == "ImportError"
-            for item in handler.type.elts
-        )
+        return any(isinstance(item, ast.Name) and item.id == "ImportError" for item in handler.type.elts)
     return False
 
 
@@ -66,9 +63,7 @@ def _collect_imports(node: ast.AST, optional: bool = False) -> tuple[set[str], s
 
     def visit(current: ast.AST, in_optional: bool = False) -> None:
         if isinstance(current, ast.Try):
-            catches_import_error = any(
-                handler_catches_import_error(handler) for handler in current.handlers
-            )
+            catches_import_error = any(handler_catches_import_error(handler) for handler in current.handlers)
             for child in current.body:
                 visit(child, in_optional or catches_import_error)
             for child in current.orelse:

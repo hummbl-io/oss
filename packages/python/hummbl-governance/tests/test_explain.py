@@ -44,8 +44,10 @@ class TestExplain:
 
     def test_explain_single_entry(self):
         eid = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="SYSTEM", tuple_data={"action": "test"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="SYSTEM",
+            tuple_data={"action": "test"},
         )
         chain = self.log.explain(eid)
         assert len(chain) == 1
@@ -58,13 +60,17 @@ class TestExplain:
     def test_explain_amendment_chain(self):
         # Create original entry
         original_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="SYSTEM", tuple_data={"version": 1},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="SYSTEM",
+            tuple_data={"version": 1},
         )
         # Create amendment
         amendment_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="SYSTEM", tuple_data={"version": 2},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="SYSTEM",
+            tuple_data={"version": 2},
             amendment_of=original_id,
         )
         chain = self.log.explain(amendment_id)
@@ -76,13 +82,17 @@ class TestExplain:
     def test_explain_contract_link(self):
         # Create contract entry
         contract_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="CONTRACT", tuple_data={"name": "budget-policy"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="CONTRACT",
+            tuple_data={"name": "budget-policy"},
         )
         # Create action governed by contract
         action_id = self._append(
-            intent_id="i1", task_id="t2",
-            tuple_type="DCTX", tuple_data={"event": "api-call"},
+            intent_id="i1",
+            task_id="t2",
+            tuple_type="DCTX",
+            tuple_data={"event": "api-call"},
             contract_id=contract_id,
         )
         chain = self.log.explain(action_id)
@@ -93,17 +103,23 @@ class TestExplain:
     def test_explain_delegation_chain(self):
         # Contract -> DCT -> Action
         contract_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="CONTRACT", tuple_data={"name": "access-policy"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="CONTRACT",
+            tuple_data={"name": "access-policy"},
         )
         dct_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="DCT", tuple_data={"subject": "worker-1"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="DCT",
+            tuple_data={"subject": "worker-1"},
             contract_id=contract_id,
         )
         action_id = self._append(
-            intent_id="i1", task_id="t2",
-            tuple_type="DCTX", tuple_data={"event": "write"},
+            intent_id="i1",
+            task_id="t2",
+            tuple_type="DCTX",
+            tuple_data={"event": "write"},
             capability_token_id=dct_id,
         )
         chain = self.log.explain(action_id)
@@ -115,12 +131,16 @@ class TestExplain:
     def test_explain_evidence_attestation(self):
         # Evidence -> Attest
         evidence_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="EVIDENCE", tuple_data={"finding": "all tests pass"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="EVIDENCE",
+            tuple_data={"finding": "all tests pass"},
         )
         attest_id = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="ATTEST", tuple_data={"verdict": "approved"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="ATTEST",
+            tuple_data={"verdict": "approved"},
             verification_id=evidence_id,
         )
         chain = self.log.explain(attest_id)
@@ -131,8 +151,10 @@ class TestExplain:
     def test_explain_no_cycles(self):
         """Ensure explain() doesn't loop on self-referential entries."""
         eid = self._append(
-            intent_id="i1", task_id="t1",
-            tuple_type="SYSTEM", tuple_data={"note": "standalone"},
+            intent_id="i1",
+            task_id="t1",
+            tuple_type="SYSTEM",
+            tuple_data={"note": "standalone"},
         )
         # Even if we could create a cycle, visited set prevents infinite loop
         chain = self.log.explain(eid)

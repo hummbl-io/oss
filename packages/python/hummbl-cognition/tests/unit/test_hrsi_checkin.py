@@ -7,7 +7,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.hrsi_checkin import (
     COGNITION_DIR,
     get_status,
@@ -469,27 +468,42 @@ class TestGetStatus:
 class TestRunCli:
     def test_status_exits_zero_on_empty(self, tmp_paths, capsys):
         baseline, cycles, _ = tmp_paths
-        code = run_cli([
-            "--status",
-            "--ledger", str(tmp_paths[2]),
-        ])
+        code = run_cli(
+            [
+                "--status",
+                "--ledger",
+                str(tmp_paths[2]),
+            ]
+        )
         # --status doesn't use baseline/cycles path overrides yet; just check exit code
         assert code == 0
 
     def test_full_cycle_exits_zero(self, tmp_paths):
         baseline, cycles, ledger = tmp_paths
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4",
-            "--mattering", "3",
-            "--connection", "5",
-            "--hule", "Insight from today's session",
-            "--lens", "bki",
-            "--delta", "K+ belonging integration",
-            "--ledger", str(ledger),
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "3",
+                "--connection",
+                "5",
+                "--hule",
+                "Insight from today's session",
+                "--lens",
+                "bki",
+                "--delta",
+                "K+ belonging integration",
+                "--ledger",
+                str(ledger),
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 0
 
     def test_missing_required_flags_exits_nonzero(self, tmp_paths, capsys):
@@ -500,45 +514,75 @@ class TestRunCli:
 
     def test_invalid_cogstate_exits_nonzero(self, tmp_paths):
         baseline, cycles, ledger = tmp_paths
-        code = run_cli([
-            "--cogstate", "BADSTATE",
-            "--safety", "4",
-            "--mattering", "4",
-            "--connection", "4",
-            "--hule", "test",
-            "--ledger", str(ledger),
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "BADSTATE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "test",
+                "--ledger",
+                str(ledger),
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code != 0
 
     def test_prints_ledger_id(self, tmp_paths, capsys):
         baseline, cycles, ledger = tmp_paths
-        run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4",
-            "--mattering", "4",
-            "--connection", "4",
-            "--hule", "Printed ledger id check",
-            "--ledger", str(ledger),
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "Printed ledger id check",
+                "--ledger",
+                str(ledger),
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         captured = capsys.readouterr()
         assert "clp-" in captured.out
 
     def test_prints_hrsi_safe(self, tmp_paths, capsys):
         baseline, cycles, ledger = tmp_paths
-        run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "3",
-            "--mattering", "3",
-            "--connection", "3",
-            "--hule", "HRSI safe day",
-            "--ledger", str(ledger),
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "3",
+                "--mattering",
+                "3",
+                "--connection",
+                "3",
+                "--hule",
+                "HRSI safe day",
+                "--ledger",
+                str(ledger),
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         captured = capsys.readouterr()
         assert "HRSI-safe" in captured.out
 
@@ -574,14 +618,26 @@ class TestBridgeMode:
                 "permanent_error": False,
             },
         )
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "bridge test",
-            "--bridge", "http://test-anvil.local:18791",
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "bridge test",
+                "--bridge",
+                "http://test-anvil.local:18791",
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 0
         captured = capsys.readouterr()
         assert "via bridge" in captured.out
@@ -600,15 +656,28 @@ class TestBridgeMode:
                 "permanent_error": False,
             },
         )
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "fallback test",
-            "--bridge", "http://test-anvil.local:18791",
-            "--ledger", str(ledger),
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "fallback test",
+                "--bridge",
+                "http://test-anvil.local:18791",
+                "--ledger",
+                str(ledger),
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 0
         captured = capsys.readouterr()
         assert "WARNING" in captured.err
@@ -626,15 +695,27 @@ class TestBridgeMode:
                 "permanent_error": False,
             },
         )
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "no fallback test",
-            "--bridge", "http://test-anvil.local:18791",
-            "--no-local-fallback",
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "no fallback test",
+                "--bridge",
+                "http://test-anvil.local:18791",
+                "--no-local-fallback",
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 1
         captured = capsys.readouterr()
         assert "ERROR" in captured.err
@@ -652,14 +733,26 @@ class TestBridgeMode:
                 "permanent_error": True,
             },
         )
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "auth fail test",
-            "--bridge", "http://test-anvil.local:18791",
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "auth fail test",
+                "--bridge",
+                "http://test-anvil.local:18791",
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 1
         captured = capsys.readouterr()
         assert "permanent error" in captured.err
@@ -671,20 +764,36 @@ class TestBridgeMode:
 
         def mock_post(url, **kw):
             called["url"] = url
-            return {"ok": True, "status_code": 200, "body": {"cycle": {}, "status": {}}, "permanent_error": False}
+            return {
+                "ok": True,
+                "status_code": 200,
+                "body": {"cycle": {}, "status": {}},
+                "permanent_error": False,
+            }
 
         monkeypatch.setattr(
             "hummbl_cognition.hrsi_bridge_client.post_hrsi_to_bridge_url_result",
             mock_post,
         )
         monkeypatch.setenv("HRSI_CANONICAL_BRIDGE_URL", "http://test-anvil.local:18791")
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "env bridge test",
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "env bridge test",
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 0
         assert "anvil" in called["url"]
 
@@ -695,21 +804,38 @@ class TestBridgeMode:
 
         def mock_post(url, **kw):
             called["url"] = url
-            return {"ok": True, "status_code": 200, "body": {"cycle": {}, "status": {}}, "permanent_error": False}
+            return {
+                "ok": True,
+                "status_code": 200,
+                "body": {"cycle": {}, "status": {}},
+                "permanent_error": False,
+            }
 
         monkeypatch.setattr(
             "hummbl_cognition.hrsi_bridge_client.post_hrsi_to_bridge_url_result",
             mock_post,
         )
         monkeypatch.setenv("HRSI_CANONICAL_BRIDGE_URL", "http://env-url:18791")
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "cli override test",
-            "--bridge", "http://cli-url:18791",
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "cli override test",
+                "--bridge",
+                "http://cli-url:18791",
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 0
         assert "cli-url" in called["url"]
 
@@ -717,13 +843,25 @@ class TestBridgeMode:
         """Without --bridge or env, no bridge call is made."""
         baseline, cycles, ledger = tmp_paths
         monkeypatch.delenv("HRSI_CANONICAL_BRIDGE_URL", raising=False)
-        code = run_cli([
-            "--cogstate", "AVAILABLE",
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--hule", "no bridge test",
-            "--ledger", str(ledger),
-            "--baseline", str(baseline),
-            "--cycles", str(cycles),
-        ])
+        code = run_cli(
+            [
+                "--cogstate",
+                "AVAILABLE",
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--hule",
+                "no bridge test",
+                "--ledger",
+                str(ledger),
+                "--baseline",
+                str(baseline),
+                "--cycles",
+                str(cycles),
+            ]
+        )
         assert code == 0
         assert cycles.exists()  # Local write happened

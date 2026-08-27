@@ -2,7 +2,7 @@
 
 **Target:** Extreme Low-Bandwidth / Air-Gapped Transfer Constraints  
 **Date:** August 2026  
-**Canonical Surface:** [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`base120`](file:///<repo-root>/PROJECTS/base120), [`kernel`](file:///<repo-root>/PROJECTS/kernel)  
+**Canonical Surface:** [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`base120`](https://github.com/hummbl-io/base120), [`kernel`](https://github.com/hummbl-io/kernel)  
 
 ---
 

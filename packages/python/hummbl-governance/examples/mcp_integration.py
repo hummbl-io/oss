@@ -14,7 +14,6 @@ from typing import Any, Callable, Dict
 from hummbl_governance import CircuitBreaker, CostGovernor, KillSwitch
 from hummbl_governance.circuit_breaker import CircuitBreakerOpen
 
-
 Decision = Dict[str, Any]
 
 
@@ -112,4 +111,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

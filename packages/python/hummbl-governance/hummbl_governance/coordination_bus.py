@@ -50,6 +50,7 @@ from hummbl_governance._types import PolicyLevel
 
 try:
     import fcntl
+
     _HAS_FCNTL = True
 except ImportError:
     _HAS_FCNTL = False
@@ -196,9 +197,7 @@ def _check_payload(message: str) -> None:
             logger.debug("Structured payload parse failed, treating as plain string: %s", exc)
 
 
-def _validate_fields(
-    from_id: str, to_id: str, msg_type: str, message: str
-) -> None:
+def _validate_fields(from_id: str, to_id: str, msg_type: str, message: str) -> None:
     """Validate that required bus message fields are non-empty strings.
 
     Raises:

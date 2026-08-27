@@ -40,7 +40,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable
 
-
 # ---------------------------------------------------------------------------
 # Rule / control / framework dataclasses
 # ---------------------------------------------------------------------------
@@ -117,9 +116,7 @@ def get_framework(framework_id: str) -> FrameworkSpec:
         return _FRAMEWORK_REGISTRY[framework_id]
     except KeyError:
         available = ", ".join(sorted(_FRAMEWORK_REGISTRY))
-        raise KeyError(
-            f"Unknown framework {framework_id!r}. Available: {available}"
-        ) from None
+        raise KeyError(f"Unknown framework {framework_id!r}. Available: {available}") from None
 
 
 def list_frameworks() -> list[str]:
@@ -135,6 +132,7 @@ def framework_count() -> int:
 # ---------------------------------------------------------------------------
 # Helper rule constructors (keep framework definitions concise)
 # ---------------------------------------------------------------------------
+
 
 def _rule(
     *tuple_types: str,
@@ -161,174 +159,288 @@ def _rule(
 
 # --- SOC 2 (AICPA Trust Service Criteria) ----------------------------------
 
-register_framework(FrameworkSpec(
-    id="soc2",
-    name="SOC2",
-    reference="AICPA SOC 2 Trust Service Criteria (CC6, CC7).",
-    default_days=7,
-    controls=(
-        ControlSpec("CC6.1", "Logical access security", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("resources", "resource_selectors"),
-                ("ops", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("CC7.2", "Monitoring and logging", (
-            _rule(signed=True),
-        )),
-        ControlSpec("CC6.3", "Identity and authentication", (
-            _rule("DCT", extract=(
-                ("subject", "subject"),
-                ("issuer", "issuer"),
-            )),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="soc2",
+        name="SOC2",
+        reference="AICPA SOC 2 Trust Service Criteria (CC6, CC7).",
+        default_days=7,
+        controls=(
+            ControlSpec(
+                "CC6.1",
+                "Logical access security",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("resources", "resource_selectors"),
+                            ("ops", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("CC7.2", "Monitoring and logging", (_rule(signed=True),)),
+            ControlSpec(
+                "CC6.3",
+                "Identity and authentication",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("subject", "subject"),
+                            ("issuer", "issuer"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # --- GDPR (Regulation (EU) 2016/679) ---------------------------------------
 
-register_framework(FrameworkSpec(
-    id="gdpr",
-    name="GDPR",
-    reference="Regulation (EU) 2016/679 (GDPR), Articles 5, 6, 25, 28, 30, 32.",
-    default_days=30,
-    controls=(
-        ControlSpec("Art.5", "Principles -- lawfulness, fairness, transparency", (
-            _rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),
-        )),
-        ControlSpec("Art.6", "Lawfulness of processing", (
-            _rule("CONTRACT", extract=(("issuer", "issuer"), ("operations", "operations"))),
-        )),
-        ControlSpec("Art.25", "Data protection by design and by default", (
-            _rule("DCT", extract=(
-                ("ops_allowed", "ops_allowed"),
-                ("resources", "resource_selectors"),
-            )),
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-        ControlSpec("Art.28", "Processor obligations", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-            )),
-        )),
-        ControlSpec("Art.30", "Records of processing activities", (
-            _rule("DCTX", "CONTRACT", "ATTEST", "EVIDENCE", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("Art.32", "Security of processing", (
-            _rule(signed=True),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="gdpr",
+        name="GDPR",
+        reference="Regulation (EU) 2016/679 (GDPR), Articles 5, 6, 25, 28, 30, 32.",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "Art.5",
+                "Principles -- lawfulness, fairness, transparency",
+                (_rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),),
+            ),
+            ControlSpec(
+                "Art.6",
+                "Lawfulness of processing",
+                (_rule("CONTRACT", extract=(("issuer", "issuer"), ("operations", "operations"))),),
+            ),
+            ControlSpec(
+                "Art.25",
+                "Data protection by design and by default",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("ops_allowed", "ops_allowed"),
+                            ("resources", "resource_selectors"),
+                        ),
+                    ),
+                    _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
+                ),
+            ),
+            ControlSpec(
+                "Art.28",
+                "Processor obligations",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "Art.30",
+                "Records of processing activities",
+                (
+                    _rule(
+                        "DCTX",
+                        "CONTRACT",
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("Art.32", "Security of processing", (_rule(signed=True),)),
+        ),
+    )
+)
 
 
 # --- OWASP Agentic Security Initiative Top 10 -----------------------------
 
-register_framework(FrameworkSpec(
-    id="owasp",
-    name="OWASP_AGENTIC",
-    reference="OWASP Agentic Security Initiative Top 10 (ASI01-ASI10).",
-    default_days=7,
-    controls=(
-        ControlSpec("ASI01", "Agent goal hijack", (
-            _rule("INTENT", extract=(
-                ("agent", "agent"),
-                ("objective", "objective"),
-                ("phase", "phase"),
-            )),
-        )),
-        ControlSpec("ASI02", "Tool misuse (code audit)", ()),
-        ControlSpec("ASI03", "Identity and privilege abuse", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("resources", "resource_selectors"),
-                ("ops", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("ASI04", "Supply chain vulnerabilities", (
-            _rule(signed=True),
-        )),
-        ControlSpec("ASI05", "Unexpected code execution (code audit)", ()),
-        ControlSpec("ASI06", "Memory and context poisoning (code audit)", ()),
-        ControlSpec("ASI07", "Insecure inter-agent communication", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("ASI08", "Cascading failures", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("ASI09", "Human-agent trust exploitation (code audit)", ()),
-        ControlSpec("ASI10", "Rogue agents (code audit)", ()),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="owasp",
+        name="OWASP_AGENTIC",
+        reference="OWASP Agentic Security Initiative Top 10 (ASI01-ASI10).",
+        default_days=7,
+        controls=(
+            ControlSpec(
+                "ASI01",
+                "Agent goal hijack",
+                (
+                    _rule(
+                        "INTENT",
+                        extract=(
+                            ("agent", "agent"),
+                            ("objective", "objective"),
+                            ("phase", "phase"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("ASI02", "Tool misuse (code audit)", ()),
+            ControlSpec(
+                "ASI03",
+                "Identity and privilege abuse",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("resources", "resource_selectors"),
+                            ("ops", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("ASI04", "Supply chain vulnerabilities", (_rule(signed=True),)),
+            ControlSpec("ASI05", "Unexpected code execution (code audit)", ()),
+            ControlSpec("ASI06", "Memory and context poisoning (code audit)", ()),
+            ControlSpec(
+                "ASI07",
+                "Insecure inter-agent communication",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "ASI08",
+                "Cascading failures",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("ASI09", "Human-agent trust exploitation (code audit)", ()),
+            ControlSpec("ASI10", "Rogue agents (code audit)", ()),
+        ),
+    )
+)
 
 
 # --- NIST AI RMF 1.0 (AI 100-1) -------------------------------------------
 
-register_framework(FrameworkSpec(
-    id="nist-rmf",
-    name="NIST_AI_RMF",
-    reference="NIST AI 100-1 (2023), AI RMF Playbook.",
-    default_days=30,
-    controls=(
-        ControlSpec("GOVERN-1.1", "AI risk management policies", (
-            _rule("INTENT", extract=(
-                ("agent", "agent"),
-                ("objective", "objective"),
-                ("phase", "phase"),
-            )),
-        )),
-        ControlSpec("GOVERN-1.7", "Processes for risk identification", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("MAP-1.1", "Organisational context", (
-            _rule("CONTRACT", "DCTX", "DCT", fallback=(
-                ("delegator", ("delegator", "issuer")),
-                ("delegatee", ("delegatee", "subject")),
-            )),
-        )),
-        ControlSpec("MAP-2.2", "Scientific basis for risk assessment", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("MEASURE-2.5", "Trustworthiness evaluations", (
-            _rule(signed=True),
-        )),
-        ControlSpec("MEASURE-2.8", "Impact metrics logged", (
-            _rule("COST_GOVERNOR", extract=(
-                ("agent", "agent"),
-                ("decision", "decision"),
-                ("spend", "spend"),
-                ("budget", "budget"),
-            )),
-        )),
-        ControlSpec("MANAGE-1.3", "Response plans executed", (
-            _rule("KILLSWITCH", extract=(("state", "state"), ("adapter", "adapter"))),
-        )),
-        ControlSpec("MANAGE-2.4", "Risk treatment applied", (
-            _rule("CIRCUIT_BREAKER", extract=(("state", "state"), ("adapter", "adapter"))),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="nist-rmf",
+        name="NIST_AI_RMF",
+        reference="NIST AI 100-1 (2023), AI RMF Playbook.",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "GOVERN-1.1",
+                "AI risk management policies",
+                (
+                    _rule(
+                        "INTENT",
+                        extract=(
+                            ("agent", "agent"),
+                            ("objective", "objective"),
+                            ("phase", "phase"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "GOVERN-1.7",
+                "Processes for risk identification",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "MAP-1.1",
+                "Organisational context",
+                (
+                    _rule(
+                        "CONTRACT",
+                        "DCTX",
+                        "DCT",
+                        fallback=(
+                            ("delegator", ("delegator", "issuer")),
+                            ("delegatee", ("delegatee", "subject")),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "MAP-2.2",
+                "Scientific basis for risk assessment",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("MEASURE-2.5", "Trustworthiness evaluations", (_rule(signed=True),)),
+            ControlSpec(
+                "MEASURE-2.8",
+                "Impact metrics logged",
+                (
+                    _rule(
+                        "COST_GOVERNOR",
+                        extract=(
+                            ("agent", "agent"),
+                            ("decision", "decision"),
+                            ("spend", "spend"),
+                            ("budget", "budget"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "MANAGE-1.3",
+                "Response plans executed",
+                (_rule("KILLSWITCH", extract=(("state", "state"), ("adapter", "adapter"))),),
+            ),
+            ControlSpec(
+                "MANAGE-2.4",
+                "Risk treatment applied",
+                (_rule("CIRCUIT_BREAKER", extract=(("state", "state"), ("adapter", "adapter"))),),
+            ),
+        ),
+    )
+)
 
 
 # --- EU AI Act (Regulation (EU) 2024/1689) ---------------------------------
@@ -344,203 +456,330 @@ def _derive_auto_generated(_entry: dict, _td: dict) -> dict:
     return {"auto_generated": True}
 
 
-register_framework(FrameworkSpec(
-    id="eu-ai-act",
-    name="EU_AI_ACT",
-    reference="Regulation (EU) 2024/1689 (AI Act), Annex III high-risk obligations.",
-    default_days=30,
-    controls=(
-        ControlSpec("Art.9", "Risk management system", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("Art.10", "Data and data governance", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("Art.11", "Technical documentation", (
-            _rule("CONTRACT", "ATTEST"),
-        )),
-        ControlSpec("Art.12", "Record-keeping and logging", (
-            _rule(signed=True),
-        )),
-        ControlSpec("Art.13", "Transparency and information provision", (
-            _rule("INTENT", extract=(
-                ("agent", "agent"),
-                ("objective", "objective"),
-                ("phase", "phase"),
-            )),
-        )),
-        ControlSpec("Art.14", "Human oversight", (
-            _rule("KILLSWITCH", extract=(("state", "state"),), derive=_derive_human_initiated),
-        )),
-        ControlSpec("Art.15", "Accuracy, robustness, cybersecurity", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(("state", "state"),)),
-        )),
-        ControlSpec("Art.16", "Obligations of providers", (
-            _rule("DCTX"),
-            _rule(signed=True),
-        )),
-        ControlSpec("Art.17", "Quality management system", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("Art.19", "Automatically generated logs", (
-            _rule(signed=True, derive=_derive_auto_generated),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="eu-ai-act",
+        name="EU_AI_ACT",
+        reference="Regulation (EU) 2024/1689 (AI Act), Annex III high-risk obligations.",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "Art.9",
+                "Risk management system",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "Art.10",
+                "Data and data governance",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("Art.11", "Technical documentation", (_rule("CONTRACT", "ATTEST"),)),
+            ControlSpec("Art.12", "Record-keeping and logging", (_rule(signed=True),)),
+            ControlSpec(
+                "Art.13",
+                "Transparency and information provision",
+                (
+                    _rule(
+                        "INTENT",
+                        extract=(
+                            ("agent", "agent"),
+                            ("objective", "objective"),
+                            ("phase", "phase"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "Art.14",
+                "Human oversight",
+                (_rule("KILLSWITCH", extract=(("state", "state"),), derive=_derive_human_initiated),),
+            ),
+            ControlSpec(
+                "Art.15",
+                "Accuracy, robustness, cybersecurity",
+                (_rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(("state", "state"),)),),
+            ),
+            ControlSpec(
+                "Art.16",
+                "Obligations of providers",
+                (
+                    _rule("DCTX"),
+                    _rule(signed=True),
+                ),
+            ),
+            ControlSpec(
+                "Art.17",
+                "Quality management system",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("Art.19", "Automatically generated logs", (_rule(signed=True, derive=_derive_auto_generated),)),
+        ),
+    )
+)
 
 
 # --- ISO/IEC 27001:2022 (Annex A) -----------------------------------------
 
-register_framework(FrameworkSpec(
-    id="iso27001",
-    name="ISO27001",
-    reference="ISO/IEC 27001:2022, Annex A (A.5-A.9, A.12).",
-    default_days=30,
-    controls=(
-        ControlSpec("A.5", "Information security policies", (
-            _rule("INTENT", extract=(("agent", "agent"), ("objective", "objective"))),
-        )),
-        ControlSpec("A.6", "Organization of information security", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("A.7", "Human resource security", (
-            _rule("DCT", "CONTRACT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("A.8", "Asset management", (
-            _rule("DCT", "ATTEST", fallback=(
-                ("resources", ("resource_selectors", "resources")),
-            )),
-        )),
-        ControlSpec("A.9", "Access control", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-                ("resources", "resource_selectors"),
-            )),
-        )),
-        ControlSpec("A.12", "Operations security -- logging", (
-            _rule(signed=True),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="iso27001",
+        name="ISO27001",
+        reference="ISO/IEC 27001:2022, Annex A (A.5-A.9, A.12).",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "A.5",
+                "Information security policies",
+                (_rule("INTENT", extract=(("agent", "agent"), ("objective", "objective"))),),
+            ),
+            ControlSpec(
+                "A.6",
+                "Organization of information security",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "A.7",
+                "Human resource security",
+                (
+                    _rule(
+                        "DCT",
+                        "CONTRACT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "A.8",
+                "Asset management",
+                (_rule("DCT", "ATTEST", fallback=(("resources", ("resource_selectors", "resources")),)),),
+            ),
+            ControlSpec(
+                "A.9",
+                "Access control",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                            ("resources", "resource_selectors"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("A.12", "Operations security -- logging", (_rule(signed=True),)),
+        ),
+    )
+)
 
 
 # --- ISO/IEC 42001:2023 (Annex A) -----------------------------------------
 
-register_framework(FrameworkSpec(
-    id="iso42001",
-    name="ISO42001",
-    reference="ISO/IEC 42001:2023, Annex A (A.2-A.10).",
-    default_days=30,
-    controls=(
-        ControlSpec("A.2", "Policies related to AI", (
-            _rule("INTENT", extract=(("agent", "agent"), ("objective", "objective"))),
-        )),
-        ControlSpec("A.3", "Internal organization", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("A.4", "Resources for AI systems", (
-            _rule("DCT", "ATTEST", fallback=(
-                ("resources", ("resource_selectors", "resources")),
-            )),
-        )),
-        ControlSpec("A.5", "Assessing impacts of AI systems", (
-            _rule("ATTEST", extract=(("subject", "subject"), ("claim", "claim"))),
-        )),
-        ControlSpec("A.6", "AI system life cycle", (
-            _rule("CONTRACT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("A.7", "Data for AI systems", (
-            _rule("DCT", extract=(
-                ("resources", "resource_selectors"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("A.8", "Information for interested parties", (
-            _rule(signed=True),
-        )),
-        ControlSpec("A.9", "Use of AI systems", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("A.10", "Third-party and customer relationships", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-            )),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="iso42001",
+        name="ISO42001",
+        reference="ISO/IEC 42001:2023, Annex A (A.2-A.10).",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "A.2",
+                "Policies related to AI",
+                (_rule("INTENT", extract=(("agent", "agent"), ("objective", "objective"))),),
+            ),
+            ControlSpec(
+                "A.3",
+                "Internal organization",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "A.4",
+                "Resources for AI systems",
+                (_rule("DCT", "ATTEST", fallback=(("resources", ("resource_selectors", "resources")),)),),
+            ),
+            ControlSpec(
+                "A.5",
+                "Assessing impacts of AI systems",
+                (_rule("ATTEST", extract=(("subject", "subject"), ("claim", "claim"))),),
+            ),
+            ControlSpec(
+                "A.6",
+                "AI system life cycle",
+                (
+                    _rule(
+                        "CONTRACT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "A.7",
+                "Data for AI systems",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("resources", "resource_selectors"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("A.8", "Information for interested parties", (_rule(signed=True),)),
+            ControlSpec(
+                "A.9",
+                "Use of AI systems",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "A.10",
+                "Third-party and customer relationships",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # --- NIST CSF 2.0 ----------------------------------------------------------
 
-register_framework(FrameworkSpec(
-    id="nist-csf",
-    name="NIST_CSF",
-    reference="NIST Cybersecurity Framework 2.0 (2024).",
-    default_days=30,
-    controls=(
-        ControlSpec("GOVERN", "Organizational context and risk strategy", (
-            _rule("INTENT", extract=(("objective", "objective"),)),
-            _rule("DCTX", extract=(("event", "event"),)),
-        )),
-        ControlSpec("IDENTIFY", "Asset and risk identification", (
-            _rule("DCT", "ATTEST", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-            )),
-        )),
-        ControlSpec("PROTECT", "Safeguards and access controls", (
-            _rule("KILLSWITCH", extract=(("state", "state"),)),
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-            _rule("DCT", extract=(("ops_allowed", "ops_allowed"),)),
-        )),
-        ControlSpec("DETECT", "Continuous monitoring and anomaly detection", (
-            _rule("CIRCUIT_BREAKER", extract=(("state", "state"),)),
-            _rule("HEALTH_PROBE"),
-            _rule("BEHAVIOR_MONITOR"),
-        )),
-        ControlSpec("RESPOND", "Incident response", (
-            _rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(("state", "state"),)),
-            _rule("CIRCUIT_BREAKER", states=("OPEN",), extract=(("state", "state"),)),
-        )),
-        ControlSpec("RECOVER", "Restoration and improvement", (
-            _rule("CIRCUIT_BREAKER", states=("HALF_OPEN",), extract=(("state", "state"),)),
-            _rule("COST_GOVERNOR", extract=(("decision", "decision"),)),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="nist-csf",
+        name="NIST_CSF",
+        reference="NIST Cybersecurity Framework 2.0 (2024).",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "GOVERN",
+                "Organizational context and risk strategy",
+                (
+                    _rule("INTENT", extract=(("objective", "objective"),)),
+                    _rule("DCTX", extract=(("event", "event"),)),
+                ),
+            ),
+            ControlSpec(
+                "IDENTIFY",
+                "Asset and risk identification",
+                (
+                    _rule(
+                        "DCT",
+                        "ATTEST",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "PROTECT",
+                "Safeguards and access controls",
+                (
+                    _rule("KILLSWITCH", extract=(("state", "state"),)),
+                    _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
+                    _rule("DCT", extract=(("ops_allowed", "ops_allowed"),)),
+                ),
+            ),
+            ControlSpec(
+                "DETECT",
+                "Continuous monitoring and anomaly detection",
+                (
+                    _rule("CIRCUIT_BREAKER", extract=(("state", "state"),)),
+                    _rule("HEALTH_PROBE"),
+                    _rule("BEHAVIOR_MONITOR"),
+                ),
+            ),
+            ControlSpec(
+                "RESPOND",
+                "Incident response",
+                (
+                    _rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(("state", "state"),)),
+                    _rule("CIRCUIT_BREAKER", states=("OPEN",), extract=(("state", "state"),)),
+                ),
+            ),
+            ControlSpec(
+                "RECOVER",
+                "Restoration and improvement",
+                (
+                    _rule("CIRCUIT_BREAKER", states=("HALF_OPEN",), extract=(("state", "state"),)),
+                    _rule("COST_GOVERNOR", extract=(("decision", "decision"),)),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # ===========================================================================
@@ -662,604 +901,951 @@ register_framework(FrameworkSpec(
 
 # --- NIST COSAiS (SP 800-53 Control Overlays for Securing AI Systems) ------
 
-register_framework(FrameworkSpec(
-    id="nist-cosais",
-    name="NIST_COSAIS",
-    reference=(
-        "NIST SP 800-53 Control Overlays for Securing AI Systems (COSAiS), "
-        "leveraging SP 800-218A, Draft NIST AI 800-1, NIST AI 100-2e2025."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("AC-AI", "Access control for AI systems", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-                ("resources", "resource_selectors"),
-            )),
-        )),
-        ControlSpec("AU-AI", "Audit logging for AI actions", (
-            _rule(signed=True),
-        )),
-        ControlSpec("CM-AI", "Configuration management for AI models", (
-            _rule("CONTRACT", extract=(("issuer", "issuer"), ("subject", "subject"))),
-        )),
-        ControlSpec("IA-AI", "Identity and authentication for agents", (
-            _rule("DCT", "DCTX", extract=(("subject", "subject"), ("issuer", "issuer"))),
-        )),
-        ControlSpec("MA-AI", "Maintenance of AI system components", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("PL-AI", "Planning for AI risk treatment", (
-            _rule("INTENT", extract=(("objective", "objective"), ("phase", "phase"))),
-        )),
-        ControlSpec("PS-AI", "Personnel security for AI operations", (
-            _rule("DCT", "CONTRACT", extract=(("issuer", "issuer"), ("subject", "subject"))),
-        )),
-        ControlSpec("RA-AI", "Risk assessment for AI systems", (
-            _rule("ATTEST", "EVIDENCE", extract=(("claim", "claim"), ("outcome", "outcome"))),
-        )),
-        ControlSpec("SA-AI", "System and information integrity for AI", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("SC-AI", "System and communications protection for agents", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-            )),
-        )),
-        ControlSpec("SI-AI", "Supply chain integrity for AI components", (
-            _rule(signed=True),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="nist-cosais",
+        name="NIST_COSAIS",
+        reference=(
+            "NIST SP 800-53 Control Overlays for Securing AI Systems (COSAiS), "
+            "leveraging SP 800-218A, Draft NIST AI 800-1, NIST AI 100-2e2025."
+        ),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "AC-AI",
+                "Access control for AI systems",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                            ("resources", "resource_selectors"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("AU-AI", "Audit logging for AI actions", (_rule(signed=True),)),
+            ControlSpec(
+                "CM-AI",
+                "Configuration management for AI models",
+                (_rule("CONTRACT", extract=(("issuer", "issuer"), ("subject", "subject"))),),
+            ),
+            ControlSpec(
+                "IA-AI",
+                "Identity and authentication for agents",
+                (_rule("DCT", "DCTX", extract=(("subject", "subject"), ("issuer", "issuer"))),),
+            ),
+            ControlSpec(
+                "MA-AI",
+                "Maintenance of AI system components",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "PL-AI",
+                "Planning for AI risk treatment",
+                (_rule("INTENT", extract=(("objective", "objective"), ("phase", "phase"))),),
+            ),
+            ControlSpec(
+                "PS-AI",
+                "Personnel security for AI operations",
+                (_rule("DCT", "CONTRACT", extract=(("issuer", "issuer"), ("subject", "subject"))),),
+            ),
+            ControlSpec(
+                "RA-AI",
+                "Risk assessment for AI systems",
+                (_rule("ATTEST", "EVIDENCE", extract=(("claim", "claim"), ("outcome", "outcome"))),),
+            ),
+            ControlSpec(
+                "SA-AI",
+                "System and information integrity for AI",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "SC-AI",
+                "System and communications protection for agents",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("SI-AI", "Supply chain integrity for AI components", (_rule(signed=True),)),
+        ),
+    )
+)
 
 
 # --- CoSAI (Coalition for Secure AI) ---------------------------------------
 
-register_framework(FrameworkSpec(
-    id="cosai",
-    name="COSAI",
-    reference=(
-        "Coalition for Secure AI (CoSAI) -- AI security controls for "
-        "model development, deployment, and operations."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("CSA-01", "AI security governance", (
-            _rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),
-        )),
-        ControlSpec("CSA-02", "AI asset inventory and classification", (
-            _rule("DCT", "ATTEST", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-            )),
-        )),
-        ControlSpec("CSA-03", "AI model access control", (
-            _rule("DCT", extract=(
-                ("ops_allowed", "ops_allowed"),
-                ("resources", "resource_selectors"),
-            )),
-        )),
-        ControlSpec("CSA-04", "AI supply chain security", (
-            _rule(signed=True),
-        )),
-        ControlSpec("CSA-05", "AI runtime monitoring and anomaly detection", (
-            _rule("CIRCUIT_BREAKER", "HEALTH_PROBE", "BEHAVIOR_MONITOR", extract=(
-                ("state", "state"),
-            )),
-        )),
-        ControlSpec("CSA-06", "AI incident response", (
-            _rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(
-                ("state", "state"),
-            )),
-        )),
-        ControlSpec("CSA-07", "AI data governance and provenance", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("CSA-08", "AI delegation and trust chains", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("CSA-09", "AI cost and resource governance", (
-            _rule("COST_GOVERNOR", extract=(
-                ("agent", "agent"),
-                ("decision", "decision"),
-                ("spend", "spend"),
-                ("budget", "budget"),
-            )),
-        )),
-        ControlSpec("CSA-10", "AI audit and compliance reporting", (
-            _rule(signed=True),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="cosai",
+        name="COSAI",
+        reference=(
+            "Coalition for Secure AI (CoSAI) -- AI security controls for model development, deployment, and operations."
+        ),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "CSA-01",
+                "AI security governance",
+                (_rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),),
+            ),
+            ControlSpec(
+                "CSA-02",
+                "AI asset inventory and classification",
+                (
+                    _rule(
+                        "DCT",
+                        "ATTEST",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "CSA-03",
+                "AI model access control",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("ops_allowed", "ops_allowed"),
+                            ("resources", "resource_selectors"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("CSA-04", "AI supply chain security", (_rule(signed=True),)),
+            ControlSpec(
+                "CSA-05",
+                "AI runtime monitoring and anomaly detection",
+                (_rule("CIRCUIT_BREAKER", "HEALTH_PROBE", "BEHAVIOR_MONITOR", extract=(("state", "state"),)),),
+            ),
+            ControlSpec(
+                "CSA-06",
+                "AI incident response",
+                (_rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(("state", "state"),)),),
+            ),
+            ControlSpec(
+                "CSA-07",
+                "AI data governance and provenance",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "CSA-08",
+                "AI delegation and trust chains",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "CSA-09",
+                "AI cost and resource governance",
+                (
+                    _rule(
+                        "COST_GOVERNOR",
+                        extract=(
+                            ("agent", "agent"),
+                            ("decision", "decision"),
+                            ("spend", "spend"),
+                            ("budget", "budget"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("CSA-10", "AI audit and compliance reporting", (_rule(signed=True),)),
+        ),
+    )
+)
 
 
 # --- HIPAA (US healthcare data protection) ---------------------------------
 
-register_framework(FrameworkSpec(
-    id="hipaa",
-    name="HIPAA",
-    reference=(
-        "HIPAA Security Rule (45 CFR 164.302-318) -- administrative, "
-        "physical, and technical safeguards for electronic protected "
-        "health information (ePHI)."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("164.312(a)(1)", "Access control", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-                ("resources", "resource_selectors"),
-            )),
-        )),
-        ControlSpec("164.312(b)", "Audit controls", (
-            _rule(signed=True),
-        )),
-        ControlSpec("164.312(c)(1)", "Integrity controls", (
-            _rule(signed=True),
-        )),
-        ControlSpec("164.312(d)", "Person or entity authentication", (
-            _rule("DCT", "DCTX", extract=(
-                ("subject", "subject"),
-                ("issuer", "issuer"),
-            )),
-        )),
-        ControlSpec("164.312(e)(1)", "Transmission security", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("164.308(a)(1)", "Security management process", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("164.308(a)(3)", "Workforce security", (
-            _rule("DCT", "CONTRACT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-            )),
-        )),
-        ControlSpec("164.308(a)(5)", "Security awareness and training", (
-            _rule("INTENT", extract=(("objective", "objective"),)),
-        )),
-        ControlSpec("164.308(a)(7)", "Contingency plan", (
-            _rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(
-                ("state", "state"),
-            )),
-        )),
-        ControlSpec("164.310(c)", "Workstation security -- use controls", (
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="hipaa",
+        name="HIPAA",
+        reference=(
+            "HIPAA Security Rule (45 CFR 164.302-318) -- administrative, "
+            "physical, and technical safeguards for electronic protected "
+            "health information (ePHI)."
+        ),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "164.312(a)(1)",
+                "Access control",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                            ("resources", "resource_selectors"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("164.312(b)", "Audit controls", (_rule(signed=True),)),
+            ControlSpec("164.312(c)(1)", "Integrity controls", (_rule(signed=True),)),
+            ControlSpec(
+                "164.312(d)",
+                "Person or entity authentication",
+                (
+                    _rule(
+                        "DCT",
+                        "DCTX",
+                        extract=(
+                            ("subject", "subject"),
+                            ("issuer", "issuer"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "164.312(e)(1)",
+                "Transmission security",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "164.308(a)(1)",
+                "Security management process",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "164.308(a)(3)",
+                "Workforce security",
+                (
+                    _rule(
+                        "DCT",
+                        "CONTRACT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "164.308(a)(5)",
+                "Security awareness and training",
+                (_rule("INTENT", extract=(("objective", "objective"),)),),
+            ),
+            ControlSpec(
+                "164.308(a)(7)",
+                "Contingency plan",
+                (_rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(("state", "state"),)),),
+            ),
+            ControlSpec(
+                "164.310(c)",
+                "Workstation security -- use controls",
+                (_rule("CAPABILITY_FENCE", extract=(("action", "action"),)),),
+            ),
+        ),
+    )
+)
 
 
 # --- MAS FEAT (Singapore Monetary Authority -- FEAT Principles) ------------
 
-register_framework(FrameworkSpec(
-    id="mas-feat",
-    name="MAS_FEAT",
-    reference=(
-        "Monetary Authority of Singapore (MAS) FEAT Principles -- "
-        "Fairness, Ethics, Accountability, Transparency for AI in "
-        "financial services."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("FEAT-F1", "Fairness -- justifiable models", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("FEAT-E1", "Ethics -- ethical assessment", (
-            _rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),
-        )),
-        ControlSpec("FEAT-E2", "Ethics -- internal controls", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("FEAT-A1", "Accountability -- clear roles", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("FEAT-A2", "Accountability -- audit trail", (
-            _rule(signed=True),
-        )),
-        ControlSpec("FEAT-T1", "Transparency -- purpose disclosure", (
-            _rule("INTENT", extract=(("objective", "objective"), ("phase", "phase"))),
-        )),
-        ControlSpec("FEAT-T2", "Transparency -- data governance", (
-            _rule("DCT", extract=(
-                ("resources", "resource_selectors"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("FEAT-A3", "Accountability -- cost governance", (
-            _rule("COST_GOVERNOR", extract=(
-                ("agent", "agent"),
-                ("decision", "decision"),
-                ("spend", "spend"),
-                ("budget", "budget"),
-            )),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="mas-feat",
+        name="MAS_FEAT",
+        reference=(
+            "Monetary Authority of Singapore (MAS) FEAT Principles -- "
+            "Fairness, Ethics, Accountability, Transparency for AI in "
+            "financial services."
+        ),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "FEAT-F1",
+                "Fairness -- justifiable models",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "FEAT-E1",
+                "Ethics -- ethical assessment",
+                (_rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),),
+            ),
+            ControlSpec(
+                "FEAT-E2",
+                "Ethics -- internal controls",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "FEAT-A1",
+                "Accountability -- clear roles",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("FEAT-A2", "Accountability -- audit trail", (_rule(signed=True),)),
+            ControlSpec(
+                "FEAT-T1",
+                "Transparency -- purpose disclosure",
+                (_rule("INTENT", extract=(("objective", "objective"), ("phase", "phase"))),),
+            ),
+            ControlSpec(
+                "FEAT-T2",
+                "Transparency -- data governance",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("resources", "resource_selectors"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "FEAT-A3",
+                "Accountability -- cost governance",
+                (
+                    _rule(
+                        "COST_GOVERNOR",
+                        extract=(
+                            ("agent", "agent"),
+                            ("decision", "decision"),
+                            ("spend", "spend"),
+                            ("budget", "budget"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # --- PCI DSS 4.0 (Payment Card Industry Data Security Standard) ------------
 
-register_framework(FrameworkSpec(
-    id="pci-dss",
-    name="PCI_DSS",
-    reference="PCI DSS 4.0 (Payment Card Industry Data Security Standard).",
-    default_days=30,
-    controls=(
-        ControlSpec("REQ-3", "Protect stored account data", (
-            _rule("DCT", extract=(
-                ("resources", "resource_selectors"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("REQ-5", "Protect all networks against malicious attacks", (
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-        ControlSpec("REQ-6", "Develop and maintain secure systems and software", (
-            _rule(signed=True),
-        )),
-        ControlSpec("REQ-7", "Restrict access to system components and cardholder data", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("REQ-8", "Identify users and authenticate access", (
-            _rule("DCT", "DCTX", extract=(
-                ("subject", "subject"),
-                ("issuer", "issuer"),
-            )),
-        )),
-        ControlSpec("REQ-10", "Log and monitor all access to system components", (
-            _rule(signed=True),
-        )),
-        ControlSpec("REQ-11", "Test security of systems and networks regularly", (
-            _rule("CIRCUIT_BREAKER", "HEALTH_PROBE", extract=(("state", "state"),)),
-        )),
-        ControlSpec("REQ-12", "Support information security with organizational policies", (
-            _rule("INTENT", extract=(("objective", "objective"),)),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="pci-dss",
+        name="PCI_DSS",
+        reference="PCI DSS 4.0 (Payment Card Industry Data Security Standard).",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "REQ-3",
+                "Protect stored account data",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("resources", "resource_selectors"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "REQ-5",
+                "Protect all networks against malicious attacks",
+                (_rule("CAPABILITY_FENCE", extract=(("action", "action"),)),),
+            ),
+            ControlSpec("REQ-6", "Develop and maintain secure systems and software", (_rule(signed=True),)),
+            ControlSpec(
+                "REQ-7",
+                "Restrict access to system components and cardholder data",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "REQ-8",
+                "Identify users and authenticate access",
+                (
+                    _rule(
+                        "DCT",
+                        "DCTX",
+                        extract=(
+                            ("subject", "subject"),
+                            ("issuer", "issuer"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("REQ-10", "Log and monitor all access to system components", (_rule(signed=True),)),
+            ControlSpec(
+                "REQ-11",
+                "Test security of systems and networks regularly",
+                (_rule("CIRCUIT_BREAKER", "HEALTH_PROBE", extract=(("state", "state"),)),),
+            ),
+            ControlSpec(
+                "REQ-12",
+                "Support information security with organizational policies",
+                (_rule("INTENT", extract=(("objective", "objective"),)),),
+            ),
+        ),
+    )
+)
 
 
 # --- NIST AI 600-1 (Generative AI Profile) --------------------------------
 
-register_framework(FrameworkSpec(
-    id="nist-ai-600",
-    name="NIST_AI_600_1",
-    reference=(
-        "NIST AI 600-1: Artificial Intelligence Risk Management Framework: "
-        "Generative Artificial Intelligence Profile (2024)."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("GEN-1.1", "Govern -- GenAI risk policies", (
-            _rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),
-        )),
-        ControlSpec("GEN-2.1", "Map -- GenAI context and use cases", (
-            _rule("CONTRACT", "DCTX", fallback=(
-                ("delegator", ("delegator", "issuer")),
-                ("delegatee", ("delegatee", "subject")),
-            )),
-        )),
-        ControlSpec("GEN-2.2", "Map -- GenAI training data provenance", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("GEN-3.1", "Measure -- GenAI trustworthiness", (
-            _rule(signed=True),
-        )),
-        ControlSpec("GEN-3.2", "Measure -- GenAI cost and resource impact", (
-            _rule("COST_GOVERNOR", extract=(
-                ("agent", "agent"),
-                ("decision", "decision"),
-                ("spend", "spend"),
-                ("budget", "budget"),
-            )),
-        )),
-        ControlSpec("GEN-4.1", "Manage -- GenAI incident response", (
-            _rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(
-                ("state", "state"),
-            )),
-        )),
-        ControlSpec("GEN-4.2", "Manage -- GenAI cascading failure controls", (
-            _rule("CIRCUIT_BREAKER", extract=(("state", "state"), ("adapter", "adapter"))),
-        )),
-        ControlSpec("GEN-4.3", "Manage -- GenAI capability fencing", (
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-        ControlSpec("GEN-1.2", "Govern -- GenAI delegation and trust chains", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="nist-ai-600",
+        name="NIST_AI_600_1",
+        reference=(
+            "NIST AI 600-1: Artificial Intelligence Risk Management Framework: "
+            "Generative Artificial Intelligence Profile (2024)."
+        ),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "GEN-1.1",
+                "Govern -- GenAI risk policies",
+                (_rule("INTENT", extract=(("objective", "objective"), ("agent", "agent"))),),
+            ),
+            ControlSpec(
+                "GEN-2.1",
+                "Map -- GenAI context and use cases",
+                (
+                    _rule(
+                        "CONTRACT",
+                        "DCTX",
+                        fallback=(
+                            ("delegator", ("delegator", "issuer")),
+                            ("delegatee", ("delegatee", "subject")),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "GEN-2.2",
+                "Map -- GenAI training data provenance",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("GEN-3.1", "Measure -- GenAI trustworthiness", (_rule(signed=True),)),
+            ControlSpec(
+                "GEN-3.2",
+                "Measure -- GenAI cost and resource impact",
+                (
+                    _rule(
+                        "COST_GOVERNOR",
+                        extract=(
+                            ("agent", "agent"),
+                            ("decision", "decision"),
+                            ("spend", "spend"),
+                            ("budget", "budget"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "GEN-4.1",
+                "Manage -- GenAI incident response",
+                (_rule("KILLSWITCH", states=("HALT_ALL", "EMERGENCY"), extract=(("state", "state"),)),),
+            ),
+            ControlSpec(
+                "GEN-4.2",
+                "Manage -- GenAI cascading failure controls",
+                (_rule("CIRCUIT_BREAKER", extract=(("state", "state"), ("adapter", "adapter"))),),
+            ),
+            ControlSpec(
+                "GEN-4.3",
+                "Manage -- GenAI capability fencing",
+                (_rule("CAPABILITY_FENCE", extract=(("action", "action"),)),),
+            ),
+            ControlSpec(
+                "GEN-1.2",
+                "Govern -- GenAI delegation and trust chains",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # --- OWASP LLM Top 10 ------------------------------------------------------
 
-register_framework(FrameworkSpec(
-    id="owasp-llm",
-    name="OWASP_LLM",
-    reference="OWASP Top 10 for Large Language Model Applications (2025).",
-    default_days=30,
-    controls=(
-        ControlSpec("LLM01", "Prompt injection", (
-            _rule("INTENT", extract=(("objective", "objective"), ("phase", "phase"))),
-        )),
-        ControlSpec("LLM02", "Insecure output handling", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("LLM03", "Training data poisoning", (
-            _rule("ATTEST", extract=(("claim", "claim"),)),
-        )),
-        ControlSpec("LLM04", "Model DoS", (
-            _rule("CIRCUIT_BREAKER", extract=(("state", "state"),)),
-        )),
-        ControlSpec("LLM05", "Supply chain vulnerabilities", (
-            _rule(signed=True),
-        )),
-        ControlSpec("LLM06", "Sensitive information disclosure", (
-            _rule("DCT", extract=(
-                ("resources", "resource_selectors"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("LLM07", "Insecure plugin design", (
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-        ControlSpec("LLM08", "Excessive agency", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("LLM09", "Overreliance", (
-            _rule("KILLSWITCH", extract=(("state", "state"),)),
-        )),
-        ControlSpec("LLM10", "Model theft", (
-            _rule("DCT", "CONTRACT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-            )),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="owasp-llm",
+        name="OWASP_LLM",
+        reference="OWASP Top 10 for Large Language Model Applications (2025).",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "LLM01",
+                "Prompt injection",
+                (_rule("INTENT", extract=(("objective", "objective"), ("phase", "phase"))),),
+            ),
+            ControlSpec(
+                "LLM02",
+                "Insecure output handling",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("LLM03", "Training data poisoning", (_rule("ATTEST", extract=(("claim", "claim"),)),)),
+            ControlSpec("LLM04", "Model DoS", (_rule("CIRCUIT_BREAKER", extract=(("state", "state"),)),)),
+            ControlSpec("LLM05", "Supply chain vulnerabilities", (_rule(signed=True),)),
+            ControlSpec(
+                "LLM06",
+                "Sensitive information disclosure",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("resources", "resource_selectors"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "LLM07", "Insecure plugin design", (_rule("CAPABILITY_FENCE", extract=(("action", "action"),)),)
+            ),
+            ControlSpec(
+                "LLM08",
+                "Excessive agency",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("LLM09", "Overreliance", (_rule("KILLSWITCH", extract=(("state", "state"),)),)),
+            ControlSpec(
+                "LLM10",
+                "Model theft",
+                (
+                    _rule(
+                        "DCT",
+                        "CONTRACT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # --- OWASP MCP Top 10 (Model Context Protocol) -----------------------------
 
-register_framework(FrameworkSpec(
-    id="owasp-mcp",
-    name="OWASP_MCP",
-    reference="OWASP Top 10 for Model Context Protocol (MCP) -- 2026 draft.",
-    default_days=30,
-    controls=(
-        ControlSpec("MCP01", "MCP server impersonation", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-            )),
-        )),
-        ControlSpec("MCP02", "Tool injection", (
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-        ControlSpec("MCP03", "Credential leakage", (
-            _rule("DCT", extract=(
-                ("resources", "resource_selectors"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("MCP04", "Excessive tool permissions", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("MCP05", "Supply chain vulnerabilities", (
-            _rule(signed=True),
-        )),
-        ControlSpec("MCP06", "Insecure inter-agent communication", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("MCP07", "Cascading failures", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("MCP08", "Lack of audit logging", (
-            _rule(signed=True),
-        )),
-        ControlSpec("MCP09", "Goal hijack via tool misuse", (
-            _rule("INTENT", extract=(("objective", "objective"),)),
-        )),
-        ControlSpec("MCP10", "Cost and resource abuse", (
-            _rule("COST_GOVERNOR", extract=(
-                ("agent", "agent"),
-                ("decision", "decision"),
-                ("spend", "spend"),
-            )),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="owasp-mcp",
+        name="OWASP_MCP",
+        reference="OWASP Top 10 for Model Context Protocol (MCP) -- 2026 draft.",
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "MCP01",
+                "MCP server impersonation",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("MCP02", "Tool injection", (_rule("CAPABILITY_FENCE", extract=(("action", "action"),)),)),
+            ControlSpec(
+                "MCP03",
+                "Credential leakage",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("resources", "resource_selectors"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "MCP04",
+                "Excessive tool permissions",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("MCP05", "Supply chain vulnerabilities", (_rule(signed=True),)),
+            ControlSpec(
+                "MCP06",
+                "Insecure inter-agent communication",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "MCP07",
+                "Cascading failures",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("MCP08", "Lack of audit logging", (_rule(signed=True),)),
+            ControlSpec(
+                "MCP09", "Goal hijack via tool misuse", (_rule("INTENT", extract=(("objective", "objective"),)),)
+            ),
+            ControlSpec(
+                "MCP10",
+                "Cost and resource abuse",
+                (
+                    _rule(
+                        "COST_GOVERNOR",
+                        extract=(
+                            ("agent", "agent"),
+                            ("decision", "decision"),
+                            ("spend", "spend"),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+)
 
 
 # --- Singapore IMDA AI Verify ----------------------------------------------
 
-register_framework(FrameworkSpec(
-    id="imda-ai-verify",
-    name="IMDA_AI_VERIFY",
-    reference=(
-        "Singapore IMDA AI Verify -- AI testing framework and governance "
-        "testing toolkit."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("AV-01", "Accountability testing", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("AV-02", "Data governance testing", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("AV-03", "Explainability testing", (
-            _rule("INTENT", extract=(
-                ("objective", "objective"),
-                ("agent", "agent"),
-                ("phase", "phase"),
-            )),
-        )),
-        ControlSpec("AV-04", "Fairness testing", (
-            _rule("ATTEST", extract=(("claim", "claim"), ("outcome", "outcome"))),
-        )),
-        ControlSpec("AV-05", "Human agency and oversight testing", (
-            _rule("KILLSWITCH", extract=(("state", "state"),), derive=_derive_human_initiated),
-        )),
-        ControlSpec("AV-06", "Incident response testing", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("AV-07", "Robustness testing", (
-            _rule("CIRCUIT_BREAKER", extract=(("state", "state"),)),
-        )),
-        ControlSpec("AV-08", "Security testing", (
-            _rule("DCT", "CAPABILITY_FENCE", extract=(
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("AV-09", "Transparency testing", (
-            _rule("INTENT", extract=(("objective", "objective"),)),
-        )),
-        ControlSpec("AV-10", "Audit trail testing", (
-            _rule(signed=True),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="imda-ai-verify",
+        name="IMDA_AI_VERIFY",
+        reference=("Singapore IMDA AI Verify -- AI testing framework and governance testing toolkit."),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "AV-01",
+                "Accountability testing",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AV-02",
+                "Data governance testing",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AV-03",
+                "Explainability testing",
+                (
+                    _rule(
+                        "INTENT",
+                        extract=(
+                            ("objective", "objective"),
+                            ("agent", "agent"),
+                            ("phase", "phase"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AV-04", "Fairness testing", (_rule("ATTEST", extract=(("claim", "claim"), ("outcome", "outcome"))),)
+            ),
+            ControlSpec(
+                "AV-05",
+                "Human agency and oversight testing",
+                (_rule("KILLSWITCH", extract=(("state", "state"),), derive=_derive_human_initiated),),
+            ),
+            ControlSpec(
+                "AV-06",
+                "Incident response testing",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("AV-07", "Robustness testing", (_rule("CIRCUIT_BREAKER", extract=(("state", "state"),)),)),
+            ControlSpec(
+                "AV-08",
+                "Security testing",
+                (_rule("DCT", "CAPABILITY_FENCE", extract=(("ops_allowed", "ops_allowed"),)),),
+            ),
+            ControlSpec("AV-09", "Transparency testing", (_rule("INTENT", extract=(("objective", "objective"),)),)),
+            ControlSpec("AV-10", "Audit trail testing", (_rule(signed=True),)),
+        ),
+    )
+)
 
 
 # --- UK AI Safety Institute (AISI) -----------------------------------------
 
-register_framework(FrameworkSpec(
-    id="uk-aisi",
-    name="UK_AISI",
-    reference=(
-        "UK AI Safety Institute (AISI) -- AI safety evaluation framework "
-        "for frontier AI models."
-    ),
-    default_days=30,
-    controls=(
-        ControlSpec("AISI-01", "Capability evaluation", (
-            _rule("ATTEST", "EVIDENCE", extract=(
-                ("claim", "claim"),
-                ("outcome", "outcome"),
-            )),
-        )),
-        ControlSpec("AISI-02", "Safety critical capability assessment", (
-            _rule("INTENT", extract=(
-                ("objective", "objective"),
-                ("phase", "phase"),
-            )),
-        )),
-        ControlSpec("AISI-03", "Safeguard efficacy", (
-            _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
-                ("state", "state"),
-                ("adapter", "adapter"),
-            )),
-        )),
-        ControlSpec("AISI-04", "Human oversight efficacy", (
-            _rule("KILLSWITCH", extract=(("state", "state"),), derive=_derive_human_initiated),
-        )),
-        ControlSpec("AISI-05", "Delegation chain integrity", (
-            _rule("DCTX", extract=(
-                ("delegator", "delegator"),
-                ("delegatee", "delegatee"),
-                ("event", "event"),
-            )),
-        )),
-        ControlSpec("AISI-06", "Supply chain integrity", (
-            _rule(signed=True),
-        )),
-        ControlSpec("AISI-07", "Access control efficacy", (
-            _rule("DCT", extract=(
-                ("issuer", "issuer"),
-                ("subject", "subject"),
-                ("ops_allowed", "ops_allowed"),
-            )),
-        )),
-        ControlSpec("AISI-08", "Cost and resource governance", (
-            _rule("COST_GOVERNOR", extract=(
-                ("agent", "agent"),
-                ("decision", "decision"),
-                ("spend", "spend"),
-                ("budget", "budget"),
-            )),
-        )),
-        ControlSpec("AISI-09", "Capability fencing efficacy", (
-            _rule("CAPABILITY_FENCE", extract=(("action", "action"),)),
-        )),
-        ControlSpec("AISI-10", "Audit and logging integrity", (
-            _rule(signed=True),
-        )),
-    ),
-))
+register_framework(
+    FrameworkSpec(
+        id="uk-aisi",
+        name="UK_AISI",
+        reference=("UK AI Safety Institute (AISI) -- AI safety evaluation framework for frontier AI models."),
+        default_days=30,
+        controls=(
+            ControlSpec(
+                "AISI-01",
+                "Capability evaluation",
+                (
+                    _rule(
+                        "ATTEST",
+                        "EVIDENCE",
+                        extract=(
+                            ("claim", "claim"),
+                            ("outcome", "outcome"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AISI-02",
+                "Safety critical capability assessment",
+                (
+                    _rule(
+                        "INTENT",
+                        extract=(
+                            ("objective", "objective"),
+                            ("phase", "phase"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AISI-03",
+                "Safeguard efficacy",
+                (
+                    _rule(
+                        "CIRCUIT_BREAKER",
+                        "KILLSWITCH",
+                        extract=(
+                            ("state", "state"),
+                            ("adapter", "adapter"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AISI-04",
+                "Human oversight efficacy",
+                (_rule("KILLSWITCH", extract=(("state", "state"),), derive=_derive_human_initiated),),
+            ),
+            ControlSpec(
+                "AISI-05",
+                "Delegation chain integrity",
+                (
+                    _rule(
+                        "DCTX",
+                        extract=(
+                            ("delegator", "delegator"),
+                            ("delegatee", "delegatee"),
+                            ("event", "event"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec("AISI-06", "Supply chain integrity", (_rule(signed=True),)),
+            ControlSpec(
+                "AISI-07",
+                "Access control efficacy",
+                (
+                    _rule(
+                        "DCT",
+                        extract=(
+                            ("issuer", "issuer"),
+                            ("subject", "subject"),
+                            ("ops_allowed", "ops_allowed"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AISI-08",
+                "Cost and resource governance",
+                (
+                    _rule(
+                        "COST_GOVERNOR",
+                        extract=(
+                            ("agent", "agent"),
+                            ("decision", "decision"),
+                            ("spend", "spend"),
+                            ("budget", "budget"),
+                        ),
+                    ),
+                ),
+            ),
+            ControlSpec(
+                "AISI-09", "Capability fencing efficacy", (_rule("CAPABILITY_FENCE", extract=(("action", "action"),)),)
+            ),
+            ControlSpec("AISI-10", "Audit and logging integrity", (_rule(signed=True),)),
+        ),
+    )
+)

@@ -15,6 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """Minimal conftest for coverage-matrix tests."""
+
 import sys
 from pathlib import Path
 

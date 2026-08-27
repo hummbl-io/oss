@@ -2,6 +2,11 @@
 
 ![hummbl-governance hero](docs/hero.svg)
 
+> **HUMMBL** = **H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
+> Base120 (120 mental models across 6 transformation families) is the "Base
+> Language" for reasoning. HUMMBL wraps those models in governance,
+> coordination, and operational infrastructure — making them "Highly Useful."
+
 
 [![PyPI](https://img.shields.io/pypi/v/hummbl-governance)](https://pypi.org/project/hummbl-governance/)
 [![Python](https://img.shields.io/pypi/pyversions/hummbl-governance)](https://pypi.org/project/hummbl-governance/)
@@ -287,6 +292,7 @@ Install hummbl-governance and use the `KillSwitch` class. It provides 4 graduate
 
 ```python
 from hummbl_governance import KillSwitch, KillSwitchMode
+
 ks = KillSwitch()
 ks.engage(KillSwitchMode.HALT_NONCRITICAL, reason="High error rate", triggered_by="monitor")
 ```
@@ -297,6 +303,7 @@ Use `CostGovernor` with soft and hard caps. Record each API call with `record_us
 
 ```python
 from hummbl_governance import CostGovernor
+
 gov = CostGovernor(":memory:", soft_cap=50.0, hard_cap=100.0)
 gov.record_usage(provider="openai", model="gpt-4", tokens_in=500, tokens_out=200, cost=0.02)
 ```
@@ -308,9 +315,11 @@ Use `DelegationTokenManager` to create HMAC-SHA256 signed tokens that grant spec
 ```python
 from hummbl_governance import DelegationTokenManager
 from hummbl_governance.delegation import TokenBinding
+
 mgr = DelegationTokenManager(secret=b"shared-secret")
-token = mgr.create_token(issuer="orchestrator", subject="worker", ops_allowed=["read", "write"],
-                         binding=TokenBinding("task-1", "contract-1"))
+token = mgr.create_token(
+    issuer="orchestrator", subject="worker", ops_allowed=["read", "write"], binding=TokenBinding("task-1", "contract-1")
+)
 valid, error = mgr.validate_token(token)
 ```
 
@@ -324,6 +333,7 @@ Use `ComplianceMapper` to map governance audit log entries to compliance framewo
 
 ```python
 from hummbl_governance import ComplianceMapper, AuditLog
+
 mapper = ComplianceMapper()
 report = mapper.map_events(audit_entries)  # Returns ComplianceReport with control mappings
 ```
@@ -346,7 +356,8 @@ registry.canonicalize("orch-1")  # -> "orchestrator"
 # Delegation tokens: HMAC-signed, scoped, chain-depth-limited
 mgr = DelegationTokenManager(secret=b"shared-secret")
 token = mgr.create_token(
-    issuer="orchestrator", subject="worker-1",
+    issuer="orchestrator",
+    subject="worker-1",
     ops_allowed=["read", "write"],
     binding=TokenBinding("task-1", "contract-1"),
 )

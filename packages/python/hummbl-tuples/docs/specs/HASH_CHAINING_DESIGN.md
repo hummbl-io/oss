@@ -58,10 +58,10 @@ integrity-layer fields removed:
 
 ```python
 d = asdict(self)
-d.pop("timestamp", None)        # legacy alias, excluded for stability
-d.pop("previous_hash", None)    # Layer 4 — would be circular
-d.pop("args_hash", None)        # Layer 4
-d.pop("signature", None)        # Layer 4
+d.pop("timestamp", None)  # legacy alias, excluded for stability
+d.pop("previous_hash", None)  # Layer 4 — would be circular
+d.pop("args_hash", None)  # Layer 4
+d.pop("signature", None)  # Layer 4
 stable_json = json.dumps(d, sort_keys=True)
 return hashlib.sha256(stable_json.encode("utf-8")).hexdigest()
 ```

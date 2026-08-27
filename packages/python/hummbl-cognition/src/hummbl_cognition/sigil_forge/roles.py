@@ -28,21 +28,23 @@ RolePolicyViolation = RolePolicyViolationError
 
 @dataclass(frozen=True)
 class RolePolicy:
-    allowed_transitions: frozenset[tuple[str, str]] = frozenset({
-        ("default", "oracle"),
-        ("default", "operative"),
-        ("default", "librarian"),
-        ("librarian", "oracle"),
-        ("librarian", "critic"),
-        ("oracle", "critic"),
-        ("oracle", "synthesizer"),
-        ("critic", "synthesizer"),
-        ("synthesizer", "critic"),
-        ("synthesizer", "machine"),
-        ("operative", "critic"),
-        ("operative", "machine"),
-        ("machine", "critic"),
-    })
+    allowed_transitions: frozenset[tuple[str, str]] = frozenset(
+        {
+            ("default", "oracle"),
+            ("default", "operative"),
+            ("default", "librarian"),
+            ("librarian", "oracle"),
+            ("librarian", "critic"),
+            ("oracle", "critic"),
+            ("oracle", "synthesizer"),
+            ("critic", "synthesizer"),
+            ("synthesizer", "critic"),
+            ("synthesizer", "machine"),
+            ("operative", "critic"),
+            ("operative", "machine"),
+            ("machine", "critic"),
+        }
+    )
 
     def validate_sequence(self, roles: list[str]) -> None:
         previous = "default"
@@ -52,5 +54,7 @@ class RolePolicy:
             if role == previous:
                 continue
             if (previous, role) not in self.allowed_transitions:
-                raise RolePolicyViolation(f"Role transition not allowed: {previous} -> {role}")
+                raise RolePolicyViolation(
+                    f"Role transition not allowed: {previous} -> {role}"
+                )
             previous = role

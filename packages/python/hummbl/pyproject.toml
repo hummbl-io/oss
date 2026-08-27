@@ -35,8 +35,8 @@ test = [
 
 [project.urls]
 Homepage = "https://hummbl.io"
-Repository = "https://github.com/hummbl-io/oss"
-Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/hummbl"
+Repository = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl"
 Issues = "https://github.com/hummbl-io/oss/issues"
 
 [tool.setuptools.packages.find]

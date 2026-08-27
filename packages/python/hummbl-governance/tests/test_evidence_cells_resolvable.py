@@ -100,6 +100,5 @@ def test_relabel_script_is_idempotent():
     # If anything in TOTAL relabeled is non-zero on a fresh dry-run, the previous
     # pass didn't fully take effect.
     assert "TOTAL relabeled: 0" in result.stdout, (
-        f"Relabel script is not idempotent — second pass would change files.\n"
-        f"Output:\n{result.stdout}"
+        f"Relabel script is not idempotent — second pass would change files.\nOutput:\n{result.stdout}"
     )

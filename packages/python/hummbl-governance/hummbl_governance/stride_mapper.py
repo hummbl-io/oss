@@ -198,71 +198,101 @@ class StrideMapper:
     def _check_spoofing(self, interaction: Interaction, findings: list[ThreatFinding]):
         if not interaction.authenticated:
             risk = RiskLevel.HIGH if interaction.trust_boundary else RiskLevel.MEDIUM
-            findings.append(self._finding(
-                StrideCategory.SPOOFING, risk,
-                interaction.source, interaction.target, interaction.action,
-                interaction.trust_boundary,
-                f"{'Cross-boundary i' if interaction.trust_boundary else 'I'}nteraction "
-                f"without authentication. Source '{interaction.source}' identity is not verified.",
-            ))
+            findings.append(
+                self._finding(
+                    StrideCategory.SPOOFING,
+                    risk,
+                    interaction.source,
+                    interaction.target,
+                    interaction.action,
+                    interaction.trust_boundary,
+                    f"{'Cross-boundary i' if interaction.trust_boundary else 'I'}nteraction "
+                    f"without authentication. Source '{interaction.source}' identity is not verified.",
+                )
+            )
 
     def _check_tampering(self, interaction: Interaction, findings: list[ThreatFinding]):
         if interaction.action in ("write", "modify", "delete", "execute") and not interaction.has_audit_trail:
             risk = RiskLevel.HIGH if interaction.trust_boundary else RiskLevel.MEDIUM
-            findings.append(self._finding(
-                StrideCategory.TAMPERING, risk,
-                interaction.source, interaction.target, interaction.action,
-                interaction.trust_boundary,
-                f"Mutation action '{interaction.action}' from '{interaction.source}' to "
-                f"'{interaction.target}' without audit trail. "
-                f"Changes cannot be detected or attributed.",
-            ))
+            findings.append(
+                self._finding(
+                    StrideCategory.TAMPERING,
+                    risk,
+                    interaction.source,
+                    interaction.target,
+                    interaction.action,
+                    interaction.trust_boundary,
+                    f"Mutation action '{interaction.action}' from '{interaction.source}' to "
+                    f"'{interaction.target}' without audit trail. "
+                    f"Changes cannot be detected or attributed.",
+                )
+            )
 
     def _check_repudiation(self, interaction: Interaction, findings: list[ThreatFinding]):
         if not interaction.has_audit_trail:
             risk = RiskLevel.MEDIUM if interaction.trust_boundary else RiskLevel.LOW
-            findings.append(self._finding(
-                StrideCategory.REPUDIATION, risk,
-                interaction.source, interaction.target, interaction.action,
-                interaction.trust_boundary,
-                f"Action '{interaction.action}' from '{interaction.source}' has no audit record. "
-                f"Source could deny performing this action.",
-            ))
+            findings.append(
+                self._finding(
+                    StrideCategory.REPUDIATION,
+                    risk,
+                    interaction.source,
+                    interaction.target,
+                    interaction.action,
+                    interaction.trust_boundary,
+                    f"Action '{interaction.action}' from '{interaction.source}' has no audit record. "
+                    f"Source could deny performing this action.",
+                )
+            )
 
     def _check_information_disclosure(self, interaction: Interaction, findings: list[ThreatFinding]):
         if interaction.trust_boundary and not interaction.has_delegation_token:
             risk = RiskLevel.HIGH if interaction.action in ("read", "query", "export") else RiskLevel.MEDIUM
-            findings.append(self._finding(
-                StrideCategory.INFORMATION_DISCLOSURE, risk,
-                interaction.source, interaction.target, interaction.action,
-                interaction.trust_boundary,
-                f"Cross-boundary access from '{interaction.source}' to '{interaction.target}' "
-                f"without delegation token. No least-privilege enforcement on data access.",
-            ))
+            findings.append(
+                self._finding(
+                    StrideCategory.INFORMATION_DISCLOSURE,
+                    risk,
+                    interaction.source,
+                    interaction.target,
+                    interaction.action,
+                    interaction.trust_boundary,
+                    f"Cross-boundary access from '{interaction.source}' to '{interaction.target}' "
+                    f"without delegation token. No least-privilege enforcement on data access.",
+                )
+            )
 
     def _check_denial_of_service(self, interaction: Interaction, findings: list[ThreatFinding]):
         if not interaction.has_rate_limit:
             risk = RiskLevel.HIGH if interaction.trust_boundary else RiskLevel.LOW
-            findings.append(self._finding(
-                StrideCategory.DENIAL_OF_SERVICE, risk,
-                interaction.source, interaction.target, interaction.action,
-                interaction.trust_boundary,
-                f"Action '{interaction.action}' from '{interaction.source}' to "
-                f"'{interaction.target}' has no rate limiting. "
-                f"Source could exhaust target resources.",
-            ))
+            findings.append(
+                self._finding(
+                    StrideCategory.DENIAL_OF_SERVICE,
+                    risk,
+                    interaction.source,
+                    interaction.target,
+                    interaction.action,
+                    interaction.trust_boundary,
+                    f"Action '{interaction.action}' from '{interaction.source}' to "
+                    f"'{interaction.target}' has no rate limiting. "
+                    f"Source could exhaust target resources.",
+                )
+            )
 
     def _check_elevation_of_privilege(self, interaction: Interaction, findings: list[ThreatFinding]):
         if interaction.trust_boundary and interaction.action in ("write", "modify", "delete", "execute", "admin"):
             if not interaction.has_delegation_token:
-                findings.append(self._finding(
-                    StrideCategory.ELEVATION_OF_PRIVILEGE, RiskLevel.CRITICAL,
-                    interaction.source, interaction.target, interaction.action,
-                    interaction.trust_boundary,
-                    f"Cross-boundary mutation '{interaction.action}' from '{interaction.source}' "
-                    f"to '{interaction.target}' without delegation token. "
-                    f"Agent may exceed intended privileges.",
-                ))
+                findings.append(
+                    self._finding(
+                        StrideCategory.ELEVATION_OF_PRIVILEGE,
+                        RiskLevel.CRITICAL,
+                        interaction.source,
+                        interaction.target,
+                        interaction.action,
+                        interaction.trust_boundary,
+                        f"Cross-boundary mutation '{interaction.action}' from '{interaction.source}' "
+                        f"to '{interaction.target}' without delegation token. "
+                        f"Agent may exceed intended privileges.",
+                    )
+                )
 
     def generate_report(self, interactions: list[Interaction]) -> StrideReport:
         """Analyze multiple interactions and produce an aggregated report."""

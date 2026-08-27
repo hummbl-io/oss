@@ -49,14 +49,13 @@ _DAY = r"(?:3[0-1]|[1-2][0-9]|[1-9])"
 # Full release tag: vYYYY.M.D[.N] — rejects zero-padded month/day.
 RELEASE_TAG_RE = re.compile(rf"^v(\d{{4}})\.{_MONTH}\.{_DAY}(?:\.(\d+))?$")
 # Full phase-gated tag: phase-{N}.vYYYY.M.D[.N] — rejects zero-padded phase.
-PHASE_TAG_RE = re.compile(
-    rf"^phase-(-1|0|[1-9][0-9]*)\.v(\d{{4}})\.{_MONTH}\.{_DAY}(?:\.(\d+))?$"
-)
+PHASE_TAG_RE = re.compile(rf"^phase-(-1|0|[1-9][0-9]*)\.v(\d{{4}})\.{_MONTH}\.{_DAY}(?:\.(\d+))?$")
 
 
 # ──────────────────────────────────────────────────────────────────────
 # Git helpers
 # ──────────────────────────────────────────────────────────────────────
+
 
 def git(*args: str, check: bool = True) -> str:
     """Run a git command in REPO_ROOT and return stdout."""
@@ -104,6 +103,7 @@ def get_last_tag(project: str, phase: int | None, tag_prefix: str | None = None)
 # CalVer tag generation
 # ──────────────────────────────────────────────────────────────────────
 
+
 def calver_date(now: datetime) -> str:
     """Format a datetime as YYYY.M.D (no zero-padding)."""
     return f"{now.year}.{now.month}.{now.day}"
@@ -133,9 +133,7 @@ def validate_tag(tag: str, phase: int | None) -> None:
         if not m:
             raise ValueError(f"Tag {tag!r} does not match phase-gated format")
         if int(m.group(1)) != phase:
-            raise ValueError(
-                f"Tag {tag!r} phase {m.group(1)} does not match requested phase {phase}"
-            )
+            raise ValueError(f"Tag {tag!r} phase {m.group(1)} does not match requested phase {phase}")
     else:
         if not RELEASE_TAG_RE.match(tag):
             raise ValueError(f"Tag {tag!r} does not match release format")
@@ -177,6 +175,7 @@ def read_pyproject_version() -> str | None:
         return None
     try:
         import tomllib
+
         with pyproject.open("rb") as f:
             data = tomllib.load(f)
         return data.get("project", {}).get("version")
@@ -268,6 +267,7 @@ def update_package_json_version(new_version: str) -> bool:
 # Changelog generation
 # ──────────────────────────────────────────────────────────────────────
 
+
 def get_commits_since(tag: str | None, max_commits: int = 50) -> list[str]:
     if tag:
         spec = f"{tag}..HEAD"
@@ -311,6 +311,7 @@ def generate_changelog(
 # Bus posting
 # ──────────────────────────────────────────────────────────────────────
 
+
 def post_bus_status(bus_from: str, project: str, tag_name: str, published: bool) -> None:
     """Post a STATUS to the coordination bus. Best-effort, never fatal."""
     bus_script = Path.home() / "bin" / "bus-global.py"
@@ -334,38 +335,45 @@ def post_bus_status(bus_from: str, project: str, tag_name: str, published: bool)
 # Main
 # ──────────────────────────────────────────────────────────────────────
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="HUMMBL CalVer release tool (see HUMMBL_CALVER_STANDARD.md)",
     )
     parser.add_argument("--project", required=True, help="Project name (for changelog title and bus)")
-    parser.add_argument("--phase", type=int, default=None,
-                        help="Phase number for phase-gated format (-1, 0, 1, 2, ...). "
-                             "Omit for release format.")
-    parser.add_argument("--bump", choices=["major", "minor", "patch"], default=None,
-                        help="Bump internal SemVer (requires pyproject.toml, __init__.py, or package.json).")
-    parser.add_argument("--no-semver", action="store_true",
-                        help="Skip internal SemVer — use CalVer as the only version.")
-    parser.add_argument("--date", default=None,
-                        help="Override CalVer date (format: YYYY.M.D). For belated releases.")
-    parser.add_argument("--timezone", default="UTC",
-                        help="IANA timezone for date computation (default: UTC).")
-    parser.add_argument("--first-release", action="store_true",
-                        help="Mark as first release (no previous tag expected).")
-    parser.add_argument("--publish", action="store_true",
-                        help="Actually create the tag and release (otherwise dry run).")
-    parser.add_argument("--push", action="store_true",
-                        help="Push the tag to origin after creating it.")
-    parser.add_argument("--gh-release", action="store_true",
-                        help="Create a GitHub release after tagging (requires gh CLI).")
-    parser.add_argument("--bus", action="store_true",
-                        help="Post STATUS to coordination bus (also on dry run).")
-    parser.add_argument("--bus-from", default=None,
-                        help="Bus sender identity (default: --project value).")
-    parser.add_argument("--tag-prefix", default=None,
-                        help="Prefix to scope tag lookup in multi-project repos.")
-    parser.add_argument("--max-commits", type=int, default=50,
-                        help="Max commits in changelog for first release (default: 50).")
+    parser.add_argument(
+        "--phase",
+        type=int,
+        default=None,
+        help="Phase number for phase-gated format (-1, 0, 1, 2, ...). Omit for release format.",
+    )
+    parser.add_argument(
+        "--bump",
+        choices=["major", "minor", "patch"],
+        default=None,
+        help="Bump internal SemVer (requires pyproject.toml, __init__.py, or package.json).",
+    )
+    parser.add_argument(
+        "--no-semver", action="store_true", help="Skip internal SemVer — use CalVer as the only version."
+    )
+    parser.add_argument("--date", default=None, help="Override CalVer date (format: YYYY.M.D). For belated releases.")
+    parser.add_argument("--timezone", default="UTC", help="IANA timezone for date computation (default: UTC).")
+    parser.add_argument(
+        "--first-release", action="store_true", help="Mark as first release (no previous tag expected)."
+    )
+    parser.add_argument(
+        "--publish", action="store_true", help="Actually create the tag and release (otherwise dry run)."
+    )
+    parser.add_argument("--push", action="store_true", help="Push the tag to origin after creating it.")
+    parser.add_argument(
+        "--gh-release", action="store_true", help="Create a GitHub release after tagging (requires gh CLI)."
+    )
+    parser.add_argument("--bus", action="store_true", help="Post STATUS to coordination bus (also on dry run).")
+    parser.add_argument("--bus-from", default=None, help="Bus sender identity (default: --project value).")
+    parser.add_argument("--tag-prefix", default=None, help="Prefix to scope tag lookup in multi-project repos.")
+    parser.add_argument(
+        "--max-commits", type=int, default=50, help="Max commits in changelog for first release (default: 50)."
+    )
     args = parser.parse_args()
 
     # Validate phase early (W5: phase < -1 is invalid).
@@ -389,6 +397,7 @@ def main() -> int:
         else:
             try:
                 from zoneinfo import ZoneInfo
+
                 now = datetime.now(ZoneInfo(args.timezone))
             except KeyError:
                 print(f"Error: unknown timezone {args.timezone!r}. Use an IANA zone name.")
@@ -407,8 +416,10 @@ def main() -> int:
     prev_tag = get_last_tag(args.project, args.phase, args.tag_prefix)
     # W10: --first-release with existing tags — ignore prev_tag for changelog.
     if args.first_release and prev_tag:
-        print(f"Note: --first-release passed but tags exist (latest: {prev_tag}). "
-              "Treating as first release for changelog.")
+        print(
+            f"Note: --first-release passed but tags exist (latest: {prev_tag}). "
+            "Treating as first release for changelog."
+        )
         prev_tag = None
     if not prev_tag and not args.first_release:
         print("No previous tags found. Use --first-release for the initial release.")
@@ -441,7 +452,12 @@ def main() -> int:
 
     # Generate changelog.
     changelog = generate_changelog(
-        args.project, tag_name, new_semver, commits, prev_tag, args.first_release,
+        args.project,
+        tag_name,
+        new_semver,
+        commits,
+        prev_tag,
+        args.first_release,
     )
 
     # Print summary.
@@ -484,7 +500,8 @@ def main() -> int:
     tag_msg = f"{args.project} {tag_name}\n\nCalVer release"
     tag_result = subprocess.run(
         ["git", "-C", str(REPO_ROOT), "tag", "-a", tag_name, "-m", tag_msg],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     if tag_result.returncode != 0:
         print(f"  ✗ Failed to create tag {tag_name}: {tag_result.stderr.strip()}")
@@ -494,9 +511,9 @@ def main() -> int:
     # Push (N2: push only the new tag, not all tags).
     if args.push:
         push_result = subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "push", "origin", "HEAD",
-             f"refs/tags/{tag_name}"],
-            capture_output=True, text=True,
+            ["git", "-C", str(REPO_ROOT), "push", "origin", "HEAD", f"refs/tags/{tag_name}"],
+            capture_output=True,
+            text=True,
         )
         if push_result.returncode != 0:
             print(f"  ✗ Failed to push: {push_result.stderr.strip()}")
@@ -508,10 +525,9 @@ def main() -> int:
     if args.gh_release:
         try:
             gh_result = subprocess.run(
-                ["gh", "release", "create", tag_name,
-                 "--title", f"{args.project} {tag_name}",
-                 "--notes", changelog],
-                capture_output=True, text=True,
+                ["gh", "release", "create", tag_name, "--title", f"{args.project} {tag_name}", "--notes", changelog],
+                capture_output=True,
+                text=True,
             )
             if gh_result.returncode != 0:
                 print(f"  ✗ Failed to create GitHub release: {gh_result.stderr.strip()}")

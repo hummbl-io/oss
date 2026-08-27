@@ -40,14 +40,13 @@ import json
 import logging
 import subprocess
 import sys
-import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from hummbl_cognition.duplicate_detector import DuplicateDetector
-from hummbl_cognition.issueops_receipt import create_receipt, append_receipt as append_issueops_receipt
+from hummbl_cognition.issueops_receipt import append_receipt as append_issueops_receipt
+from hummbl_cognition.issueops_receipt import create_receipt
 from hummbl_cognition.write_boundary import WriteBoundaryEnforcer
 
 __all__ = [
@@ -261,15 +260,11 @@ def harvest(
         repo = candidate.get("repo", "")
         if skip_gh_fetch or existing_issues_map is not None:
             existing = existing_issues_map.get(repo, []) if existing_issues_map else []
-            check = detector.check_candidate(
-                candidate.get("title", ""), existing
-            )
+            check = detector.check_candidate(candidate.get("title", ""), existing)
         else:
             # Fetch both open and closed issues from the repo
             existing = detector.fetch_issues(repo, state="all")
-            check = detector.check_candidate(
-                candidate.get("title", ""), existing
-            )
+            check = detector.check_candidate(candidate.get("title", ""), existing)
 
         if check.is_duplicate:
             dup_entry = dict(candidate)
@@ -330,7 +325,13 @@ def _cli() -> None:
     parser.add_argument(
         "--source",
         required=True,
-        choices=["chatgpt-connector", "arbiter-audit", "manual", "scheduled", "webhook"],
+        choices=[
+            "chatgpt-connector",
+            "arbiter-audit",
+            "manual",
+            "scheduled",
+            "webhook",
+        ],
         help="Source of candidates",
     )
     parser.add_argument(
@@ -412,7 +413,8 @@ def _cli() -> None:
                 "match_reason": c.get("_duplicate_match", {}).get("match_type", ""),
             }
             for c in result.issues_skipped_duplicate
-        ] or None,
+        ]
+        or None,
         read_only_candidates=[
             {
                 "repo": c.get("repo", ""),
@@ -421,14 +423,18 @@ def _cli() -> None:
                 "severity": c.get("severity", "medium"),
             }
             for c in result.issues_skipped_boundary
-        ] or None,
+        ]
+        or None,
         backpressure_notes=(
             f"{len(result.issues_skipped_backpressure)} candidates deferred due to max-issues limit"
-            if result.issues_skipped_backpressure else None
+            if result.issues_skipped_backpressure
+            else None
         ),
         run_disposition=(
-            "created" if result.total_created > 0
-            else "skipped-all" if result.total_skipped > 0
+            "created"
+            if result.total_created > 0
+            else "skipped-all"
+            if result.total_skipped > 0
             else "no-op"
         ),
     )

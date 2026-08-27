@@ -15,11 +15,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """Tests for training_receipt module."""
+
 from __future__ import annotations
 
 import math
 import tempfile
-
 
 from hummbl_governance.kernel.model_registry import ModelRegistry
 from hummbl_governance.kernel.training_receipt import register_training_result
@@ -82,6 +82,7 @@ class TestTrainingReceipt:
             }
 
             from hummbl_governance.kernel.training_receipt import auto_register
+
             auto_register(result, registry_path=f"{tmp}/models.jsonl")
 
             # Should infer model_id: char_lm_128d_3l_65v

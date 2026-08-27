@@ -19,9 +19,7 @@ from typing import Any
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
 from hummbl_governance.schema_validator import SchemaValidator, ValidationError
 
-_SCHEMA_PATH = (
-    Path(__file__).parent.parent / "data" / "receipt_integrity_monitor.schema.json"
-)
+_SCHEMA_PATH = Path(__file__).parent.parent / "data" / "receipt_integrity_monitor.schema.json"
 _SCHEMA_CACHE: dict[str, Any] | None = None
 
 
@@ -212,9 +210,7 @@ def run_integrity_check(
     import hashlib
     import json as _json
 
-    report_str = _json.dumps(
-        {"agent_id": agent_id, "receipts_checked": len(receipts)}, sort_keys=True
-    )
+    report_str = _json.dumps({"agent_id": agent_id, "receipts_checked": len(receipts)}, sort_keys=True)
     receipt_hash = hashlib.sha256(report_str.encode()).hexdigest()
 
     return {
@@ -293,9 +289,7 @@ def validate_receipt_integrity_monitor(report: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(report, schema)
     if errors:
-        raise ValidationError(
-            f"Receipt integrity monitor schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Receipt integrity monitor schema validation failed: {'; '.join(errors)}")
 
 
 def validate_monitor_report(report: dict[str, Any]) -> None:
@@ -325,13 +319,11 @@ def validate_monitor_report(report: dict[str, Any]) -> None:
 
     if integrity_failed and not panic_triggered:
         raise ValueError(
-            "Monitor report inconsistent: sequence or hash-chain check "
-            "failed but panic_triggered is False"
+            "Monitor report inconsistent: sequence or hash-chain check failed but panic_triggered is False"
         )
     if not integrity_failed and panic_triggered:
         raise ValueError(
-            "Monitor report inconsistent: sequence and hash-chain checks "
-            "passed but panic_triggered is True"
+            "Monitor report inconsistent: sequence and hash-chain checks passed but panic_triggered is True"
         )
 
 

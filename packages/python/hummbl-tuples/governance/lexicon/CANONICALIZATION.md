@@ -36,6 +36,7 @@ Python equivalent:
 
 ```python
 import hashlib, json
+
 with open("acronyms.v0.1.json", "rb") as f:
     print(hashlib.sha256(f.read()).hexdigest())
 ```

@@ -42,8 +42,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hummbl_governance import (
-    KillSwitch,
     CircuitBreaker,
+    KillSwitch,
 )
 
 try:
@@ -72,8 +72,7 @@ _sandboxes = {}
 class Sandbox:
     """An isolated governance context for an agent."""
 
-    def __init__(self, sandbox_id, agent_name, allowed_tools=None,
-                 blocked_paths=None, max_cost=10.0, timeout_sec=300):
+    def __init__(self, sandbox_id, agent_name, allowed_tools=None, blocked_paths=None, max_cost=10.0, timeout_sec=300):
         self.id = sandbox_id
         self.agent = agent_name
         self.allowed_tools = set(allowed_tools or [])
@@ -95,7 +94,7 @@ class Sandbox:
         """Check kill switch and circuit breaker (hard denials)."""
         if self.kill_switch.engaged:
             return {"allowed": False, "reason": f"Kill switch engaged: {self.kill_switch.mode}"}
-        if hasattr(self.circuit_breaker, 'state') and self.circuit_breaker.state.name == "OPEN":
+        if hasattr(self.circuit_breaker, "state") and self.circuit_breaker.state.name == "OPEN":
             return {"allowed": False, "reason": "Circuit breaker OPEN — too many failures"}
         return None
 
@@ -123,10 +122,14 @@ class Sandbox:
             return {"allowed": False, "reasons": reasons}
 
         self.cost_spent += cost
-        self.actions.append({
-            "tool": tool, "path": path, "cost": cost,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        self.actions.append(
+            {
+                "tool": tool,
+                "path": path,
+                "cost": cost,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
         return {"allowed": True, "cost_remaining": round(self.max_cost - self.cost_spent, 2)}
 
     def to_dict(self):
@@ -140,9 +143,7 @@ class Sandbox:
             "cost_spent": round(self.cost_spent, 2),
             "actions_count": len(self.actions),
             "kill_switch": (
-                self.kill_switch.mode.name
-                if hasattr(self.kill_switch.mode, "name")
-                else str(self.kill_switch.mode)
+                self.kill_switch.mode.name if hasattr(self.kill_switch.mode, "name") else str(self.kill_switch.mode)
             ),
             "circuit_breaker": (
                 self.circuit_breaker.state.name
@@ -164,11 +165,13 @@ TOOLS = [
             "properties": {
                 "agent_name": {"type": "string", "description": "Agent identity"},
                 "allowed_tools": {
-                    "type": "array", "items": {"type": "string"},
+                    "type": "array",
+                    "items": {"type": "string"},
                     "description": "Allowlist of tools (empty = all allowed)",
                 },
                 "blocked_paths": {
-                    "type": "array", "items": {"type": "string"},
+                    "type": "array",
+                    "items": {"type": "string"},
                     "description": "Paths the agent cannot access",
                 },
                 "max_cost": {"type": "number", "description": "Maximum cost in USD (default: 10.0)", "default": 10.0},
@@ -264,10 +267,10 @@ def _handle_sandbox_validate_output(arguments):
     output = arguments["output"]
     issues = []
     secret_patterns = [
-        (r'sk-[a-zA-Z0-9_-]{10,}', "API key (sk-...)"),
-        (r'ghp_[a-zA-Z0-9]{36}', "GitHub PAT"),
-        (r'AKIA[A-Z0-9]{16}', "AWS access key"),
-        (r'-----BEGIN.*PRIVATE KEY-----', "Private key"),
+        (r"sk-[a-zA-Z0-9_-]{10,}", "API key (sk-...)"),
+        (r"ghp_[a-zA-Z0-9]{36}", "GitHub PAT"),
+        (r"AKIA[A-Z0-9]{16}", "AWS access key"),
+        (r"-----BEGIN.*PRIVATE KEY-----", "Private key"),
     ]
     for pattern, desc in secret_patterns:
         if re.search(pattern, output):
@@ -355,20 +358,26 @@ def main():
 
         try:
             if method == "initialize":
-                send_response(msg_id, {
-                    "protocolVersion": PROTOCOL_VERSION,
-                    "capabilities": {"tools": {}},
-                    "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "protocolVersion": PROTOCOL_VERSION,
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                    },
+                )
             elif method == "notifications/initialized":
                 pass
             elif method == "tools/list":
                 send_response(msg_id, {"tools": TOOLS})
             elif method == "tools/call":
                 result = handle_tool(params.get("name", ""), params.get("arguments", {}))
-                send_response(msg_id, {
-                    "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
+                    },
+                )
             elif method == "ping":
                 send_response(msg_id, {})
             else:

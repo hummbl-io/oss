@@ -38,7 +38,6 @@ import string
 import tempfile
 from pathlib import Path
 
-
 from hummbl_governance.kernel import (
     EvidenceEngine,
     IdentityEngine,
@@ -59,6 +58,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # ===========================================================================
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
+
 
 class TestFuzzing:
     """Random inputs to find unexpected behavior."""

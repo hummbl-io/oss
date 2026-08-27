@@ -3,14 +3,13 @@
 import os
 import unittest
 from datetime import datetime, timezone
+
 from hummbl_kernel.kernel import (
-    MissionModeKernel,
-    ComplianceFramework,
-    EventStatus,
-    RiskClass,
     AuditEvent,
-    MissionReceipt,
+    ComplianceFramework,
     FleetConfig,
+    MissionModeKernel,
+    RiskClass,
 )
 
 # Set test signing key for audit event signing tests
@@ -46,13 +45,10 @@ class TestMissionModeKernel(unittest.TestCase):
             capability="file.read",
             risk_class=RiskClass.LOW,
             adapter_id="adapter_001",
-            compliance_frameworks=[ComplianceFramework.SOC_2]
+            compliance_frameworks=[ComplianceFramework.SOC_2],
         )
         self.assertIn("file.read", self.kernel.capability_registry)
-        self.assertEqual(
-            self.kernel.capability_registry["file.read"]["risk_class"],
-            RiskClass.LOW
-        )
+        self.assertEqual(self.kernel.capability_registry["file.read"]["risk_class"], RiskClass.LOW)
 
     def test_capability_admission_low_risk(self):
         """LOW risk capabilities should be auto-admitted."""
@@ -60,12 +56,12 @@ class TestMissionModeKernel(unittest.TestCase):
             capability="file.read",
             risk_class=RiskClass.LOW,
             adapter_id="adapter_001",
-            compliance_frameworks=[ComplianceFramework.SOC_2]
+            compliance_frameworks=[ComplianceFramework.SOC_2],
         )
         admitted, reason = self.kernel.admit_capability(
             capability="file.read",
             agent="test_agent",
-            compliance_framework=ComplianceFramework.SOC_2
+            compliance_framework=ComplianceFramework.SOC_2,
         )
         self.assertTrue(admitted)
         self.assertEqual(reason, "Capability admitted")
@@ -76,12 +72,12 @@ class TestMissionModeKernel(unittest.TestCase):
             capability="network.external",
             risk_class=RiskClass.HIGH,
             adapter_id="adapter_001",
-            compliance_frameworks=[ComplianceFramework.SOC_2]
+            compliance_frameworks=[ComplianceFramework.SOC_2],
         )
         admitted, reason = self.kernel.admit_capability(
             capability="network.external",
             agent="test_agent",
-            compliance_framework=ComplianceFramework.SOC_2
+            compliance_framework=ComplianceFramework.SOC_2,
         )
         self.assertFalse(admitted)
         self.assertIn("requires explicit approval", reason)
@@ -91,7 +87,7 @@ class TestMissionModeKernel(unittest.TestCase):
         admitted, reason = self.kernel.admit_capability(
             capability="unregistered.cap",
             agent="test_agent",
-            compliance_framework=ComplianceFramework.SOC_2
+            compliance_framework=ComplianceFramework.SOC_2,
         )
         self.assertFalse(admitted)
         self.assertIn("not registered", reason)
@@ -104,7 +100,7 @@ class TestMissionModeKernel(unittest.TestCase):
             compliance_framework=ComplianceFramework.SOC_2,
             audit_period_start="2025-01-01T00:00:00Z",
             audit_period_end="2025-12-31T23:59:59Z",
-            organization_id="org_001"
+            organization_id="org_001",
         )
         self.assertIsNotNone(audit_trail_id)
         self.assertTrue(audit_trail_id.startswith("at_"))
@@ -118,7 +114,7 @@ class TestMissionModeKernel(unittest.TestCase):
             compliance_framework=ComplianceFramework.SOC_2,
             audit_period_start="2025-01-01T00:00:00Z",
             audit_period_end="2025-12-31T23:59:59Z",
-            organization_id="org_001"
+            organization_id="org_001",
         )
         event = AuditEvent(
             event_id=self.kernel._generate_id("evt"),
@@ -132,7 +128,7 @@ class TestMissionModeKernel(unittest.TestCase):
             actor="system",
             payload={},
             compliance_metadata={},
-            evidence_refs=[]
+            evidence_refs=[],
         )
         success = self.kernel.append_audit_event(audit_trail_id, event)
         self.assertTrue(success)
@@ -146,7 +142,7 @@ class TestMissionModeKernel(unittest.TestCase):
             compliance_framework=ComplianceFramework.SOC_2,
             audit_period_start="2025-01-01T00:00:00Z",
             audit_period_end="2025-12-31T23:59:59Z",
-            organization_id="org_001"
+            organization_id="org_001",
         )
         success = self.kernel.finalize_audit_trail(audit_trail_id)
         self.assertTrue(success)
@@ -160,7 +156,7 @@ class TestMissionModeKernel(unittest.TestCase):
             compliance_framework=ComplianceFramework.SOC_2,
             audit_period_start="2025-01-01T00:00:00Z",
             audit_period_end="2025-12-31T23:59:59Z",
-            organization_id="org_001"
+            organization_id="org_001",
         )
         receipt = self.kernel.generate_receipt(
             mission_id="test_mission",
@@ -168,7 +164,7 @@ class TestMissionModeKernel(unittest.TestCase):
             final_status="completed",
             agent="test_agent",
             audit_trail_id=audit_trail_id,
-            evidence_refs=["ev_001"]
+            evidence_refs=["ev_001"],
         )
         self.assertEqual(receipt.mission_id, "test_mission")
         self.assertEqual(receipt.final_status, "completed")
@@ -186,9 +182,7 @@ class TestMissionModeKernel(unittest.TestCase):
     def test_fleet_config_custom(self):
         """Custom fleet config should be respected."""
         custom_config = FleetConfig(
-            primary_compute="alpha",
-            gpu_compute="beta",
-            fallback_compute="gamma"
+            primary_compute="alpha", gpu_compute="beta", fallback_compute="gamma"
         )
         kernel_custom = MissionModeKernel(fleet_config=custom_config)
         self.assertEqual(kernel_custom.fleet_config.primary_compute, "alpha")
@@ -214,7 +208,7 @@ class TestMissionModeKernel(unittest.TestCase):
             actor="system",
             payload={"test": "data"},
             compliance_metadata={},
-            evidence_refs=[]
+            evidence_refs=[],
         )
         signature = self.kernel._sign_event(event)
         self.assertIsNotNone(signature)

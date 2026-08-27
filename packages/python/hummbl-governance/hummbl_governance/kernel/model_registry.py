@@ -38,6 +38,7 @@ Usage:
     models = reg.find(task="char_lm")
     best = reg.best(metrics_key="val_ppl", higher_is_better=False)
 """
+
 from __future__ import annotations
 
 import json
@@ -92,9 +93,7 @@ class ModelRegistry:
         self.registry_path.parent.mkdir(parents=True, exist_ok=True)
         seed = package_seed_registry_path()
         if using_default_path and not self.registry_path.exists() and seed.exists():
-            tmp_fd, tmp_name = tempfile.mkstemp(
-                dir=self.registry_path.parent, suffix=".tmp"
-            )
+            tmp_fd, tmp_name = tempfile.mkstemp(dir=self.registry_path.parent, suffix=".tmp")
             try:
                 with os.fdopen(tmp_fd, "wb") as tmp_f:
                     tmp_f.write(seed.read_bytes())
@@ -138,7 +137,8 @@ class ModelRegistry:
                 except (json.JSONDecodeError, TypeError) as exc:
                     logger.error(
                         "Corrupted model registry line in %s: %s",
-                        self.registry_path, line[:100],
+                        self.registry_path,
+                        line[:100],
                     )
                     raise KernelPanic(
                         KernelInvariant.INTEGRITY,
@@ -199,9 +199,7 @@ class ModelRegistry:
         valid = compatible
         if not valid:
             return None
-        best = (
-            max(valid, key=lambda e: e[1]) if higher_is_better else min(valid, key=lambda e: e[1])
-        )
+        best = max(valid, key=lambda e: e[1]) if higher_is_better else min(valid, key=lambda e: e[1])
         return best[0]
 
     def get(self, model_id: str) -> ModelEntry | None:

@@ -70,9 +70,9 @@ def _summarize_indexed(
         if not index.doc_meta:
             return None
 
-        cutoff = (
-            datetime.now(timezone.utc) - timedelta(days=max_age_days)
-        ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
 
         # Filter and sort by priority + timestamp using index metadata only
         candidates = []
@@ -97,9 +97,7 @@ def _summarize_indexed(
             content = meta.get("content_preview", "")
             tags = meta.get("tags", [])
             tags_str = f" [{', '.join(tags)}]" if tags else ""
-            lines.append(
-                f"- [{ts[:10]}] ({agent}) {prefix}: {content}{tags_str}"
-            )
+            lines.append(f"- [{ts[:10]}] ({agent}) {prefix}: {content}{tags_str}")
 
         return "\n".join(lines) if lines else None
 
@@ -130,7 +128,11 @@ def _resolve_cognition_dir(override: str | Path | None = None) -> Path:
         ).strip()
         if root:
             return Path(root) / DEFAULT_COGNITION_DIR
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
     return Path(DEFAULT_COGNITION_DIR)
 

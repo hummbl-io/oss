@@ -29,6 +29,7 @@ Usage:
                                      [--report docs/coverage/EVIDENCE_VALIDATION.json]
                                      [--promote-threshold 50]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -86,16 +87,16 @@ def _extract_validated_rows(report: dict) -> list[dict]:
         rows = matrix_data.get("rows", [])
         for row in rows:
             if row.get("status") == "pass":
-                identities.append({
-                    "matrix": matrix_name,
-                    "control_id": row.get("control_id"),
-                })
+                identities.append(
+                    {
+                        "matrix": matrix_name,
+                        "control_id": row.get("control_id"),
+                    }
+                )
     return identities
 
 
-def _check_row_identities(
-    baseline_rows: list[dict], report: dict
-) -> tuple[list[dict], list[dict]]:
+def _check_row_identities(baseline_rows: list[dict], report: dict) -> tuple[list[dict], list[dict]]:
     """Check that all baseline row identities still validate.
 
     Returns (preserved, lost) where:
@@ -124,27 +125,37 @@ def _check_row_identities(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Coverage matrix ratchet gate")
     parser.add_argument(
-        "--baseline", type=str, default="docs/coverage/ratchet-baseline.json",
+        "--baseline",
+        type=str,
+        default="docs/coverage/ratchet-baseline.json",
         help="Path to ratchet baseline file",
     )
     parser.add_argument(
-        "--report", type=str, default="docs/coverage/EVIDENCE_VALIDATION.json",
+        "--report",
+        type=str,
+        default="docs/coverage/EVIDENCE_VALIDATION.json",
         help="Path to evidence validation JSON report",
     )
     parser.add_argument(
-        "--promote-threshold", type=float, default=50.0,
+        "--promote-threshold",
+        type=float,
+        default=50.0,
         help="Validated %% at which the CI job should flip to blocking (default: 50)",
     )
     parser.add_argument(
-        "--init-baseline", action="store_true",
+        "--init-baseline",
+        action="store_true",
         help="Initialize or raise the baseline to current validated count",
     )
     parser.add_argument(
-        "--force-lower", action="store_true",
+        "--force-lower",
+        action="store_true",
         help="Allow --init-baseline to LOWER the baseline (requires --reason)",
     )
     parser.add_argument(
-        "--reason", type=str, default="",
+        "--reason",
+        type=str,
+        default="",
         help="Justification string required when using --force-lower",
     )
     args = parser.parse_args()
@@ -166,18 +177,17 @@ def main() -> int:
             existing_count = existing.get("validated_count", 0)
             if current["validated_count"] < existing_count:
                 if not args.force_lower:
-                    new_count = current['validated_count']
+                    new_count = current["validated_count"]
                     print(
-                        f"::error::REFUSED: --init-baseline would lower baseline "
-                        f"from {existing_count} to {new_count}"
+                        f"::error::REFUSED: --init-baseline would lower baseline from {existing_count} to {new_count}"
                     )
-                    print("::error::Use --force-lower --reason \"...\" to override with justification.")
+                    print('::error::Use --force-lower --reason "..." to override with justification.')
                     print("::error::Lowering the baseline allows regressions to pass the ratchet silently.")
                     return 1
                 if not args.reason:
-                    print("::error::REFUSED: --force-lower requires --reason \"...\" justification string.")
+                    print('::error::REFUSED: --force-lower requires --reason "..." justification string.')
                     return 1
-                new_count = current['validated_count']
+                new_count = current["validated_count"]
                 print(f"::warning::BASELINE LOWERED with --force-lower: {existing_count} -> {new_count}")
                 print(f"::warning::Reason: {args.reason}")
 
@@ -253,7 +263,7 @@ def main() -> int:
 
     # Promotion threshold check
     if current["validated_pct"] >= args.promote_threshold:
-        pct = current['validated_pct']
+        pct = current["validated_pct"]
         print(f"\n::warning::PROMOTION THRESHOLD REACHED: {pct}% >= {args.promote_threshold}%")
         print("::warning::Consider flipping continue-on-error to false in .github/workflows/ci.yml")
     else:

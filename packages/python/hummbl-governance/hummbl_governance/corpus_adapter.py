@@ -89,9 +89,7 @@ class CorpusAdapter:
         state_dir: Path | None = None,
     ) -> None:
         self.corpus_dir = corpus_dir
-        self.state_dir = state_dir or Path(
-            os.environ.get("HUMMBL_KERNEL_STATE_DIR", ".kernel")
-        )
+        self.state_dir = state_dir or Path(os.environ.get("HUMMBL_KERNEL_STATE_DIR", ".kernel"))
         self._ingestor: Any = None
         if _HAS_CORPUS and corpus_dir is not None:
             self._ingestor = CorpusIngestor(corpus_dir=corpus_dir)
@@ -152,9 +150,7 @@ class CorpusAdapter:
         ingested: list[str] = []
         new_queue_file = self.state_dir / "corpus_queue" / "pending.new.jsonl"
 
-        with open(queue_file, "r", encoding="utf-8") as f_in, open(
-            new_queue_file, "w", encoding="utf-8"
-        ) as f_out:
+        with open(queue_file, "r", encoding="utf-8") as f_in, open(new_queue_file, "w", encoding="utf-8") as f_out:
             for line in f_in:
                 line = line.strip()
                 if not line:

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 _COST_PER_1K_TOKENS: dict[str, float] = {
     "T0": 0.0,
     "T1": 0.001,  # OpenRouter paid / GCP ~$0.001/1K
-    "T2": 0.05,   # Anthropic Haiku/GPT-4 blended ~$0.01–$0.10/1K
+    "T2": 0.05,  # Anthropic Haiku/GPT-4 blended ~$0.01–$0.10/1K
 }
 
 # Baseline tier for any task without explicit justification
@@ -82,7 +82,16 @@ def recommended_tier(
     desc_lower = description.lower()
 
     # T2: review-gate types or P0
-    if mtype in {"PROPOSAL", "REVIEW", "ACK", "VETO", "DECISION", "APPROVE", "REJECT", "BLOCKED"}:
+    if mtype in {
+        "PROPOSAL",
+        "REVIEW",
+        "ACK",
+        "VETO",
+        "DECISION",
+        "APPROVE",
+        "REJECT",
+        "BLOCKED",
+    }:
         return "T2"
     if priority is not None and priority.strip().upper() in {"P0", "P1"}:
         return "T2"
@@ -198,7 +207,9 @@ def validate_tier_escalation(
         return
 
     # Tier is above recommendation — check for justification
-    justification = _extract_tag(body, "tier_justification") or _extract_tag(body, "justification")
+    justification = _extract_tag(body, "tier_justification") or _extract_tag(
+        body, "justification"
+    )
     if justification and justification.strip():
         logger.info(
             "Tier escalation accepted for %s: %s → %s | justification: %s",

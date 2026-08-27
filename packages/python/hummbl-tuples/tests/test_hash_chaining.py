@@ -7,8 +7,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from hummbl_tuples.base import IDPTuple, _sha256_hex
 from dataclasses import dataclass
+
+from hummbl_tuples.base import IDPTuple, _sha256_hex
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -130,6 +131,7 @@ def test_examples_exist():
 def test_genesis_example_has_null_previous_hash():
     """The genesis example should have previous_hash null."""
     import json
+
     p = REPO_ROOT / "examples" / "hash_chaining" / "chain_step1.json"
     data = json.loads(p.read_text(encoding="utf-8"))
     assert data.get("previous_hash") is None
@@ -138,6 +140,7 @@ def test_genesis_example_has_null_previous_hash():
 def test_chained_examples_have_previous_hash():
     """Non-genesis examples should have non-null previous_hash."""
     import json
+
     for name in ("chain_step2.json", "chain_step3.json"):
         p = REPO_ROOT / "examples" / "hash_chaining" / name
         data = json.loads(p.read_text(encoding="utf-8"))

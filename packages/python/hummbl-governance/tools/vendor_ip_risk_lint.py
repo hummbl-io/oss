@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-
 ALLOWED_RISKS = {"RED", "YELLOW", "GREEN"}
 SENSITIVE_TIERS = {"T2", "T3"}
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -117,16 +116,10 @@ def lint_rows(rows: list[VendorRow]) -> list[Finding]:
             continue
 
         if row.risk not in ALLOWED_RISKS:
-            findings.append(
-                Finding(row.row, "invalid-risk", f"{row.vendor}: risk={row.risk!r}")
-            )
+            findings.append(Finding(row.row, "invalid-risk", f"{row.vendor}: risk={row.risk!r}"))
 
-        if not row.source_urls or (
-            row.source_urls != "REVIEW_REQUIRED" and not URL_RE.search(row.source_urls)
-        ):
-            findings.append(
-                Finding(row.row, "missing-source", f"{row.vendor}: missing source URL")
-            )
+        if not row.source_urls or (row.source_urls != "REVIEW_REQUIRED" and not URL_RE.search(row.source_urls)):
+            findings.append(Finding(row.row, "missing-source", f"{row.vendor}: missing source URL"))
 
         if not DATE_RE.match(row.last_reviewed):
             findings.append(

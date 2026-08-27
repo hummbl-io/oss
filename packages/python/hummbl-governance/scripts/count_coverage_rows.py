@@ -72,13 +72,10 @@ def count_rows(path: Path) -> dict:
         # Skip the vertical summary table rows (e.g., "| ✅ Fulfilled | 5 |").
         # Distinguishing feature: cell 1 has a state glyph + label like "Fulfilled".
         first_cell = cells[0] if cells else ""
-        if any(
-            (state in first_cell and lbl in first_cell)
-            for state in STATES
-            for lbl in LEGEND_LABELS
-        ):
+        if any((state in first_cell and lbl in first_cell) for state in STATES for lbl in LEGEND_LABELS):
             i += 1
             continue
+
         # Skip summary breakdown rows: rows with 3+ integer-only cells
         # (possibly bolded). Aggregate tables either look like
         # "| Model AI Governance | 4 | 2 | 2 | 0 |" (1 label + integer
@@ -133,9 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--format", choices=("json", "human"), default="human")
     args = p.parse_args(argv)
 
-    files = sorted(
-        f for f in args.matrix_dir.glob("*.md") if f.name not in GENERATED_MATRIX_REPORTS
-    )
+    files = sorted(f for f in args.matrix_dir.glob("*.md") if f.name not in GENERATED_MATRIX_REPORTS)
     fleet = {s: 0 for s in STATES}
     fleet_rows = 0
 

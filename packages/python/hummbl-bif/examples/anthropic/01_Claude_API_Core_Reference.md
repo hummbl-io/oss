@@ -40,9 +40,7 @@ client = anthropic.Anthropic(api_key="YOUR_API_KEY")  # or set ANTHROPIC_API_KEY
 message = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
-    messages=[
-        {"role": "user", "content": "Hello, Claude."}
-    ]
+    messages=[{"role": "user", "content": "Hello, Claude."}],
 )
 print(message.content[0].text)
 ```
@@ -201,9 +199,7 @@ response = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
     system="You are a senior Python developer. Respond with concise, production-ready code. Include type hints. Do not explain unless asked.",
-    messages=[
-        {"role": "user", "content": "Write a function to validate an email address."}
-    ]
+    messages=[{"role": "user", "content": "Write a function to validate an email address."}],
 )
 ```
 
@@ -231,16 +227,16 @@ tools = [
             "properties": {
                 "location": {
                     "type": "string",
-                    "description": "City and country, e.g. 'Atlanta, US'"
+                    "description": "City and country, e.g. 'Atlanta, US'",
                 },
                 "unit": {
                     "type": "string",
                     "enum": ["celsius", "fahrenheit"],
-                    "description": "Temperature unit"
-                }
+                    "description": "Temperature unit",
+                },
             },
-            "required": ["location"]
-        }
+            "required": ["location"],
+        },
     }
 ]
 ```
@@ -258,9 +254,7 @@ response = client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=1024,
     tools=tools,
-    messages=[
-        {"role": "user", "content": "What's the weather in Atlanta?"}
-    ]
+    messages=[{"role": "user", "content": "What's the weather in Atlanta?"}],
 )
 
 # Step 2: If stop_reason == "tool_use", execute the tool
@@ -286,11 +280,11 @@ if response.stop_reason == "tool_use":
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use_block.id,
-                        "content": json.dumps(result)
+                        "content": json.dumps(result),
                     }
-                ]
-            }
-        ]
+                ],
+            },
+        ],
     )
 ```
 
@@ -304,7 +298,7 @@ Server-sent events for real-time output:
 with client.messages.stream(
     model="claude-sonnet-4-6",
     max_tokens=1024,
-    messages=[{"role": "user", "content": "Write a haiku about recursion."}]
+    messages=[{"role": "user", "content": "Write a haiku about recursion."}],
 ) as stream:
     for text in stream.text_stream:
         print(text, end="", flush=True)
@@ -344,7 +338,7 @@ while True:
         model="claude-sonnet-4-6",
         max_tokens=1024,
         system="You are a helpful assistant.",
-        messages=messages
+        messages=messages,
     )
 
     assistant_reply = response.content[0].text
@@ -375,18 +369,12 @@ response = client.messages.create(
             "content": [
                 {
                     "type": "image",
-                    "source": {
-                        "type": "url",
-                        "url": "https://example.com/chart.png"
-                    }
+                    "source": {"type": "url", "url": "https://example.com/chart.png"},
                 },
-                {
-                    "type": "text",
-                    "text": "What does this chart show?"
-                }
-            ]
+                {"type": "text", "text": "What does this chart show?"},
+            ],
         }
-    ]
+    ],
 )
 
 # From local file (base64)
@@ -400,16 +388,12 @@ response = client.messages.create(
             "content": [
                 {
                     "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": "image/png",
-                        "data": image_data
-                    }
+                    "source": {"type": "base64", "media_type": "image/png", "data": image_data},
                 },
-                {"type": "text", "text": "What does this chart show?"}
-            ]
+                {"type": "text", "text": "What does this chart show?"},
+            ],
         }
-    ]
+    ],
 )
 ```
 
@@ -434,9 +418,9 @@ response = client.messages.create(
     max_tokens=16000,
     thinking={
         "type": "enabled",
-        "budget_tokens": 10000  # Tokens Claude can use for internal reasoning
+        "budget_tokens": 10000,  # Tokens Claude can use for internal reasoning
     },
-    messages=[{"role": "user", "content": "Solve this complex math problem..."}]
+    messages=[{"role": "user", "content": "Solve this complex math problem..."}],
 )
 
 # Response will include thinking blocks
@@ -457,9 +441,7 @@ from anthropic import APIStatusError, APIConnectionError, RateLimitError
 
 try:
     response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Hello"}]
+        model="claude-sonnet-4-6", max_tokens=1024, messages=[{"role": "user", "content": "Hello"}]
     )
 except RateLimitError as e:
     # 429 — back off and retry
@@ -492,8 +474,7 @@ except APIConnectionError as e:
 ```python
 # Count tokens before sending (useful for budget management)
 token_count = client.messages.count_tokens(
-    model="claude-sonnet-4-6",
-    messages=[{"role": "user", "content": "Hello, how are you?"}]
+    model="claude-sonnet-4-6", messages=[{"role": "user", "content": "Hello, how are you?"}]
 )
 print(f"Input tokens: {token_count.input_tokens}")
 ```

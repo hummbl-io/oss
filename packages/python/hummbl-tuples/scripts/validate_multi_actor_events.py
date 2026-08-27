@@ -24,8 +24,11 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAMPLES_DIR = os.path.join(REPO_ROOT, "examples", "multi_actor")
 
 VALID_REGIMES = {
-    "user_only", "user_plus_agent", "user_plus_agent_team",
-    "organization_plus_agents", "bounded_agent_only",
+    "user_only",
+    "user_plus_agent",
+    "user_plus_agent_team",
+    "organization_plus_agents",
+    "bounded_agent_only",
     "agent_society_sandbox",
 }
 

@@ -29,15 +29,29 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
-BASELINE_PATH = Path(__file__).resolve().parents[1] / "_state" / "cognition" / "belonging_baseline.jsonl"
+BASELINE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "_state"
+    / "cognition"
+    / "belonging_baseline.jsonl"
+)
 COGNITION_DIR = BASELINE_PATH.parent
-COGSTATE_VALUES = {"AVAILABLE", "HYPERFOCUS", "TRANSITION", "RECOVERY", "DEPLETED", "RSD_RISK", "SHUTDOWN"}
+COGSTATE_VALUES = {
+    "AVAILABLE",
+    "HYPERFOCUS",
+    "TRANSITION",
+    "RECOVERY",
+    "DEPLETED",
+    "RSD_RISK",
+    "SHUTDOWN",
+}
 SCORE_RANGE = range(1, 6)  # 1–5 inclusive
 
 
 # ---------------------------------------------------------------------------
 # I/O helpers
 # ---------------------------------------------------------------------------
+
 
 def _load(path: Path = BASELINE_PATH) -> list[dict]:
     """Return all entries from the baseline file, oldest first."""
@@ -69,6 +83,7 @@ def _today() -> str:
 # ---------------------------------------------------------------------------
 # Domain logic
 # ---------------------------------------------------------------------------
+
 
 def belonging_score(entry: dict) -> Optional[float]:
     s, m, c = entry.get("safety"), entry.get("mattering"), entry.get("connection")
@@ -120,6 +135,7 @@ def _next_day_number(entries: list[dict]) -> int:
 # Core operations
 # ---------------------------------------------------------------------------
 
+
 def fill(
     safety: int,
     mattering: int,
@@ -134,18 +150,28 @@ def fill(
     If today is already complete, raise ValueError.
     If today has no entry, append a new one.
     """
-    for name, val in [("safety", safety), ("mattering", mattering), ("connection", connection)]:
+    for name, val in [
+        ("safety", safety),
+        ("mattering", mattering),
+        ("connection", connection),
+    ]:
         if val not in SCORE_RANGE:
             raise ValueError(f"{name} must be 1–5, got {val}")
     if cogstate is not None and cogstate not in COGSTATE_VALUES:
-        raise ValueError(f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}")
+        raise ValueError(
+            f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}"
+        )
 
     d = today or _today()
     entries = _load(path)
     existing = _get_entry_for_date(entries, d)
 
     if existing is not None:
-        s, m, c = existing.get("safety"), existing.get("mattering"), existing.get("connection")
+        s, m, c = (
+            existing.get("safety"),
+            existing.get("mattering"),
+            existing.get("connection"),
+        )
         if None not in (s, m, c):
             raise ValueError(
                 f"Entry for {d} already has scores (safety={s}, mattering={m}, connection={c}). "
@@ -189,11 +215,17 @@ def force_update(
     path: Path = BASELINE_PATH,
 ) -> dict:
     """Overwrite today's entry regardless of existing scores."""
-    for name, val in [("safety", safety), ("mattering", mattering), ("connection", connection)]:
+    for name, val in [
+        ("safety", safety),
+        ("mattering", mattering),
+        ("connection", connection),
+    ]:
         if val not in SCORE_RANGE:
             raise ValueError(f"{name} must be 1–5, got {val}")
     if cogstate is not None and cogstate not in COGSTATE_VALUES:
-        raise ValueError(f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}")
+        raise ValueError(
+            f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}"
+        )
 
     d = today or _today()
     entries = _load(path)
@@ -234,7 +266,9 @@ def status(path: Path = BASELINE_PATH) -> str:
     if today_entry:
         score = belonging_score(today_entry)
         if score is None:
-            lines.append(f"  Today (Day {today_entry['day']}): UNFILLED — run belonging-check to log scores")
+            lines.append(
+                f"  Today (Day {today_entry['day']}): UNFILLED — run belonging-check to log scores"
+            )
         else:
             safe_marker = " ✓ HRSI-safe" if is_hrsi_safe(today_entry) else ""
             lines.append(
@@ -255,7 +289,9 @@ def history(n: int = 7, path: Path = BASELINE_PATH) -> str:
     if not recent:
         return "No entries."
 
-    lines = [f"{'Date':<12} {'Day':>4} {'S':>3} {'M':>3} {'C':>3} {'Score':>6} {'State':<12} {'Safe':>5}"]
+    lines = [
+        f"{'Date':<12} {'Day':>4} {'S':>3} {'M':>3} {'C':>3} {'Score':>6} {'State':<12} {'Safe':>5}"
+    ]
     lines.append("-" * 55)
     for e in recent:
         score = belonging_score(e)
@@ -265,13 +301,16 @@ def history(n: int = 7, path: Path = BASELINE_PATH) -> str:
         c = str(e.get("connection") or "—")
         cog = (e.get("cogstate") or "—")[:10]
         safe_str = "  ✓" if is_hrsi_safe(e) else "   "
-        lines.append(f"{e['date']:<12} {e['day']:>4} {s:>3} {m:>3} {c:>3} {score_str:>6} {cog:<12} {safe_str:>5}")
+        lines.append(
+            f"{e['date']:<12} {e['day']:>4} {s:>3} {m:>3} {c:>3} {score_str:>6} {cog:<12} {safe_str:>5}"
+        )
     return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
 # Interactive prompt
 # ---------------------------------------------------------------------------
+
 
 def _prompt_score(question: str, label: str) -> int:
     while True:
@@ -295,23 +334,36 @@ def interactive_fill(path: Path = BASELINE_PATH) -> dict:
     print("Score each 1 (no) → 5 (fully yes)\n")
 
     safety = _prompt_score("Did I feel safe enough to be wrong today?", "Safety    ")
-    mattering = _prompt_score("Did my work or presence matter to someone?", "Mattering ")
-    connection = _prompt_score("Did I experience genuine contact with another person?", "Connection")
+    mattering = _prompt_score(
+        "Did my work or presence matter to someone?", "Mattering "
+    )
+    connection = _prompt_score(
+        "Did I experience genuine contact with another person?", "Connection"
+    )
 
-    cog_input = input("\n  Cogstate (AVAILABLE/HYPERFOCUS/TRANSITION/RECOVERY/DEPLETED/RSD_RISK/SHUTDOWN, or blank): ").strip().upper()
+    cog_input = (
+        input(
+            "\n  Cogstate (AVAILABLE/HYPERFOCUS/TRANSITION/RECOVERY/DEPLETED/RSD_RISK/SHUTDOWN, or blank): "
+        )
+        .strip()
+        .upper()
+    )
     cogstate = cog_input if cog_input in COGSTATE_VALUES else None
 
     notes = input("  Notes (optional, blank to skip): ").strip()
 
     entry = fill(safety, mattering, connection, cogstate, notes or "", path=path)
     score = belonging_score(entry)
-    print(f"\n  Logged: score={score:.1f} [S={safety} M={mattering} C={connection}] cogstate={cogstate or 'unset'}")
+    print(
+        f"\n  Logged: score={score:.1f} [S={safety} M={mattering} C={connection}] cogstate={cogstate or 'unset'}"
+    )
     return entry
 
 
 # ---------------------------------------------------------------------------
 # CLI entry point (called from cognition/__main__.py)
 # ---------------------------------------------------------------------------
+
 
 def run_cli(args: list[str]) -> int:
     """Parse args and execute. Returns exit code."""
@@ -321,15 +373,40 @@ def run_cli(args: list[str]) -> int:
         prog="belonging-check",
         description="HRSI Gap 1 — daily belonging baseline (safety / mattering / connection)",
     )
-    parser.add_argument("--safety", type=int, choices=list(SCORE_RANGE), help="Safety score 1–5")
-    parser.add_argument("--mattering", type=int, choices=list(SCORE_RANGE), help="Mattering score 1–5")
-    parser.add_argument("--connection", type=int, choices=list(SCORE_RANGE), help="Connection score 1–5")
-    parser.add_argument("--cogstate", choices=sorted(COGSTATE_VALUES), help="Cogstate at time of logging")
+    parser.add_argument(
+        "--safety", type=int, choices=list(SCORE_RANGE), help="Safety score 1–5"
+    )
+    parser.add_argument(
+        "--mattering", type=int, choices=list(SCORE_RANGE), help="Mattering score 1–5"
+    )
+    parser.add_argument(
+        "--connection", type=int, choices=list(SCORE_RANGE), help="Connection score 1–5"
+    )
+    parser.add_argument(
+        "--cogstate",
+        choices=sorted(COGSTATE_VALUES),
+        help="Cogstate at time of logging",
+    )
     parser.add_argument("--notes", default="", help="Optional free-text notes")
-    parser.add_argument("--status", action="store_true", help="Show progress and today's entry")
-    parser.add_argument("--history", type=int, metavar="N", nargs="?", const=7, help="Show last N entries (default 7)")
-    parser.add_argument("--force", action="store_true", help="Overwrite today's scores even if already filled")
-    parser.add_argument("--path", default=str(BASELINE_PATH), help="Override baseline file path")
+    parser.add_argument(
+        "--status", action="store_true", help="Show progress and today's entry"
+    )
+    parser.add_argument(
+        "--history",
+        type=int,
+        metavar="N",
+        nargs="?",
+        const=7,
+        help="Show last N entries (default 7)",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite today's scores even if already filled",
+    )
+    parser.add_argument(
+        "--path", default=str(BASELINE_PATH), help="Override baseline file path"
+    )
 
     parsed = parser.parse_args(args)
     path = Path(parsed.path)
@@ -342,24 +419,41 @@ def run_cli(args: list[str]) -> int:
         print(history(parsed.history, path))
         return 0
 
-    scores_provided = parsed.safety is not None or parsed.mattering is not None or parsed.connection is not None
+    scores_provided = (
+        parsed.safety is not None
+        or parsed.mattering is not None
+        or parsed.connection is not None
+    )
     if scores_provided:
-        missing = [k for k in ("safety", "mattering", "connection") if getattr(parsed, k) is None]
+        missing = [
+            k
+            for k in ("safety", "mattering", "connection")
+            if getattr(parsed, k) is None
+        ]
         if missing:
-            print(f"Error: must provide all three scores. Missing: {', '.join(missing)}", file=sys.stderr)
+            print(
+                f"Error: must provide all three scores. Missing: {', '.join(missing)}",
+                file=sys.stderr,
+            )
             return 1
         try:
             fn = force_update if parsed.force else fill
             entry = fn(
-                parsed.safety, parsed.mattering, parsed.connection,
-                cogstate=parsed.cogstate, notes=parsed.notes, path=path,
+                parsed.safety,
+                parsed.mattering,
+                parsed.connection,
+                cogstate=parsed.cogstate,
+                notes=parsed.notes,
+                path=path,
             )
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             return 1
         score = belonging_score(entry)
         safe_tag = " [HRSI-safe ✓]" if is_hrsi_safe(entry) else ""
-        print(f"Logged Day {entry['day']} ({entry['date']}): score={score:.1f} [S={entry['safety']} M={entry['mattering']} C={entry['connection']}] cogstate={entry.get('cogstate') or 'unset'}{safe_tag}")
+        print(
+            f"Logged Day {entry['day']} ({entry['date']}): score={score:.1f} [S={entry['safety']} M={entry['mattering']} C={entry['connection']}] cogstate={entry.get('cogstate') or 'unset'}{safe_tag}"
+        )
         return 0
 
     # No args — interactive

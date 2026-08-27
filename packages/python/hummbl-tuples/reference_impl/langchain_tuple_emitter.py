@@ -15,7 +15,6 @@ from collections.abc import Mapping
 from datetime import date, datetime, timezone
 from typing import Any
 
-
 JsonObject = dict[str, Any]
 
 
@@ -151,5 +150,7 @@ class LangChainTupleEmitter:
             time=time,
         )
 
-    def emit_many(self, events: list[Mapping[str, Any]], *, time: str | None = None) -> list[JsonObject]:
+    def emit_many(
+        self, events: list[Mapping[str, Any]], *, time: str | None = None
+    ) -> list[JsonObject]:
         return [self.emit(event, time=time) for event in events]

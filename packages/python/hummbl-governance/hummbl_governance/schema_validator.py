@@ -90,9 +90,7 @@ class RefRegistry:
         """
         key = schema.get("$id") or alias
         if not key:
-            raise RefResolutionError(
-                "schema has no $id and no alias was supplied; cannot register"
-            )
+            raise RefResolutionError("schema has no $id and no alias was supplied; cannot register")
         self._schemas[key] = schema
         if alias and alias != key:
             self._schemas[alias] = schema
@@ -150,14 +148,10 @@ class _Resolver:
             return self._resolve_fragment(self.root, fragment)
 
         if self.registry is None:
-            raise RefResolutionError(
-                f"$ref {ref!r} targets another document but no registry was provided"
-            )
+            raise RefResolutionError(f"$ref {ref!r} targets another document but no registry was provided")
         document = self.registry.get(document_part)
         if document is None:
-            raise RefResolutionError(
-                f"$ref {ref!r} targets unregistered document {document_part!r}"
-            )
+            raise RefResolutionError(f"$ref {ref!r} targets unregistered document {document_part!r}")
         return self._resolve_fragment(document, fragment)
 
     @staticmethod
@@ -173,17 +167,13 @@ class _Resolver:
                 try:
                     node = node[int(token)]
                 except (ValueError, IndexError) as exc:
-                    raise RefResolutionError(
-                        f"fragment token {token!r} is not a valid array index"
-                    ) from exc
+                    raise RefResolutionError(f"fragment token {token!r} is not a valid array index") from exc
             elif isinstance(node, dict):
                 if token not in node:
                     raise RefResolutionError(f"fragment token {token!r} not found in document")
                 node = node[token]
             else:
-                raise RefResolutionError(
-                    f"fragment token {token!r} cannot descend into {type(node).__name__}"
-                )
+                raise RefResolutionError(f"fragment token {token!r} cannot descend into {type(node).__name__}")
         if not isinstance(node, dict):
             raise RefResolutionError("$ref target must be a schema object")
         return node

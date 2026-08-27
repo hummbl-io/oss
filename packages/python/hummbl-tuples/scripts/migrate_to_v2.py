@@ -30,19 +30,28 @@ SCHEMAS_DIR = REPO_ROOT / "schemas"
 EXAMPLES_DIR = REPO_ROOT / "examples"
 
 # IDP tuple types that get Layer 2 governance fields
-IDP_TYPES = frozenset({
-    "CONTRACT", "DCT", "DCTX", "EVIDENCE", "ATTEST", "SYSTEM",
-})
+IDP_TYPES = frozenset(
+    {
+        "CONTRACT",
+        "DCT",
+        "DCTX",
+        "EVIDENCE",
+        "ATTEST",
+        "SYSTEM",
+    }
+)
 
 # Schema files that correspond to IDP types
-IDP_SCHEMA_FILES = frozenset({
-    "contract.schema.json",
-    "dct.schema.json",
-    "dctx.schema.json",
-    "evidence.schema.json",
-    "attest.schema.json",
-    "system.schema.json",
-})
+IDP_SCHEMA_FILES = frozenset(
+    {
+        "contract.schema.json",
+        "dct.schema.json",
+        "dctx.schema.json",
+        "evidence.schema.json",
+        "attest.schema.json",
+        "system.schema.json",
+    }
+)
 
 
 def _short_id() -> str:
@@ -143,7 +152,14 @@ def migrate_schema(path: Path) -> bool:
                 if k in props:
                     ordered_props[k] = props[k]
         # Domain-specific (everything else except tuple_data and Layer 4)
-        layer_4 = {"args_hash", "signature", "previous_hash", "contract_id", "dct_id", "dct_chain_depth"}
+        layer_4 = {
+            "args_hash",
+            "signature",
+            "previous_hash",
+            "contract_id",
+            "dct_id",
+            "dct_chain_depth",
+        }
         for k, v in props.items():
             if k not in ordered_props and k != "tuple_data" and k not in layer_4:
                 ordered_props[k] = v
@@ -166,6 +182,7 @@ def migrate_schema(path: Path) -> bool:
 # ---------------------------------------------------------------------------
 # Example migration
 # ---------------------------------------------------------------------------
+
 
 def migrate_example(path: Path) -> bool:
     """Migrate a single example file. Returns True if modified."""
@@ -243,6 +260,7 @@ def migrate_example(path: Path) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     print("=== Migrating schemas ===")
     schema_count = 0
@@ -253,7 +271,7 @@ def main() -> int:
         else:
             print(f"  OK       {schema_path.name}")
 
-    print(f"\n=== Migrating examples ===")
+    print("\n=== Migrating examples ===")
     example_count = 0
     for example_path in sorted(EXAMPLES_DIR.rglob("*.json")):
         if migrate_example(example_path):

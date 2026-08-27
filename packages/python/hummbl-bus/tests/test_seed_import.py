@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_bus.seed_import import import_bus_history, seed_request_id
 
 

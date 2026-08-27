@@ -3,7 +3,7 @@
 **Subject:** Hardening HUMMBL Formal Proofs for Independent Third-Party Verification  
 **Dedicated Portal:** `proofs.hummbl.io` (or `krineia.hummbl.io`)  
 **Date:** August 2026  
-**Canonical Surface:** [`krineia`](file:///<repo-root>/PROJECTS/krineia), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`hummbl-production`](file:///<repo-root>/PROJECTS/hummbl-production)  
+**Canonical Surface:** [`krineia`](https://github.com/hummbl-io/krineia), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`hummbl-production`](https://github.com/hummbl-io/hummbl-production)  
 
 ---
 
@@ -36,7 +36,7 @@ To achieve complete third-party verifiability, HUMMBL enforces the **Four Pillar
 
 ### Requirement 1: Machine-Checkable Theorem Files (TLA+ & Lean 4)
 - **TLA+ Specifications:**
-  - Complete `.tla` and `.cfg` files (as stored in [`krineia/papers/krineia-invariants/tla/`](file:///<repo-root>/PROJECTS/krineia/papers/krineia-invariants/tla)).
+  - Complete `.tla` and `.cfg` files (as stored in [`krineia/papers/krineia-invariants/tla/`](https://github.com/hummbl-io/krineiapapers/krineia-invariants/tla)).
   - Explicit state space bounds (e.g., `MaxDepth = 5`, `Agents = {a1, a2, a3}`).
   - **Invariants Checked:** Deadlock freedom, non-bypassable capability fences, single-authority kill switch severance, and append-only receipt ordering.
 - **Lean 4 Interactive Proofs:**
@@ -113,4 +113,4 @@ proofs.hummbl.io (or krineia.hummbl.io)
 
 1. **DNS Setup:** Add `proofs.hummbl.io` or `krineia.hummbl.io` CNAME in Cloudflare (Zone: `hummbl.io`).
 2. **Hosting:** Deploy as a static Cloudflare Pages project (pure HTML/JS/WASM, zero backend servers).
-3. **Asset Compilation:** Export the existing [`KRINEIA.tla`](file:///<repo-root>/PROJECTS/krineia/papers/krineia-invariants/tla/KRINEIA.tla) model and paper to the web interface.
+3. **Asset Compilation:** Export the existing [`KRINEIA.tla`](https://github.com/hummbl-io/krineiapapers/krineia-invariants/tla/KRINEIA.tla) model and paper to the web interface.

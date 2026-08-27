@@ -8,12 +8,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.models import LedgerEntry
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 def _make_entry(
     content: str,
@@ -49,6 +49,7 @@ def _write_ledger(tmp_path: Path, entries: list[LedgerEntry]) -> Path:
 # ---------------------------------------------------------------------------
 # L1: Schema — links field
 # ---------------------------------------------------------------------------
+
 
 class TestLinksField:
     def test_create_with_no_links(self):
@@ -93,9 +94,13 @@ class TestLinksField:
     def test_links_from_list(self):
         e1 = _make_entry("first")
         e2 = LedgerEntry.create(
-            agent="test", vendor="anthropic", model="test",
-            entry_type="lesson", scope="project",
-            content="with list links", links=[e1.id],
+            agent="test",
+            vendor="anthropic",
+            model="test",
+            entry_type="lesson",
+            scope="project",
+            content="with list links",
+            links=[e1.id],
         )
         assert isinstance(e2.links, tuple)
         assert e2.links == (e1.id,)
@@ -114,9 +119,11 @@ class TestLinksField:
 # L2: Indexer
 # ---------------------------------------------------------------------------
 
+
 class TestTokenize:
     def test_basic_tokenization(self):
         from hummbl_cognition.indexer import tokenize
+
         tokens = tokenize("OAuth token refresh failed")
         assert "oauth" in tokens
         assert "token" in tokens
@@ -125,6 +132,7 @@ class TestTokenize:
 
     def test_stopwords_removed(self):
         from hummbl_cognition.indexer import tokenize
+
         tokens = tokenize("the quick brown fox is not very fast")
         assert "the" not in tokens
         assert "is" not in tokens
@@ -134,12 +142,14 @@ class TestTokenize:
 
     def test_single_char_removed(self):
         from hummbl_cognition.indexer import tokenize
+
         tokens = tokenize("a b c def")
         assert "a" not in tokens
         assert "def" in tokens
 
     def test_dotted_identifiers(self):
         from hummbl_cognition.indexer import tokenize
+
         tokens = tokenize("hummbl_cognition.retriever.search")
         assert "hummbl_cognition.retriever.search" in tokens
 
@@ -147,6 +157,7 @@ class TestTokenize:
 class TestBM25Index:
     def test_build_empty_ledger(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         ledger = tmp_path / "empty.jsonl"
         ledger.touch()
         idx = BM25Index()
@@ -156,6 +167,7 @@ class TestBM25Index:
 
     def test_build_and_search(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry("OAuth token refresh failed during morning briefing"),
             _make_entry("Circuit breaker opened for GitHub adapter"),
@@ -172,6 +184,7 @@ class TestBM25Index:
 
     def test_search_with_scope_filter(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry("OAuth issue", scope="project"),
             _make_entry("OAuth module bug", scope="module"),
@@ -186,6 +199,7 @@ class TestBM25Index:
 
     def test_search_with_type_filter(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry("discovered a bug", entry_type="discovery"),
             _make_entry("decided to fix the bug", entry_type="decision"),
@@ -200,6 +214,7 @@ class TestBM25Index:
 
     def test_save_and_load(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry("test content for indexing"),
             _make_entry("another entry about testing"),
@@ -221,11 +236,13 @@ class TestBM25Index:
 
     def test_load_nonexistent_returns_false(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         idx = BM25Index()
         assert idx.load(tmp_path / "nope.json") is False
 
     def test_retrieval_boost(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry("alpha topic first"),
             _make_entry("alpha topic second"),
@@ -244,6 +261,7 @@ class TestBM25Index:
 
     def test_empty_query_returns_empty(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [_make_entry("some content")]
         ledger = _write_ledger(tmp_path, entries)
         idx = BM25Index()
@@ -253,6 +271,7 @@ class TestBM25Index:
 
     def test_search_limit(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [_make_entry(f"topic number {i}") for i in range(10)]
         ledger = _write_ledger(tmp_path, entries)
         idx = BM25Index()
@@ -262,6 +281,7 @@ class TestBM25Index:
 
     def test_since_filter(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [_make_entry("recent event")]
         ledger = _write_ledger(tmp_path, entries)
         idx = BM25Index()
@@ -273,6 +293,7 @@ class TestBM25Index:
 
     def test_indexes_tags(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry("generic content", tags=("authentication", "oauth")),
         ]
@@ -285,6 +306,7 @@ class TestBM25Index:
 
     def test_indexes_links_in_meta(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         e1 = _make_entry("first")
         e2 = _make_entry("second", links=(e1.id,))
         ledger = _write_ledger(tmp_path, [e1, e2])
@@ -297,6 +319,7 @@ class TestBM25Index:
 # ---------------------------------------------------------------------------
 # L3: Retriever
 # ---------------------------------------------------------------------------
+
 
 class TestOpenBrainRetriever:
     def test_search_ledger_only(self, tmp_path):
@@ -316,7 +339,9 @@ class TestOpenBrainRetriever:
         retriever = OpenBrainRetriever(state_dir=tmp_path, index=idx)
         retriever._index_loaded = True
         results = retriever.search(
-            "OAuth refresh", sources=["ledger"], agent="test",
+            "OAuth refresh",
+            sources=["ledger"],
+            agent="test",
         )
         assert len(results) > 0
         assert results[0].source == "ledger"
@@ -336,7 +361,10 @@ class TestOpenBrainRetriever:
         retriever = OpenBrainRetriever(state_dir=tmp_path, index=idx)
         retriever._index_loaded = True
         results = retriever.search(
-            "topic", token_budget=100, sources=["ledger"], agent="test",
+            "topic",
+            token_budget=100,
+            sources=["ledger"],
+            agent="test",
         )
         total = sum(r.tokens for r in results)
         assert total <= 100
@@ -347,34 +375,48 @@ class TestOpenBrainRetriever:
         findings_dir = tmp_path / "autoresearch"
         findings_dir.mkdir()
         findings = [
-            {"id": "f1", "claim": "Learning rate sweep improves convergence",
-             "source": "test", "confidence": 0.8, "category": "ml"},
+            {
+                "id": "f1",
+                "claim": "Learning rate sweep improves convergence",
+                "source": "test",
+                "confidence": 0.8,
+                "category": "ml",
+            },
         ]
         (findings_dir / "findings_test.json").write_text(json.dumps(findings))
 
         retriever = OpenBrainRetriever(state_dir=tmp_path)
         retriever._index_loaded = True
         results = retriever.search(
-            "learning rate", sources=["findings"], agent="test",
+            "learning rate",
+            sources=["findings"],
+            agent="test",
         )
         assert len(results) > 0
         assert results[0].source == "findings"
 
     def test_search_no_results(self, tmp_path):
         from hummbl_cognition.retriever import OpenBrainRetriever
+
         (tmp_path / "cognition").mkdir()
         retriever = OpenBrainRetriever(state_dir=tmp_path)
         retriever._index_loaded = True
         results = retriever.search(
-            "xyzzy nonexistent", sources=["ledger"], agent="test",
+            "xyzzy nonexistent",
+            sources=["ledger"],
+            agent="test",
         )
         assert results == []
 
     def test_result_to_dict(self):
         from hummbl_cognition.retriever import MemoryResult
+
         r = MemoryResult(
-            source="ledger", entry_id="clp-000000000001",
-            score=1.5, content="test", metadata={"type": "lesson"},
+            source="ledger",
+            entry_id="clp-000000000001",
+            score=1.5,
+            content="test",
+            metadata={"type": "lesson"},
         )
         d = r.to_dict()
         assert d["source"] == "ledger"
@@ -410,6 +452,7 @@ class TestOpenBrainRetriever:
 # L6: Feedback Tracker
 # ---------------------------------------------------------------------------
 
+
 class TestFeedbackTracker:
     def test_log_and_read(self, tmp_path):
         from hummbl_cognition.feedback_tracker import (
@@ -417,15 +460,20 @@ class TestFeedbackTracker:
             log_retrieval,
             read_retrieval_log,
         )
+
         log_path = tmp_path / "retrieval.jsonl"
 
         log_retrieval(
-            query="OAuth", entry_ids=["clp-000000000001", "clp-000000000002"],
-            agent="test", log_path=log_path,
+            query="OAuth",
+            entry_ids=["clp-000000000001", "clp-000000000002"],
+            agent="test",
+            log_path=log_path,
         )
         log_retrieval(
-            query="OAuth refresh", entry_ids=["clp-000000000001"],
-            agent="test", log_path=log_path,
+            query="OAuth refresh",
+            entry_ids=["clp-000000000001"],
+            agent="test",
+            log_path=log_path,
         )
 
         counts = get_retrieval_counts(log_path=log_path)
@@ -439,6 +487,7 @@ class TestFeedbackTracker:
 
     def test_empty_log(self, tmp_path):
         from hummbl_cognition.feedback_tracker import get_retrieval_counts
+
         counts = get_retrieval_counts(log_path=tmp_path / "nope.jsonl")
         assert counts == {}
 
@@ -447,14 +496,18 @@ class TestFeedbackTracker:
             get_retrieval_counts,
             log_retrieval,
         )
+
         log_path = tmp_path / "retrieval.jsonl"
         log_retrieval(
-            query="test", entry_ids=["clp-000000000001"],
-            agent="test", log_path=log_path,
+            query="test",
+            entry_ids=["clp-000000000001"],
+            agent="test",
+            log_path=log_path,
         )
         # Future date filters everything out
         counts = get_retrieval_counts(
-            log_path=log_path, since="2099-01-01T00:00:00Z",
+            log_path=log_path,
+            since="2099-01-01T00:00:00Z",
         )
         assert counts == {}
 
@@ -463,11 +516,14 @@ class TestFeedbackTracker:
             log_retrieval,
             read_retrieval_log,
         )
+
         log_path = tmp_path / "retrieval.jsonl"
         long_query = "x" * 1000
         log_retrieval(
-            query=long_query, entry_ids=["clp-000000000001"],
-            agent="test", log_path=log_path,
+            query=long_query,
+            entry_ids=["clp-000000000001"],
+            agent="test",
+            log_path=log_path,
         )
         events = read_retrieval_log(log_path=log_path)
         assert len(events[0]["query"]) == 500
@@ -476,6 +532,7 @@ class TestFeedbackTracker:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 class TestCLISearch:
     def test_search_command_runs(self, tmp_path):
@@ -486,11 +543,17 @@ class TestCLISearch:
         cog_dir.mkdir()
         ledger = _write_ledger(cog_dir, entries)
 
-        with patch.dict(os.environ, {"COGNITION_LEDGER": str(ledger),
-                                     "COGNITION_INDEX": str(cog_dir / "index.json"),
-                                     "HUMMBL_COGNITION_STATE": str(tmp_path)}):
-            result = main(["--ledger", str(ledger), "search", "OAuth",
-                          "--sources", "ledger"])
+        with patch.dict(
+            os.environ,
+            {
+                "COGNITION_LEDGER": str(ledger),
+                "COGNITION_INDEX": str(cog_dir / "index.json"),
+                "HUMMBL_COGNITION_STATE": str(tmp_path),
+            },
+        ):
+            result = main(
+                ["--ledger", str(ledger), "search", "OAuth", "--sources", "ledger"]
+            )
         assert result == 0
 
     def test_reindex_command(self, tmp_path):
@@ -511,9 +574,9 @@ class TestCLISearch:
 # Boot Context
 # ---------------------------------------------------------------------------
 
+
 class TestBootContext:
-    def _setup_cognition_dir(self, tmp_path, *, entries=None, intent=None,
-                              state=None):
+    def _setup_cognition_dir(self, tmp_path, *, entries=None, intent=None, state=None):
         """Create a cognition dir with optional intent, state, and ledger."""
         cog = tmp_path / "cognition"
         cog.mkdir(parents=True, exist_ok=True)
@@ -527,6 +590,7 @@ class TestBootContext:
 
     def test_all_three_layers(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
+
         cog = self._setup_cognition_dir(
             tmp_path,
             intent="# Sprint\nMARCH-OPS",
@@ -546,8 +610,10 @@ class TestBootContext:
 
     def test_intent_only(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
+
         cog = self._setup_cognition_dir(
-            tmp_path, intent="# My Intent\nDo the thing",
+            tmp_path,
+            intent="# My Intent\nDo the thing",
         )
         ctx = build_boot_context(cog)
         assert "Current Intent" in ctx
@@ -555,6 +621,7 @@ class TestBootContext:
 
     def test_empty_cognition_dir(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
+
         cog = tmp_path / "cognition"
         cog.mkdir()
         ctx = build_boot_context(cog)
@@ -562,6 +629,7 @@ class TestBootContext:
 
     def test_type_priority_ordering(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
+
         entries = [
             _make_entry("a discovery", entry_type="discovery"),
             _make_entry("a decision", entry_type="decision"),
@@ -575,6 +643,7 @@ class TestBootContext:
 
     def test_max_age_filtering(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
+
         entries = [_make_entry("recent entry")]
         cog = self._setup_cognition_dir(tmp_path, entries=entries)
         # max_age_days=0 should filter everything (entry is from "now")
@@ -582,12 +651,17 @@ class TestBootContext:
         # Use the index path to test instead.
         ctx = build_boot_context(cog, max_age_days=14)
         # Recent entry should be included
-        assert "recent entry" in ctx or "Recent Learnings" in ctx or "No cognitive data" in ctx
+        assert (
+            "recent entry" in ctx
+            or "Recent Learnings" in ctx
+            or "No cognitive data" in ctx
+        )
 
     def test_index_based_summary(self, tmp_path):
         """When index.json exists, use fast path."""
         from hummbl_cognition.boot_context import build_boot_context
         from hummbl_cognition.indexer import BM25Index
+
         entries = [_make_entry("indexed entry about testing", entry_type="decision")]
         cog = self._setup_cognition_dir(tmp_path, entries=entries)
         # Build and save index
@@ -601,6 +675,7 @@ class TestBootContext:
     def test_sequential_fallback_no_index(self, tmp_path):
         """Without index.json, falls back to sequential scan."""
         from hummbl_cognition.boot_context import build_boot_context
+
         entries = [_make_entry("sequential scan entry", entry_type="lesson")]
         cog = self._setup_cognition_dir(tmp_path, entries=entries)
         # No index.json built
@@ -610,6 +685,7 @@ class TestBootContext:
 
     def test_state_formatting(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
+
         cog = self._setup_cognition_dir(
             tmp_path,
             state={
@@ -631,6 +707,7 @@ class TestBootContext:
     def test_malformed_state_json(self, tmp_path):
         """Corrupt state.json should not crash."""
         from hummbl_cognition.boot_context import build_boot_context
+
         cog = tmp_path / "cognition"
         cog.mkdir()
         (cog / "state.json").write_text("{invalid json!!")
@@ -640,7 +717,10 @@ class TestBootContext:
 
     def test_max_entries_limits_output(self, tmp_path):
         from hummbl_cognition.boot_context import build_boot_context
-        entries = [_make_entry(f"entry number {i}", entry_type="lesson") for i in range(50)]
+
+        entries = [
+            _make_entry(f"entry number {i}", entry_type="lesson") for i in range(50)
+        ]
         cog = self._setup_cognition_dir(tmp_path, entries=entries)
         ctx = build_boot_context(cog, max_entries=5)
         # Should not contain all 50 entries
@@ -651,10 +731,12 @@ class TestBootContext:
 # Edge Cases: Token budget, stigmergic boost, pool discounts
 # ---------------------------------------------------------------------------
 
+
 class TestEdgeCases:
     def test_token_budget_zero(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
         from hummbl_cognition.retriever import OpenBrainRetriever
+
         entries = [_make_entry("test content")]
         ledger = _write_ledger(tmp_path / "cognition", entries)
         (tmp_path / "cognition").mkdir(exist_ok=True)
@@ -668,6 +750,7 @@ class TestEdgeCases:
     def test_token_budget_truncates_content(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
         from hummbl_cognition.retriever import OpenBrainRetriever
+
         entries = [_make_entry("keyword " * 100)]  # Large content
         ledger = _write_ledger(tmp_path / "cognition", entries)
         (tmp_path / "cognition").mkdir(exist_ok=True)
@@ -682,7 +765,11 @@ class TestEdgeCases:
 
     def test_boost_with_no_retrievals(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
-        entries = [_make_entry("alpha topic content"), _make_entry("beta topic content")]
+
+        entries = [
+            _make_entry("alpha topic content"),
+            _make_entry("beta topic content"),
+        ]
         ledger = _write_ledger(tmp_path, entries)
         idx = BM25Index()
         idx.build(ledger_path=ledger)
@@ -693,6 +780,7 @@ class TestEdgeCases:
 
     def test_boost_with_single_retrieval(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [_make_entry("alpha topic"), _make_entry("beta topic")]
         ledger = _write_ledger(tmp_path, entries)
         idx = BM25Index()
@@ -704,6 +792,7 @@ class TestEdgeCases:
 
     def test_boost_disabled(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         entries = [_make_entry("alpha topic"), _make_entry("alpha topic")]
         ledger = _write_ledger(tmp_path, entries)
         idx = BM25Index()
@@ -719,6 +808,7 @@ class TestEdgeCases:
     def test_pool_discount_bus(self, tmp_path):
         """Bus pool results are discounted by 0.7x."""
         from hummbl_cognition.retriever import OpenBrainRetriever
+
         coord_dir = tmp_path / "coordination"
         coord_dir.mkdir()
         (coord_dir / "messages.tsv").write_text(
@@ -734,11 +824,16 @@ class TestEdgeCases:
     def test_pool_discount_findings(self, tmp_path):
         """Findings pool results are discounted by 0.8x."""
         from hummbl_cognition.retriever import OpenBrainRetriever
+
         ar_dir = tmp_path / "autoresearch"
         ar_dir.mkdir()
-        (ar_dir / "findings_test.json").write_text(json.dumps([
-            {"id": "f1", "claim": "learning rate improvement confirmed"},
-        ]))
+        (ar_dir / "findings_test.json").write_text(
+            json.dumps(
+                [
+                    {"id": "f1", "claim": "learning rate improvement confirmed"},
+                ]
+            )
+        )
         r = OpenBrainRetriever(state_dir=tmp_path)
         r._index_loaded = True
         results = r.search("learning rate", sources=["findings"], agent="test")
@@ -750,9 +845,11 @@ class TestEdgeCases:
 # Error Resilience
 # ---------------------------------------------------------------------------
 
+
 class TestErrorResilience:
     def test_corrupted_index_load_returns_false(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         bad_index = tmp_path / "index.json"
         bad_index.write_text("{corrupt json!!")
         idx = BM25Index()
@@ -760,6 +857,7 @@ class TestErrorResilience:
 
     def test_malformed_ledger_lines_skipped(self, tmp_path):
         from hummbl_cognition.indexer import BM25Index
+
         ledger = tmp_path / "ledger.jsonl"
         good = _make_entry("valid entry")
         with open(ledger, "w") as f:
@@ -773,10 +871,11 @@ class TestErrorResilience:
 
     def test_malformed_retrieval_log_lines(self, tmp_path):
         from hummbl_cognition.feedback_tracker import get_retrieval_counts
+
         log = tmp_path / "retrieval.jsonl"
         log.write_text(
             '{"timestamp":"2026-03-15","entry_ids":["clp-000000000001"]}\n'
-            '{bad json\n'
+            "{bad json\n"
             '{"timestamp":"2026-03-15","entry_ids":["clp-000000000002"]}\n'
         )
         counts = get_retrieval_counts(log_path=log)
@@ -786,16 +885,20 @@ class TestErrorResilience:
     def test_retriever_missing_dirs_graceful(self, tmp_path):
         """Retriever handles missing pool directories without crashing."""
         from hummbl_cognition.retriever import OpenBrainRetriever
+
         r = OpenBrainRetriever(state_dir=tmp_path)
         r._index_loaded = True
         # All pools should gracefully return empty
-        results = r.search("anything", sources=["bus", "briefings", "findings"], agent="test")
+        results = r.search(
+            "anything", sources=["bus", "briefings", "findings"], agent="test"
+        )
         assert results == []
 
 
 # ---------------------------------------------------------------------------
 # Concurrency
 # ---------------------------------------------------------------------------
+
 
 class TestConcurrency:
     def test_concurrent_feedback_logging(self, tmp_path):
@@ -805,6 +908,7 @@ class TestConcurrency:
         from hummbl_cognition.feedback_tracker import (
             log_retrieval,
         )
+
         log_path = tmp_path / "concurrent.jsonl"
         errors = []
 
@@ -840,12 +944,15 @@ class TestConcurrency:
         # a concurrent append without raising. The test's core guarantee is
         # that no line is corrupted (all are valid JSON) and no errors raised.
         # Allow a small tolerance for the known Windows locking limitation.
-        assert line_count >= 95, f"Expected >=95 lines, got {line_count} (5 threads * 20 writes)"
+        assert line_count >= 95, (
+            f"Expected >=95 lines, got {line_count} (5 threads * 20 writes)"
+        )
 
 
 # ---------------------------------------------------------------------------
 # Performance Baselines
 # ---------------------------------------------------------------------------
+
 
 class TestPerformance:
     def test_large_ledger_index_build(self, tmp_path):
@@ -853,8 +960,11 @@ class TestPerformance:
         import time
 
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
-            _make_entry(f"Entry about topic {i} with content about testing and development")
+            _make_entry(
+                f"Entry about topic {i} with content about testing and development"
+            )
             for i in range(1000)
         ]
         ledger = _write_ledger(tmp_path, entries)
@@ -870,6 +980,7 @@ class TestPerformance:
         import time
 
         from hummbl_cognition.indexer import BM25Index
+
         entries = [
             _make_entry(f"Entry about topic {i} with content about testing development")
             for i in range(1000)
@@ -888,6 +999,7 @@ class TestPerformance:
         import time
 
         from hummbl_cognition.consolidator import run_consolidation
+
         entries = [
             _make_entry(f"OAuth token refresh variant {i} failed scheduler briefing")
             for i in range(500)
@@ -907,6 +1019,7 @@ class TestPerformance:
 # Research Queue Externalization
 # ---------------------------------------------------------------------------
 
+
 class TestResearchQueueExternalization:
     """Tests for load_research_queue / save_research_queue externalization."""
 
@@ -915,12 +1028,23 @@ class TestResearchQueueExternalization:
         from hummbl_cognition.research_processor import (
             load_research_queue,
         )
+
         queue_file = tmp_path / "research_queue.json"
         items = [
-            {"id": "RQ-100", "domain": "test", "query": "What is X?",
-             "tier": 1, "recurrence": "weekly"},
-            {"id": "RQ-101", "domain": "test2", "query": "What is Y?",
-             "tier": 2, "recurrence": "monthly"},
+            {
+                "id": "RQ-100",
+                "domain": "test",
+                "query": "What is X?",
+                "tier": 1,
+                "recurrence": "weekly",
+            },
+            {
+                "id": "RQ-101",
+                "domain": "test2",
+                "query": "What is Y?",
+                "tier": 2,
+                "recurrence": "monthly",
+            },
         ]
         queue_file.write_text(json.dumps(items), encoding="utf-8")
 
@@ -935,6 +1059,7 @@ class TestResearchQueueExternalization:
             DEFAULT_QUEUE,
             load_research_queue,
         )
+
         missing = tmp_path / "does_not_exist.json"
         loaded = load_research_queue(path=missing)
         assert loaded == DEFAULT_QUEUE
@@ -947,9 +1072,15 @@ class TestResearchQueueExternalization:
             load_research_queue,
             save_research_queue,
         )
+
         items = [
-            {"id": "RQ-200", "domain": "roundtrip", "query": "Does it work?",
-             "tier": 3, "recurrence": "once"},
+            {
+                "id": "RQ-200",
+                "domain": "roundtrip",
+                "query": "Does it work?",
+                "tier": 3,
+                "recurrence": "once",
+            },
         ]
         out_path = tmp_path / "rq.json"
         returned_path = save_research_queue(items, path=out_path)
@@ -965,18 +1096,27 @@ class TestResearchQueueExternalization:
             load_research_queue,
             save_research_queue,
         )
+
         queue_file = tmp_path / "research_queue.json"
         original = [
-            {"id": "RQ-300", "domain": "alpha", "query": "Q1",
-             "tier": 1, "recurrence": "weekly"},
+            {
+                "id": "RQ-300",
+                "domain": "alpha",
+                "query": "Q1",
+                "tier": 1,
+                "recurrence": "weekly",
+            },
         ]
         save_research_queue(original, path=queue_file)
 
         # Load, add, save
         queue = load_research_queue(path=queue_file)
         new_item = {
-            "id": "RQ-301", "domain": "beta", "query": "Q2",
-            "tier": 2, "recurrence": "monthly",
+            "id": "RQ-301",
+            "domain": "beta",
+            "query": "Q2",
+            "tier": 2,
+            "recurrence": "monthly",
         }
         queue.append(new_item)
         save_research_queue(queue, path=queue_file)

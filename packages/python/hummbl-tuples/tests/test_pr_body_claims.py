@@ -18,7 +18,6 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from check_pr_body_claims import extract_file_paths, strip_code_blocks
 
-
 # A file that exists in the repo
 EXISTING_FILE = "docs/specs/HASH_CHAINING_DESIGN.md"
 # A file that does not exist
@@ -128,11 +127,7 @@ def test_tilde_fenced_code_block_stripped():
 
 def test_tilde_fenced_path_not_extracted():
     """A file path inside a tilde-fenced code block should NOT be extracted."""
-    text = (
-        "~~~python\n"
-        "# config at docs/specs/baz.md\n"
-        "~~~\n"
-    )
+    text = "~~~python\n# config at docs/specs/baz.md\n~~~\n"
     stripped = strip_code_blocks(text)
     paths = extract_file_paths(stripped)
     assert "docs/specs/baz.md" not in paths

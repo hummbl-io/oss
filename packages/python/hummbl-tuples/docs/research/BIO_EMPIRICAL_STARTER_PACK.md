@@ -9,11 +9,11 @@ Provide the minimum kit needed to begin collecting evidence for the bio-cognitiv
 
 ## Included Components
 
-- [BIO_GOVERNANCE_INDEX.md](/Users/others/PROJECTS/hummbl-tuples/docs/specs/BIO_GOVERNANCE_INDEX.md)
-- [BIO_GOVERNANCE_TUPLE_TAXONOMY.md](/Users/others/PROJECTS/hummbl-tuples/docs/specs/BIO_GOVERNANCE_TUPLE_TAXONOMY.md)
-- [BIO_CONTROL_EXPERIMENT_MATRIX.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_CONTROL_EXPERIMENT_MATRIX.md)
-- [BIO_PROTOCOLS.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_PROTOCOLS.md)
-- [BIO_CASE_LOG_TEMPLATE.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_CASE_LOG_TEMPLATE.md)
+- [BIO_GOVERNANCE_INDEX.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/specs/BIO_GOVERNANCE_INDEX.md)
+- [BIO_GOVERNANCE_TUPLE_TAXONOMY.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/specs/BIO_GOVERNANCE_TUPLE_TAXONOMY.md)
+- [BIO_CONTROL_EXPERIMENT_MATRIX.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_CONTROL_EXPERIMENT_MATRIX.md)
+- [BIO_PROTOCOLS.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_PROTOCOLS.md)
+- [BIO_CASE_LOG_TEMPLATE.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_CASE_LOG_TEMPLATE.md)
 
 ## First Recommended Run
 

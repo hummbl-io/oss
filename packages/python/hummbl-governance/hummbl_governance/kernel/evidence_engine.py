@@ -117,6 +117,7 @@ class EvidenceEngine:
         Used to deduplicate and track claims across receipts.
         """
         import hashlib
+
         return hashlib.sha256(claim.lower().strip().encode()).hexdigest()[:16]
 
     def validate_receipt_claims(self, payload: dict[str, Any]) -> tuple[bool, list[str]]:
@@ -137,8 +138,6 @@ class EvidenceEngine:
                 claim.get("methodology", ""),
             )
             if not grade.is_acceptable():
-                reasons.append(
-                    f"Claim '{claim.get('text', '')[:50]}...' has unacceptable evidence grade (all C)"
-                )
+                reasons.append(f"Claim '{claim.get('text', '')[:50]}...' has unacceptable evidence grade (all C)")
 
         return len(reasons) == 0, reasons

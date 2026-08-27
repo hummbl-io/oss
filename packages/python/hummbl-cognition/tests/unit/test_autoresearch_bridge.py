@@ -16,21 +16,25 @@ def _write_report(path: Path, title: str, summary: str) -> Path:
 class TestExtractTitle:
     def test_extracts_h1(self):
         from hummbl_cognition.autoresearch_bridge import _extract_title
+
         assert _extract_title("# My Report\n\nBody text") == "My Report"
 
     def test_empty_when_no_heading(self):
         from hummbl_cognition.autoresearch_bridge import _extract_title
+
         assert _extract_title("Just plain text") == ""
 
 
 class TestExtractSummary:
     def test_extracts_executive_summary(self):
         from hummbl_cognition.autoresearch_bridge import _extract_summary
+
         content = "# Title\n\n## Executive Summary\n\nThis is the summary.\n\n## Next Section\n"
         assert "This is the summary" in _extract_summary(content)
 
     def test_fallback_to_first_paragraph(self):
         from hummbl_cognition.autoresearch_bridge import _extract_summary
+
         content = "# Title\n\nFirst paragraph here.\n\nSecond paragraph.\n"
         summary = _extract_summary(content)
         assert "First paragraph" in summary
@@ -41,7 +45,9 @@ class TestParseReport:
         from hummbl_cognition.autoresearch_bridge import _parse_report
 
         report = tmp_path / "reports" / "2026-03-14-test-report.md"
-        _write_report(report, "Test Report", "This is a test finding about OAuth patterns.")
+        _write_report(
+            report, "Test Report", "This is a test finding about OAuth patterns."
+        )
 
         entry = _parse_report(report)
         assert entry is not None
@@ -127,7 +133,8 @@ class TestRunBridge:
         repo_dir = tmp_path / "repo"
         _write_report(
             repo_dir / "reports" / "2026-03-14-test.md",
-            "Test Report", "A summary about OAuth.",
+            "Test Report",
+            "A summary about OAuth.",
         )
 
         result = run_bridge(
@@ -151,7 +158,8 @@ class TestRunBridge:
         repo_dir = tmp_path / "repo"
         _write_report(
             repo_dir / "reports" / "2026-03-14-test.md",
-            "Test Report", "A summary about OAuth.",
+            "Test Report",
+            "A summary about OAuth.",
         )
 
         result = run_bridge(
@@ -177,7 +185,8 @@ class TestRunBridge:
         repo_dir = tmp_path / "repo"
         report = _write_report(
             repo_dir / "reports" / "2026-03-14-test.md",
-            "Test Report", "A summary.",
+            "Test Report",
+            "A summary.",
         )
 
         # Pre-populate state as already ingested
@@ -223,15 +232,19 @@ class TestRunBridge:
         repo_dir = tmp_path / "repo"
         _write_report(
             repo_dir / "reports" / "2026-03-14-test.md",
-            "Test Report", "Original content.",
+            "Test Report",
+            "Original content.",
         )
 
         # Pre-populate with OLD hash
         state_file = tmp_path / "state.json"
-        _save_state(state_file, {
-            "ingested_files": {"reports/2026-03-14-test.md": "old_hash"},
-            "last_run": None,
-        })
+        _save_state(
+            state_file,
+            {
+                "ingested_files": {"reports/2026-03-14-test.md": "old_hash"},
+                "last_run": None,
+            },
+        )
 
         result = run_bridge(
             repo_dir=repo_dir,

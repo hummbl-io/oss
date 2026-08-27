@@ -33,6 +33,7 @@ import json
 import hashlib
 from pathlib import Path
 
+
 def verify_base120_seed(base120_path: Path) -> bool:
     """Verify Base120 seed integrity. Returns True if valid."""
     seed_path = base120_path / "artifacts" / "base120.v1.0.0.seed.json"
@@ -101,7 +102,7 @@ provenance = {
     "version": "v1.0.0",
     "sha256": "74c51092b218dcf7b430569fffb36a23ae42aa07f7f1b900479b1721e585656d",  # pragma: allowlist secret -- public sha256 of base120 v1.0.0 seed artifact
     "acquired_at": datetime.now(timezone.utc).isoformat(),
-    "verified": True
+    "verified": True,
 }
 ```
 
@@ -110,8 +111,12 @@ provenance = {
 ```python
 import requests
 
-SEED_URL = "https://raw.githubusercontent.com/hummbl-io/base120/main/artifacts/base120.v1.0.0.seed.json"
-HASH_URL = "https://raw.githubusercontent.com/hummbl-io/base120/main/artifacts/base120.v1.0.0.seed.sha256"
+SEED_URL = (
+    "https://raw.githubusercontent.com/hummbl-io/base120/main/artifacts/base120.v1.0.0.seed.json"
+)
+HASH_URL = (
+    "https://raw.githubusercontent.com/hummbl-io/base120/main/artifacts/base120.v1.0.0.seed.sha256"
+)
 
 # Fetch and verify before use
 ```

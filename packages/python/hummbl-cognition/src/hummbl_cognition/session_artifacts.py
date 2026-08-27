@@ -44,14 +44,16 @@ logger = logging.getLogger(__name__)
 class SessionArtifact:
     """An artifact produced by a skill during this session."""
 
-    name: str                          # unique key (e.g., "arcana_synthesis", "dashboard_url")
-    summary: str                       # 1-3 sentence description of what was produced
-    source_skill: str                  # which skill produced this (e.g., "/arcana", "/build")
-    timestamp: str = field(            # ISO 8601 UTC
+    name: str  # unique key (e.g., "arcana_synthesis", "dashboard_url")
+    summary: str  # 1-3 sentence description of what was produced
+    source_skill: str  # which skill produced this (e.g., "/arcana", "/build")
+    timestamp: str = field(  # ISO 8601 UTC
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
-    artifact_path: Optional[str] = None   # file path if the artifact was written to disk
-    artifact_type: Optional[str] = None   # "synthesis", "code", "document", "deployment", "decision"
+    artifact_path: Optional[str] = None  # file path if the artifact was written to disk
+    artifact_type: Optional[str] = (
+        None  # "synthesis", "code", "document", "deployment", "decision"
+    )
 
 
 # ---------------------------------------------------------------------------

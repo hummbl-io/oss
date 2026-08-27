@@ -7,12 +7,12 @@ concurrency control.
 
 Zero third-party dependencies. Uses only Python stdlib + hummbl_cognition.
 """
+
 from __future__ import annotations
 
 import json
 import sys
 import traceback
-from dataclasses import asdict
 from typing import Any
 
 SERVER_NAME = "cognitive-state"
@@ -44,8 +44,14 @@ _TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "agent_id": {"type": "string", "description": "Agent identifier (e.g., 'claude-code', 'codex')"},
-                "status": {"type": "string", "description": "Agent status (e.g., 'active', 'idle', 'blocked')"},
+                "agent_id": {
+                    "type": "string",
+                    "description": "Agent identifier (e.g., 'claude-code', 'codex')",
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Agent status (e.g., 'active', 'idle', 'blocked')",
+                },
                 "vendor": {"type": "string", "description": "Agent vendor (optional)"},
                 "model": {"type": "string", "description": "Agent model (optional)"},
             },
@@ -59,8 +65,15 @@ _TOOLS = [
             "type": "object",
             "properties": {
                 "path": {"type": "string", "description": "File path to claim"},
-                "agent_id": {"type": "string", "description": "Agent claiming the file"},
-                "purpose": {"type": "string", "description": "Why the file is being claimed (optional)", "default": ""},
+                "agent_id": {
+                    "type": "string",
+                    "description": "Agent claiming the file",
+                },
+                "purpose": {
+                    "type": "string",
+                    "description": "Why the file is being claimed (optional)",
+                    "default": "",
+                },
             },
             "required": ["path", "agent_id"],
         },
@@ -72,7 +85,10 @@ _TOOLS = [
             "type": "object",
             "properties": {
                 "path": {"type": "string", "description": "File path to release"},
-                "agent_id": {"type": "string", "description": "Agent releasing the file"},
+                "agent_id": {
+                    "type": "string",
+                    "description": "Agent releasing the file",
+                },
             },
             "required": ["path", "agent_id"],
         },
@@ -84,8 +100,13 @@ _TOOLS = [
             "type": "object",
             "properties": {
                 "flag": {"type": "string", "description": "Flag name"},
-                "value": {"description": "Value to set (omit to read). Any JSON-serializable value."},
-                "agent_id": {"type": "string", "description": "Agent setting the flag (required for writes)"},
+                "value": {
+                    "description": "Value to set (omit to read). Any JSON-serializable value."
+                },
+                "agent_id": {
+                    "type": "string",
+                    "description": "Agent setting the flag (required for writes)",
+                },
             },
             "required": ["flag"],
         },
@@ -132,12 +153,17 @@ def _handle_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
             if "model" in args:
                 kwargs["model"] = args["model"]
             state = update_agent_status(agent_id, status, **kwargs)
-            return _ok(json.dumps({
-                "updated": True,
-                "agent_id": agent_id,
-                "status": status,
-                "version": state.version,
-            }, indent=2))
+            return _ok(
+                json.dumps(
+                    {
+                        "updated": True,
+                        "agent_id": agent_id,
+                        "status": status,
+                        "version": state.version,
+                    },
+                    indent=2,
+                )
+            )
 
         elif name == "state_claim_file":
             path = args.get("path", "")
@@ -146,12 +172,17 @@ def _handle_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
                 return _err("Missing required parameters: path, agent_id")
             purpose = args.get("purpose", "")
             state = claim_file(path, agent_id, purpose=purpose)
-            return _ok(json.dumps({
-                "claimed": True,
-                "path": path,
-                "agent_id": agent_id,
-                "version": state.version,
-            }, indent=2))
+            return _ok(
+                json.dumps(
+                    {
+                        "claimed": True,
+                        "path": path,
+                        "agent_id": agent_id,
+                        "version": state.version,
+                    },
+                    indent=2,
+                )
+            )
 
         elif name == "state_release_file":
             path = args.get("path", "")
@@ -159,12 +190,17 @@ def _handle_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
             if not path or not agent_id:
                 return _err("Missing required parameters: path, agent_id")
             state = release_file(path, agent_id)
-            return _ok(json.dumps({
-                "released": True,
-                "path": path,
-                "agent_id": agent_id,
-                "version": state.version,
-            }, indent=2))
+            return _ok(
+                json.dumps(
+                    {
+                        "released": True,
+                        "path": path,
+                        "agent_id": agent_id,
+                        "version": state.version,
+                    },
+                    indent=2,
+                )
+            )
 
         elif name == "state_flags":
             flag = args.get("flag", "")
@@ -175,27 +211,39 @@ def _handle_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
                 # Read mode
                 state = read_state()
                 current = state.flags.get(flag)
-                return _ok(json.dumps({
-                    "flag": flag,
-                    "value": current,
-                    "exists": flag in state.flags,
-                }, indent=2))
+                return _ok(
+                    json.dumps(
+                        {
+                            "flag": flag,
+                            "value": current,
+                            "exists": flag in state.flags,
+                        },
+                        indent=2,
+                    )
+                )
             else:
                 # Write mode
                 agent_id = args.get("agent_id", "")
                 if not agent_id:
-                    return _err("Missing required parameter: agent_id (required for setting flags)")
+                    return _err(
+                        "Missing required parameter: agent_id (required for setting flags)"
+                    )
                 value = args["value"]
                 state = read_state()
                 state.flags[flag] = value
                 state.increment_version(agent_id)
                 write_state(state, expected_version=state.version - 1)
-                return _ok(json.dumps({
-                    "flag": flag,
-                    "value": value,
-                    "set": True,
-                    "version": state.version,
-                }, indent=2))
+                return _ok(
+                    json.dumps(
+                        {
+                            "flag": flag,
+                            "value": value,
+                            "set": True,
+                            "version": state.version,
+                        },
+                        indent=2,
+                    )
+                )
 
         elif name == "state_summary":
             state = read_state()
@@ -235,11 +283,14 @@ def serve_stdio() -> None:
             req = json.loads(line)
         except json.JSONDecodeError:
             sys.stdout.write(
-                json.dumps({
-                    "jsonrpc": "2.0",
-                    "id": None,
-                    "error": {"code": -32700, "message": "Parse error"},
-                }) + "\n"
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {"code": -32700, "message": "Parse error"},
+                    }
+                )
+                + "\n"
             )
             sys.stdout.flush()
             continue
@@ -264,11 +315,14 @@ def serve_stdio() -> None:
             )
         else:
             sys.stdout.write(
-                json.dumps({
-                    "jsonrpc": "2.0",
-                    "id": rid,
-                    "error": {"code": -32601, "message": f"Unknown: {method}"},
-                }) + "\n"
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": rid,
+                        "error": {"code": -32601, "message": f"Unknown: {method}"},
+                    }
+                )
+                + "\n"
             )
             sys.stdout.flush()
             continue

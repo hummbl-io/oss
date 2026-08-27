@@ -11,14 +11,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.indexer import (
     _STOPWORDS,
     BM25_B,
     BM25_K1,
-    BM25Index,
     RETRIEVAL_DECAY_HALF_LIFE_DAYS,
     TIME_DECAY_HALF_LIFE_DAYS,
+    BM25Index,
     _resolve_index_path,
     tokenize,
 )
@@ -27,9 +26,11 @@ from hummbl_cognition.indexer import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class FakeLedgerEntry:
     """Minimal stand-in for LedgerEntry used by indexer.build()."""
+
     id: str
     content: str
     type: str
@@ -62,11 +63,19 @@ def _make_entry(
     contests: str | None = None,
 ) -> FakeLedgerEntry:
     return FakeLedgerEntry(
-        id=id, content=content, type=type, scope=scope,
-        agent=agent, tags=tags, links=links,
-        timestamp=timestamp, confidence=confidence,
-        supersedes=supersedes, previous_hash=previous_hash,
-        valid_time=valid_time, contests=contests,
+        id=id,
+        content=content,
+        type=type,
+        scope=scope,
+        agent=agent,
+        tags=tags,
+        links=links,
+        timestamp=timestamp,
+        confidence=confidence,
+        supersedes=supersedes,
+        previous_hash=previous_hash,
+        valid_time=valid_time,
+        contests=contests,
     )
 
 
@@ -102,6 +111,7 @@ SAMPLE_ENTRIES = [
 # ---------------------------------------------------------------------------
 # tokenize()
 # ---------------------------------------------------------------------------
+
 
 class TestTokenize:
     def test_basic_tokenization(self):
@@ -151,6 +161,7 @@ class TestTokenize:
 # _resolve_index_path()
 # ---------------------------------------------------------------------------
 
+
 class TestResolveIndexPath:
     def test_override_wins(self):
         p = _resolve_index_path("/tmp/my_index.json")
@@ -181,16 +192,23 @@ class TestResolveIndexPath:
         which returns the workspace root when the repo is nested. Verify
         the new implementation does not shell out to git."""
         import hummbl_cognition.indexer as idx_mod
+
         # The resolved path should NOT depend on git
         p = _resolve_index_path()
         # Confirm it matches the __file__-based resolution
-        expected = Path(idx_mod.__file__).resolve().parent.parent / "_state" / "cognition" / "index.json"
+        expected = (
+            Path(idx_mod.__file__).resolve().parent.parent
+            / "_state"
+            / "cognition"
+            / "index.json"
+        )
         assert p == expected
 
 
 # ---------------------------------------------------------------------------
 # BM25Index.build()
 # ---------------------------------------------------------------------------
+
 
 class TestBM25IndexBuild:
     @patch("hummbl_cognition.indexer.read_entries")
@@ -256,6 +274,7 @@ class TestBM25IndexBuild:
 # BM25Index.search()
 # ---------------------------------------------------------------------------
 
+
 class TestBM25IndexSearch:
     @pytest.fixture()
     def populated_index(self):
@@ -294,9 +313,7 @@ class TestBM25IndexSearch:
 
     def test_search_since_filter(self, populated_index):
         # Only entries on or after 2026-03-29
-        results = populated_index.search(
-            "adapter", since="2026-03-29T00:00:00Z"
-        )
+        results = populated_index.search("adapter", since="2026-03-29T00:00:00Z")
         for r in results:
             assert r["meta"]["timestamp"] >= "2026-03-29T00:00:00Z"
 
@@ -329,6 +346,7 @@ class TestBM25IndexSearch:
 # ---------------------------------------------------------------------------
 # BM25Index.record_retrieval() -- stigmergic ranking
 # ---------------------------------------------------------------------------
+
 
 class TestRecordRetrieval:
     def test_record_increments(self):
@@ -373,6 +391,7 @@ class TestRecordRetrieval:
 # ---------------------------------------------------------------------------
 # BM25Index.save() / load()
 # ---------------------------------------------------------------------------
+
 
 class TestSaveLoad:
     @patch("hummbl_cognition.indexer.read_entries")
@@ -463,6 +482,7 @@ class TestSaveLoad:
 # BM25 scoring correctness
 # ---------------------------------------------------------------------------
 
+
 class TestBM25Scoring:
     def test_idf_higher_for_rare_terms(self):
         """A term appearing in fewer docs should have higher IDF."""
@@ -503,6 +523,7 @@ class TestBM25Scoring:
 # Time decay and retrieval decay (Tier 1: inverted-retrieval fix)
 # ---------------------------------------------------------------------------
 
+
 class TestTimeDecay:
     """Test exponential time decay on BM25 scores based on entry age."""
 
@@ -530,12 +551,12 @@ class TestTimeDecay:
     def test_time_decay_reduces_old_entry_score(self, age_varied_index):
         """Older entries should score lower when time_decay=True."""
         now = "2026-06-27T12:00:00Z"
-        results = age_varied_index.search(
-            "circuit breaker", time_decay=True, now=now
-        )
+        results = age_varied_index.search("circuit breaker", time_decay=True, now=now)
         assert len(results) == 2
         # Recent entry should score higher than old entry
-        recent_score = next(r["score"] for r in results if r["id"] == "clp-recent111111")
+        recent_score = next(
+            r["score"] for r in results if r["id"] == "clp-recent111111"
+        )
         old_score = next(r["score"] for r in results if r["id"] == "clp-old222222222")
         assert recent_score > old_score
 
@@ -568,13 +589,15 @@ class TestTimeDecay:
     def test_time_decay_preserves_recent_score(self, age_varied_index):
         """Very recent entries should not be significantly decayed."""
         now = "2026-06-27T10:05:00Z"  # 5 minutes after recent entry
-        results = age_varied_index.search(
-            "circuit breaker", time_decay=True, now=now
-        )
+        results = age_varied_index.search("circuit breaker", time_decay=True, now=now)
         recent = next(r for r in results if r["id"] == "clp-recent111111")
         # 5 minutes is negligible vs 90-day half-life
         assert recent["score"] > 0.99 * (
-            next(r["score"] for r in age_varied_index.search("circuit breaker") if r["id"] == "clp-recent111111")
+            next(
+                r["score"]
+                for r in age_varied_index.search("circuit breaker")
+                if r["id"] == "clp-recent111111"
+            )
         )
 
 
@@ -675,6 +698,7 @@ class TestDecayConstants:
 # ---------------------------------------------------------------------------
 # Edge cases
 # ---------------------------------------------------------------------------
+
 
 class TestEdgeCases:
     @patch("hummbl_cognition.indexer.read_entries")

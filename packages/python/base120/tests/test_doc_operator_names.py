@@ -48,6 +48,7 @@ def _read(relative: str) -> str:
 # README.md
 # ---------------------------------------------------------------------------
 
+
 class TestReadmeOperatorNames:
     """Every operator in the registry must appear in README.md with its canonical name."""
 
@@ -69,12 +70,8 @@ class TestReadmeOperatorNames:
                     if found.lower() != name.lower():
                         wrong.append((code, found, name))
                 missing.append(code)
-        assert not missing, (
-            f"README.md is missing {len(missing)} operators: {missing[:10]}..."
-        )
-        assert not wrong, (
-            f"README.md has {len(wrong)} misnamed operators: {wrong[:5]}..."
-        )
+        assert not missing, f"README.md is missing {len(missing)} operators: {missing[:10]}..."
+        assert not wrong, f"README.md has {len(wrong)} misnamed operators: {wrong[:5]}..."
 
     def test_no_phantom_operators(self) -> None:
         canonical = _load_canonical()
@@ -99,6 +96,7 @@ class TestReadmeOperatorNames:
 # llms.txt
 # ---------------------------------------------------------------------------
 
+
 class TestLlmsTxtOperatorNames:
     """Every operator in the registry must appear in llms.txt with its canonical name."""
 
@@ -117,12 +115,8 @@ class TestLlmsTxtOperatorNames:
                     if found.lower() != name.lower():
                         wrong.append((code, found, name))
                 missing.append(code)
-        assert not missing, (
-            f"llms.txt is missing {len(missing)} operators: {missing[:10]}..."
-        )
-        assert not wrong, (
-            f"llms.txt has {len(wrong)} misnamed operators: {wrong[:5]}..."
-        )
+        assert not missing, f"llms.txt is missing {len(missing)} operators: {missing[:10]}..."
+        assert not wrong, f"llms.txt has {len(wrong)} misnamed operators: {wrong[:5]}..."
 
     def test_no_phantom_operators(self) -> None:
         canonical = _load_canonical()
@@ -137,7 +131,7 @@ class TestLlmsTxtOperatorNames:
     def test_family_ranges_match_registry(self) -> None:
         """The header ranges (e.g. P1–P20) must match the actual registry range."""
         engine = Engine()
-        canonical = {op.code: op.name for op in engine.list()}
+        {op.code: op.name for op in engine.list()}
         llms = _read("llms.txt")
         family_order = ["P", "IN", "CO", "DE", "RE", "SY"]
         for fam in family_order:

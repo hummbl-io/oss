@@ -22,8 +22,8 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from hummbl_governance.kernel import Kernel, Receipt, ReceiptEngine
 from hummbl_governance.corpus_adapter import CorpusAdapter
+from hummbl_governance.kernel import Kernel, Receipt, ReceiptEngine
 
 
 class TestReceiptCorpusWire:

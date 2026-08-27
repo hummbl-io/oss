@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.contestability import (
     ContestStatus,
     ReviewOutcome,
-    validate_contestability,
-    validate_contest_evidence,
-    validate_review_consistency,
     validate_contest,
+    validate_contest_evidence,
+    validate_contestability,
+    validate_review_consistency,
 )
 from hummbl_governance.schema_validator import ValidationError
 

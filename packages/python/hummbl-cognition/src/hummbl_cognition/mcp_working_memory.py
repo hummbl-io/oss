@@ -7,6 +7,7 @@ for multi-agent ephemeral coordination state with TTL-based expiry.
 
 Zero third-party dependencies. Uses only Python stdlib + hummbl_cognition.
 """
+
 from __future__ import annotations
 
 import json
@@ -31,7 +32,10 @@ _TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "key": {"type": "string", "description": "Namespaced key (agent:topic)"},
+                "key": {
+                    "type": "string",
+                    "description": "Namespaced key (agent:topic)",
+                },
             },
             "required": ["key"],
         },
@@ -42,10 +46,20 @@ _TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "key": {"type": "string", "description": "Namespaced key (agent:topic)"},
+                "key": {
+                    "type": "string",
+                    "description": "Namespaced key (agent:topic)",
+                },
                 "value": {"description": "JSON-serializable value to store"},
-                "agent": {"type": "string", "description": "Agent identifier (must match key prefix)"},
-                "ttl_seconds": {"type": "integer", "description": "Time-to-live in seconds (default: 3600, max: 86400)", "default": 3600},
+                "agent": {
+                    "type": "string",
+                    "description": "Agent identifier (must match key prefix)",
+                },
+                "ttl_seconds": {
+                    "type": "integer",
+                    "description": "Time-to-live in seconds (default: 3600, max: 86400)",
+                    "default": 3600,
+                },
                 "metadata": {"type": "object", "description": "Optional metadata dict"},
             },
             "required": ["key", "value", "agent"],
@@ -57,7 +71,10 @@ _TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "agent": {"type": "string", "description": "Filter by agent (optional)"},
+                "agent": {
+                    "type": "string",
+                    "description": "Filter by agent (optional)",
+                },
             },
         },
     },
@@ -68,7 +85,10 @@ _TOOLS = [
             "type": "object",
             "properties": {
                 "key": {"type": "string", "description": "Key to delete"},
-                "agent": {"type": "string", "description": "Agent requesting deletion (must own the item)"},
+                "agent": {
+                    "type": "string",
+                    "description": "Agent requesting deletion (must own the item)",
+                },
             },
             "required": ["key", "agent"],
         },
@@ -80,7 +100,10 @@ _TOOLS = [
             "type": "object",
             "properties": {
                 "key": {"type": "string", "description": "Key to promote"},
-                "agent": {"type": "string", "description": "Agent requesting promotion (must own the item)"},
+                "agent": {
+                    "type": "string",
+                    "description": "Agent requesting promotion (must own the item)",
+                },
             },
             "required": ["key", "agent"],
         },
@@ -185,11 +208,14 @@ def serve_stdio() -> None:
             req = json.loads(line)
         except json.JSONDecodeError:
             sys.stdout.write(
-                json.dumps({
-                    "jsonrpc": "2.0",
-                    "id": None,
-                    "error": {"code": -32700, "message": "Parse error"},
-                }) + "\n"
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {"code": -32700, "message": "Parse error"},
+                    }
+                )
+                + "\n"
             )
             sys.stdout.flush()
             continue
@@ -214,11 +240,14 @@ def serve_stdio() -> None:
             )
         else:
             sys.stdout.write(
-                json.dumps({
-                    "jsonrpc": "2.0",
-                    "id": rid,
-                    "error": {"code": -32601, "message": f"Unknown: {method}"},
-                }) + "\n"
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": rid,
+                        "error": {"code": -32601, "message": f"Unknown: {method}"},
+                    }
+                )
+                + "\n"
             )
             sys.stdout.flush()
             continue

@@ -20,13 +20,25 @@ class PlanValidator:
         node_ids = {node.id for node in plan.nodes}
         for edge in plan.edges:
             if edge.source not in node_ids:
-                issues.append(PlanIssue("missing_source", f"Missing source node: {edge.source}", "error"))
+                issues.append(
+                    PlanIssue(
+                        "missing_source", f"Missing source node: {edge.source}", "error"
+                    )
+                )
             if edge.target not in node_ids:
-                issues.append(PlanIssue("missing_target", f"Missing target node: {edge.target}", "error"))
+                issues.append(
+                    PlanIssue(
+                        "missing_target", f"Missing target node: {edge.target}", "error"
+                    )
+                )
         targeted = {edge.target for edge in plan.edges}
         for node in plan.nodes[1:]:
             if node.id not in targeted:
-                issues.append(PlanIssue("unreachable_node", f"Node has no inbound edge: {node.id}"))
+                issues.append(
+                    PlanIssue(
+                        "unreachable_node", f"Node has no inbound edge: {node.id}"
+                    )
+                )
         return tuple(issues)
 
 
@@ -39,5 +51,7 @@ def to_mermaid(plan: ExecutionPlan) -> str:
         lines.extend(f"  {label}" for label in labels.values())
         return "\n".join(lines)
     for edge in plan.edges:
-        lines.append(f"  {labels.get(edge.source, edge.source)} --> {labels.get(edge.target, edge.target)}")
+        lines.append(
+            f"  {labels.get(edge.source, edge.source)} --> {labels.get(edge.target, edge.target)}"
+        )
     return "\n".join(lines)

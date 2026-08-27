@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from tuple_to_events import tuple_to_cloudevent, tuple_to_ndjson, convert_trace
+from tuple_to_events import convert_trace, tuple_to_cloudevent, tuple_to_ndjson
 
 
 def test_cloudevent_basic():
@@ -44,7 +44,13 @@ def test_cloudevent_no_state():
 
 def test_cloudevent_no_intent_id():
     """Tuples without intent_id should not have subject."""
-    t = {"tuple_type": "CONTRACT", "id": "test-003", "time": "2026-07-01T00:00:00Z", "state": "ok", "tuple_data": {}}
+    t = {
+        "tuple_type": "CONTRACT",
+        "id": "test-003",
+        "time": "2026-07-01T00:00:00Z",
+        "state": "ok",
+        "tuple_data": {},
+    }
     event = tuple_to_cloudevent(t)
     assert "subject" not in event
 
@@ -82,8 +88,20 @@ def test_ndjson_format():
 def test_convert_trace_cloudevents():
     """convert_trace should produce a list of CloudEvents."""
     trace = [
-        {"tuple_type": "CONTRACT", "id": "1", "time": "2026-07-01T00:00:00Z", "state": "ok", "tuple_data": {}},
-        {"tuple_type": "EVIDENCE", "id": "2", "time": "2026-07-01T00:00:01Z", "state": "ok", "tuple_data": {}},
+        {
+            "tuple_type": "CONTRACT",
+            "id": "1",
+            "time": "2026-07-01T00:00:00Z",
+            "state": "ok",
+            "tuple_data": {},
+        },
+        {
+            "tuple_type": "EVIDENCE",
+            "id": "2",
+            "time": "2026-07-01T00:00:01Z",
+            "state": "ok",
+            "tuple_data": {},
+        },
     ]
     events = convert_trace(trace, "cloudevents")
     assert isinstance(events, list)

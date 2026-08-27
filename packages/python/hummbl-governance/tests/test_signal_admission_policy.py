@@ -13,9 +13,17 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures" / "signal"
 SCHEMA_PATH = Path(__file__).parent.parent / "docs" / "ecosystem" / "schemas" / "signal_receipt.schema.json"
 
 REQUIRED_FIELDS = [
-    "receipt_id", "surface", "lane", "actor_or_agent", "recipient_alias",
-    "event_class", "risk_class", "message_hash", "message_summary",
-    "admission_decision", "durable_uri",
+    "receipt_id",
+    "surface",
+    "lane",
+    "actor_or_agent",
+    "recipient_alias",
+    "event_class",
+    "risk_class",
+    "message_hash",
+    "message_summary",
+    "admission_decision",
+    "durable_uri",
 ]
 
 VALID_LANES = {"notify", "ack", "candidate_command", "agent_coordination"}
@@ -34,14 +42,17 @@ def schema() -> dict:
         return json.load(f)
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "notify_allowlisted.json",
-    "notify_unknown_recipient.json",
-    "inbound_candidate_command.json",
-    "broad_broadcast_denied.json",
-    "agent_to_agent_no_scope.json",
-    "secret_redaction.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "notify_allowlisted.json",
+        "notify_unknown_recipient.json",
+        "inbound_candidate_command.json",
+        "broad_broadcast_denied.json",
+        "agent_to_agent_no_scope.json",
+        "secret_redaction.json",
+    ],
+)
 def test_fixture_has_all_required_fields(fixture_name):
     """Every fixture must have all required receipt fields."""
     data = _load_fixture(fixture_name)
@@ -49,56 +60,68 @@ def test_fixture_has_all_required_fields(fixture_name):
         assert field in data, f"{fixture_name} missing required field: {field}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "notify_allowlisted.json",
-    "notify_unknown_recipient.json",
-    "inbound_candidate_command.json",
-    "broad_broadcast_denied.json",
-    "agent_to_agent_no_scope.json",
-    "secret_redaction.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "notify_allowlisted.json",
+        "notify_unknown_recipient.json",
+        "inbound_candidate_command.json",
+        "broad_broadcast_denied.json",
+        "agent_to_agent_no_scope.json",
+        "secret_redaction.json",
+    ],
+)
 def test_fixture_surface_is_signal(fixture_name):
     """Every fixture must have surface=signal."""
     data = _load_fixture(fixture_name)
     assert data["surface"] == "signal"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "notify_allowlisted.json",
-    "notify_unknown_recipient.json",
-    "inbound_candidate_command.json",
-    "broad_broadcast_denied.json",
-    "agent_to_agent_no_scope.json",
-    "secret_redaction.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "notify_allowlisted.json",
+        "notify_unknown_recipient.json",
+        "inbound_candidate_command.json",
+        "broad_broadcast_denied.json",
+        "agent_to_agent_no_scope.json",
+        "secret_redaction.json",
+    ],
+)
 def test_fixture_valid_lane(fixture_name):
     """Every fixture must have a valid lane."""
     data = _load_fixture(fixture_name)
     assert data["lane"] in VALID_LANES, f"{fixture_name} has invalid lane: {data['lane']}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "notify_allowlisted.json",
-    "notify_unknown_recipient.json",
-    "inbound_candidate_command.json",
-    "broad_broadcast_denied.json",
-    "agent_to_agent_no_scope.json",
-    "secret_redaction.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "notify_allowlisted.json",
+        "notify_unknown_recipient.json",
+        "inbound_candidate_command.json",
+        "broad_broadcast_denied.json",
+        "agent_to_agent_no_scope.json",
+        "secret_redaction.json",
+    ],
+)
 def test_fixture_valid_risk_class(fixture_name):
     """Every fixture must have a valid risk_class."""
     data = _load_fixture(fixture_name)
     assert data["risk_class"] in VALID_RISK_CLASSES, f"{fixture_name} has invalid risk_class: {data['risk_class']}"
 
 
-@pytest.mark.parametrize("fixture_name", [
-    "notify_allowlisted.json",
-    "notify_unknown_recipient.json",
-    "inbound_candidate_command.json",
-    "broad_broadcast_denied.json",
-    "agent_to_agent_no_scope.json",
-    "secret_redaction.json",
-])
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "notify_allowlisted.json",
+        "notify_unknown_recipient.json",
+        "inbound_candidate_command.json",
+        "broad_broadcast_denied.json",
+        "agent_to_agent_no_scope.json",
+        "secret_redaction.json",
+    ],
+)
 def test_fixture_valid_admission_decision(fixture_name):
     """Every fixture must have a valid admission_decision."""
     data = _load_fixture(fixture_name)

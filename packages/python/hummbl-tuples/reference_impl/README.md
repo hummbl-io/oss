@@ -3,7 +3,7 @@
 Cross-language reference implementations of the HUMMBL Typed Tuple specification.
 
 All implementations produce **byte-identical** canonical JSON and SHA-256 hashes
-per [CANONICAL_SERIALIZATION_v1.md](../../docs/specs/CANONICAL_SERIALIZATION_v1.md).
+per [CANONICAL_SERIALIZATION_v1.md](../docs/specs/CANONICAL_SERIALIZATION_v1.md).
 
 ## Implementations
 
@@ -53,5 +53,5 @@ python cross_lang_verify.py
 
 ## Conformance
 
-Each implementation must pass the [conformance test vectors](../../conformance/test_vectors.jsonl)
+Each implementation must pass the [conformance test vectors](https://github.com/hummbl-io/oss)
 and produce identical SHA-256 hashes for the same logical tuple.

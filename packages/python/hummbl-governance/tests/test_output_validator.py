@@ -17,9 +17,9 @@
 """Tests for hummbl_governance.output_validator."""
 
 import pytest
-
 from hummbl_governance.output_validator import (
     BlocklistFilter,
+    EncodingBypassDetector,
     InjectionDetector,
     JailbreakPatternDetector,
     LengthBounds,
@@ -27,7 +27,6 @@ from hummbl_governance.output_validator import (
     PIIDetector,
     ProvenanceCheck,
     SteganographyDetector,
-    EncodingBypassDetector,
 )
 
 
@@ -406,10 +405,12 @@ class TestOutputValidator:
         assert result["valid"] is False
 
     def test_custom_rules(self):
-        validator = OutputValidator(rules=[
-            PIIDetector(),
-            BlocklistFilter(terms=["classified"]),
-        ])
+        validator = OutputValidator(
+            rules=[
+                PIIDetector(),
+                BlocklistFilter(terms=["classified"]),
+            ]
+        )
         result = validator.validate("This document is classified")
         assert result["valid"] is False
         assert result["violations"][0]["rule"] == "blocklist"

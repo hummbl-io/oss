@@ -9,7 +9,7 @@ Status: ready
 
 Reference:
 
-- [BIO_PROTOCOLS.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_PROTOCOLS.md)
+- [BIO_PROTOCOLS.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_PROTOCOLS.md)
 
 ## Goal
 
@@ -69,6 +69,6 @@ Optional:
 
 ## Artifacts To Produce
 
-- one filled case log using [BIO_CASE_LOG_TEMPLATE.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_CASE_LOG_TEMPLATE.md)
+- one filled case log using [BIO_CASE_LOG_TEMPLATE.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_CASE_LOG_TEMPLATE.md)
 - tuple references or example JSONs
 - one short note on whether the protocol should be reused

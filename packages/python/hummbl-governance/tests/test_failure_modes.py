@@ -19,21 +19,20 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.failure_modes import (
-    FailureModeRecord,
     ErrorRecord,
+    FailureModeRecord,
+    all_error_records,
     all_failure_modes,
-    get_fm,
     classify_subclass,
     get_errors_for_fm,
-    all_error_records,
+    get_fm,
 )
-
 
 # ---------------------------------------------------------------------------
 # FailureModeRecord dataclass
 # ---------------------------------------------------------------------------
+
 
 class TestFailureModeRecord:
     def test_frozen(self):
@@ -57,6 +56,7 @@ class TestFailureModeRecord:
 # ErrorRecord dataclass
 # ---------------------------------------------------------------------------
 
+
 class TestErrorRecord:
     def test_fm_is_tuple(self):
         rec = ErrorRecord(id="ERR-TEST-001", fm=("FM15",), severity="fatal")
@@ -71,6 +71,7 @@ class TestErrorRecord:
 # ---------------------------------------------------------------------------
 # all_failure_modes()
 # ---------------------------------------------------------------------------
+
 
 class TestAllFailureModes:
     def test_returns_30_records(self):
@@ -109,6 +110,7 @@ class TestAllFailureModes:
 # get_fm()
 # ---------------------------------------------------------------------------
 
+
 class TestGetFM:
     def test_get_existing(self):
         rec = get_fm("FM1")
@@ -142,6 +144,7 @@ class TestGetFM:
 # classify_subclass()
 # ---------------------------------------------------------------------------
 
+
 class TestClassifySubclass:
     def test_returns_list(self):
         result = classify_subclass("02")
@@ -167,14 +170,13 @@ class TestClassifySubclass:
         """Every FM returned by classify_subclass must exist in the registry."""
         for sc in ["01", "02", "03", "13"]:
             for fm_id in classify_subclass(sc):
-                assert get_fm(fm_id) is not None, (
-                    f"Subclass {sc!r} maps to {fm_id!r} which is not in the registry"
-                )
+                assert get_fm(fm_id) is not None, f"Subclass {sc!r} maps to {fm_id!r} which is not in the registry"
 
 
 # ---------------------------------------------------------------------------
 # get_errors_for_fm()
 # ---------------------------------------------------------------------------
+
 
 class TestGetErrorsForFM:
     def test_returns_list(self):
@@ -201,6 +203,7 @@ class TestGetErrorsForFM:
 # all_error_records()
 # ---------------------------------------------------------------------------
 
+
 class TestAllErrorRecords:
     def test_returns_list(self):
         records = all_error_records()
@@ -221,9 +224,7 @@ class TestAllErrorRecords:
     def test_severity_values_known(self):
         known = {"fatal", "escalation", "warning", "unknown"}
         for rec in all_error_records():
-            assert rec.severity in known, (
-                f"{rec.id} has unexpected severity {rec.severity!r}"
-            )
+            assert rec.severity in known, f"{rec.id} has unexpected severity {rec.severity!r}"
 
     def test_err_schema_001_present(self):
         ids = {r.id for r in all_error_records()}

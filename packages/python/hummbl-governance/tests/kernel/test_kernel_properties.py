@@ -33,7 +33,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from hummbl_governance.kernel import (
     EvidenceEngine,
     IdentityEngine,
@@ -43,10 +42,10 @@ from hummbl_governance.kernel import (
 )
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
 
-
 # ===========================================================================
 # Property-Based Receipt Engine Tests
 # ===========================================================================
+
 
 class TestReceiptProperties:
     """Generate random receipts and verify invariants hold."""
@@ -152,6 +151,7 @@ class TestReceiptProperties:
 # Property-Based Sequence Engine Tests
 # ===========================================================================
 
+
 class TestSequenceProperties:
     """Generate random sequence operations and verify monotonicity."""
 
@@ -183,10 +183,7 @@ class TestSequenceProperties:
             engine = SequenceEngine(Path(tmpdir))
             for _ in range(50):
                 n = random.randint(1, 100)
-                receipts = [
-                    {"sequence_id": random.randint(1, n * 2)}
-                    for _ in range(n)
-                ]
+                receipts = [{"sequence_id": random.randint(1, n * 2)} for _ in range(n)]
                 result = engine.reconstruct("agent", receipts)
                 seq_ids = [r["sequence_id"] for r in result if "sequence_id" in r]
                 assert seq_ids == sorted(seq_ids)
@@ -209,6 +206,7 @@ class TestSequenceProperties:
 # ===========================================================================
 # Property-Based Identity Engine Tests
 # ===========================================================================
+
 
 class TestIdentityProperties:
     """Generate random identity operations and verify registry invariants."""
@@ -314,6 +312,7 @@ class TestIdentityProperties:
 # Property-Based Evidence Engine Tests
 # ===========================================================================
 
+
 class TestEvidenceProperties:
     """Generate random evidence inputs and verify grading invariants."""
 
@@ -387,6 +386,7 @@ class TestEvidenceProperties:
 # Property-Based Kernel Integration Tests
 # ===========================================================================
 
+
 class TestKernelIntegrationProperties:
     """Test the full Kernel with random multi-agent scenarios."""
 
@@ -411,10 +411,7 @@ class TestKernelIntegrationProperties:
         """Every Kernel boot produces a valid KERNEL_BOOT receipt."""
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
-            boot_receipts = [
-                r for r in kernel.receipt.list_for_agent("kernel")
-                if r.action_type == "KERNEL_BOOT"
-            ]
+            boot_receipts = [r for r in kernel.receipt.list_for_agent("kernel") if r.action_type == "KERNEL_BOOT"]
             assert len(boot_receipts) >= 1
             for receipt in boot_receipts:
                 assert receipt.signature != ""

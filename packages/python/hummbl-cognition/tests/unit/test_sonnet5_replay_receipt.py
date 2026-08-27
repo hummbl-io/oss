@@ -64,8 +64,18 @@ def _conditional_receipt() -> dict:
         ],
         operator_approval_ref="risk-acceptance-2026-07-04-sonnet5",
         eval_scores=[
-            {"eval_name": "BrowseComp", "sonnet_46_score": 21.5, "sonnet_5_score": 50.0, "score_delta": 28.5},
-            {"eval_name": "HumanEval", "sonnet_46_score": 92.0, "sonnet_5_score": 95.0, "score_delta": 3.0},
+            {
+                "eval_name": "BrowseComp",
+                "sonnet_46_score": 21.5,
+                "sonnet_5_score": 50.0,
+                "score_delta": 28.5,
+            },
+            {
+                "eval_name": "HumanEval",
+                "sonnet_46_score": 92.0,
+                "sonnet_5_score": 95.0,
+                "score_delta": 3.0,
+            },
         ],
         corpus_size_prompts=500,
         notes="Full replay with evals. Conditional admission with max_tokens revision and 400-mitigation.",
@@ -245,7 +255,9 @@ def test_validate_rejects_negative_token_count():
     valid, errors = validate_sonnet5_replay_receipt(receipt)
 
     assert not valid
-    assert any("sonnet_5_token_count must be a non-negative integer" in e for e in errors)
+    assert any(
+        "sonnet_5_token_count must be a non-negative integer" in e for e in errors
+    )
 
 
 def test_validate_rejects_negative_token_delta_ratio():
@@ -415,7 +427,9 @@ def test_conditional_requires_operator_approval_and_conditions():
 
     assert not valid
     assert any("conditional requires operator_approval_ref" in e for e in errors)
-    assert any("conditional requires a non-empty admission_conditions" in e for e in errors)
+    assert any(
+        "conditional requires a non-empty admission_conditions" in e for e in errors
+    )
 
 
 def test_tampered_hash_rejected():

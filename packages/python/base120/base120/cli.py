@@ -115,7 +115,7 @@ def _cmd_verify_docs(engine: Engine, _args: argparse.Namespace) -> int:
                 if m:
                     found = m.group(1).strip().rstrip(".")
                     if found.lower() != name.lower():
-                        wrong.append(f"  {code}: found \"{found}\", expected \"{name}\"")
+                        wrong.append(f'  {code}: found "{found}", expected "{name}"')
                 missing.append(code)
 
         if missing:
@@ -127,8 +127,7 @@ def _cmd_verify_docs(engine: Engine, _args: argparse.Namespace) -> int:
         # Check for phantom operator codes
         found_codes = set(re.findall(r"\b([PICDRS][A-Z]\d{1,2})\b", text))
         phantom = {
-            c for c in found_codes
-            if c not in canonical and re.match(r"^(P|IN|CO|DE|RE|SY)\d+$", c)
+            c for c in found_codes if c not in canonical and re.match(r"^(P|IN|CO|DE|RE|SY)\d+$", c)
         }
         if phantom:
             errors.append(f"{relative}: {len(phantom)} phantom codes: {sorted(phantom)}")
@@ -139,15 +138,15 @@ def _cmd_verify_docs(engine: Engine, _args: argparse.Namespace) -> int:
             print(f"  {err}")
         return 1
 
-    print(f"OK: all 120 operators verified in README.md and llms.txt")
+    print("OK: all 120 operators verified in README.md and llms.txt")
     return 0
 
 
 def _cmd_run(engine: Engine, args: argparse.Namespace) -> int:
     """Execute a .b120 reasoning program."""
     try:
-        from base120lang.loader import load_program, LoadError
-        from base120lang.interpreter import Interpreter, BudgetExceededError, SchemaValidationError
+        from base120lang.interpreter import BudgetExceededError, Interpreter, SchemaValidationError
+        from base120lang.loader import LoadError, load_program
         from base120lang.mock_runner import MockRunner
     except ImportError:
         print(
@@ -243,12 +242,12 @@ def main(argv: list[str] | None = None) -> int:
     engine = Engine()
 
     dispatch = {
-        "list":         _cmd_list,
-        "get":          _cmd_get,
-        "prompt":       _cmd_prompt,
-        "families":     _cmd_families,
-        "verify-docs":  _cmd_verify_docs,
-        "run":          _cmd_run,
+        "list": _cmd_list,
+        "get": _cmd_get,
+        "prompt": _cmd_prompt,
+        "families": _cmd_families,
+        "verify-docs": _cmd_verify_docs,
+        "run": _cmd_run,
     }
     handler = dispatch.get(args.command)
     if handler is None:

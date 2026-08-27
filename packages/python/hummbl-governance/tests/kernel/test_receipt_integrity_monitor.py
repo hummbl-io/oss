@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.receipt_integrity_monitor import (
-    check_sequence,
     check_hash_chain,
+    check_sequence,
     check_timestamps,
     run_integrity_check,
-    validate_receipt_integrity_monitor,
     validate_monitor_report,
+    validate_receipt_integrity_monitor,
 )
 from hummbl_governance.schema_validator import ValidationError
 
@@ -176,9 +175,7 @@ class TestSchemaValidation:
             validate_receipt_integrity_monitor({"schema_version": "1.0.0"})
 
     def test_invalid_invariant_enum_fails(self):
-        report = run_integrity_check(
-            [_receipt(0, "aaa"), _receipt(5, "bbb", prev_hash="aaa")], "agent-001"
-        )
+        report = run_integrity_check([_receipt(0, "aaa"), _receipt(5, "bbb", prev_hash="aaa")], "agent-001")
         report["panic_details"]["invariant_violated"] = "K99"
         with pytest.raises(ValidationError):
             validate_receipt_integrity_monitor(report)

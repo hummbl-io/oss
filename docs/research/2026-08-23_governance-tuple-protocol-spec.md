@@ -3,7 +3,7 @@
 
 **Author:** Operator & the HUMMBL Fleet  
 **Date:** August 2026  
-**Canonical Surface:** [`hummbl-tuples`](file:///<repo-root>/PROJECTS/hummbl-tuples), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`oss`](file:///<repo-root>/PROJECTS/oss)  
+**Canonical Surface:** [`hummbl-tuples`](https://github.com/hummbl-io/hummbl-tuples), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`oss`](https://github.com/hummbl-io/oss)  
 **Status:** Protocol Specification v1.0.0  
 
 ---
@@ -135,7 +135,7 @@ If any clause of $C$ is violated, or if the signature $\sigma_{\text{HMAC}}$ of 
 ## 5. Polyglot Reference Implementations
 
 The Governance Tuple is explicitly designed for multi-language portability:
-- **Python (3.11+ Stdlib):** [`hummbl_governance.tuple.GovernanceTuple`](file:///<repo-root>/PROJECTS/hummbl-governance) (Pure stdlib `dataclasses`, `hmac`, `hashlib`).
+- **Python (3.11+ Stdlib):** [`hummbl_governance.tuple.GovernanceTuple`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance) (Pure stdlib `dataclasses`, `hmac`, `hashlib`).
 - **Rust:** `hummbl_tuples::GovernanceTuple` (Zero external crates, `no_std` compatible for embedded robotics).
 - **Go:** `hummbl/tuples.GovernanceTuple` (Pure `crypto/hmac`, `crypto/sha256`).
 - **TypeScript:** `@hummbl/tuples` (Browser WebCrypto & Node.js crypto native).

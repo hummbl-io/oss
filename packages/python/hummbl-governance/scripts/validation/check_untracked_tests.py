@@ -45,10 +45,7 @@ def _git(repo: Path, *args: str) -> str:
 
 def _is_test_file(path: Path) -> bool:
     name = path.name
-    return (
-        (name.startswith("test_") and name.endswith(".py"))
-        or (name.endswith("_test.py"))
-    )
+    return (name.startswith("test_") and name.endswith(".py")) or (name.endswith("_test.py"))
 
 
 def check_repo(repo: Path) -> list[Path]:

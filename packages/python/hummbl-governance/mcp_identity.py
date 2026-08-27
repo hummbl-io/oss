@@ -41,13 +41,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from hummbl_governance.identity import AgentRegistry
 from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.delegation import (
-    DelegationTokenManager,
     DelegationToken,
+    DelegationTokenManager,
     TokenBinding,
 )
+from hummbl_governance.identity import AgentRegistry
 from hummbl_governance.lamport_clock import LamportClock, LamportTimestamp
 
 SERVER_NAME = "hummbl-identity"
@@ -66,6 +66,7 @@ _tokens: dict[str, DelegationToken] = {}
 # ---------------------------------------------------------------------------
 # Tool handlers
 # ---------------------------------------------------------------------------
+
 
 def _identity_register(args: dict) -> dict:
     agent_id = args.get("agent_id", "")
@@ -170,7 +171,9 @@ def _delegation_create(args: dict) -> dict:
         "binding": {
             "task_id": token.binding.task_id,
             "contract_id": token.binding.contract_id,
-        } if token.binding else None,
+        }
+        if token.binding
+        else None,
         "signature": token.signature[:16] + "...",  # truncated for safety
     }
 
@@ -416,6 +419,7 @@ _TOOL_SCHEMAS = [
 # Protocol helpers
 # ---------------------------------------------------------------------------
 
+
 def _ok(request_id, result):
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
@@ -430,11 +434,14 @@ def handle_request(req: dict) -> dict:
     params = req.get("params", {})
 
     if method == "initialize":
-        return _ok(req_id, {
-            "protocolVersion": PROTOCOL_VERSION,
-            "capabilities": {"tools": {}},
-            "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-        })
+        return _ok(
+            req_id,
+            {
+                "protocolVersion": PROTOCOL_VERSION,
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+            },
+        )
 
     if method == "tools/list":
         return _ok(req_id, {"tools": _TOOL_SCHEMAS})
@@ -447,9 +454,7 @@ def handle_request(req: dict) -> dict:
             return _err(req_id, -32601, f"Unknown tool: {tool_name}")
         try:
             result = handler(tool_args)
-            return _ok(req_id, {
-                "content": [{"type": "text", "text": json.dumps(result, default=str)}]
-            })
+            return _ok(req_id, {"content": [{"type": "text", "text": json.dumps(result, default=str)}]})
         except Exception:
             tb = traceback.format_exc()
             return _err(req_id, -32000, tb)

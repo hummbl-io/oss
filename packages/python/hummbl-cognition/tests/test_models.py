@@ -5,28 +5,27 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from hummbl_cognition.models import (
-    AssuranceLevel,
     CANONICAL_LEDGER_SCOPES,
     CANONICAL_LEDGER_TYPES,
+    VALID_VENDORS,
+    AssuranceLevel,
     ColorTeam,
     IntelType,
     LedgerEntry,
     LedgerEntryType,
     LedgerScope,
     SharedState,
-    VALID_VENDORS,
     _generate_entry_id,
     _is_valid_id,
     _utc_now_iso,
     compute_content_hash,
 )
 
-
 # ---------------------------------------------------------------------------
 # ID generation / validation
 # ---------------------------------------------------------------------------
+
 
 class TestEntryId:
     def test_generate_entry_id_format(self) -> None:
@@ -63,6 +62,7 @@ class TestEntryId:
 # Timestamp helper
 # ---------------------------------------------------------------------------
 
+
 class TestUtcNow:
     def test_format(self) -> None:
         ts = _utc_now_iso()
@@ -71,12 +71,14 @@ class TestUtcNow:
         # Should be parseable
         # Replace Z with +00:00 for fromisoformat
         from datetime import datetime
+
         datetime.fromisoformat(ts.replace("Z", "+00:00"))
 
 
 # ---------------------------------------------------------------------------
 # Content hash
 # ---------------------------------------------------------------------------
+
 
 class TestComputeContentHash:
     def test_deterministic(self) -> None:
@@ -94,31 +96,51 @@ class TestComputeContentHash:
 
     def test_is_sha256_hex(self) -> None:
         h = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="c",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="c",
         )
         assert len(h) == 64
         assert all(c in "0123456789abcdef" for c in h)
 
     def test_different_content_different_hash(self) -> None:
         h1 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="foo",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="foo",
         )
         h2 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="bar",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="bar",
         )
         assert h1 != h2
 
     def test_different_agent_different_hash(self) -> None:
         h1 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="c",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="c",
         )
         h2 = compute_content_hash(
-            agent="b", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="c",
+            agent="b",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="c",
         )
         assert h1 != h2
 
@@ -126,6 +148,7 @@ class TestComputeContentHash:
 # ---------------------------------------------------------------------------
 # LedgerEntry
 # ---------------------------------------------------------------------------
+
 
 class TestLedgerEntry:
     def _make_entry(self, **overrides) -> LedgerEntry:
@@ -321,6 +344,7 @@ class TestLedgerEntry:
 # SharedState
 # ---------------------------------------------------------------------------
 
+
 class TestSharedState:
     def test_default_state(self) -> None:
         state = SharedState()
@@ -359,6 +383,7 @@ class TestSharedState:
 # ---------------------------------------------------------------------------
 # Enum / constant sanity
 # ---------------------------------------------------------------------------
+
 
 class TestEnums:
     def test_canonical_types_subset_of_all_types(self) -> None:

@@ -37,8 +37,8 @@ test = ["pytest>=7,<10"]
 
 [project.urls]
 Homepage = "https://hummbl.io"
-Repository = "https://github.com/hummbl-io/oss"
-Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/hummbl-kernel"
+Repository = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-kernel"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-kernel"
 Issues = "https://github.com/hummbl-io/oss/issues"
 
 [tool.setuptools.packages.find]

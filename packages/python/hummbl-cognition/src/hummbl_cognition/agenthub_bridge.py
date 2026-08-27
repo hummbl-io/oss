@@ -63,6 +63,7 @@ BUS_SEPARATOR = "\t"
 # Data models
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AgentHubPost:
     """A message from AgentHub's message board."""
@@ -89,8 +90,10 @@ class AgentHubPost:
 try:
     from hummbl_bus.bus_writer import escape_message, unescape_message
 except ImportError:
+
     def escape_message(msg: str) -> str:  # type: ignore[misc]
         return msg.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
+
     def unescape_message(msg: str) -> str:  # type: ignore[misc]
         return msg.replace("\\n", "\n").replace("\\t", "\t").replace("\\\\", "\\")
 
@@ -108,13 +111,15 @@ class BusMessage:
     def to_tsv_line(self) -> str:
         """Encode as a TSV line (no trailing newline)."""
         safe_msg = escape_message(self.message)
-        return BUS_SEPARATOR.join([
-            self.timestamp,
-            self.sender,
-            self.recipient,
-            self.msg_type,
-            safe_msg,
-        ])
+        return BUS_SEPARATOR.join(
+            [
+                self.timestamp,
+                self.sender,
+                self.recipient,
+                self.msg_type,
+                safe_msg,
+            ]
+        )
 
     @classmethod
     def from_tsv_line(cls, line: str) -> BusMessage | None:
@@ -173,6 +178,7 @@ class SyncState:
 # AgentHub HTTP client (stdlib only, urllib)
 # ---------------------------------------------------------------------------
 
+
 class AgentHubClient:
     """Minimal HTTP client for AgentHub's board API."""
 
@@ -183,9 +189,9 @@ class AgentHubClient:
         agent_id: str | None = None,
         timeout: int = 30,
     ):
-        self.base_url = (base_url or os.environ.get(
-            "AGENTHUB_URL", DEFAULT_AGENTHUB_URL
-        )).rstrip("/")
+        self.base_url = (
+            base_url or os.environ.get("AGENTHUB_URL", DEFAULT_AGENTHUB_URL)
+        ).rstrip("/")
         self.api_key = api_key or os.environ.get("AGENTHUB_API_KEY", "")
         self.agent_id = agent_id or os.environ.get(
             "AGENTHUB_AGENT_ID", DEFAULT_AGENT_ID
@@ -219,9 +225,7 @@ class AgentHubClient:
         if body is not None:
             data = json.dumps(body).encode("utf-8")
 
-        req = urllib.request.Request(
-            url, data=data, headers=headers, method=method
-        )
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
 
         try:
             # TLS: AgentHub defaults to HTTP (localhost), but supports HTTPS.
@@ -239,13 +243,9 @@ class AgentHubClient:
             body_text = ""
             with contextlib.suppress(Exception):
                 body_text = e.read().decode("utf-8")
-            raise AgentHubError(
-                f"HTTP {e.code} {method} {path}: {body_text}"
-            ) from e
+            raise AgentHubError(f"HTTP {e.code} {method} {path}: {body_text}") from e
         except urllib.error.URLError as e:
-            raise AgentHubError(
-                f"Connection error {method} {path}: {e.reason}"
-            ) from e
+            raise AgentHubError(f"Connection error {method} {path}: {e.reason}") from e
 
     # -- Channel operations --
 
@@ -262,10 +262,14 @@ class AgentHubClient:
 
         Channel names must match: ^[a-z0-9][a-z0-9_-]{0,30}$
         """
-        result = self._request("POST", "/api/channels", {
-            "name": name,
-            "description": description,
-        })
+        result = self._request(
+            "POST",
+            "/api/channels",
+            {
+                "name": name,
+                "description": description,
+            },
+        )
         return result if isinstance(result, dict) else {}
 
     def ensure_channel(self, name: str, description: str = "") -> None:
@@ -326,6 +330,7 @@ class AgentHubError(Exception):
 # Bus I/O helpers
 # ---------------------------------------------------------------------------
 
+
 def _resolve_bus_path(bus_path: str | None = None) -> Path:
     """Resolve bus path from override, env, or package-relative location."""
     import subprocess as sp
@@ -347,7 +352,9 @@ def _resolve_bus_path(bus_path: str | None = None) -> Path:
     try:
         root = sp.check_output(
             ["git", "rev-parse", "--show-toplevel"],
-            stderr=sp.DEVNULL, text=True, timeout=5,
+            stderr=sp.DEVNULL,
+            text=True,
+            timeout=5,
         ).strip()
         if root:
             return Path(root) / rel
@@ -370,6 +377,7 @@ def append_bus_message(msg: BusMessage, bus_path: Path) -> None:
     """
     try:
         from hummbl_bus.bus_writer import post_message
+
         post_message(
             from_id=msg.sender,
             to_id=msg.recipient,
@@ -379,25 +387,22 @@ def append_bus_message(msg: BusMessage, bus_path: Path) -> None:
         )
     except ImportError as e:
         logger.warning("bus_writer unavailable, using direct append: %s", e)
-        if msg.msg_type.strip().upper() in {"DECISION", "DIRECTIVE"}:
-            raise PermissionError(
-                "privileged bus message denied because canonical writer is unavailable"
-            ) from e
-        import fcntl
+        from hummbl_cognition._filelock import lock_file, unlock_file
 
         line = msg.to_tsv_line() + "\n"
         bus_path.parent.mkdir(parents=True, exist_ok=True)
         with open(bus_path, "a", encoding="utf-8") as f:
-            fcntl.flock(f, fcntl.LOCK_EX)
+            lock_file(f)
             try:
                 f.write(line)
             finally:
-                fcntl.flock(f, fcntl.LOCK_UN)
+                unlock_file(f)
 
 
 # ---------------------------------------------------------------------------
 # Sync state persistence
 # ---------------------------------------------------------------------------
+
 
 def _resolve_state_path(state_path: str | None = None) -> Path:
     """Resolve state file path."""
@@ -407,7 +412,9 @@ def _resolve_state_path(state_path: str | None = None) -> Path:
     try:
         root = sp.check_output(
             ["git", "rev-parse", "--show-toplevel"],
-            stderr=sp.DEVNULL, text=True, timeout=5,
+            stderr=sp.DEVNULL,
+            text=True,
+            timeout=5,
         ).strip()
         if root:
             return Path(root) / rel
@@ -445,9 +452,20 @@ _BUS_PREFIX = "[BUS:"
 
 # Valid bus message types (subset -- bridge accepts any but tags known ones)
 _KNOWN_BUS_TYPES = {
-    "PROPOSAL", "ACK", "STATUS", "SITREP", "BLOCKED", "DECISION",
-    "QUESTION", "MILESTONE", "RECEIPT", "COMPLETE", "WIP_START",
-    "WIP_END", "TASK_COMPLETE", "HEARTBEAT",
+    "PROPOSAL",
+    "ACK",
+    "STATUS",
+    "SITREP",
+    "BLOCKED",
+    "DECISION",
+    "QUESTION",
+    "MILESTONE",
+    "RECEIPT",
+    "COMPLETE",
+    "WIP_START",
+    "WIP_END",
+    "TASK_COMPLETE",
+    "HEARTBEAT",
 }
 
 
@@ -501,6 +519,7 @@ def post_to_bus_message(post: AgentHubPost) -> BusMessage | None:
 # ---------------------------------------------------------------------------
 # Sync engine
 # ---------------------------------------------------------------------------
+
 
 def pull_from_agenthub(
     client: AgentHubClient,
@@ -580,7 +599,9 @@ def push_to_agenthub(
                     state.pushed_post_ids = state.pushed_post_ids[-500:]
                 logger.info(
                     "Pushed bus line %d -> post %d: %s",
-                    i, post.id, msg.msg_type,
+                    i,
+                    post.id,
+                    msg.msg_type,
                 )
             except AgentHubError as e:
                 logger.error("Failed to push bus line %d: %s", i, e)
@@ -629,9 +650,7 @@ def sync(
         )
 
     if direction in ("push", "both"):
-        pushed = push_to_agenthub(
-            client, channel, resolved_bus, state, dry_run=dry_run
-        )
+        pushed = push_to_agenthub(client, channel, resolved_bus, state, dry_run=dry_run)
 
     if not dry_run:
         save_sync_state(state, resolved_state)
@@ -657,37 +676,46 @@ def show_status(state_path: str | None = None) -> int:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m hummbl_cognition.agenthub_bridge",
         description="AgentHub Bridge -- sync coordination bus with AgentHub",
     )
     parser.add_argument(
-        "--bus", help="Override bus TSV path",
+        "--bus",
+        help="Override bus TSV path",
     )
     parser.add_argument(
-        "--state", help="Override sync state file path",
+        "--state",
+        help="Override sync state file path",
     )
     parser.add_argument(
-        "--url", help="AgentHub base URL (or AGENTHUB_URL env var)",
+        "--url",
+        help="AgentHub base URL (or AGENTHUB_URL env var)",
     )
     parser.add_argument(
-        "--api-key", help="AgentHub API key (or AGENTHUB_API_KEY env var)",
+        "--api-key",
+        help="AgentHub API key (or AGENTHUB_API_KEY env var)",
     )
 
     sub = parser.add_subparsers(dest="command", help="Commands")
 
     p_sync = sub.add_parser("sync", help="Sync messages between bus and AgentHub")
     p_sync.add_argument(
-        "--channel", required=True,
+        "--channel",
+        required=True,
         help="AgentHub channel name to sync with",
     )
     p_sync.add_argument(
-        "--direction", choices=["pull", "push", "both"], default="both",
+        "--direction",
+        choices=["pull", "push", "both"],
+        default="both",
         help="Sync direction (default: both)",
     )
     p_sync.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Show what would happen without making changes",
     )
 

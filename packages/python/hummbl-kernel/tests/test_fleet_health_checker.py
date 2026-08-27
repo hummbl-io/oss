@@ -1,14 +1,15 @@
 """Tests for fleet health checker."""
 
 import unittest
-from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
+
 from hummbl_kernel.fleet.fleet_health_checker import (
+    FleetHealth,
     FleetHealthChecker,
     FleetMode,
-    MachineStatus,
     MachineHealth,
-    FleetHealth,
+    MachineStatus,
 )
 
 
@@ -23,8 +24,8 @@ class TestFleetHealthChecker(unittest.TestCase):
                 "ssh_alias": "primary",
                 "services": {
                     "ollama": "http://100.x.x.x:11434/api/tags",
-                    "bus": "http://100.x.x.x:18790/health"
-                }
+                    "bus": "http://100.x.x.x:18790/health",
+                },
             },
             self.gpu_name: {
                 "tailscale_ip": "100.x.x.x",
@@ -32,9 +33,9 @@ class TestFleetHealthChecker(unittest.TestCase):
                 "ssh_alias": "gpu",
                 "services": {
                     "gitea": "https://example.com",
-                    "ollama": "http://localhost:11434/api/tags"
-                }
-            }
+                    "ollama": "http://localhost:11434/api/tags",
+                },
+            },
         }
         self.test_routing = {
             "inference": self.primary_name,
@@ -46,7 +47,7 @@ class TestFleetHealthChecker(unittest.TestCase):
             "compliance_validation": self.primary_name,
             "evidence_collection": self.gpu_name,
             "report_generation": self.primary_name,
-            "audit_trail_storage": self.gpu_name
+            "audit_trail_storage": self.gpu_name,
         }
         self.checker = FleetHealthChecker(
             mode=FleetMode.HYBRID,
@@ -94,43 +95,49 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_check_http_endpoint_success(self):
         """HTTP endpoint check should succeed for 2xx/3xx codes."""
-        with patch.object(self.checker, '_check_http_endpoint', return_value=(True, "HTTP 200")):
+        with patch.object(self.checker, "_check_http_endpoint", return_value=(True, "HTTP 200")):
             is_healthy, msg = self.checker._check_http_endpoint("http://example.com")
             self.assertTrue(is_healthy)
             self.assertEqual(msg, "HTTP 200")
 
     def test_check_http_endpoint_failure(self):
         """HTTP endpoint check should fail for 4xx/5xx codes."""
-        with patch.object(self.checker, '_check_http_endpoint', return_value=(False, "HTTP 404")):
+        with patch.object(self.checker, "_check_http_endpoint", return_value=(False, "HTTP 404")):
             is_healthy, msg = self.checker._check_http_endpoint("http://example.com")
             self.assertFalse(is_healthy)
             self.assertEqual(msg, "HTTP 404")
 
     def test_check_http_endpoint_timeout(self):
         """HTTP endpoint check should handle timeout."""
-        with patch.object(self.checker, '_check_http_endpoint', return_value=(False, "timeout")):
+        with patch.object(self.checker, "_check_http_endpoint", return_value=(False, "timeout")):
             is_healthy, msg = self.checker._check_http_endpoint("http://example.com")
             self.assertFalse(is_healthy)
             self.assertEqual(msg, "timeout")
 
     def test_check_ssh_connectivity_success(self):
         """SSH connectivity check should succeed."""
-        with patch.object(self.checker, '_check_ssh_connectivity', return_value=(True, "connected")):
+        with patch.object(
+            self.checker, "_check_ssh_connectivity", return_value=(True, "connected")
+        ):
             is_healthy, msg = self.checker._check_ssh_connectivity(self.primary_name)
             self.assertTrue(is_healthy)
             self.assertEqual(msg, "connected")
 
     def test_check_ssh_connectivity_failure(self):
         """SSH connectivity check should fail."""
-        with patch.object(self.checker, '_check_ssh_connectivity', return_value=(False, "Connection refused")):
+        with patch.object(
+            self.checker, "_check_ssh_connectivity", return_value=(False, "Connection refused")
+        ):
             is_healthy, msg = self.checker._check_ssh_connectivity(self.primary_name)
             self.assertFalse(is_healthy)
             self.assertEqual(msg, "Connection refused")
 
     def test_check_machine_healthy(self):
         """Machine check should return healthy status when all checks pass."""
-        with patch.object(self.checker, '_check_http_endpoint', return_value=(True, "HTTP 200")):
-            with patch.object(self.checker, '_check_ssh_connectivity', return_value=(True, "connected")):
+        with patch.object(self.checker, "_check_http_endpoint", return_value=(True, "HTTP 200")):
+            with patch.object(
+                self.checker, "_check_ssh_connectivity", return_value=(True, "connected")
+            ):
                 health = self.checker._check_machine(self.primary_name)
                 self.assertEqual(health.status, MachineStatus.HEALTHY)
                 self.assertEqual(health.name, self.primary_name)
@@ -138,8 +145,10 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_check_machine_unhealthy(self):
         """Machine check should return unhealthy status when checks fail."""
-        with patch.object(self.checker, '_check_http_endpoint', return_value=(False, "HTTP 404")):
-            with patch.object(self.checker, '_check_ssh_connectivity', return_value=(False, "Connection refused")):
+        with patch.object(self.checker, "_check_http_endpoint", return_value=(False, "HTTP 404")):
+            with patch.object(
+                self.checker, "_check_ssh_connectivity", return_value=(False, "Connection refused")
+            ):
                 health = self.checker._check_machine(self.primary_name)
                 self.assertEqual(health.status, MachineStatus.UNHEALTHY)
                 self.assertEqual(health.name, self.primary_name)
@@ -153,14 +162,15 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_check_fleet_health(self):
         """Fleet health check should return status for all machines."""
-        with patch.object(self.checker, '_check_machine') as mock_check:
+        with patch.object(self.checker, "_check_machine") as mock_check:
             # Mock both machines as healthy
             def mock(name):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
+
             mock_check.side_effect = mock
 
             fleet_health = self.checker.check_fleet_health()
@@ -170,33 +180,36 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_fleet_health_degraded(self):
         """Fleet health should be degraded when one machine is unhealthy."""
+
         def mock_check_machine(name):
             if name == self.primary_name:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
             else:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.UNHEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
 
-        with patch.object(self.checker, '_check_machine', side_effect=mock_check_machine):
+        with patch.object(self.checker, "_check_machine", side_effect=mock_check_machine):
             fleet_health = self.checker.check_fleet_health()
             self.assertEqual(fleet_health.overall_status, MachineStatus.UNHEALTHY)
 
     def test_routing_recommendations_hybrid(self):
         """Hybrid mode should generate routing recommendations."""
-        with patch.object(self.checker, '_check_machine') as mock_check:
+        with patch.object(self.checker, "_check_machine") as mock_check:
+
             def mock(name):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
+
             mock_check.side_effect = mock
 
             fleet_health = self.checker.check_fleet_health()
@@ -205,28 +218,29 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_routing_recommendations_fallback(self):
         """Routing should fallback when primary node is unhealthy."""
+
         def mock_check_machine(name):
             if name == self.primary_name:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.UNHEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
             else:
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
 
-        with patch.object(self.checker, '_check_machine', side_effect=mock_check_machine):
+        with patch.object(self.checker, "_check_machine", side_effect=mock_check_machine):
             fleet_health = self.checker.check_fleet_health()
             # Inference should fallback to gpu when primary is unhealthy
             self.assertEqual(fleet_health.routing_recommendations["inference"], self.gpu_name)
 
     def test_get_optimal_compute(self):
         """Optimal compute should return recommended node."""
-        with patch.object(self.checker, 'check_fleet_health') as mock_health:
+        with patch.object(self.checker, "check_fleet_health") as mock_health:
             mock_health.return_value = MagicMock(
                 routing_recommendations={"inference": self.primary_name}
             )
@@ -235,9 +249,7 @@ class TestFleetHealthChecker(unittest.TestCase):
 
     def test_get_optimal_compute_with_health_param(self):
         """Optimal compute should use provided health status."""
-        fleet_health = MagicMock(
-            routing_recommendations={"gpu_workload": self.gpu_name}
-        )
+        fleet_health = MagicMock(routing_recommendations={"gpu_workload": self.gpu_name})
         optimal = self.checker.get_optimal_compute("gpu_workload", fleet_health)
         self.assertEqual(optimal, self.gpu_name)
 
@@ -249,13 +261,15 @@ class TestFleetHealthChecker(unittest.TestCase):
             fleet_config=self.test_config,
             task_routing=local_routing,
         )
-        with patch.object(local_checker, '_check_machine') as mock_check:
+        with patch.object(local_checker, "_check_machine") as mock_check:
+
             def mock(name):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
+
             mock_check.side_effect = mock
 
             fleet_health = local_checker.check_fleet_health()
@@ -270,13 +284,15 @@ class TestFleetHealthChecker(unittest.TestCase):
             fleet_config=self.test_config,
             task_routing=single_routing,
         )
-        with patch.object(single_checker, '_check_machine') as mock_check:
+        with patch.object(single_checker, "_check_machine") as mock_check:
+
             def mock(name):
                 return MachineHealth(
                     name=name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
+
             mock_check.side_effect = mock
 
             fleet_health = single_checker.check_fleet_health()
@@ -292,16 +308,16 @@ class TestFleetHealthChecker(unittest.TestCase):
                 self.primary_name: MachineHealth(
                     name=self.primary_name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 ),
                 self.gpu_name: MachineHealth(
                     name=self.gpu_name,
                     status=MachineStatus.HEALTHY,
-                    timestamp=datetime.now(timezone.utc).isoformat()
-                )
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                ),
             },
             overall_status=MachineStatus.HEALTHY,
-            routing_recommendations={"inference": self.primary_name}
+            routing_recommendations={"inference": self.primary_name},
         )
         # Should not raise exception
         self.checker.print_health_report(fleet_health)

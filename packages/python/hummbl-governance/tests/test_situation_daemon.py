@@ -3,7 +3,6 @@ Tests for HUMMBL Situation Daemon (EventStore, Deduplication, Workers, and HTTP 
 """
 
 import json
-import threading
 import time
 import unittest
 import urllib.request
@@ -12,8 +11,6 @@ from datetime import datetime, timezone
 from examples.situation_daemon import (
     AlertDispatcher,
     EventStore,
-    SituationDaemon,
-    SituationHTTPHandler,
     TelemetryEvent,
     run_http_server,
 )
@@ -38,7 +35,7 @@ class TestSituationDaemon(unittest.TestCase):
         self.assertTrue(self.store.add(ev1))
         # Second insertion with same ID is rejected (deduplicated)
         self.assertFalse(self.store.add(ev1))
-        
+
         recent = self.store.get_recent()
         self.assertEqual(len(recent), 1)
         self.assertEqual(recent[0].id, "test_ev_1")
@@ -54,19 +51,18 @@ class TestSituationDaemon(unittest.TestCase):
         )
         self.store.add(ev)
         self.assertEqual(len(self.store.get_recent()), 1)
-        
+
         # Artificially age the event timestamp
         with self.store._lock:
             self.store._event_timestamps["expiring_ev"] = time.time() - 10
-            
+
         # Purge triggers on next query
         self.assertEqual(len(self.store.get_recent()), 0)
         self.assertTrue(self.store.is_new("expiring_ev"))
 
     def test_alert_dispatcher_formatting(self):
-        dispatched_events = []
         dispatcher = AlertDispatcher(webhook_urls=[])
-        
+
         ev = TelemetryEvent(
             id="alert_test",
             domain="space_weather",
@@ -93,7 +89,7 @@ class TestSituationDaemon(unittest.TestCase):
             longitude=-0.1278,
         )
         self.store.add(ev)
-        
+
         server = run_http_server(self.store, port=test_port)
         time.sleep(0.1)
 

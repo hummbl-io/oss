@@ -21,9 +21,9 @@ from __future__ import annotations
 
 import argparse
 import json
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SCHEMAS_DIR = REPO_ROOT / "schemas"
@@ -47,12 +47,14 @@ def generate_manifest(schemas: dict[str, dict]) -> dict:
         tt_schema = props.get("tuple_type", {})
         if isinstance(tt_schema, dict):
             tuple_type = tt_schema.get("const")
-        schema_list.append({
-            "schema_id": name,
-            "url": schema.get("$id", ""),
-            "title": schema.get("title", ""),
-            "tuple_type": tuple_type,
-        })
+        schema_list.append(
+            {
+                "schema_id": name,
+                "url": schema.get("$id", ""),
+                "title": schema.get("title", ""),
+                "tuple_type": tuple_type,
+            }
+        )
     return {
         "registry_version": "0.1.0",
         "schema_count": len(schema_list),
@@ -78,10 +80,7 @@ class RegistryHandler(BaseHTTPRequestHandler):
                 if len(parts) >= 5 and parts[4] == "versions":
                     # Mock: single version
                     if schema_id in self.schemas:
-                        self._json_response(200, {
-                            "schema_id": schema_id,
-                            "versions": ["latest"]
-                        })
+                        self._json_response(200, {"schema_id": schema_id, "versions": ["latest"]})
                     else:
                         self._json_response(404, {"error": "Schema not found"})
                 elif schema_id in self.schemas:
@@ -93,7 +92,8 @@ class RegistryHandler(BaseHTTPRequestHandler):
         elif path == "/registry/search":
             q = query.get("q", [""])[0].lower()
             results = [
-                s for s in self.manifest["schemas"]
+                s
+                for s in self.manifest["schemas"]
                 if q in s.get("title", "").lower() or q in str(s.get("tuple_type", "")).lower()
             ]
             self._json_response(200, {"query": q, "results": results})
@@ -115,8 +115,9 @@ class RegistryHandler(BaseHTTPRequestHandler):
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=9099, help="Port to listen on")
-    parser.add_argument("--schemas-dir", default=str(DEFAULT_SCHEMAS_DIR),
-                        help="Directory containing schema files")
+    parser.add_argument(
+        "--schemas-dir", default=str(DEFAULT_SCHEMAS_DIR), help="Directory containing schema files"
+    )
     args = parser.parse_args(argv)
 
     schemas = load_schemas(Path(args.schemas_dir))
@@ -128,12 +129,12 @@ def main(argv: list[str] | None = None) -> int:
     server = HTTPServer(("localhost", args.port), RegistryHandler)
     print(f"Schema registry server running on http://localhost:{args.port}")
     print(f"Loaded {len(schemas)} schemas")
-    print(f"Endpoints:")
-    print(f"  GET /registry/manifest")
-    print(f"  GET /registry/schemas/{{id}}")
-    print(f"  GET /registry/schemas/{{id}}/versions")
-    print(f"  GET /registry/search?q=...")
-    print(f"Press Ctrl+C to stop")
+    print("Endpoints:")
+    print("  GET /registry/manifest")
+    print("  GET /registry/schemas/{id}")
+    print("  GET /registry/schemas/{id}/versions")
+    print("  GET /registry/search?q=...")
+    print("Press Ctrl+C to stop")
 
     try:
         server.serve_forever()

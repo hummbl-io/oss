@@ -107,25 +107,25 @@ Generate immutable, append-only audit trails for compliance frameworks (SOC 2, I
 def validate_evidence(evidence, control_id, framework):
     """Validate evidence against compliance requirements"""
     # Check provenance
-    if not evidence.get('source'):
+    if not evidence.get("source"):
         return False, "Missing evidence source"
-    
+
     # Check integrity
-    if evidence.get('hash') != compute_hash(evidence.get('location')):
+    if evidence.get("hash") != compute_hash(evidence.get("location")):
         return False, "Hash mismatch - evidence corrupted"
-    
+
     # Check timeliness
-    if not is_within_audit_period(evidence.get('date'), framework):
+    if not is_within_audit_period(evidence.get("date"), framework):
         return False, "Evidence outside audit period"
-    
+
     # Check relevance
     if not maps_to_control(evidence, control_id):
         return False, "Evidence not relevant to control"
-    
+
     # Check completeness
     if not is_complete(evidence, control_id):
         return False, "Evidence incomplete for control"
-    
+
     return True, "Evidence valid"
 ```
 

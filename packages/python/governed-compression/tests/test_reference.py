@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from governed_compression.bench.distortion import mean_squared_error
 from governed_compression.core.config import CompressionConfig
 from governed_compression.core.reference import approximate_dot, quantize_reference
@@ -131,6 +130,7 @@ def test_mse_rejects_shape_mismatch() -> None:
 # CompressionConfig validation
 # ---------------------------------------------------------------------------
 
+
 def test_config_rejects_negative_bits_per_channel() -> None:
     with pytest.raises(ValueError, match="non-negative"):
         CompressionConfig(method="scalar_baseline", bits_per_channel=-1.0)
@@ -143,6 +143,7 @@ def test_config_accepts_zero_bits_per_channel() -> None:
 
 def test_default_config_has_expected_values() -> None:
     from governed_compression.core.config import DEFAULT_CONFIG
+
     assert DEFAULT_CONFIG.method == "scalar_baseline"
     assert DEFAULT_CONFIG.bits_per_channel == 8.0
     assert DEFAULT_CONFIG.residual_enabled is False
@@ -152,11 +153,16 @@ def test_default_config_has_expected_values() -> None:
 # CompressionRun tuple
 # ---------------------------------------------------------------------------
 
+
 def test_compression_run_to_dict() -> None:
     from governed_compression.experiment.tuples import CompressionRun
+
     run = CompressionRun(
-        run_id="R1", method="scalar_baseline", bits_per_channel=4.0,
-        dataset="synthetic", benchmark="mse",
+        run_id="R1",
+        method="scalar_baseline",
+        bits_per_channel=4.0,
+        dataset="synthetic",
+        benchmark="mse",
     )
     d = run.to_dict()
     assert d["run_id"] == "R1"
@@ -168,9 +174,13 @@ def test_compression_run_to_dict() -> None:
 
 def test_compression_run_is_frozen() -> None:
     from governed_compression.experiment.tuples import CompressionRun
+
     run = CompressionRun(
-        run_id="R1", method="scalar_baseline", bits_per_channel=4.0,
-        dataset="synthetic", benchmark="mse",
+        run_id="R1",
+        method="scalar_baseline",
+        bits_per_channel=4.0,
+        dataset="synthetic",
+        benchmark="mse",
     )
     with pytest.raises((AttributeError, TypeError)):
         run.run_id = "R2"  # type: ignore[misc]
@@ -179,6 +189,7 @@ def test_compression_run_is_frozen() -> None:
 # ---------------------------------------------------------------------------
 # Edge cases
 # ---------------------------------------------------------------------------
+
 
 def test_mse_with_empty_arrays_raises() -> None:
     with pytest.raises(ValueError):

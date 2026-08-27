@@ -1,20 +1,15 @@
 """Tests for surface_audit module."""
 
-import json
-from pathlib import Path
-
 import pytest
-
 from hummbl_cognition.surface_audit import (
-    DEFAULT_LOG_PATH,
-    VALID_SURFACES,
     VALID_AUTHORITY_LEVELS,
     VALID_RESULTS,
+    VALID_SURFACES,
     SurfaceAuditError,
-    record_action,
-    validate_receipt,
     append_receipt,
     read_receipts,
+    record_action,
+    validate_receipt,
 )
 
 

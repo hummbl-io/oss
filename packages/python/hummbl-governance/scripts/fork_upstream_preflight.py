@@ -117,9 +117,7 @@ def extract_rules(docs: dict[str, str | None]) -> dict[str, str]:
     rules: dict[str, str] = {}
     contributing = docs.get("CONTRIBUTING.md") or ""
 
-    rules["unsolicited_prs_permitted"] = (
-        "unknown" if not contributing else "check-contributing"
-    )
+    rules["unsolicited_prs_permitted"] = "unknown" if not contributing else "check-contributing"
     rules["issue_first_required"] = "unknown"
     rules["ai_disclosure_required"] = "unknown"
     rules["dco_signoff_required"] = "unknown"
@@ -148,9 +146,7 @@ def verify_topology(remotes: dict[str, str]) -> tuple[bool, str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Third-Party Fork & Upstream Contribution Protocol v0.1 Preflight"
-    )
+    parser = argparse.ArgumentParser(description="Third-Party Fork & Upstream Contribution Protocol v0.1 Preflight")
     parser.add_argument("--repo", required=True, help="Path to the fork repository")
     parser.add_argument("--upstream", help="Upstream org/repo (e.g., SakanaAI/AI-Scientist-v2)")
     parser.add_argument("--json", action="store_true", help="Output receipt as JSON")
@@ -202,8 +198,7 @@ def main() -> int:
         "preflight_pass": not needs_escalation,
         "operator_escalation": needs_escalation,
         "escalation_reasons": (
-            [f"unknown_rule: {r}" for r in unknown_rules]
-            + (["topology_not_verified"] if fail_closed else [])
+            [f"unknown_rule: {r}" for r in unknown_rules] + (["topology_not_verified"] if fail_closed else [])
         ),
     }
 

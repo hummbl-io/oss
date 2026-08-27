@@ -41,7 +41,7 @@ _DATA_DIR = Path(__file__).parent / "data"
 FAMILIES: tuple[str, ...] = ("P", "IN", "CO", "DE", "RE", "SY")
 
 FAMILY_NAMES: dict[str, str] = {
-    "P":  "Perspective",
+    "P": "Perspective",
     "IN": "Inversion",
     "CO": "Composition",
     "DE": "Decomposition",
@@ -50,11 +50,36 @@ FAMILY_NAMES: dict[str, str] = {
 }
 
 
-_STOP_WORDS = frozenset({
-    "a", "an", "the", "and", "or", "of", "in", "to", "for",
-    "with", "as", "by", "on", "at", "is", "are", "be", "it",
-    "its", "this", "that", "how", "what", "why", "when", "where",
-})
+_STOP_WORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "of",
+        "in",
+        "to",
+        "for",
+        "with",
+        "as",
+        "by",
+        "on",
+        "at",
+        "is",
+        "are",
+        "be",
+        "it",
+        "its",
+        "this",
+        "that",
+        "how",
+        "what",
+        "why",
+        "when",
+        "where",
+    }
+)
 
 
 def _tokenize(text: str) -> frozenset[str]:
@@ -166,8 +191,7 @@ class Engine:
         op = self.get(code)
         if op is None:
             raise ValueError(
-                f"Unknown operator code: {code!r}. "
-                f"Use engine.list() to see all 120 codes."
+                f"Unknown operator code: {code!r}. Use engine.list() to see all 120 codes."
             )
         return (
             f"You are applying the Base120 reasoning operator "
@@ -245,9 +269,7 @@ class Engine:
         if op is None:
             raise ValueError(f"Unknown operator code: {code!r}.")
         if not 0.0 <= confidence <= 1.0:
-            raise ValueError(
-                f"confidence must be between 0.0 and 1.0, got {confidence!r}."
-            )
+            raise ValueError(f"confidence must be between 0.0 and 1.0, got {confidence!r}.")
         return ApplyResult(
             code=op.code,
             name=op.name,

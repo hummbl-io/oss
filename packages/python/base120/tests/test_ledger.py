@@ -22,13 +22,13 @@ import json
 from pathlib import Path
 
 import pytest
-
 from base120.ledger import Ledger
 from base120.models import OperatorTuple
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_tuple(code: str = "P6", state: str = "rec", drift: float = 0.15) -> OperatorTuple:
     return OperatorTuple(
@@ -42,6 +42,7 @@ def _make_tuple(code: str = "P6", state: str = "rec", drift: float = 0.15) -> Op
 # ---------------------------------------------------------------------------
 # Construction
 # ---------------------------------------------------------------------------
+
 
 class TestConstruction:
     def test_custom_path(self, tmp_path: Path):
@@ -62,6 +63,7 @@ class TestConstruction:
 # ---------------------------------------------------------------------------
 # append()
 # ---------------------------------------------------------------------------
+
 
 class TestAppend:
     def test_creates_file(self, tmp_path: Path):
@@ -113,12 +115,18 @@ class TestAppend:
         t = OperatorTuple(id="SY20", time="2026-04-14T12:00:00Z", state="synthesize", drift=0.05)
         ledger.append(t)
         obj = json.loads(ledger.path.read_text().strip())
-        assert obj == {"id": "SY20", "time": "2026-04-14T12:00:00Z", "state": "synthesize", "drift": 0.05}
+        assert obj == {
+            "id": "SY20",
+            "time": "2026-04-14T12:00:00Z",
+            "state": "synthesize",
+            "drift": 0.05,
+        }
 
 
 # ---------------------------------------------------------------------------
 # project()
 # ---------------------------------------------------------------------------
+
 
 class TestProject:
     def test_empty_returns_empty(self, tmp_path: Path):
@@ -138,13 +146,13 @@ class TestProject:
     def test_all_entries_no_limit(self, tmp_path: Path):
         ledger = Ledger(tmp_path / "l.jsonl")
         for i in range(5):
-            ledger.append(_make_tuple(f"P{i+1}"))
+            ledger.append(_make_tuple(f"P{i + 1}"))
         assert len(ledger.project()) == 5
 
     def test_project_n_returns_last_n(self, tmp_path: Path):
         ledger = Ledger(tmp_path / "l.jsonl")
         for i in range(5):
-            ledger.append(_make_tuple(f"P{i+1}"))
+            ledger.append(_make_tuple(f"P{i + 1}"))
         last2 = ledger.project(n=2)
         assert len(last2) == 2
         assert last2[0].id == "P4"
@@ -169,7 +177,9 @@ class TestProject:
 
     def test_corrupted_json_line_raises(self, tmp_path: Path):
         p = tmp_path / "l.jsonl"
-        p.write_text('{"id": "P6", "time": "t", "state": "s", "drift": 0.1}\n{bad json}\n', encoding="utf-8")
+        p.write_text(
+            '{"id": "P6", "time": "t", "state": "s", "drift": 0.1}\n{bad json}\n', encoding="utf-8"
+        )
         ledger = Ledger(p)
         with pytest.raises(ValueError, match="Corrupted ledger line 2"):
             ledger.project()
@@ -192,6 +202,7 @@ class TestProject:
 # ---------------------------------------------------------------------------
 # cut()
 # ---------------------------------------------------------------------------
+
 
 class TestCut:
     def test_returns_entries_above_threshold(self, tmp_path: Path):
@@ -227,7 +238,7 @@ class TestCut:
     def test_all_entries_above_returns_all(self, tmp_path: Path):
         ledger = Ledger(tmp_path / "l.jsonl")
         for i in range(3):
-            ledger.append(_make_tuple(f"P{i+1}", drift=0.9))
+            ledger.append(_make_tuple(f"P{i + 1}", drift=0.9))
         assert len(ledger.cut(max_drift=0.0)) == 3
 
     def test_preserves_order(self, tmp_path: Path):
@@ -243,6 +254,7 @@ class TestCut:
 # VERUM invariants (structural)
 # ---------------------------------------------------------------------------
 
+
 class TestVERUMInvariants:
     def test_no_delete_method(self):
         assert not hasattr(Ledger, "delete")
@@ -255,7 +267,8 @@ class TestVERUMInvariants:
     def test_exactly_three_public_methods(self):
         """Minimal operators: append, project, cut — no more."""
         public = [
-            m for m in dir(Ledger)
+            m
+            for m in dir(Ledger)
             if not m.startswith("_") and callable(getattr(Ledger, m)) and m != "path"
         ]
         assert set(public) == {"append", "project", "cut"}, f"Unexpected methods: {public}"

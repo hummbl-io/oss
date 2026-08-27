@@ -1,12 +1,5 @@
 from .base import TypedTuple
-from .idp import (
-    ContractTuple,
-    DCTTuple,
-    DCTXTuple,
-    EvidenceTuple,
-    AttestTuple,
-    SystemTuple
-)
+from .idp import AttestTuple, ContractTuple, DCTTuple, DCTXTuple, EvidenceTuple, SystemTuple
 
 __all__ = [
     "TypedTuple",
@@ -15,5 +8,5 @@ __all__ = [
     "DCTXTuple",
     "EvidenceTuple",
     "AttestTuple",
-    "SystemTuple"
+    "SystemTuple",
 ]

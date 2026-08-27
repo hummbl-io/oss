@@ -33,7 +33,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # --- Visualization commands (delegated to visualize module) ---
     if command in ("view", "timeline", "categories", "diff"):
-        from hummbl.visualize import cli_view, cli_timeline, cli_categories, cli_diff
+        from hummbl.visualize import cli_categories, cli_diff, cli_timeline, cli_view
 
         dispatch = {
             "view": cli_view,

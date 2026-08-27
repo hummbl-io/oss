@@ -16,7 +16,6 @@
 
 """Tests for hummbl_governance.identity."""
 
-
 from hummbl_governance.identity import AgentRegistry
 
 

@@ -38,14 +38,10 @@ def validate_admission_control(proposal: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(proposal, schema)
     if errors:
-        raise ValidationError(
-            f"Admission control schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Admission control schema validation failed: {'; '.join(errors)}")
 
 
-def validate_gateway_emitted_fields(
-    proposal: dict[str, Any], *, is_proposer: bool = False
-) -> list[str]:
+def validate_gateway_emitted_fields(proposal: dict[str, Any], *, is_proposer: bool = False) -> list[str]:
     """Check that proposer-emitted fields do not contain gateway-emitted values.
 
     The schema cannot express 'this field must not be set by the proposer'
@@ -74,21 +70,17 @@ def validate_gateway_emitted_fields(
     # The gateway sets these after validation; the proposer must not.
     if "freshness_checked_at" in ctx:
         violations.append(
-            "context_freshness.freshness_checked_at is GATEWAY-EMITTED ONLY; "
-            "proposer must not supply this field"
+            "context_freshness.freshness_checked_at is GATEWAY-EMITTED ONLY; proposer must not supply this field"
         )
     if "stale_sources" in ctx:
         violations.append(
-            "context_freshness.stale_sources is GATEWAY-EMITTED ONLY; "
-            "proposer must not supply this field"
+            "context_freshness.stale_sources is GATEWAY-EMITTED ONLY; proposer must not supply this field"
         )
 
     return violations
 
 
-def validate_admission(
-    proposal: dict[str, Any], *, is_proposer: bool = False
-) -> None:
+def validate_admission(proposal: dict[str, Any], *, is_proposer: bool = False) -> None:
     """Full admission validation: schema + gateway-emitted field convention.
 
     Args:
@@ -102,9 +94,7 @@ def validate_admission(
     validate_admission_control(proposal)
     violations = validate_gateway_emitted_fields(proposal, is_proposer=is_proposer)
     if violations:
-        raise ValueError(
-            "Admission validation failed: " + "; ".join(violations)
-        )
+        raise ValueError("Admission validation failed: " + "; ".join(violations))
 
 
 __all__ = [

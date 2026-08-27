@@ -30,12 +30,14 @@ def test_kinematic_governor_enforces_velocity():
     assert result["allowed"] is False
     assert "Velocity 1.5 exceeds limit 1.0" in result["reason"]
 
+
 def test_kinematic_governor_enforces_force():
     gov = KinematicGovernor(max_force=50.0)
     assert gov.check_motion(force=30.0)["allowed"] is True
     result = gov.check_motion(force=60.0)
     assert result["allowed"] is False
     assert "Force 60.0 exceeds limit 50.0" in result["reason"]
+
 
 def test_phri_monitor_detects_human_proximity():
     monitor = pHRISafetyMonitor(min_distance=0.5)
@@ -46,11 +48,13 @@ def test_phri_monitor_detects_human_proximity():
     # Critical proximity -> Emergency
     assert monitor.check_safety(distance=0.1)["mode"] == PhysicalSafetyMode.EMERGENCY
 
+
 def test_phri_monitor_collision_detection():
     monitor = pHRISafetyMonitor()
     result = monitor.check_safety(collision=True)
     assert result["mode"] == PhysicalSafetyMode.EMERGENCY
     assert "Collision detected" in result["reason"]
+
 
 def test_kinematic_governor_dynamic_scaling():
     gov = KinematicGovernor(max_velocity=1.0)

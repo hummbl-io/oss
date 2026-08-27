@@ -36,7 +36,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel import (
     IdentityEngine,
     Kernel,
@@ -277,6 +276,7 @@ class TestChaosKernelIntegration:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Override atlas_dir to a non-existent path
             from hummbl_governance.kernel.law_engine import LawEngine
+
             # Manually construct kernel with no atlas
             kernel = Kernel(state_dir=Path(tmpdir))
             # Replace law engine with empty atlas

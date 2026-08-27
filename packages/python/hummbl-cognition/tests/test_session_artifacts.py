@@ -125,7 +125,12 @@ class TestSummary:
 
     def test_summary_with_artifacts(self):
         register("arcana_synthesis", "14 hypotheses", "/arcana")
-        register("dashboard_url", "dashboard.hummbl.io", "/deploy-canary", artifact_path="https://dashboard.hummbl.io")
+        register(
+            "dashboard_url",
+            "dashboard.hummbl.io",
+            "/deploy-canary",
+            artifact_path="https://dashboard.hummbl.io",
+        )
         s = summary()
         assert "arcana_synthesis" in s
         assert "dashboard_url" in s

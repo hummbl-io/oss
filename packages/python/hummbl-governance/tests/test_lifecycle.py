@@ -84,6 +84,7 @@ class TestAuthorize:
         # Trip the circuit breaker by calling a failing function
         def fail():
             raise RuntimeError("boom")
+
         for _ in range(5):
             try:
                 self.cb.call(fail)
@@ -98,7 +99,10 @@ class TestAuthorize:
         # Exhaust the budget
         self.cg.record_usage("openai", "gpt-4", 0, 0, 250.0)
         decision = self.lifecycle.authorize(
-            "worker-1", "api", "query", cost=10.0,
+            "worker-1",
+            "api",
+            "query",
+            cost=10.0,
         )
         assert not decision.allowed
         assert "DENY" in decision.reason
@@ -121,8 +125,10 @@ class TestStatus:
         reg.register_agent("a1", trust="high")
 
         lifecycle = GovernanceLifecycle(
-            kill_switch=ks, circuit_breaker=cb,
-            cost_governor=cg, registry=reg,
+            kill_switch=ks,
+            circuit_breaker=cb,
+            cost_governor=cg,
+            registry=reg,
         )
         status = lifecycle.status()
         assert status.kill_switch_mode == "DISENGAGED"

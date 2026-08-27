@@ -2,23 +2,21 @@
 
 from __future__ import annotations
 
-import json
 import socket
 import sys
 import threading
 import time
 from http.server import ThreadingHTTPServer
 from pathlib import Path
-from urllib.error import HTTPError
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from hummbl_cognition import belonging_check as bc
 from hummbl_cognition import hrsi_bridge_client as hcli
 from hummbl_cognition import hrsi_bridge_server as hs
 from hummbl_cognition import hrsi_checkin as hc
-from hummbl_cognition import belonging_check as bc
 
 
 @pytest.fixture
@@ -107,7 +105,9 @@ class TestPostToBridge:
         result = hcli.post_hrsi_to_bridge_url_result(
             server["base_url"],
             cogstate="AVAILABLE",
-            safety=4, mattering=3, connection=4,
+            safety=4,
+            mattering=3,
+            connection=4,
             hule="test",
         )
         assert result["ok"] is False
@@ -118,7 +118,9 @@ class TestPostToBridge:
         result = hcli.post_hrsi_to_bridge_url_result(
             "http://127.0.0.1:1",  # port 1 = nothing listening
             cogstate="AVAILABLE",
-            safety=4, mattering=3, connection=4,
+            safety=4,
+            mattering=3,
+            connection=4,
             hule="test",
         )
         assert result["ok"] is False
@@ -129,7 +131,9 @@ class TestPostToBridge:
         result = hcli.post_hrsi_to_bridge_url_result(
             server["base_url"],
             cogstate="INVALID",
-            safety=4, mattering=3, connection=4,
+            safety=4,
+            mattering=3,
+            connection=4,
             hule="test",
         )
         assert result["ok"] is False

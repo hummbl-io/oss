@@ -20,40 +20,40 @@ This lane is organized around three layers:
 
 ## Key Specs
 
-- [BIO_COGNITIVE_TERMINOLOGY.md](/Users/others/PROJECTS/hummbl-tuples/docs/specs/BIO_COGNITIVE_TERMINOLOGY.md)
-- [BIO_GOVERNANCE_TUPLE_TAXONOMY.md](/Users/others/PROJECTS/hummbl-tuples/docs/specs/BIO_GOVERNANCE_TUPLE_TAXONOMY.md)
+- [BIO_COGNITIVE_TERMINOLOGY.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/specs/BIO_COGNITIVE_TERMINOLOGY.md)
+- [BIO_GOVERNANCE_TUPLE_TAXONOMY.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/specs/BIO_GOVERNANCE_TUPLE_TAXONOMY.md)
 
 ## Key Research Notes
 
-- [BIO_COGNITIVE_STANDARDS_MEMO.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_COGNITIVE_STANDARDS_MEMO.md)
-- [BIO_COGNITIVE_EXPERIMENT_BRIEF.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_COGNITIVE_EXPERIMENT_BRIEF.md)
-- [BIO_COGNITIVE_HUMMBL_BRIDGE.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/BIO_COGNITIVE_HUMMBL_BRIDGE.md)
+- [BIO_COGNITIVE_STANDARDS_MEMO.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_COGNITIVE_STANDARDS_MEMO.md)
+- [BIO_COGNITIVE_EXPERIMENT_BRIEF.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_COGNITIVE_EXPERIMENT_BRIEF.md)
+- [BIO_COGNITIVE_HUMMBL_BRIDGE.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/BIO_COGNITIVE_HUMMBL_BRIDGE.md)
 
 ## Schemas
 
 ### Signal And State
 
-- [bio_signal_captured.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_signal_captured.schema.json)
-- [readiness_inferred.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/readiness_inferred.schema.json)
-- [workload_inferred.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/workload_inferred.schema.json)
-- [strain_flagged.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/strain_flagged.schema.json)
+- [bio_signal_captured.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_signal_captured.schema.json)
+- [readiness_inferred.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/readiness_inferred.schema.json)
+- [workload_inferred.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/workload_inferred.schema.json)
+- [strain_flagged.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/strain_flagged.schema.json)
 
 ### Adaptation And Authority
 
-- [bio_adaptation_proposed.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_adaptation_proposed.schema.json)
-- [bio_action_authorized.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_action_authorized.schema.json)
-- [bio_action_blocked.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_action_blocked.schema.json)
-- [bio_override.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_override.schema.json)
-- [bio_adaptation_executed.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_adaptation_executed.schema.json)
+- [bio_adaptation_proposed.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_adaptation_proposed.schema.json)
+- [bio_action_authorized.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_action_authorized.schema.json)
+- [bio_action_blocked.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_action_blocked.schema.json)
+- [bio_override.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_override.schema.json)
+- [bio_adaptation_executed.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_adaptation_executed.schema.json)
 
 ### Outcomes And Harms
 
-- [bio_outcome_observed.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_outcome_observed.schema.json)
-- [bio_harm_signal.schema.json](/Users/others/PROJECTS/hummbl-tuples/schemas/bio_harm_signal.schema.json)
+- [bio_outcome_observed.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_outcome_observed.schema.json)
+- [bio_harm_signal.schema.json](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/schemas/bio_harm_signal.schema.json)
 
 ## Examples
 
-- [examples/bio/README.md](/Users/others/PROJECTS/hummbl-tuples/examples/bio/README.md)
+- [examples/bio/README.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/examples/bio/README.md)
 
 The current example set covers:
 

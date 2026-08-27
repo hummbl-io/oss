@@ -52,8 +52,12 @@ OPERATOR_ACTIONS = {
     "filter": ActionSpec("filter", RiskLevel.LOW, "Computes a selection metric."),
     "format": ActionSpec("format", RiskLevel.LOW, "Formats the current output."),
     "generate": ActionSpec("generate", RiskLevel.LOW, "Calls a model adapter."),
-    "policy_check": ActionSpec("policy_check", RiskLevel.LOW, "Records a local policy metric."),
-    "refine": ActionSpec("refine", RiskLevel.LOW, "Calls a model adapter to refine output."),
+    "policy_check": ActionSpec(
+        "policy_check", RiskLevel.LOW, "Records a local policy metric."
+    ),
+    "refine": ActionSpec(
+        "refine", RiskLevel.LOW, "Calls a model adapter to refine output."
+    ),
     "retrieve": ActionSpec(
         "retrieve",
         RiskLevel.MEDIUM,
@@ -73,27 +77,31 @@ OPERATOR_ACTIONS = {
 class CapabilityPolicy:
     """Preflight policy for compiled DSL programs."""
 
-    allowed_operators: frozenset[str] = frozenset({
-        "context_reset",
-        "critique",
-        "filter",
-        "format",
-        "generate",
-        "policy_check",
-        "refine",
-        "retrieve",
-        "store",
-        "transform",
-    })
-    allowed_roles: frozenset[str] = frozenset({
-        "critic",
-        "default",
-        "librarian",
-        "machine",
-        "operative",
-        "oracle",
-        "synthesizer",
-    })
+    allowed_operators: frozenset[str] = frozenset(
+        {
+            "context_reset",
+            "critique",
+            "filter",
+            "format",
+            "generate",
+            "policy_check",
+            "refine",
+            "retrieve",
+            "store",
+            "transform",
+        }
+    )
+    allowed_roles: frozenset[str] = frozenset(
+        {
+            "critic",
+            "default",
+            "librarian",
+            "machine",
+            "operative",
+            "oracle",
+            "synthesizer",
+        }
+    )
     allowed_memory_targets: frozenset[str] = frozenset({"session"})
     max_loop_count: int = 3
     max_model_calls: int = 12
@@ -154,8 +162,13 @@ class CapabilityPolicy:
                 self._validate_control(statement.else_body)
 
     def _validate_action_risk(self, operator: str) -> None:
-        action = OPERATOR_ACTIONS.get(operator, ActionSpec(operator, RiskLevel.HIGH, "Unknown action"))
-        if action.risk > self.max_risk_without_approval and action.name not in self.approved_actions:
+        action = OPERATOR_ACTIONS.get(
+            operator, ActionSpec(operator, RiskLevel.HIGH, "Unknown action")
+        )
+        if (
+            action.risk > self.max_risk_without_approval
+            and action.name not in self.approved_actions
+        ):
             raise PolicyViolation(
                 f"Action {action.name} risk {action.risk.name} exceeds "
                 f"unapproved limit {self.max_risk_without_approval.name}"

@@ -47,7 +47,9 @@ class DSLCompiler:
 
         walk(program)
         normalized = tuple(_normalize_node_roles(item) for item in program)
-        return ExecutionPlan(nodes=tuple(nodes), edges=tuple(edges), program=normalized, source=source)
+        return ExecutionPlan(
+            nodes=tuple(nodes), edges=tuple(edges), program=normalized, source=source
+        )
 
 
 class _NodeCounter:
@@ -62,7 +64,11 @@ class _NodeCounter:
 def _normalize_node_roles(program: Program) -> Program:
     if program.kind == "node":
         role = program.params.get("role")
-        return program if role is None else replace(program, params={**program.params, "role": str(role)})
+        return (
+            program
+            if role is None
+            else replace(program, params={**program.params, "role": str(role)})
+        )
     return replace(
         program,
         body=tuple(_normalize_node_roles(item) for item in program.body),

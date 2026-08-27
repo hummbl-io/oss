@@ -51,6 +51,7 @@ class TestCorpusAdapter:
         assert len(lines) == 1
 
         import json
+
         entry = json.loads(lines[0])
         assert entry["kernel_output"]["kernel_name"] == "hummbl-governance"
         assert entry["kernel_output"]["kernel_version"] == hummbl_governance.__version__

@@ -64,14 +64,10 @@ def validate_canon_registry(proposal: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(proposal, schema)
     if errors:
-        raise ValidationError(
-            f"Canon registry schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Canon registry schema validation failed: {'; '.join(errors)}")
 
 
-def validate_transition(
-    current: str, proposed: str
-) -> None:
+def validate_transition(current: str, proposed: str) -> None:
     """Validate that a canon-level transition is allowed.
 
     Args:
@@ -82,9 +78,7 @@ def validate_transition(
         ValueError: If the transition is not valid.
     """
     if current == proposed:
-        raise ValueError(
-            f"Canon transition rejected: current and proposed are both '{current}'"
-        )
+        raise ValueError(f"Canon transition rejected: current and proposed are both '{current}'")
 
     # Deprecation is allowed from any level
     if proposed == CanonLevel.DEPRECATED.value:
@@ -93,13 +87,10 @@ def validate_transition(
     # Check forward transition
     expected_next = _FORWARD_TRANSITIONS.get(current)
     if expected_next is None:
-        raise ValueError(
-            f"Canon transition rejected: no forward transition from '{current}'"
-        )
+        raise ValueError(f"Canon transition rejected: no forward transition from '{current}'")
     if proposed != expected_next:
         raise ValueError(
-            f"Canon transition rejected: '{current}' -> '{proposed}' "
-            f"(expected '{current}' -> '{expected_next}')"
+            f"Canon transition rejected: '{current}' -> '{proposed}' (expected '{current}' -> '{expected_next}')"
         )
 
 
@@ -117,16 +108,11 @@ def validate_operator_approval(proposal: dict[str, Any]) -> None:
         raise ValueError("Canon promotion rejected: authority gate missing or invalid")
 
     if not authority.get("operator_approval", False):
-        raise ValueError(
-            "Canon promotion rejected: D5 (NO_AUTO_PROMOTION) violation — "
-            "operator_approval must be True"
-        )
+        raise ValueError("Canon promotion rejected: D5 (NO_AUTO_PROMOTION) violation — operator_approval must be True")
 
     approver_id = authority.get("approver_id", "")
     if not approver_id or not isinstance(approver_id, str):
-        raise ValueError(
-            "Canon promotion rejected: approver_id must be a non-empty string"
-        )
+        raise ValueError("Canon promotion rejected: approver_id must be a non-empty string")
 
 
 def validate_review_required(proposal: dict[str, Any]) -> None:
@@ -146,22 +132,15 @@ def validate_review_required(proposal: dict[str, Any]) -> None:
 
     review = proposal.get("review")
     if not isinstance(review, dict):
-        raise ValueError(
-            "Canon promotion rejected: review gate required for "
-            f"'{current}' -> next level transition"
-        )
+        raise ValueError(f"Canon promotion rejected: review gate required for '{current}' -> next level transition")
 
     verdict = review.get("review_verdict", "")
     if verdict == "fail":
-        raise ValueError(
-            "Canon promotion rejected: review_verdict is 'fail'"
-        )
+        raise ValueError("Canon promotion rejected: review_verdict is 'fail'")
 
     reviewer_ids = review.get("reviewer_ids", [])
     if not isinstance(reviewer_ids, list) or len(reviewer_ids) == 0:
-        raise ValueError(
-            "Canon promotion rejected: at least one reviewer_id is required"
-        )
+        raise ValueError("Canon promotion rejected: at least one reviewer_id is required")
 
 
 def validate_promotion(proposal: dict[str, Any]) -> None:
@@ -175,9 +154,7 @@ def validate_promotion(proposal: dict[str, Any]) -> None:
         ValueError: If transition, operator approval, or review validation fails.
     """
     validate_canon_registry(proposal)
-    validate_transition(
-        proposal["current_canon_level"], proposal["proposed_canon_level"]
-    )
+    validate_transition(proposal["current_canon_level"], proposal["proposed_canon_level"])
     validate_operator_approval(proposal)
     validate_review_required(proposal)
 

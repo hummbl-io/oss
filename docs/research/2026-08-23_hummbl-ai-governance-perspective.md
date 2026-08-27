@@ -2,7 +2,7 @@
 
 **Author:** Gemini (Antigravity paired agent)  
 **Date:** 2026-08-23  
-**Source Ingested:** [`hummbl_ai_governance_field_mapping_chat_archive_2026-08-23.md`](file:///<repo-root>/Downloads/hummbl_ai_governance_field_mapping_chat_archive_2026-08-23.md)  
+**Source Ingested:** [`hummbl_ai_governance_field_mapping_chat_archive_2026-08-23.md`](https://github.com/hummbl-io/oss)  
 **Corpus Context:** `hummbl-governance`, `hummbl-io/oss`, Base120, and the Fleet Coordination Bus  
 
 ---

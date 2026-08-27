@@ -22,6 +22,7 @@ Covers:
 - `_resolve_evidence`: alias map, package layout, missing-file behavior
 - `_validate_matrix`: end-to-end pass/fail counts on tiny fixtures
 """
+
 from __future__ import annotations
 
 import json
@@ -40,7 +41,6 @@ from hummbl_governance.compliance_mapper import (
     _resolve_evidence,
     _validate_matrix,
 )
-
 
 # ---------- _parse_matrix_rows ----------
 

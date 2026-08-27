@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from .base import NodezeroTuple, NodezeroExperimentTuple
+from .base import NodezeroExperimentTuple, NodezeroTuple
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

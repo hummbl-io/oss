@@ -36,7 +36,6 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-
 from hummbl_governance.kernel import (
     EvidenceEngine,
     Kernel,
@@ -55,6 +54,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # ===========================================================================
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
+
 
 class TestEdgeCaseReceipts:
     """Extreme and unusual inputs."""
@@ -112,6 +112,7 @@ class TestEdgeCaseReceipts:
             action = "TEST:ACTION/SUB|TYPE"
             receipt = engine.create(agent_id="test", action_type=action)
             assert receipt.action_type == action
+
 
 class TestEdgeCaseEvidence:
     """Boundary conditions for evidence grading."""

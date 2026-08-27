@@ -1,12 +1,11 @@
 """Tests for duplicate_detector module."""
 
 import pytest
-
 from hummbl_cognition.duplicate_detector import (
     DEFAULT_THRESHOLD,
+    DetectionResult,
     DuplicateDetector,
     DuplicateMatch,
-    DetectionResult,
     detect_duplicates,
 )
 
@@ -21,7 +20,9 @@ class TestSimilarityScoring:
 
     def test_completely_different(self):
         detector = DuplicateDetector()
-        score = detector.score_similarity("fix: bug in parser", "feat: add new dashboard")
+        score = detector.score_similarity(
+            "fix: bug in parser", "feat: add new dashboard"
+        )
         assert score < 0.5
 
     def test_near_duplicate(self):
@@ -59,7 +60,9 @@ class TestCheckCandidate:
     def test_near_match(self):
         detector = DuplicateDetector(threshold=0.7)
         existing = [{"number": 50, "title": "docs: reconcile README test count"}]
-        result = detector.check_candidate("docs: reconcile README test-count claims", existing)
+        result = detector.check_candidate(
+            "docs: reconcile README test-count claims", existing
+        )
         assert result.is_duplicate is True
         # With keyword overlap scoring, high-overlap titles classify as "keyword"
         # rather than "near". These titles share 3 of 4 meaningful keywords.
@@ -84,7 +87,9 @@ class TestCheckCandidate:
         assert result.is_duplicate is True
         assert result.matches[0].match_type == "keyword"
         assert result.matches[0].issue_state == "closed"
-        assert result.matches[0].issue_url == "https://github.com/example/repo/issues/77"
+        assert (
+            result.matches[0].issue_url == "https://github.com/example/repo/issues/77"
+        )
 
     def test_no_match(self):
         detector = DuplicateDetector()
@@ -184,7 +189,9 @@ class TestIssueFetching:
 
         def runner(repo, state="all"):
             calls.append((repo, state))
-            return [{"number": 1, "title": "closed issue", "state": "closed", "url": "u"}]
+            return [
+                {"number": 1, "title": "closed issue", "state": "closed", "url": "u"}
+            ]
 
         detector = DuplicateDetector(gh_runner=runner)
         issues = detector.fetch_issues("test/repo", state="closed")
@@ -232,7 +239,14 @@ class TestDetectionResult:
         result = DetectionResult(
             candidate_title="test",
             is_duplicate=True,
-            matches=[DuplicateMatch(issue_number=1, issue_title="test", similarity=0.95, match_type="near")],
+            matches=[
+                DuplicateMatch(
+                    issue_number=1,
+                    issue_title="test",
+                    similarity=0.95,
+                    match_type="near",
+                )
+            ],
             best_similarity=0.95,
         )
         d = result.to_dict()

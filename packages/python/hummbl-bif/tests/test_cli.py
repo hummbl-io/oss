@@ -1,11 +1,9 @@
 """Subprocess-based CLI tests for bif_cli.py."""
+
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
-
-import pytest
 
 REPO_ROOT = Path(__file__).parent.parent
 CLI = str(REPO_ROOT / "bif_cli.py")

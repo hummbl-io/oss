@@ -16,12 +16,12 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from hummbl.analyzer import TraceAnalyzer, categorize_experiment, get_top_category
-
+from hummbl.analyzer import TraceAnalyzer, categorize_experiment
 
 # ---------------------------------------------------------------------------
 # Unicode vs ASCII glyph sets
 # ---------------------------------------------------------------------------
+
 
 def _can_unicode() -> bool:
     """Check if the terminal can render Unicode box-drawing characters."""
@@ -36,17 +36,18 @@ def _can_unicode() -> bool:
 
 class _Glyphs:
     """Character set for rendering."""
+
     def __init__(self, unicode: bool = True):
         if unicode:
-            self.h_line = "\u2500"      # horizontal line
-            self.v_line = "\u2502"      # vertical line
-            self.top_left = "\u250c"    # top-left corner
-            self.bot_left = "\u2514"    # bottom-left corner
-            self.tee = "\u251c"         # tee (left side)
+            self.h_line = "\u2500"  # horizontal line
+            self.v_line = "\u2502"  # vertical line
+            self.top_left = "\u250c"  # top-left corner
+            self.bot_left = "\u2514"  # bottom-left corner
+            self.tee = "\u251c"  # tee (left side)
             self.block_full = "\u2588"  # full block
-            self.block_light = "\u2591" # light shade
-            self.check = "\u2713"       # checkmark
-            self.cross = "\u2717"       # cross
+            self.block_light = "\u2591"  # light shade
+            self.check = "\u2713"  # checkmark
+            self.cross = "\u2717"  # cross
             self.down_arrow = "\u25bc"  # down-pointing triangle
             self.dash = "\u2500"
         else:
@@ -78,6 +79,7 @@ def _g() -> _Glyphs:
 # Data loading helpers
 # ---------------------------------------------------------------------------
 
+
 def _load_raw_traces(path: str | Path) -> list[dict]:
     """Load raw trace dicts from a HUMMBL JSON file."""
     path = Path(path)
@@ -100,7 +102,7 @@ def _extract_trace_info(trace: dict, index: int) -> dict:
     if steps:
         hyp = steps[0].get("content", "")
         prefix = f"Experiment {index}: "
-        info["description"] = hyp[len(prefix):] if hyp.startswith(prefix) else hyp
+        info["description"] = hyp[len(prefix) :] if hyp.startswith(prefix) else hyp
 
     # Action
     if len(steps) > 1:
@@ -132,8 +134,10 @@ def _extract_trace_info(trace: dict, index: int) -> dict:
 # View 1: Single trace view
 # ---------------------------------------------------------------------------
 
-def render_single_trace(path: str | Path, trace_id: Optional[str] = None,
-                        trace_index: Optional[int] = None) -> str:
+
+def render_single_trace(
+    path: str | Path, trace_id: Optional[str] = None, trace_index: Optional[int] = None
+) -> str:
     """Render a single trace as a step chain diagram."""
     g = _g()
     traces = _load_raw_traces(path)
@@ -157,7 +161,7 @@ def render_single_trace(path: str | Path, trace_id: Optional[str] = None,
             target = traces[trace_index]
             idx = trace_index
         else:
-            return f"Trace index {trace_index} out of range (0-{len(traces)-1})."
+            return f"Trace index {trace_index} out of range (0-{len(traces) - 1})."
     else:
         # Default to first trace
         target = traces[0]
@@ -170,7 +174,6 @@ def render_single_trace(path: str | Path, trace_id: Optional[str] = None,
     lines.append(g.dash * 50)
     lines.append("")
 
-    step_types = ["hypothesis", "action", "observation", "evaluation", "decision"]
     step_labels = {
         "hypothesis": "HYPOTHESIS",
         "action": "ACTION",
@@ -185,8 +188,8 @@ def render_single_trace(path: str | Path, trace_id: Optional[str] = None,
         content = step.get("content", "")
         label = step_labels.get(stype, stype.upper())
 
-        is_first = (i == 0)
-        is_last = (i == len(steps) - 1)
+        is_first = i == 0
+        is_last = i == len(steps) - 1
 
         if is_first:
             connector = g.top_left + g.h_line
@@ -235,6 +238,7 @@ def render_single_trace(path: str | Path, trace_id: Optional[str] = None,
 # View 2: Timeline view
 # ---------------------------------------------------------------------------
 
+
 def render_timeline(path: str | Path, max_width: int = 80) -> str:
     """Render experiment timeline with progress bars."""
     g = _g()
@@ -256,13 +260,15 @@ def render_timeline(path: str | Path, max_width: int = 80) -> str:
                 is_new_best = True
                 running_best = val_bpb
 
-        records.append({
-            "index": i,
-            "description": info.get("description", "?"),
-            "outcome": outcome,
-            "val_bpb": val_bpb,
-            "is_new_best": is_new_best,
-        })
+        records.append(
+            {
+                "index": i,
+                "description": info.get("description", "?"),
+                "outcome": outcome,
+                "val_bpb": val_bpb,
+                "is_new_best": is_new_best,
+            }
+        )
 
     # Find bpb range for bar scaling
     bpb_values = [r["val_bpb"] for r in records if r["val_bpb"] > 0]
@@ -299,7 +305,7 @@ def render_timeline(path: str | Path, max_width: int = 80) -> str:
 
         # Truncate description
         if len(desc) > desc_width:
-            desc = desc[:desc_width - 2] + ".."
+            desc = desc[: desc_width - 2] + ".."
 
         # Bar length: proportional to bpb (lower = shorter bar = better)
         if val_bpb > 0:
@@ -309,9 +315,7 @@ def render_timeline(path: str | Path, max_width: int = 80) -> str:
         else:
             bar = ""
 
-        lines.append(
-            f" #{idx:02d} {symbol} {desc:<{desc_width}s} {val_bpb:.3f} {bar}"
-        )
+        lines.append(f" #{idx:02d} {symbol} {desc:<{desc_width}s} {val_bpb:.3f} {bar}")
 
     # Summary line
     lines.append(g.dash * min(max_width, 70))
@@ -325,6 +329,7 @@ def render_timeline(path: str | Path, max_width: int = 80) -> str:
 # ---------------------------------------------------------------------------
 # View 3: Category summary
 # ---------------------------------------------------------------------------
+
 
 def render_categories(path: str | Path) -> str:
     """Render category performance summary with bar chart."""
@@ -349,7 +354,7 @@ def render_categories(path: str | Path) -> str:
     )
 
     # Find max total for scale
-    max_total = max(s.total for _, s in sorted_cats) if sorted_cats else 1
+    max(s.total for _, s in sorted_cats) if sorted_cats else 1
 
     # Header
     cat_col = 25
@@ -357,8 +362,9 @@ def render_categories(path: str | Path) -> str:
         f"  {'Category':<{cat_col}s} {'Bar':<{bar_width + 2}s} "
         f"{'Keep':>8s}  {'Rate':>6s}  {'Best BPB':>10s}"
     )
-    lines.append(f"  {g.dash * cat_col} {g.dash * (bar_width + 2)} "
-                 f"{g.dash * 8}  {g.dash * 6}  {g.dash * 10}")
+    lines.append(
+        f"  {g.dash * cat_col} {g.dash * (bar_width + 2)} {g.dash * 8}  {g.dash * 6}  {g.dash * 10}"
+    )
 
     for cat, stats in sorted_cats:
         # Bar: filled portion = keep rate
@@ -371,7 +377,7 @@ def render_categories(path: str | Path) -> str:
         best_str = f"{stats.best_bpb:.6f}" if stats.best_bpb else "N/A"
 
         # Truncate category name
-        cat_display = cat if len(cat) <= cat_col else cat[:cat_col - 2] + ".."
+        cat_display = cat if len(cat) <= cat_col else cat[: cat_col - 2] + ".."
         lines.append(
             f"  {cat_display:<{cat_col}s} {bar}  {keep_str:>8s}  {rate_str:>6s}  {best_str:>10s}"
         )
@@ -380,7 +386,9 @@ def render_categories(path: str | Path) -> str:
     lines.append(f"  {g.dash * cat_col}")
     total_keeps = result.total_keeps
     total = result.total_experiments
-    lines.append(f"  {'TOTAL':<{cat_col}s}           {total_keeps}/{total:>4d}  {result.keep_rate:.1%}")
+    lines.append(
+        f"  {'TOTAL':<{cat_col}s}           {total_keeps}/{total:>4d}  {result.keep_rate:.1%}"
+    )
 
     return "\n".join(lines)
 
@@ -388,6 +396,7 @@ def render_categories(path: str | Path) -> str:
 # ---------------------------------------------------------------------------
 # View 4: Trace diff
 # ---------------------------------------------------------------------------
+
 
 def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
     """Render side-by-side comparison of two traces."""
@@ -435,9 +444,9 @@ def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
     desc_a = info_a.get("description", "?")
     desc_b = info_b.get("description", "?")
     if len(desc_a) > col_width:
-        desc_a = desc_a[:col_width - 2] + ".."
+        desc_a = desc_a[: col_width - 2] + ".."
     if len(desc_b) > col_width:
-        desc_b = desc_b[:col_width - 2] + ".."
+        desc_b = desc_b[: col_width - 2] + ".."
     lines.append(f"{desc_a:<{col_width}s}{sep}{desc_b:<{col_width}s}")
     lines.append("")
 
@@ -449,8 +458,9 @@ def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
 
     bpb_a = info_a.get("val_bpb", 0.0)
     bpb_b = info_b.get("val_bpb", 0.0)
-    lines.append(row("val_bpb", f"{bpb_a:.6f}" if bpb_a else "N/A",
-                      f"{bpb_b:.6f}" if bpb_b else "N/A"))
+    lines.append(
+        row("val_bpb", f"{bpb_a:.6f}" if bpb_a else "N/A", f"{bpb_b:.6f}" if bpb_b else "N/A")
+    )
 
     delta_a = info_a.get("delta_bpb")
     delta_b = info_b.get("delta_bpb")
@@ -461,21 +471,40 @@ def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
         pct = abs(d / baseline * 100) if baseline else 0
         return f"{d:+.6f} ({pct:.1f}%)"
 
-    lines.append(row(
-        "delta",
-        fmt_delta(delta_a, bpb_a, info_a.get("baseline_bpb")),
-        fmt_delta(delta_b, bpb_b, info_b.get("baseline_bpb")),
-    ))
+    lines.append(
+        row(
+            "delta",
+            fmt_delta(delta_a, bpb_a, info_a.get("baseline_bpb")),
+            fmt_delta(delta_b, bpb_b, info_b.get("baseline_bpb")),
+        )
+    )
 
     vram_a = info_a.get("peak_vram_gb", 0.0)
     vram_b = info_b.get("peak_vram_gb", 0.0)
-    lines.append(row("peak_vram", f"{vram_a:.1f} GB" if vram_a else "N/A",
-                      f"{vram_b:.1f} GB" if vram_b else "N/A"))
+    lines.append(
+        row(
+            "peak_vram",
+            f"{vram_a:.1f} GB" if vram_a else "N/A",
+            f"{vram_b:.1f} GB" if vram_b else "N/A",
+        )
+    )
 
     outcome_a = info_a.get("outcome", "?")
     outcome_b = info_b.get("outcome", "?")
-    status_a = f"{g.check} KEEP" if outcome_a == "keep" else f"{g.cross} DISCARD" if outcome_a == "discard" else outcome_a.upper()
-    status_b = f"{g.check} KEEP" if outcome_b == "keep" else f"{g.cross} DISCARD" if outcome_b == "discard" else outcome_b.upper()
+    status_a = (
+        f"{g.check} KEEP"
+        if outcome_a == "keep"
+        else f"{g.cross} DISCARD"
+        if outcome_a == "discard"
+        else outcome_a.upper()
+    )
+    status_b = (
+        f"{g.check} KEEP"
+        if outcome_b == "keep"
+        else f"{g.cross} DISCARD"
+        if outcome_b == "discard"
+        else outcome_b.upper()
+    )
     lines.append(row("status", status_a, status_b))
 
     cat_a = categorize_experiment(info_a.get("description", ""))
@@ -499,6 +528,7 @@ def render_diff(path: str | Path, id_a: str, id_b: str) -> str:
 # ---------------------------------------------------------------------------
 # CLI dispatch (called from cli.py)
 # ---------------------------------------------------------------------------
+
 
 def cli_view(args: list[str]) -> int:
     """Handle 'view' command."""

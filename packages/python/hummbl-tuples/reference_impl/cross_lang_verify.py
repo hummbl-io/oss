@@ -7,6 +7,7 @@ canonical JSON and SHA-256 hashes to the Python reference implementation.
 Usage:
     python cross_lang_verify.py
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -127,6 +128,7 @@ def python_content_hash(obj: dict) -> str:
 def _remove_integrity_fields(obj: dict) -> dict:
     """Remove integrity-layer fields from a tuple dict."""
     import copy
+
     cleaned = copy.deepcopy(obj)
     for field in ("previous_hash", "args_hash", "signature"):
         cleaned.pop(field, None)
@@ -159,7 +161,7 @@ def main() -> int:
     if go_dir.exists():
         print("  Checking Go implementation...")
         # Write a small Go program that outputs hashes for our test tuples
-        go_checker = go_dir / "cross_check_main.go"
+        go_dir / "cross_check_main.go"
         # We'll use `go test -run TestCrossLang` instead
         # For now, just verify Go tests pass
         result = subprocess.run(

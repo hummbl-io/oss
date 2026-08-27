@@ -19,7 +19,6 @@
 import time
 
 import pytest
-
 from hummbl_governance.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerOpen,
@@ -147,6 +146,7 @@ class TestStateChangeCallback:
     def test_callback_error_swallowed(self):
         def bad_callback(old, new):
             raise RuntimeError("callback error")
+
         cb = CircuitBreaker(failure_threshold=1, on_state_change=bad_callback)
         with pytest.raises(RuntimeError, match="service down"):
             cb.call(_failing_fn)

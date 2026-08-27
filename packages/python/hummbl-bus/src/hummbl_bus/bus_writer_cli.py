@@ -97,7 +97,9 @@ def _resolve_bus_path(override: str | None = None) -> Path:
     return Path(DEFAULT_BUS_PATH)
 
 
-def _extract_flag(args: list[str], flag: str, needs_value: bool = True) -> tuple[list[str], str | bool | None]:
+def _extract_flag(
+    args: list[str], flag: str, needs_value: bool = True
+) -> tuple[list[str], str | bool | None]:
     """Extract a CLI flag and its optional value from *args*.
 
     Returns ``(remaining_args, value)`` where *value* is ``None`` when the
@@ -108,11 +110,11 @@ def _extract_flag(args: list[str], flag: str, needs_value: bool = True) -> tuple
         return args, None
     idx = args.index(flag)
     if not needs_value:
-        return args[:idx] + args[idx + 1:], True
+        return args[:idx] + args[idx + 1 :], True
     if idx + 1 >= len(args):
         return args, None  # caller detects missing value
     value = args[idx + 1]
-    return args[:idx] + args[idx + 2:], value
+    return args[:idx] + args[idx + 2 :], value
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -135,12 +137,16 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     args, correlation_id = _extract_flag(args, "--cid")
-    if correlation_id is None and "--cid" in (argv if argv is not None else sys.argv[1:]):
+    if correlation_id is None and "--cid" in (
+        argv if argv is not None else sys.argv[1:]
+    ):
         print("ERROR: --cid requires a correlation id argument", file=sys.stderr)
         return 2
 
     args, secret_file = _extract_flag(args, "--secret-file")
-    if secret_file is None and "--secret-file" in (argv if argv is not None else sys.argv[1:]):
+    if secret_file is None and "--secret-file" in (
+        argv if argv is not None else sys.argv[1:]
+    ):
         print("ERROR: --secret-file requires a path argument", file=sys.stderr)
         return 2
 
@@ -164,6 +170,7 @@ def main(argv: list[str] | None = None) -> int:
     secret: bytes | None = None
     if secret_file:
         import base64
+
         try:
             with open(secret_file, "r", encoding="utf-8") as f:
                 key_data = json.load(f)
@@ -182,7 +189,10 @@ def main(argv: list[str] | None = None) -> int:
             base_identity = from_id.split("(")[0].strip() if "(" in from_id else from_id
             secret = km.get_key(base_identity)
         except Exception as e:
-            print(f"ERROR: --sign failed to resolve key for {from_id!r}: {e}", file=sys.stderr)
+            print(
+                f"ERROR: --sign failed to resolve key for {from_id!r}: {e}",
+                file=sys.stderr,
+            )
             return 1
 
     try:

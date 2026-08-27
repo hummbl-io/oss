@@ -53,7 +53,6 @@ admitted as a default route).
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import uuid
 from datetime import datetime
@@ -71,7 +70,10 @@ __all__ = [
 
 
 VALID_METHODOLOGY = {
-    "token_counting_api", "side_by_side_eval", "full_replay", "sampled_replay",
+    "token_counting_api",
+    "side_by_side_eval",
+    "full_replay",
+    "sampled_replay",
 }
 VALID_BEHAVIOR_CHANGE = {
     "adaptive_thinking_default_on",
@@ -83,8 +85,14 @@ VALID_BEHAVIOR_CHANGE = {
 }
 VALID_ADMISSION = {"admit", "conditional", "hold", "reject"}
 VALID_CONTENT_TYPE = {
-    "english", "spanish", "chinese", "python", "javascript",
-    "json", "markdown", "other",
+    "english",
+    "spanish",
+    "chinese",
+    "python",
+    "javascript",
+    "json",
+    "markdown",
+    "other",
 }
 
 # Behavior changes that return 400 — admission must not be 'admit' if
@@ -103,20 +111,35 @@ _RATIO_TOLERANCE = 0.01
 _PCT_TOLERANCE = 0.1
 
 ALLOWED_FIELDS = {
-    "receipt_id", "timestamp", "prompt_corpus_ref", "replay_methodology",
-    "corpus_size_prompts", "sonnet_46_token_count", "sonnet_5_token_count",
-    "token_delta_ratio", "token_delta_pct",
-    "standard_pricing_per_1m_input_usd", "standard_pricing_per_1m_output_usd",
+    "receipt_id",
+    "timestamp",
+    "prompt_corpus_ref",
+    "replay_methodology",
+    "corpus_size_prompts",
+    "sonnet_46_token_count",
+    "sonnet_5_token_count",
+    "token_delta_ratio",
+    "token_delta_pct",
+    "standard_pricing_per_1m_input_usd",
+    "standard_pricing_per_1m_output_usd",
     "introductory_pricing_per_1m_input_usd",
     "introductory_pricing_per_1m_output_usd",
     "introductory_pricing_expires_at",
-    "sonnet_46_cost_usd", "sonnet_5_cost_usd", "cost_delta_pct",
+    "sonnet_46_cost_usd",
+    "sonnet_5_cost_usd",
+    "cost_delta_pct",
     "sonnet_5_cost_introductory_usd",
-    "eval_scores", "behavior_changes_detected",
-    "max_tokens_truncation_observed", "prompt_cache_invalidated",
-    "content_type_breakdown", "admission_recommendation",
-    "admission_conditions", "operator_approval_ref",
-    "evidence_refs", "notes", "receipt_hash",
+    "eval_scores",
+    "behavior_changes_detected",
+    "max_tokens_truncation_observed",
+    "prompt_cache_invalidated",
+    "content_type_breakdown",
+    "admission_recommendation",
+    "admission_conditions",
+    "operator_approval_ref",
+    "evidence_refs",
+    "notes",
+    "receipt_hash",
 }
 
 
@@ -174,13 +197,24 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
     errors: list[str] = []
 
     required = [
-        "receipt_id", "timestamp", "prompt_corpus_ref", "replay_methodology",
-        "sonnet_46_token_count", "sonnet_5_token_count",
-        "token_delta_ratio", "token_delta_pct",
-        "standard_pricing_per_1m_input_usd", "standard_pricing_per_1m_output_usd",
-        "sonnet_46_cost_usd", "sonnet_5_cost_usd", "cost_delta_pct",
-        "behavior_changes_detected", "max_tokens_truncation_observed",
-        "prompt_cache_invalidated", "admission_recommendation", "receipt_hash",
+        "receipt_id",
+        "timestamp",
+        "prompt_corpus_ref",
+        "replay_methodology",
+        "sonnet_46_token_count",
+        "sonnet_5_token_count",
+        "token_delta_ratio",
+        "token_delta_pct",
+        "standard_pricing_per_1m_input_usd",
+        "standard_pricing_per_1m_output_usd",
+        "sonnet_46_cost_usd",
+        "sonnet_5_cost_usd",
+        "cost_delta_pct",
+        "behavior_changes_detected",
+        "max_tokens_truncation_observed",
+        "prompt_cache_invalidated",
+        "admission_recommendation",
+        "receipt_hash",
     ]
     for field in required:
         if field not in receipt or receipt[field] is None:
@@ -207,8 +241,13 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
         errors.append(
             f"timestamp must be an RFC3339 date-time string (got {receipt['timestamp']!r})"
         )
-    if not isinstance(receipt.get("prompt_corpus_ref"), str) or not receipt["prompt_corpus_ref"].strip():
-        errors.append("prompt_corpus_ref must be a non-empty string (must be replayable)")
+    if (
+        not isinstance(receipt.get("prompt_corpus_ref"), str)
+        or not receipt["prompt_corpus_ref"].strip()
+    ):
+        errors.append(
+            "prompt_corpus_ref must be a non-empty string (must be replayable)"
+        )
     if not isinstance(receipt.get("receipt_hash"), str):
         errors.append("receipt_hash must be a string")
 
@@ -218,9 +257,15 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
         if not isinstance(v, int) or v < 0:
             errors.append(f"{field} must be a non-negative integer")
 
-    for field in ("token_delta_ratio", "token_delta_pct",
-                  "standard_pricing_per_1m_input_usd", "standard_pricing_per_1m_output_usd",
-                  "sonnet_46_cost_usd", "sonnet_5_cost_usd", "cost_delta_pct"):
+    for field in (
+        "token_delta_ratio",
+        "token_delta_pct",
+        "standard_pricing_per_1m_input_usd",
+        "standard_pricing_per_1m_output_usd",
+        "sonnet_46_cost_usd",
+        "sonnet_5_cost_usd",
+        "cost_delta_pct",
+    ):
         v = receipt.get(field)
         if not isinstance(v, (int, float)) or isinstance(v, bool):
             errors.append(f"{field} must be a number")
@@ -242,14 +287,18 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
 
     ar = receipt.get("admission_recommendation")
     if ar not in VALID_ADMISSION:
-        errors.append(f"admission_recommendation: {ar!r} not in {sorted(VALID_ADMISSION)}")
+        errors.append(
+            f"admission_recommendation: {ar!r} not in {sorted(VALID_ADMISSION)}"
+        )
 
     # behavior_changes_detected items
     bcd = receipt.get("behavior_changes_detected")
     if isinstance(bcd, list):
         for item in bcd:
             if item not in VALID_BEHAVIOR_CHANGE:
-                errors.append(f"behavior_changes_detected item: {item!r} not in {sorted(VALID_BEHAVIOR_CHANGE)}")
+                errors.append(
+                    f"behavior_changes_detected item: {item!r} not in {sorted(VALID_BEHAVIOR_CHANGE)}"
+                )
     else:
         errors.append("behavior_changes_detected must be a list")
 
@@ -263,7 +312,9 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
                 if isinstance(item, dict):
                     ct = item.get("content_type")
                     if ct not in VALID_CONTENT_TYPE:
-                        errors.append(f"content_type_breakdown content_type: {ct!r} not in {sorted(VALID_CONTENT_TYPE)}")
+                        errors.append(
+                            f"content_type_breakdown content_type: {ct!r} not in {sorted(VALID_CONTENT_TYPE)}"
+                        )
                 else:
                     errors.append("content_type_breakdown items must be objects")
 
@@ -279,8 +330,13 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
                 if not isinstance(item, dict):
                     errors.append("eval_scores items must be objects")
                     break
-                if not all(k in item for k in ("eval_name", "sonnet_46_score", "sonnet_5_score")):
-                    errors.append("eval_scores items must have eval_name, sonnet_46_score, sonnet_5_score")
+                if not all(
+                    k in item
+                    for k in ("eval_name", "sonnet_46_score", "sonnet_5_score")
+                ):
+                    errors.append(
+                        "eval_scores items must have eval_name, sonnet_46_score, sonnet_5_score"
+                    )
                     break
 
     if errors:
@@ -302,9 +358,14 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
     s5 = receipt.get("sonnet_5_token_count")
     tdr = receipt.get("token_delta_ratio")
     tdp = receipt.get("token_delta_pct")
-    if (isinstance(s46, int) and isinstance(s5, int)
-            and isinstance(tdr, (int, float)) and not isinstance(tdr, bool)
-            and isinstance(tdp, (int, float)) and not isinstance(tdp, bool)):
+    if (
+        isinstance(s46, int)
+        and isinstance(s5, int)
+        and isinstance(tdr, (int, float))
+        and not isinstance(tdr, bool)
+        and isinstance(tdp, (int, float))
+        and not isinstance(tdp, bool)
+    ):
         if s46 > 0:
             expected_ratio = s5 / s46
             expected_pct = (s5 - s46) / s46 * 100.0
@@ -391,8 +452,18 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
                 # Check if the change is addressed in admission_conditions
                 # (look for keywords related to the change)
                 keywords = {
-                    "manual_extended_thinking_returns_400": ["extended_thinking", "thinking", "400"],
-                    "non_default_sampling_returns_400": ["sampling", "temperature", "top_p", "top_k", "400"],
+                    "manual_extended_thinking_returns_400": [
+                        "extended_thinking",
+                        "thinking",
+                        "400",
+                    ],
+                    "non_default_sampling_returns_400": [
+                        "sampling",
+                        "temperature",
+                        "top_p",
+                        "top_k",
+                        "400",
+                    ],
                 }
                 kw_list = keywords.get(change, [])
                 if not any(kw in ac_text.lower() for kw in kw_list):
@@ -408,8 +479,12 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
     # can legitimately differ).
     tdp = receipt.get("token_delta_pct")
     cdp = receipt.get("cost_delta_pct")
-    if (isinstance(tdp, (int, float)) and isinstance(cdp, (int, float))
-            and not isinstance(tdp, bool) and not isinstance(cdp, bool)):
+    if (
+        isinstance(tdp, (int, float))
+        and isinstance(cdp, (int, float))
+        and not isinstance(tdp, bool)
+        and not isinstance(cdp, bool)
+    ):
         if abs(tdp - cdp) > 5.0:
             # This is a soft warning — we add it to errors but the receipt
             # is still considered valid if this is the only issue. We
@@ -420,7 +495,9 @@ def validate_sonnet5_replay_receipt(receipt: dict[str, Any]) -> tuple[bool, list
     # Hash verification
     expected_hash = compute_receipt_hash(receipt)
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 
@@ -517,9 +594,13 @@ def create_sonnet5_replay_receipt(
     if corpus_size_prompts:
         receipt["corpus_size_prompts"] = corpus_size_prompts
     if introductory_pricing_per_1m_input_usd:
-        receipt["introductory_pricing_per_1m_input_usd"] = introductory_pricing_per_1m_input_usd
+        receipt["introductory_pricing_per_1m_input_usd"] = (
+            introductory_pricing_per_1m_input_usd
+        )
     if introductory_pricing_per_1m_output_usd:
-        receipt["introductory_pricing_per_1m_output_usd"] = introductory_pricing_per_1m_output_usd
+        receipt["introductory_pricing_per_1m_output_usd"] = (
+            introductory_pricing_per_1m_output_usd
+        )
     if introductory_pricing_expires_at:
         receipt["introductory_pricing_expires_at"] = introductory_pricing_expires_at
     if sonnet_5_cost_introductory_usd:

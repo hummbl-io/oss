@@ -92,7 +92,9 @@ class WriteBoundaryEnforcer:
     def check_repo(self, repo_full_name: str) -> BoundaryResult:
         """Check if a repo is in the authorized write boundary."""
         if not repo_full_name or not isinstance(repo_full_name, str):
-            return BoundaryResult(repo=str(repo_full_name), authorized=False, reason="invalid repo name")
+            return BoundaryResult(
+                repo=str(repo_full_name), authorized=False, reason="invalid repo name"
+            )
         normalized = repo_full_name.strip()
         if normalized in self._authorized:
             return BoundaryResult(repo=normalized, authorized=True)
@@ -102,9 +104,7 @@ class WriteBoundaryEnforcer:
             reason=f"repo not in authorized write boundary: {sorted(self._authorized)}",
         )
 
-    def filter_candidates(
-        self, candidates: list[dict[str, Any]]
-    ) -> FilterResult:
+    def filter_candidates(self, candidates: list[dict[str, Any]]) -> FilterResult:
         """Filter a batch of issue candidates into authorized and skipped."""
         result = FilterResult()
         for candidate in candidates:

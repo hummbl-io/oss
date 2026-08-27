@@ -9,6 +9,7 @@ import pytest
 
 try:
     from hummbl_governance.kill_switch_core import get_kill_switch_core  # noqa: F401
+
     _HAS_KILL_SWITCH_CORE = True
 except ImportError:
     _HAS_KILL_SWITCH_CORE = False
@@ -164,7 +165,10 @@ class TestStateManagement:
 
         state_file = tmp_path / "state.json"
         state = _load_state(state_file)
-        state["processed"]["RQ-T01"] = {"hash": "abc", "last_processed": "2026-03-14T00:00:00Z"}
+        state["processed"]["RQ-T01"] = {
+            "hash": "abc",
+            "last_processed": "2026-03-14T00:00:00Z",
+        }
         _save_state(state_file, state)
 
         reloaded = _load_state(state_file)
@@ -181,7 +185,10 @@ class TestStateManagement:
 
 
 class TestKillSwitchHelper:
-    @pytest.mark.skipif(not _HAS_KILL_SWITCH_CORE, reason="hummbl_governance.kill_switch_core not available")
+    @pytest.mark.skipif(
+        not _HAS_KILL_SWITCH_CORE,
+        reason="hummbl_governance.kill_switch_core not available",
+    )
     def test_runtime_error_fails_closed(self):
         from hummbl_cognition.research_processor import _is_kill_switch_engaged
 
@@ -349,16 +356,19 @@ class TestProcessorStatus:
 
         state_file = tmp_path / "state.json"
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        _save_state(state_file, {
-            "processed": {
-                "RQ-T03": {
-                    "hash": _question_hash(SAMPLE_QUEUE[2]),
-                    "last_processed": now,
-                }
+        _save_state(
+            state_file,
+            {
+                "processed": {
+                    "RQ-T03": {
+                        "hash": _question_hash(SAMPLE_QUEUE[2]),
+                        "last_processed": now,
+                    }
+                },
+                "last_run": None,
+                "total_processed": 1,
             },
-            "last_run": None,
-            "total_processed": 1,
-        })
+        )
 
         s = processor_status(
             queue=SAMPLE_QUEUE,

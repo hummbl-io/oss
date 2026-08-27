@@ -44,6 +44,7 @@ def _get_validator():
     global _validator
     if _validator is None:
         from hummbl_governance import SchemaValidator
+
         _validator = SchemaValidator()
     return _validator
 
@@ -103,7 +104,11 @@ def _load_default_schema(filename: str) -> dict[str, Any]:
         schema_path = Path(root) / "contracts" / "cognition" / "schemas" / filename
         if schema_path.exists():
             return json.loads(schema_path.read_text(encoding="utf-8"))
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
 
     schema_path = Path("contracts") / "cognition" / "schemas" / filename

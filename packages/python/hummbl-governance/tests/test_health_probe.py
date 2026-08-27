@@ -32,7 +32,6 @@ from hummbl_governance.health_probe import (
     ProbeResult,
 )
 
-
 # ---------------------------------------------------------------------------
 # Concrete probe implementations for testing
 # ---------------------------------------------------------------------------

@@ -115,9 +115,7 @@ def summarize(root: Path) -> dict[str, object]:
             for metric in all_metrics
         ],
         "estimated_finops_score": score,
-        "status": (
-            "green" if score < 12 else ("yellow" if score < 24 else "amber")
-        ),
+        "status": ("green" if score < 12 else ("yellow" if score < 24 else "amber")),
     }
 
 

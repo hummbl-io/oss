@@ -1,5 +1,7 @@
 # hummbl
 
+**H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
+
 **Structured reasoning framework for AI agents.**
 
 hummbl turns plans, hypotheses, observations, evaluations, decisions, and reflections into durable, inspectable artifacts. It provides reasoning primitives, protocols (scientific method, structured tool use), capture from existing artifacts or live runtime hooks, planning, local analysis, scoring, and visualization.

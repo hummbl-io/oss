@@ -32,18 +32,13 @@ import tempfile
 import tomllib
 from pathlib import Path
 
-
 PACKAGE = "hummbl-governance"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _without_repo_paths() -> None:
     repo = REPO_ROOT.resolve()
-    sys.path[:] = [
-        entry
-        for entry in sys.path
-        if entry and not Path(entry).resolve().is_relative_to(repo)
-    ]
+    sys.path[:] = [entry for entry in sys.path if entry and not Path(entry).resolve().is_relative_to(repo)]
     os.chdir(tempfile.gettempdir())
 
 

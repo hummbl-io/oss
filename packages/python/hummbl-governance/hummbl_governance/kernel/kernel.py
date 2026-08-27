@@ -49,6 +49,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 def _default_state_dir() -> Path:
     """Return the default Kernel state directory.
 
@@ -266,9 +267,7 @@ class Kernel:
         # K2: Evaluate against laws
         violations = self.law.evaluate(receipt.__dict__)
         if violations:
-            logger.warning(
-                f"Receipt {receipt.receipt_id} has {len(violations)} law violations"
-            )
+            logger.warning(f"Receipt {receipt.receipt_id} has {len(violations)} law violations")
 
         receipt_id = self.receipt.store(receipt)
 
@@ -418,9 +417,7 @@ class Kernel:
                     canonical = dict(receipt_dict)
                     canonical.pop("signature", None)
                     canonical_str = json.dumps(canonical, sort_keys=True, separators=(",", ":"))
-                    receipt_dict["receipt_hash"] = hashlib.sha256(
-                        canonical_str.encode("utf-8")
-                    ).hexdigest()
+                    receipt_dict["receipt_hash"] = hashlib.sha256(canonical_str.encode("utf-8")).hexdigest()
                     receipts.append(receipt_dict)
 
         # Adjust for 1-based sequence IDs: SequenceEngine starts at 1,

@@ -32,7 +32,9 @@ class TestStrideMapperBasic:
 
     def test_unauthenticated_cross_boundary(self):
         interaction = Interaction(
-            source="worker", target="database", action="write",
+            source="worker",
+            target="database",
+            action="write",
             trust_boundary=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
@@ -42,8 +44,11 @@ class TestStrideMapperBasic:
 
     def test_authenticated_reduces_spoofing(self):
         interaction = Interaction(
-            source="worker", target="api", action="read",
-            trust_boundary=True, authenticated=True,
+            source="worker",
+            target="api",
+            action="read",
+            trust_boundary=True,
+            authenticated=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
         categories = {f.category for f in findings}
@@ -51,7 +56,9 @@ class TestStrideMapperBasic:
 
     def test_audit_trail_reduces_tampering_repudiation(self):
         interaction = Interaction(
-            source="worker", target="store", action="write",
+            source="worker",
+            target="store",
+            action="write",
             has_audit_trail=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
@@ -61,8 +68,11 @@ class TestStrideMapperBasic:
 
     def test_delegation_token_reduces_disclosure_and_eop(self):
         interaction = Interaction(
-            source="worker", target="secrets", action="read",
-            trust_boundary=True, has_delegation_token=True,
+            source="worker",
+            target="secrets",
+            action="read",
+            trust_boundary=True,
+            has_delegation_token=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
         categories = {f.category for f in findings}
@@ -71,7 +81,9 @@ class TestStrideMapperBasic:
 
     def test_rate_limit_reduces_dos(self):
         interaction = Interaction(
-            source="worker", target="api", action="query",
+            source="worker",
+            target="api",
+            action="query",
             has_rate_limit=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
@@ -81,7 +93,9 @@ class TestStrideMapperBasic:
     def test_fully_mitigated_interaction(self):
         """An interaction with all mitigations should produce no findings."""
         interaction = Interaction(
-            source="orchestrator", target="worker", action="read",
+            source="orchestrator",
+            target="worker",
+            action="read",
             trust_boundary=False,
             authenticated=True,
             has_audit_trail=True,
@@ -100,7 +114,9 @@ class TestStrideMapperRiskLevels:
 
     def test_cross_boundary_spoofing_is_high(self):
         interaction = Interaction(
-            source="external", target="api", action="write",
+            source="external",
+            target="api",
+            action="write",
             trust_boundary=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
@@ -109,7 +125,9 @@ class TestStrideMapperRiskLevels:
 
     def test_internal_spoofing_is_medium(self):
         interaction = Interaction(
-            source="worker", target="cache", action="read",
+            source="worker",
+            target="cache",
+            action="read",
             trust_boundary=False,
         )
         findings = self.mapper.analyze_interaction(interaction)
@@ -118,7 +136,9 @@ class TestStrideMapperRiskLevels:
 
     def test_cross_boundary_mutation_without_token_is_critical(self):
         interaction = Interaction(
-            source="agent", target="database", action="delete",
+            source="agent",
+            target="database",
+            action="delete",
             trust_boundary=True,
         )
         findings = self.mapper.analyze_interaction(interaction)
@@ -165,7 +185,9 @@ class TestThreatFindingMitigations:
     def test_all_findings_have_mitigations(self):
         mapper = StrideMapper()
         interaction = Interaction(
-            source="untrusted", target="critical", action="execute",
+            source="untrusted",
+            target="critical",
+            action="execute",
             trust_boundary=True,
         )
         findings = mapper.analyze_interaction(interaction)

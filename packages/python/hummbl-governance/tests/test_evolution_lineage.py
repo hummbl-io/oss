@@ -18,11 +18,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import threading
+from datetime import datetime, timezone
 
 import pytest
-
 from hummbl_governance.evolution_lineage import (
     EvolutionLineage,
     ModificationRecord,
@@ -160,14 +159,16 @@ class TestLineageQueries:
 
     def test_get_variant_returns_mutation_safe_copy(self):
         lineage = EvolutionLineage()
-        lineage.record_variant(VariantRecord(
-            id="root",
-            parent_id=None,
-            generation=0,
-            created_at=datetime(2026, 5, 3, tzinfo=timezone.utc),
-            fitness={"alignment": 0.9},
-            metadata={"nested": {"stage": "candidate"}},
-        ))
+        lineage.record_variant(
+            VariantRecord(
+                id="root",
+                parent_id=None,
+                generation=0,
+                created_at=datetime(2026, 5, 3, tzinfo=timezone.utc),
+                fitness={"alignment": 0.9},
+                metadata={"nested": {"stage": "candidate"}},
+            )
+        )
 
         returned = lineage.get_variant("root")
         assert returned is not None
@@ -181,14 +182,16 @@ class TestLineageQueries:
 
     def test_get_lineage_returns_mutation_safe_copies(self):
         lineage = EvolutionLineage()
-        lineage.record_variant(VariantRecord(
-            id="root",
-            parent_id=None,
-            generation=0,
-            created_at=datetime(2026, 5, 3, tzinfo=timezone.utc),
-            fitness={"alignment": 0.9},
-            metadata={"nested": {"stage": "root"}},
-        ))
+        lineage.record_variant(
+            VariantRecord(
+                id="root",
+                parent_id=None,
+                generation=0,
+                created_at=datetime(2026, 5, 3, tzinfo=timezone.utc),
+                fitness={"alignment": 0.9},
+                metadata={"nested": {"stage": "root"}},
+            )
+        )
         lineage.record_variant(_variant("child", parent_id="root", generation=1))
 
         returned = lineage.get_lineage("child")
@@ -203,14 +206,16 @@ class TestLineageQueries:
     def test_get_children_returns_mutation_safe_copies(self):
         lineage = EvolutionLineage()
         lineage.record_variant(_variant("root"))
-        lineage.record_variant(VariantRecord(
-            id="child",
-            parent_id="root",
-            generation=1,
-            created_at=datetime(2026, 5, 3, tzinfo=timezone.utc),
-            fitness={"alignment": 0.9},
-            metadata={"nested": {"stage": "child"}},
-        ))
+        lineage.record_variant(
+            VariantRecord(
+                id="child",
+                parent_id="root",
+                generation=1,
+                created_at=datetime(2026, 5, 3, tzinfo=timezone.utc),
+                fitness={"alignment": 0.9},
+                metadata={"nested": {"stage": "child"}},
+            )
+        )
 
         returned = lineage.get_children("root")
         returned[0].fitness["alignment"] = 0.1
@@ -306,12 +311,14 @@ class TestDriftDetection:
     def test_drift_detected_for_large_metric_delta(self):
         lineage = EvolutionLineage(drift_threshold=0.3)
         lineage.record_variant(_variant("root", fitness={"performance": 0.7, "alignment": 0.9}))
-        lineage.record_variant(_variant(
-            "child",
-            parent_id="root",
-            generation=1,
-            fitness={"performance": 0.95, "alignment": 0.5},
-        ))
+        lineage.record_variant(
+            _variant(
+                "child",
+                parent_id="root",
+                generation=1,
+                fitness={"performance": 0.95, "alignment": 0.5},
+            )
+        )
         reports = lineage.detect_drift()
         assert len(reports) == 1
         assert reports[0].variant_id == "child"
@@ -321,24 +328,28 @@ class TestDriftDetection:
     def test_added_metric_flags_drift(self):
         lineage = EvolutionLineage()
         lineage.record_variant(_variant("root", fitness={"alignment": 0.9}))
-        lineage.record_variant(_variant(
-            "child",
-            parent_id="root",
-            generation=1,
-            fitness={"alignment": 0.9, "resource_acquisition": 0.2},
-        ))
+        lineage.record_variant(
+            _variant(
+                "child",
+                parent_id="root",
+                generation=1,
+                fitness={"alignment": 0.9, "resource_acquisition": 0.2},
+            )
+        )
         report = lineage.detect_drift()[0]
         assert report.added_metrics == ["resource_acquisition"]
 
     def test_removed_metric_flags_drift(self):
         lineage = EvolutionLineage()
         lineage.record_variant(_variant("root", fitness={"alignment": 0.9, "stability": 0.8}))
-        lineage.record_variant(_variant(
-            "child",
-            parent_id="root",
-            generation=1,
-            fitness={"alignment": 0.9},
-        ))
+        lineage.record_variant(
+            _variant(
+                "child",
+                parent_id="root",
+                generation=1,
+                fitness={"alignment": 0.9},
+            )
+        )
         report = lineage.detect_drift()[0]
         assert report.removed_metrics == ["stability"]
 

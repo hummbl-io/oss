@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_bus.bus_writer import (
     _normalize_timestamp,
     _parse_signing_envelope,

@@ -332,12 +332,12 @@ site: hummbl.io     # hummbl.io | operator.com | both
 
 | File | Description |
 |:---|:---|
-| [`completeness-over-score-essay.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/research/2026-08-23_completeness-over-score-essay.md) | Essay: architecture of honest AI governance |
-| [`inversion-of-vanity-essay.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/research/2026-08-23_inversion-of-vanity-essay.md) | Essay: epistemology of humility in AI engineering |
-| [`batch2-compliance-gaps.md`](file:///<repo-root>/PROJECTS/hummbl-governance/batch2-compliance-gaps.md) | 11-item compliance audit + gaps report |
-| [`governance_question.schema.json`](file:///<repo-root>/PROJECTS/hummbl-governance/schemas/governance_question.schema.json) | JSON Schema for open governance questions |
-| [`capability_manifest.schema.json`](file:///<repo-root>/PROJECTS/hummbl-governance/schemas/capability_manifest.schema.json) | JSON Schema for capability manifests |
-| [`essay-peer-review.md`](file:///<repo-root>/.gemini/antigravity-cli/brain/1372b0f4-d179-44ef-8671-99fc161fca6d/essay-peer-review.md) | Peer review of both essays with P1/P2/P3 corrections |
+| [`completeness-over-score-essay.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/research/2026-08-23_completeness-over-score-essay.md) | Essay: architecture of honest AI governance |
+| [`inversion-of-vanity-essay.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/research/2026-08-23_inversion-of-vanity-essay.md) | Essay: epistemology of humility in AI engineering |
+| [`batch2-compliance-gaps.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancebatch2-compliance-gaps.md) | 11-item compliance audit + gaps report |
+| [`governance_question.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/governance_question.schema.json) | JSON Schema for open governance questions |
+| [`capability_manifest.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/capability_manifest.schema.json) | JSON Schema for capability manifests |
+| [`essay-peer-review.md`](https://github.com/hummbl-io/oss) | Peer review of both essays with P1/P2/P3 corrections |
 
 ---
 

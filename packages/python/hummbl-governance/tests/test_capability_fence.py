@@ -20,7 +20,6 @@ import threading
 from dataclasses import replace
 
 import pytest
-
 from hummbl_governance.capability_fence import (
     CapabilityAuditEntry,
     CapabilityDenied,
@@ -234,7 +233,8 @@ class TestCapabilityFenceFromToken:
     def test_from_token_with_audit_log(self):
         mgr = DelegationTokenManager(secret=b"test-secret")
         token = mgr.create_token(
-            issuer="o", subject="w",
+            issuer="o",
+            subject="w",
             ops_allowed=["api:read"],
             binding=TokenBinding(task_id="t1", contract_id="c1"),
         )
@@ -601,9 +601,7 @@ class TestCapabilityFenceFromToken:
             subject="w",
             ops_allowed=["database:read"],
             binding=TokenBinding(task_id="t1", contract_id="c1"),
-            resource_selectors=[
-                ResourceSelector("database", "prod-*", constraints=constraints)
-            ],
+            resource_selectors=[ResourceSelector("database", "prod-*", constraints=constraints)],
         )
         fence = CapabilityFence.from_delegation_token(
             token,
@@ -693,9 +691,7 @@ class TestCapabilityFenceFromToken:
             subject="w",
             ops_allowed=["database:read"],
             binding=TokenBinding(task_id="t1", contract_id="c1"),
-            resource_selectors=[
-                ResourceSelector("database", "prod-*", constraints=constraints)
-            ],
+            resource_selectors=[ResourceSelector("database", "prod-*", constraints=constraints)],
         )
         fence = CapabilityFence.from_delegation_token(
             token,

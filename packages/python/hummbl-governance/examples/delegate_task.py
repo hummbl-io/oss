@@ -22,8 +22,8 @@ with least-privilege enforcement.
 """
 
 from hummbl_governance import (
-    ResourceSelector,
     Caveat,
+    ResourceSelector,
     TokenBinding,
     create_token,
     validate_token,

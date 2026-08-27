@@ -13,23 +13,21 @@ import json
 from pathlib import Path
 
 import pytest
-
+from hummbl_bus.bus_utils import parse_bus_line
 from hummbl_bus.bus_writer import (
-    _validate_fields,
-    _validate_content,
     _sanitize_correlation_id,
+    _validate_content,
+    _validate_fields,
     escape_message,
     unescape_message,
     validate_tsv_integrity,
 )
-from hummbl_bus.bus_utils import parse_bus_line
 from hummbl_bus.message_signing import (
     NonceTracker,
     extract_timestamp_from_nonce,
     unwrap_signing_envelope,
 )
 from hummbl_bus.spool import load_spool_record
-
 
 # ---------------------------------------------------------------------------
 # _validate_fields — error paths and boundary conditions
@@ -115,15 +113,21 @@ class TestValidateContent:
 
 class TestSanitizeCorrelationId:
     def test_rejects_empty_string(self) -> None:
-        with pytest.raises(ValueError, match="correlation_id must be a non-empty string"):
+        with pytest.raises(
+            ValueError, match="correlation_id must be a non-empty string"
+        ):
             _sanitize_correlation_id("")
 
     def test_rejects_whitespace_only(self) -> None:
-        with pytest.raises(ValueError, match="correlation_id must be a non-empty string"):
+        with pytest.raises(
+            ValueError, match="correlation_id must be a non-empty string"
+        ):
             _sanitize_correlation_id("   ")
 
     def test_rejects_non_string(self) -> None:
-        with pytest.raises(ValueError, match="correlation_id must be a non-empty string"):
+        with pytest.raises(
+            ValueError, match="correlation_id must be a non-empty string"
+        ):
             _sanitize_correlation_id(None)  # type: ignore[arg-type]
 
     def test_strips_tabs_and_newlines(self) -> None:

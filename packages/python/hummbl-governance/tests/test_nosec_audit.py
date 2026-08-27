@@ -7,6 +7,7 @@ Verifies:
 4. Scanner produces correct registry JSON
 5. Scanner handles files with no nosec comments
 """
+
 from __future__ import annotations
 
 import json
@@ -51,7 +52,7 @@ class TestNosecAuditScan:
         """Scanner flags nosec without justification."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = random.random()  # nosec\n',
+            "x = random.random()  # nosec\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg), "--strict")
@@ -63,7 +64,7 @@ class TestNosecAuditScan:
         """Without --strict, unjustified nosec warns but exits 0."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = random.random()  # nosec\n',
+            "x = random.random()  # nosec\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg))
@@ -74,11 +75,11 @@ class TestNosecAuditScan:
         """Scanner skips test_*.py files."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = random.random()  # nosec B311 — statistical use\n',
+            "x = random.random()  # nosec B311 — statistical use\n",
             encoding="utf-8",
         )
         (pkg / "test_module.py").write_text(
-            'y = random.random()  # nosec B311 — test file should be skipped\n',
+            "y = random.random()  # nosec B311 — test file should be skipped\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg))
@@ -90,7 +91,7 @@ class TestNosecAuditScan:
         """Scanner handles files with no nosec comments."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = 1\ny = 2\n',
+            "x = 1\ny = 2\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg))
@@ -102,8 +103,8 @@ class TestNosecAuditScan:
         """Scanner finds multiple nosec comments in the same file."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'a = random.random()  # nosec B311 — statistical\n'
-            'b = random.choice(x)  # nosec B311 — statistical\n'
+            "a = random.random()  # nosec B311 — statistical\n"
+            "b = random.choice(x)  # nosec B311 — statistical\n"
             'c = "password"  # nosec B105 — not a password\n',
             encoding="utf-8",
         )
@@ -118,7 +119,7 @@ class TestNosecAuditRegistry:
         """--registry writes a valid JSON registry file."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = random.random()  # nosec B311 — statistical use\n',
+            "x = random.random()  # nosec B311 — statistical use\n",
             encoding="utf-8",
         )
         registry_path = tmp_path / "nosec-registry.json"
@@ -139,7 +140,7 @@ class TestNosecAuditRegistry:
         """--json outputs JSON to stdout."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = random.random()  # nosec B311 — statistical\n',
+            "x = random.random()  # nosec B311 — statistical\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg), "--json")
@@ -154,7 +155,7 @@ class TestNosecAuditJustificationFormats:
         """Scanner parses em-dash separated justifications."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = 1  # nosec B105 — em dash justification\n',
+            "x = 1  # nosec B105 — em dash justification\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg))
@@ -165,7 +166,7 @@ class TestNosecAuditJustificationFormats:
         """Scanner parses colon-separated justifications."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = 1  # nosec B105: colon justification\n',
+            "x = 1  # nosec B105: colon justification\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg))
@@ -176,7 +177,7 @@ class TestNosecAuditJustificationFormats:
         """Scanner parses hyphen-separated justifications."""
         pkg = _make_package(tmp_path)
         (pkg / "module.py").write_text(
-            'x = 1  # nosec B105 - hyphen justification\n',
+            "x = 1  # nosec B105 - hyphen justification\n",
             encoding="utf-8",
         )
         rc, output = _run_audit(str(pkg))

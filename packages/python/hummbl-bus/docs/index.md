@@ -3,7 +3,7 @@
 > **Extraction warning:** this documentation set contains target-state and
 > hummbl-governance-derived behavior that is not yet present in the standalone
 > package. Do not treat feature descriptions below as a production cutover
-> contract. Start with the [Phase −1 evidence report](research/PHASE_MINUS1_EVIDENCE_AND_GAPS_2026-08-08.md),
+> contract. Start with the [Phase −1 evidence report](https://github.com/hummbl-io/oss),
 > [program plan](program/PHASE_MINUS1_0_1_PROGRAM.md), and
 > [versioning plan](architecture/VERSIONING_AND_COMPATIBILITY_PLAN.md).
 

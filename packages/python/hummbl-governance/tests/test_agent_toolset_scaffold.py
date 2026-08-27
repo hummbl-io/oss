@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 import scripts.agent_toolset_scaffold as scaffold
 
 
@@ -24,9 +23,7 @@ def _write_git_config(repo: Path, remote_url: str) -> None:
         ("git@github.com:hummbl-io/hummbl-governance.git", "hummbl-io/hummbl-governance"),
     ],
 )
-def test_repo_default_name_accepts_github_remote_forms(
-    tmp_path: Path, remote_url: str, expected: str
-) -> None:
+def test_repo_default_name_accepts_github_remote_forms(tmp_path: Path, remote_url: str, expected: str) -> None:
     _write_git_config(tmp_path, remote_url)
 
     assert scaffold.repo_default_name(tmp_path) == expected
@@ -43,9 +40,7 @@ def test_repo_default_name_accepts_github_remote_forms(
         "git@github.com.evil.example:hummbl-io/hummbl-governance.git",
     ],
 )
-def test_repo_default_name_rejects_github_substring_bypasses(
-    tmp_path: Path, remote_url: str
-) -> None:
+def test_repo_default_name_rejects_github_substring_bypasses(tmp_path: Path, remote_url: str) -> None:
     _write_git_config(tmp_path, remote_url)
 
     assert scaffold.repo_default_name(tmp_path) == "<owner>/<repo>"

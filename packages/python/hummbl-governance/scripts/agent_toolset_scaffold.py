@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any, Dict
 from urllib.parse import urlparse
 
-
 TOOLSET_FILES: Dict[str, str] = {
     "scripts/issue_pr_draft_coverage.py": "Issue/PR draft coverage + promotion pipeline",
     "scripts/pr_census.py": "PR and branch drift snapshot",
@@ -50,7 +49,7 @@ def find_repo_root(path: Path) -> Path:
 
 
 def repo_default_name(repo_path: Path) -> str:
-    remote = (repo_path / ".git" / "config")
+    remote = repo_path / ".git" / "config"
     if not remote.exists():
         return "<owner>/<repo>"
     text = remote.read_text(encoding="utf-8", errors="replace")
@@ -79,17 +78,21 @@ def status_for_repo(repo_root: Path) -> Dict[str, Any]:
         root_match = repo_root / relpath
         nested_match = repo_root / "hummbl-governance" / relpath
         if root_match.exists():
-            out["present"].append({
-                "path": relpath,
-                "why": reason,
-                "resolved_path": str(root_match),
-            })
+            out["present"].append(
+                {
+                    "path": relpath,
+                    "why": reason,
+                    "resolved_path": str(root_match),
+                }
+            )
         elif nested_match.exists():
-            out["present"].append({
-                "path": relpath,
-                "why": reason,
-                "resolved_path": str(nested_match),
-            })
+            out["present"].append(
+                {
+                    "path": relpath,
+                    "why": reason,
+                    "resolved_path": str(nested_match),
+                }
+            )
         else:
             out["missing"].append({"path": relpath, "why": reason})
     out["summary"] = {
@@ -111,7 +114,7 @@ def detect_docs_root(repo_root: Path) -> Path:
         nested = doc_root / "operations"
         if nested.exists():
             return nested
-    return (repo_root / "docs" / "operations")
+    return repo_root / "docs" / "operations"
 
 
 def print_table(repo_root: Path, status: Dict[str, Any]) -> str:

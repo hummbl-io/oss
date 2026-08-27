@@ -43,14 +43,65 @@ RETRIEVAL_DECAY_HALF_LIFE_DAYS = float(
 )
 
 # Stopwords for English (minimal set -- keeps index small without a dep)
-_STOPWORDS = frozenset({
-    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-    "of", "with", "by", "from", "is", "it", "be", "as", "was", "were",
-    "are", "been", "being", "have", "has", "had", "do", "does", "did",
-    "will", "would", "could", "should", "may", "might", "can", "this",
-    "that", "these", "those", "not", "no", "so", "if", "then", "than",
-    "too", "very", "just", "about", "also", "into", "over", "after",
-})
+_STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "from",
+        "is",
+        "it",
+        "be",
+        "as",
+        "was",
+        "were",
+        "are",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "can",
+        "this",
+        "that",
+        "these",
+        "those",
+        "not",
+        "no",
+        "so",
+        "if",
+        "then",
+        "than",
+        "too",
+        "very",
+        "just",
+        "about",
+        "also",
+        "into",
+        "over",
+        "after",
+    }
+)
 
 _TOKEN_RE = re.compile(r"[a-z0-9_]+(?:\.[a-z0-9_]+)*")
 
@@ -115,9 +166,7 @@ class BM25Index:
 
         if not entries:
             self.avg_doc_length = 0.0
-            self.built_at = datetime.now(timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            )
+            self.built_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             return 0
 
         total_length = 0
@@ -166,7 +215,9 @@ class BM25Index:
 
         logger.info(
             "Built index: %d entries, %d terms, avg_doc_len=%.1f",
-            self.total_docs, len(self.inverted_index), self.avg_doc_length,
+            self.total_docs,
+            len(self.inverted_index),
+            self.avg_doc_length,
         )
         return self.total_docs
 
@@ -211,9 +262,7 @@ class BM25Index:
 
             # IDF: log((N - n + 0.5) / (n + 0.5) + 1)
             n = len(postings)
-            idf = math.log(
-                (self.total_docs - n + 0.5) / (n + 0.5) + 1.0
-            )
+            idf = math.log((self.total_docs - n + 0.5) / (n + 0.5) + 1.0)
 
             for doc_id, tf in postings:
                 doc_len = self.doc_lengths.get(doc_id, 0)
@@ -243,9 +292,7 @@ class BM25Index:
                 if not entry_ts:
                     continue
                 try:
-                    entry_dt = datetime.fromisoformat(
-                        entry_ts.replace("Z", "+00:00")
-                    )
+                    entry_dt = datetime.fromisoformat(entry_ts.replace("Z", "+00:00"))
                     age_days = max((ref_dt - entry_dt).total_seconds() / 86400.0, 0.0)
                     time_factor = math.exp(-time_lambda * age_days)
                     scores[doc_id] *= time_factor
@@ -268,11 +315,13 @@ class BM25Index:
                         decayed_counts[doc_id] = float(raw_count)
                         continue
                     try:
-                        last_dt = datetime.fromisoformat(
-                            last_ts.replace("Z", "+00:00")
+                        last_dt = datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+                        age_days = max(
+                            (ref_dt - last_dt).total_seconds() / 86400.0, 0.0
                         )
-                        age_days = max((ref_dt - last_dt).total_seconds() / 86400.0, 0.0)
-                        decayed_counts[doc_id] = raw_count * math.exp(-retr_lambda * age_days)
+                        decayed_counts[doc_id] = raw_count * math.exp(
+                            -retr_lambda * age_days
+                        )
                     except (ValueError, TypeError):
                         decayed_counts[doc_id] = float(raw_count)
                 max_retrievals = max(decayed_counts.values()) if decayed_counts else 1
@@ -283,7 +332,9 @@ class BM25Index:
                         scores[doc_id] *= boost
             else:
                 # Original behavior: no decay on retrieval counts
-                max_retrievals = max(self.retrieval_counts.values()) if self.retrieval_counts else 1
+                max_retrievals = (
+                    max(self.retrieval_counts.values()) if self.retrieval_counts else 1
+                )
                 for doc_id in scores:
                     count = self.retrieval_counts.get(doc_id, 0)
                     if count > 0:
@@ -317,14 +368,14 @@ class BM25Index:
             timestamp: Optional UTC timestamp (defaults to now). Stored in
                 retrieval_last_at for retrieval-count decay.
         """
-        self.retrieval_counts[entry_id] = (
-            self.retrieval_counts.get(entry_id, 0) + 1
-        )
+        self.retrieval_counts[entry_id] = self.retrieval_counts.get(entry_id, 0) + 1
         if timestamp is None:
             timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         self.retrieval_last_at[entry_id] = timestamp
 
-    def add_document(self, doc_id: str, text: str, metadata: dict[str, Any] | None = None) -> None:
+    def add_document(
+        self, doc_id: str, text: str, metadata: dict[str, Any] | None = None
+    ) -> None:
         """Add a single document to the index."""
         tokens = tokenize(text)
         doc_len = len(tokens)
@@ -416,6 +467,7 @@ class BM25Index:
 
         logger.info(
             "Loaded index: %d entries, %d terms",
-            self.total_docs, len(self.inverted_index),
+            self.total_docs,
+            len(self.inverted_index),
         )
         return True

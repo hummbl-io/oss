@@ -85,7 +85,8 @@ class IdentityEngine:
                 except (json.JSONDecodeError, KeyError, TypeError) as exc:
                     logger.error(
                         "Corrupted identity registry line in %s: %s",
-                        self.registry_file, line[:100],
+                        self.registry_file,
+                        line[:100],
                     )
                     raise KernelPanic(
                         KernelInvariant.IDENTITY,
@@ -105,7 +106,8 @@ class IdentityEngine:
                 except (json.JSONDecodeError, KeyError, TypeError) as exc:
                     logger.error(
                         "Corrupted role claim line in %s: %s",
-                        self.role_claims_file, line[:100],
+                        self.role_claims_file,
+                        line[:100],
                     )
                     raise KernelPanic(
                         KernelInvariant.ROLE,
@@ -138,7 +140,7 @@ class IdentityEngine:
         if trust_tier not in self.TRUST_TIERS:
             raise KernelPanic(
                 KernelInvariant.IDENTITY,
-                f"Invalid trust tier \'{trust_tier}\'",
+                f"Invalid trust tier '{trust_tier}'",
                 agent_id=agent_id,
             )
         with self._lock:
@@ -148,7 +150,7 @@ class IdentityEngine:
             if agent_id in self._identities:
                 raise KernelPanic(
                     KernelInvariant.IDENTITY,
-                    f"Agent \'{agent_id}\' already registered",
+                    f"Agent '{agent_id}' already registered",
                     agent_id=agent_id,
                 )
             identity = AgentIdentity(
@@ -176,7 +178,7 @@ class IdentityEngine:
         if new_tier not in self.TRUST_TIERS:
             raise KernelPanic(
                 KernelInvariant.IDENTITY,
-                f"Invalid trust tier \'{new_tier}\'",
+                f"Invalid trust tier '{new_tier}'",
                 agent_id=agent_id,
             )
         with self._lock:
@@ -187,7 +189,7 @@ class IdentityEngine:
             if not identity:
                 raise KernelPanic(
                     KernelInvariant.IDENTITY,
-                    f"Agent \'{agent_id}\' not found",
+                    f"Agent '{agent_id}' not found",
                     agent_id=agent_id,
                 )
             identity.trust_tier = new_tier
@@ -199,7 +201,7 @@ class IdentityEngine:
 
         Returns probation token with expiry.
         """
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta, timezone
 
         with self._lock:
             # Lookup, validation, and mutation all happen inside the lock
@@ -296,10 +298,7 @@ class IdentityEngine:
     def list_roles(self, agent_id: str) -> list[dict[str, Any]]:
         """List all role claims for an agent."""
         with self._lock:
-            return [
-                claim for key, claim in self._role_claims.items()
-                if key.startswith(f"{agent_id}:")
-            ]
+            return [claim for key, claim in self._role_claims.items() if key.startswith(f"{agent_id}:")]
 
     def list_role_claims(self) -> dict[str, dict[str, Any]]:
         """Return a copy of all role claims."""

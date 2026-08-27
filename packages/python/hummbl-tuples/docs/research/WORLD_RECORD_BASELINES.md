@@ -80,7 +80,7 @@ At present, the strongest defensible categories are:
 - `best_verified_same_family_tinystories_bpb`
 
 Those are grounded by local receipts in:
-- [TRAINING_RUN_LEDGER.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/TRAINING_RUN_LEDGER.md)
+- [TRAINING_RUN_LEDGER.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/TRAINING_RUN_LEDGER.md)
 
 ## What We Still Need
 

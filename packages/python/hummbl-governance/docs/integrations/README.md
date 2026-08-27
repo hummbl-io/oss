@@ -8,9 +8,9 @@ The pattern is the same whether you're using CrewAI, LangChain, AutoGen, or raw 
 ```python
 from hummbl_governance import KillSwitch, CircuitBreaker, CostGovernor
 
-ks = KillSwitch()                              # 1. Emergency stop
-cb = CircuitBreaker(failure_threshold=3)       # 2. Auto-fail on errors
-gov = CostGovernor(":memory:", soft_cap=5.0)   # 3. Budget enforcement
+ks = KillSwitch()  # 1. Emergency stop
+cb = CircuitBreaker(failure_threshold=3)  # 2. Auto-fail on errors
+gov = CostGovernor(":memory:", soft_cap=5.0)  # 3. Budget enforcement
 
 # Wrap your agent call
 result = ks.check_task_allowed("my_task")
@@ -57,9 +57,7 @@ if ks.check_task_allowed("research")["allowed"]:
         result = cb.call(crew.kickoff)
         gov.record_usage("openai", "gpt-4", 1000, 500, 0.015)
     except CircuitBreakerOpen:
-        ks.engage(KillSwitchMode.HALT_NONCRITICAL,
-                  reason="Circuit breaker opened",
-                  triggered_by="circuit_breaker")
+        ks.engage(KillSwitchMode.HALT_NONCRITICAL, reason="Circuit breaker opened", triggered_by="circuit_breaker")
 ```
 
 **Solves:**
@@ -88,6 +86,7 @@ ks = KillSwitch()
 gov = CostGovernor("costs.db", soft_cap=5.0, hard_cap=10.0)
 receipts = []
 
+
 def before_tool_call(context):
     tool_name = context.tool_name
     agent_id = getattr(context.agent, "role", None) or "crewai-agent"
@@ -104,14 +103,11 @@ def before_tool_call(context):
         },
         kill_switch_result=kill_switch_result,
         budget_status=budget_status,
-        terminal_outcome=(
-            "blocked"
-            if not kill_switch_result["allowed"] or budget_denied
-            else None
-        ),
+        terminal_outcome=("blocked" if not kill_switch_result["allowed"] or budget_denied else None),
     )
     receipts.append(receipt)
     return receipt.decision != "HARD_BLOCK"
+
 
 register_before_tool_call_hook(before_tool_call)
 try:
@@ -141,6 +137,7 @@ executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools)
 ks = KillSwitch()
 cb = CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
 gov = CostGovernor("costs.db", soft_cap=5.0, hard_cap=10.0)
+
 
 def governed_invoke(input_text):
     if not ks.check_task_allowed("langchain_agent")["allowed"]:
@@ -189,16 +186,14 @@ client = openai.OpenAI()
 cb = CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
 gov = CostGovernor("costs.db", soft_cap=5.0, hard_cap=10.0)
 
+
 def governed_completion(prompt, model="gpt-4"):
     response = cb.call(
         client.chat.completions.create,
         model=model,
         messages=[{"role": "user", "content": prompt}],
     )
-    gov.record_usage("openai", model,
-                     response.usage.prompt_tokens,
-                     response.usage.completion_tokens,
-                     cost=0.015)
+    gov.record_usage("openai", model, response.usage.prompt_tokens, response.usage.completion_tokens, cost=0.015)
     return response
 ```
 
@@ -211,6 +206,7 @@ framework calls:
 
 ```python
 from hummbl_governance import KillSwitch, CircuitBreaker, CostGovernor
+
 
 def guarded_tool(method, params, tool):
     if not KillSwitch().check_task_allowed(f"mcp:{method}")["allowed"]:

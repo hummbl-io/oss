@@ -14,9 +14,9 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from check_schema_code_consistency import (
-    _load_schemas,
     _extract_schema_fields,
     _get_dataclass_fields,
+    _load_schemas,
     check_consistency,
 )
 
@@ -43,7 +43,9 @@ def test_extract_schema_fields():
 
 def test_dataclass_importable():
     """IDPTuple should be importable and have expected fields."""
-    all_fields, data_fields, tuple_type, import_error = _get_dataclass_fields("hummbl_tuples.base", "IDPTuple")
+    all_fields, data_fields, tuple_type, import_error = _get_dataclass_fields(
+        "hummbl_tuples.base", "IDPTuple"
+    )
     assert len(all_fields) > 0, "IDPTuple has no fields"
     assert "tuple_type" in all_fields, "tuple_type should be a field"
     assert tuple_type is not None or "tuple_type" in all_fields, "tuple_type should exist"

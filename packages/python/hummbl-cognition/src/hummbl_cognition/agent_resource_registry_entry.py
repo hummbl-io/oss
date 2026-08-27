@@ -45,13 +45,11 @@ Reference: Agent Resource Registry.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from datetime import datetime
 from typing import Any
 
 from hummbl_cognition._json_utils import canonical_json as _canonical_json
-from hummbl_cognition._timeutils import utc_now as _utc_now
 
 __all__ = [
     "AgentResourceRegistryError",
@@ -66,21 +64,42 @@ __all__ = [
 
 
 VALID_RESOURCE_TYPE = {
-    "tool", "mcp_server", "skill", "agent", "canvas",
-    "connector", "script", "vertex-extension", "other",
+    "tool",
+    "mcp_server",
+    "skill",
+    "agent",
+    "canvas",
+    "connector",
+    "script",
+    "vertex-extension",
+    "other",
 }
 VALID_NAMESPACE_STATUS = {"candidate", "admitted", "rejected", "retired"}
 VALID_AUTHORITY = {
-    "operator_only", "steward", "trusted", "active", "probationary", "disabled",
+    "operator_only",
+    "steward",
+    "trusted",
+    "active",
+    "probationary",
+    "disabled",
 }
 VALID_CONTEXT = {
-    "development", "testing", "production", "research",
-    "briefing", "governance", "external_facing",
+    "development",
+    "testing",
+    "production",
+    "research",
+    "briefing",
+    "governance",
+    "external_facing",
 }
 VALID_RISK_CLASS = {"low", "medium", "high", "critical"}
 VALID_PRIVACY_CLASS = {"public", "internal", "confidential", "restricted"}
 VALID_MIGRATION_DECISION = {
-    "none", "inventory_only", "migrate", "hold", "reject_migration",
+    "none",
+    "inventory_only",
+    "migrate",
+    "hold",
+    "reject_migration",
 }
 
 # Risk ordering for comparison
@@ -90,14 +109,31 @@ _RISK_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 _RESOURCE_ID_RE = re.compile(r"^res-[a-z0-9-]+$")
 
 ALLOWED_FIELDS = {
-    "resource_id", "resource_type", "resource_name", "resource_owner",
-    "source_registry", "namespace_status", "install_authority",
-    "invoke_authority", "publish_authority", "allowed_contexts",
-    "blocked_contexts", "secrets_required", "network_required",
-    "risk_class", "privacy_class", "receipt_required",
-    "discovery_receipts", "rejection_reason", "admission_conditions",
-    "migration_decision", "migration_target", "last_reviewed_at",
-    "reviewed_by", "notes", "entry_hash",
+    "resource_id",
+    "resource_type",
+    "resource_name",
+    "resource_owner",
+    "source_registry",
+    "namespace_status",
+    "install_authority",
+    "invoke_authority",
+    "publish_authority",
+    "allowed_contexts",
+    "blocked_contexts",
+    "secrets_required",
+    "network_required",
+    "risk_class",
+    "privacy_class",
+    "receipt_required",
+    "discovery_receipts",
+    "rejection_reason",
+    "admission_conditions",
+    "migration_decision",
+    "migration_target",
+    "last_reviewed_at",
+    "reviewed_by",
+    "notes",
+    "entry_hash",
 }
 
 
@@ -161,9 +197,17 @@ def validate_registry_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
     errors: list[str] = []
 
     required = [
-        "resource_id", "resource_type", "resource_owner", "namespace_status",
-        "install_authority", "invoke_authority", "risk_class", "privacy_class",
-        "receipt_required", "last_reviewed_at", "entry_hash",
+        "resource_id",
+        "resource_type",
+        "resource_owner",
+        "namespace_status",
+        "install_authority",
+        "invoke_authority",
+        "risk_class",
+        "privacy_class",
+        "receipt_required",
+        "last_reviewed_at",
+        "entry_hash",
     ]
     for field in required:
         if field not in entry or entry[field] is None:
@@ -184,7 +228,10 @@ def validate_registry_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
             "resource_id must match pattern ^res-[a-z0-9-]+$ "
             f"(lowercase alphanumeric and hyphens only after 'res-' prefix — got {entry['resource_id']!r})"
         )
-    if not isinstance(entry.get("resource_owner"), str) or not entry["resource_owner"].strip():
+    if (
+        not isinstance(entry.get("resource_owner"), str)
+        or not entry["resource_owner"].strip()
+    ):
         errors.append("resource_owner must be a non-empty string")
     if not isinstance(entry.get("last_reviewed_at"), str):
         errors.append("last_reviewed_at must be a string")
@@ -198,19 +245,37 @@ def validate_registry_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
         errors.append("receipt_required must be a boolean")
 
     # Optional string fields
-    for field in ("resource_name", "source_registry", "rejection_reason",
-                  "migration_target", "reviewed_by", "notes"):
-        if field in entry and entry[field] is not None and not isinstance(entry[field], str):
+    for field in (
+        "resource_name",
+        "source_registry",
+        "rejection_reason",
+        "migration_target",
+        "reviewed_by",
+        "notes",
+    ):
+        if (
+            field in entry
+            and entry[field] is not None
+            and not isinstance(entry[field], str)
+        ):
             errors.append(f"{field} must be a string if present")
 
     # Optional boolean fields
     for field in ("secrets_required", "network_required"):
-        if field in entry and entry[field] is not None and not isinstance(entry[field], bool):
+        if (
+            field in entry
+            and entry[field] is not None
+            and not isinstance(entry[field], bool)
+        ):
             errors.append(f"{field} must be a boolean if present")
 
     # Optional list fields
-    for field in ("allowed_contexts", "blocked_contexts",
-                  "discovery_receipts", "admission_conditions"):
+    for field in (
+        "allowed_contexts",
+        "blocked_contexts",
+        "discovery_receipts",
+        "admission_conditions",
+    ):
         if field in entry and entry[field] is not None:
             if not isinstance(entry[field], list):
                 errors.append(f"{field} must be a list if present")
@@ -224,7 +289,9 @@ def validate_registry_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
 
     ns = entry.get("namespace_status")
     if ns not in VALID_NAMESPACE_STATUS:
-        errors.append(f"namespace_status: {ns!r} not in {sorted(VALID_NAMESPACE_STATUS)}")
+        errors.append(
+            f"namespace_status: {ns!r} not in {sorted(VALID_NAMESPACE_STATUS)}"
+        )
 
     for field in ("install_authority", "invoke_authority", "publish_authority"):
         v = entry.get(field)
@@ -241,7 +308,9 @@ def validate_registry_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
 
     md = entry.get("migration_decision")
     if md is not None and md not in VALID_MIGRATION_DECISION:
-        errors.append(f"migration_decision: {md!r} not in {sorted(VALID_MIGRATION_DECISION)}")
+        errors.append(
+            f"migration_decision: {md!r} not in {sorted(VALID_MIGRATION_DECISION)}"
+        )
 
     # Context enum checks
     for field in ("allowed_contexts", "blocked_contexts"):
@@ -249,7 +318,9 @@ def validate_registry_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
         if isinstance(ctxs, list):
             for ctx in ctxs:
                 if ctx not in VALID_CONTEXT:
-                    errors.append(f"{field} item: {ctx!r} not in {sorted(VALID_CONTEXT)}")
+                    errors.append(
+                        f"{field} item: {ctx!r} not in {sorted(VALID_CONTEXT)}"
+                    )
 
     if errors:
         return False, errors
@@ -530,19 +601,38 @@ def validate_registry_batch(
 
 # Discovery receipt field validation sets (mirror the JSON Schema).
 VALID_DISCOVERY_SOURCE = {
-    "mcp-server-registry", "internal", "vertex-ai-extensions-catalog",
-    "skill-registry", "tool-discovery", "manual", "other",
+    "mcp-server-registry",
+    "internal",
+    "vertex-ai-extensions-catalog",
+    "skill-registry",
+    "tool-discovery",
+    "manual",
+    "other",
 }
 VALID_ADMISSION_DECISION = {"admit", "reject", "hold", "retire"}
 VALID_REVIEWER = {"operator", "steward", "trusted", "active"}
 VALID_EVIDENCE_KIND = {
-    "url", "commit", "pr", "issue", "doc", "test", "log", "other",
+    "url",
+    "commit",
+    "pr",
+    "issue",
+    "doc",
+    "test",
+    "log",
+    "other",
 }
 
 ALLOWED_RECEIPT_FIELDS = {
-    "receipt_id", "resource_id", "discovery_source", "evidence",
-    "admission_decision", "reviewer", "timestamp", "notes",
-    "rejection_reason", "receipt_hash",
+    "receipt_id",
+    "resource_id",
+    "discovery_source",
+    "evidence",
+    "admission_decision",
+    "reviewer",
+    "timestamp",
+    "notes",
+    "rejection_reason",
+    "receipt_hash",
 }
 
 # receipt_id must match ^dr-[a-z0-9-]+$
@@ -563,8 +653,14 @@ def validate_discovery_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]
     errors: list[str] = []
 
     required = [
-        "receipt_id", "resource_id", "discovery_source", "evidence",
-        "admission_decision", "reviewer", "timestamp", "receipt_hash",
+        "receipt_id",
+        "resource_id",
+        "discovery_source",
+        "evidence",
+        "admission_decision",
+        "reviewer",
+        "timestamp",
+        "receipt_hash",
     ]
     for field in required:
         if field not in receipt or receipt[field] is None:
@@ -579,15 +675,11 @@ def validate_discovery_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]
 
     rid = receipt["receipt_id"]
     if not _RECEIPT_ID_RE.match(rid):
-        errors.append(
-            f"receipt_id must match ^dr-[a-z0-9-]+$ (got {rid!r})"
-        )
+        errors.append(f"receipt_id must match ^dr-[a-z0-9-]+$ (got {rid!r})")
 
     resource_id = receipt["resource_id"]
     if not _RESOURCE_ID_RE.match(resource_id):
-        errors.append(
-            f"resource_id must match ^res-[a-z0-9-]+$ (got {resource_id!r})"
-        )
+        errors.append(f"resource_id must match ^res-[a-z0-9-]+$ (got {resource_id!r})")
 
     ds = receipt["discovery_source"]
     if ds not in VALID_DISCOVERY_SOURCE:
@@ -636,14 +728,14 @@ def validate_discovery_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]
     # timestamp must be valid ISO 8601
     ts = receipt["timestamp"]
     if not _is_valid_iso8601(ts):
-        errors.append(
-            f"timestamp must be a valid RFC3339 date-time (got {ts!r})"
-        )
+        errors.append(f"timestamp must be a valid RFC3339 date-time (got {ts!r})")
 
     # Hash verification
     expected_hash = compute_receipt_hash(receipt)
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 

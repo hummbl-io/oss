@@ -7,11 +7,13 @@ hummbl_cognition.schema_validator.
 
 import json
 from pathlib import Path
-import pytest
 
+import pytest
 from hummbl_cognition.schema_validator import validate, validate_file
 
-SCHEMAS_DIR = Path(__file__).parent.parent.parent / "src" / "hummbl_cognition" / "schemas"
+SCHEMAS_DIR = (
+    Path(__file__).parent.parent.parent / "src" / "hummbl_cognition" / "schemas"
+)
 CLAIM_SCHEMA_PATH = SCHEMAS_DIR / "claim.schema.json"
 SCEP_SCHEMA_PATH = SCHEMAS_DIR / "scep.schema.json"
 

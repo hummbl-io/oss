@@ -11,7 +11,6 @@ Origin: hummbl-io/hummbl-governance#94
 import sys
 from pathlib import Path
 
-
 TOOLS_DIR = Path(__file__).parent.parent.parent / "tools"
 sys.path.insert(0, str(TOOLS_DIR))
 
@@ -49,29 +48,17 @@ class TestFieldDetection:
 
     def test_missing_steward(self):
         """Content missing Steward should be detectable."""
-        content = (
-            "**Status:** accepted\n"
-            "**Date:** 2026-01-15\n"
-            "**Decision owner:** devin\n"
-        )
+        content = "**Status:** accepted\n**Date:** 2026-01-15\n**Decision owner:** devin\n"
         assert "**Steward:**" not in content
 
     def test_missing_date(self):
         """Content missing Date should be detectable."""
-        content = (
-            "**Status:** accepted\n"
-            "**Decision owner:** devin\n"
-            "**Steward:** operator\n"
-        )
+        content = "**Status:** accepted\n**Decision owner:** devin\n**Steward:** operator\n"
         assert "**Date:**" not in content
 
     def test_missing_status(self):
         """Content missing Status should be detectable."""
-        content = (
-            "**Date:** 2026-01-15\n"
-            "**Decision owner:** devin\n"
-            "**Steward:** operator\n"
-        )
+        content = "**Date:** 2026-01-15\n**Decision owner:** devin\n**Steward:** operator\n"
         assert "**Status:**" not in content
 
     def test_domain_prefixed_superseded_by(self):
@@ -98,6 +85,7 @@ class TestFleetVerifyImport:
     def test_import(self):
         """fleet_verify module should import cleanly."""
         import fleet_verify
+
         assert hasattr(fleet_verify, "verify_fleet")
         assert hasattr(fleet_verify, "check_missing_fields")
         assert hasattr(fleet_verify, "ORG")

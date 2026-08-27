@@ -28,7 +28,6 @@ from pathlib import Path
 from typing import Any
 
 
-
 @dataclass
 class AuthorityCheck:
     """Result of an authority check."""
@@ -138,6 +137,7 @@ class AuthorityEngine:
     ) -> None:
         """Log an authority exercise to the append-only log."""
         from datetime import datetime, timezone
+
         entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "agent_id": agent_id,

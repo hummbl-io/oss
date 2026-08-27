@@ -152,6 +152,8 @@ This ensures key ordering is unambiguous across all implementations.
 ### Python
 ```python
 import json
+
+
 def canonical_json(obj: dict) -> str:
     return json.dumps(obj, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
 ```

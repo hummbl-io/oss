@@ -38,17 +38,90 @@ DEFAULT_THRESHOLD: float = 0.80
 # Minimum token length to be considered a meaningful keyword
 _MIN_KEYWORD_LEN = 3
 # Stopwords excluded from keyword overlap scoring
-_STOPWORDS = frozenset({
-    "the", "and", "for", "are", "but", "not", "you", "all", "any", "can",
-    "had", "her", "was", "one", "our", "out", "has", "have", "from", "this",
-    "that", "with", "will", "your", "add", "new", "use", "using", "into",
-    "via", "when", "where", "which", "what", "who", "how", "why", "its",
-    "such", "than", "then", "them", "they", "their", "there", "been",
-    "more", "most", "some", "only", "very", "also", "just", "like", "does",
-    "did", "done", "each", "both", "few", "other", "own", "same", "so",
-    "no", "nor", "too", "want", "needs", "need", "issue", "pr", "bug",
-    "fix", "feat", "docs", "chore", "refactor", "ci", "test",
-})
+_STOPWORDS = frozenset(
+    {
+        "the",
+        "and",
+        "for",
+        "are",
+        "but",
+        "not",
+        "you",
+        "all",
+        "any",
+        "can",
+        "had",
+        "her",
+        "was",
+        "one",
+        "our",
+        "out",
+        "has",
+        "have",
+        "from",
+        "this",
+        "that",
+        "with",
+        "will",
+        "your",
+        "add",
+        "new",
+        "use",
+        "using",
+        "into",
+        "via",
+        "when",
+        "where",
+        "which",
+        "what",
+        "who",
+        "how",
+        "why",
+        "its",
+        "such",
+        "than",
+        "then",
+        "them",
+        "they",
+        "their",
+        "there",
+        "been",
+        "more",
+        "most",
+        "some",
+        "only",
+        "very",
+        "also",
+        "just",
+        "like",
+        "does",
+        "did",
+        "done",
+        "each",
+        "both",
+        "few",
+        "other",
+        "own",
+        "same",
+        "so",
+        "no",
+        "nor",
+        "too",
+        "want",
+        "needs",
+        "need",
+        "issue",
+        "pr",
+        "bug",
+        "fix",
+        "feat",
+        "docs",
+        "chore",
+        "refactor",
+        "ci",
+        "test",
+    }
+)
 
 
 @dataclass
@@ -103,7 +176,9 @@ class DuplicateDetector:
         if not 0.0 < threshold <= 1.0:
             raise ValueError(f"threshold must be in (0, 1], got {threshold}")
         if not 0.0 < keyword_threshold <= 1.0:
-            raise ValueError(f"keyword_threshold must be in (0, 1], got {keyword_threshold}")
+            raise ValueError(
+                f"keyword_threshold must be in (0, 1], got {keyword_threshold}"
+            )
         self._threshold = threshold
         self._keyword_threshold = keyword_threshold
         self._gh_runner = gh_runner or _default_gh_runner
@@ -150,10 +225,7 @@ class DuplicateDetector:
     def _tokenize(title: str) -> set[str]:
         """Extract meaningful keyword tokens from a title."""
         tokens = re.findall(r"[a-z0-9]+", title.lower())
-        return {
-            t for t in tokens
-            if len(t) >= _MIN_KEYWORD_LEN and t not in _STOPWORDS
-        }
+        return {t for t in tokens if len(t) >= _MIN_KEYWORD_LEN and t not in _STOPWORDS}
 
     def _keyword_overlap(self, title_a: str, title_b: str) -> float:
         """Compute Jaccard overlap of meaningful keywords between two titles."""
@@ -200,7 +272,10 @@ class DuplicateDetector:
             if sim >= self._threshold:
                 if sim >= 0.999:
                     match_type = "exact"
-                elif self._keyword_overlap(candidate_title, existing_title) >= self._keyword_threshold:
+                elif (
+                    self._keyword_overlap(candidate_title, existing_title)
+                    >= self._keyword_threshold
+                ):
                     match_type = "keyword"
                 else:
                     match_type = "near"
@@ -308,7 +383,9 @@ def detect_duplicates(
     Returns (unique_candidates, duplicate_candidates).
     """
     if existing_issues is not None:
-        detector = DuplicateDetector(threshold=threshold, gh_runner=lambda _repo: existing_issues)
+        detector = DuplicateDetector(
+            threshold=threshold, gh_runner=lambda _repo: existing_issues
+        )
     else:
         detector = DuplicateDetector(threshold=threshold)
     return detector.filter_candidates(candidates, repo)

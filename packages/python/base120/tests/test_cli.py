@@ -19,12 +19,12 @@
 from __future__ import annotations
 
 import pytest
-
 from base120.cli import build_parser, main
 
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
+
 
 class TestParser:
     def test_list_no_args(self):
@@ -64,6 +64,7 @@ class TestParser:
 # ---------------------------------------------------------------------------
 # Command execution
 # ---------------------------------------------------------------------------
+
 
 class TestMain:
     def test_list_all(self, capsys: pytest.CaptureFixture[str]):
@@ -120,13 +121,13 @@ class TestMain:
 # run command
 # ---------------------------------------------------------------------------
 
+
 class TestRun:
     def test_run_valid_program(self, capsys: pytest.CaptureFixture[str]):
         import os
+
         pytest.importorskip("base120lang", reason="base120lang not installed — separate package")
-        examples = os.path.join(
-            os.path.dirname(__file__), "..", "examples", "rest_to_graphql.b120"
-        )
+        examples = os.path.join(os.path.dirname(__file__), "..", "examples", "rest_to_graphql.b120")
         if not os.path.exists(examples):
             pytest.skip("examples dir not found")
         rc = main(["run", examples])
@@ -146,9 +147,11 @@ class TestRun:
 # verify-docs command
 # ---------------------------------------------------------------------------
 
+
 class TestVerifyDocs:
     def test_verify_docs_passes_when_docs_are_current(
-        self, capsys: pytest.CaptureFixture[str],
+        self,
+        capsys: pytest.CaptureFixture[str],
     ):
         rc = main(["verify-docs"])
         assert rc == 0

@@ -4,7 +4,7 @@ This file is retained as a compatibility pointer.
 
 Canonical source:
 
-- [TYPED_TUPLE_TAXONOMY.md](C:/Users/Owner/PROJECTS/hummbl-tuples/docs/specs/TYPED_TUPLE_TAXONOMY.md:1)
+- [TYPED_TUPLE_TAXONOMY.md](./TYPED_TUPLE_TAXONOMY.md)
 
 Use the canonical file for:
 

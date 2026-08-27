@@ -19,7 +19,6 @@
 from __future__ import annotations
 
 import pytest
-
 from base120.engine import Engine
 from base120.models import Operator
 
@@ -29,6 +28,7 @@ _engine = Engine()
 # ---------------------------------------------------------------------------
 # Return shape
 # ---------------------------------------------------------------------------
+
 
 class TestReturnShape:
     def test_returns_list(self):
@@ -76,6 +76,7 @@ class TestReturnShape:
 # Score invariants
 # ---------------------------------------------------------------------------
 
+
 class TestScores:
     def test_scores_in_unit_interval(self):
         for _, score in _engine.select("governance risk analysis", n=20):
@@ -95,6 +96,7 @@ class TestScores:
 # ---------------------------------------------------------------------------
 # Relevance — known matches from productization matrix
 # ---------------------------------------------------------------------------
+
 
 class TestRelevance:
     def test_root_cause_surfaces_de1(self):

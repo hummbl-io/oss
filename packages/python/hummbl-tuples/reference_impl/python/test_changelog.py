@@ -1,10 +1,11 @@
 """Test the changelog system."""
+
 import sys
 import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from changelog import Changelog, generate, promote, link, lattice_init
+from changelog import Changelog, generate, lattice_init, link, promote
 
 # Create a temp changelog
 tmpdir = tempfile.mkdtemp()
@@ -16,8 +17,26 @@ cl = Changelog(cl_path)
 cl.append(lattice_init("Domain120:Architecture", "devin", "P05", ["scale", "function", "material"]))
 
 # Generate 2 operators
-cl.append(generate("Domain120:Architecture", "op-001", "devin", "DE", "Factorize Load Path", "Decompose structural system into load paths"))
-cl.append(generate("Domain120:Architecture", "op-002", "devin", "IN", "Invert Seismic Assumption", "Reverse assumed load direction for seismic check"))
+cl.append(
+    generate(
+        "Domain120:Architecture",
+        "op-001",
+        "devin",
+        "DE",
+        "Factorize Load Path",
+        "Decompose structural system into load paths",
+    )
+)
+cl.append(
+    generate(
+        "Domain120:Architecture",
+        "op-002",
+        "devin",
+        "IN",
+        "Invert Seismic Assumption",
+        "Reverse assumed load direction for seismic check",
+    )
+)
 
 # Promote op-001
 cl.append(promote("Domain120:Architecture", "op-001", "devin", "Candidate", "Curated"))
@@ -45,7 +64,7 @@ for e in cl2.entries():
 
 # Show canonical JSON of first entry
 first = cl2.entries().__next__()
-print(f"\nFirst entry canonical JSON:")
+print("\nFirst entry canonical JSON:")
 print(f"  {first.to_canonical_json()[:120]}...")
 
 # Show the JSONL file content

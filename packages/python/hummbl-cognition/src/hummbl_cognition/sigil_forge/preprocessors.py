@@ -40,11 +40,15 @@ class PromptInjectionDetector(InputPreprocessor):
 
     def process(self, text: str) -> PreprocessResult:
         warnings = [
-            PreprocessWarning("prompt_injection", f"Matched pattern: {pattern.pattern}", "error")
+            PreprocessWarning(
+                "prompt_injection", f"Matched pattern: {pattern.pattern}", "error"
+            )
             for pattern in self.patterns
             if pattern.search(text)
         ]
-        return PreprocessResult(text=text, warnings=tuple(warnings), blocked=bool(warnings))
+        return PreprocessResult(
+            text=text, warnings=tuple(warnings), blocked=bool(warnings)
+        )
 
 
 class AmbiguityDetector(InputPreprocessor):
@@ -53,7 +57,11 @@ class AmbiguityDetector(InputPreprocessor):
         hits = [signal for signal in signals if signal in text.lower()]
         warnings = ()
         if len(hits) >= 2:
-            warnings = (PreprocessWarning("ambiguous_input", f"Ambiguous signals: {', '.join(hits)}"),)
+            warnings = (
+                PreprocessWarning(
+                    "ambiguous_input", f"Ambiguous signals: {', '.join(hits)}"
+                ),
+            )
         return PreprocessResult(text=text, warnings=warnings)
 
 
@@ -75,7 +83,9 @@ class DefensiveTextScanner(InputPreprocessor):
 
     def process(self, text: str) -> PreprocessResult:
         warnings = list(scan_text(text))
-        blocked = self.block_on_error and any(warning.severity == "error" for warning in warnings)
+        blocked = self.block_on_error and any(
+            warning.severity == "error" for warning in warnings
+        )
         return PreprocessResult(text=text, warnings=tuple(warnings), blocked=blocked)
 
 
@@ -97,10 +107,18 @@ def scan_text(text: str) -> tuple[PreprocessWarning, ...]:
     tag_chars = [char for char in text if 0xE0000 <= ord(char) <= 0xE007F]
     if tag_chars:
         warnings.append(
-            PreprocessWarning("unicode_tags", f"Found {len(tag_chars)} Unicode tag character(s)", "error")
+            PreprocessWarning(
+                "unicode_tags",
+                f"Found {len(tag_chars)} Unicode tag character(s)",
+                "error",
+            )
         )
 
-    bidi_controls = [char for char in text if unicodedata.bidirectional(char) in _BIDI_CONTROL_CLASSES]
+    bidi_controls = [
+        char
+        for char in text
+        if unicodedata.bidirectional(char) in _BIDI_CONTROL_CLASSES
+    ]
     if bidi_controls:
         warnings.append(
             PreprocessWarning(
@@ -134,34 +152,38 @@ def scan_text(text: str) -> tuple[PreprocessWarning, ...]:
     return tuple(warnings)
 
 
-_BIDI_CONTROL_CLASSES = frozenset({"LRE", "RLE", "LRO", "RLO", "PDF", "LRI", "RLI", "FSI", "PDI"})
-_ZERO_WIDTH_CODEPOINTS = frozenset({
-    0x00AD,
-    0x034F,
-    0x061C,
-    0x115F,
-    0x1160,
-    0x17B4,
-    0x17B5,
-    0x180E,
-    0x200B,
-    0x200C,
-    0x200D,
-    0x200E,
-    0x200F,
-    0x2060,
-    0x2061,
-    0x2062,
-    0x2063,
-    0x2064,
-    0x206A,
-    0x206B,
-    0x206C,
-    0x206D,
-    0x206E,
-    0x206F,
-    0xFEFF,
-})
+_BIDI_CONTROL_CLASSES = frozenset(
+    {"LRE", "RLE", "LRO", "RLO", "PDF", "LRI", "RLI", "FSI", "PDI"}
+)
+_ZERO_WIDTH_CODEPOINTS = frozenset(
+    {
+        0x00AD,
+        0x034F,
+        0x061C,
+        0x115F,
+        0x1160,
+        0x17B4,
+        0x17B5,
+        0x180E,
+        0x200B,
+        0x200C,
+        0x200D,
+        0x200E,
+        0x200F,
+        0x2060,
+        0x2061,
+        0x2062,
+        0x2063,
+        0x2064,
+        0x206A,
+        0x206B,
+        0x206C,
+        0x206D,
+        0x206E,
+        0x206F,
+        0xFEFF,
+    }
+)
 
 
 def _is_zero_width(char: str) -> bool:
@@ -203,7 +225,9 @@ def _mixed_script_warnings(text: str) -> tuple[PreprocessWarning, ...]:
     return ()
 
 
-def run_preprocessors(text: str, preprocessors: list[InputPreprocessor]) -> PreprocessResult:
+def run_preprocessors(
+    text: str, preprocessors: list[InputPreprocessor]
+) -> PreprocessResult:
     current = text
     warnings: list[PreprocessWarning] = []
     blocked = False

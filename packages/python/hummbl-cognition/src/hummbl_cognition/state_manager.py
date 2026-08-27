@@ -18,7 +18,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from hummbl_cognition._exceptions import ConcurrencyError
-from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
+from hummbl_cognition._filelock import lock_file as _lock_file
+from hummbl_cognition._filelock import unlock_file as _unlock_file
 from hummbl_cognition.models import SharedState
 
 logger = logging.getLogger(__name__)
@@ -212,9 +213,7 @@ def claim_file(
 
         state.claimed_files[filepath] = {
             "agent": agent_id,
-            "claimed_at": datetime.now(timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            ),
+            "claimed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "purpose": purpose,
         }
         state.increment_version(agent_id)

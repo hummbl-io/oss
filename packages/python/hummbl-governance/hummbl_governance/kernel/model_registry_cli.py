@@ -23,6 +23,7 @@ Usage:
     python -m hummbl_governance.kernel.model_registry_cli get example-char-lm-v1
     python -m hummbl_governance.kernel.model_registry_cli stats
 """
+
 from __future__ import annotations
 
 import argparse

@@ -206,10 +206,7 @@ class CircuitBreaker:
         if self._state == CircuitBreakerState.HALF_OPEN:
             self._half_open_probe_in_flight = False
             self._transition(CircuitBreakerState.OPEN)
-        elif (
-            self._state == CircuitBreakerState.CLOSED
-            and self._failure_count >= self._failure_threshold
-        ):
+        elif self._state == CircuitBreakerState.CLOSED and self._failure_count >= self._failure_threshold:
             self._transition(CircuitBreakerState.OPEN)
 
     def _record_success(self) -> None:
@@ -232,9 +229,7 @@ class CircuitBreaker:
         self._state = new_state
         self._fire_callback(old_state, new_state)
 
-    def _fire_callback(
-        self, old_state: CircuitBreakerState, new_state: CircuitBreakerState
-    ) -> None:
+    def _fire_callback(self, old_state: CircuitBreakerState, new_state: CircuitBreakerState) -> None:
         """Fire the on_state_change callback, swallowing errors."""
         if self._on_state_change is None:
             return

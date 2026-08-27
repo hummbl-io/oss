@@ -83,9 +83,7 @@ class TestEnforceContract:
 
     def test_enforcement_catches_semantic_violation(self):
         contract = _load("valid-wave1-contract.json")
-        contract["consumers"].append(
-            {"repo": contract["producer"]["repo"], "requirement": "advisory"}
-        )
+        contract["consumers"].append({"repo": contract["producer"]["repo"], "requirement": "advisory"})
         result = enforce_contract(contract)
         assert result.is_valid is False
         assert any("producer.repo must not also be a consumer" in e for e in result.semantic_errors)

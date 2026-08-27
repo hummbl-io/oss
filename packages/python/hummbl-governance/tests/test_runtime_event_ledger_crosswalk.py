@@ -6,9 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.schema_validator import SchemaValidator
-
 
 ROOT = Path(__file__).parent.parent
 FIXTURE_PATH = ROOT / "tests" / "fixtures" / "runtime_event_ledger" / "runtime_event_ledger_fixtures.json"

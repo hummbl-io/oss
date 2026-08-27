@@ -26,15 +26,10 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.schema_validator import SchemaValidator
 
-
 SCHEMA_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "hummbl_governance"
-    / "data"
-    / "evidence_readiness_review_receipt.schema.json"
+    Path(__file__).resolve().parents[1] / "hummbl_governance" / "data" / "evidence_readiness_review_receipt.schema.json"
 )
 
 
@@ -93,14 +88,9 @@ def _validate(receipt: dict) -> tuple[bool, list[str]]:
 
 def test_schema_is_promoted_to_governed_v1():
     schema = _schema()
-    assert schema["$id"] == (
-        "https://hummbl.io/schemas/evidence-readiness-review-receipt.v1.json"
-    )
+    assert schema["$id"] == ("https://hummbl.io/schemas/evidence-readiness-review-receipt.v1.json")
     assert schema["title"] == "Evidence Readiness Review Receipt v1"
-    assert (
-        schema["properties"]["schema_version"]["const"]
-        == "evidence-readiness-review-receipt.v1"
-    )
+    assert schema["properties"]["schema_version"]["const"] == "evidence-readiness-review-receipt.v1"
 
 
 # --- Acceptance / rejection of field values --------------------------------
@@ -183,11 +173,7 @@ def test_schema_rejects_bad_finding_severity():
 
 
 def _has_blocking_finding(receipt: dict) -> bool:
-    return any(
-        f["severity"] == "P0"
-        or (f["severity"] == "P1" and f["status"] == "OPEN")
-        for f in receipt["findings"]
-    )
+    return any(f["severity"] == "P0" or (f["severity"] == "P1" and f["status"] == "OPEN") for f in receipt["findings"])
 
 
 def test_governance_rule_p0_open_finding_requires_blocked_relay():
@@ -281,10 +267,7 @@ def test_governance_rule_detects_violating_receipt():
     assert violates is True
     # The corrective action: flip allowed to false.
     receipt["relay_decision"]["allowed"] = False
-    assert (
-        _has_blocking_finding(receipt)
-        and receipt["relay_decision"]["allowed"] is False
-    )
+    assert _has_blocking_finding(receipt) and receipt["relay_decision"]["allowed"] is False
 
 
 # --- Canonical example fixture round-trip ----------------------------------
@@ -292,10 +275,7 @@ def test_governance_rule_detects_violating_receipt():
 
 def test_canonical_example_fixture_validates_against_schema():
     fixture_path = (
-        Path(__file__).resolve().parent
-        / "conformance"
-        / "fixtures_evidence_readiness"
-        / "ERR1_RECEIPT_OK.json"
+        Path(__file__).resolve().parent / "conformance" / "fixtures_evidence_readiness" / "ERR1_RECEIPT_OK.json"
     )
     receipt = json.loads(fixture_path.read_text(encoding="utf-8"))
     valid, errors = _validate(receipt)

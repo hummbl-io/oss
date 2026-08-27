@@ -21,7 +21,6 @@ from pathlib import Path
 from .core import Environment, trace_summary
 from .scenarios import gemini_probation_scenario
 
-
 _SCENARIOS = {
     "gemini-probation": gemini_probation_scenario,
 }

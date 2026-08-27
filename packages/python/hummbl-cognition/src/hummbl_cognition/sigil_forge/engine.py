@@ -85,7 +85,9 @@ class ExecutionEngine:
             return state
         state = RuntimeState(user_input=preprocess.text)
         for warning in preprocess.warnings:
-            state.audit.append({"event": "preprocess_warning", "warning": warning.__dict__})
+            state.audit.append(
+                {"event": "preprocess_warning", "warning": warning.__dict__}
+            )
         error: str | None = None
         try:
             for statement in plan.program:
@@ -110,7 +112,9 @@ class ExecutionEngine:
         if statement.kind == "loop":
             count = int(statement.params["count"])
             for index in range(count):
-                state.audit.append({"event": "loop", "iteration": index + 1, "count": count})
+                state.audit.append(
+                    {"event": "loop", "iteration": index + 1, "count": count}
+                )
                 for child in statement.body:
                     self._execute_statement(child, state)
             return
@@ -139,7 +143,9 @@ class ExecutionEngine:
         if handler is None:
             raise ValueError(f"Unsupported operator: {operator}")
         handler(statement, state)
-        state.audit.append({"event": "node", "operator": operator, "params": statement.params})
+        state.audit.append(
+            {"event": "node", "operator": operator, "params": statement.params}
+        )
 
     def _op_retrieve(self, statement: Program, state: RuntimeState) -> None:
         count = int(statement.params.get("k", 5))
@@ -177,7 +183,9 @@ class ExecutionEngine:
     def _op_format(self, statement: Program, state: RuntimeState) -> None:
         output_type = str(statement.params.get("type", "text"))
         if output_type == "json":
-            state.last_output = json.dumps({"output": state.last_output}, sort_keys=True)
+            state.last_output = json.dumps(
+                {"output": state.last_output}, sort_keys=True
+            )
         state.outputs["final"] = state.last_output
 
     def _op_store(self, statement: Program, state: RuntimeState) -> None:
@@ -209,7 +217,9 @@ class ExecutionEngine:
             state.outputs.clear()
             state.last_output = ""
 
-    def _build_prompt(self, statement: Program, state: RuntimeState, *, task: str) -> str:
+    def _build_prompt(
+        self, statement: Program, state: RuntimeState, *, task: str
+    ) -> str:
         role = str(statement.params.get("role", "default"))
         return "\n".join(
             [

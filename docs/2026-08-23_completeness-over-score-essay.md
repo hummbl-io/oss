@@ -1,8 +1,10 @@
 # Completeness Over Score: The Architecture of Honest AI Governance
 
-**By:** Operator & the HUMMBL Fleet  
+**HUMMBL** = **H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
+
+**By:** Operator & the HUMMBL Fleet
 **Date:** August 2026  
-**Canonical Surface:** [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance) / [`hummbl-io/oss`](file:///<repo-root>/PROJECTS/oss)  
+**Canonical Surface:** [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance) / [`hummbl-io/oss`](https://github.com/hummbl-io/oss)  
 
 ---
 
@@ -55,7 +57,7 @@ If an agent attempts an action without a valid $D$, the runtime **capability fen
 
 ## 3. Boundary Honesty: Why HUMMBL Refuses to "Self-Grade"
 
-In [ADR-001 (Coverage Matrix Not Self-Grade)](file:///<repo-root>/PROJECTS/hummbl-governance/docs/adr/ADR-001-coverage-matrix-not-self-grade.md), HUMMBL established an architectural precedent: **Software cannot legally certify an organization, and claiming to do so is fraudulent.**
+In [ADR-001 (Coverage Matrix Not Self-Grade)](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/adr/ADR-001-coverage-matrix-not-self-grade.md), HUMMBL established an architectural precedent: **Software cannot legally certify an organization, and claiming to do so is fraudulent.**
 
 Across our **99 international framework coverage matrices** (spanning the EU AI Act, NIST, ISO 27001, ISO 42001, SOC 2, and 40+ national/state statutes), HUMMBL categorizes every individual legal and security clause into four explicit boundary states:
 

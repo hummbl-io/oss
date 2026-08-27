@@ -56,8 +56,8 @@ class SovereignCryptosystem:
         if len(signed_envelope) < self.MINIMUM_ENVELOPE_SIZE:
             raise ValueError("Envelope payload is too small.")
 
-        nonce = signed_envelope[:self.NONCE_SIZE]
-        ciphertext = signed_envelope[self.NONCE_SIZE:]
+        nonce = signed_envelope[: self.NONCE_SIZE]
+        ciphertext = signed_envelope[self.NONCE_SIZE :]
 
         try:
             return self._cipher.decrypt(nonce, ciphertext, associated_data)

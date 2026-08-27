@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.belonging_check import (
     COGSTATE_VALUES,
     belonging_score,
@@ -23,6 +22,7 @@ from hummbl_cognition.belonging_check import (
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def tmp_baseline(tmp_path):
@@ -45,6 +45,7 @@ def _read(path: Path) -> list[dict]:
 # ---------------------------------------------------------------------------
 # belonging_score
 # ---------------------------------------------------------------------------
+
 
 class TestBelongingScore:
     def test_all_filled(self):
@@ -71,6 +72,7 @@ class TestBelongingScore:
 # ---------------------------------------------------------------------------
 # is_hrsi_safe
 # ---------------------------------------------------------------------------
+
 
 class TestIsHrsiSafe:
     def test_safe_entry(self):
@@ -102,29 +104,79 @@ class TestIsHrsiSafe:
 # compute_streak
 # ---------------------------------------------------------------------------
 
+
 class TestComputeStreak:
     def test_empty(self):
         assert compute_streak([]) == 0
 
     def test_all_safe(self):
         entries = [
-            {"date": "2026-04-10", "day": 1, "safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},
-            {"date": "2026-04-11", "day": 2, "safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},
+            {
+                "date": "2026-04-10",
+                "day": 1,
+                "safety": 4,
+                "mattering": 4,
+                "connection": 4,
+                "cogstate": "AVAILABLE",
+            },
+            {
+                "date": "2026-04-11",
+                "day": 2,
+                "safety": 4,
+                "mattering": 4,
+                "connection": 4,
+                "cogstate": "AVAILABLE",
+            },
         ]
         assert compute_streak(entries) == 2
 
     def test_streak_broken(self):
         entries = [
-            {"date": "2026-04-10", "day": 1, "safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},
-            {"date": "2026-04-11", "day": 2, "safety": 1, "mattering": 1, "connection": 1, "cogstate": "DEPLETED"},
-            {"date": "2026-04-12", "day": 3, "safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},
+            {
+                "date": "2026-04-10",
+                "day": 1,
+                "safety": 4,
+                "mattering": 4,
+                "connection": 4,
+                "cogstate": "AVAILABLE",
+            },
+            {
+                "date": "2026-04-11",
+                "day": 2,
+                "safety": 1,
+                "mattering": 1,
+                "connection": 1,
+                "cogstate": "DEPLETED",
+            },
+            {
+                "date": "2026-04-12",
+                "day": 3,
+                "safety": 4,
+                "mattering": 4,
+                "connection": 4,
+                "cogstate": "AVAILABLE",
+            },
         ]
         assert compute_streak(entries) == 1
 
     def test_nulls_excluded(self):
         entries = [
-            {"date": "2026-04-10", "day": 1, "safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},
-            {"date": "2026-04-11", "day": 2, "safety": None, "mattering": None, "connection": None, "cogstate": None},
+            {
+                "date": "2026-04-10",
+                "day": 1,
+                "safety": 4,
+                "mattering": 4,
+                "connection": 4,
+                "cogstate": "AVAILABLE",
+            },
+            {
+                "date": "2026-04-11",
+                "day": 2,
+                "safety": None,
+                "mattering": None,
+                "connection": None,
+                "cogstate": None,
+            },
         ]
         assert compute_streak(entries) == 1  # null excluded, last complete = safe
 
@@ -132,6 +184,7 @@ class TestComputeStreak:
 # ---------------------------------------------------------------------------
 # gap1_progress
 # ---------------------------------------------------------------------------
+
 
 class TestGap1Progress:
     def test_empty(self):
@@ -141,17 +194,34 @@ class TestGap1Progress:
 
     def test_mixed(self):
         entries = [
-            {"safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},  # score 4.0 ≥ 3
-            {"safety": 1, "mattering": 1, "connection": 1, "cogstate": "DEPLETED"},   # score 1.0 < 3
-            {"safety": 3, "mattering": 3, "connection": 3, "cogstate": "AVAILABLE"},  # score 3.0 ≥ 3
-            {"safety": None, "mattering": None, "connection": None},                   # excluded
+            {
+                "safety": 4,
+                "mattering": 4,
+                "connection": 4,
+                "cogstate": "AVAILABLE",
+            },  # score 4.0 ≥ 3
+            {
+                "safety": 1,
+                "mattering": 1,
+                "connection": 1,
+                "cogstate": "DEPLETED",
+            },  # score 1.0 < 3
+            {
+                "safety": 3,
+                "mattering": 3,
+                "connection": 3,
+                "cogstate": "AVAILABLE",
+            },  # score 3.0 ≥ 3
+            {"safety": None, "mattering": None, "connection": None},  # excluded
         ]
         qualifying, total = gap1_progress(entries)
         assert qualifying == 2
         assert total == 3
 
     def test_all_qualifying(self):
-        entries = [{"safety": 5, "mattering": 5, "connection": 5, "cogstate": "AVAILABLE"}] * 21
+        entries = [
+            {"safety": 5, "mattering": 5, "connection": 5, "cogstate": "AVAILABLE"}
+        ] * 21
         qualifying, total = gap1_progress(entries)
         assert qualifying == 21
         assert total == 21
@@ -160,6 +230,7 @@ class TestGap1Progress:
 # ---------------------------------------------------------------------------
 # fill
 # ---------------------------------------------------------------------------
+
 
 class TestFill:
     def test_new_entry(self, tmp_baseline):
@@ -173,21 +244,45 @@ class TestFill:
         assert len(rows) == 1
 
     def test_fill_scaffolded_null_entry(self, tmp_baseline):
-        _write(tmp_baseline, [
-            {"date": "2026-04-12", "day": 1, "safety": None, "mattering": None, "connection": None,
-             "notes": "scaffold", "cogstate": None, "hrsi_cycle_complete": False},
-        ])
-        entry = fill(4, 3, 5, cogstate="AVAILABLE", path=tmp_baseline, today="2026-04-12")
+        _write(
+            tmp_baseline,
+            [
+                {
+                    "date": "2026-04-12",
+                    "day": 1,
+                    "safety": None,
+                    "mattering": None,
+                    "connection": None,
+                    "notes": "scaffold",
+                    "cogstate": None,
+                    "hrsi_cycle_complete": False,
+                },
+            ],
+        )
+        entry = fill(
+            4, 3, 5, cogstate="AVAILABLE", path=tmp_baseline, today="2026-04-12"
+        )
         assert entry["safety"] == 4
         rows = _read(tmp_baseline)
         assert len(rows) == 1  # updated in place, not appended
         assert rows[0]["safety"] == 4
 
     def test_fill_complete_entry_raises(self, tmp_baseline):
-        _write(tmp_baseline, [
-            {"date": "2026-04-12", "day": 1, "safety": 4, "mattering": 3, "connection": 5,
-             "notes": "", "cogstate": None, "hrsi_cycle_complete": False},
-        ])
+        _write(
+            tmp_baseline,
+            [
+                {
+                    "date": "2026-04-12",
+                    "day": 1,
+                    "safety": 4,
+                    "mattering": 3,
+                    "connection": 5,
+                    "notes": "",
+                    "cogstate": None,
+                    "hrsi_cycle_complete": False,
+                },
+            ],
+        )
         with pytest.raises(ValueError, match="already has scores"):
             fill(3, 3, 3, path=tmp_baseline, today="2026-04-12")
 
@@ -229,12 +324,24 @@ class TestFill:
 # force_update
 # ---------------------------------------------------------------------------
 
+
 class TestForceUpdate:
     def test_overwrites_complete_entry(self, tmp_baseline):
-        _write(tmp_baseline, [
-            {"date": "2026-04-12", "day": 1, "safety": 4, "mattering": 4, "connection": 4,
-             "notes": "", "cogstate": None, "hrsi_cycle_complete": False},
-        ])
+        _write(
+            tmp_baseline,
+            [
+                {
+                    "date": "2026-04-12",
+                    "day": 1,
+                    "safety": 4,
+                    "mattering": 4,
+                    "connection": 4,
+                    "notes": "",
+                    "cogstate": None,
+                    "hrsi_cycle_complete": False,
+                },
+            ],
+        )
         entry = force_update(1, 1, 1, path=tmp_baseline, today="2026-04-12")
         assert entry["safety"] == 1
         rows = _read(tmp_baseline)
@@ -249,25 +356,48 @@ class TestForceUpdate:
 # status
 # ---------------------------------------------------------------------------
 
+
 class TestStatus:
     def test_empty(self, tmp_baseline):
         out = status(tmp_baseline)
         assert "No baseline entries" in out
 
     def test_shows_progress(self, tmp_baseline):
-        _write(tmp_baseline, [
-            {"date": "2026-04-11", "day": 1, "safety": 4, "mattering": 4, "connection": 4, "cogstate": "AVAILABLE"},
-        ])
+        _write(
+            tmp_baseline,
+            [
+                {
+                    "date": "2026-04-11",
+                    "day": 1,
+                    "safety": 4,
+                    "mattering": 4,
+                    "connection": 4,
+                    "cogstate": "AVAILABLE",
+                },
+            ],
+        )
         out = status(tmp_baseline)
         assert "1/21" in out
 
     def test_shows_unfilled_today(self, tmp_baseline):
         import datetime
+
         today = datetime.date.today().isoformat()
-        _write(tmp_baseline, [
-            {"date": today, "day": 1, "safety": None, "mattering": None, "connection": None,
-             "notes": "", "cogstate": None, "hrsi_cycle_complete": False},
-        ])
+        _write(
+            tmp_baseline,
+            [
+                {
+                    "date": today,
+                    "day": 1,
+                    "safety": None,
+                    "mattering": None,
+                    "connection": None,
+                    "notes": "",
+                    "cogstate": None,
+                    "hrsi_cycle_complete": False,
+                },
+            ],
+        )
         out = status(tmp_baseline)
         assert "UNFILLED" in out
 
@@ -276,6 +406,7 @@ class TestStatus:
 # history
 # ---------------------------------------------------------------------------
 
+
 class TestHistory:
     def test_empty(self, tmp_baseline):
         out = history(7, tmp_baseline)
@@ -283,7 +414,14 @@ class TestHistory:
 
     def test_shows_n_rows(self, tmp_baseline):
         entries = [
-            {"date": f"2026-04-{i:02d}", "day": i, "safety": 3, "mattering": 3, "connection": 3, "cogstate": "AVAILABLE"}
+            {
+                "date": f"2026-04-{i:02d}",
+                "day": i,
+                "safety": 3,
+                "mattering": 3,
+                "connection": 3,
+                "cogstate": "AVAILABLE",
+            }
             for i in range(1, 11)
         ]
         _write(tmp_baseline, entries)
@@ -292,10 +430,21 @@ class TestHistory:
         assert len(lines) == 5
 
     def test_dash_for_null_scores(self, tmp_baseline):
-        _write(tmp_baseline, [
-            {"date": "2026-04-12", "day": 1, "safety": None, "mattering": None, "connection": None,
-             "notes": "", "cogstate": None, "hrsi_cycle_complete": False},
-        ])
+        _write(
+            tmp_baseline,
+            [
+                {
+                    "date": "2026-04-12",
+                    "day": 1,
+                    "safety": None,
+                    "mattering": None,
+                    "connection": None,
+                    "notes": "",
+                    "cogstate": None,
+                    "hrsi_cycle_complete": False,
+                },
+            ],
+        )
         out = history(1, tmp_baseline)
         assert "—" in out
 
@@ -304,34 +453,55 @@ class TestHistory:
 # run_cli
 # ---------------------------------------------------------------------------
 
+
 class TestRunCli:
     def test_status_flag(self, tmp_baseline):
         result = run_cli(["--status", "--path", str(tmp_baseline)])
         assert result == 0
 
     def test_scores_flag(self, tmp_baseline):
-        result = run_cli([
-            "--safety", "4", "--mattering", "3", "--connection", "5",
-            "--path", str(tmp_baseline),
-        ])
+        result = run_cli(
+            [
+                "--safety",
+                "4",
+                "--mattering",
+                "3",
+                "--connection",
+                "5",
+                "--path",
+                str(tmp_baseline),
+            ]
+        )
         assert result == 0
         rows = _read(tmp_baseline)
         assert rows[0]["safety"] == 4
 
     def test_scores_with_cogstate(self, tmp_baseline):
-        result = run_cli([
-            "--safety", "4", "--mattering", "4", "--connection", "4",
-            "--cogstate", "AVAILABLE",
-            "--notes", "test note",
-            "--path", str(tmp_baseline),
-        ])
+        result = run_cli(
+            [
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--cogstate",
+                "AVAILABLE",
+                "--notes",
+                "test note",
+                "--path",
+                str(tmp_baseline),
+            ]
+        )
         assert result == 0
         rows = _read(tmp_baseline)
         assert rows[0]["cogstate"] == "AVAILABLE"
         assert rows[0]["notes"] == "test note"
 
     def test_missing_one_score_fails(self, tmp_baseline):
-        result = run_cli(["--safety", "4", "--mattering", "3", "--path", str(tmp_baseline)])
+        result = run_cli(
+            ["--safety", "4", "--mattering", "3", "--path", str(tmp_baseline)]
+        )
         assert result == 1
 
     def test_history_flag(self, tmp_baseline):
@@ -339,20 +509,59 @@ class TestRunCli:
         assert result == 0
 
     def test_force_flag_overwrites(self, tmp_baseline):
-        run_cli(["--safety", "4", "--mattering", "4", "--connection", "4", "--path", str(tmp_baseline)])
-        result = run_cli([
-            "--safety", "1", "--mattering", "1", "--connection", "1",
-            "--force", "--path", str(tmp_baseline),
-        ])
+        run_cli(
+            [
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--path",
+                str(tmp_baseline),
+            ]
+        )
+        result = run_cli(
+            [
+                "--safety",
+                "1",
+                "--mattering",
+                "1",
+                "--connection",
+                "1",
+                "--force",
+                "--path",
+                str(tmp_baseline),
+            ]
+        )
         assert result == 0
         rows = _read(tmp_baseline)
         assert len(rows) == 1
         assert rows[0]["safety"] == 1
 
     def test_already_complete_without_force_fails(self, tmp_baseline):
-        run_cli(["--safety", "4", "--mattering", "4", "--connection", "4", "--path", str(tmp_baseline)])
-        result = run_cli([
-            "--safety", "1", "--mattering", "1", "--connection", "1",
-            "--path", str(tmp_baseline),
-        ])
+        run_cli(
+            [
+                "--safety",
+                "4",
+                "--mattering",
+                "4",
+                "--connection",
+                "4",
+                "--path",
+                str(tmp_baseline),
+            ]
+        )
+        result = run_cli(
+            [
+                "--safety",
+                "1",
+                "--mattering",
+                "1",
+                "--connection",
+                "1",
+                "--path",
+                str(tmp_baseline),
+            ]
+        )
         assert result == 1

@@ -32,7 +32,6 @@ from .events import (
 )
 from .trust import ProbationPolicy, TrustModel
 
-
 # ---------------------------------------------------------------------------
 # Scenario configuration types
 # ---------------------------------------------------------------------------
@@ -109,8 +108,7 @@ class LLMAdapter(Protocol):
 
     def propose_action(
         self, agent_state: AgentState, context: dict[str, Any]
-    ) -> ScheduledAction:
-        ...
+    ) -> ScheduledAction: ...
 
 
 # ---------------------------------------------------------------------------
@@ -133,11 +131,7 @@ class SimulationClock:
         self._sub_tick = 0
 
     def now(self) -> str:
-        moment = (
-            self._start
-            + self._ticks * self._dt
-            + timedelta(microseconds=self._sub_tick)
-        )
+        moment = self._start + self._ticks * self._dt + timedelta(microseconds=self._sub_tick)
         self._sub_tick += 1
         return moment.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
@@ -176,9 +170,7 @@ class Environment:
         self.trust = trust_model or TrustModel()
         self.policy = probation_policy or ProbationPolicy()
         self.adapter = adapter  # reserved for Stage 2
-        self.clock = SimulationClock(
-            scenario.start_timestamp, scenario.dt_seconds
-        )
+        self.clock = SimulationClock(scenario.start_timestamp, scenario.dt_seconds)
         self.trace: list[dict[str, Any]] = []
         self.agent_states: dict[str, AgentState] = {}
         self._step_index = 0
@@ -205,15 +197,14 @@ class Environment:
     def setup(self) -> None:
         """Emit CONTRACT/DCT/DCTX tuples for every configured contract."""
         from .events import reset_id_counter
+
         reset_id_counter()
         for task_id in sorted(self.scenario.contracts):
             contract = self.scenario.contracts[task_id]
             self._emit_contract_bundle(task_id, contract)
         self.clock.advance()
 
-    def _emit_contract_bundle(
-        self, task_id: str, contract: ContractConfig
-    ) -> None:
+    def _emit_contract_bundle(self, task_id: str, contract: ContractConfig) -> None:
         self.trace.append(
             contract_event(
                 timestamp=self.clock.now(),
@@ -265,11 +256,7 @@ class Environment:
         )
 
     def step(self) -> None:
-        scheduled = [
-            action
-            for action in self.scenario.actions
-            if action.step == self._step_index
-        ]
+        scheduled = [action for action in self.scenario.actions if action.step == self._step_index]
         for action in scheduled:
             self._process_action(action)
         self.clock.advance()
@@ -436,20 +423,17 @@ def trace_summary(trace: list[dict[str, Any]]) -> dict[str, Any]:
     denials = sum(
         1
         for e in trace
-        if e["tuple_type"] == "SYSTEM"
-        and e["tuple_data"].get("enforcement") == "denied"
+        if e["tuple_type"] == "SYSTEM" and e["tuple_data"].get("enforcement") == "denied"
     )
     probation_entries = sum(
         1
         for e in trace
-        if e["tuple_type"] == "DCTX"
-        and e["tuple_data"].get("event") == "probation_entered"
+        if e["tuple_type"] == "DCTX" and e["tuple_data"].get("event") == "probation_entered"
     )
     probation_exits = sum(
         1
         for e in trace
-        if e["tuple_type"] == "DCTX"
-        and e["tuple_data"].get("event") == "probation_exited"
+        if e["tuple_type"] == "DCTX" and e["tuple_data"].get("event") == "probation_exited"
     )
     evidence_events = [e for e in trace if e["tuple_type"] == "EVIDENCE"]
     return {

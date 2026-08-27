@@ -22,12 +22,12 @@ import re
 import uuid
 
 import pytest
-
 from base120.models import ApplyResult, Operator, OperatorTuple
 
 # ---------------------------------------------------------------------------
 # Operator dataclass
 # ---------------------------------------------------------------------------
+
 
 class TestOperator:
     def test_frozen(self):
@@ -55,6 +55,7 @@ class TestOperator:
 # OperatorTuple (NamedTuple)
 # ---------------------------------------------------------------------------
 
+
 class TestOperatorTuple:
     def test_is_named_tuple(self):
         t = OperatorTuple(id="P6", time="2026-04-14T00:00:00Z", state="rec", drift=0.15)
@@ -76,6 +77,7 @@ class TestOperatorTuple:
 # ---------------------------------------------------------------------------
 # ApplyResult + to_tuple()
 # ---------------------------------------------------------------------------
+
 
 class TestApplyResult:
     def _make(self, **kwargs: object) -> ApplyResult:
@@ -151,6 +153,7 @@ class TestApplyResult:
 
     def test_to_tuple_time_advances(self):
         import time as _time
+
         r = self._make()
         t1 = r.to_tuple()
         _time.sleep(0.01)

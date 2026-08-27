@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
 from hummbl_cognition.consolidator import (
     MAX_GROUP_SIZE,
     MIN_GROUP_SIZE,
@@ -15,7 +11,6 @@ from hummbl_cognition.consolidator import (
     _group_by_links,
     _group_similar,
 )
-from hummbl_cognition.ledger_writer import post_entry
 from hummbl_cognition.models import LedgerEntry, LedgerEntryType, LedgerScope
 
 

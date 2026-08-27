@@ -19,31 +19,31 @@
 from __future__ import annotations
 
 from hummbl_governance.errors import (
-    FailureMode,
-    HummblError,
     FM_TO_ERRORS,
-    fm_to_errors,
-    # IDP_E_* backward-compat aliases
-    IDP_E_DCT_VIOLATION,
-    IDP_E_TOKEN_EXPIRED,
-    IDP_E_TOKEN_INVALID,
-    IDP_E_BINDING_MISMATCH,
-    IDP_E_DEPTH_EXCEEDED,
-    IDP_E_CAPABILITY_ESCALATION,
-    IDP_E_REPLAN_LIMIT,
+    IDP_E_AMENDMENT_TARGET_MISSING,
     IDP_E_AUDIT_IMMUTABLE,
     IDP_E_AUDIT_INCOMPLETE,
-    IDP_E_AMENDMENT_TARGET_MISSING,
-    IDP_E_VERIFICATION_REF_INVALID,
-    IDP_E_EVIDENCE_REQUIRED,
+    IDP_E_BINDING_MISMATCH,
+    IDP_E_CAPABILITY_ESCALATION,
     IDP_E_CHAIN_BROKEN,
+    # IDP_E_* backward-compat aliases
+    IDP_E_DCT_VIOLATION,
+    IDP_E_DEPTH_EXCEEDED,
+    IDP_E_EVIDENCE_REQUIRED,
     IDP_E_INVALID_STATE_TRANSITION,
+    IDP_E_REPLAN_LIMIT,
+    IDP_E_TOKEN_EXPIRED,
+    IDP_E_TOKEN_INVALID,
+    IDP_E_VERIFICATION_REF_INVALID,
+    FailureMode,
+    HummblError,
+    fm_to_errors,
 )
-
 
 # ---------------------------------------------------------------------------
 # FailureMode enum
 # ---------------------------------------------------------------------------
+
 
 class TestFailureMode:
     def test_all_30_codes_present(self):
@@ -83,6 +83,7 @@ class TestFailureMode:
 # HummblError enum
 # ---------------------------------------------------------------------------
 
+
 class TestHummblError:
     def test_all_14_codes_present(self):
         codes = {e.value for e in HummblError}
@@ -90,9 +91,7 @@ class TestHummblError:
 
     def test_hg_e_prefix(self):
         for error in HummblError:
-            assert error.value.startswith("HG_E_"), (
-                f"{error.name} value {error.value!r} must start with HG_E_"
-            )
+            assert error.value.startswith("HG_E_"), f"{error.name} value {error.value!r} must start with HG_E_"
 
     def test_string_subclass(self):
         assert isinstance(HummblError.DCT_VIOLATION, str)
@@ -122,6 +121,7 @@ class TestHummblError:
 # ---------------------------------------------------------------------------
 # FM_TO_ERRORS mapping + fm_to_errors()
 # ---------------------------------------------------------------------------
+
 
 class TestFMToErrors:
     def test_fm_to_errors_invalid_state_transition(self):
@@ -179,6 +179,7 @@ class TestFMToErrors:
 # ---------------------------------------------------------------------------
 # IDP_E_* backward-compatibility aliases
 # ---------------------------------------------------------------------------
+
 
 class TestIDPAliases:
     """IDP_E_* aliases must resolve to the canonical HummblError members."""
@@ -244,6 +245,4 @@ class TestIDPAliases:
             IDP_E_INVALID_STATE_TRANSITION,
         ]
         for alias in aliases:
-            assert isinstance(alias, HummblError), (
-                f"{alias!r} should be a HummblError enum member"
-            )
+            assert isinstance(alias, HummblError), f"{alias!r} should be a HummblError enum member"

@@ -67,28 +67,37 @@ def test_sandbox_create_stores_agent_name(tmp_path, monkeypatch):
 
 def test_sandbox_create_with_allowed_tools(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    result = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "restricted-agent",
-        "allowed_tools": ["read", "write"],
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "restricted-agent",
+            "allowed_tools": ["read", "write"],
+        },
+    )
     assert result["sandbox"]["allowed_tools"] == ["read", "write"]
 
 
 def test_sandbox_create_with_blocked_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    result = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "agent",
-        "blocked_paths": ["/etc", "/root"],
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "agent",
+            "blocked_paths": ["/etc", "/root"],
+        },
+    )
     assert "/etc" in result["sandbox"]["blocked_paths"]
 
 
 def test_sandbox_create_with_cost_cap(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    result = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "agent",
-        "max_cost": 5.0,
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "agent",
+            "max_cost": 5.0,
+        },
+    )
     assert result["sandbox"]["max_cost"] == 5.0
 
 
@@ -102,54 +111,79 @@ def test_sandbox_create_default_cost_cap(tmp_path, monkeypatch):
 # sandbox_check
 # ---------------------------------------------------------------------------
 def test_sandbox_check_allows_unlisted_tool_when_no_allowlist(basic_sandbox):
-    result = mcp_sandbox.handle_tool("sandbox_check", {
-        "sandbox_id": basic_sandbox,
-        "tool": "any_tool",
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_check",
+        {
+            "sandbox_id": basic_sandbox,
+            "tool": "any_tool",
+        },
+    )
     assert result["allowed"] is True
 
 
 def test_sandbox_check_allows_listed_tool(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    sb = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "agent",
-        "allowed_tools": ["read", "search"],
-    })["sandbox"]["id"]
+    sb = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "agent",
+            "allowed_tools": ["read", "search"],
+        },
+    )["sandbox"]["id"]
     result = mcp_sandbox.handle_tool("sandbox_check", {"sandbox_id": sb, "tool": "read"})
     assert result["allowed"] is True
 
 
 def test_sandbox_check_denies_unlisted_tool(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    sb = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "agent",
-        "allowed_tools": ["read"],
-    })["sandbox"]["id"]
+    sb = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "agent",
+            "allowed_tools": ["read"],
+        },
+    )["sandbox"]["id"]
     result = mcp_sandbox.handle_tool("sandbox_check", {"sandbox_id": sb, "tool": "exec"})
     assert result["allowed"] is False
 
 
 def test_sandbox_check_denies_blocked_path(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    sb = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "agent",
-        "blocked_paths": ["/etc"],
-    })["sandbox"]["id"]
-    result = mcp_sandbox.handle_tool("sandbox_check", {
-        "sandbox_id": sb, "tool": "read", "path": "/etc/passwd",
-    })
+    sb = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "agent",
+            "blocked_paths": ["/etc"],
+        },
+    )["sandbox"]["id"]
+    result = mcp_sandbox.handle_tool(
+        "sandbox_check",
+        {
+            "sandbox_id": sb,
+            "tool": "read",
+            "path": "/etc/passwd",
+        },
+    )
     assert result["allowed"] is False
 
 
 def test_sandbox_check_denies_cost_exceeded(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_sandbox, "STATE_DIR", tmp_path / "sandbox")
-    sb = mcp_sandbox.handle_tool("sandbox_create", {
-        "agent_name": "agent",
-        "max_cost": 1.0,
-    })["sandbox"]["id"]
-    result = mcp_sandbox.handle_tool("sandbox_check", {
-        "sandbox_id": sb, "tool": "call", "cost": 2.0,
-    })
+    sb = mcp_sandbox.handle_tool(
+        "sandbox_create",
+        {
+            "agent_name": "agent",
+            "max_cost": 1.0,
+        },
+    )["sandbox"]["id"]
+    result = mcp_sandbox.handle_tool(
+        "sandbox_check",
+        {
+            "sandbox_id": sb,
+            "tool": "call",
+            "cost": 2.0,
+        },
+    )
     assert result["allowed"] is False
 
 
@@ -169,45 +203,60 @@ def test_sandbox_check_unknown_sandbox():
 # sandbox_validate_output
 # ---------------------------------------------------------------------------
 def test_sandbox_validate_output_clean(basic_sandbox):
-    result = mcp_sandbox.handle_tool("sandbox_validate_output", {
-        "sandbox_id": basic_sandbox,
-        "output": "Hello, world! This is clean output.",
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_validate_output",
+        {
+            "sandbox_id": basic_sandbox,
+            "output": "Hello, world! This is clean output.",
+        },
+    )
     assert result["valid"] is True
     assert result["issues"] == []
 
 
 def test_sandbox_validate_output_api_key_leak(basic_sandbox):
-    result = mcp_sandbox.handle_tool("sandbox_validate_output", {
-        "sandbox_id": basic_sandbox,
-        "output": "Here is your key: sk-abcdefghijklmnopqrstuvwxyz1234567890",
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_validate_output",
+        {
+            "sandbox_id": basic_sandbox,
+            "output": "Here is your key: sk-abcdefghijklmnopqrstuvwxyz1234567890",
+        },
+    )
     assert result["valid"] is False
     assert any(i["type"] == "secret_leak" for i in result["issues"])
 
 
 def test_sandbox_validate_output_github_pat(basic_sandbox):
-    result = mcp_sandbox.handle_tool("sandbox_validate_output", {
-        "sandbox_id": basic_sandbox,
-        "output": "token: ghp_" + "A" * 36,
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_validate_output",
+        {
+            "sandbox_id": basic_sandbox,
+            "output": "token: ghp_" + "A" * 36,
+        },
+    )
     assert result["valid"] is False
 
 
 def test_sandbox_validate_output_excessive_length(basic_sandbox):
-    result = mcp_sandbox.handle_tool("sandbox_validate_output", {
-        "sandbox_id": basic_sandbox,
-        "output": "x" * 100001,
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_validate_output",
+        {
+            "sandbox_id": basic_sandbox,
+            "output": "x" * 100001,
+        },
+    )
     assert result["valid"] is False
     assert any(i["type"] == "excessive_output" for i in result["issues"])
 
 
 def test_sandbox_validate_output_unknown_sandbox():
-    result = mcp_sandbox.handle_tool("sandbox_validate_output", {
-        "sandbox_id": "sbx-ghost",
-        "output": "text",
-    })
+    result = mcp_sandbox.handle_tool(
+        "sandbox_validate_output",
+        {
+            "sandbox_id": "sbx-ghost",
+            "output": "text",
+        },
+    )
     assert "error" in result
 
 
@@ -304,19 +353,25 @@ def _rpc_sandbox(messages, tmp_dir):
 
 
 def test_sandbox_protocol_initialize(tmp_path):
-    responses = _rpc_sandbox([
-        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-    ], tmp_path)
+    responses = _rpc_sandbox(
+        [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+        ],
+        tmp_path,
+    )
     assert any(r.get("id") == 1 and "result" in r for r in responses)
     r = next(r for r in responses if r.get("id") == 1)
     assert r["result"]["serverInfo"]["name"] == "hummbl-sandbox"
 
 
 def test_sandbox_protocol_tools_list(tmp_path):
-    responses = _rpc_sandbox([
-        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-        {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-    ], tmp_path)
+    responses = _rpc_sandbox(
+        [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+        ],
+        tmp_path,
+    )
     tools_resp = next(r for r in responses if r.get("id") == 2)
     names = {t["name"] for t in tools_resp["result"]["tools"]}
     assert "sandbox_create" in names
@@ -325,19 +380,24 @@ def test_sandbox_protocol_tools_list(tmp_path):
 
 
 def test_sandbox_protocol_create_and_status(tmp_path):
-    responses = _rpc_sandbox([
-        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-        {
-            "jsonrpc": "2.0", "id": 2,
-            "method": "tools/call",
-            "params": {"name": "sandbox_create", "arguments": {"agent_name": "test-agent"}},
-        },
-        {
-            "jsonrpc": "2.0", "id": 3,
-            "method": "tools/call",
-            "params": {"name": "sandbox_status", "arguments": {}},
-        },
-    ], tmp_path)
+    responses = _rpc_sandbox(
+        [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+            {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "tools/call",
+                "params": {"name": "sandbox_create", "arguments": {"agent_name": "test-agent"}},
+            },
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "tools/call",
+                "params": {"name": "sandbox_status", "arguments": {}},
+            },
+        ],
+        tmp_path,
+    )
     status_resp = next(r for r in responses if r.get("id") == 3)
     data = json.loads(status_resp["result"]["content"][0]["text"])
     assert data["active_sandboxes"] == 1

@@ -108,8 +108,7 @@ class Ledger:
                 missing = {"id", "time", "state", "drift"} - obj.keys()
                 if missing:
                     raise ValueError(
-                        f"Ledger line {lineno} missing fields {missing} "
-                        f"in {self._path}"
+                        f"Ledger line {lineno} missing fields {missing} in {self._path}"
                     )
                 entries.append(
                     OperatorTuple(

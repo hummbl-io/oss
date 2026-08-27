@@ -22,9 +22,7 @@ def test_structured_tool_use_scorer_scores_recovery_trace_high():
         {
             "role": "user",
             "content": (
-                "<tool_response>"
-                '{"matches":["config.py: FEATURE_X = False"]}'
-                "</tool_response>"
+                '<tool_response>{"matches":["config.py: FEATURE_X = False"]}</tool_response>'
             ),
         },
         {
@@ -40,11 +38,7 @@ def test_structured_tool_use_scorer_scores_recovery_trace_high():
         },
         {
             "role": "user",
-            "content": (
-                "<tool_response>"
-                '{"content":"FEATURE_X = True"}'
-                "</tool_response>"
-            ),
+            "content": ('<tool_response>{"content":"FEATURE_X = True"}</tool_response>'),
         },
         {
             "role": "assistant",
@@ -132,9 +126,7 @@ def test_structured_tool_use_scorer_summary_aggregates_scores():
             {
                 "role": "user",
                 "content": (
-                    "<tool_response>"
-                    '{"matches":["config.py: FEATURE_X = False"]}'
-                    "</tool_response>"
+                    '<tool_response>{"matches":["config.py: FEATURE_X = False"]}</tool_response>'
                 ),
             },
             {
@@ -150,11 +142,7 @@ def test_structured_tool_use_scorer_summary_aggregates_scores():
             },
             {
                 "role": "user",
-                "content": (
-                    "<tool_response>"
-                    '{"content":"FEATURE_X = True"}'
-                    "</tool_response>"
-                ),
+                "content": ('<tool_response>{"content":"FEATURE_X = True"}</tool_response>'),
             },
             {
                 "role": "assistant",
@@ -199,9 +187,7 @@ def test_structured_tool_use_scorer_summary_aggregates_scores():
     weak_trace.add_step(weak_decision)
     weak_trace.outcome = "finalize"
 
-    summary = scorer.summary(
-        scorer.score_traces([strong_trace, weak_trace])
-    )
+    summary = scorer.summary(scorer.score_traces([strong_trace, weak_trace]))
 
     assert summary["total"] == 2
     assert summary["max_total_score"] == 10

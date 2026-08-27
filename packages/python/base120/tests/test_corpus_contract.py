@@ -60,7 +60,6 @@ def test_invalid_corpus_has_expected_error_manifests() -> None:
 def test_no_orphan_expected_error_manifests() -> None:
     invalid_stems = {path.stem for path in INVALID_DIR.glob("*.json")}
     expected_stems = {
-        path.name.removesuffix(".errs.json")
-        for path in EXPECTED_DIR.glob("*.errs.json")
+        path.name.removesuffix(".errs.json") for path in EXPECTED_DIR.glob("*.errs.json")
     }
     assert expected_stems == invalid_stems

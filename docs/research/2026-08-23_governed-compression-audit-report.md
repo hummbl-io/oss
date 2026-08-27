@@ -1,6 +1,6 @@
 # Repository Audit: `governed-compression`
 
-**Repository Path:** [`<repo-root>/PROJECTS\governed-compression`](file:///<repo-root>/PROJECTS/governed-compression)  
+**Repository Path:** [`<repo-root>/PROJECTS\governed-compression`](https://github.com/hummbl-io/governed-compression)  
 **Published PyPI Designation:** `governed-compression` (v0.1.0)  
 **License:** Apache 2.0  
 **Test Status:** ✅ **14/14 tests passing** (`pytest tests/ -v` passed in 0.23s)  

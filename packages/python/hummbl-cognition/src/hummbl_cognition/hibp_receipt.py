@@ -17,7 +17,6 @@ Reference: issue #1105
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import uuid
 from typing import Any
@@ -33,8 +32,12 @@ __all__ = [
 ]
 
 VALID_QUERY_TYPES = {
-    "breachedaccount", "breaches", "breachname",
-    "dataclasses", "pwnedpassword", "pwnedpasswordsrange",
+    "breachedaccount",
+    "breaches",
+    "breachname",
+    "dataclasses",
+    "pwnedpassword",
+    "pwnedpasswordsrange",
 }
 VALID_MODES = {"advisory_only", "approved_lookup", "forbidden"}
 VALID_APPROVAL = {"not_required", "approved", "denied", "pending"}
@@ -45,13 +48,28 @@ APPROVAL_REQUIRED_TYPES = {"breachedaccount", "pwnedpassword", "pwnedpasswordsra
 # Query types that are safe without approval (aggregate/public data)
 NO_APPROVAL_TYPES = {"breaches", "breachname", "dataclasses"}
 ALLOWED_RECEIPT_FIELDS = {
-    "receipt_id", "timestamp", "query_type", "query_subject",
-    "query_subject_redacted", "api_key_used", "operator_approval",
-    "operator_approval_by", "mode", "findings_count", "findings_summary",
-    "actions_taken", "forbidden_actions_avoided", "redacted", "receipt_hash",
+    "receipt_id",
+    "timestamp",
+    "query_type",
+    "query_subject",
+    "query_subject_redacted",
+    "api_key_used",
+    "operator_approval",
+    "operator_approval_by",
+    "mode",
+    "findings_count",
+    "findings_summary",
+    "actions_taken",
+    "forbidden_actions_avoided",
+    "redacted",
+    "receipt_hash",
 }
 ALLOWED_FINDING_KEYS = {
-    "breach_name", "breach_date", "data_classes", "is_verified", "is_sensitive",
+    "breach_name",
+    "breach_date",
+    "data_classes",
+    "is_verified",
+    "is_sensitive",
 }
 
 
@@ -74,8 +92,14 @@ def validate_hibp_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]]:
     errors: list[str] = []
 
     required = [
-        "receipt_id", "timestamp", "query_type", "query_subject",
-        "operator_approval", "mode", "findings_count", "receipt_hash",
+        "receipt_id",
+        "timestamp",
+        "query_type",
+        "query_subject",
+        "operator_approval",
+        "mode",
+        "findings_count",
+        "receipt_hash",
     ]
     for field in required:
         if field not in receipt or receipt[field] is None:
@@ -98,7 +122,9 @@ def validate_hibp_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]]:
 
     approval = receipt.get("operator_approval", "")
     if approval and approval not in VALID_APPROVAL:
-        errors.append(f"operator_approval: {approval!r} not in {sorted(VALID_APPROVAL)}")
+        errors.append(
+            f"operator_approval: {approval!r} not in {sorted(VALID_APPROVAL)}"
+        )
 
     # Approval-required query types must have approved status
     if query_type in APPROVAL_REQUIRED_TYPES:
@@ -132,7 +158,10 @@ def validate_hibp_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]]:
     if not receipt.get("redacted", True):
         errors.append("redacted must be true — sensitive data must be redacted")
 
-    if not receipt.get("query_subject_redacted", True) and query_type == "breachedaccount":
+    if (
+        not receipt.get("query_subject_redacted", True)
+        and query_type == "breachedaccount"
+    ):
         errors.append(
             "query_subject_redacted must be true for breachedaccount queries "
             "(personal email must be redacted)"
@@ -154,7 +183,9 @@ def validate_hibp_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]]:
     # API key must never be in the receipt as a string
     for key, val in receipt.items():
         if isinstance(val, str) and val.startswith("hibp-") and key != "receipt_id":
-            errors.append(f"potential API key found in field '{key}' — keys must never be in receipts")
+            errors.append(
+                f"potential API key found in field '{key}' — keys must never be in receipts"
+            )
 
     # Hash verification
     expected_hash = compute_hibp_receipt_hash(receipt)
@@ -162,7 +193,9 @@ def validate_hibp_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str]]:
     if isinstance(stored_hash, str) and not re.fullmatch(r"[a-f0-9]{64}", stored_hash):
         errors.append("receipt_hash must be 64 lowercase hex characters")
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 

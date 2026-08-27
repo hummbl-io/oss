@@ -48,9 +48,9 @@ class OperatorTuple(NamedTuple):
       drift  → deviation from setpoint (1.0 - confidence)
     """
 
-    id: str       # operator code, e.g. "P6"
-    time: str     # UTC ISO-8601, e.g. "2026-04-14T21:00:00Z"
-    state: str    # recommendation text
+    id: str  # operator code, e.g. "P6"
+    time: str  # UTC ISO-8601, e.g. "2026-04-14T21:00:00Z"
+    state: str  # recommendation text
     drift: float  # 1.0 - confidence
 
 
