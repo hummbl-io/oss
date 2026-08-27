@@ -548,6 +548,118 @@ register_framework(FrameworkSpec(
 # ===========================================================================
 
 
+# --- NIST SP 800-53 Rev 5 (base security control catalog) ------------------
+#
+# Maps the base 800-53 Rev 5 control families to HUMMBL governance primitives.
+# This is the foundational catalog; the COSAiS overlay below adds AI-specific
+# controls. Evidence is drawn from the same tuple types used by other
+# frameworks (DCT, DCTX, CONTRACT, ATTEST, EVIDENCE, INTENT, KILLSWITCH,
+# CIRCUIT_BREAKER, and signed audit entries).
+
+register_framework(FrameworkSpec(
+    id="nist-800-53",
+    name="NIST_SP_800_53_R5",
+    reference=(
+        "NIST SP 800-53 Rev 5, Security and Privacy Controls for Information "
+        "Systems and Organizations (2020, updated 2023)."
+    ),
+    default_days=30,
+    controls=(
+        # --- AC: Access Control ---
+        ControlSpec("AC-2", "Account management", (
+            _rule("DCTX", extract=(
+                ("delegator", "delegator"),
+                ("delegatee", "delegatee"),
+            )),
+        )),
+        ControlSpec("AC-3", "Access enforcement", (
+            _rule("DCT", extract=(
+                ("issuer", "issuer"),
+                ("subject", "subject"),
+                ("ops_allowed", "ops_allowed"),
+                ("resources", "resource_selectors"),
+            )),
+        )),
+        ControlSpec("AC-5", "Separation of duties", (
+            _rule("CONTRACT", extract=(
+                ("issuer", "issuer"),
+                ("subject", "subject"),
+            )),
+        )),
+        ControlSpec("AC-21", "Information sharing", (
+            _rule("DCT", extract=(
+                ("issuer", "issuer"),
+                ("subject", "subject"),
+            )),
+        )),
+        # --- AU: Audit and Accountability ---
+        ControlSpec("AU-2", "Event logging", (
+            _rule(signed=True),
+        )),
+        ControlSpec("AU-6", "Audit record review and analysis", (
+            _rule(signed=True),
+        )),
+        ControlSpec("AU-12", "Audit record generation", (
+            _rule(signed=True),
+        )),
+        # --- CM: Configuration Management ---
+        ControlSpec("CM-2", "Baseline configuration", (
+            _rule("CONTRACT", extract=(
+                ("issuer", "issuer"),
+                ("operations", "operations"),
+            )),
+        )),
+        # --- CP: Contingency Planning ---
+        ControlSpec("CP-2", "Contingency plan", (
+            _rule("CIRCUIT_BREAKER", extract=(
+                ("state", "state"),
+                ("adapter", "adapter"),
+            )),
+        )),
+        # --- IA: Identification and Authentication ---
+        ControlSpec("IA-2", "Identification and authentication", (
+            _rule("DCTX", "DCT", extract=(
+                ("subject", "subject"),
+                ("issuer", "issuer"),
+            )),
+        )),
+        ControlSpec("IA-4", "Identifier management", (
+            _rule("DCTX", extract=(
+                ("delegatee", "delegatee"),
+            )),
+        )),
+        ControlSpec("IA-5", "Authenticator management", (
+            _rule(signed=True),
+        )),
+        # --- IR: Incident Response ---
+        ControlSpec("IR-4", "Incident handling", (
+            _rule("KILLSWITCH", extract=(
+                ("state", "state"),
+                ("adapter", "adapter"),
+            )),
+        )),
+        # --- RA: Risk Assessment ---
+        ControlSpec("RA-3", "Risk assessment", (
+            _rule("ATTEST", "EVIDENCE", extract=(
+                ("claim", "claim"),
+                ("outcome", "outcome"),
+            )),
+        )),
+        # --- SC: System and Communications Protection ---
+        ControlSpec("SC-8", "Transmission confidentiality and integrity", (
+            _rule(signed=True),
+        )),
+        ControlSpec("SC-13", "Cryptographic protection", (
+            _rule(signed=True),
+        )),
+        # --- SI: System and Information Integrity ---
+        ControlSpec("SI-7", "Software and firmware integrity", (
+            _rule(signed=True),
+        )),
+    ),
+))
+
+
 # --- NIST COSAiS (SP 800-53 Control Overlays for Securing AI Systems) ------
 
 register_framework(FrameworkSpec(

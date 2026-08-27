@@ -95,6 +95,22 @@ jobs:
           name: dist
           path: ${{ steps.pkg.outputs.path }}/dist/
 
+      - name: Generate SBOM
+        working-directory: ${{ steps.pkg.outputs.path }}
+        run: |
+          pip install "cyclonedx-bom>=5.0" --quiet
+          # Per-artifact SBOM: scan a clean venv containing only the built
+          # wheel and its runtime deps (not test extras like pytest).
+          python -m venv /tmp/sbom-venv
+          /tmp/sbom-venv/bin/pip install dist/*.whl "cyclonedx-bom>=5.0"
+          /tmp/sbom-venv/bin/cyclonedx-py environment --output-reproducible --outfile sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.1
+        with:
+          name: sbom
+          path: ${{ steps.pkg.outputs.path }}/sbom.json
+
   publish:
     name: publish
     needs: build

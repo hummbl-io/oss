@@ -31,11 +31,29 @@ governed by `docs/TEST_COUNT_AUTHORITY.md`; as of 2026-08-23,
 
 ## Audit-log signature semantics
 
-The `AuditLog.append()` method requires a non-empty `signature` field on each
-entry by default (`require_signature=True`) but does NOT cryptographically
-verify the signature against the entry body — the field is presence-checked,
-not HMAC-verified. Tamper detection on the audit log is the responsibility of
-an external verifier; entries are an append-only attestation record, not a
-self-verifying cryptographic chain. See `hummbl_governance/audit_log.py` and
-`tests/test_audit_log.py` for current behavior. HMAC-verified append is
-tracked as a roadmap item (open an issue at [github.com/hummbl-io/oss/issues](https://github.com/hummbl-io/oss/issues)).
+The `AuditLog` supports two signature verification modes:
+
+1. **Presence-check (default, backward-compatible):** `require_signature=True`
+   with no `hmac_key`. Entries must have a non-empty `signature` field, but the
+   field is not cryptographically verified against the entry body. A warning is
+   logged at construction time. Suitable for development and non-adversarial
+   environments.
+
+2. **HMAC-verified (recommended for production):** Pass `hmac_key=<32 bytes>`
+   and `strict_hmac=True`. `append()` computes HMAC-SHA256 over a canonical
+   form of the entry (excluding the signature itself) and rejects entries
+   whose signature does not match (`E_AUDIT_SIGNATURE_INVALID`).
+   `verify_entry()` re-verifies any entry on read. This satisfies
+   NIST SP 800-53 AU-6 (audit review, analysis, and reporting) and aligns
+   with SP 800-92 (protection of audit log integrity).
+
+Callers compute the signature as:
+
+```python
+import hmac
+from hashlib import sha256
+sig = hmac.new(key, AuditLog.canonical_bytes(entry), sha256).hexdigest()
+```
+
+See `hummbl_governance/audit_log.py` and `tests/test_audit_log.py`
+(`TestHmacVerification`) for implementation and test coverage.

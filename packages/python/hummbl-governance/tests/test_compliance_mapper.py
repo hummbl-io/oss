@@ -1462,3 +1462,38 @@ class TestComplianceMapperCrosswalk:
         assert parsed["framework"] == "CROSSWALK"
         assert len(parsed["controls"]["entries"]) == 1
         assert len(parsed["controls"]["summary"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# NIST SP 800-53 Rev 5 framework registration
+# ---------------------------------------------------------------------------
+
+class TestNist80053Registration:
+    """Verify the nist-800-53 framework is registered and queryable."""
+
+    def test_framework_is_registered(self):
+        from hummbl_governance.compliance_frameworks import get_framework
+        fw = get_framework("nist-800-53")
+        assert fw is not None
+        assert fw.name == "NIST_SP_800_53_R5"
+
+    def test_framework_has_expected_control_families(self):
+        from hummbl_governance.compliance_frameworks import get_framework
+        fw = get_framework("nist-800-53")
+        control_ids = {c.id for c in fw.controls}
+        # Spot-check key controls across families
+        assert "AC-21" in control_ids  # Information sharing (was mislabeled AC-16)
+        assert "AU-2" in control_ids   # Event logging
+        assert "SC-13" in control_ids  # Cryptographic protection
+        assert "IA-2" in control_ids   # Identification and authentication
+
+    def test_ac_21_label_is_correct(self):
+        """Verify AC-21 is labeled 'Information sharing', not the old AC-16 mislabel."""
+        from hummbl_governance.compliance_frameworks import get_framework
+        fw = get_framework("nist-800-53")
+        ac21 = [c for c in fw.controls if c.id == "AC-21"]
+        assert len(ac21) == 1
+        assert ac21[0].description == "Information sharing"
+        # Ensure the old mislabeled AC-16 does not exist
+        ac16 = [c for c in fw.controls if c.id == "AC-16"]
+        assert len(ac16) == 0

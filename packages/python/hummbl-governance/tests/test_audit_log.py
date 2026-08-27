@@ -518,3 +518,25 @@ class TestHmacVerification:
         e3 = replace(e1, signature=None)
         assert AuditLog.canonical_bytes(e1) == AuditLog.canonical_bytes(e2)
         assert AuditLog.canonical_bytes(e1) == AuditLog.canonical_bytes(e3)
+
+    def test_strict_hmac_raises_without_key(self):
+        """strict_hmac=True with no hmac_key raises ValueError at construction."""
+        import pytest
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with pytest.raises(ValueError, match="strict_hmac"):
+                AuditLog(tmpdir, strict_hmac=True)
+
+    def test_strict_hmac_accepts_key(self):
+        """strict_hmac=True with hmac_key set constructs without error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log = AuditLog(tmpdir, hmac_key=self.KEY, strict_hmac=True)
+            log.close()
+
+    def test_warning_logged_when_no_key(self, caplog):
+        """require_signature=True with no hmac_key logs a warning."""
+        import logging
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with caplog.at_level(logging.WARNING, logger="hummbl_governance.audit_log"):
+                with AuditLog(tmpdir) as log:
+                    pass
+        assert any("presence-checked only" in r.message for r in caplog.records)

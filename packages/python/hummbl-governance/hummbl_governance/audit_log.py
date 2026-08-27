@@ -99,6 +99,12 @@ class AuditLog:
             signature presence is checked but contents are not verified.
             Callers should compute the signature as:
                 hmac.new(key, AuditLog.canonical_bytes(entry), sha256).hexdigest()
+        strict_hmac: If True, requires hmac_key to be set at construction
+            time. Raises ValueError if hmac_key is None. Use this for
+            deployments that require cryptographic tamper detection
+            (NIST SP 800-53 AU-6, SP 800-92). When False (default), a
+            warning is logged if require_signature=True but no hmac_key
+            is set, since signatures are presence-checked only.
     """
 
     def __init__(
@@ -109,6 +115,7 @@ class AuditLog:
         require_signature: bool = True,
         file_prefix: str = "governance",
         hmac_key: bytes | None = None,
+        strict_hmac: bool = False,
     ):
         self._base_dir = Path(base_dir)
         self._retention_days = retention_days
@@ -116,6 +123,21 @@ class AuditLog:
         self._require_signature = require_signature
         self._file_prefix = file_prefix
         self._hmac_key = hmac_key
+
+        if strict_hmac and hmac_key is None:
+            raise ValueError(
+                "strict_hmac=True requires hmac_key to be set; "
+                "without it, signatures are presence-checked only "
+                "(not cryptographically verified). See NIST SP 800-53 AU-6."
+            )
+
+        if require_signature and hmac_key is None and not strict_hmac:
+            logger.warning(
+                "AuditLog initialized with require_signature=True but no "
+                "hmac_key: signatures are presence-checked only, not "
+                "cryptographically verified. Set strict_hmac=True or "
+                "provide hmac_key for NIST SP 800-53 AU-6 compliance."
+            )
 
         self._base_dir.mkdir(parents=True, exist_ok=True)
         try:
