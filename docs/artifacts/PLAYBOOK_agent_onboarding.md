@@ -1,7 +1,7 @@
 # Playbook: Agent Onboarding
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute (drafted by Devin)
+**Author:** Operator, HUMMBL, LLC (drafted by Devin)
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 23)
 **Reader:** agents, operators, Operator

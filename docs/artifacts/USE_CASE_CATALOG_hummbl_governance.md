@@ -1,7 +1,7 @@
 # Use Case Catalog: hummbl-governance Product Directions
 
 **Status:** live v1.0 (private — pre-decision)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-08-24
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md
 **Reader:** Operator (use-case selection, stress-test prioritization)

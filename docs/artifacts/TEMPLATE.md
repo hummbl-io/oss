@@ -3,7 +3,7 @@
 > **Usage:** Copy this file to `docs/artifacts/<TYPE>_<subject>.md` and fill in the placeholders. Delete this header block before promoting to live.
 
 **Status:** draft v0.1 (public|private)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** YYYY-MM-DD
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item N)
 **Reader:** <target reader — who is this for?>

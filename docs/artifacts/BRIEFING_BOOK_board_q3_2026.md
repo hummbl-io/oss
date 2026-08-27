@@ -1,7 +1,7 @@
 # Briefing Book: Board Q3 2026
 
 **Status:** live v1.0 (private)
-**Author:** Operator, HUMMBL Research Institute (drafted by Devin)
+**Author:** Operator, HUMMBL, LLC (drafted by Devin)
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 18)
 **Reader:** Board members (5 Directors: operator, governance-officer, risk-officer, stakeholder-proxy, future-self)

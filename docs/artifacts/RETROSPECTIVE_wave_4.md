@@ -1,7 +1,7 @@
 # Retrospective: Wave 4 (Days 20-24)
 
 **Status:** live v1.0 (private)
-**Author:** Operator, HUMMBL Research Institute (drafted by Devin)
+**Author:** Operator, HUMMBL, LLC (drafted by Devin)
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md
 **Reader:** Operator, Board, agents

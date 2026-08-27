@@ -3,7 +3,7 @@
 - **Status:** accepted
 - **Date:** 2026-06-23
 - **Decision owner:** Operator
-- **Steward:** HUMMBL Research Institute
+- **Steward:** HUMMBL, LLC
 - **Supersedes:** none
 - **Superseded by:** none
 

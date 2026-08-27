@@ -1,7 +1,7 @@
 # SWOT: HUMMBL Current State (2026-06-23)
 
 **Status:** live v1.0 (private)
-**Author:** Operator, HUMMBL Research Institute (drafted by Devin)
+**Author:** Operator, HUMMBL, LLC (drafted by Devin)
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 19)
 **Reader:** Operator, Board, agents

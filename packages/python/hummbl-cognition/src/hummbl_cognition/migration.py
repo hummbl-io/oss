@@ -263,14 +263,36 @@ def import_from_memory_md(
 # Bus History Import
 # ---------------------------------------------------------------------------
 
-# Bus message types that map to ledger entry types
-_BUS_TYPE_MAP: dict[str, str] = {
+# Tier 1: High-signal bus types — imported by default.
+# These carry decisions, milestones, lessons, and structured knowledge.
+TIER1_BUS_TYPES: dict[str, str] = {
     "DECISION": "decision",
     "CORRECTION": "correction",
     "MILESTONE": "discovery",
+    "HANDOFF": "discovery",
+    "PROPOSAL": "decision",
+    "BLOCKED": "lesson",
+    "REVIEW": "discovery",
+    "RECEIPT": "discovery",
     "COMPLETE": "discovery",
     "SESSION_COMPLETE": "discovery",
+    "LESSON-LEARNED": "lesson",
+    "SECURITY-INCIDENT": "lesson",
+    "SECURITY-INCIDENT-UPDATE": "lesson",
 }
+
+# Tier 2: Noisy bus types — skipped by default, included with --include-noisy.
+# These are high-volume operational messages (SITREP, STATUS, SKILL_INVOKE).
+NOISY_BUS_TYPES: dict[str, str] = {
+    "SITREP": "discovery",
+    "STATUS": "discovery",
+    "SKILL_INVOKE": "discovery",
+    "WIP_START": "discovery",
+    "WIP_END": "discovery",
+}
+
+# Combined map for backward compatibility and --include-noisy mode
+_BUS_TYPE_MAP: dict[str, str] = {**TIER1_BUS_TYPES, **NOISY_BUS_TYPES}
 
 
 def import_from_bus_history(
@@ -283,8 +305,10 @@ def import_from_bus_history(
 ) -> list[LedgerEntry]:
     """Import relevant bus messages into the cognitive ledger.
 
-    Extracts DECISION, CORRECTION, and MILESTONE messages from the
-    coordination bus and converts them to ledger entries.
+    Extracts high-signal messages (DECISION, CORRECTION, MILESTONE, HANDOFF,
+    PROPOSAL, BLOCKED, REVIEW, RECEIPT, etc.) from the coordination bus and
+    converts them to ledger entries. Noisy types (SITREP, STATUS, SKILL_INVOKE)
+    are skipped by default — pass the full set via msg_types to include them.
 
     Parameters
     ----------
@@ -295,8 +319,8 @@ def import_from_bus_history(
     since : str | None
         ISO 8601 timestamp -- only import messages after this time.
     msg_types : set[str] | None
-        Override which bus types to import. Defaults to DECISION,
-        CORRECTION, MILESTONE, COMPLETE, SESSION_COMPLETE.
+        Override which bus types to import. Defaults to TIER1_BUS_TYPES
+        (high-signal types only).
     dry_run : bool
         If True, create entries but don't write to ledger.
 
@@ -306,7 +330,7 @@ def import_from_bus_history(
         All created entries.
     """
     if msg_types is None:
-        msg_types = set(_BUS_TYPE_MAP.keys())
+        msg_types = set(TIER1_BUS_TYPES.keys())
 
     # Resolve bus path
     if bus_path is None:

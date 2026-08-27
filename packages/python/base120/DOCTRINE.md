@@ -1,7 +1,7 @@
 # DOCTRINE.md - base120
 
 **Status:** v0.2
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Amendment history:** v0.1 → v0.2 (2026-08-19): §4 amended to introduce registry/language layer distinction and reconcile §1 executability claim with §4 non-execution boundary. Operator-adjudicated, governance-review-drafted text. See ADR and KRINEIA receipt for audit trail.
 
 ## 1. Thesis

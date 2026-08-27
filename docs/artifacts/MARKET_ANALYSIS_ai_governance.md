@@ -1,7 +1,7 @@
 # Market Analysis: AI Governance Market Size and Segmentation
 
 **Status:** live v1.0 (private)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 8)
 **Reader:** Operator + Board (segment focus, GTM prioritization)

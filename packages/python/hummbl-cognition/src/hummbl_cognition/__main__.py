@@ -14,6 +14,7 @@ Commands:
     startup   Generate startup context with cognition plus recent inbox
     reindex   Rebuild the Open Brain search index from ledger
     batch-ingest  Bulk-import JSONL file of ledger entries with dedup
+    migrate    Import existing knowledge stores (bus, MEMORY.md, git log) into the ledger
     belonging-check  HRSI Gap 1 — daily belonging baseline (safety/mattering/connection)
     hrsi-checkin     HRSI Gap 2 — unified daily cycle (cogstate+belonging+HULE+lens+delta)
 """
@@ -518,6 +519,68 @@ def cmd_batch_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_migrate(args: argparse.Namespace) -> int:
+    """Import existing knowledge stores into the cognitive ledger."""
+    from hummbl_cognition.migration import (
+        import_from_bus_history,
+        import_from_git_log,
+        import_from_memory_md,
+    )
+
+    dry_run: bool = args.dry_run
+    source: str = args.source
+    total_imported = 0
+
+    if source in ("bus", "all"):
+        # Build msg_types set based on --include-noisy flag
+        if args.include_noisy:
+            from hummbl_cognition.migration import NOISY_BUS_TYPES, TIER1_BUS_TYPES
+            msg_types = TIER1_BUS_TYPES | NOISY_BUS_TYPES
+        else:
+            from hummbl_cognition.migration import TIER1_BUS_TYPES
+            msg_types = TIER1_BUS_TYPES
+
+        entries = import_from_bus_history(
+            bus_path=args.bus,
+            ledger_path=args.ledger,
+            since=args.since,
+            msg_types=msg_types,
+            dry_run=dry_run,
+        )
+        prefix = "[DRY RUN] " if dry_run else ""
+        print(f"{prefix}Imported {len(entries)} entries from bus history")
+        total_imported += len(entries)
+
+    if source in ("memory", "all"):
+        memory_path = args.memory_path
+        if memory_path is None:
+            print("ERROR: --memory-path required for memory migration", file=sys.stderr)
+            return 1
+        entries = import_from_memory_md(
+            memory_path=memory_path,
+            ledger_path=args.ledger,
+            agent=args.agent,
+            dry_run=dry_run,
+        )
+        prefix = "[DRY RUN] " if dry_run else ""
+        print(f"{prefix}Imported {len(entries)} entries from MEMORY.md")
+        total_imported += len(entries)
+
+    if source in ("git", "all"):
+        entries = import_from_git_log(
+            ledger_path=args.ledger,
+            since=args.since,
+            max_commits=args.max_commits,
+            dry_run=dry_run,
+        )
+        prefix = "[DRY RUN] " if dry_run else ""
+        print(f"{prefix}Imported {len(entries)} entries from git log")
+        total_imported += len(entries)
+
+    print(f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---")
+    return 0
+
+
 def cmd_reindex(args: argparse.Namespace) -> int:
     """Rebuild the Open Brain search index."""
     from hummbl_cognition.indexer import BM25Index
@@ -737,6 +800,25 @@ def build_parser() -> argparse.ArgumentParser:
     # reindex (Open Brain)
     subparsers.add_parser("reindex", help="Rebuild the Open Brain search index")
 
+    # migrate
+    p_migrate = subparsers.add_parser(
+        "migrate",
+        help="Import existing knowledge stores (bus, MEMORY.md, git log) into the ledger",
+    )
+    p_migrate.add_argument(
+        "source",
+        choices=["bus", "memory", "git", "all"],
+        help="Knowledge source to import",
+    )
+    p_migrate.add_argument("--dry-run", action="store_true", help="Show what would be imported without writing")
+    p_migrate.add_argument("--ledger", help="Override ledger file path")
+    p_migrate.add_argument("--bus", help="Override bus messages.tsv path")
+    p_migrate.add_argument("--memory-path", help="Path to MEMORY.md file (for 'memory' source)")
+    p_migrate.add_argument("--since", help="Only import entries after this ISO 8601 timestamp")
+    p_migrate.add_argument("--max-commits", type=int, default=100, help="Max git commits to import")
+    p_migrate.add_argument("--agent", default="migration", help="Agent identifier for imported entries")
+    p_migrate.add_argument("--include-noisy", action="store_true", help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)")
+
     # validate
     p_validate = subparsers.add_parser("validate", help="Validate ledger integrity")
     p_validate.add_argument("--report", action="store_true", help="Generate structured report")
@@ -863,6 +945,7 @@ def main(argv: list[str] | None = None) -> int:
         "boot": cmd_boot,
         "startup": cmd_startup,
         "batch-ingest": cmd_batch_ingest,
+        "migrate": cmd_migrate,
         "report": cmd_report,
     }
 

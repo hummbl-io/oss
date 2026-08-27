@@ -2,7 +2,7 @@
 
 **Status:** live v1.0 (promoted 2026-06-23 per ARTIFACT_STACK_PROMOTION_PACKET.md)
 **Owner:** Operator
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 4)
 **Reader:** enterprise buyer evaluating AI governance vendors; analyst covering AI governance

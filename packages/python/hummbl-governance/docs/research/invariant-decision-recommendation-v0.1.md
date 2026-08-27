@@ -2,7 +2,7 @@
 
 **Status:** APPROVED_WITH_CONSTRAINTS — enum promotion of K9-K11 and D6-D7 approved by operator 2026-06-26
 **Date:** 2026-06-26 (corrected from 2026-07-14 — original was future-dated relative to session)
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Decision needed:** Should K9-K11 be added to `KernelInvariant` enum (KernelPanic on violation) or kept as doctrine-level guidance? Same for D6-D7 in `DoctrineInvariant` enum.
 **Receipt note:** Original date `2026-07-14` was future-dated relative to the actual session date `2026-06-26`. Corrected with this receipt note per operator instruction.
 

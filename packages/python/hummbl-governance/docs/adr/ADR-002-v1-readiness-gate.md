@@ -3,7 +3,7 @@
 - **Status:** proposed
 - **Date:** 2026-06-16
 - **Decision owner:** Reuben Bowlby
-- **Steward:** HUMMBL Research Institute
+- **Steward:** HUMMBL, LLC
 - **Authors:** devin
 - **Supersedes:** none
 - **Superseded by:** none
