@@ -83,4 +83,25 @@ This is a **public** repository. Do not commit:
 - Operator names, machine hostnames, or internal infrastructure details
 - Fleet inventory or audit matrices
 
-Internal artifacts belong in the private `hummbl-io/hummbl-governance` repo.
+Internal artifacts belong in the private `hummbl-io/hummbl-dev` repo.
+
+## Encoding-safe file extraction (Windows)
+
+When extracting files from git (e.g., `git show <ref>:<path>`) on Windows with PowerShell, **never pipe through PowerShell stdout** — it transcodes non-ASCII bytes through the system codepage (CP1252), corrupting UTF-8 content (em-dashes, arrows, math symbols become mojibake).
+
+**Correct method** — use Python `subprocess` with binary capture:
+```python
+import subprocess, pathlib
+result = subprocess.run(['git', 'show', f'{ref}:{path}'], cwd=repo, capture_output=True)
+pathlib.Path(dest).write_bytes(result.stdout)  # raw bytes, no transcoding
+```
+
+**Verify after extraction** — compare bytes against the git blob:
+```python
+verify = subprocess.run(['git', 'cat-file', 'blob', f'{ref}:{path}'], cwd=repo, capture_output=True)
+assert pathlib.Path(dest).read_bytes() == verify.stdout, "Byte mismatch"
+```
+
+**Never use** `Out-File -Encoding utf8` (adds BOM, transcodes through CP1252) or `git show ... > file` in PowerShell (same transcoding issue). If you must use the shell, use `cmd /c "git show ... > file"` which doesn't transcode.
+
+Origin: 2026-08-27 session — mojibake introduced by `Out-File -Encoding utf8` was not caught by a flawed verification check (`chr(0xe7) in text` tested for the wrong codepoint). The correct check is byte-for-byte comparison against the git blob.
