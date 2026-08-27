@@ -5,10 +5,10 @@ Enables branch protection on main for the 20 unprotected repos with:
 - allow_force_pushes: false
 - allow_deletions: false
 - enforce_admins: false (don't lock out admins)
-- required_status_checks: null (no CI requirement yet ΓÇö gap-8 will add)
+- required_status_checks: null (no CI requirement yet — gap-8 will add)
 - required_pull_request_reviews: null (no PR review requirement yet)
 
-Mutates GitHub ΓÇö requires operator authorization (gap-7 remediation).
+Mutates GitHub — requires operator authorization (gap-7 remediation).
 """
 import json
 import subprocess
@@ -25,7 +25,7 @@ UNPROTECTED = [
     "vendor-skill-fleet", "wags",
 ]
 
-# Branch protection payload ΓÇö minimal: block force-push + deletions
+# Branch protection payload — minimal: block force-push + deletions
 PAYLOAD = json.dumps({
     "allow_force_pushes": False,
     "allow_deletions": False,

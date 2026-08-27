@@ -56,7 +56,7 @@ class AgentCredential:
 
     def mask(self) -> str:
         """Return a masked version of the token for logging."""
-        if len(self.token) <= 8:
+        if len(self.token) <= 16:
             return "***"
         return f"{self.token[:4]}...{self.token[-4:]}"
 
@@ -82,7 +82,7 @@ class AuthProvider(Protocol):
 
 
 class EnvVarAuthProvider:
-    """Default auth provider ΓÇö reads per-agent tokens from env vars.
+    """Default auth provider — reads per-agent tokens from env vars.
 
     Reads GITHUB_TOKEN_<AGENT_ID> from the environment. Agent IDs are
     uppercased and hyphens replaced with underscores.
@@ -124,7 +124,7 @@ class EnvVarAuthProvider:
 
 
 class PATAuthProvider:
-    """Fine-grained PAT auth provider ΓÇö reads from a config file.
+    """Fine-grained PAT auth provider — reads from a config file.
 
     Reads a JSON config file mapping agent_ids to PATs. The operator
     creates fine-grained PATs per agent and places them in the config.
@@ -221,7 +221,7 @@ class GitHubAppAuthProvider:
             import urllib.request
             from pathlib import Path
 
-            # PyJWT is optional ΓÇö import here so the module loads without it
+            # PyJWT is optional — import here so the module loads without it
             import jwt  # type: ignore[import-not-found]
         except ImportError:
             return None

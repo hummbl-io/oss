@@ -38,7 +38,7 @@ All fleet mutations are classified into four severity levels:
 **Legend:**
 - **auto**: permitted automatically after identity resolution
 - **with authority check**: permitted after `AuthorityEngine.check()` verifies scope and limit
-- **with DECISION receipt**: two-person rule ΓÇö requires operator DECISION receipt (posted to bus with operator principal proof)
+- **with DECISION receipt**: two-person rule — requires operator DECISION receipt (posted to bus with operator principal proof)
 - **with self-attestation**: operator can self-attest (single-person authority for human reviewer)
 
 ## Two-person rule
@@ -51,7 +51,7 @@ For HIGH and CRITICAL mutations, the two-person rule applies:
 4. The pre-mutation gate (gap-1) verifies the receipt before permitting
 
 **Exception:** The operator (human_reviewer, tier 5) can self-attest for
-HIGH/CRITICAL mutations ΓÇö the two-person rule is satisfied by the human
+HIGH/CRITICAL mutations — the two-person rule is satisfied by the human
 reviewer's own authority at tier 5.
 
 ## Scope and limits

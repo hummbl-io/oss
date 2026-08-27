@@ -41,18 +41,16 @@ from hummbl_governance.primitives.merkle_anchor import (
 
 
 def find_bus_file() -> Path:
-    """Find the coordination bus file."""
-    candidates = []
+    """Find the coordination bus file.
+
+    Uses BUS_PATH env var. No hardcoded local paths — this is a public repo.
+    """
     bus_env = os.environ.get("BUS_PATH", "")
     if bus_env:
-        candidates.append(Path(bus_env))
-    candidates.append(Path.home() / "PROJECTS" / "hummbl-governance" / "_state" / "coordination" / "messages.tsv")
-    candidates.append(Path("/opt/hummbl-governance/_state/coordination/messages.tsv"))
-    for c in candidates:
-        if c.exists() and c.stat().st_size > 0:
-            return c
-    # Return the default even if it doesn't exist (for --dry-run)
-    return candidates[0] if candidates else Path.home() / "PROJECTS" / "hummbl-governance" / "_state" / "coordination" / "messages.tsv"
+        return Path(bus_env)
+    raise FileNotFoundError(
+        "BUS_PATH env var not set. Set it to your coordination bus TSV path."
+    )
 
 
 def hash_bus_entries(bus_path: Path) -> list[str]:
@@ -252,7 +250,7 @@ def verify(bus_path: Path, machine: str) -> int:
             print("ALERT: Root hash mismatch! Bus entries may have been modified.", file=sys.stderr)
             return 1
 
-    # cur_size > pub_size ΓÇö new entries since last anchor (expected)
+    # cur_size > pub_size — new entries since last anchor (expected)
     # Verify the prefix matches
     tree = MerkleTree()
     for h in hashes[:pub_size]:
@@ -293,8 +291,8 @@ def main() -> int:
     parser.add_argument("mode", choices=["anchor", "verify", "history"],
                         help="anchor: generate+publish STH, verify: check bus, history: show STH")
     parser.add_argument("--bus-path", default="", help="Path to bus TSV file")
-    parser.add_argument("--machine", default=os.environ.get("MACHINE_NAME", "anvil"),
-                        help="Machine name (default: anvil or MACHINE_NAME env)")
+    parser.add_argument("--machine", default=os.environ.get("MACHINE_NAME", "unknown"),
+                        help="Machine name (default: unknown or MACHINE_NAME env)")
     parser.add_argument("--dry-run", action="store_true", help="Don't publish, just print")
     args = parser.parse_args()
 

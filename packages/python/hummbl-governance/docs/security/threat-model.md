@@ -4,13 +4,13 @@
 **Issue:** #409 (gap-4)
 **Federal standards:** NIST 800-53 RA-3 (Risk Assessment), SC-7 (Boundary Protection)
 **Date:** 2026-08-27
-**Status:** ACTIVE ΓÇö operator review required
+**Status:** ACTIVE — operator review required
 
 ## 1. Purpose
 
 This document identifies threats to the HUMMBL agent fleet, maps them
 to trust boundaries, and links them to NIST 800-53 controls. It is a
-living document ΓÇö updated when new components, boundaries, or threats
+living document — updated when new components, boundaries, or threats
 are identified.
 
 ## 2. System components
@@ -32,50 +32,50 @@ are identified.
 ## 3. Trust boundaries
 
 ```
-ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
-Γöé                     EXTERNAL (UNTRUSTED)                         Γöé
-Γöé  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ                    Γöé
-Γöé  Γöé  GitHub   Γöé  Γöé CloudflareΓöé  Γöé  Public   Γöé                    Γöé
-Γöé  Γöé   API     Γöé  Γöé  Network  Γöé  Γöé  Internet Γöé                    Γöé
-Γöé  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ                    Γöé
-Γöé        Γöé              Γöé                                          Γöé
-ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
-         Γöé BOUNDARY 1   Γöé BOUNDARY 2
-         Γöé GitHub API   Γöé Cloudflare Tunnel
-         Γöé auth + TLS   Γöé Access policy + TLS
-ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
-Γöé        Γû╝              Γû╝              INTERNAL (SEMI-TRUSTED)       Γöé
-Γöé  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ      Γöé
-Γöé  Γöé  Bus      Γöé  Γöé  CI       Γöé  Γöé  Agent    Γöé  Γöé  GPG      Γöé      Γöé
-Γöé  Γöé  Bridge   Γöé  Γöé  Runner   Γöé  Γöé  CLIs     Γöé  Γöé  Keyring  Γöé      Γöé
-Γöé  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ      Γöé
-Γöé        Γöé BOUNDARY 3                 Γöé BOUNDARY 4                   Γöé
-Γöé        Γöé Bus file I/O               Γöé Agent -> Gate                Γöé
-Γöé  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓû╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓû╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ               Γöé
-Γöé  Γöé           PRE-MUTATION GATE (gap-1)            Γöé               Γöé
-Γöé  Γöé  Identity resolution -> Authority check ->     Γöé               Γöé
-Γöé  Γöé  Two-person rule (HIGH/CRITICAL)               Γöé               Γöé
-Γöé  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ               Γöé
-Γöé                       Γöé BOUNDARY 5                                Γöé
-Γöé                       Γöé Gate -> GitHub API                        Γöé
-Γöé                       Γû╝                                           Γöé
-Γöé              [GitHub API mutation]                                Γöé
-Γöé                                                                  Γöé
-Γöé  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ               Γöé
-Γöé  Γöé           TAILSCALE NETWORK (BOUNDARY 6)      Γöé               Γöé
-Γöé  Γöé  Anvil <-> Delta <-> VPS                      Γöé               Γöé
-Γöé  Γöé  WireGuard encryption, ACL-scoped             Γöé               Γöé
-Γöé  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ               Γöé
-ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
-         Γöé BOUNDARY 7
-         Γöé Credential Manager -> Agent
-ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓû╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
-Γöé                     TRUSTED (OPERATOR)                           Γöé
-Γöé  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ  ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ                    Γöé
-Γöé  Γöé Operator  Γöé  Γöé Windows   Γöé  Γöé GPG keys  Γöé                    Γöé
-Γöé  Γöé (human)   Γöé  Γöé Cred Mgr  Γöé  Γöé (private) Γöé                    Γöé
-Γöé  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ  ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ                    Γöé
-ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+┌─────────────────────────────────────────────────────────────────┐
+│                     EXTERNAL (UNTRUSTED)                         │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐                    │
+│  │  GitHub   │  │ Cloudflare│  │  Public   │                    │
+│  │   API     │  │  Network  │  │  Internet │                    │
+│  └─────┬─────┘  └─────┬─────┘  └───────────┘                    │
+│        │              │                                          │
+└────────┼──────────────┼──────────────────────────────────────────┘
+         │ BOUNDARY 1   │ BOUNDARY 2
+         │ GitHub API   │ Cloudflare Tunnel
+         │ auth + TLS   │ Access policy + TLS
+┌────────┼──────────────┼──────────────────────────────────────────┐
+│        ▼              ▼              INTERNAL (SEMI-TRUSTED)       │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐      │
+│  │  Bus      │  │  CI       │  │  Agent    │  │  GPG      │      │
+│  │  Bridge   │  │  Runner   │  │  CLIs     │  │  Keyring  │      │
+│  └─────┬─────┘  └───────────┘  └─────┬─────┘  └───────────┘      │
+│        │ BOUNDARY 3                 │ BOUNDARY 4                   │
+│        │ Bus file I/O               │ Agent -> Gate                │
+│  ┌─────▼─────────────────────────────▼───────────┐               │
+│  │           PRE-MUTATION GATE (gap-1)            │               │
+│  │  Identity resolution -> Authority check ->     │               │
+│  │  Two-person rule (HIGH/CRITICAL)               │               │
+│  └────────────────────┬──────────────────────────┘               │
+│                       │ BOUNDARY 5                                │
+│                       │ Gate -> GitHub API                        │
+│                       ▼                                           │
+│              [GitHub API mutation]                                │
+│                                                                  │
+│  ┌──────────────────────────────────────────────┐               │
+│  │           TAILSCALE NETWORK (BOUNDARY 6)      │               │
+│  │  Anvil <-> Delta <-> VPS                      │               │
+│  │  WireGuard encryption, ACL-scoped             │               │
+│  └──────────────────────────────────────────────┘               │
+└──────────────────────────────────────────────────────────────────┘
+         │ BOUNDARY 7
+         │ Credential Manager -> Agent
+┌────────▼─────────────────────────────────────────────────────────┐
+│                     TRUSTED (OPERATOR)                           │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐                    │
+│  │ Operator  │  │ Windows   │  │ GPG keys  │                    │
+│  │ (human)   │  │ Cred Mgr  │  │ (private) │                    │
+│  └───────────┘  └───────────┘  └───────────┘                    │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Boundary descriptions
@@ -84,7 +84,7 @@ are identified.
 |---|----------|----------|------------|
 | 1 | GitHub API | Agent/org -> GitHub | Per-agent auth (gap-3), TLS, branch protection (gap-7) |
 | 2 | Cloudflare Tunnel | Public -> internal services | Cloudflare Access policy, TLS |
-| 3 | Bus file I/O | Bridge/agents -> bus TSV | File permissions, bridge auth (no crypto integrity ΓÇö gap-6) |
+| 3 | Bus file I/O | Bridge/agents -> bus TSV | File permissions, bridge auth (no crypto integrity — gap-6) |
 | 4 | Agent -> Gate | Agent -> PreMutationGate | Identity resolution (gap-1), authority policy (gap-9) |
 | 5 | Gate -> GitHub | Gate -> GitHub API | Per-agent credential (gap-3), two-person rule (gap-1) |
 | 6 | Tailscale | Anvil <-> Delta <-> VPS | WireGuard encryption, Tailscale ACLs |
@@ -112,7 +112,7 @@ delete, force-push) without authorization.
 
 **NIST controls:** AC-3, AC-5, CM-5, IA-2
 
-**Residual risk:** LOW ΓÇö gate is built but not yet integrated into all
+**Residual risk:** LOW — gate is built but not yet integrated into all
 agent CLI call sites. Integration is gap-1 phase 2.
 
 ### T2: Bus data tampering (HIGH)
@@ -140,7 +140,7 @@ could modify or delete bus messages retroactively.
 **NIST controls:** SC-8 (Transmission Integrity), SC-16 (Transmission
 of Security Attributes)
 
-**Residual risk:** MEDIUM ΓÇö no crypto integrity until gap-6 is active.
+**Residual risk:** MEDIUM — no crypto integrity until gap-6 is active.
 
 ### T3: Secret exposure (HIGH)
 
@@ -162,7 +162,7 @@ exposed through bus messages, commits, or logs.
 
 **NIST controls:** SC-12, SC-13, IA-5
 
-**Residual risk:** LOW ΓÇö multiple layers of secret scanning.
+**Residual risk:** LOW — multiple layers of secret scanning.
 
 ### T4: Identity spoofing (MEDIUM)
 
@@ -187,7 +187,7 @@ be operator) to gain elevated privileges.
 
 **NIST controls:** IA-2, IA-6
 
-**Residual risk:** MEDIUM ΓÇö string lookup until cryptographic resolver
+**Residual risk:** MEDIUM — string lookup until cryptographic resolver
 is built (gap-3 phase 2).
 
 ### T5: Cross-host compromise (MEDIUM)
@@ -207,7 +207,7 @@ compromise of others via Tailscale network.
 
 **NIST controls:** SC-7, AC-3
 
-**Residual risk:** MEDIUM ΓÇö Tailscale ACLs are not regularly audited.
+**Residual risk:** MEDIUM — Tailscale ACLs are not regularly audited.
 
 ### T6: CI runner compromise (MEDIUM)
 
@@ -230,9 +230,9 @@ an attacker to inject code into CI pipelines or steal secrets.
 
 **NIST controls:** CM-3, CM-5, SC-7
 
-**Residual risk:** MEDIUM ΓÇö runner has broad access until isolated.
+**Residual risk:** MEDIUM — runner has broad access until isolated.
 
-### T7: Force-push history loss (LOW ΓÇö mitigated)
+### T7: Force-push history loss (LOW — mitigated)
 
 **Threat:** Force-push to protected branches destroys commit history.
 
@@ -247,7 +247,7 @@ an attacker to inject code into CI pipelines or steal secrets.
 
 **NIST controls:** CM-5, SI-7
 
-**Residual risk:** LOW ΓÇö all repos with main branches are protected.
+**Residual risk:** LOW — all repos with main branches are protected.
 
 ## 5. Case study: 2026-08-26 archive incident
 
@@ -279,7 +279,7 @@ no pre-mutation gate in place.
 - Authorization enforcement must be at the API call boundary, not in
   agent discretion
 - HIGH/CRITICAL operations require operator DECISION receipt (two-person
-  rule) ΓÇö agents must not self-authorize destructive operations
+  rule) — agents must not self-authorize destructive operations
 - Per-agent authentication is necessary for attribution and revocation
 
 ## 6. NIST 800-53 control mapping

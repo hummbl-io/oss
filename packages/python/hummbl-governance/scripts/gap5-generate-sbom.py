@@ -18,6 +18,7 @@ import hashlib
 import json
 import sys
 import time
+import uuid
 from pathlib import Path
 
 try:
@@ -114,7 +115,7 @@ def generate_sbom(repo_path: Path) -> dict:
     sbom = {
         "bomFormat": "CycloneDX",
         "specVersion": "1.5",
-        "serialNumber": f"urn:uuid:{hashlib.uuid4()}" if hasattr(hashlib, 'uuid4') else "",
+        "serialNumber": f"urn:uuid:{uuid.uuid4()}",
         "version": 1,
         "metadata": {
             "timestamp": timestamp,

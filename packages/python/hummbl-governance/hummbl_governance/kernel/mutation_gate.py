@@ -24,7 +24,7 @@ NIST 800-53 AC-3 (Access Enforcement), AC-5 (Separation of Duties),
 CM-5 (Access Restrictions for Change), DoD Zero Trust "Verify Explicit
 Access."
 
-Operator decision (2026-08-27): pluggable identity resolver ΓÇö ship with
+Operator decision (2026-08-27): pluggable identity resolver — ship with
 string-lookup default, gap-3 swaps in cryptographic proof as a new
 resolver implementation without gate changes.
 """
@@ -64,7 +64,7 @@ class IdentityResolver(Protocol):
 
     Gap-1 ships with StringLookupResolver (wraps IdentityEngine.resolve).
     Gap-3 will provide CryptographicIdentityResolver that adds
-    cryptographic proof-of-identity ΓÇö no gate changes needed.
+    cryptographic proof-of-identity — no gate changes needed.
     """
 
     def resolve(self, agent_id: str) -> Any:
@@ -77,7 +77,7 @@ class IdentityResolver(Protocol):
 
 
 class StringLookupResolver:
-    """Default identity resolver ΓÇö wraps IdentityEngine.resolve().
+    """Default identity resolver — wraps IdentityEngine.resolve().
 
     This is the current string-lookup identity resolution. Gap-3 will
     replace this with CryptographicIdentityResolver.
@@ -253,7 +253,7 @@ class PreMutationGate:
                     decision_receipt_required=True,
                     decision_receipt_provided=False,
                 )
-            # Receipt provided ΓÇö record it
+            # Receipt provided — record it
             return GateDecision(
                 permitted=True,
                 reason=f"{severity.value} mutation permitted with DECISION receipt",
@@ -265,7 +265,7 @@ class PreMutationGate:
                 receipt_id=decision_receipt,
             )
 
-        # LOW/MEDIUM ΓÇö authority check is sufficient
+        # LOW/MEDIUM — authority check is sufficient
         return GateDecision(
             permitted=True,
             reason=f"{severity.value} mutation permitted",

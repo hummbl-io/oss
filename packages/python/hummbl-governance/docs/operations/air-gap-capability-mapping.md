@@ -4,7 +4,7 @@
 **Federal standards:** DoD Zero Trust "Assume Breach" pillar, DISA STIG,
 S9 Air-Gap Proof Track
 **Date:** 2026-08-27
-**Status:** PREP ONLY ΓÇö operator decision (2026-08-27): prep, no demo run
+**Status:** PREP ONLY — operator decision (2026-08-27): prep, no demo run
 
 ## 1. Purpose
 
@@ -55,7 +55,7 @@ in `docs/operations/air-gap-demo-runbooks.md` for future execution.
 
 | Artifact | Type | S9 Level | Notes |
 |----------|------|----------|-------|
-| Zero runtime dependencies | Code | 2 | Stdlib-only production code ΓÇö no PyPI needed at runtime |
+| Zero runtime dependencies | Code | 2 | Stdlib-only production code — no PyPI needed at runtime |
 | `sbom.cdx.json` (gap-5) | SBOM | 2 | Component inventory for offline verification |
 | `scripts/gap5-audit-ci-pinning.py` | Script | 2 | CI pinning audit (runs offline) |
 
@@ -69,14 +69,14 @@ in `docs/operations/air-gap-demo-runbooks.md` for future execution.
 
 ### What's missing
 
-1. **Governance kernel air-gap test** ΓÇö no test verifies that
+1. **Governance kernel air-gap test** — no test verifies that
    `hummbl_governance` package imports and runs in an air-gapped
    environment (no internet, no PyPI)
-2. **Level 2 demo for governance kernel** ΓÇö no documented demonstration
+2. **Level 2 demo for governance kernel** — no documented demonstration
    that the governance kernel passes its test suite offline
-3. **Level 3 demo for governance kernel** ΓÇö no documented demonstration
+3. **Level 3 demo for governance kernel** — no documented demonstration
    on a fully air-gapped host
-4. **Evidence package integration** ΓÇö air-gap test results not in the
+4. **Evidence package integration** — air-gap test results not in the
    20-artifact evidence package (S8 #14)
 
 ### Remediation path
@@ -95,16 +95,16 @@ in `docs/operations/air-gap-demo-runbooks.md` for future execution.
 The `hummbl-governance` package is uniquely suited for air-gapped
 operation:
 
-1. **Zero runtime dependencies** ΓÇö `dependencies = []` in pyproject.toml.
+1. **Zero runtime dependencies** — `dependencies = []` in pyproject.toml.
    The package uses only Python stdlib in production code. No PyPI
    access needed at runtime.
-2. **Test deps are optional** ΓÇö `[test]` extras (pytest, ruff,
+2. **Test deps are optional** — `[test]` extras (pytest, ruff,
    cryptography) can be pre-cached via `AIR_GAPPED_DEPS.md` procedures.
-3. **No network calls in production code** ΓÇö the governance primitives
+3. **No network calls in production code** — the governance primitives
    (kill switch, circuit breaker, Merkle anchor, etc.) make no HTTP
    calls. Network calls are only in scripts that interact with GitHub
    or the bus bridge.
-4. **SBOM exists** (gap-5) ΓÇö component inventory available for offline
+4. **SBOM exists** (gap-5) — component inventory available for offline
    verification.
 
 This means the governance kernel can be installed, imported, and

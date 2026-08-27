@@ -3,13 +3,13 @@
 **Issue:** #415 (gap-10)
 **Federal standards:** S9 Air-Gap Proof Track, DoD Zero Trust
 **Date:** 2026-08-27
-**Status:** PREP ONLY ΓÇö operator decision (2026-08-27): prep, no demo run
+**Status:** PREP ONLY — operator decision (2026-08-27): prep, no demo run
 
 ## 1. Purpose
 
 This document provides runbooks for demonstrating the HUMMBL governance
 kernel's air-gap capability at S9 Level 2 (Offline Capable) and Level 3
-(Air-Gapped). These are prep artifacts ΓÇö the operator chose not to run
+(Air-Gapped). These are prep artifacts — the operator chose not to run
 demos in this phase.
 
 ## 2. Level 2: Offline Capable Demonstration
@@ -24,7 +24,7 @@ using only pre-cached dependencies.
 
 - Python 3.11+ installed
 - pip cache populated with test dependencies (pytest, pytest-cov, ruff,
-  build, cryptography) ΓÇö see `AIR_GAPPED_DEPS.md` for download procedure
+  build, cryptography) — see `AIR_GAPPED_DEPS.md` for download procedure
 - `hummbl-governance` source code available (git clone or tarball)
 - Network egress disabled (firewall block or disconnected NIC)
 

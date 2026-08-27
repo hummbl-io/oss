@@ -4,7 +4,7 @@
 Enumerates all non-archived hummbl-io repos, checks branch protection
 on main, and reports which repos are unprotected or allow force-pushes.
 
-Read-only ΓÇö no mutations. Outputs JSON for the audit report.
+Read-only — no mutations. Outputs JSON for the audit report.
 """
 import json
 import subprocess
@@ -39,14 +39,14 @@ def check_repo(name):
 
     # Also check if main branch exists
     if code == 404:
-        # Could be no protection OR no main branch ΓÇö check branch existence
+        # Could be no protection OR no main branch — check branch existence
         bc, _ = gh_api(f"repos/hummbl-io/{name}/branches/main")
         if bc == 404:
             return {"repo": name, "status": "no-main-branch"}
         return {"repo": name, "status": "unprotected"}
 
     if code == 200:
-        # Protected ΓÇö check force_push setting via detailed query
+        # Protected — check force_push setting via detailed query
         try:
             r = subprocess.run(
                 ["gh", "api", f"repos/hummbl-io/{name}/branches/main/protection",

@@ -224,7 +224,7 @@ class TestPreMutationGate:
         assert "Authority denied" in decision.reason
 
     def test_force_push_blocked_without_receipt(self) -> None:
-        """Force-push is HIGH ΓÇö blocked without DECISION receipt."""
+        """Force-push is HIGH — blocked without DECISION receipt."""
         gate = self._make_gate()
         decision = gate.check(
             agent_id="devin", role_id="devin", authority="github_mutation",

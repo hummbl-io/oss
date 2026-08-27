@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "",
+  "serialNumber": "urn:uuid:d509f19c-599b-4f23-ac98-33ffb8766ae2",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-08-27T11:22:37Z",
+    "timestamp": "2026-08-27T21:43:42Z",
     "tools": [
       {
         "vendor": "HUMMBL",
@@ -14,9 +14,9 @@
     ],
     "component": {
       "type": "library",
-      "bom-ref": "pkg:pypi/hummbl-governance@1.4.1",
+      "bom-ref": "pkg:pypi/hummbl-governance@1.4.2",
       "name": "hummbl-governance",
-      "version": "1.4.1",
+      "version": "1.4.2",
       "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem.",
       "licenses": [
         {
@@ -25,7 +25,7 @@
           }
         }
       ],
-      "purl": "pkg:pypi/hummbl-governance@1.4.1",
+      "purl": "pkg:pypi/hummbl-governance@1.4.2",
       "properties": [
         {
           "name": "hummbl:runtime_deps",
@@ -33,7 +33,7 @@
         },
         {
           "name": "hummbl:pkg_sha256",
-          "value": "dbccebab402a7fc5519c20a51dfc6b1be2880c4eba1b93224bfe0649460cea5b"
+          "value": "2fcece05d011710c0eca5b098ec0239ca6d3febf595667f547c4336068486032"
         }
       ]
     }
@@ -41,9 +41,9 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:pypi/hummbl-governance@1.4.1",
+      "bom-ref": "pkg:pypi/hummbl-governance@1.4.2",
       "name": "hummbl-governance",
-      "version": "1.4.1",
+      "version": "1.4.2",
       "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem.",
       "licenses": [
         {
@@ -52,7 +52,7 @@
           }
         }
       ],
-      "purl": "pkg:pypi/hummbl-governance@1.4.1",
+      "purl": "pkg:pypi/hummbl-governance@1.4.2",
       "properties": [
         {
           "name": "hummbl:runtime_deps",
@@ -60,7 +60,7 @@
         },
         {
           "name": "hummbl:pkg_sha256",
-          "value": "dbccebab402a7fc5519c20a51dfc6b1be2880c4eba1b93224bfe0649460cea5b"
+          "value": "2fcece05d011710c0eca5b098ec0239ca6d3febf595667f547c4336068486032"
         }
       ]
     },
@@ -137,7 +137,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:pypi/hummbl-governance@1.4.1",
+      "ref": "pkg:pypi/hummbl-governance@1.4.2",
       "dependsOn": [
         "pkg:pypi/build",
         "pkg:pypi/pytest",
