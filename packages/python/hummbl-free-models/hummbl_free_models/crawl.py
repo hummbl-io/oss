@@ -384,6 +384,24 @@ def crawl_all(providers_data, registry_entries, provider_filter=None, dry_run=Fa
     return all_verified, all_discovered, errors
 
 
+def _sanitize_error_for_log(error):
+    """Redact potentially sensitive values from error text before logging."""
+    text = str(error)
+    # Redact common secret-bearing key/value patterns.
+    text = re.sub(
+        r"(?i)\b(api[_\-\s]*key|password|passwd|token|secret|bearer)\b\s*[:=]\s*([^\s,;]+)",
+        r"\1=<redacted>",
+        text,
+    )
+    # Redact env var style credential identifiers (e.g. OPENAI_API_KEY).
+    text = re.sub(
+        r"\b[A-Z0-9_]*(API_KEY|TOKEN|PASSWORD|SECRET)[A-Z0-9_]*\b",
+        "<redacted>",
+        text,
+    )
+    return text
+
+
 def main():
     ap = argparse.ArgumentParser(description="Crawl live provider /models endpoints")
     ap.add_argument("--provider", help="Crawl only this provider id")
@@ -421,7 +439,7 @@ def main():
     print(f"  Errors:      {len(errors)} providers")
     if errors:
         for pid, err in errors:
-            print(f"    {pid}: {err}")
+            print(f"    {pid}: {_sanitize_error_for_log(err)}")
     print(f"  Total:       {len(final)} entries")
 
     if not args.no_save and not args.dry_run:
