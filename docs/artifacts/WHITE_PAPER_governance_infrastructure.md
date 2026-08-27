@@ -1,7 +1,7 @@
 # White Paper: Why Governance Infrastructure for AI-Native Teams
 
 **Status:** live v1.0 (promoted 2026-06-23 per ARTIFACT_STACK_PROMOTION_PACKET.md)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 1)
 **Reader:** enterprise buyer evaluating AI governance vendors; analyst covering AI governance

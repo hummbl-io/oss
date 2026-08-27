@@ -1,8 +1,8 @@
 # Memory System Registry
 
 **Status:** PROPOSED - candidate namespace registry, not canonical yet
-**Owner:** HUMMBL Research Institute
-**Decision authority:** HUMMBL Research Institute operator
+**Owner:** HUMMBL, LLC
+**Decision authority:** HUMMBL, LLC operator
 **Authoritative candidate:** `memory_system_registry.candidate.json`
 **Candidate schema:** `memory_system_registry.schema.json`
 **Validator:** `python scripts/validate_memory_system_registry.py`

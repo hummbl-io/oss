@@ -1,7 +1,7 @@
 # Doctrine: AI Governance Principles
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 11)
 **Reader:** team, agents (Codex, Claude Code, Gemini, OpenCode, Kai, Apex, Nexus, Auditor, Hermes, Devin)

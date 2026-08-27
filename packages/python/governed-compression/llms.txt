@@ -51,4 +51,4 @@ Apache 2.0
 ## Links
 
 - GitHub: https://github.com/hummbl-io/governed-compression
-- HUMMBL Research Institute: https://hummbl.io
+- HUMMBL, LLC: https://hummbl.io

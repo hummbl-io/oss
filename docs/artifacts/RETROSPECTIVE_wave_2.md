@@ -1,7 +1,7 @@
 # Retrospective: Wave 2 (Days 11-14)
 
 **Status:** live v1.0 (private)
-**Author:** Operator, HUMMBL Research Institute (drafted by Devin)
+**Author:** Operator, HUMMBL, LLC (drafted by Devin)
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md
 **Reader:** Operator, agents

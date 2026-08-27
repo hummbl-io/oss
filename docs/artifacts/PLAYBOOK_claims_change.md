@@ -1,7 +1,7 @@
 # Playbook: Claims Change Protocol
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 14)
 **Reader:** agents, operators

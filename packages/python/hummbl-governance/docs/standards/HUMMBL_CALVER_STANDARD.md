@@ -1,7 +1,7 @@
 # HUMMBL Calendar Versioning (CalVer) Standard v0.1
 
 **Status:** v0.1 (draft)
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Approving human:** Reuben Bowlby
 **Source of record:** this file in `hummbl-io/hummbl-governance` (canonical)
 **Depends on:** HUMMBL Repo Standard v0.1

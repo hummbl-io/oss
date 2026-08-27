@@ -1,7 +1,7 @@
 # Business Case: Game Engine Roadmap — Minecraft to Unreal (#408)
 
 **Status:** live v1.0 (private)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 6); GitHub issue hummbl-io/hummbl-production#408
 **Reader:** Operator (Principal Agent) — funding decision for Stage 0

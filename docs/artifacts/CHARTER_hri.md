@@ -1,19 +1,19 @@
-# Charter: HUMMBL Research Institute
+# Charter: HUMMBL, LLC
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 12)
 **Reader:** steward, operators, Board, external partners
 **Decision:** what HRI may decide, what it must escalate, how it operates
 
-**TL;DR:** HUMMBL Research Institute (HRI) is the steward of HUMMBL's governance doctrine, constitutions, and normative files. HRI is not a legal entity; it is a functional role held by Operator as Principal Agent, with delegation to trusted agents and human collaborators. This charter defines HRI's purpose, scope, authority, decision rights, and escalation rules. HRI may decide doctrine, standards, and coverage matrices; HRI must escalate funding, legal commitments, and strategic pivots to the Principal Agent.
+**TL;DR:** HUMMBL, LLC (HRI) is the steward of HUMMBL's governance doctrine, constitutions, and normative files. HRI is not a legal entity; it is a functional role held by Operator as Principal Agent, with delegation to trusted agents and human collaborators. This charter defines HRI's purpose, scope, authority, decision rights, and escalation rules. HRI may decide doctrine, standards, and coverage matrices; HRI must escalate funding, legal commitments, and strategic pivots to the Principal Agent.
 
 ---
 
 ## 1. Purpose
 
-HUMMBL Research Institute exists to:
+HUMMBL, LLC exists to:
 
 1. **Steward HUMMBL's governance doctrine** — the 10 AI governance principles (`DOCTRINE_ai_governance.md`) and their amendments
 2. **Steward HUMMBL's constitutions** — the repo-level constitutions (`CONSTITUTION.md` in each HUMMBL repo) and the machine-global AGENTS.md
@@ -198,11 +198,11 @@ HRI's authority is **internal to HUMMBL**. HRI does not claim authority over oth
 
 A reader can re-verify every claim in this charter independently:
 
-1. **HRI is the steward** — inspect `CONSTITUTION.md` §5 ("Steward: HUMMBL Research Institute").
+1. **HRI is the steward** — inspect `CONSTITUTION.md` §5 ("Steward: HUMMBL, LLC").
 2. **HRI stewards the doctrine** — inspect `docs/artifacts/DOCTRINE_ai_governance.md` (authored by HRI).
 3. **HRI stewards coverage matrices** — inspect `hummbl-io/hummbl-governance/docs/coverage/` (maintained by HRI).
 4. **HRI convenes the Board** — inspect the Board review log in `docs/artifacts/ARTIFACT_MANIFEST.md` (Board meeting 2026-06-23).
-5. **HRI is not a legal entity** — this is a self-declaration; verify by checking that no incorporation documents exist for "HUMMBL Research Institute" (it is a functional role, not a legal entity).
+5. **HRI is not a legal entity** — this is a self-declaration; verify by checking that no incorporation documents exist for "HUMMBL, LLC" (it is a functional role, not a legal entity).
 6. **The Director is the Principal Agent** — inspect the authority boundary section in any HUMMBL artifact.
 7. **The Board is advisory** — inspect the Board Constitution Registry and the board-meeting-orchestrator skill.
 

@@ -4,7 +4,7 @@
 **Promotion posture:** ADAPT_REQUIRED
 **Canonical status:** NOT_CANON
 **Origin:** External research artifact (ChatGPT synthesis), ingested 2026-06-25
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Validated scope:** mapped against current 498-framework inventory; all inventory items map to >=1 family; all 17 cited sources verified reachable and claim-accurate (2026-06-25)
 **Unvalidated scope:** global exhaustiveness, HUMMBL primitive alignment, YAML schema conformance, stack-to-tier reconciliation
 **Companion artifact:** `docs/research/ai-governance-framework-inventory.md` (498 frameworks catalogued)
