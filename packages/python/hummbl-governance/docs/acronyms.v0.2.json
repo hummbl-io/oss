@@ -1,0 +1,78 @@
+{
+  "version": "0.2.0",
+  "last_updated": "2026-08-27",
+  "source": "maintainer-confirmed 2026-08-27",
+  "acronyms": {
+    "HUMMBL": {
+      "expansion": "Highly Useful Mental Model Base Language",
+      "letter_map": {
+        "H": "Highly",
+        "U": "Useful",
+        "M": "Model",
+        "B": "Base",
+        "L": "Language"
+      },
+      "origin": "Base120 (120 mental models across 6 transformation families: P, IN, CO, DE, RE, SY) is the 'Base Language' for reasoning. HUMMBL is the umbrella that makes those models 'Highly Useful' by wrapping them in governance, coordination, and operational infrastructure.",
+      "misuse_notes": "Prior to 2026-08-27, no acronym expansion was recorded in the project. 27 sites across docs mischaracterized HUMMBL by describing its function (governance, compliance, safety, evidence) instead of its name. HUMMBL is not 'an AI governance company' or 'a governance platform' — those are things it does, not what it is.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    },
+    "BKI": {
+      "expansion": "Belonging as Knowledge Infrastructure",
+      "letter_map": {
+        "B": "Belonging",
+        "K": "Knowledge",
+        "I": "Infrastructure"
+      },
+      "origin": "Belonging as the structural precondition for knowledge creation, transmission, and transformation.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    },
+    "ARCANA": {
+      "expansion": "Not an acronym — proper name for the philosophical lens fleet",
+      "letter_map": {},
+      "origin": "Named after the Latin 'arcanum' (secret/mystery). The 28+ agent philosophical lens fleet.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    },
+    "PRAXIS": {
+      "expansion": "Not an acronym — proper name for the practice/application layer",
+      "letter_map": {},
+      "origin": "Greek for 'practice' — the application of theory to action.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    },
+    "EVIDENCE": {
+      "expansion": "Not an acronym — proper name for the evidence/proof layer",
+      "letter_map": {},
+      "origin": "English word used as proper noun for the evidentiary boundary layer.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    },
+    "CLP": {
+      "expansion": "Cognitive Ledger Protocol",
+      "letter_map": {
+        "C": "Cognitive",
+        "L": "Ledger",
+        "P": "Protocol"
+      },
+      "origin": "The protocol for durable cognitive state recording.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    },
+    "KRINEIA": {
+      "expansion": "Not an acronym — proper name for the governance receipt system",
+      "letter_map": {},
+      "origin": "Greek for 'judgment/decision' — the receipt and audit trail system.",
+      "tags": [
+        "HUMMBL:SY"
+      ]
+    }
+  }
+}
