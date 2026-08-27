@@ -33,5 +33,9 @@ PyPI = "https://pypi.org/project/hummbl-compass/"
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hummbl_compass*"]
+
 [tool.pytest.ini_options]
 pythonpath = [".", "hummbl_compass"]

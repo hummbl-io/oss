@@ -19,7 +19,7 @@ CLI::
     python -m compass "benchmark a kernel on Metal"
     python -m compass --by-base120 SY20
     python -m compass --gaps
-    python -m compass --bridges hummbl-bki
+    python -m compass --bridges hummbl-governance
 """
 
 from __future__ import annotations
