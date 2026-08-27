@@ -95,7 +95,7 @@ These are the articles a high-risk provider must satisfy operationally. Here is 
 | Art. 9  | Risk management system (continuous, iterative)         | Governance bus (every agent action emits a tuple); circuit breaker + kill switch for residual risk control                                                                                           | `governance_bus` tuples with `INTENT`, `DCT`, adverse-event types; `circuit_breaker` and `kill_switch` events |
 | Art. 10 | Data and data governance                               | `ATTEST` and `EVIDENCE` tuple types for dataset provenance, transformation chain, bias examination                                                                                                   | Dataset-card schema; governance bus `DATASET` tuple type                                                      |
 | Art. 11 | Technical documentation (Annex IV)                     | `compliance_mapper --framework eu-ai-act --export annex-iv` generates Annex IV documentation from compliance-mapper output                                                                           | Live-regenerated on every release                                                                             |
-| Art. 12 | Record-keeping (automatic logs over lifetime)          | Append-only governance bus (JSONL) + cognition ledger (JSONL); every agent action, every delegation, every kill-switch event recorded; retention configurable, default 5+ years aligned with Art. 19 | `_state/coordination/messages.tsv`, `_state/cognition/ledger.jsonl`                                           |
+| Art. 12 | Record-keeping (automatic logs over lifetime)          | Append-only governance bus (JSONL) + cognition ledger (JSONL); every agent action, every delegation, every kill-switch event recorded; retention configurable, default 5+ years aligned with Art. 19 | `the coordination bus log`, `the cognition ledger`                                           |
 | Art. 13 | Transparency (instructions for use, interpretability)  | `INTENT` tuples capture purpose and objectives; delegation chain (`DCT`) makes the decision path legible                                                                                             | `INTENT` tuple type; `DCT` chain                                                                              |
 | Art. 14 | Human oversight                                        | Kill switch (4 modes: DISENGAGED → HALT_NONCRITICAL → HALT_ALL → EMERGENCY); delegation token expiry; circuit breaker automatic halt                                                                 | `kill_switch_core.py`, `delegation_token.py`, `circuit_breaker.py`                                            |
 | Art. 15 | Accuracy, robustness, cybersecurity                    | 1,234 governance tests (per-primitive coverage); circuit breaker for robustness; HMAC-SHA256 signed delegation tokens for integrity                                                                  | `pytest` corpus; `circuit_breaker.py`; `delegation_token.py`                                                  |
@@ -110,7 +110,7 @@ A compliance buyer integrates HUMMBL into their AI system's runtime. Every agent
 ```python
 from hummbl_governance import ComplianceMapper
 
-mapper = ComplianceMapper(governance_dir="_state/coordination")
+mapper = ComplianceMapper(governance_dir="the coordination bus")
 report = mapper.generate_eu_ai_act_report(days=30)
 print(report.to_json())
 ```
@@ -219,7 +219,7 @@ A reader can re-verify every claim in this paper independently:
 1. **The EU AI Act exists and the deadline is August 2, 2026** — check the official text at https://eur-lex.europa.eu/eli/reg/2024/1689/oj. Article 113 sets the application dates.
 2. **HUMMBL's coverage matrix exists** — inspect `hummbl-io/hummbl-governance/docs/coverage/eu-ai-act.md`. 306 lines, 113 articles, all 13 annexes.
 3. **The compliance mapper exists and generates EU AI Act reports** — `pip install hummbl-governance` and run `compliance_mapper --framework eu-ai-act --days 30`.
-4. **The governance bus exists** — inspect `_state/coordination/messages.tsv` in any HUMMBL-instrumented repo.
+4. **The governance bus exists** — inspect `the coordination bus log` in any HUMMBL-instrumented repo.
 5. **The KRINEIA receipt chain exists** — inspect `_receipts/krineia/primary.jsonl` in `hummbl-io/hummbl-production`.
 6. **HUMMBL is open-source** — check https://github.com/hummbl-io/hummbl-governance for Apache 2.0 license.
 7. **The 1,234 tests exist** — clone `hummbl-io/hummbl-governance` and run `pytest --collect-only`.

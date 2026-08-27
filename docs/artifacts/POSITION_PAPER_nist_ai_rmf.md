@@ -91,7 +91,7 @@ A compliance buyer integrates HUMMBL into their AI system's runtime. Every agent
 ```python
 from hummbl_governance import ComplianceMapper
 
-mapper = ComplianceMapper(governance_dir="_state/coordination")
+mapper = ComplianceMapper(governance_dir="the coordination bus")
 report = mapper.generate_nist_rmf_report(days=30)
 print(report.to_json())
 ```
@@ -203,7 +203,7 @@ A reader can re-verify every claim in this paper independently:
 1. **NIST AI RMF 1.0 exists** — check the official document at https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf (NIST AI 100-1, January 2023).
 2. **HUMMBL's coverage matrix exists** — inspect `hummbl-io/hummbl-governance/docs/coverage/nist-ai-rmf.md`. 217 lines, ~70 subcategories, all 4 functions.
 3. **The compliance mapper exists and generates NIST AI RMF reports** — `pip install hummbl-governance` and run `compliance_mapper --framework nist-ai-rmf --days 30`.
-4. **The governance bus exists** — inspect `_state/coordination/messages.tsv` in any HUMMBL-instrumented repo.
+4. **The governance bus exists** — inspect `the coordination bus log` in any HUMMBL-instrumented repo.
 5. **The KRINEIA receipt chain exists** — inspect `_receipts/krineia/primary.jsonl` in `hummbl-io/hummbl-production`.
 6. **HUMMBL is open-source** — check https://github.com/hummbl-io/hummbl-governance for Apache 2.0 license.
 7. **OMB Circular M-24-10 requires AI RMF alignment for federal AI vendors** — check the OMB circular at https://www.whitehouse.gov/wp-content/uploads/2024/03/M-24-10-Advancing-Governance-Innovation-and-Risk-Management-for-Agency-Use-of-Artificial-Intelligence.pdf.

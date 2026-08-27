@@ -243,8 +243,8 @@ A reader can verify an agent is properly onboarded by:
 2. **Guardrail exists:** `ls .agents/rules/<agent>-guardrails.md`
 3. **Bus identity is approved:** `python3 -c "from hummbl_governance.services.agent_identity import is_approved; print(is_approved('<bus_id>'))"`
 4. **Model tier is assigned:** `grep "<agent-name>" .agents/rules/model-tier-policy.md`
-5. **Agent has posted to the bus:** `grep "^<timestamp>\s*<bus_id>" hummbl_governance/_state/coordination/messages.tsv | head -5`
-6. **30-day review conducted (if 30+ days old):** `grep "<agent-name>.*30-day review" hummbl_governance/_state/coordination/messages.tsv`
+5. **Agent has posted to the bus:** `grep "^<timestamp>\s*<bus_id>" the coordination bus log | head -5`
+6. **30-day review conducted (if 30+ days old):** `grep "<agent-name>.*30-day review" the coordination bus log`
 
 If any verification fails, the agent is not properly onboarded. Open an issue.
 
@@ -279,7 +279,7 @@ A reader can re-verify this playbook's claims by:
 2. **The guardrail directory exists:** `ls .agents/rules/ | grep guardrails`
 3. **The bus identity registry exists:** `ls hummbl_governance/services/agent_identity.py`
 4. **The model tier policy exists:** `ls .agents/rules/model-tier-policy.md MODEL_TIERS.md`
-5. **The coordination bus exists:** `ls hummbl_governance/_state/coordination/messages.tsv`
+5. **The coordination bus exists:** `ls the coordination bus log`
 6. **The KRINEIA receipt chain exists:** `wc -l _receipts/krineia/primary.jsonl`
 
 If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`.
