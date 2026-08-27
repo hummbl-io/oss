@@ -39,7 +39,7 @@ PyPI = "https://pypi.org/project/governed-compression/"
 
 [project.optional-dependencies]
 test = [
-  "pytest>=7",
+  "pytest>=9.1.1",
   "ruff>=0.4",
 ]
 
