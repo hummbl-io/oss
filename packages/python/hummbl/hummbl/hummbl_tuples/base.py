@@ -1,23 +1,26 @@
 from __future__ import annotations
+
 import hashlib
 import json
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, Type, TypeVar
 
 T = TypeVar("T", bound="TypedTuple")
+
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class TypedTuple:
     """Base class for all HUMMBL Typed Tuples.
-    
+
     Tuples are immutable (frozen) and include a deterministic SHA-256 hash
     of their content for cryptographic integrity and chaining.
     """
+
     tuple_type: str
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     version: str = "v1"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert tuple to a dictionary, ensuring all values are serializable."""
         return asdict(self)

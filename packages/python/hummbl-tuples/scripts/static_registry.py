@@ -35,13 +35,15 @@ def generate_manifest(schemas_dir: Path) -> dict[str, Any]:
         tt_schema = props.get("tuple_type", {})
         if isinstance(tt_schema, dict):
             tuple_type = tt_schema.get("const")
-        schemas.append({
-            "schema_id": p.name,
-            "url": schema.get("$id", ""),
-            "version": schema.get("version", "unknown"),
-            "title": schema.get("title", ""),
-            "tuple_type": tuple_type,
-        })
+        schemas.append(
+            {
+                "schema_id": p.name,
+                "url": schema.get("$id", ""),
+                "version": schema.get("version", "unknown"),
+                "title": schema.get("title", ""),
+                "tuple_type": tuple_type,
+            }
+        )
     return {
         "registry_version": "0.1.0",
         "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -52,10 +54,10 @@ def generate_manifest(schemas_dir: Path) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--schemas-dir", default=str(DEFAULT_SCHEMAS_DIR),
-                        help="Directory containing schema files")
-    parser.add_argument("--output", default=str(DEFAULT_OUTPUT),
-                        help="Output manifest file path")
+    parser.add_argument(
+        "--schemas-dir", default=str(DEFAULT_SCHEMAS_DIR), help="Directory containing schema files"
+    )
+    parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Output manifest file path")
     args = parser.parse_args(argv)
 
     schemas_dir = Path(args.schemas_dir)

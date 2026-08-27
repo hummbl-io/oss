@@ -2,7 +2,7 @@
 
 **Author:** Operator & the HUMMBL Fleet  
 **Date:** August 2026  
-**Canonical Surface:** [`hummbl-tuples`](file:///<repo-root>/PROJECTS/hummbl-tuples), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`oss`](file:///<repo-root>/PROJECTS/oss)  
+**Canonical Surface:** [`hummbl-tuples`](https://github.com/hummbl-io/hummbl-tuples), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`oss`](https://github.com/hummbl-io/oss)  
 **Status:** Protocol Engineering Reference  
 
 ---

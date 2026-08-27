@@ -22,7 +22,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 MCP_PATH = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(MCP_PATH))
 
@@ -31,6 +30,7 @@ import mcp_physical as mcp  # noqa: E402
 
 def fresh_module():
     import mcp_physical
+
     importlib.reload(mcp_physical)
     return mcp_physical
 
@@ -39,13 +39,17 @@ def fresh_module():
 # KinematicGovernor tools
 # ---------------------------------------------------------------------------
 
+
 class TestKinematicCheckMotion:
     def test_within_limits(self):
-        result = mcp.handle_tool("kinematic_check_motion", {
-            "velocity": 0.5,
-            "force": 20.0,
-            "jerk": 2.0,
-        })
+        result = mcp.handle_tool(
+            "kinematic_check_motion",
+            {
+                "velocity": 0.5,
+                "force": 20.0,
+                "jerk": 2.0,
+            },
+        )
         assert result["allowed"] is True
         assert "Within kinematic limits" in result["reason"]
 
@@ -138,6 +142,7 @@ class TestKinematicScaledVel:
 # pHRISafetyMonitor tools
 # ---------------------------------------------------------------------------
 
+
 class TestPhriCheckSafety:
     def test_normal_safe_distance(self):
         result = mcp.handle_tool("phri_check_safety", {"distance": 2.0})
@@ -159,10 +164,13 @@ class TestPhriCheckSafety:
         assert result["mode"] == "emergency"
 
     def test_collision_overrides_safe_distance(self):
-        result = mcp.handle_tool("phri_check_safety", {
-            "distance": 5.0,
-            "collision": True,
-        })
+        result = mcp.handle_tool(
+            "phri_check_safety",
+            {
+                "distance": 5.0,
+                "collision": True,
+            },
+        )
         assert result["mode"] == "emergency"
 
     def test_no_input_is_normal(self):
@@ -195,25 +203,31 @@ class TestPhriGetConfig:
 
 class TestPhriBatchCheck:
     def test_batch_all_safe(self):
-        result = mcp.handle_tool("phri_batch_check", {
-            "readings": [
-                {"distance": 2.0},
-                {"distance": 3.0},
-                {"distance": 1.5},
-            ],
-        })
+        result = mcp.handle_tool(
+            "phri_batch_check",
+            {
+                "readings": [
+                    {"distance": 2.0},
+                    {"distance": 3.0},
+                    {"distance": 1.5},
+                ],
+            },
+        )
         assert result["total"] == 3
         assert result["emergency_count"] == 0
         assert result["any_emergency"] is False
 
     def test_batch_mixed(self):
-        result = mcp.handle_tool("phri_batch_check", {
-            "readings": [
-                {"distance": 2.0},          # normal
-                {"distance": 0.3},           # caution
-                {"collision": True},          # emergency
-            ],
-        })
+        result = mcp.handle_tool(
+            "phri_batch_check",
+            {
+                "readings": [
+                    {"distance": 2.0},  # normal
+                    {"distance": 0.3},  # caution
+                    {"collision": True},  # emergency
+                ],
+            },
+        )
         assert result["total"] == 3
         assert result["emergency_count"] == 1
         assert result["caution_count"] == 1
@@ -229,9 +243,12 @@ class TestPhriBatchCheck:
         assert "error" in result
 
     def test_batch_results_per_reading(self):
-        result = mcp.handle_tool("phri_batch_check", {
-            "readings": [{"distance": 1.0}, {"distance": 0.05}],
-        })
+        result = mcp.handle_tool(
+            "phri_batch_check",
+            {
+                "readings": [{"distance": 1.0}, {"distance": 0.05}],
+            },
+        )
         assert len(result["results"]) == 2
         assert result["results"][0]["index"] == 0
         assert result["results"][1]["index"] == 1
@@ -240,6 +257,7 @@ class TestPhriBatchCheck:
 # ---------------------------------------------------------------------------
 # Protocol-level tests
 # ---------------------------------------------------------------------------
+
 
 class TestProtocol:
     def _call(self, req_obj):
@@ -266,22 +284,26 @@ class TestProtocol:
         assert len(tools) == 6
 
     def test_tools_call_get_limits(self):
-        resp = self._call({
-            "jsonrpc": "2.0",
-            "id": 3,
-            "method": "tools/call",
-            "params": {"name": "kinematic_get_limits", "arguments": {}},
-        })
+        resp = self._call(
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "tools/call",
+                "params": {"name": "kinematic_get_limits", "arguments": {}},
+            }
+        )
         content = json.loads(resp["result"]["content"][0]["text"])
         assert "max_velocity" in content
 
     def test_tools_call_phri_config(self):
-        resp = self._call({
-            "jsonrpc": "2.0",
-            "id": 4,
-            "method": "tools/call",
-            "params": {"name": "phri_get_config", "arguments": {}},
-        })
+        resp = self._call(
+            {
+                "jsonrpc": "2.0",
+                "id": 4,
+                "method": "tools/call",
+                "params": {"name": "phri_get_config", "arguments": {}},
+            }
+        )
         content = json.loads(resp["result"]["content"][0]["text"])
         assert "min_distance" in content
 

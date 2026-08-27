@@ -128,7 +128,7 @@ def _compute_pairwise_similarity(
     ids = list(doc_tokens.keys())
 
     for i, id_a in enumerate(ids):
-        for id_b in ids[i + 1:]:
+        for id_b in ids[i + 1 :]:
             tokens_a = doc_tokens[id_a]
             tokens_b = doc_tokens[id_b]
             intersection = len(tokens_a & tokens_b)
@@ -202,9 +202,7 @@ def _group_similar(
 
     # Sort entries by number of similar neighbors (most connected first)
     scored = [
-        (eid, len(similarity.get(eid, {})))
-        for eid in entry_map
-        if eid in similarity
+        (eid, len(similarity.get(eid, {}))) for eid in entry_map if eid in similarity
     ]
     scored.sort(key=lambda x: x[1], reverse=True)
 
@@ -243,8 +241,7 @@ def _synthesize_group(
 ) -> str | None:
     """Synthesize a consolidated summary for a group of related entries."""
     entries_text = "\n".join(
-        f"- [{e.type}] ({e.agent}, {e.timestamp[:10]}): {e.content}"
-        for e in group
+        f"- [{e.type}] ({e.agent}, {e.timestamp[:10]}): {e.content}" for e in group
     )
 
     prompt = f"""You are a knowledge consolidator for a multi-agent AI system.
@@ -273,8 +270,12 @@ def run_consolidation(
     """
     if _is_kill_switch_engaged():
         logger.warning("Kill switch engaged, skipping consolidation")
-        return {"groups_found": 0, "consolidated": 0, "skipped": 0,
-                "errors": ["kill switch engaged"]}
+        return {
+            "groups_found": 0,
+            "consolidated": 0,
+            "skipped": 0,
+            "errors": ["kill switch engaged"],
+        }
 
     # Read all entries
     entries = read_entries(ledger_path=ledger_path, limit=999_999)
@@ -286,7 +287,8 @@ def run_consolidation(
 
     # Filter to unconsolidated entries only
     candidates = [
-        e for e in entries
+        e
+        for e in entries
         if e.id not in already_consolidated and "consolidated" not in e.tags
     ]
 
@@ -374,7 +376,9 @@ def status(*, ledger_path: str | Path | None = None) -> dict[str, Any]:
         "total_entries": len(entries),
         "consolidated_entries": len(consolidated_entries),
         "source_entries_covered": len(consolidated_ids),
-        "unconsolidated": len(entries) - len(consolidated_entries) - len(consolidated_ids),
+        "unconsolidated": len(entries)
+        - len(consolidated_entries)
+        - len(consolidated_ids),
     }
 
 
@@ -390,9 +394,17 @@ def main(argv: list[str] | None = None) -> int:
     subparsers = parser.add_subparsers(dest="command")
 
     p_run = subparsers.add_parser("run", help="Run consolidation pass")
-    p_run.add_argument("--dry-run", action="store_true", help="Show groups without writing")
-    p_run.add_argument("--model", default=DEFAULT_MODEL, help=f"Ollama model (default: {DEFAULT_MODEL})")
-    p_run.add_argument("--ollama-url", default=DEFAULT_OLLAMA_URL, help="Ollama base URL")
+    p_run.add_argument(
+        "--dry-run", action="store_true", help="Show groups without writing"
+    )
+    p_run.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Ollama model (default: {DEFAULT_MODEL})",
+    )
+    p_run.add_argument(
+        "--ollama-url", default=DEFAULT_OLLAMA_URL, help="Ollama base URL"
+    )
     p_run.add_argument("--ledger", help="Override ledger path")
 
     p_status = subparsers.add_parser("status", help="Show consolidation status")

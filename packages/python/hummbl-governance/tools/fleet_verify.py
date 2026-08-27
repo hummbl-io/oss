@@ -20,17 +20,18 @@ Exit codes:
 """
 
 import argparse
+import base64
 import json
 import os
 import subprocess
 import sys
 import time
-import base64
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 
 ORG = "hummbl-io"
 
 # --- Data classes ---
+
 
 @dataclass
 class RepoCheck:
@@ -39,6 +40,7 @@ class RepoCheck:
     fork: bool = False
     checks: dict = field(default_factory=dict)
     issues: list = field(default_factory=list)
+
 
 @dataclass
 class FleetReport:
@@ -49,7 +51,9 @@ class FleetReport:
     skipped: int = 0
     repos: list = field(default_factory=list)
 
+
 # --- API helpers ---
+
 
 def gh_api(endpoint):
     result = subprocess.run(["gh", "api", endpoint], capture_output=True, text=True)
@@ -57,13 +61,14 @@ def gh_api(endpoint):
         return None
     return json.loads(result.stdout)
 
+
 def get_all_repos(org=ORG):
     """Get all non-fork repos (including archived)."""
     # Use gh repo list which works for both orgs and user accounts
     result = subprocess.run(
-        ["gh", "repo", "list", org, "--limit", "200", "--json",
-         "name,isFork,isArchived,isPrivate"],
-        capture_output=True, text=True
+        ["gh", "repo", "list", org, "--limit", "200", "--json", "name,isFork,isArchived,isPrivate"],
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         return []
@@ -75,6 +80,7 @@ def get_all_repos(org=ORG):
         r["private"] = r.get("isPrivate", True)
     return repos
 
+
 def get_repo_tree(repo, org=ORG):
     """Get file tree for a repo."""
     data = gh_api(f"repos/{org}/{repo}/git/trees/HEAD?recursive=1")
@@ -82,17 +88,19 @@ def get_repo_tree(repo, org=ORG):
         return []
     return [item["path"] for item in data.get("tree", [])]
 
+
 def get_file_content(repo, path, org=ORG):
     """Get file content via API."""
     result = subprocess.run(
-        ["gh", "api", f"repos/{org}/{repo}/contents/{path}", "--jq", ".content"],
-        capture_output=True, text=True
+        ["gh", "api", f"repos/{org}/{repo}/contents/{path}", "--jq", ".content"], capture_output=True, text=True
     )
     if result.returncode != 0:
         return None
     return base64.b64decode(result.stdout.strip()).decode()
 
+
 # --- Check functions ---
+
 
 def check_governance_stack(repo, tree, archived):
     """Check that all required governance files are present."""
@@ -116,28 +124,34 @@ def check_governance_stack(repo, tree, archived):
             issues.append(f"MISSING: {req}")
 
     # Check for governance baseline ADR (any number, not just ADR-001)
-    has_governance_adr = any("repo-governance-baseline" in p.lower() and "docs/adr/" in p.lower()
-                             for p in tree)
+    has_governance_adr = any("repo-governance-baseline" in p.lower() and "docs/adr/" in p.lower() for p in tree)
     if not has_governance_adr and not archived:
         issues.append("MISSING: docs/adr/ADR-NNN-repo-governance-baseline.md (any number)")
 
     return issues
+
 
 def check_adr_format(repo, tree):
     """Check ADR filenames and basic format."""
     issues = []
     import re
 
-    adr_files = [p for p in tree if "docs/adr/" in p and p.endswith(".md")
-                 and "ADR_INDEX" not in p.upper() and "ADR_TEMPLATE" not in p.upper()
-                 and not os.path.basename(p).startswith("DRAFT")]
+    adr_files = [
+        p
+        for p in tree
+        if "docs/adr/" in p
+        and p.endswith(".md")
+        and "ADR_INDEX" not in p.upper()
+        and "ADR_TEMPLATE" not in p.upper()
+        and not os.path.basename(p).startswith("DRAFT")
+    ]
 
     if not adr_files:
         return issues  # No ADRs is not an error (some repos may not have any)
 
     # Patterns: standard ADR-NNN-title.md or domain-prefixed ADR-DOMAIN-NNN-title.md
-    standard_pat = re.compile(r'^ADR-(\d{3})-([a-z0-9-]+)\.md$')
-    domain_pat = re.compile(r'^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-([a-z0-9-]+)\.md$')
+    standard_pat = re.compile(r"^ADR-(\d{3})-([a-z0-9-]+)\.md$")
+    domain_pat = re.compile(r"^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-([a-z0-9-]+)\.md$")
 
     # Check filenames and duplicates per-directory
     by_dir = {}
@@ -167,14 +181,15 @@ def check_adr_format(repo, tree):
 
     return issues
 
+
 def check_missing_fields(repo, tree):
     """Check that baseline ADRs have all required fields."""
     issues = []
 
     # Find baseline ADR(s) — only in docs/adr/, not docs/handoffs/
-    adr_baselines = [p for p in tree if "docs/adr/" in p
-                     and "repo-governance-baseline" in p.lower()
-                     and p.endswith(".md")]
+    adr_baselines = [
+        p for p in tree if "docs/adr/" in p and "repo-governance-baseline" in p.lower() and p.endswith(".md")
+    ]
 
     for adr_path in adr_baselines:
         content = get_file_content(repo, adr_path)
@@ -182,8 +197,14 @@ def check_missing_fields(repo, tree):
             issues.append(f"FETCH_FAILED: {adr_path}")
             continue
 
-        required_fields = ["**Status:**", "**Date:**", "**Decision owner:**",
-                          "**Steward:**", "**Supersedes:**", "**Superseded by:**"]
+        required_fields = [
+            "**Status:**",
+            "**Date:**",
+            "**Decision owner:**",
+            "**Steward:**",
+            "**Supersedes:**",
+            "**Superseded by:**",
+        ]
 
         for field_marker in required_fields:
             if field_marker not in content:
@@ -191,7 +212,9 @@ def check_missing_fields(repo, tree):
 
     return issues
 
+
 # --- Main verify ---
+
 
 def verify_fleet(check_type="all", org=ORG, output_json=False):
     """Run verification across the fleet."""
@@ -254,14 +277,20 @@ def verify_fleet(check_type="all", org=ORG, output_json=False):
 
     return report, 0
 
+
 # --- CLI ---
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="Fleet Verification Tool — post-batch verification for fleet-wide operations"
     )
-    parser.add_argument("--check", choices=["governance-stack", "adr-format", "missing-fields", "all"],
-                        default="all", help="Type of check to run")
+    parser.add_argument(
+        "--check",
+        choices=["governance-stack", "adr-format", "missing-fields", "all"],
+        default="all",
+        help="Type of check to run",
+    )
     parser.add_argument("--org", default=ORG, help="GitHub org")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--fail-on-issues", action="store_true", help="Exit 1 if any issues found")
@@ -294,6 +323,7 @@ def main():
     if args.fail_on_issues and report.failed > 0:
         sys.exit(1)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

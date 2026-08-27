@@ -2,7 +2,7 @@
 
 **Author:** Operator & the HUMMBL Fleet  
 **Date:** August 2026  
-**Canonical Surface:** [`krineia`](file:///<repo-root>/PROJECTS/krineia), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`oss`](file:///<repo-root>/PROJECTS/oss)  
+**Canonical Surface:** [`krineia`](https://github.com/hummbl-io/krineia), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`oss`](https://github.com/hummbl-io/oss)  
 **Status:** Foundational Architecture Treatise  
 
 ---
@@ -90,7 +90,7 @@ KRINEIA formally adjudicates every autonomous operation against eleven non-negot
 KRINEIA is not merely an abstract mathematical paper. It is realized in two mutually reinforcing formats:
 
 1. **The Machine-Checkable Specification (`KRINEIA.tla` / `KRINEIA.cfg`):**
-   - Stored in [`krineia/papers/krineia-invariants/tla/`](file:///<repo-root>/PROJECTS/krineia/papers/krineia-invariants/tla).
+   - Stored in [`krineia/papers/krineia-invariants/tla/`](https://github.com/hummbl-io/krineiapapers/krineia-invariants/tla).
    - Explores over 1,420,000 discrete state transitions under the TLC Model Checker with **zero invariant violations**.
 2. **The Zero-Dependency Production Runtime (`hummbl-governance`):**
    - Implemented in **pure Python Standard Library (3.11+)** with zero third-party dependencies.

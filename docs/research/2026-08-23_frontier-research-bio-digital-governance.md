@@ -2,7 +2,7 @@
 
 **Research Focus:** Divergent frontier at the intersection of Synthetic Biology, Organoid Computing (OI), Brain-Computer Interfaces (BCI), and Runtime Neurorights Governance.  
 **Date:** August 2026  
-**Canonical Surfaces:** [`hummbl-medical`](file:///<repo-root>/PROJECTS/hummbl-medical), [`peptide-check`](file:///<repo-root>/PROJECTS/peptide-check), [`hummbl-cognition`](file:///<repo-root>/PROJECTS/hummbl-cognition)  
+**Canonical Surfaces:** [`hummbl-medical`](https://github.com/hummbl-io/hummbl-medical), [`peptide-check`](https://github.com/hummbl-io/peptide-check), [`hummbl-cognition`](https://github.com/hummbl-io/hummbl-cognition)  
 
 ---
 
@@ -37,7 +37,7 @@ While these technologies unlock revolutionary medical therapeutics, they create 
 - **The 2026 State-of-the-Art:**
   - Mandatory **Compute-Layer DNA Screening**: Synthesis providers require non-interactive cryptographic receipts (Proofs of Verification) demonstrating that the sequence passed a validated screening filter before DNA printers accept the job.
 - **Direct HUMMBL Mapping:**
-  - [`peptide-check`](file:///<repo-root>/PROJECTS/peptide-check) and `hummbl-medical` reflect this exact model: deterministic rule-based filters that validate peptide/protein claims and assert invariant safety before downstream synthesis execution.
+  - [`peptide-check`](https://github.com/hummbl-io/peptide-check) and `hummbl-medical` reflect this exact model: deterministic rule-based filters that validate peptide/protein claims and assert invariant safety before downstream synthesis execution.
 
 ---
 

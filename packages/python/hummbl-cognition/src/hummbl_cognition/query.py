@@ -91,9 +91,9 @@ def summarize_for_boot(
     prioritizing lessons and decisions.
     """
     # Calculate since timestamp
-    cutoff = (
-        datetime.now(timezone.utc) - timedelta(days=max_age_days)
-    ).replace(hour=0, minute=0, second=0, microsecond=0)
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     since = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     entries = active_entries(ledger_path=ledger_path, limit=max_entries * 2)

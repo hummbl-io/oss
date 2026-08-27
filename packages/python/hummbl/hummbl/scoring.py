@@ -62,8 +62,7 @@ class TraceScore:
             "trace_id": self.trace_id,
             "protocol_name": self.protocol_name,
             "dimensions": {
-                name: dimension.to_dict()
-                for name, dimension in self.dimensions.items()
+                name: dimension.to_dict() for name, dimension in self.dimensions.items()
             },
             "total_score": self.total_score,
             "max_score": self.max_score,
@@ -106,14 +105,10 @@ class StructuredToolUseScorer:
 
         dimensions = {
             "pre_tool_reasoning": self._score_pre_tool_reasoning(episodes),
-            "tool_discriminativeness": self._score_tool_discriminativeness(
-                episodes
-            ),
+            "tool_discriminativeness": self._score_tool_discriminativeness(episodes),
             "evidence_integration": self._score_evidence_integration(episodes),
             "recovery_behavior": self._score_recovery_behavior(episodes),
-            "final_artifact_quality": self._score_final_artifact_quality(
-                trace, episodes
-            ),
+            "final_artifact_quality": self._score_final_artifact_quality(trace, episodes),
         }
 
         total_score = sum(dimension.score for dimension in dimensions.values())
@@ -123,9 +118,7 @@ class StructuredToolUseScorer:
         if violations:
             notes.append("Protocol violations lower confidence in the score.")
         if not any(step.confidence is not None for step in trace.steps):
-            notes.append(
-                "Trace does not encode explicit step-level confidence yet."
-            )
+            notes.append("Trace does not encode explicit step-level confidence yet.")
 
         return TraceScore(
             trace_id=trace.id,
@@ -157,27 +150,18 @@ class StructuredToolUseScorer:
             for name in dimension_names
         }
 
-        protocol_conformant = sum(
-            1 for score in scores if not score.protocol_violations
-        )
+        protocol_conformant = sum(1 for score in scores if not score.protocol_violations)
         finalized = sum(1 for score in scores if score.outcome == "finalize")
         recoveries = sum(
             1
             for score in scores
-            if score.dimensions["recovery_behavior"].evidence.get(
-                "recovery_triggers", 0
-            )
-            > 0
+            if score.dimensions["recovery_behavior"].evidence.get("recovery_triggers", 0) > 0
         )
 
         return {
             "total": total,
-            "average_total_score": (
-                sum(score.total_score for score in scores) / total
-            ),
-            "average_normalized_score": (
-                sum(score.normalized_score for score in scores) / total
-            ),
+            "average_total_score": (sum(score.total_score for score in scores) / total),
+            "average_normalized_score": (sum(score.normalized_score for score in scores) / total),
             "max_total_score": max_total_score,
             "dimension_averages": dimension_averages,
             "protocol_conformance_rate": protocol_conformant / total,
@@ -188,28 +172,20 @@ class StructuredToolUseScorer:
     def _build_episodes(self, trace: ReasoningTrace) -> list[ToolUseEpisode]:
         episodes: list[ToolUseEpisode] = []
         for index, action in enumerate(trace.get_steps_by_type(StepType.ACTION)):
-            hypothesis = self._find_ancestor_of_type(
-                trace, action, StepType.HYPOTHESIS
-            )
+            hypothesis = self._find_ancestor_of_type(trace, action, StepType.HYPOTHESIS)
             context_observation = (
                 self._find_ancestor_of_type(trace, hypothesis, StepType.OBSERVATION)
                 if hypothesis is not None
                 else self._find_ancestor_of_type(trace, action, StepType.OBSERVATION)
             )
-            tool_observation = self._find_direct_child_of_type(
-                trace, action, StepType.OBSERVATION
-            )
+            tool_observation = self._find_direct_child_of_type(trace, action, StepType.OBSERVATION)
             evaluation = (
-                self._find_direct_child_of_type(
-                    trace, tool_observation, StepType.EVALUATION
-                )
+                self._find_direct_child_of_type(trace, tool_observation, StepType.EVALUATION)
                 if tool_observation is not None
                 else None
             )
             decision = (
-                self._find_direct_child_of_type(
-                    trace, evaluation, StepType.DECISION
-                )
+                self._find_direct_child_of_type(trace, evaluation, StepType.DECISION)
                 if evaluation is not None
                 else None
             )
@@ -226,9 +202,7 @@ class StructuredToolUseScorer:
             )
         return episodes
 
-    def _score_pre_tool_reasoning(
-        self, episodes: list[ToolUseEpisode]
-    ) -> DimensionScore:
+    def _score_pre_tool_reasoning(self, episodes: list[ToolUseEpisode]) -> DimensionScore:
         if not episodes:
             return DimensionScore(
                 name="pre_tool_reasoning",
@@ -241,22 +215,14 @@ class StructuredToolUseScorer:
         partial = 0
 
         for episode in episodes:
-            knowns = self._has_value(
-                episode.context_observation, "knowns"
-            )
-            unknowns = self._has_value(
-                episode.context_observation, "unknowns"
-            )
+            knowns = self._has_value(episode.context_observation, "knowns")
+            unknowns = self._has_value(episode.context_observation, "unknowns")
             candidate = self._has_value(episode.hypothesis, "candidate")
             tool_name = self._has_value(episode.action, "tool_name")
             why_now = self._has_value(episode.action, "why_now")
-            expected_signal = self._has_value(
-                episode.action, "expected_signal"
-            )
+            expected_signal = self._has_value(episode.action, "expected_signal")
 
-            if all(
-                [knowns, unknowns, candidate, tool_name, why_now, expected_signal]
-            ):
+            if all([knowns, unknowns, candidate, tool_name, why_now, expected_signal]):
                 score = 2
                 complete += 1
             elif tool_name and any([knowns, unknowns, candidate, why_now, expected_signal]):
@@ -281,9 +247,7 @@ class StructuredToolUseScorer:
             },
         )
 
-    def _score_tool_discriminativeness(
-        self, episodes: list[ToolUseEpisode]
-    ) -> DimensionScore:
+    def _score_tool_discriminativeness(self, episodes: list[ToolUseEpisode]) -> DimensionScore:
         if not episodes:
             return DimensionScore(
                 name="tool_discriminativeness",
@@ -298,9 +262,7 @@ class StructuredToolUseScorer:
         for episode in episodes:
             tool_name = str(episode.action.metadata.get("tool_name", "")).strip()
             why_now = str(episode.action.metadata.get("why_now", "")).strip()
-            expected_signal = str(
-                episode.action.metadata.get("expected_signal", "")
-            ).strip()
+            expected_signal = str(episode.action.metadata.get("expected_signal", "")).strip()
             arguments = episode.action.metadata.get("arguments", {})
             if not isinstance(arguments, dict):
                 arguments = {}
@@ -347,9 +309,7 @@ class StructuredToolUseScorer:
             },
         )
 
-    def _score_evidence_integration(
-        self, episodes: list[ToolUseEpisode]
-    ) -> DimensionScore:
+    def _score_evidence_integration(self, episodes: list[ToolUseEpisode]) -> DimensionScore:
         if not episodes:
             return DimensionScore(
                 name="evidence_integration",
@@ -362,9 +322,7 @@ class StructuredToolUseScorer:
         partial = 0
 
         for episode in episodes:
-            result_summary = self._string_value(
-                episode.tool_observation, "result_summary"
-            )
+            result_summary = self._string_value(episode.tool_observation, "result_summary")
             supports = self._normalize_support(episode.evaluation)
             next_status = self._string_value(episode.evaluation, "next_status")
             has_decision = episode.decision is not None
@@ -394,9 +352,7 @@ class StructuredToolUseScorer:
             },
         )
 
-    def _score_recovery_behavior(
-        self, episodes: list[ToolUseEpisode]
-    ) -> DimensionScore:
+    def _score_recovery_behavior(self, episodes: list[ToolUseEpisode]) -> DimensionScore:
         if not episodes:
             return DimensionScore(
                 name="recovery_behavior",
@@ -480,9 +436,7 @@ class StructuredToolUseScorer:
             )
 
         status = str(final_decision.metadata.get("status", "")).strip()
-        final_answer = str(
-            final_decision.metadata.get("final_answer", "")
-        ).strip()
+        final_answer = str(final_decision.metadata.get("final_answer", "")).strip()
         evidence_count = sum(
             1
             for episode in episodes

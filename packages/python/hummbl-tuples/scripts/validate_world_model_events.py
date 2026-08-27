@@ -14,9 +14,7 @@ import os
 import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCHEMA_DIR = os.path.join(
-    REPO_ROOT, "schemas", "extensions", "world_model"
-)
+SCHEMA_DIR = os.path.join(REPO_ROOT, "schemas", "extensions", "world_model")
 EXAMPLES_DIR = os.path.join(REPO_ROOT, "examples", "world_model")
 
 CONTROL_MODE_ENUM = {"USER_DIRECT", "AI_PROPOSE_USER_CONFIRM", "AI_AUTONOMOUS"}
@@ -26,8 +24,13 @@ UNCERTAINTY_ENUM = {"low", "moderate", "high", "unknown"}
 VISIBILITY_ENUM = {"private", "shared", "public"}
 
 REQUIRED_ENVELOPE = [
-    "tuple_type", "id", "time", "actor", "principal",
-    "control_mode", "tuple_data",
+    "tuple_type",
+    "id",
+    "time",
+    "actor",
+    "principal",
+    "control_mode",
+    "tuple_data",
 ]
 
 
@@ -75,15 +78,13 @@ def validate_event(event: dict, filename: str) -> list[str]:
         if event.get("control_mode") == "AI_AUTONOMOUS":
             if td.get("to_state") == "published":
                 errors.append(
-                    f"[{eid}] AI_AUTONOMOUS state transition to "
-                    f"'published' without user authority"
+                    f"[{eid}] AI_AUTONOMOUS state transition to 'published' without user authority"
                 )
 
     if ttype == "MODEL_REVISION":
         if not td.get("receipt_link"):
             errors.append(
-                f"[{eid}] MODEL_REVISION requires receipt_link — "
-                f"durable event without receipt"
+                f"[{eid}] MODEL_REVISION requires receipt_link — durable event without receipt"
             )
         if event.get("control_mode") == "AI_AUTONOMOUS":
             if td.get("user_approval_posture") == "pending":
@@ -97,10 +98,7 @@ def validate_event(event: dict, filename: str) -> list[str]:
     if ttype == "CONTRADICTION_EVENT":
         claims = td.get("competing_claims", [])
         if isinstance(claims, list) and len(claims) < 2:
-            errors.append(
-                f"[{eid}] CONTRADICTION_EVENT requires at least "
-                f"2 competing_claims"
-            )
+            errors.append(f"[{eid}] CONTRADICTION_EVENT requires at least 2 competing_claims")
 
     return errors
 

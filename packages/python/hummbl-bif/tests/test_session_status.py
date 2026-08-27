@@ -1,6 +1,6 @@
 """Tests for bif_session_status tool."""
-import pytest
-from mcp_server import tool_bif_start_session, tool_bif_session_status
+
+from mcp_server import tool_bif_session_status, tool_bif_start_session
 
 
 class TestSessionStatus:
@@ -66,6 +66,7 @@ class TestSessionStatus:
     def test_next_batch_is_none_when_all_done(self):
         """If target_batches=1 and batch 1 is complete, next_batch should be None."""
         from mcp_server import _load_session, _save_session
+
         created = tool_bif_start_session({"domain": "TestDomain", "target_batches": 1})
         sid = created["session_id"]
         session = _load_session(sid)

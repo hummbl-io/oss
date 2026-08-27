@@ -4,7 +4,6 @@ import json
 import re
 
 import pytest
-
 from hummbl_bus.bus_writer import (
     _redact_metadata,
     _validate_bridge_url,

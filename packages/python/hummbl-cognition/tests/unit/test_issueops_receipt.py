@@ -7,18 +7,13 @@ content hashing, and CLI entry points.
 from __future__ import annotations
 
 import json
-import os
-import sys
-from pathlib import Path
-from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.issueops_receipt import (
     DEFAULT_RECEIPT_LOG_PATH,
     SCHEMA_PATH,
-    VALID_SOURCES,
     VALID_SEVERITIES,
+    VALID_SOURCES,
     IssueOpsReceiptError,
     append_receipt,
     create_receipt,
@@ -26,7 +21,6 @@ from hummbl_cognition.issueops_receipt import (
     read_receipts,
     validate_receipt,
 )
-
 
 # =============================================================================
 # Constants / schema presence
@@ -118,7 +112,15 @@ def test_create_receipt_dedup_total():
     receipt = create_receipt(
         source="chatgpt-connector",
         agent="claude-code",
-        issues_created=[{"repo": "o/r", "number": 1, "title": "t", "category": "c", "severity": "low"}],
+        issues_created=[
+            {
+                "repo": "o/r",
+                "number": 1,
+                "title": "t",
+                "category": "c",
+                "severity": "low",
+            }
+        ],
         issues_commented=[{"repo": "o/r", "number": 1}],
         issues_closed=[{"repo": "o/r", "number": 1, "reason": "duplicate"}],
     )
@@ -156,7 +158,13 @@ def test_create_receipt_invalid_severity():
             source="manual",
             agent="devin",
             issues_created=[
-                {"repo": "o/r", "number": 1, "title": "t", "category": "c", "severity": "bogus"}
+                {
+                    "repo": "o/r",
+                    "number": 1,
+                    "title": "t",
+                    "category": "c",
+                    "severity": "bogus",
+                }
             ],
         )
 
@@ -168,7 +176,12 @@ def test_create_receipt_missing_created_subfield():
             source="manual",
             agent="devin",
             issues_created=[
-                {"repo": "o/r", "number": 1, "title": "t", "category": "c"}  # no severity
+                {
+                    "repo": "o/r",
+                    "number": 1,
+                    "title": "t",
+                    "category": "c",
+                }  # no severity
             ],
         )
 
@@ -189,13 +202,19 @@ def test_content_hash_is_sha256_hex():
 def test_content_hash_deterministic():
     """Same receipt content produces the same hash."""
     r1 = create_receipt(
-        source="manual", agent="devin", run_id="issueops-x", timestamp="2026-01-01T00:00:00Z"
+        source="manual",
+        agent="devin",
+        run_id="issueops-x",
+        timestamp="2026-01-01T00:00:00Z",
     )
     # Recompute without the hash field
     r2 = dict(r1)
     del r2["content_hash"]
     r2 = create_receipt(
-        source="manual", agent="devin", run_id="issueops-x", timestamp="2026-01-01T00:00:00Z"
+        source="manual",
+        agent="devin",
+        run_id="issueops-x",
+        timestamp="2026-01-01T00:00:00Z",
     )
     assert r1["content_hash"] == r2["content_hash"]
 
@@ -203,10 +222,16 @@ def test_content_hash_deterministic():
 def test_content_hash_changes_on_content_change():
     """Different content produces a different hash."""
     r1 = create_receipt(
-        source="manual", agent="devin", run_id="issueops-x", timestamp="2026-01-01T00:00:00Z"
+        source="manual",
+        agent="devin",
+        run_id="issueops-x",
+        timestamp="2026-01-01T00:00:00Z",
     )
     r2 = create_receipt(
-        source="manual", agent="codex", run_id="issueops-x", timestamp="2026-01-01T00:00:00Z"
+        source="manual",
+        agent="codex",
+        run_id="issueops-x",
+        timestamp="2026-01-01T00:00:00Z",
     )
     assert r1["content_hash"] != r2["content_hash"]
 
@@ -303,7 +328,10 @@ def test_read_receipts_newest_first(tmp_path):
     ids = []
     for i in range(3):
         r = create_receipt(
-            source="manual", agent="devin", run_id=f"issueops-{i}", timestamp=f"2026-01-0{i+1}T00:00:00Z"
+            source="manual",
+            agent="devin",
+            run_id=f"issueops-{i}",
+            timestamp=f"2026-01-0{i + 1}T00:00:00Z",
         )
         ids.append(r["run_id"])
         append_receipt(r, log_path=log)
@@ -339,8 +367,10 @@ def test_cli_create_dry_run(tmp_path, capsys):
     rc = main(
         [
             "create",
-            "--source", "manual",
-            "--agent", "devin",
+            "--source",
+            "manual",
+            "--agent",
+            "devin",
             "--dry-run",
         ]
     )
@@ -358,9 +388,12 @@ def test_cli_create_writes_to_log(tmp_path, capsys, monkeypatch):
     rc = main(
         [
             "create",
-            "--source", "arbiter-audit",
-            "--agent", "devin",
-            "--evidence-refs", "https://example.com/report",
+            "--source",
+            "arbiter-audit",
+            "--agent",
+            "devin",
+            "--evidence-refs",
+            "https://example.com/report",
         ]
     )
     assert rc == 0
@@ -378,17 +411,26 @@ def test_cli_create_with_issues_json(tmp_path, capsys, monkeypatch):
     rc = main(
         [
             "create",
-            "--source", "arbiter-audit",
-            "--agent", "devin",
-            "--issues-created", json.dumps([
-                {"repo": "o/r", "number": 1, "title": "t", "category": "c", "severity": "high"}
-            ]),
-            "--issues-closed", json.dumps([
-                {"repo": "o/r", "number": 2, "reason": "resolved"}
-            ]),
-            "--issues-commented", json.dumps([
-                {"repo": "o/r", "number": 1}
-            ]),
+            "--source",
+            "arbiter-audit",
+            "--agent",
+            "devin",
+            "--issues-created",
+            json.dumps(
+                [
+                    {
+                        "repo": "o/r",
+                        "number": 1,
+                        "title": "t",
+                        "category": "c",
+                        "severity": "high",
+                    }
+                ]
+            ),
+            "--issues-closed",
+            json.dumps([{"repo": "o/r", "number": 2, "reason": "resolved"}]),
+            "--issues-commented",
+            json.dumps([{"repo": "o/r", "number": 1}]),
         ]
     )
     assert rc == 0
@@ -409,9 +451,12 @@ def test_cli_create_invalid_issues_json(tmp_path, capsys, monkeypatch):
     rc = main(
         [
             "create",
-            "--source", "manual",
-            "--agent", "devin",
-            "--issues-created", "{not json}",
+            "--source",
+            "manual",
+            "--agent",
+            "devin",
+            "--issues-created",
+            "{not json}",
         ]
     )
     assert rc == 1
@@ -516,7 +561,10 @@ class TestExtendedSchemaFields:
             run_disposition="no-op",
         )
         assert len(receipt["read_only_candidates"]) == 1
-        assert receipt["write_boundary"] == ["hummbl-dev/arbiter", "hummbl-io/hummbl-governance"]
+        assert receipt["write_boundary"] == [
+            "hummbl-dev/arbiter",
+            "hummbl-io/hummbl-governance",
+        ]
         is_valid, errors = validate_receipt(receipt)
         assert is_valid, f"Validation errors: {errors}"
 
@@ -544,7 +592,13 @@ class TestExtendedSchemaFields:
             source="manual",
             agent="devin",
             issues_created=[
-                {"repo": "hummbl-dev/arbiter", "number": 1, "title": "test", "category": "gov", "severity": "high"}
+                {
+                    "repo": "hummbl-dev/arbiter",
+                    "number": 1,
+                    "title": "test",
+                    "category": "gov",
+                    "severity": "high",
+                }
             ],
             quality_scores={
                 "avg_quality_score": 85.5,
@@ -590,19 +644,36 @@ class TestExtendedSchemaFields:
             source="arbiter-audit",
             agent="devin",
             issues_created=[
-                {"repo": "hummbl-dev/arbiter", "number": 10, "title": "fix A", "category": "security", "severity": "high"}
+                {
+                    "repo": "hummbl-dev/arbiter",
+                    "number": 10,
+                    "title": "fix A",
+                    "category": "security",
+                    "severity": "high",
+                }
             ],
-            issues_commented=[
-                {"repo": "hummbl-io/hummbl-governance", "number": 5}
-            ],
+            issues_commented=[{"repo": "hummbl-io/hummbl-governance", "number": 5}],
             skipped_duplicate_candidates=[
-                {"repo": "hummbl-dev/arbiter", "proposed_title": "fix B", "duplicate_of": 8}
+                {
+                    "repo": "hummbl-dev/arbiter",
+                    "proposed_title": "fix B",
+                    "duplicate_of": 8,
+                }
             ],
             read_only_candidates=[
-                {"repo": "hummbl-dev/some-fork", "proposed_title": "fix C", "category": "governance", "severity": "low"}
+                {
+                    "repo": "hummbl-dev/some-fork",
+                    "proposed_title": "fix C",
+                    "category": "governance",
+                    "severity": "low",
+                }
             ],
             access_limits=[
-                {"repo": "hummbl-dev/private", "limit_type": "read-only", "details": "No write access"}
+                {
+                    "repo": "hummbl-dev/private",
+                    "limit_type": "read-only",
+                    "details": "No write access",
+                }
             ],
             write_boundary=["hummbl-dev/arbiter", "hummbl-io/hummbl-governance"],
             quality_scores={"avg_quality_score": 90.0, "rubric_version": "v1.0"},
@@ -619,7 +690,13 @@ class TestExtendedSchemaFields:
             source="manual",
             agent="devin",
             issues_created=[
-                {"repo": "hummbl-dev/arbiter", "number": 1, "title": "test", "category": "gov", "severity": "low"}
+                {
+                    "repo": "hummbl-dev/arbiter",
+                    "number": 1,
+                    "title": "test",
+                    "category": "gov",
+                    "severity": "low",
+                }
             ],
         )
         is_valid, errors = validate_receipt(receipt)
@@ -636,7 +713,11 @@ class TestExtendedSchemaFields:
             source="chatgpt-connector",
             agent="devin",
             skipped_duplicate_candidates=[
-                {"repo": "hummbl-dev/arbiter", "proposed_title": "test", "duplicate_of": 99}
+                {
+                    "repo": "hummbl-dev/arbiter",
+                    "proposed_title": "test",
+                    "duplicate_of": 99,
+                }
             ],
             run_disposition="skipped-all",
         )

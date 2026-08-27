@@ -15,7 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from hummbl_cognition._filelock import lock_file as _lock_file, unlock_file as _unlock_file
+from hummbl_cognition._filelock import lock_file as _lock_file
+from hummbl_cognition._filelock import unlock_file as _unlock_file
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +32,11 @@ def _resolve_log_path(override: str | Path | None = None) -> Path:
         return Path(env_path)
     try:
         import subprocess
+
         root = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL, text=True,
+            stderr=subprocess.DEVNULL,
+            text=True,
         ).strip()
         if root:
             return Path(root) / DEFAULT_LOG_PATH

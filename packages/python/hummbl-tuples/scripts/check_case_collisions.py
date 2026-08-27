@@ -127,7 +127,9 @@ def main() -> int:
         known_file = {k: v for k, v in file_collisions.items() if k in known}
         known_dir = {k: v for k, v in dir_collisions.items() if k in known}
         if known_file or known_dir:
-            print(f"INFO: {len(known_file) + len(known_dir)} known pre-existing collision(s) skipped:")
+            print(
+                f"INFO: {len(known_file) + len(known_dir)} known pre-existing collision(s) skipped:"
+            )
             for lower, actuals in sorted(known_file.items()):
                 print(f"  [known] {lower} -> {actuals}")
             for lower, actuals in sorted(known_dir.items()):

@@ -90,6 +90,7 @@ LOCK_PATH = COGNITION_DIR / ".hrsi-checkin.lock"
 # Cycle I/O
 # ---------------------------------------------------------------------------
 
+
 def _load_cycles(path: Path = CYCLES_PATH) -> list[dict]:
     if not path.exists():
         return []
@@ -155,6 +156,7 @@ def _restore(path: Path, content: bytes | None) -> None:
 # Core logic
 # ---------------------------------------------------------------------------
 
+
 def record_cycle(
     cogstate: str,
     safety: int,
@@ -187,8 +189,14 @@ def record_cycle(
     if cycles_path is None:
         cycles_path = CYCLES_PATH
     if cogstate not in COGSTATE_VALUES:
-        raise ValueError(f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}")
-    for name, val in [("safety", safety), ("mattering", mattering), ("connection", connection)]:
+        raise ValueError(
+            f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}"
+        )
+    for name, val in [
+        ("safety", safety),
+        ("mattering", mattering),
+        ("connection", connection),
+    ]:
         if val not in SCORE_RANGE:
             raise ValueError(f"{name} must be 1–5, got {val}")
     if not hule or not hule.strip():
@@ -203,7 +211,9 @@ def record_cycle(
 
     # Build cycle record
     belonging_avg = round((safety + mattering + connection) / 3, 2)
-    hrsi_safe = cogstate == "AVAILABLE" and all(v >= 3 for v in (safety, mattering, connection))
+    hrsi_safe = cogstate == "AVAILABLE" and all(
+        v >= 3 for v in (safety, mattering, connection)
+    )
 
     cycle: dict = {
         "date": d,
@@ -257,8 +267,12 @@ def record_cycle(
         if share_sensitive_notes:
             content_parts.append(f"relational: {relational_value}")
         else:
-            relational_hash = hashlib.sha256(relational_value.encode("utf-8")).hexdigest()
-            content_parts.append(f"relational note recorded locally; relational_sha256={relational_hash}")
+            relational_hash = hashlib.sha256(
+                relational_value.encode("utf-8")
+            ).hexdigest()
+            content_parts.append(
+                f"relational note recorded locally; relational_sha256={relational_hash}"
+            )
 
     content = " | ".join(content_parts)
     if len(content) > 4096:
@@ -330,6 +344,7 @@ def get_status(
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m hummbl_cognition hrsi-checkin",
@@ -347,14 +362,23 @@ def _build_parser() -> argparse.ArgumentParser:
         "--hule",
         help="Human Unique Lived Experience entry (required for full cycle)",
     )
-    parser.add_argument("--lens", help="ARCANA/PRAXIS lens applied today (e.g. 'bki', 'girard')")
+    parser.add_argument(
+        "--lens", help="ARCANA/PRAXIS lens applied today (e.g. 'bki', 'girard')"
+    )
     parser.add_argument("--delta", help="K/C/D shift description")
-    parser.add_argument("--energy", type=int, choices=range(1, 6), metavar="1-5",
-                        help="Somatic energy level (1=depleted, 5=thriving)")
-    parser.add_argument("--sleep", type=float, metavar="HOURS",
-                        help="Hours of sleep last night (0-24)")
-    parser.add_argument("--relational-note",
-                        help="Who you connected with today (free text, optional)")
+    parser.add_argument(
+        "--energy",
+        type=int,
+        choices=range(1, 6),
+        metavar="1-5",
+        help="Somatic energy level (1=depleted, 5=thriving)",
+    )
+    parser.add_argument(
+        "--sleep", type=float, metavar="HOURS", help="Hours of sleep last night (0-24)"
+    )
+    parser.add_argument(
+        "--relational-note", help="Who you connected with today (free text, optional)"
+    )
     parser.add_argument(
         "--share-sensitive-notes",
         action="store_true",
@@ -366,12 +390,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Show current HRSI Gap progress without recording",
     )
     parser.add_argument("--ledger", help="Override ledger path")
-    parser.add_argument("--baseline", help="Override belonging baseline path (for testing)")
+    parser.add_argument(
+        "--baseline", help="Override belonging baseline path (for testing)"
+    )
     parser.add_argument("--cycles", help="Override hrsi_cycles path (for testing)")
     parser.add_argument(
         "--bridge",
         help="Post to HRSI bridge at this base URL instead of writing locally. "
-             "Overrides HRSI_CANONICAL_BRIDGE_URL env.",
+        "Overrides HRSI_CANONICAL_BRIDGE_URL env.",
     )
     parser.add_argument(
         "--origin-machine",
@@ -404,7 +430,9 @@ def run_cli(argv: list[str] | None = None) -> int:
     except SystemExit as exc:
         return int(exc.code) if exc.code is not None else 1
 
-    baseline_path = Path(args.baseline) if getattr(args, "baseline", None) else BASELINE_PATH
+    baseline_path = (
+        Path(args.baseline) if getattr(args, "baseline", None) else BASELINE_PATH
+    )
     cycles_path = Path(args.cycles) if getattr(args, "cycles", None) else CYCLES_PATH
 
     if args.status:
@@ -415,7 +443,9 @@ def run_cli(argv: list[str] | None = None) -> int:
             f"({'CLOSED' if status['gap1_closed'] else 'open'})"
         )
         print(f"Gap 1 (belonging baseline): {gap1_pct}")
-        print(f"Gap 2 (hrsi-checkin):        {'CLOSED' if status['gap2_closed'] else 'OPEN'}")
+        print(
+            f"Gap 2 (hrsi-checkin):        {'CLOSED' if status['gap2_closed'] else 'OPEN'}"
+        )
         print(f"Total HRSI cycles logged:    {status['total_cycles']}")
         print(f"Current streak:              {status['current_streak']} day(s)")
         return 0
@@ -440,11 +470,15 @@ def run_cli(argv: list[str] | None = None) -> int:
     ledger_path = Path(args.ledger) if args.ledger else None
 
     # Bridge mode: post to remote bridge instead of writing locally
-    bridge_url = getattr(args, "bridge", None) or os.environ.get("HRSI_CANONICAL_BRIDGE_URL", "")
+    bridge_url = getattr(args, "bridge", None) or os.environ.get(
+        "HRSI_CANONICAL_BRIDGE_URL", ""
+    )
     if bridge_url:
         from hummbl_cognition.hrsi_bridge_client import post_hrsi_to_bridge_url_result
 
-        origin = getattr(args, "origin_machine", None) or socket.gethostname().split(".")[0]
+        origin = (
+            getattr(args, "origin_machine", None) or socket.gethostname().split(".")[0]
+        )
         result = post_hrsi_to_bridge_url_result(
             bridge_url,
             cogstate=args.cogstate,
@@ -465,7 +499,9 @@ def run_cli(argv: list[str] | None = None) -> int:
             cycle = body.get("cycle", {})
             status_body = body.get("status", {})
             hrsi_safe_str = "HRSI-safe" if cycle.get("hrsi_safe") else "not HRSI-safe"
-            print(f"Cycle recorded via bridge: {cycle.get('date', '?')} | {cycle.get('cogstate', '?')} | {hrsi_safe_str}")
+            print(
+                f"Cycle recorded via bridge: {cycle.get('date', '?')} | {cycle.get('cogstate', '?')} | {hrsi_safe_str}"
+            )
             print(f"Belonging avg:  {cycle.get('belonging_avg', 0):.1f}/5.0")
             if cycle.get("energy"):
                 print(f"Energy:         {cycle['energy']}/5")
@@ -473,7 +509,9 @@ def run_cli(argv: list[str] | None = None) -> int:
                 print(f"Sleep:          {cycle['sleep_hours']}h")
             if cycle.get("relational_note"):
                 print(f"Relational:     {cycle['relational_note']}")
-            print(f"Bridge status:  gap1={status_body.get('gap1_qualifying_days', '?')}/30 cycles={status_body.get('total_cycles', '?')}")
+            print(
+                f"Bridge status:  gap1={status_body.get('gap1_qualifying_days', '?')}/30 cycles={status_body.get('total_cycles', '?')}"
+            )
             return 0
 
         # Bridge failed

@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_bus.authority import (
     _CONSTRUCTOR_GUARD,
     CANONICAL_BUS_ID,

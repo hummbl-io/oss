@@ -8,7 +8,6 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-
 SENSITIVE_HINTS = ("token", "secret", "password", "ghp_", "aws_", "AKIA")
 REQUIRED_KEYS = ("on", "jobs")
 

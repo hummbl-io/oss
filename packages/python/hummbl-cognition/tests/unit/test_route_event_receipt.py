@@ -231,7 +231,9 @@ def test_health_check_must_not_have_error():
     valid, errors = validate_route_event_receipt(receipt)
 
     assert not valid
-    assert any("event_class=health_check requires error_type='none'" in e for e in errors)
+    assert any(
+        "event_class=health_check requires error_type='none'" in e for e in errors
+    )
 
 
 def test_health_check_with_500_status_rejected_even_with_no_error():
@@ -245,7 +247,9 @@ def test_health_check_with_500_status_rejected_even_with_no_error():
     valid, errors = validate_route_event_receipt(receipt)
 
     assert not valid
-    assert any("event_class=health_check requires status_code < 400" in e for e in errors)
+    assert any(
+        "event_class=health_check requires status_code < 400" in e for e in errors
+    )
 
 
 def test_health_check_with_403_status_rejected():
@@ -257,7 +261,9 @@ def test_health_check_with_403_status_rejected():
     valid, errors = validate_route_event_receipt(receipt)
 
     assert not valid
-    assert any("event_class=health_check requires status_code < 400" in e for e in errors)
+    assert any(
+        "event_class=health_check requires status_code < 400" in e for e in errors
+    )
 
 
 def test_health_check_with_200_status_accepted():

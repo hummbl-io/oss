@@ -31,21 +31,22 @@ import os
 import re
 import subprocess
 import sys
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 
 # --- Constants ---
 
 # Standard: ADR-NNN-kebab-title.md
-FILENAME_PATTERN = re.compile(r'^ADR-(\d{3})-([a-z0-9-]+)\.md$')
+FILENAME_PATTERN = re.compile(r"^ADR-(\d{3})-([a-z0-9-]+)\.md$")
 # Domain-prefixed: ADR-FM-NNN-title.md, ADR-GOV-NNN-title.md, ADR-ATL-WEDGE-NNN-title.md, etc.
-DOMAIN_FILENAME_PATTERN = re.compile(r'^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-([a-z0-9-]+)\.md$')
+DOMAIN_FILENAME_PATTERN = re.compile(r"^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-([a-z0-9-]+)\.md$")
 REQUIRED_FIELDS = ["Status", "Date", "Decision owner", "Steward"]
 VALID_STATUSES = {"accepted", "proposed", "superseded", "deprecated"}
-DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REQUIRED_SECTIONS = ["Context", "Decision"]
 
 # --- Data classes ---
+
 
 @dataclass
 class Violation:
@@ -55,13 +56,16 @@ class Violation:
     message: str
     severity: str = "error"  # error, warning
 
+
 @dataclass
 class LintResult:
     file: str
     violations: list = field(default_factory=list)
     passed: bool = True
 
+
 # --- Linting functions ---
+
 
 def lint_filename(filepath):
     """Check filename format."""
@@ -69,10 +73,7 @@ def lint_filename(filepath):
     violations = []
 
     if not basename.endswith(".md"):
-        return [Violation(
-            file=filepath, line=0, rule="F001",
-            message=f"ADR file must end with .md, got: {basename}"
-        )]
+        return [Violation(file=filepath, line=0, rule="F001", message=f"ADR file must end with .md, got: {basename}")]
 
     # Skip non-ADR files (index, template, draft)
     if basename.upper() in ("ADR_INDEX.MD", "ADR_TEMPLATE.MD") or basename.startswith("DRAFT"):
@@ -86,28 +87,32 @@ def lint_filename(filepath):
             return violations  # Domain-prefixed filenames are valid
 
         # Check for common issues
-        if re.match(r'^\d{3}-', basename):
-            violations.append(Violation(
-                file=filepath, line=0, rule="F002",
-                message=f"Missing ADR- prefix: {basename} → ADR-{basename}"
-            ))
-        elif re.match(r'^ADR-0\d{3}-', basename):
-            violations.append(Violation(
-                file=filepath, line=0, rule="F003",
-                message=f"4-digit number should be 3-digit: {basename}"
-            ))
-        elif re.match(r'^ADR-\d{3}_', basename):
-            violations.append(Violation(
-                file=filepath, line=0, rule="F005",
-                message=f"Underscore instead of hyphen: {basename}"
-            ))
+        if re.match(r"^\d{3}-", basename):
+            violations.append(
+                Violation(
+                    file=filepath, line=0, rule="F002", message=f"Missing ADR- prefix: {basename} → ADR-{basename}"
+                )
+            )
+        elif re.match(r"^ADR-0\d{3}-", basename):
+            violations.append(
+                Violation(file=filepath, line=0, rule="F003", message=f"4-digit number should be 3-digit: {basename}")
+            )
+        elif re.match(r"^ADR-\d{3}_", basename):
+            violations.append(
+                Violation(file=filepath, line=0, rule="F005", message=f"Underscore instead of hyphen: {basename}")
+            )
         else:
-            violations.append(Violation(
-                file=filepath, line=0, rule="F000",
-                message=f"Filename doesn't match ADR-NNN-kebab-title.md: {basename}"
-            ))
+            violations.append(
+                Violation(
+                    file=filepath,
+                    line=0,
+                    rule="F000",
+                    message=f"Filename doesn't match ADR-NNN-kebab-title.md: {basename}",
+                )
+            )
 
     return violations
+
 
 def lint_header_fields(filepath, content):
     """Check required header fields."""
@@ -117,9 +122,9 @@ def lint_header_fields(filepath, content):
     for field_name in REQUIRED_FIELDS:
         # Check for field in various formats
         patterns = [
-            rf'- \*\*{re.escape(field_name)}:\*\* ',  # Standard: - **Field:** value
-            rf'\*\*{re.escape(field_name)}\*\*: ',     # Alt: **Field**: value
-            rf'^{re.escape(field_name)}: ',             # Bare: Field: value
+            rf"- \*\*{re.escape(field_name)}:\*\* ",  # Standard: - **Field:** value
+            rf"\*\*{re.escape(field_name)}\*\*: ",  # Alt: **Field**: value
+            rf"^{re.escape(field_name)}: ",  # Bare: Field: value
         ]
 
         found = False
@@ -132,12 +137,12 @@ def lint_header_fields(filepath, content):
                 break
 
         if not found:
-            violations.append(Violation(
-                file=filepath, line=0, rule="H001",
-                message=f"Missing required field: {field_name}"
-            ))
+            violations.append(
+                Violation(file=filepath, line=0, rule="H001", message=f"Missing required field: {field_name}")
+            )
 
     return violations
+
 
 def lint_status_format(filepath, content):
     """Check status field format and value."""
@@ -146,39 +151,56 @@ def lint_status_format(filepath, content):
 
     for i, line in enumerate(lines[:20]):
         # Standard format: - **Status:** accepted
-        m = re.search(r'- \*\*Status:\*\* (\w+)', line)
+        m = re.search(r"- \*\*Status:\*\* (\w+)", line)
         if m:
             value = m.group(1)
             if value not in VALID_STATUSES:
-                violations.append(Violation(
-                    file=filepath, line=i+1, rule="S001",
-                    message=f"Invalid status value: '{value}' (must be one of: {', '.join(VALID_STATUSES)})"
-                ))
+                violations.append(
+                    Violation(
+                        file=filepath,
+                        line=i + 1,
+                        rule="S001",
+                        message=f"Invalid status value: '{value}' (must be one of: {', '.join(VALID_STATUSES)})",
+                    )
+                )
             if value != value.lower():
-                violations.append(Violation(
-                    file=filepath, line=i+1, rule="S002",
-                    message=f"Status should be lowercase: '{value}' → '{value.lower()}'"
-                ))
+                violations.append(
+                    Violation(
+                        file=filepath,
+                        line=i + 1,
+                        rule="S002",
+                        message=f"Status should be lowercase: '{value}' → '{value.lower()}'",
+                    )
+                )
             return violations
 
         # Non-standard format
-        m = re.search(r'\*\*Status\*\*:?\s*(\w+)', line)
+        m = re.search(r"\*\*Status\*\*:?\s*(\w+)", line)
         if m:
-            violations.append(Violation(
-                file=filepath, line=i+1, rule="S003",
-                message=f"Non-standard status format. Use: - **Status:** {m.group(1).lower()}"
-            ))
+            violations.append(
+                Violation(
+                    file=filepath,
+                    line=i + 1,
+                    rule="S003",
+                    message=f"Non-standard status format. Use: - **Status:** {m.group(1).lower()}",
+                )
+            )
             return violations
 
         # ## Status header
-        if re.match(r'^## Status', line):
-            violations.append(Violation(
-                file=filepath, line=i+1, rule="S004",
-                message="Use '- **Status:** value' instead of '## Status\\n\\nvalue'"
-            ))
+        if re.match(r"^## Status", line):
+            violations.append(
+                Violation(
+                    file=filepath,
+                    line=i + 1,
+                    rule="S004",
+                    message="Use '- **Status:** value' instead of '## Status\\n\\nvalue'",
+                )
+            )
             return violations
 
     return violations
+
 
 def lint_date_format(filepath, content):
     """Check date field format."""
@@ -187,40 +209,46 @@ def lint_date_format(filepath, content):
 
     for i, line in enumerate(lines[:20]):
         # Standard: - **Date:** YYYY-MM-DD
-        m = re.search(r'- \*\*Date:\*\* (\d{4}-\d{2}-\d{2})', line)
+        m = re.search(r"- \*\*Date:\*\* (\d{4}-\d{2}-\d{2})", line)
         if m:
             return violations  # OK
 
         # Non-standard: **Date**: or **Decided**:
-        m = re.search(r'\*\*(?:Date|Decided)\*\*:?\s*(\d{4}-\d{2}-\d{2})', line)
+        m = re.search(r"\*\*(?:Date|Decided)\*\*:?\s*(\d{4}-\d{2}-\d{2})", line)
         if m:
-            violations.append(Violation(
-                file=filepath, line=i+1, rule="D001",
-                message=f"Non-standard date format. Use: - **Date:** {m.group(1)}"
-            ))
+            violations.append(
+                Violation(
+                    file=filepath,
+                    line=i + 1,
+                    rule="D001",
+                    message=f"Non-standard date format. Use: - **Date:** {m.group(1)}",
+                )
+            )
             return violations
 
     # No date found
-    violations.append(Violation(
-        file=filepath, line=0, rule="D002",
-        message="Missing date field",
-        severity="warning"
-    ))
+    violations.append(Violation(file=filepath, line=0, rule="D002", message="Missing date field", severity="warning"))
     return violations
+
 
 def lint_sections(filepath, content):
     """Check required sections."""
     violations = []
 
     for section in REQUIRED_SECTIONS:
-        if not re.search(rf'^##\s+{re.escape(section)}', content, re.MULTILINE):
-            violations.append(Violation(
-                file=filepath, line=0, rule="SEC001",
-                message=f"Missing required section: ## {section}",
-                severity="warning"
-            ))
+        if not re.search(rf"^##\s+{re.escape(section)}", content, re.MULTILINE):
+            violations.append(
+                Violation(
+                    file=filepath,
+                    line=0,
+                    rule="SEC001",
+                    message=f"Missing required section: ## {section}",
+                    severity="warning",
+                )
+            )
 
     return violations
+
 
 def lint_duplicate_numbers(adr_files):
     """Check for duplicate ADR numbers within the same directory (per-domain).
@@ -238,23 +266,28 @@ def lint_duplicate_numbers(adr_files):
             by_dir[parent] = {}
         basename = os.path.basename(filepath)
         # Extract the full ADR identifier (including domain prefix if present)
-        m = re.search(r'ADR-(?:([A-Z]{2,6})-)?(\d{3})-', basename)
+        m = re.search(r"ADR-(?:([A-Z]{2,6})-)?(\d{3})-", basename)
         if m:
             domain = m.group(1) or ""
             num = m.group(2)
             key = f"{domain}-{num}" if domain else num
             if key in by_dir[parent]:
-                violations.append(Violation(
-                    file=filepath, line=0, rule="DUP001",
-                    message=(
-                        f"Duplicate ADR number: ADR-{domain}-{num if domain else num}"
-                        f" (also in {os.path.basename(by_dir[parent][key])})"
+                violations.append(
+                    Violation(
+                        file=filepath,
+                        line=0,
+                        rule="DUP001",
+                        message=(
+                            f"Duplicate ADR number: ADR-{domain}-{num if domain else num}"
+                            f" (also in {os.path.basename(by_dir[parent][key])})"
+                        ),
                     )
-                ))
+                )
             else:
                 by_dir[parent][key] = filepath
 
     return violations
+
 
 def lint_superseded_refs(filepath, content, all_adr_numbers):
     """Check that superseded-by references point to valid ADRs.
@@ -265,7 +298,7 @@ def lint_superseded_refs(filepath, content, all_adr_numbers):
 
     # Match both standard (ADR-001) and domain-prefixed (ADR-FM-001) references
     m = re.search(
-        r'\*\*Superseded by:\*\* (ADR-(?:[A-Z]{2,6}(?:-[A-Z]{2,6})?-)?\d{3}|none)',
+        r"\*\*Superseded by:\*\* (ADR-(?:[A-Z]{2,6}(?:-[A-Z]{2,6})?-)?\d{3}|none)",
         content,
     )
     if m:
@@ -273,20 +306,26 @@ def lint_superseded_refs(filepath, content, all_adr_numbers):
         if ref != "none":
             # Extract the full identifier (domain prefix + number or just number)
             id_match = re.search(
-                r'ADR-((?:[A-Z]{2,6}(?:-[A-Z]{2,6})?-)?\d{3})',
+                r"ADR-((?:[A-Z]{2,6}(?:-[A-Z]{2,6})?-)?\d{3})",
                 ref,
             )
             if id_match:
                 ref_id = id_match.group(1)
                 if ref_id not in all_adr_numbers:
-                    violations.append(Violation(
-                        file=filepath, line=0, rule="REF001",
-                        message=f"Superseded by references non-existent ADR: {ref}"
-                    ))
+                    violations.append(
+                        Violation(
+                            file=filepath,
+                            line=0,
+                            rule="REF001",
+                            message=f"Superseded by references non-existent ADR: {ref}",
+                        )
+                    )
 
     return violations
 
+
 # --- Main lint ---
+
 
 def lint_adr_file(filepath, all_adr_numbers=None):
     """Run all lint checks on a single ADR file."""
@@ -299,10 +338,7 @@ def lint_adr_file(filepath, all_adr_numbers=None):
     try:
         content = Path(filepath).read_text()
     except Exception as e:
-        result.violations.append(Violation(
-            file=filepath, line=0, rule="ERR",
-            message=f"Could not read file: {e}"
-        ))
+        result.violations.append(Violation(file=filepath, line=0, rule="ERR", message=f"Could not read file: {e}"))
         result.passed = False
         return result
 
@@ -325,6 +361,7 @@ def lint_adr_file(filepath, all_adr_numbers=None):
     result.passed = len([v for v in result.violations if v.severity == "error"]) == 0
     return result
 
+
 def lint_directory(adr_dir):
     """Lint all ADR files in a directory (recursively)."""
     adr_path = Path(adr_dir)
@@ -333,10 +370,13 @@ def lint_directory(adr_dir):
         return [], 2
 
     # Find all .md files
-    adr_files = sorted(str(f) for f in adr_path.rglob("*.md")
-                       if not f.name.upper().startswith("ADR_INDEX")
-                       and not f.name.upper().startswith("ADR_TEMPLATE")
-                       and not f.name.startswith("DRAFT"))
+    adr_files = sorted(
+        str(f)
+        for f in adr_path.rglob("*.md")
+        if not f.name.upper().startswith("ADR_INDEX")
+        and not f.name.upper().startswith("ADR_TEMPLATE")
+        and not f.name.startswith("DRAFT")
+    )
 
     if not adr_files:
         print(f"No ADR files found in {adr_dir}")
@@ -348,11 +388,11 @@ def lint_directory(adr_dir):
     for f in adr_files:
         basename = os.path.basename(f)
         # Standard: ADR-NNN-title.md → "NNN"
-        m = re.match(r'^ADR-(\d{3})-', basename)
+        m = re.match(r"^ADR-(\d{3})-", basename)
         if m:
             all_numbers.add(m.group(1))
         # Domain-prefixed: ADR-FM-NNN-title.md → "FM-NNN"
-        m = re.match(r'^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-', basename)
+        m = re.match(r"^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-", basename)
         if m:
             all_numbers.add(f"{m.group(1)}-{m.group(2)}")
 
@@ -377,6 +417,7 @@ def lint_directory(adr_dir):
 
     return results, 0
 
+
 def lint_repo_via_api(repo, org="hummbl-io"):
     """Lint ADRs in a remote repo via GitHub API."""
     cmd = ["gh", "api", f"repos/{org}/{repo}/git/trees/HEAD?recursive=1"]
@@ -387,9 +428,15 @@ def lint_repo_via_api(repo, org="hummbl-io"):
 
     tree_data = json.loads(result.stdout)
     all_paths = [item["path"] for item in tree_data.get("tree", [])]
-    adr_paths = [p for p in all_paths if "docs/adr/" in p and p.endswith(".md")
-                 and "ADR_INDEX" not in p.upper() and "ADR_TEMPLATE" not in p.upper()
-                 and not os.path.basename(p).startswith("DRAFT")]
+    adr_paths = [
+        p
+        for p in all_paths
+        if "docs/adr/" in p
+        and p.endswith(".md")
+        and "ADR_INDEX" not in p.upper()
+        and "ADR_TEMPLATE" not in p.upper()
+        and not os.path.basename(p).startswith("DRAFT")
+    ]
 
     if not adr_paths:
         return [], 0
@@ -398,15 +445,16 @@ def lint_repo_via_api(repo, org="hummbl-io"):
     all_numbers = set()
     for p in adr_paths:
         basename = os.path.basename(p)
-        m = re.match(r'^ADR-(\d{3})-', basename)
+        m = re.match(r"^ADR-(\d{3})-", basename)
         if m:
             all_numbers.add(m.group(1))
-        m = re.match(r'^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-', basename)
+        m = re.match(r"^ADR-([A-Z]{2,6}(?:-[A-Z]{2,6})?)-(\d{3})-", basename)
         if m:
             all_numbers.add(f"{m.group(1)}-{m.group(2)}")
 
     # Fetch and lint each file
     import base64
+
     results = []
     for adr_path in adr_paths:
         cmd = ["gh", "api", f"repos/{org}/{repo}/contents/{adr_path}", "--jq", ".content"]
@@ -448,12 +496,12 @@ def lint_repo_via_api(repo, org="hummbl-io"):
 
     return results, 0
 
+
 # --- CLI ---
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="ADR Format Compliance Linter (HUMMBL Init Standard v0.1)"
-    )
+    parser = argparse.ArgumentParser(description="ADR Format Compliance Linter (HUMMBL Init Standard v0.1)")
     parser.add_argument("path", nargs="?", default="docs/adr/", help="Path to ADR directory")
     parser.add_argument("--check-repo", help="Lint ADRs in a remote GitHub repo")
     parser.add_argument("--org", default="hummbl-io", help="GitHub org")
@@ -491,7 +539,7 @@ def main():
             "violations": [
                 {"file": v.file, "line": v.line, "rule": v.rule, "message": v.message, "severity": v.severity}
                 for v in all_violations
-            ]
+            ],
         }
         print(json.dumps(output, indent=2))
     else:
@@ -507,6 +555,7 @@ def main():
     if args.ci and failed > 0:
         sys.exit(1)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

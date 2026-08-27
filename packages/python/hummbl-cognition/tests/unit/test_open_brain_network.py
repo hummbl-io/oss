@@ -9,14 +9,16 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.models import LedgerEntry
 
 
 def _make_entry(content: str, **kwargs) -> LedgerEntry:
     defaults = dict(
-        agent="test-agent", vendor="anthropic", model="test-model",
-        entry_type="lesson", scope="project",
+        agent="test-agent",
+        vendor="anthropic",
+        model="test-model",
+        entry_type="lesson",
+        scope="project",
     )
     defaults.update(kwargs)
     return LedgerEntry.create(content=content, **defaults)
@@ -37,7 +39,9 @@ class TestOpenBrainServer:
         """Helper to post JSON payloads and parse response JSON."""
         conn = HTTPConnection("127.0.0.1", port)
         data = json.dumps(body or {}).encode("utf-8")
-        conn.request("POST", path, body=data, headers={"Content-Type": "application/json"})
+        conn.request(
+            "POST", path, body=data, headers={"Content-Type": "application/json"}
+        )
         resp = conn.getresponse()
         return resp.status, json.loads(resp.read().decode("utf-8"))
 
@@ -75,12 +79,14 @@ class TestOpenBrainServer:
 
     def test_health(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
         assert client.health() is True
 
     def test_status(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, entries = brain_server
         client = OpenBrainClient(url)
         status = client.status()
@@ -90,16 +96,20 @@ class TestOpenBrainServer:
 
     def test_search(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, entries = brain_server
         client = OpenBrainClient(url)
         results = client.search("OAuth token refresh")
         assert len(results) > 0
         assert results[0]["source"] == "ledger"
         # First result should be the OAuth entry
-        assert "oauth" in results[0]["content"].lower() or "OAuth" in results[0]["content"]
+        assert (
+            "oauth" in results[0]["content"].lower() or "OAuth" in results[0]["content"]
+        )
 
     def test_search_with_budget(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
         results = client.search("OAuth", token_budget=50)
@@ -108,6 +118,7 @@ class TestOpenBrainServer:
 
     def test_search_no_results(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
         results = client.search("xyzzy nonexistent gibberish")
@@ -115,6 +126,7 @@ class TestOpenBrainServer:
 
     def test_search_missing_query(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
         with pytest.raises(RuntimeError, match="missing"):
@@ -122,6 +134,7 @@ class TestOpenBrainServer:
 
     def test_reindex(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
         result = client.reindex()
@@ -131,6 +144,7 @@ class TestOpenBrainServer:
     @pytest.mark.allow_ledger_writes
     def test_ingest(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
 
@@ -148,15 +162,20 @@ class TestOpenBrainServer:
 
     def test_404(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
+
         url, _ = brain_server
         client = OpenBrainClient(url)
         with pytest.raises(RuntimeError, match="not found"):
             client._request("GET", "/nonexistent")
 
-    def test_bus_post(self, tmp_path):
+    def test_bus_post(self, tmp_path, monkeypatch):
         from http.server import HTTPServer
 
+        from hummbl_bus.bus_policy import reset_bus_policy
         from hummbl_cognition.server import OpenBrainState, _make_handler
+
+        monkeypatch.setenv("BUS_SECURITY_POLICY", "permissive")
+        reset_bus_policy()
 
         entries = [_make_entry("OAuth token refresh failed during morning briefing")]
         cog_dir = tmp_path / "cognition"
@@ -234,10 +253,14 @@ class TestOpenBrainServer:
     def test_lineage_endpoint(self, tmp_path):
         from http.client import HTTPConnection
         from http.server import HTTPServer
+
         from hummbl_cognition.server import OpenBrainState, _make_handler
 
         entries = [
-            _make_entry("Original finding", previous_hash="0000000000000000000000000000000000000000000000000000000000000000"),
+            _make_entry(
+                "Original finding",
+                previous_hash="0000000000000000000000000000000000000000000000000000000000000000",
+            ),
         ]
         target_id = entries[0].id
         child = _make_entry("Correction finding", supersedes=target_id)
@@ -277,11 +300,13 @@ class TestOpenBrainClientOffline:
 
     def test_health_returns_false_when_unreachable(self):
         from hummbl_cognition.client import OpenBrainClient
+
         client = OpenBrainClient("http://127.0.0.1:19999", timeout=1)
         assert client.health() is False
 
     def test_default_url_from_env(self, monkeypatch):
         from hummbl_cognition.client import OpenBrainClient
+
         monkeypatch.setenv("OPEN_BRAIN_URL", "http://10.0.0.1:9999")
         client = OpenBrainClient()
         assert client.host == "10.0.0.1"
@@ -289,6 +314,7 @@ class TestOpenBrainClientOffline:
 
     def test_default_url_fallback(self, monkeypatch):
         from hummbl_cognition.client import OpenBrainClient
+
         monkeypatch.delenv("OPEN_BRAIN_URL", raising=False)
         client = OpenBrainClient()
         assert client.host == "100.117.251.32"

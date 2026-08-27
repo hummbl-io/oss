@@ -39,8 +39,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.physical_governor import (
     KinematicGovernor,
-    pHRISafetyMonitor,
     PhysicalSafetyMode,
+    pHRISafetyMonitor,
 )
 
 SERVER_NAME = "hummbl-physical"
@@ -55,6 +55,7 @@ _phri = pHRISafetyMonitor()
 # ---------------------------------------------------------------------------
 # Tool handlers
 # ---------------------------------------------------------------------------
+
 
 def _kinematic_check_motion(args: dict) -> dict:
     velocity = args.get("velocity")
@@ -105,19 +106,13 @@ def _kinematic_scaled_vel(args: dict) -> dict:
     }
     mode = mode_map.get(mode_str)
     if mode is None:
-        return {
-            "error": f"Unknown mode '{mode_str}'. Valid: normal, caution, emergency"
-        }
+        return {"error": f"Unknown mode '{mode_str}'. Valid: normal, caution, emergency"}
     effective_vel = _kinematic.get_scaled_velocity(mode)
     return {
         "mode": mode_str,
         "effective_velocity": effective_vel,
         "max_velocity": _kinematic.max_velocity,
-        "reduction_factor": (
-            round(effective_vel / _kinematic.max_velocity, 4)
-            if _kinematic.max_velocity > 0
-            else 0.0
-        ),
+        "reduction_factor": (round(effective_vel / _kinematic.max_velocity, 4) if _kinematic.max_velocity > 0 else 0.0),
     }
 
 
@@ -176,12 +171,14 @@ def _phri_batch_check(args: dict) -> dict:
         )
         mode = result["mode"]
         mode_str = mode.value if isinstance(mode, PhysicalSafetyMode) else str(mode)
-        results.append({
-            "index": i,
-            "mode": mode_str,
-            "reason": result["reason"],
-            "safe": mode == PhysicalSafetyMode.NORMAL if isinstance(mode, PhysicalSafetyMode) else False,
-        })
+        results.append(
+            {
+                "index": i,
+                "mode": mode_str,
+                "reason": result["reason"],
+                "safe": mode == PhysicalSafetyMode.NORMAL if isinstance(mode, PhysicalSafetyMode) else False,
+            }
+        )
         if mode == PhysicalSafetyMode.EMERGENCY:
             emergency_count += 1
         elif mode == PhysicalSafetyMode.CAUTION:
@@ -283,6 +280,7 @@ _TOOL_SCHEMAS = [
 # Protocol helpers
 # ---------------------------------------------------------------------------
 
+
 def _ok(request_id, result):
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
@@ -297,11 +295,14 @@ def handle_request(req: dict) -> dict:
     params = req.get("params", {})
 
     if method == "initialize":
-        return _ok(req_id, {
-            "protocolVersion": PROTOCOL_VERSION,
-            "capabilities": {"tools": {}},
-            "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-        })
+        return _ok(
+            req_id,
+            {
+                "protocolVersion": PROTOCOL_VERSION,
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+            },
+        )
 
     if method == "tools/list":
         return _ok(req_id, {"tools": _TOOL_SCHEMAS})
@@ -314,9 +315,7 @@ def handle_request(req: dict) -> dict:
             return _err(req_id, -32601, f"Unknown tool: {tool_name}")
         try:
             result = handler(tool_args)
-            return _ok(req_id, {
-                "content": [{"type": "text", "text": json.dumps(result, default=str)}]
-            })
+            return _ok(req_id, {"content": [{"type": "text", "text": json.dumps(result, default=str)}]})
         except Exception:
             tb = traceback.format_exc()
             return _err(req_id, -32000, tb)

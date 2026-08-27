@@ -53,8 +53,24 @@ _REVIEW_REQUIRED = {
 
 # Valid target invariants
 _VALID_TARGETS = {
-    "K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8", "K9", "K10", "K11",
-    "D1", "D2", "D3", "D4", "D5", "D6", "D7",
+    "K1",
+    "K2",
+    "K3",
+    "K4",
+    "K5",
+    "K6",
+    "K7",
+    "K8",
+    "K9",
+    "K10",
+    "K11",
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
 }
 
 
@@ -75,9 +91,7 @@ def validate_doctrine_amendment(amendment: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(amendment, schema)
     if errors:
-        raise ValidationError(
-            f"Doctrine amendment schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Doctrine amendment schema validation failed: {'; '.join(errors)}")
 
 
 def validate_operator_approval(amendment: dict[str, Any]) -> None:
@@ -96,9 +110,7 @@ def validate_operator_approval(amendment: dict[str, Any]) -> None:
     """
     authority = amendment.get("authority", {})
     if not isinstance(authority, dict):
-        raise ValueError(
-            "Amendment rejected: authority gate missing or invalid"
-        )
+        raise ValueError("Amendment rejected: authority gate missing or invalid")
 
     if not authority.get("operator_approval", False):
         raise ValueError(
@@ -109,10 +121,7 @@ def validate_operator_approval(amendment: dict[str, Any]) -> None:
 
     approver_id = authority.get("approver_id", "")
     if not isinstance(approver_id, str) or not approver_id.strip():
-        raise ValueError(
-            "Amendment rejected: authority.approver_id must be a "
-            "non-empty string"
-        )
+        raise ValueError("Amendment rejected: authority.approver_id must be a non-empty string")
 
 
 def validate_amendment_evidence(amendment: dict[str, Any]) -> None:
@@ -129,9 +138,7 @@ def validate_amendment_evidence(amendment: dict[str, Any]) -> None:
     """
     evidence = amendment.get("evidence", {})
     if not isinstance(evidence, dict):
-        raise ValueError(
-            "Amendment rejected: evidence gate missing or invalid"
-        )
+        raise ValueError("Amendment rejected: evidence gate missing or invalid")
 
     evidence_refs = evidence.get("evidence_refs", [])
     if not isinstance(evidence_refs, list) or len(evidence_refs) == 0:
@@ -165,16 +172,11 @@ def validate_review_consistency(amendment: dict[str, Any]) -> None:
 
         reviewer_id = review.get("reviewer_id", "")
         if not reviewer_id or not isinstance(reviewer_id, str):
-            raise ValueError(
-                "Amendment rejected: review.reviewer_id must be a "
-                "non-empty string"
-            )
+            raise ValueError("Amendment rejected: review.reviewer_id must be a non-empty string")
 
         review_outcome = review.get("review_outcome", "")
         if not review_outcome:
-            raise ValueError(
-                "Amendment rejected: review.review_outcome must be present"
-            )
+            raise ValueError("Amendment rejected: review.review_outcome must be present")
 
 
 def validate_amendment(amendment: dict[str, Any]) -> None:

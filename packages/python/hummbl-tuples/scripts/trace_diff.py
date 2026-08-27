@@ -86,12 +86,14 @@ def diff_traces(
         fp_a = _tuple_fingerprint(keys_a[k])
         fp_b = _tuple_fingerprint(keys_b[k])
         if fp_a != fp_b:
-            modified.append({
-                "key": k,
-                "trace_a": keys_a[k],
-                "trace_b": keys_b[k],
-                "diff_fields": _field_diff(keys_a[k], keys_b[k]),
-            })
+            modified.append(
+                {
+                    "key": k,
+                    "trace_a": keys_a[k],
+                    "trace_b": keys_b[k],
+                    "diff_fields": _field_diff(keys_a[k], keys_b[k]),
+                }
+            )
         else:
             matched.append({"key": k, "tuple": keys_a[k]})
 
@@ -100,27 +102,33 @@ def diff_traces(
     max_len = max(len(trace_a), len(trace_b))
     for i in range(max_len):
         if i >= len(trace_a):
-            divergence_points.append({
-                "index": i,
-                "type": "extra_in_b",
-                "tuple_b": trace_b[i],
-            })
+            divergence_points.append(
+                {
+                    "index": i,
+                    "type": "extra_in_b",
+                    "tuple_b": trace_b[i],
+                }
+            )
         elif i >= len(trace_b):
-            divergence_points.append({
-                "index": i,
-                "type": "extra_in_a",
-                "tuple_a": trace_a[i],
-            })
+            divergence_points.append(
+                {
+                    "index": i,
+                    "type": "extra_in_a",
+                    "tuple_a": trace_a[i],
+                }
+            )
         else:
             key_a = _tuple_key(trace_a[i])
             key_b = _tuple_key(trace_b[i])
             if key_a != key_b:
-                divergence_points.append({
-                    "index": i,
-                    "type": "key_mismatch",
-                    "tuple_a_key": key_a,
-                    "tuple_b_key": key_b,
-                })
+                divergence_points.append(
+                    {
+                        "index": i,
+                        "type": "key_mismatch",
+                        "tuple_a_key": key_a,
+                        "tuple_b_key": key_b,
+                    }
+                )
 
     # Magnitude: how different are the traces (0.0 = identical, 1.0 = completely different)
     total = max(len(trace_a), len(trace_b), 1)
@@ -154,11 +162,13 @@ def _field_diff(a: dict[str, Any], b: dict[str, Any]) -> list[dict[str, Any]]:
         va = a.get(k)
         vb = b.get(k)
         if va != vb:
-            diffs.append({
-                "field": k,
-                "value_a": va,
-                "value_b": vb,
-            })
+            diffs.append(
+                {
+                    "field": k,
+                    "value_a": va,
+                    "value_b": vb,
+                }
+            )
     return diffs
 
 
@@ -211,8 +221,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--trace-a", required=True, help="First trace file (JSON array)")
     parser.add_argument("--trace-b", required=True, help="Second trace file (JSON array)")
     parser.add_argument("--output", help="Output file for structured diff (JSON)")
-    parser.add_argument("--format", choices=["summary", "json"], default="summary",
-                        help="Output format (default: summary)")
+    parser.add_argument(
+        "--format",
+        choices=["summary", "json"],
+        default="summary",
+        help="Output format (default: summary)",
+    )
     args = parser.parse_args(argv)
 
     trace_a = load_trace(args.trace_a)

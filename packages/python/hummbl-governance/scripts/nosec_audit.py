@@ -13,6 +13,7 @@ Usage:
   python scripts/nosec_audit.py [--package hummbl_governance] [--json]
   python scripts/nosec_audit.py --registry docs/nosec-registry.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -21,7 +22,6 @@ import re
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
-
 
 # Match: # nosec B123 — justification text
 # or:    # nosec B123 - justification text
@@ -65,14 +65,16 @@ def _scan_file(path: Path, repo_root: Path) -> list[NosecSuppression]:
             rule = match.group(1) or ""
             justification = (match.group(2) or "").strip()
             has_just = bool(justification)
-            suppressions.append(NosecSuppression(
-                file=rel_path,
-                line_no=line_no,
-                rule=rule,
-                justification=justification,
-                has_justification=has_just,
-                source_line=line.strip(),
-            ))
+            suppressions.append(
+                NosecSuppression(
+                    file=rel_path,
+                    line_no=line_no,
+                    rule=rule,
+                    justification=justification,
+                    has_justification=has_just,
+                    source_line=line.strip(),
+                )
+            )
     return suppressions
 
 
@@ -101,19 +103,25 @@ def scan_package(package_dir: Path, repo_root: Path) -> list[NosecSuppression]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit nosec suppressions in production code")
     parser.add_argument(
-        "--package", type=str, default="hummbl_governance",
+        "--package",
+        type=str,
+        default="hummbl_governance",
         help="Package directory to scan (default: hummbl_governance)",
     )
     parser.add_argument(
-        "--json", action="store_true",
+        "--json",
+        action="store_true",
         help="Output as JSON instead of human-readable",
     )
     parser.add_argument(
-        "--registry", type=str, default="",
+        "--registry",
+        type=str,
+        default="",
         help="Path to write a nosec registry JSON file",
     )
     parser.add_argument(
-        "--strict", action="store_true",
+        "--strict",
+        action="store_true",
         help="Exit 1 if any nosec lacks justification (default: warn only)",
     )
     args = parser.parse_args()
@@ -127,8 +135,7 @@ def main() -> int:
     if args.registry:
         registry = {
             "description": (
-                "Registry of all nosec suppressions in production code. "
-                "Review quarterly per ADR-007 and issue #137."
+                "Registry of all nosec suppressions in production code. Review quarterly per ADR-007 and issue #137."
             ),
             "total": len(suppressions),
             "justified": len(suppressions) - len(unjustified),

@@ -7,26 +7,28 @@ subtype barriers for HUMMBL Base120/Seed20 mental models.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, NamedTuple, Tuple
+from typing import Any, NamedTuple
 
 
 class Domain(str, Enum):
     """Mental model domains in HUMMBL Seed20/Base120 taxonomy."""
+
     IN = "IN"  # Inversion (e.g. IN18 Kill Criteria, IN7 Boundary Testing)
     RE = "RE"  # Reduction & Reasoning (e.g. RE1 First Principles, RE8 Root Cause)
     CO = "CO"  # Composition & Systems (e.g. CO5 Systems Coupling, CO7 Growth Loops)
     DE = "DE"  # Decomposition (e.g. DE5 Dimensional Reduction)
-    P  = "P"   # Perception & Framing (e.g. P5 User Journey, P9 Accessibility)
+    P = "P"  # Perception & Framing (e.g. P5 User Journey, P9 Accessibility)
 
 
 class Relation(str, Enum):
     """Relational operators for Grammatical Mathematics."""
-    ORTHOGONAL = "⊥"   # Subtype barrier / Disjoint domains
-    COMPOSED   = "∘"   # Direct functional composition
-    ENTAILS    = "⇒"   # Logical implication / Precedence
-    DUAL       = "⇔"   # Epistemic duality
-    BOUND      = "↦"   # Contextual binding
-    SUPERSEDES = "≻"   # Precedence / Hierarchy override
+
+    ORTHOGONAL = "⊥"  # Subtype barrier / Disjoint domains
+    COMPOSED = "∘"  # Direct functional composition
+    ENTAILS = "⇒"  # Logical implication / Precedence
+    DUAL = "⇔"  # Epistemic duality
+    BOUND = "↦"  # Contextual binding
+    SUPERSEDES = "≻"  # Precedence / Hierarchy override
 
     def __str__(self) -> str:
         return self.value
@@ -34,6 +36,7 @@ class Relation(str, Enum):
 
 class SubtypeBarrier(NamedTuple):
     """Represents an explicit non-interfering subtype boundary (A ⊥ B)."""
+
     left: str
     right: str
     relation: Relation = Relation.ORTHOGONAL
@@ -44,7 +47,7 @@ class SubtypeBarrier(NamedTuple):
 SUBTYPE_BARRIERS: dict[tuple[str, str], SubtypeBarrier] = {
     ("IN18", "RE8"): SubtypeBarrier("IN18", "RE8"),  # Kill-Criteria ⊥ Root Cause
     ("IN18", "RE1"): SubtypeBarrier("IN18", "RE1"),  # Kill-Criteria ⊥ First Principles
-    ("CO5", "IN7"):  SubtypeBarrier("CO5", "IN7"),   # Systems Coupling ⊥ Boundary Testing
+    ("CO5", "IN7"): SubtypeBarrier("CO5", "IN7"),  # Systems Coupling ⊥ Boundary Testing
 }
 
 
@@ -98,7 +101,9 @@ def is_domain_compatible(domain_a: Domain, domain_b: Domain) -> bool:
     """Return True if domain_a and domain_b are functionally compatible (non-barrier)."""
     if domain_a == domain_b:
         return True
-    entry = DOMAIN_MATRIX.get((domain_a, domain_b)) or DOMAIN_MATRIX.get((domain_b, domain_a))
+    entry = DOMAIN_MATRIX.get((domain_a, domain_b)) or DOMAIN_MATRIX.get(
+        (domain_b, domain_a)
+    )
     if entry is None:
         return True
     return not entry.get("is_barrier", False)

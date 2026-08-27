@@ -23,7 +23,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from hummbl_cognition.retriever import (
     MemoryResult,
     OpenBrainRetriever,
@@ -38,6 +37,7 @@ from hummbl_cognition.retriever import (
 # ---------------------------------------------------------------------------
 # _estimate_tokens
 # ---------------------------------------------------------------------------
+
 
 class TestEstimateTokens:
     def test_short_string(self):
@@ -54,6 +54,7 @@ class TestEstimateTokens:
 # ---------------------------------------------------------------------------
 # _resolve_state_dir
 # ---------------------------------------------------------------------------
+
 
 class TestResolveStateDir:
     def test_override_path(self, tmp_path):
@@ -81,7 +82,11 @@ class TestResolveStateDir:
     def test_no_git_fallback(self, monkeypatch):
         monkeypatch.delenv("HUMMBL_COGNITION_STATE", raising=False)
         import subprocess
-        with patch("subprocess.check_output", side_effect=subprocess.CalledProcessError(1, "git")):
+
+        with patch(
+            "subprocess.check_output",
+            side_effect=subprocess.CalledProcessError(1, "git"),
+        ):
             result = _resolve_state_dir()
             assert result[0] == Path("_state")
 
@@ -89,6 +94,7 @@ class TestResolveStateDir:
 # ---------------------------------------------------------------------------
 # MemoryResult
 # ---------------------------------------------------------------------------
+
 
 class TestMemoryResult:
     def test_basic_construction(self):
@@ -108,23 +114,34 @@ class TestMemoryResult:
 
     def test_explicit_tokens(self):
         r = MemoryResult(
-            source="bus", entry_id="bus:1", score=0.5,
-            content="x", metadata={}, tokens=42,
+            source="bus",
+            entry_id="bus:1",
+            score=0.5,
+            content="x",
+            metadata={},
+            tokens=42,
         )
         assert r.tokens == 42
 
     def test_auto_token_estimation(self):
         content = "a" * 80
         r = MemoryResult(
-            source="bus", entry_id="bus:1", score=0.5,
-            content=content, metadata={},
+            source="bus",
+            entry_id="bus:1",
+            score=0.5,
+            content=content,
+            metadata={},
         )
         assert r.tokens == 20  # 80 / 4
 
     def test_to_dict(self):
         r = MemoryResult(
-            source="findings", entry_id="f-1", score=0.12345,
-            content="claim", metadata={"k": "v"}, tokens=10,
+            source="findings",
+            entry_id="f-1",
+            score=0.12345,
+            content="claim",
+            metadata={"k": "v"},
+            tokens=10,
         )
         d = r.to_dict()
         assert d["source"] == "findings"
@@ -138,6 +155,7 @@ class TestMemoryResult:
 # ---------------------------------------------------------------------------
 # _extract_tsv_messages
 # ---------------------------------------------------------------------------
+
 
 class TestExtractTsvMessages:
     def test_basic_extraction(self):
@@ -166,8 +184,7 @@ class TestExtractTsvMessages:
 
     def test_max_lines_cap(self):
         lines = [
-            f"2026-03-{i:02d}T00:00:00Z\ta\tb\tSTATUS\tmsg{i}"
-            for i in range(1, 31)
+            f"2026-03-{i:02d}T00:00:00Z\ta\tb\tSTATUS\tmsg{i}" for i in range(1, 31)
         ]
         tsv = "\n".join(lines)
         result = _extract_tsv_messages(tsv, max_lines=5)
@@ -184,9 +201,14 @@ class TestExtractTsvMessages:
 # _extract_snippet
 # ---------------------------------------------------------------------------
 
+
 class TestExtractSnippet:
     def test_finds_relevant_section(self):
-        text = "unrelated intro " * 50 + "important keyword section " * 5 + "trailing " * 50
+        text = (
+            "unrelated intro " * 50
+            + "important keyword section " * 5
+            + "trailing " * 50
+        )
         tokens = {"important", "keyword"}
         snippet = _extract_snippet(text, tokens, max_chars=200)
         assert "important" in snippet.lower() or "keyword" in snippet.lower()
@@ -214,6 +236,7 @@ class TestExtractSnippet:
 # OpenBrainRetriever -- initialization
 # ---------------------------------------------------------------------------
 
+
 class TestRetrieverInit:
     def test_default_init(self, tmp_path):
         r = OpenBrainRetriever(state_dir=tmp_path)
@@ -229,6 +252,7 @@ class TestRetrieverInit:
 # ---------------------------------------------------------------------------
 # OpenBrainRetriever.ensure_index
 # ---------------------------------------------------------------------------
+
 
 class TestEnsureIndex:
     def test_loads_from_disk_if_exists(self, tmp_path):
@@ -270,6 +294,7 @@ class TestEnsureIndex:
 # OpenBrainRetriever._search_ledger
 # ---------------------------------------------------------------------------
 
+
 class TestSearchLedger:
     def test_returns_memory_results(self, tmp_path):
         idx = MagicMock()
@@ -303,19 +328,27 @@ class TestSearchLedger:
         idx.search.return_value = []
         r = OpenBrainRetriever(state_dir=tmp_path, index=idx)
         r._search_ledger(
-            "query", scope="project", entry_type="INSIGHT",
-            since="2026-03-01", limit=5,
+            "query",
+            scope="project",
+            entry_type="INSIGHT",
+            since="2026-03-01",
+            limit=5,
         )
         idx.search.assert_called_once_with(
-            "query", limit=5, scope="project",
-            entry_type="INSIGHT", since="2026-03-01",
-            time_decay=False, retrieval_decay=False,
+            "query",
+            limit=5,
+            scope="project",
+            entry_type="INSIGHT",
+            since="2026-03-01",
+            time_decay=False,
+            retrieval_decay=False,
         )
 
 
 # ---------------------------------------------------------------------------
 # OpenBrainRetriever._search_text_pool
 # ---------------------------------------------------------------------------
+
 
 class TestSearchTextPool:
     def test_finds_matching_files(self, tmp_path):
@@ -342,9 +375,11 @@ class TestSearchTextPool:
         idx = MagicMock()
         r = OpenBrainRetriever(state_dir=tmp_path, index=idx)
         results = r._search_text_pool(
-            "query", pool_name="bus",
+            "query",
+            pool_name="bus",
             search_dir=tmp_path / "nonexistent",
-            glob_pattern="*.tsv", limit=5,
+            glob_pattern="*.tsv",
+            limit=5,
         )
         assert results == []
 
@@ -406,6 +441,7 @@ class TestSearchTextPool:
 # OpenBrainRetriever._search_findings
 # ---------------------------------------------------------------------------
 
+
 class TestSearchFindings:
     def test_finds_matching_claims(self, tmp_path):
         findings_dir = tmp_path / "autoresearch"
@@ -419,9 +455,7 @@ class TestSearchFindings:
                 "category": "ai-governance",
             },
         ]
-        (findings_dir / "findings_2026-03-01.json").write_text(
-            json.dumps(findings)
-        )
+        (findings_dir / "findings_2026-03-01.json").write_text(json.dumps(findings))
 
         idx = MagicMock()
         r = OpenBrainRetriever(state_dir=tmp_path, index=idx)
@@ -480,11 +514,14 @@ class TestSearchFindings:
 # OpenBrainRetriever._search_memory_md
 # ---------------------------------------------------------------------------
 
+
 class TestSearchMemoryMd:
     def test_finds_memory_files(self, tmp_path):
         memory_dir = tmp_path / ".claude" / "projects" / "proj" / "memory"
         memory_dir.mkdir(parents=True)
-        (memory_dir / "MEMORY.md").write_text("# Memory\n\nCI infrastructure on nodezero")
+        (memory_dir / "MEMORY.md").write_text(
+            "# Memory\n\nCI infrastructure on nodezero"
+        )
 
         idx = MagicMock()
         r = OpenBrainRetriever(state_dir=tmp_path, index=idx)
@@ -517,6 +554,7 @@ class TestSearchMemoryMd:
 # ---------------------------------------------------------------------------
 # OpenBrainRetriever.search -- full pipeline
 # ---------------------------------------------------------------------------
+
 
 class TestSearch:
     def _make_retriever(self, tmp_path):
@@ -650,10 +688,12 @@ class TestSearch:
         # Pin to single state dir so call counts are predictable
         r.state_dirs = [tmp_path]
 
-        with patch.object(r, "_search_ledger", return_value=[]) as m_ledger, \
-             patch.object(r, "_search_text_pool", return_value=[]) as m_text, \
-             patch.object(r, "_search_findings", return_value=[]) as m_findings, \
-             patch.object(r, "_search_memory_md", return_value=[]) as m_memory:
+        with (
+            patch.object(r, "_search_ledger", return_value=[]) as m_ledger,
+            patch.object(r, "_search_text_pool", return_value=[]) as m_text,
+            patch.object(r, "_search_findings", return_value=[]) as m_findings,
+            patch.object(r, "_search_memory_md", return_value=[]) as m_memory,
+        ):
             r.search("test", token_budget=1000)
             m_ledger.assert_called_once()
             # _search_text_pool called twice (bus + briefings)
@@ -665,6 +705,7 @@ class TestSearch:
 # ---------------------------------------------------------------------------
 # Edge cases
 # ---------------------------------------------------------------------------
+
 
 class TestEdgeCases:
     def test_empty_query_text_pool(self, tmp_path):
@@ -721,7 +762,9 @@ class TestEdgeCases:
         """Findings entries missing optional fields should still work."""
         findings_dir = tmp_path / "autoresearch"
         findings_dir.mkdir()
-        findings = [{"claim": "governance tool released"}]  # No id, source, confidence, category
+        findings = [
+            {"claim": "governance tool released"}
+        ]  # No id, source, confidence, category
         (findings_dir / "findings_1.json").write_text(json.dumps(findings))
 
         idx = MagicMock()
@@ -737,9 +780,17 @@ class TestEdgeCases:
         idx.load.return_value = True
         idx.search.return_value = [
             {
-                "id": "clp-001", "score": 5.0,
-                "meta": {"content_preview": "test", "type": "D", "scope": "p",
-                         "agent": "c", "timestamp": "t", "confidence": 1, "tags": []},
+                "id": "clp-001",
+                "score": 5.0,
+                "meta": {
+                    "content_preview": "test",
+                    "type": "D",
+                    "scope": "p",
+                    "agent": "c",
+                    "timestamp": "t",
+                    "confidence": 1,
+                    "tags": [],
+                },
             },
         ]
         r = OpenBrainRetriever(state_dir=tmp_path, index=idx)

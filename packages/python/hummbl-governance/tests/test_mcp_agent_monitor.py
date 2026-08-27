@@ -23,7 +23,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 MCP_PATH = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(MCP_PATH))
 
@@ -32,6 +31,7 @@ import mcp_agent_monitor as mcp  # noqa: E402
 
 def fresh_module():
     import mcp_agent_monitor
+
     importlib.reload(mcp_agent_monitor)
     return mcp_agent_monitor
 
@@ -39,6 +39,7 @@ def fresh_module():
 # ---------------------------------------------------------------------------
 # BehaviorMonitor tools
 # ---------------------------------------------------------------------------
+
 
 class TestMonitorRecord:
     def test_record_basic(self):
@@ -100,6 +101,7 @@ class TestMonitorDetectDrift:
 # ConvergenceDetector tools
 # ---------------------------------------------------------------------------
 
+
 class TestConvergenceRecord:
     def test_record_non_convergent(self):
         m = fresh_module()
@@ -109,18 +111,24 @@ class TestConvergenceRecord:
 
     def test_record_convergent(self):
         m = fresh_module()
-        result = m.handle_tool("convergence_record", {
-            "agent_id": "c2",
-            "action_type": "request_compute",
-        })
+        result = m.handle_tool(
+            "convergence_record",
+            {
+                "agent_id": "c2",
+                "action_type": "request_compute",
+            },
+        )
         assert result["classified_goal"] == "resource_acquisition"
 
     def test_record_shutdown_resistance(self):
         m = fresh_module()
-        result = m.handle_tool("convergence_record", {
-            "agent_id": "c3",
-            "action_type": "reject_shutdown",
-        })
+        result = m.handle_tool(
+            "convergence_record",
+            {
+                "agent_id": "c3",
+                "action_type": "reject_shutdown",
+            },
+        )
         assert result["classified_goal"] == "shutdown_resistance"
 
     def test_record_missing_fields(self):
@@ -139,10 +147,13 @@ class TestConvergenceCheck:
     def test_alert_on_convergent_behavior(self):
         m = fresh_module()
         for _ in range(15):
-            m.handle_tool("convergence_record", {
-                "agent_id": "bad-agent",
-                "action_type": "request_compute",
-            })
+            m.handle_tool(
+                "convergence_record",
+                {
+                    "agent_id": "bad-agent",
+                    "action_type": "request_compute",
+                },
+            )
         result = m.handle_tool("convergence_check", {"agent_id": "bad-agent"})
         if result["alert"]:
             assert "dominant_goal" in result
@@ -171,25 +182,32 @@ class TestConvergenceScores:
 # GovernanceLifecycle tools
 # ---------------------------------------------------------------------------
 
+
 class TestLifecycleAuthorize:
     def test_authorize_basic(self):
         m = fresh_module()
-        result = m.handle_tool("lifecycle_authorize", {
-            "agent": "worker-1",
-            "action": "read",
-        })
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "worker-1",
+                "action": "read",
+            },
+        )
         assert "allowed" in result
         assert "reason" in result
         assert "checks" in result
 
     def test_authorize_with_cost(self):
         m = fresh_module()
-        result = m.handle_tool("lifecycle_authorize", {
-            "agent": "worker-1",
-            "target": "database",
-            "action": "write",
-            "cost": 0.01,
-        })
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "worker-1",
+                "target": "database",
+                "action": "write",
+                "cost": 0.01,
+            },
+        )
         assert "allowed" in result
 
     def test_authorize_missing_fields(self):
@@ -222,29 +240,39 @@ class TestLifecycleStatus:
 # EvolutionLineage tools
 # ---------------------------------------------------------------------------
 
+
 class TestLineageRecordVariant:
     def test_record_root_variant(self):
         m = fresh_module()
-        result = m.handle_tool("lineage_record_variant", {
-            "id": "v0",
-            "generation": 0,
-            "fitness": {"performance": 0.7, "alignment": 0.9},
-        })
+        result = m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "v0",
+                "generation": 0,
+                "fitness": {"performance": 0.7, "alignment": 0.9},
+            },
+        )
         assert result["recorded"] is True
 
     def test_record_child_variant(self):
         m = fresh_module()
-        m.handle_tool("lineage_record_variant", {
-            "id": "base",
-            "generation": 0,
-            "fitness": {"perf": 0.8},
-        })
-        result = m.handle_tool("lineage_record_variant", {
-            "id": "child",
-            "parent_id": "base",
-            "generation": 1,
-            "fitness": {"perf": 0.85},
-        })
+        m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "base",
+                "generation": 0,
+                "fitness": {"perf": 0.8},
+            },
+        )
+        result = m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "child",
+                "parent_id": "base",
+                "generation": 1,
+                "fitness": {"perf": 0.85},
+            },
+        )
         assert result["recorded"] is True
 
     def test_record_missing_id(self):
@@ -253,23 +281,29 @@ class TestLineageRecordVariant:
 
     def test_record_bad_parent(self):
         m = fresh_module()
-        result = m.handle_tool("lineage_record_variant", {
-            "id": "orphan",
-            "parent_id": "nonexistent",
-            "generation": 1,
-            "fitness": {},
-        })
+        result = m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "orphan",
+                "parent_id": "nonexistent",
+                "generation": 1,
+                "fitness": {},
+            },
+        )
         assert "error" in result
 
 
 class TestLineageGet:
     def setup_method(self):
         self.m = fresh_module()
-        self.m.handle_tool("lineage_record_variant", {
-            "id": "root",
-            "generation": 0,
-            "fitness": {"perf": 0.8},
-        })
+        self.m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "root",
+                "generation": 0,
+                "fitness": {"perf": 0.8},
+            },
+        )
 
     def test_get_existing(self):
         result = self.m.handle_tool("lineage_get", {"variant_id": "root"})
@@ -281,16 +315,22 @@ class TestLineageGet:
         assert result["found"] is False
 
     def test_get_with_lineage(self):
-        self.m.handle_tool("lineage_record_variant", {
-            "id": "child-v",
-            "parent_id": "root",
-            "generation": 1,
-            "fitness": {"perf": 0.85},
-        })
-        result = self.m.handle_tool("lineage_get", {
-            "variant_id": "child-v",
-            "include_lineage": True,
-        })
+        self.m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "child-v",
+                "parent_id": "root",
+                "generation": 1,
+                "fitness": {"perf": 0.85},
+            },
+        )
+        result = self.m.handle_tool(
+            "lineage_get",
+            {
+                "variant_id": "child-v",
+                "include_lineage": True,
+            },
+        )
         assert result["found"] is True
         assert len(result["ancestry"]) == 2
 
@@ -308,17 +348,23 @@ class TestLineageDrift:
 
     def test_drift_with_data(self):
         m = fresh_module()
-        m.handle_tool("lineage_record_variant", {
-            "id": "base",
-            "generation": 0,
-            "fitness": {"perf": 0.7},
-        })
-        m.handle_tool("lineage_record_variant", {
-            "id": "child",
-            "parent_id": "base",
-            "generation": 1,
-            "fitness": {"perf": 0.2},  # Large drop should trigger drift
-        })
+        m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "base",
+                "generation": 0,
+                "fitness": {"perf": 0.7},
+            },
+        )
+        m.handle_tool(
+            "lineage_record_variant",
+            {
+                "id": "child",
+                "parent_id": "base",
+                "generation": 1,
+                "fitness": {"perf": 0.2},  # Large drop should trigger drift
+            },
+        )
         result = m.handle_tool("lineage_drift", {"include_non_drifted": True})
         assert result["total"] >= 1
 
@@ -326,6 +372,7 @@ class TestLineageDrift:
 # ---------------------------------------------------------------------------
 # Protocol-level tests
 # ---------------------------------------------------------------------------
+
 
 class TestProtocol:
     def _call(self, req_obj):
@@ -352,11 +399,13 @@ class TestProtocol:
         assert len(tools) == 11
 
     def test_tools_call_lifecycle_status(self):
-        resp = self._call({
-            "jsonrpc": "2.0",
-            "id": 3,
-            "method": "tools/call",
-            "params": {"name": "lifecycle_status", "arguments": {}},
-        })
+        resp = self._call(
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "tools/call",
+                "params": {"name": "lifecycle_status", "arguments": {}},
+            }
+        )
         content = json.loads(resp["result"]["content"][0]["text"])
         assert "govern" in content

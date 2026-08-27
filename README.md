@@ -1,5 +1,10 @@
 # HUMMBL OSS
 
+**HUMMBL** = **H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
+Base120 (120 mental models across 6 transformation families) is the "Base
+Language" for reasoning. HUMMBL wraps those models in governance,
+coordination, and operational infrastructure.
+
 Public monorepo for HUMMBL open-source packages. Consolidation in progress.
 
 ## Packages

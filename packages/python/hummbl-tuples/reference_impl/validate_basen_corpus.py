@@ -132,14 +132,20 @@ def analyze_trace(row_id: int, trace: dict) -> dict:
 
         if expected_steps is not None and idx < len(expected_steps):
             if step_type != expected_steps[idx]:
-                result["status"] = QUARANTINED if result["status"] == VALIDATED else result["status"]
+                result["status"] = (
+                    QUARANTINED if result["status"] == VALIDATED else result["status"]
+                )
                 result["error_codes"].append("STEP_TYPE_MISMATCH")
 
-        if protocol_id == "ScientificMethod" and any(marker in normalized for marker in SCIENTIFIC_LEAK_MARKERS):
+        if protocol_id == "ScientificMethod" and any(
+            marker in normalized for marker in SCIENTIFIC_LEAK_MARKERS
+        ):
             result["status"] = QUARANTINED if result["status"] == VALIDATED else result["status"]
             result["error_codes"].append("PROTOCOL_LEAKAGE")
 
-        if protocol_id == "WickednessAudit" and any(marker in normalized for marker in RUBRIC_LEAK_MARKERS):
+        if protocol_id == "WickednessAudit" and any(
+            marker in normalized for marker in RUBRIC_LEAK_MARKERS
+        ):
             result["status"] = QUARANTINED if result["status"] == VALIDATED else result["status"]
             result["error_codes"].append("PROTOCOL_LEAKAGE")
 

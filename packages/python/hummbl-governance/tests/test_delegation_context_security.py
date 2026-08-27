@@ -6,7 +6,6 @@ from dataclasses import FrozenInstanceError, asdict
 from datetime import datetime, timedelta
 
 import pytest
-
 from hummbl_governance.delegation import (
     Caveat,
     DelegationTokenManager,
@@ -221,9 +220,7 @@ def test_token_root_rejects_wrong_verifier_and_lossy_resource_conversion():
         subject="worker",
         ops_allowed=["database:read"],
         binding=TokenBinding("task-1", "contract-1"),
-        resource_selectors=[
-            ResourceSelector("database", "prod-*", {"tenant": "trusted"})
-        ],
+        resource_selectors=[ResourceSelector("database", "prod-*", {"tenant": "trusted"})],
     )
     context_manager = DelegationContextManager()
     expected = {

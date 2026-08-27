@@ -35,13 +35,21 @@ from hummbl_cognition.sigil_forge.preprocessors import (
     PromptInjectionDetector,
     scan_text,
 )
-from hummbl_cognition.sigil_forge.race import RaceCandidate, RaceReport, RaceResult, run_race
+from hummbl_cognition.sigil_forge.race import (
+    RaceCandidate,
+    RaceReport,
+    RaceResult,
+    run_race,
+)
 from hummbl_cognition.sigil_forge.receipts import (
     ExecutionReceipt,
     ExecutionReceiptWriter,
     build_receipt,
 )
-from hummbl_cognition.sigil_forge.retrievers import OpenBrainSigilRetriever, StaticRetriever
+from hummbl_cognition.sigil_forge.retrievers import (
+    OpenBrainSigilRetriever,
+    StaticRetriever,
+)
 from hummbl_cognition.sigil_forge.rituals import RitualLibrary
 from hummbl_cognition.sigil_forge.roles import RolePolicy, RolePolicyViolation
 

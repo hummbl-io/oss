@@ -125,9 +125,7 @@ class Attest:
             "nonce": n,
             "timestamp": ts,
         }
-        policy_hash = hashlib.sha256(
-            json.dumps(policy_data, sort_keys=True).encode()
-        ).hexdigest()
+        policy_hash = hashlib.sha256(json.dumps(policy_data, sort_keys=True).encode()).hexdigest()
 
         def _check_allowed_scope(
             allowed: set[str],

@@ -381,11 +381,14 @@ def main():
 
         try:
             if method == "initialize":
-                send_response(msg_id, {
-                    "protocolVersion": PROTOCOL_VERSION,
-                    "capabilities": {"tools": {}},
-                    "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "protocolVersion": PROTOCOL_VERSION,
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                    },
+                )
             elif method == "notifications/initialized":
                 pass
             elif method == "tools/list":
@@ -394,9 +397,12 @@ def main():
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
                 result = handle_tool(tool_name, arguments)
-                send_response(msg_id, {
-                    "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
+                    },
+                )
             elif method == "ping":
                 send_response(msg_id, {})
             else:

@@ -195,9 +195,7 @@ class TestSyncState(unittest.TestCase):
         self.assertEqual(state.last_pulled_post_id, 0)
 
     def test_load_corrupt_file(self):
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write("not json{{{")
             f.flush()
             name = f.name
@@ -378,8 +376,11 @@ class TestAgentHubClient(unittest.TestCase):
         import urllib.error
 
         error = urllib.error.HTTPError(
-            "http://hub.test/api/channels", 500, "Internal Server Error",
-            {}, io.BytesIO(b"server broke"),
+            "http://hub.test/api/channels",
+            500,
+            "Internal Server Error",
+            {},
+            io.BytesIO(b"server broke"),
         )
         mock_urlopen.side_effect = error
 
@@ -393,9 +394,7 @@ class TestBusIO(unittest.TestCase):
     """Test bus file reading and writing."""
 
     def test_read_bus_lines(self):
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".tsv", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             f.write("ts1\ta\tb\tSTATUS\tmsg1\n")
             f.write("ts2\tc\td\tACK\tmsg2\n")
             f.flush()
@@ -420,13 +419,16 @@ class TestBusIO(unittest.TestCase):
                 message="test",
             )
             # Force ImportError for bus_writer
-            with patch(
-                "hummbl_cognition.agenthub_bridge.post_message",
-                side_effect=ImportError("no bus_writer"),
-                create=True,
-            ), patch(
-                "hummbl_bus.bus_writer.post_message",
-                side_effect=ImportError("no bus_writer"),
+            with (
+                patch(
+                    "hummbl_cognition.agenthub_bridge.post_message",
+                    side_effect=ImportError("no bus_writer"),
+                    create=True,
+                ),
+                patch(
+                    "hummbl_bus.bus_writer.post_message",
+                    side_effect=ImportError("no bus_writer"),
+                ),
             ):
                 append_bus_message(msg, bus_path)
 
@@ -446,10 +448,13 @@ class TestBusIO(unittest.TestCase):
                 message="test",
             )
 
-            with patch(
-                "hummbl_bus.bus_writer.post_message",
-                side_effect=RuntimeError("writer failed"),
-            ), self.assertRaises(RuntimeError):
+            with (
+                patch(
+                    "hummbl_bus.bus_writer.post_message",
+                    side_effect=RuntimeError("writer failed"),
+                ),
+                self.assertRaises(RuntimeError),
+            ):
                 append_bus_message(msg, bus_path)
 
             self.assertFalse(bus_path.exists())
@@ -664,8 +669,11 @@ class TestPushToAgentHub(unittest.TestCase):
 
             with patch.object(client, "create_post") as mock_create:
                 mock_create.return_value = AgentHubPost(
-                    id=200, channel_id=1, agent_id="hummbl-cognition",
-                    content="...", created_at="2026-03-16T10:01:00",
+                    id=200,
+                    channel_id=1,
+                    agent_id="hummbl-cognition",
+                    content="...",
+                    created_at="2026-03-16T10:01:00",
                 )
                 count = push_to_agenthub(client, "general", bus_path, state)
 
@@ -675,9 +683,7 @@ class TestPushToAgentHub(unittest.TestCase):
     def test_push_dry_run(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             bus_path = Path(tmpdir) / "bus.tsv"
-            bus_path.write_text(
-                "2026-03-16T10:00:00Z\tclaude\tall\tSTATUS\ttest\n"
-            )
+            bus_path.write_text("2026-03-16T10:00:00Z\tclaude\tall\tSTATUS\ttest\n")
             state = SyncState()
             client = self._make_client()
 
@@ -702,12 +708,16 @@ class TestPushToAgentHub(unittest.TestCase):
             client = self._make_client()
 
             post_id = 1000
+
             def mock_create(channel, content, parent_id=None):
                 nonlocal post_id
                 post_id += 1
                 return AgentHubPost(
-                    id=post_id, channel_id=1, agent_id="hummbl-cognition",
-                    content=content, created_at="2026-03-16T10:00:00",
+                    id=post_id,
+                    channel_id=1,
+                    agent_id="hummbl-cognition",
+                    content=content,
+                    created_at="2026-03-16T10:00:00",
                 )
 
             with patch.object(client, "create_post", side_effect=mock_create):
@@ -730,9 +740,7 @@ class TestPushToAgentHub(unittest.TestCase):
             state = SyncState()
             client = self._make_client()
 
-            with patch.object(
-                client, "create_post", side_effect=AgentHubError("fail")
-            ):
+            with patch.object(client, "create_post", side_effect=AgentHubError("fail")):
                 count = push_to_agenthub(client, "general", bus_path, state)
 
             self.assertEqual(count, 0)
@@ -751,8 +759,14 @@ class TestSync(unittest.TestCase):
     @patch("hummbl_cognition.agenthub_bridge.pull_from_agenthub")
     @patch("hummbl_cognition.agenthub_bridge.push_to_agenthub")
     def test_sync_both(
-        self, mock_push, mock_pull, mock_save, mock_load,
-        mock_state_path, mock_bus_path, mock_client_cls,
+        self,
+        mock_push,
+        mock_pull,
+        mock_save,
+        mock_load,
+        mock_state_path,
+        mock_bus_path,
+        mock_client_cls,
     ):
         mock_bus_path.return_value = Path("/tmp/bus.tsv")
         mock_state_path.return_value = Path("/tmp/state.json")
@@ -779,8 +793,14 @@ class TestSync(unittest.TestCase):
     @patch("hummbl_cognition.agenthub_bridge.pull_from_agenthub")
     @patch("hummbl_cognition.agenthub_bridge.push_to_agenthub")
     def test_sync_pull_only(
-        self, mock_push, mock_pull, mock_save, mock_load,
-        mock_state_path, mock_bus_path, mock_client_cls,
+        self,
+        mock_push,
+        mock_pull,
+        mock_save,
+        mock_load,
+        mock_state_path,
+        mock_bus_path,
+        mock_client_cls,
     ):
         mock_bus_path.return_value = Path("/tmp/bus.tsv")
         mock_state_path.return_value = Path("/tmp/state.json")
@@ -801,8 +821,14 @@ class TestSync(unittest.TestCase):
     @patch("hummbl_cognition.agenthub_bridge.pull_from_agenthub")
     @patch("hummbl_cognition.agenthub_bridge.push_to_agenthub")
     def test_sync_dry_run_does_not_save(
-        self, mock_push, mock_pull, mock_save, mock_load,
-        mock_state_path, mock_bus_path, mock_client_cls,
+        self,
+        mock_push,
+        mock_pull,
+        mock_save,
+        mock_load,
+        mock_state_path,
+        mock_bus_path,
+        mock_client_cls,
     ):
         mock_bus_path.return_value = Path("/tmp/bus.tsv")
         mock_state_path.return_value = Path("/tmp/state.json")
@@ -832,10 +858,17 @@ class TestCLI(unittest.TestCase):
     @patch("hummbl_cognition.agenthub_bridge.sync")
     def test_sync_command(self, mock_sync):
         mock_sync.return_value = {"pulled": 1, "pushed": 2}
-        result = main([
-            "--api-key", "test-key",
-            "sync", "--channel", "general", "--direction", "both",
-        ])
+        result = main(
+            [
+                "--api-key",
+                "test-key",
+                "sync",
+                "--channel",
+                "general",
+                "--direction",
+                "both",
+            ]
+        )
         self.assertEqual(result, 0)
         mock_sync.assert_called_once()
         call_kwargs = mock_sync.call_args
@@ -845,10 +878,15 @@ class TestCLI(unittest.TestCase):
     @patch("hummbl_cognition.agenthub_bridge.sync")
     def test_sync_error_returns_1(self, mock_sync):
         mock_sync.side_effect = AgentHubError("connection refused")
-        result = main([
-            "--api-key", "key",
-            "sync", "--channel", "general",
-        ])
+        result = main(
+            [
+                "--api-key",
+                "key",
+                "sync",
+                "--channel",
+                "general",
+            ]
+        )
         self.assertEqual(result, 1)
 
 

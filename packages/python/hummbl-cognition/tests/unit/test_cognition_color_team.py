@@ -11,7 +11,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from hummbl_cognition.models import (
     VALID_COLOR_TEAMS,
     VALID_INTEL_TYPES,
@@ -20,7 +19,6 @@ from hummbl_cognition.models import (
     LedgerEntry,
     compute_content_hash,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -66,8 +64,14 @@ class TestColorTeamEnum:
 
     def test_specialized_colors_present(self):
         for color in (
-            "silver", "gray", "lavender", "pink", "bronze",
-            "charcoal", "slate", "tan",
+            "silver",
+            "gray",
+            "lavender",
+            "pink",
+            "bronze",
+            "charcoal",
+            "slate",
+            "tan",
         ):
             assert color in VALID_COLOR_TEAMS
 
@@ -93,9 +97,21 @@ class TestIntelTypeEnum:
 
     def test_all_int_types_present(self):
         expected = {
-            "HUMINT", "OSINT", "MASINT", "IMINT", "GEOINT",
-            "FININT", "TECHINT", "CYBINT", "GITINT", "BUSINT",
-            "OPSINT", "CODEINT", "LOGINT", "REGINT", "TOPOINT",
+            "HUMINT",
+            "OSINT",
+            "MASINT",
+            "IMINT",
+            "GEOINT",
+            "FININT",
+            "TECHINT",
+            "CYBINT",
+            "GITINT",
+            "BUSINT",
+            "OPSINT",
+            "CODEINT",
+            "LOGINT",
+            "REGINT",
+            "TOPOINT",
         }
         assert VALID_INTEL_TYPES == expected
 
@@ -366,7 +382,9 @@ class TestColorTeamTamperDetection:
 
     def test_tamper_intel_types_undetectable_by_hash(self):
         """Changing intel_types on a deserialized entry does not break verify_hash."""
-        e = _make_entry(intel_types_consumed=("CYBINT",), intel_types_produced=("OSINT",))
+        e = _make_entry(
+            intel_types_consumed=("CYBINT",), intel_types_produced=("OSINT",)
+        )
         assert e.verify_hash() is True
         tampered = object.__new__(LedgerEntry)
         tampered.__dict__.update(e.__dict__)
@@ -484,7 +502,8 @@ class TestCLIArgumentParsing:
     def _parse_post_verified(self, argv):
         """Parse post-verified args and return the namespace."""
         import argparse
-        from hummbl_cognition.models import VALID_COLOR_TEAMS, VALID_INTEL_TYPES
+
+        from hummbl_cognition.models import VALID_COLOR_TEAMS
 
         p = argparse.ArgumentParser()
         p.add_argument("--agent", required=True)
@@ -502,25 +521,45 @@ class TestCLIArgumentParsing:
         return p.parse_args(argv)
 
     def test_parse_color_team(self):
-        ns = self._parse_post_verified([
-            "--agent", "devin", "--content", "test",
-            "--color-team", "lavender",
-        ])
+        ns = self._parse_post_verified(
+            [
+                "--agent",
+                "devin",
+                "--content",
+                "test",
+                "--color-team",
+                "lavender",
+            ]
+        )
         assert ns.color_team == "lavender"
 
     def test_parse_invalid_color_team_rejected(self):
         # argparse choices= rejects invalid values at parse time
         with pytest.raises(SystemExit):
-            self._parse_post_verified([
-                "--agent", "devin", "--content", "test",
-                "--color-team", "INVALID_COLOR",
-            ])
+            self._parse_post_verified(
+                [
+                    "--agent",
+                    "devin",
+                    "--content",
+                    "test",
+                    "--color-team",
+                    "INVALID_COLOR",
+                ]
+            )
 
     def test_parse_intel_types_consumed_multiple(self):
-        ns = self._parse_post_verified([
-            "--agent", "devin", "--content", "test",
-            "--intel-types-consumed", "CYBINT", "TECHINT", "CODEINT",
-        ])
+        ns = self._parse_post_verified(
+            [
+                "--agent",
+                "devin",
+                "--content",
+                "test",
+                "--intel-types-consumed",
+                "CYBINT",
+                "TECHINT",
+                "CODEINT",
+            ]
+        )
         assert ns.intel_types_consumed == ["CYBINT", "TECHINT", "CODEINT"]
 
     def test_parse_intel_types_nargs_plus_requires_at_least_one(self):
@@ -528,26 +567,47 @@ class TestCLIArgumentParsing:
         # (but default=[] means the flag is simply not present, not empty)
         # When flag IS present with no values, argparse errors
         with pytest.raises(SystemExit):
-            self._parse_post_verified([
-                "--agent", "devin", "--content", "test",
-                "--intel-types-consumed",  # no values
-            ])
+            self._parse_post_verified(
+                [
+                    "--agent",
+                    "devin",
+                    "--content",
+                    "test",
+                    "--intel-types-consumed",  # no values
+                ]
+            )
 
     def test_parse_exercise_role(self):
-        ns = self._parse_post_verified([
-            "--agent", "devin", "--content", "test",
-            "--exercise-role", "ai-ml-security",
-        ])
+        ns = self._parse_post_verified(
+            [
+                "--agent",
+                "devin",
+                "--content",
+                "test",
+                "--exercise-role",
+                "ai-ml-security",
+            ]
+        )
         assert ns.exercise_role == "ai-ml-security"
 
     def test_parse_all_color_team_flags(self):
-        ns = self._parse_post_verified([
-            "--agent", "devin", "--content", "full test",
-            "--color-team", "amber",
-            "--intel-types-consumed", "CYBINT", "TECHINT",
-            "--intel-types-produced", "CYBINT",
-            "--exercise-role", "supply-chain-security",
-        ])
+        ns = self._parse_post_verified(
+            [
+                "--agent",
+                "devin",
+                "--content",
+                "full test",
+                "--color-team",
+                "amber",
+                "--intel-types-consumed",
+                "CYBINT",
+                "TECHINT",
+                "--intel-types-produced",
+                "CYBINT",
+                "--exercise-role",
+                "supply-chain-security",
+            ]
+        )
         assert ns.color_team == "amber"
         assert ns.intel_types_consumed == ["CYBINT", "TECHINT"]
         assert ns.intel_types_produced == ["CYBINT"]
@@ -669,22 +729,38 @@ class TestCLIEndToEnd:
         from hummbl_cognition.__main__ import main
 
         ledger = tmp_path / "e2e_ledger.jsonl"
-        rc = main([
-            "--ledger", str(ledger),
-            "post-verified",
-            "--agent", "devin",
-            "--vendor", "local",
-            "--model", "glm-5.2-high",
-            "--type", "discovery",
-            "--scope", "project",
-            "--content", "E2E color team test",
-            "--evidence", "e2e-evidence",
-            "--confidence", "0.85",
-            "--color-team", "lavender",
-            "--intel-types-consumed", "CYBINT", "TECHINT",
-            "--intel-types-produced", "CYBINT",
-            "--exercise-role", "ai-ml-security",
-        ])
+        rc = main(
+            [
+                "--ledger",
+                str(ledger),
+                "post-verified",
+                "--agent",
+                "devin",
+                "--vendor",
+                "local",
+                "--model",
+                "glm-5.2-high",
+                "--type",
+                "discovery",
+                "--scope",
+                "project",
+                "--content",
+                "E2E color team test",
+                "--evidence",
+                "e2e-evidence",
+                "--confidence",
+                "0.85",
+                "--color-team",
+                "lavender",
+                "--intel-types-consumed",
+                "CYBINT",
+                "TECHINT",
+                "--intel-types-produced",
+                "CYBINT",
+                "--exercise-role",
+                "ai-ml-security",
+            ]
+        )
         assert rc == 0
         lines = ledger.read_text(encoding="utf-8").strip().splitlines()
         assert len(lines) == 1
@@ -699,19 +775,31 @@ class TestCLIEndToEnd:
         from hummbl_cognition.__main__ import main
 
         ledger = tmp_path / "e2e_reject.jsonl"
-        rc = main([
-            "--ledger", str(ledger),
-            "post-verified",
-            "--agent", "devin",
-            "--vendor", "local",
-            "--model", "glm-5.2-high",
-            "--type", "discovery",
-            "--scope", "project",
-            "--content", "Should be rejected",
-            "--evidence", "test",
-            "--confidence", "0.9",
-            "--intel-types-consumed", "FAKEINT",
-        ])
+        rc = main(
+            [
+                "--ledger",
+                str(ledger),
+                "post-verified",
+                "--agent",
+                "devin",
+                "--vendor",
+                "local",
+                "--model",
+                "glm-5.2-high",
+                "--type",
+                "discovery",
+                "--scope",
+                "project",
+                "--content",
+                "Should be rejected",
+                "--evidence",
+                "test",
+                "--confidence",
+                "0.9",
+                "--intel-types-consumed",
+                "FAKEINT",
+            ]
+        )
         assert rc == 1
         captured = capsys.readouterr()
         assert "FAKEINT" in captured.err
@@ -721,19 +809,31 @@ class TestCLIEndToEnd:
         from hummbl_cognition.__main__ import main
 
         ledger = tmp_path / "e2e_role_reject.jsonl"
-        rc = main([
-            "--ledger", str(ledger),
-            "post-verified",
-            "--agent", "devin",
-            "--vendor", "local",
-            "--model", "glm-5.2-high",
-            "--type", "discovery",
-            "--scope", "project",
-            "--content", "Should be rejected",
-            "--evidence", "test",
-            "--confidence", "0.9",
-            "--exercise-role", "role with spaces!",
-        ])
+        rc = main(
+            [
+                "--ledger",
+                str(ledger),
+                "post-verified",
+                "--agent",
+                "devin",
+                "--vendor",
+                "local",
+                "--model",
+                "glm-5.2-high",
+                "--type",
+                "discovery",
+                "--scope",
+                "project",
+                "--content",
+                "Should be rejected",
+                "--evidence",
+                "test",
+                "--confidence",
+                "0.9",
+                "--exercise-role",
+                "role with spaces!",
+            ]
+        )
         assert rc == 1
         captured = capsys.readouterr()
         assert "exercise-role" in captured.err
@@ -744,19 +844,34 @@ class TestCLIEndToEnd:
         from hummbl_cognition.__main__ import main
 
         ledger = tmp_path / "e2e_dedup.jsonl"
-        rc = main([
-            "--ledger", str(ledger),
-            "post-verified",
-            "--agent", "devin",
-            "--vendor", "local",
-            "--model", "glm-5.2-high",
-            "--type", "discovery",
-            "--scope", "project",
-            "--content", "Dedup E2E test",
-            "--evidence", "dedup-evidence",
-            "--confidence", "0.9",
-            "--intel-types-consumed", "TECHINT", "CYBINT", "CYBINT", "OSINT",
-        ])
+        rc = main(
+            [
+                "--ledger",
+                str(ledger),
+                "post-verified",
+                "--agent",
+                "devin",
+                "--vendor",
+                "local",
+                "--model",
+                "glm-5.2-high",
+                "--type",
+                "discovery",
+                "--scope",
+                "project",
+                "--content",
+                "Dedup E2E test",
+                "--evidence",
+                "dedup-evidence",
+                "--confidence",
+                "0.9",
+                "--intel-types-consumed",
+                "TECHINT",
+                "CYBINT",
+                "CYBINT",
+                "OSINT",
+            ]
+        )
         assert rc == 0
         lines = ledger.read_text(encoding="utf-8").strip().splitlines()
         data = json.loads(lines[0])

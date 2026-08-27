@@ -9,13 +9,13 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from tuples_vs_logs import (
-    generate_tuples,
-    tuples_to_untyped_logs,
-    measure_validation_time,
-    measure_storage_size,
-    measure_query_scope_violations,
-    run_comparison,
     SCALES,
+    generate_tuples,
+    measure_query_scope_violations,
+    measure_storage_size,
+    measure_validation_time,
+    run_comparison,
+    tuples_to_untyped_logs,
 )
 
 

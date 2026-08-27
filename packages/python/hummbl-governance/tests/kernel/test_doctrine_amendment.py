@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.doctrine_amendment import (
-    AmendmentType,
     AmendmentStatus,
+    AmendmentType,
+    validate_amendment,
+    validate_amendment_evidence,
     validate_doctrine_amendment,
     validate_operator_approval,
-    validate_amendment_evidence,
     validate_review_consistency,
-    validate_amendment,
 )
 from hummbl_governance.schema_validator import ValidationError
 

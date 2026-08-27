@@ -1,14 +1,10 @@
 """Tests for write_boundary enforcer module."""
 
 import json
-from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.write_boundary import (
-    DEFAULT_AUTHORIZED_REPOS,
     BoundaryResult,
-    FilterResult,
     WriteBoundaryEnforcer,
     WriteBoundaryError,
 )
@@ -143,6 +139,8 @@ class TestBoundaryResult:
         assert d == {"repo": "hummbl-io/test", "authorized": True, "reason": ""}
 
     def test_to_dict_with_reason(self):
-        r = BoundaryResult(repo="hummbl-io/test", authorized=False, reason="not allowed")
+        r = BoundaryResult(
+            repo="hummbl-io/test", authorized=False, reason="not allowed"
+        )
         d = r.to_dict()
         assert d["reason"] == "not allowed"

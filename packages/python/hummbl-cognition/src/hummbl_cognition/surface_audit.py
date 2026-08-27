@@ -108,13 +108,17 @@ def record_action(
 ) -> dict[str, Any]:
     """Create a surface audit receipt (does not append to log)."""
     if surface_id not in VALID_SURFACES:
-        raise SurfaceAuditError(f"invalid surface_id: {surface_id}; must be one of {VALID_SURFACES}")
+        raise SurfaceAuditError(
+            f"invalid surface_id: {surface_id}; must be one of {VALID_SURFACES}"
+        )
     if authority_level not in VALID_AUTHORITY_LEVELS:
         raise SurfaceAuditError(
             f"invalid authority_level: {authority_level}; must be one of {VALID_AUTHORITY_LEVELS}"
         )
     if result not in VALID_RESULTS:
-        raise SurfaceAuditError(f"invalid result: {result}; must be one of {VALID_RESULTS}")
+        raise SurfaceAuditError(
+            f"invalid result: {result}; must be one of {VALID_RESULTS}"
+        )
     if not actor:
         raise SurfaceAuditError("actor must not be empty")
     if not action:
@@ -145,14 +149,24 @@ def record_action(
 
 def validate_receipt(receipt: dict[str, Any]) -> bool:
     """Validate a surface audit receipt has all required fields."""
-    required = ["action_id", "timestamp", "surface_id", "actor", "authority_level", "action", "result"]
+    required = [
+        "action_id",
+        "timestamp",
+        "surface_id",
+        "actor",
+        "authority_level",
+        "action",
+        "result",
+    ]
     for field_name in required:
         if field_name not in receipt:
             raise SurfaceAuditError(f"missing required field: {field_name}")
     if receipt["surface_id"] not in VALID_SURFACES:
         raise SurfaceAuditError(f"invalid surface_id: {receipt['surface_id']}")
     if receipt["authority_level"] not in VALID_AUTHORITY_LEVELS:
-        raise SurfaceAuditError(f"invalid authority_level: {receipt['authority_level']}")
+        raise SurfaceAuditError(
+            f"invalid authority_level: {receipt['authority_level']}"
+        )
     if receipt["result"] not in VALID_RESULTS:
         raise SurfaceAuditError(f"invalid result: {receipt['result']}")
     return True

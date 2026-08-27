@@ -2,7 +2,7 @@
 
 **By:** Operator & the HUMMBL Fleet  
 **Date:** August 2026  
-**Canonical Surface:** [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance) / [`hummbl-io/oss`](file:///<repo-root>/PROJECTS/oss)  
+**Canonical Surface:** [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance) / [`hummbl-io/oss`](https://github.com/hummbl-io/oss)  
 
 ---
 
@@ -56,7 +56,7 @@ When an engineering team truly accepts these axioms, its architectural choices t
 
 ### 2.2 From Cosmetic Scores to Cryptographic Proof
 - **The Vain System** displays a green "99% Compliant" badge on a web dashboard.
-- **The Humble System** refuses to grade itself. It implements [ADR-001](file:///<repo-root>/PROJECTS/hummbl-governance/docs/adr/ADR-001-coverage-matrix-not-self-grade.md), marking organizational policies as `⚪ Boundary (Human Domain)` and focusing entirely on producing **tamper-evident, HMAC-signed receipts** that prove exactly what happened, with zero self-aggrandizing commentary.
+- **The Humble System** refuses to grade itself. It implements [ADR-001](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/adr/ADR-001-coverage-matrix-not-self-grade.md), marking organizational policies as `⚪ Boundary (Human Domain)` and focusing entirely on producing **tamper-evident, HMAC-signed receipts** that prove exactly what happened, with zero self-aggrandizing commentary.
 
 ### 2.3 From Dependency Bloat to Standard-Library Purity
 - **The Vain System** imports dozens of cutting-edge third-party frameworks, chasing developer convenience at the cost of an un-auditable supply chain.

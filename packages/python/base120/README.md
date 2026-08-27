@@ -298,9 +298,9 @@ engine = Engine()
 
 # Look up an operator by ID
 operator = engine.get("P6")
-print(operator.name)        # → Point-of-View Anchoring
-print(operator.family)      # → P (Perspective)
-print(operator.description) # → Anchor analysis to a specific viewpoint
+print(operator.name)  # → Point-of-View Anchoring
+print(operator.family)  # → P (Perspective)
+print(operator.description)  # → Anchor analysis to a specific viewpoint
 
 # Generate an operator-specific prompt for a problem
 prompt = engine.prompt("P6", "How should we price the certification tier?")
@@ -428,10 +428,10 @@ ledger = Ledger("decisions.jsonl")
 
 # Apply an operator and record the result
 result = engine.record(
-    "DE1",                                    # operator ID
-    "Reduce release risk.",                   # problem
-    "Split blockers by owner.",               # response
-    0.9,                                      # confidence
+    "DE1",  # operator ID
+    "Reduce release risk.",  # problem
+    "Split blockers by owner.",  # response
+    0.9,  # confidence
 )
 
 ledger.append(result.to_tuple())
@@ -500,10 +500,10 @@ ledger = Ledger("launch-premortem.jsonl")
 
 # Run a pre-mortem on the launch plan
 result = engine.record(
-    "IN6",                                          # Pre-Mortem
-    "Launch the new pricing tier next Monday.",     # problem
+    "IN6",  # Pre-Mortem
+    "Launch the new pricing tier next Monday.",  # problem
     "Top failure mode: existing customers downgrade to the new tier, cannibalizing revenue.",
-    0.8,                                            # confidence
+    0.8,  # confidence
 )
 
 ledger.append(result.to_tuple())
@@ -538,9 +538,9 @@ with open("Base120_Canonical_Model_Registry.yaml") as f:
     registry = yaml.safe_load(f)
 
 models = {m["id"]: m for m in registry["models"]}
-print(models["P1"]["name"])   # → First Principles Framing
+print(models["P1"]["name"])  # → First Principles Framing
 print(models["IN6"]["name"])  # → Inverse/Proof by Contradiction
-print(models["SY13"]["name"]) # → Incentive Architecture
+print(models["SY13"]["name"])  # → Incentive Architecture
 ```
 
 ```javascript
@@ -708,7 +708,12 @@ package distribution is published.
 
 ## HUMMBL Ecosystem
 
-Base120 is part of the [HUMMBL](https://hummbl.io) cognitive AI architecture:
+**HUMMBL** = **H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
+Base120 — the 120 mental models you are reading about right now — is the
+"Base Language" that gives HUMMBL its name. The broader ecosystem wraps
+those models in governance, coordination, and operational infrastructure:
+
+Base120 is part of the [HUMMBL](https://hummbl.io) architecture:
 
 - [hummbl-governance](https://github.com/hummbl-io/oss/tree/main/packages/hummbl-governance) — Governance runtime (kill switch, circuit breaker, cost governor)
 - [arbiter](https://github.com/hummbl-io/arbiter) — Agent-aware code quality scoring and attribution

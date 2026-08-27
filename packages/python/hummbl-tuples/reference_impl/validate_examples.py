@@ -159,9 +159,13 @@ def _validate(value, schema: dict, path: str = "$") -> None:
 
     if isinstance(value, str):
         if "minLength" in schema and len(value) < schema["minLength"]:
-            raise ValidationError(f"{path}: string length {len(value)} < minLength {schema['minLength']}")
+            raise ValidationError(
+                f"{path}: string length {len(value)} < minLength {schema['minLength']}"
+            )
         if "pattern" in schema and not re.search(schema["pattern"], value):
-            raise ValidationError(f"{path}: value {value!r} does not match pattern {schema['pattern']!r}")
+            raise ValidationError(
+                f"{path}: value {value!r} does not match pattern {schema['pattern']!r}"
+            )
         if schema.get("format") == "uuid" and not _UUID_RE.match(value):
             raise ValidationError(f"{path}: value {value!r} is not a valid uuid")
 
@@ -173,7 +177,9 @@ def _validate(value, schema: dict, path: str = "$") -> None:
 
     if isinstance(value, list):
         if "minItems" in schema and len(value) < schema["minItems"]:
-            raise ValidationError(f"{path}: item count {len(value)} < minItems {schema['minItems']}")
+            raise ValidationError(
+                f"{path}: item count {len(value)} < minItems {schema['minItems']}"
+            )
         item_schema = schema.get("items")
         if item_schema is not None:
             for idx, item in enumerate(value):
@@ -261,7 +267,6 @@ def _schema_for_example(example_path: Path) -> Path | None:
         "STRAIN_FLAGGED": "strain_flagged.schema.json",
         "PATH_COMPARISON": "path_comparison.schema.json",
         "TRACE_EVIDENCE": "trace_evidence_tuple.schema.json",
-        "SYSTEM": "system.schema.json",
         "WORKLOAD_INFERRED": "workload_inferred.schema.json",
         "MM_APPLIED": "experimental/mm_applied.schema.json",
         "OBSERVATION_EVENT": "extensions/world_model/observation_event.schema.json",
@@ -331,10 +336,7 @@ def validate_example(example_path: Path) -> None:
 
 def main() -> int:
     failures: list[str] = []
-    examples = sorted(
-        p for p in EXAMPLES_DIR.rglob("*.json")
-        if "invalid" not in p.parts
-    )
+    examples = sorted(p for p in EXAMPLES_DIR.rglob("*.json") if "invalid" not in p.parts)
     for example in examples:
         try:
             validate_example(example)

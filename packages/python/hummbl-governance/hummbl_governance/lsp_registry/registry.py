@@ -26,7 +26,6 @@ import logging
 import os
 import shutil
 import subprocess
-import sys
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
@@ -169,9 +168,7 @@ class ServerDef:
     extensions: Tuple[str, ...]
     language_ids: Tuple[str, ...] = field(default_factory=tuple)
     resolve_root: Callable[[str, str], Optional[str]] = field(default=lambda fp, ws: ws)
-    build_spawn: Callable[[str, ServerContext], Optional[SpawnSpec]] = field(
-        default=lambda root, ctx: None
-    )
+    build_spawn: Callable[[str, ServerContext], Optional[SpawnSpec]] = field(default=lambda root, ctx: None)
     description: str = ""
     category: str = "core"
     min_version: Optional[str] = None
@@ -555,9 +552,7 @@ def _root_rust(file_path: str, workspace: str) -> Optional[str]:
 
 
 def _root_clangd(file_path: str, workspace: str) -> Optional[str]:
-    return _root_or_workspace(
-        file_path, workspace, ["compile_commands.json", "compile_flags.txt", ".clangd"]
-    )
+    return _root_or_workspace(file_path, workspace, ["compile_commands.json", "compile_flags.txt", ".clangd"])
 
 
 def _root_bash(file_path: str, workspace: str) -> str:

@@ -38,7 +38,6 @@ import threading
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel import (
     IdentityEngine,
     Kernel,
@@ -59,6 +58,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # ===========================================================================
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
+
 
 class TestRaceConditions:
     """Concurrent operations must not corrupt state."""
@@ -129,6 +129,7 @@ class TestRaceConditions:
 # ===========================================================================
 # 4. RECOVERY EVALS
 # ===========================================================================
+
 
 class TestRecovery:
     """Kernel must recover gracefully from corruption."""

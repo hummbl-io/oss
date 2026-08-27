@@ -170,6 +170,6 @@ except SanitizedError as e:
 ## Support
 
 For issues or questions:
-- Check the main API documentation: `../api/openapi.yaml`
-- Review kill switch integration guide: `../kill_switch_integration.md`
+- Check the main API documentation: `https://github.com/hummbl-io/oss`
+- Review kill switch integration guide: `./kill_switch_integration.md`
 - Contact: contact@hummbl.io

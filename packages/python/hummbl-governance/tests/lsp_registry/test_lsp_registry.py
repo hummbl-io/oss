@@ -5,20 +5,19 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from hummbl_governance.lsp_registry import (
-    get_registry,
-    ServerDef,
-    ServerContext,
-    SpawnSpec,
     LANGUAGE_BY_EXT,
+    RECIPES,
+    REGISTRY_SCHEMA,
+    SERVER_SCHEMA,
+    ServerContext,
+    ServerDef,
+    SpawnSpec,
+    get_registry,
     nearest_root,
     resolve_workspace_for_file,
-    RECIPES,
     try_install,
     verify_install,
-    SERVER_SCHEMA,
-    REGISTRY_SCHEMA,
 )
 
 

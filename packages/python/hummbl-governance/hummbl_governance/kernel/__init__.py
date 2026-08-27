@@ -54,16 +54,16 @@ from __future__ import annotations
 __version__ = "1.2.2"
 __spec_version__ = "1.2.2"
 
-from .kernel import Kernel
-from .invariants import KernelInvariant, KernelPanic
-from .receipt_engine import Receipt, ReceiptEngine
-from .law_engine import LawEngine
-from .identity_engine import IdentityEngine
-from .sequence_engine import SequenceEngine
-from .evidence_engine import EvidenceEngine
 from .authority_engine import AuthorityEngine
-from .schedule_engine import ScheduleEngine
 from .doctrine_engine import DoctrineEngine, Stage
+from .evidence_engine import EvidenceEngine
+from .identity_engine import IdentityEngine
+from .invariants import KernelInvariant, KernelPanic
+from .kernel import Kernel
+from .law_engine import LawEngine
+from .receipt_engine import Receipt, ReceiptEngine
+from .schedule_engine import ScheduleEngine
+from .sequence_engine import SequenceEngine
 
 __all__ = [
     "Kernel",

@@ -46,14 +46,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hummbl_governance import __version__ as _pkg_version
-from hummbl_governance.reward_monitor import BehaviorMonitor
-from hummbl_governance.convergence_guard import ConvergenceDetector
-from hummbl_governance.lifecycle import GovernanceLifecycle
-from hummbl_governance.evolution_lineage import EvolutionLineage, VariantRecord
-from hummbl_governance.kill_switch import KillSwitch
 from hummbl_governance.circuit_breaker import CircuitBreaker
+from hummbl_governance.convergence_guard import ConvergenceDetector
 from hummbl_governance.cost_governor import CostGovernor
+from hummbl_governance.evolution_lineage import EvolutionLineage, VariantRecord
 from hummbl_governance.identity import AgentRegistry
+from hummbl_governance.kill_switch import KillSwitch
+from hummbl_governance.lifecycle import GovernanceLifecycle
+from hummbl_governance.reward_monitor import BehaviorMonitor
 
 SERVER_NAME = "hummbl-agent-monitor"
 SERVER_VERSION = _pkg_version
@@ -81,6 +81,7 @@ _lifecycle = GovernanceLifecycle(
 # ---------------------------------------------------------------------------
 # Tool handlers
 # ---------------------------------------------------------------------------
+
 
 def _monitor_record(args: dict) -> dict:
     agent_id = args.get("agent_id", "")
@@ -161,8 +162,12 @@ def _lifecycle_authorize(args: dict) -> dict:
     provider = args.get("provider", "")
     model = args.get("model", "")
     decision = _lifecycle.authorize(
-        agent, target or "default", action,
-        cost=cost, provider=provider, model=model,
+        agent,
+        target or "default",
+        action,
+        cost=cost,
+        provider=provider,
+        model=model,
     )
     return {
         "agent": agent,
@@ -398,6 +403,7 @@ _TOOL_SCHEMAS = [
 # Protocol helpers
 # ---------------------------------------------------------------------------
 
+
 def _ok(request_id, result):
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
@@ -412,11 +418,14 @@ def handle_request(req: dict) -> dict:
     params = req.get("params", {})
 
     if method == "initialize":
-        return _ok(req_id, {
-            "protocolVersion": PROTOCOL_VERSION,
-            "capabilities": {"tools": {}},
-            "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-        })
+        return _ok(
+            req_id,
+            {
+                "protocolVersion": PROTOCOL_VERSION,
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+            },
+        )
 
     if method == "tools/list":
         return _ok(req_id, {"tools": _TOOL_SCHEMAS})
@@ -429,9 +438,7 @@ def handle_request(req: dict) -> dict:
             return _err(req_id, -32601, f"Unknown tool: {tool_name}")
         try:
             result = handler(tool_args)
-            return _ok(req_id, {
-                "content": [{"type": "text", "text": json.dumps(result, default=str)}]
-            })
+            return _ok(req_id, {"content": [{"type": "text", "text": json.dumps(result, default=str)}]})
         except Exception:
             tb = traceback.format_exc()
             return _err(req_id, -32000, tb)

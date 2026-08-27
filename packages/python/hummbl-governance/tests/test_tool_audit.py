@@ -22,6 +22,7 @@ class TestToolCallAuditor:
             )
 
             try:
+
                 def search_tool(query: str) -> dict[str, str]:
                     return {"q": query}
 
@@ -110,6 +111,7 @@ class TestToolCallAuditor:
             )
 
             try:
+
                 def failing_tool():
                     raise ValueError("tool failure")
 
@@ -148,6 +150,7 @@ class TestToolCallAuditor:
             lock = threading.Lock()
 
             try:
+
                 def count_tool():
                     nonlocal counter
                     with lock:

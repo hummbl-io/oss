@@ -28,6 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+
 @dataclass
 class ScalingLaw:
     """A scaling law record."""
@@ -95,6 +96,7 @@ class LawEngine:
         for file in self.atlas_dir.glob("SL-*.yaml"):
             try:
                 import yaml
+
                 data = yaml.safe_load(file.read_text())
             except ImportError:
                 # Fallback: parse YAML-ish manually for stdlib-only operation
@@ -157,7 +159,7 @@ class LawEngine:
             if ":" in stripped:
                 colon_idx = stripped.index(":")
                 key = stripped[:colon_idx].strip()
-                raw_value = stripped[colon_idx + 1:].strip()
+                raw_value = stripped[colon_idx + 1 :].strip()
                 if not key:
                     continue
 
@@ -180,9 +182,7 @@ class LawEngine:
                     result[current_key] = None
                 elif raw_value.startswith("[") and raw_value.endswith("]"):
                     result[current_key] = [
-                        v.strip().strip("'").strip(chr(34))
-                        for v in raw_value[1:-1].split(",")
-                        if v.strip()
+                        v.strip().strip("'").strip(chr(34)) for v in raw_value[1:-1].split(",") if v.strip()
                     ]
                 else:
                     result[current_key] = raw_value.strip(chr(34)).strip("'")
@@ -208,9 +208,7 @@ class LawEngine:
 
         return violations
 
-    def _check_law(
-        self, law: ScalingLaw, agent_id: str, timestamp: str, payload: dict[str, Any]
-    ) -> Violation | None:
+    def _check_law(self, law: ScalingLaw, agent_id: str, timestamp: str, payload: dict[str, Any]) -> Violation | None:
         """Check a single law against receipt payload.
 
         This is a simplified rule-based checker. Full implementation
@@ -309,7 +307,6 @@ class LawEngine:
 
         return None
 
-    
     def list_laws(self) -> list[ScalingLaw]:
         """List all loaded scaling laws."""
         return list(self.laws.values())

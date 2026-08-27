@@ -18,12 +18,12 @@ This test suite exercises _parse_yamlish() directly (bypassing the
 PyYAML import) against the real atlas YAML files and synthetic edge
 cases to guard against all three regressions.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 
 from hummbl_governance.kernel.law_engine import LawEngine
-
 
 ATLAS_DIR = Path(__file__).resolve().parents[2] / "hummbl_governance" / "data" / "atlas"
 
@@ -96,9 +96,9 @@ class TestParseYamlishBlockLists:
         engine = LawEngine()
         yaml_text = (
             "boundary_conditions:\n"
-            "  - \"Authority attenuation monotonic\"\n"
-            "  - \"Each hop logged\"\n"
-            "  - \"Verification cost bounded\"\n"
+            '  - "Authority attenuation monotonic"\n'
+            '  - "Each hop logged"\n'
+            '  - "Verification cost bounded"\n'
         )
         result = engine._parse_yamlish(yaml_text)
         assert result["boundary_conditions"] == [
@@ -113,13 +113,13 @@ class TestParseYamlishBlockLists:
             "id: SL-07\n"
             "experiment_receipts: []\n"
             "boundary_conditions:\n"
-            "  - \"Authority attenuation monotonic\"\n"
-            "  - \"Each hop logged\"\n"
-            "  - \"Verification cost bounded\"\n"
+            '  - "Authority attenuation monotonic"\n'
+            '  - "Each hop logged"\n'
+            '  - "Verification cost bounded"\n'
             "related_modules:\n"
-            "  - \"delegation_token\"\n"
-            "  - \"governance_bus\"\n"
-            "  - \"idp\"\n"
+            '  - "delegation_token"\n'
+            '  - "governance_bus"\n'
+            '  - "idp"\n'
         )
         result = engine._parse_yamlish(yaml_text)
         assert result["id"] == "SL-07"
@@ -140,12 +140,7 @@ class TestParseYamlishBlockLists:
 
     def test_scalar_after_block_list_starts_fresh(self) -> None:
         engine = LawEngine()
-        yaml_text = (
-            "boundary_conditions:\n"
-            "  - \"item one\"\n"
-            "  - \"item two\"\n"
-            "status: candidate.accepted\n"
-        )
+        yaml_text = 'boundary_conditions:\n  - "item one"\n  - "item two"\nstatus: candidate.accepted\n'
         result = engine._parse_yamlish(yaml_text)
         assert result["boundary_conditions"] == ["item one", "item two"]
         assert result["status"] == "candidate.accepted"
@@ -179,8 +174,7 @@ class TestParseYamlishRealAtlasFiles:
         loaded_ids = {law.law_id for law in engine.list_laws()}
 
         assert len(loaded_ids) == len(atlas_files), (
-            f"Expected {len(atlas_files)} laws loaded, got {len(loaded_ids)}: "
-            f"{loaded_ids}"
+            f"Expected {len(atlas_files)} laws loaded, got {len(loaded_ids)}: {loaded_ids}"
         )
         # Every file stem should correspond to exactly one loaded law_id.
         expected_stems = {path.stem for path in atlas_files}
@@ -198,6 +192,7 @@ class TestParseYamlishRealAtlasFiles:
         sl07_path = ATLAS_DIR / "SL-07.yaml"
         if not sl07_path.exists():
             import pytest
+
             pytest.skip("SL-07.yaml not present in this checkout")
 
         result = engine._parse_yamlish(sl07_path.read_text(encoding="utf-8"))

@@ -9,7 +9,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from hummbl_cognition.retriever import (
     MemoryResult,
     OpenBrainRetriever,
@@ -42,29 +41,44 @@ class TestMemoryResult:
     def test_tokens_auto_estimated(self):
         content = "a" * 100
         r = MemoryResult(
-            source="bus", entry_id="b-1", score=0.5,
-            content=content, metadata={},
+            source="bus",
+            entry_id="b-1",
+            score=0.5,
+            content=content,
+            metadata={},
         )
         assert r.tokens == 100 // 4  # _CHARS_PER_TOKEN = 4
 
     def test_tokens_override(self):
         r = MemoryResult(
-            source="bus", entry_id="b-1", score=0.5,
-            content="short", metadata={}, tokens=42,
+            source="bus",
+            entry_id="b-1",
+            score=0.5,
+            content="short",
+            metadata={},
+            tokens=42,
         )
         assert r.tokens == 42
 
     def test_tokens_zero_falls_back_to_estimate(self):
         r = MemoryResult(
-            source="bus", entry_id="b-1", score=0.5,
-            content="short", metadata={}, tokens=0,
+            source="bus",
+            entry_id="b-1",
+            score=0.5,
+            content="short",
+            metadata={},
+            tokens=0,
         )
         assert r.tokens == _estimate_tokens("short")
 
     def test_to_dict(self):
         r = MemoryResult(
-            source="findings", entry_id="f-1", score=0.12345678,
-            content="test", metadata={"k": "v"}, tokens=10,
+            source="findings",
+            entry_id="f-1",
+            score=0.12345678,
+            content="test",
+            metadata={"k": "v"},
+            tokens=10,
         )
         d = r.to_dict()
         assert d["source"] == "findings"
@@ -76,8 +90,11 @@ class TestMemoryResult:
 
     def test_empty_content_tokens_at_least_one(self):
         r = MemoryResult(
-            source="x", entry_id="x", score=0.0,
-            content="", metadata={},
+            source="x",
+            entry_id="x",
+            score=0.0,
+            content="",
+            metadata={},
         )
         assert r.tokens >= 1
 
@@ -128,10 +145,7 @@ class TestExtractTsvMessages:
         assert result == ""
 
     def test_max_lines_cap(self):
-        lines = [
-            f"2026-03-01T{i:02d}:00:00Z\ta\tb\tSTATUS\tmsg{i}"
-            for i in range(10)
-        ]
+        lines = [f"2026-03-01T{i:02d}:00:00Z\ta\tb\tSTATUS\tmsg{i}" for i in range(10)]
         tsv = "\n".join(lines)
         result = _extract_tsv_messages(tsv, max_lines=3)
         # Should only contain last 3
@@ -282,9 +296,11 @@ class TestSearchTextPool:
     def test_nonexistent_dir_returns_empty(self):
         r = OpenBrainRetriever(state_dir="/tmp/s")
         results = r._search_text_pool(
-            "test", pool_name="bus",
+            "test",
+            pool_name="bus",
             search_dir=Path("/nonexistent/path"),
-            glob_pattern="*.tsv", limit=5,
+            glob_pattern="*.tsv",
+            limit=5,
         )
         assert results == []
 
@@ -294,8 +310,11 @@ class TestSearchTextPool:
             p.write_text("governance agent orchestration platform")
             r = OpenBrainRetriever(state_dir="/tmp/s")
             results = r._search_text_pool(
-                "governance orchestration", pool_name="briefings",
-                search_dir=Path(td), glob_pattern="*.md", limit=5,
+                "governance orchestration",
+                pool_name="briefings",
+                search_dir=Path(td),
+                glob_pattern="*.md",
+                limit=5,
             )
             assert len(results) >= 1
             assert results[0].source == "briefings"
@@ -333,21 +352,25 @@ class TestSearchTextPool:
             p.write_text("completely unrelated content here")
             r = OpenBrainRetriever(state_dir="/tmp/s")
             results = r._search_text_pool(
-                "zzzznotaword", pool_name="briefings",
-                search_dir=Path(td), glob_pattern="*.md", limit=5,
+                "zzzznotaword",
+                pool_name="briefings",
+                search_dir=Path(td),
+                glob_pattern="*.md",
+                limit=5,
             )
             assert results == []
 
     def test_tsv_file_extracts_messages(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "messages.tsv"
-            p.write_text(
-                "2026-03-01T00:00:00Z\tagent\tall\tSTATUS\tgovernance check\n"
-            )
+            p.write_text("2026-03-01T00:00:00Z\tagent\tall\tSTATUS\tgovernance check\n")
             r = OpenBrainRetriever(state_dir="/tmp/s")
             results = r._search_text_pool(
-                "governance", pool_name="bus",
-                search_dir=Path(td), glob_pattern="*.tsv", limit=5,
+                "governance",
+                pool_name="bus",
+                search_dir=Path(td),
+                glob_pattern="*.tsv",
+                limit=5,
             )
             assert len(results) >= 1
             assert results[0].source == "bus"
@@ -356,11 +379,11 @@ class TestSearchTextPool:
     def test_bus_content_window_expands_from_tsv_source_path(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "messages.tsv"
-            long_message = "prefix " * 120 + "governance bus retrieval " * 20 + "suffix " * 120
+            long_message = (
+                "prefix " * 120 + "governance bus retrieval " * 20 + "suffix " * 120
+            )
             p.write_text(
-                "2026-03-01T00:00:00Z\tagent\tall\tSTATUS\t"
-                + long_message
-                + "\n",
+                "2026-03-01T00:00:00Z\tagent\tall\tSTATUS\t" + long_message + "\n",
                 encoding="utf-8",
             )
 
@@ -386,8 +409,11 @@ class TestSearchTextPool:
             p.write_text("something")
             r = OpenBrainRetriever(state_dir="/tmp/s")
             results = r._search_text_pool(
-                "", pool_name="bus",
-                search_dir=Path(td), glob_pattern="*.md", limit=5,
+                "",
+                pool_name="bus",
+                search_dir=Path(td),
+                glob_pattern="*.md",
+                limit=5,
             )
             assert results == []
 
@@ -397,8 +423,11 @@ class TestSearchTextPool:
             p.write_text("governance platform")
             r = OpenBrainRetriever(state_dir="/tmp/s")
             results = r._search_text_pool(
-                "governance", pool_name="briefings",
-                search_dir=Path(td), glob_pattern="*.md", limit=5,
+                "governance",
+                pool_name="briefings",
+                search_dir=Path(td),
+                glob_pattern="*.md",
+                limit=5,
             )
             # Score multiplied by 0.7
             assert all(res.score <= 0.7 for res in results)
@@ -421,8 +450,13 @@ class TestSearchFindings:
             ar_dir = state / "autoresearch"
             ar_dir.mkdir()
             findings = [
-                {"id": "f1", "claim": "governance framework improves safety",
-                 "source": "paper.pdf", "confidence": 0.8, "category": "safety"},
+                {
+                    "id": "f1",
+                    "claim": "governance framework improves safety",
+                    "source": "paper.pdf",
+                    "confidence": 0.8,
+                    "category": "safety",
+                },
             ]
             (ar_dir / "findings_2026_03.json").write_text(json.dumps(findings))
 
@@ -439,8 +473,13 @@ class TestSearchFindings:
             ar_dir.mkdir()
             data = {
                 "findings": [
-                    {"id": "f2", "claim": "agent orchestration pattern",
-                     "source": "s", "confidence": 0.7, "category": "arch"},
+                    {
+                        "id": "f2",
+                        "claim": "agent orchestration pattern",
+                        "source": "s",
+                        "confidence": 0.7,
+                        "category": "arch",
+                    },
                 ],
             }
             (ar_dir / "findings_2026_04.json").write_text(json.dumps(data))
@@ -602,8 +641,10 @@ class TestSearchIntegration:
         r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
         with patch("hummbl_cognition.retriever.log_retrieval"):
             results = r.search(
-                "test", token_budget=250,
-                sources=["ledger"], agent="test",
+                "test",
+                token_budget=250,
+                sources=["ledger"],
+                agent="test",
             )
         total_tokens = sum(res.tokens for res in results)
         assert total_tokens <= 250
@@ -631,8 +672,10 @@ class TestSearchIntegration:
         r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
         with patch("hummbl_cognition.retriever.log_retrieval"):
             results = r.search(
-                "test", token_budget=100,
-                sources=["ledger"], agent="test",
+                "test",
+                token_budget=100,
+                sources=["ledger"],
+                agent="test",
             )
         assert len(results) == 1
         assert results[0].content.endswith("...")
@@ -645,9 +688,15 @@ class TestSearchIntegration:
             {
                 "id": "clp-001",
                 "score": 3.0,
-                "meta": {"content_preview": "test", "type": "obs",
-                         "scope": "p", "agent": "a", "timestamp": "t",
-                         "confidence": 0.5, "tags": []},
+                "meta": {
+                    "content_preview": "test",
+                    "type": "obs",
+                    "scope": "p",
+                    "agent": "a",
+                    "timestamp": "t",
+                    "confidence": 0.5,
+                    "tags": [],
+                },
             },
         ]
         idx.record_retrieval = MagicMock()
@@ -657,7 +706,9 @@ class TestSearchIntegration:
             r.search("test", sources=["ledger"], agent="test-agent")
             mock_log.assert_called_once()
             call_kwargs = mock_log.call_args
-            assert "clp-001" in call_kwargs[1]["entry_ids"] or "clp-001" in call_kwargs.kwargs.get("entry_ids", [])
+            assert "clp-001" in call_kwargs[1][
+                "entry_ids"
+            ] or "clp-001" in call_kwargs.kwargs.get("entry_ids", [])
 
     def test_feedback_tracking_skipped_for_non_ledger(self):
         idx = MagicMock()
@@ -675,14 +726,22 @@ class TestSearchIntegration:
             {
                 "id": "clp-fail",
                 "score": 1.0,
-                "meta": {"content_preview": "t", "type": "o",
-                         "scope": "p", "agent": "a", "timestamp": "t",
-                         "confidence": 0.5, "tags": []},
+                "meta": {
+                    "content_preview": "t",
+                    "type": "o",
+                    "scope": "p",
+                    "agent": "a",
+                    "timestamp": "t",
+                    "confidence": 0.5,
+                    "tags": [],
+                },
             },
         ]
         idx.record_retrieval = MagicMock()
         r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
-        with patch("hummbl_cognition.retriever.log_retrieval", side_effect=OSError("nope")):
+        with patch(
+            "hummbl_cognition.retriever.log_retrieval", side_effect=OSError("nope")
+        ):
             # Should not raise
             results = r.search("test", sources=["ledger"], agent="test")
             assert len(results) == 1
@@ -694,14 +753,21 @@ class TestSearchIntegration:
         r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
         with patch("hummbl_cognition.retriever.log_retrieval"):
             r.search(
-                "test", sources=["ledger"],
-                scope="project", entry_type="decision",
-                since="2026-03-01", agent="test",
+                "test",
+                sources=["ledger"],
+                scope="project",
+                entry_type="decision",
+                since="2026-03-01",
+                agent="test",
             )
         idx.search.assert_called_once_with(
-            "test", limit=50, scope="project",
-            entry_type="decision", since="2026-03-01",
-            time_decay=True, retrieval_decay=True,
+            "test",
+            limit=50,
+            scope="project",
+            entry_type="decision",
+            since="2026-03-01",
+            time_decay=True,
+            retrieval_decay=True,
         )
 
     @pytest.mark.xfail(reason="API changed: search sources list")
@@ -724,12 +790,32 @@ class TestSearchIntegration:
         idx = MagicMock()
         idx.load.return_value = True
         idx.search.return_value = [
-            {"id": "clp-low", "score": 1.0,
-             "meta": {"content_preview": "lo", "type": "o", "scope": "p",
-                      "agent": "a", "timestamp": "t", "confidence": 0.5, "tags": []}},
-            {"id": "clp-high", "score": 9.0,
-             "meta": {"content_preview": "hi", "type": "o", "scope": "p",
-                      "agent": "a", "timestamp": "t", "confidence": 0.5, "tags": []}},
+            {
+                "id": "clp-low",
+                "score": 1.0,
+                "meta": {
+                    "content_preview": "lo",
+                    "type": "o",
+                    "scope": "p",
+                    "agent": "a",
+                    "timestamp": "t",
+                    "confidence": 0.5,
+                    "tags": [],
+                },
+            },
+            {
+                "id": "clp-high",
+                "score": 9.0,
+                "meta": {
+                    "content_preview": "hi",
+                    "type": "o",
+                    "scope": "p",
+                    "agent": "a",
+                    "timestamp": "t",
+                    "confidence": 0.5,
+                    "tags": [],
+                },
+            },
         ]
         idx.record_retrieval = MagicMock()
         r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
@@ -756,8 +842,13 @@ class TestSearchIntegration:
         idx.search.return_value = []
         r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
         with patch("hummbl_cognition.retriever.log_retrieval"):
-            r.search("test", sources=["ledger"], agent="t",
-                     time_decay=False, retrieval_decay=False)
+            r.search(
+                "test",
+                sources=["ledger"],
+                agent="t",
+                time_decay=False,
+                retrieval_decay=False,
+            )
         _, kwargs = idx.search.call_args
         assert kwargs.get("time_decay") is False
         assert kwargs.get("retrieval_decay") is False
@@ -767,14 +858,19 @@ class TestSearchIntegration:
         idx = MagicMock()
         idx.load.return_value = True
         idx.search.return_value = []
-        r = OpenBrainRetriever(state_dir="/tmp/s", index=idx)
-        with patch.dict(os.environ, {
-            "COGNITION_RETRIEVER_TIME_DECAY": "0",
-            "COGNITION_RETRIEVER_RETRIEVAL_DECAY": "0",
-        }):
+        OpenBrainRetriever(state_dir="/tmp/s", index=idx)
+        with patch.dict(
+            os.environ,
+            {
+                "COGNITION_RETRIEVER_TIME_DECAY": "0",
+                "COGNITION_RETRIEVER_RETRIEVAL_DECAY": "0",
+            },
+        ):
             # Re-import to pick up env var defaults
             import importlib
+
             import hummbl_cognition.retriever as retr_mod
+
             importlib.reload(retr_mod)
             r2 = retr_mod.OpenBrainRetriever(state_dir="/tmp/s", index=idx)
             with patch("hummbl_cognition.retriever.log_retrieval"):
@@ -793,15 +889,18 @@ class TestSearchIntegration:
 class TestResolveStateDir:
     def test_override_path(self):
         from hummbl_cognition.retriever import _resolve_state_dir
+
         assert _resolve_state_dir("/custom/path") == Path("/custom/path")
 
     def test_env_var(self):
         from hummbl_cognition.retriever import _resolve_state_dir
+
         with patch.dict(os.environ, {"HUMMBL_COGNITION_STATE": "/env/state"}):
             assert _resolve_state_dir() == Path("/env/state")
 
     def test_git_fallback(self):
         from hummbl_cognition.retriever import _resolve_state_dir
+
         with patch.dict(os.environ, {}, clear=True):
             os.environ.pop("HUMMBL_COGNITION_STATE", None)
             with patch("subprocess.check_output", return_value="/repo/root\n"):
@@ -811,6 +910,7 @@ class TestResolveStateDir:
     def test_no_git_default(self):
 
         from hummbl_cognition.retriever import _resolve_state_dir
+
         with patch.dict(os.environ, {}, clear=True):
             os.environ.pop("HUMMBL_COGNITION_STATE", None)
             with patch("subprocess.check_output", side_effect=FileNotFoundError):

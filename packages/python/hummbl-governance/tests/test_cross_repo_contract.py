@@ -93,9 +93,7 @@ def test_conditional_acceptance_requires_conditions() -> None:
 
 def test_producer_cannot_also_be_consumer() -> None:
     contract = _load("valid-wave1-contract.json")
-    contract["consumers"].append(
-        {"repo": contract["producer"]["repo"], "requirement": "advisory"}
-    )
+    contract["consumers"].append({"repo": contract["producer"]["repo"], "requirement": "advisory"})
     errors = validate_contract_document(contract)
     assert any("producer.repo must not also be a consumer" in error for error in errors)
 

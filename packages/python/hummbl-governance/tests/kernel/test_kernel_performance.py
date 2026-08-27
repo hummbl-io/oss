@@ -37,7 +37,6 @@ import tempfile
 import time
 from pathlib import Path
 
-
 from hummbl_governance.kernel import (
     IdentityEngine,
     Kernel,
@@ -58,6 +57,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
 
+
 class TestPerformance:
     """Measure performance under load."""
 
@@ -69,7 +69,7 @@ class TestPerformance:
                 receipt = kernel.create_receipt("perf", "BULK", payload={"i": i})
                 kernel.store_receipt(receipt)
             elapsed = time.time() - start
-            print(f"\n    1000 receipts in {elapsed:.2f}s ({1000/elapsed:.0f}/sec)")
+            print(f"\n    1000 receipts in {elapsed:.2f}s ({1000 / elapsed:.0f}/sec)")
             assert elapsed < 30
 
     def test_10000_sequence_ids(self) -> None:

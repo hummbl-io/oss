@@ -451,6 +451,6 @@ await client.setKillSwitchState('DISENGAGED', 'Test complete');
 ## Related Documentation
 
 - [Error Handling Patterns](./error_handling_patterns.md)
-- [Kill Switch Integration Guide](../kill_switch_integration.md)
-- [OpenAPI Specification](../api/openapi.yaml)
-- [API Safety Documentation](../api_safety.md)
+- [Kill Switch Integration Guide](./kill_switch_integration.md)
+- [OpenAPI Specification](https://github.com/hummbl-io/oss)
+- [API Safety Documentation](https://github.com/hummbl-io/oss)

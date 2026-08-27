@@ -13,7 +13,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel import Kernel
 from hummbl_governance.kernel.doctrine_engine import DoctrineEngine, Stage
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic

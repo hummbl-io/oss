@@ -25,14 +25,12 @@ _CHARS_PER_TOKEN = 4
 # Tier 1: time-decay and retrieval-decay defaults for the retriever.
 # The retriever turns decay ON by default (the indexer keeps it OFF for
 # backward compat). Override via env vars for testing or tuning.
-_DEFAULT_TIME_DECAY = (
-    os.environ.get("COGNITION_RETRIEVER_TIME_DECAY", "1").strip().lower()
-    not in ("0", "false", "no", "off")
-)
-_DEFAULT_RETRIEVAL_DECAY = (
-    os.environ.get("COGNITION_RETRIEVER_RETRIEVAL_DECAY", "1").strip().lower()
-    not in ("0", "false", "no", "off")
-)
+_DEFAULT_TIME_DECAY = os.environ.get(
+    "COGNITION_RETRIEVER_TIME_DECAY", "1"
+).strip().lower() not in ("0", "false", "no", "off")
+_DEFAULT_RETRIEVAL_DECAY = os.environ.get(
+    "COGNITION_RETRIEVER_RETRIEVAL_DECAY", "1"
+).strip().lower() not in ("0", "false", "no", "off")
 
 
 def _estimate_tokens(text: str) -> int:
@@ -52,9 +50,12 @@ def _resolve_state_dirs(override: str | Path | None = None) -> list[Path]:
 
     try:
         import subprocess
+
         root = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL, text=True, timeout=5,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=5,
         ).strip()
         if root:
             root_path = Path(root)
@@ -67,7 +68,11 @@ def _resolve_state_dirs(override: str | Path | None = None) -> list[Path]:
             internal_state = root_path / "src" / "hummbl_cognition" / "_state"
             if internal_state.exists() and internal_state not in dirs:
                 dirs.append(internal_state)
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
 
     # Fallback
@@ -80,7 +85,15 @@ def _resolve_state_dirs(override: str | Path | None = None) -> list[Path]:
 class MemoryResult:
     """A single result from the Open Brain retriever."""
 
-    __slots__ = ("source", "entry_id", "score", "content", "metadata", "tokens", "content_window")
+    __slots__ = (
+        "source",
+        "entry_id",
+        "score",
+        "content",
+        "metadata",
+        "tokens",
+        "content_window",
+    )
 
     def __init__(
         self,
@@ -204,44 +217,66 @@ class OpenBrainRetriever:
             retrieval_decay = _DEFAULT_RETRIEVAL_DECAY
 
         all_sources = sources or [
-            "ledger", "bus", "briefings", "findings", "memory_md",
+            "ledger",
+            "bus",
+            "briefings",
+            "findings",
+            "memory_md",
         ]
 
         results: list[MemoryResult] = []
 
         if "ledger" in all_sources:
-            results.extend(self._search_ledger(
-                query, scope=scope, entry_type=entry_type,
-                since=since, limit=limit,
-                time_decay=time_decay, retrieval_decay=retrieval_decay,
-            ))
+            results.extend(
+                self._search_ledger(
+                    query,
+                    scope=scope,
+                    entry_type=entry_type,
+                    since=since,
+                    limit=limit,
+                    time_decay=time_decay,
+                    retrieval_decay=retrieval_decay,
+                )
+            )
 
         if "bus" in all_sources:
             for s_dir in self.state_dirs:
-                results.extend(self._search_text_pool(
-                    query, pool_name="bus",
-                    search_dir=s_dir / "coordination",
-                    glob_pattern="*.tsv",
-                    since=since, limit=limit // 4,
-                ))
+                results.extend(
+                    self._search_text_pool(
+                        query,
+                        pool_name="bus",
+                        search_dir=s_dir / "coordination",
+                        glob_pattern="*.tsv",
+                        since=since,
+                        limit=limit // 4,
+                    )
+                )
 
         if "briefings" in all_sources:
             for s_dir in self.state_dirs:
                 # Also check siblings of state dirs if 'state' folder exists
                 brief_dir = s_dir.parent / "state" / "briefings"
-                results.extend(self._search_text_pool(
-                    query, pool_name="briefings",
-                    search_dir=brief_dir,
-                    glob_pattern="*.md",
-                    since=since, limit=limit // 4,
-                ))
+                results.extend(
+                    self._search_text_pool(
+                        query,
+                        pool_name="briefings",
+                        search_dir=brief_dir,
+                        glob_pattern="*.md",
+                        since=since,
+                        limit=limit // 4,
+                    )
+                )
 
         if "findings" in all_sources:
             for s_dir in self.state_dirs:
-                results.extend(self._search_findings(
-                    query, search_dir=s_dir / "autoresearch",
-                    since=since, limit=limit // 4,
-                ))
+                results.extend(
+                    self._search_findings(
+                        query,
+                        search_dir=s_dir / "autoresearch",
+                        since=since,
+                        limit=limit // 4,
+                    )
+                )
 
         if "memory_md" in all_sources:
             results.extend(self._search_memory_md(query, limit=limit // 4))
@@ -279,7 +314,9 @@ class OpenBrainRetriever:
                     query=query,
                     entry_ids=retrieved_ids,
                     agent=agent,
-                    log_path=self.primary_state_dir / "cognition" / "retrieval_log.jsonl",
+                    log_path=self.primary_state_dir
+                    / "cognition"
+                    / "retrieval_log.jsonl",
                 )
                 # Update index retrieval counts
                 for eid in retrieved_ids:
@@ -316,7 +353,9 @@ class OpenBrainRetriever:
                     result.content_window = full
             elif result.source in ("bus", "bus_digest", "briefings"):
                 # Text pool results: try to fetch more context from source
-                src_file = result.metadata.get("path") or result.metadata.get("file", "")
+                src_file = result.metadata.get("path") or result.metadata.get(
+                    "file", ""
+                )
                 if src_file:
                     try:
                         path = Path(src_file)
@@ -352,28 +391,34 @@ class OpenBrainRetriever:
         self.ensure_index()
 
         hits = self.index.search(
-            query, limit=limit, scope=scope,
-            entry_type=entry_type, since=since,
-            time_decay=time_decay, retrieval_decay=retrieval_decay,
+            query,
+            limit=limit,
+            scope=scope,
+            entry_type=entry_type,
+            since=since,
+            time_decay=time_decay,
+            retrieval_decay=retrieval_decay,
         )
 
         results = []
         for hit in hits:
             meta = hit["meta"]
-            results.append(MemoryResult(
-                source="ledger",
-                entry_id=hit["id"],
-                score=hit["score"],
-                content=meta.get("content_preview", ""),
-                metadata={
-                    "type": meta.get("type"),
-                    "scope": meta.get("scope"),
-                    "agent": meta.get("agent"),
-                    "timestamp": meta.get("timestamp"),
-                    "confidence": meta.get("confidence"),
-                    "tags": meta.get("tags", []),
-                },
-            ))
+            results.append(
+                MemoryResult(
+                    source="ledger",
+                    entry_id=hit["id"],
+                    score=hit["score"],
+                    content=meta.get("content_preview", ""),
+                    metadata={
+                        "type": meta.get("type"),
+                        "scope": meta.get("scope"),
+                        "agent": meta.get("agent"),
+                        "timestamp": meta.get("timestamp"),
+                        "confidence": meta.get("confidence"),
+                        "tags": meta.get("tags", []),
+                    },
+                )
+            )
         return results
 
     def _search_text_pool(
@@ -425,16 +470,18 @@ class OpenBrainRetriever:
             # Extract relevant snippet
             snippet = _extract_snippet(text, query_tokens, max_chars=500)
 
-            results.append(MemoryResult(
-                source=pool_name,
-                entry_id=f"{pool_name}:{filepath.name}",
-                score=score * 0.7,  # Discount vs ledger BM25
-                content=snippet,
-                metadata={
-                    "file": filepath.name,
-                    "path": str(filepath),
-                },
-            ))
+            results.append(
+                MemoryResult(
+                    source=pool_name,
+                    entry_id=f"{pool_name}:{filepath.name}",
+                    score=score * 0.7,  # Discount vs ledger BM25
+                    content=snippet,
+                    metadata={
+                        "file": filepath.name,
+                        "path": str(filepath),
+                    },
+                )
+            )
 
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
@@ -472,17 +519,19 @@ class OpenBrainRetriever:
                     continue
 
                 score = len(overlap) / len(query_tokens) * 0.8
-                results.append(MemoryResult(
-                    source="findings",
-                    entry_id=finding.get("id", f"finding:{filepath.name}"),
-                    score=score,
-                    content=claim,
-                    metadata={
-                        "source_file": finding.get("source", ""),
-                        "confidence": finding.get("confidence", 0),
-                        "category": finding.get("category", ""),
-                    },
-                ))
+                results.append(
+                    MemoryResult(
+                        source="findings",
+                        entry_id=finding.get("id", f"finding:{filepath.name}"),
+                        score=score,
+                        content=claim,
+                        metadata={
+                            "source_file": finding.get("source", ""),
+                            "confidence": finding.get("confidence", 0),
+                            "category": finding.get("category", ""),
+                        },
+                    )
+                )
 
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
@@ -519,13 +568,15 @@ class OpenBrainRetriever:
                 score = len(overlap) / len(query_tokens) * 0.6
                 snippet = _extract_snippet(text, query_tokens, max_chars=300)
 
-                results.append(MemoryResult(
-                    source="memory_md",
-                    entry_id=f"memory:{memory_file.name}",
-                    score=score,
-                    content=snippet,
-                    metadata={"file": str(memory_file)},
-                ))
+                results.append(
+                    MemoryResult(
+                        source="memory_md",
+                        entry_id=f"memory:{memory_file.name}",
+                        score=score,
+                        content=snippet,
+                        metadata={"file": str(memory_file)},
+                    )
+                )
         except OSError:
             pass
 

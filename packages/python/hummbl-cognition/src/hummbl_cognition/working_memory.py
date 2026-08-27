@@ -37,13 +37,13 @@ except ImportError:  # pragma: no cover - POSIX
     msvcrt = None  # type: ignore[assignment]
 
 from hummbl_cognition._exceptions import ConcurrencyError
+from hummbl_cognition._timeutils import utc_now as _utc_now_iso
 from hummbl_cognition.ledger_writer import (
     ContentScanError,  # noqa: F401 — re-exported for tests
 )
 from hummbl_cognition.ledger_writer import (
     scan_content as _scan_content,
 )
-from hummbl_cognition._timeutils import utc_now as _utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +127,7 @@ def _resolve_store_path(override: str | Path | None = None) -> Path:
         return Path(env_path)
     try:
         import subprocess
+
         root = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
             stderr=subprocess.DEVNULL,
@@ -135,7 +136,11 @@ def _resolve_store_path(override: str | Path | None = None) -> Path:
         ).strip()
         if root:
             return Path(root) / DEFAULT_STORE_PATH
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
     return Path(DEFAULT_STORE_PATH)
 
@@ -282,7 +287,9 @@ class WorkingMemoryStore:
                 elif msvcrt is not None:
                     lock_file.flush()
                     lock_file.seek(0)
-                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_LOCK, _WINDOWS_LOCK_SPAN)
+                    msvcrt.locking(
+                        lock_file.fileno(), msvcrt.LK_LOCK, _WINDOWS_LOCK_SPAN
+                    )
                 try:
                     store = self._read_store()
                     store = modify_fn(store)
@@ -372,8 +379,7 @@ class WorkingMemoryStore:
         # Validate content length for string values
         if isinstance(value, str) and len(value) > MAX_CONTENT_LENGTH:
             raise ValueError(
-                f"Value too long: {len(value)} chars "
-                f"(max {MAX_CONTENT_LENGTH})"
+                f"Value too long: {len(value)} chars (max {MAX_CONTENT_LENGTH})"
             )
 
         # Validate metadata
@@ -494,6 +500,7 @@ class WorkingMemoryStore:
         ValueError
             If the item doesn't exist or agent doesn't own it.
         """
+
         def _modify(store: dict[str, Any]) -> dict[str, Any]:
             items = store["items"]
             if key not in items:
@@ -575,8 +582,7 @@ class WorkingMemoryStore:
                 )
             if item_data.get("promoted_to") is not None:
                 raise ValueError(
-                    f"Item {key!r} already promoted to "
-                    f"{item_data['promoted_to']!r}"
+                    f"Item {key!r} already promoted to {item_data['promoted_to']!r}"
                 )
 
             # Mark as promoted
@@ -589,14 +595,16 @@ class WorkingMemoryStore:
             # Build the return dict
             value = item_data["value"]
             content = value if isinstance(value, str) else json.dumps(value)
-            result.append({
-                "entry_id": entry_id,
-                "agent": item_data["agent"],
-                "content": content,
-                "created_utc": item_data["created_utc"],
-                "metadata": item_data.get("metadata", {}),
-                "key": key,
-            })
+            result.append(
+                {
+                    "entry_id": entry_id,
+                    "agent": item_data["agent"],
+                    "content": content,
+                    "created_utc": item_data["created_utc"],
+                    "metadata": item_data.get("metadata", {}),
+                    "key": key,
+                }
+            )
             return store
 
         self._locked_write(_modify)
@@ -625,8 +633,7 @@ class WorkingMemoryStore:
                 store["items"] = {}
             else:
                 keys_to_remove = [
-                    k for k, v in items.items()
-                    if v.get("agent") == agent
+                    k for k, v in items.items() if v.get("agent") == agent
                 ]
                 for k in keys_to_remove:
                     del items[k]

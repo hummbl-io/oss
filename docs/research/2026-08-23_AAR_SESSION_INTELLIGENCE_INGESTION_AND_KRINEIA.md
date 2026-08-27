@@ -10,7 +10,7 @@
   4. Design public web architecture (`hummbl.io`, `operator.com`, `kernelclothing.com`, `proofs.hummbl.io`).
   5. Audit air-gapped minimal payloads, physical AI, and formal mathematical verifiability under KRINEIA.
 - **Success criteria**: All audits completed with receipts; zero third-party dependency violations; formal TLA+ and JSON schemas validated; all documentation permanently preserved in `hummbl-governance/docs/research/` and `oss/docs/research/`.
-- **Constraints**: Standard library only (Python 3.11+); no direct commits/pushes to `main`; boundary honesty ([ADR-001](file:///<repo-root>/PROJECTS/hummbl-governance/docs/adr/ADR-001-coverage-matrix-not-self-grade.md)); host-tagged coordination bus updates.
+- **Constraints**: Standard library only (Python 3.11+); no direct commits/pushes to `main`; boundary honesty ([ADR-001](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/adr/ADR-001-coverage-matrix-not-self-grade.md)); host-tagged coordination bus updates.
 
 ---
 
@@ -74,7 +74,7 @@
 ## 7. Recommendations (DE7: Pareto Decomposition)
 1. **[HIGH]** Deposit the `krineia/papers/krineia-invariants/` LaTeX preprints to arXiv/Zenodo to establish permanent academic DOIs for the $K_1$–$K_{11}$ invariants.
 2. **[HIGH]** Ratify the Pricing Tier structure (Free / Pro / Enterprise) to unblock Zone 1 development on `hummbl.io`.
-3. **[MED]** Execute the `operator.com` redesign inside [`hummbl-production/operator/site/`](file:///<repo-root>/PROJECTS/hummbl-production/operator/site) and deploy via Wrangler Pages.
+3. **[MED]** Execute the `operator.com` redesign inside [`hummbl-production/operator/site/`](https://hummbl.io) and deploy via Wrangler Pages.
 4. **[MED]** Add `docs.hummbl.io` CNAME in Cloudflare and initialize `mint.json` in `hummbl-dev/docs`.
 5. **[LOW]** Add 301 redirect for `kernelclothing.com` $\to$ `hummbl.io` in Cloudflare until physical merchandise line is active.
 

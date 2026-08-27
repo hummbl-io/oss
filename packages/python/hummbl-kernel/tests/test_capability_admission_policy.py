@@ -1,13 +1,13 @@
 """Tests for Capability Admission Policy."""
 
 import unittest
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+
 from hummbl_kernel.security.capability_admission_policy import (
-    CapabilityAdmissionPolicy,
-    RiskClass,
-    ComplianceFramework,
     AdmissionStatus,
-    AdmissionDecision,
+    CapabilityAdmissionPolicy,
+    ComplianceFramework,
+    RiskClass,
 )
 
 
@@ -127,9 +127,9 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             adapter_id="test_adapter",
             compliance_frameworks=[ComplianceFramework.SOC_2],
             evidence_quality="artifact",
-            registered_by="test"
+            registered_by="test",
         )
-        
+
         decision = self.policy.request_admission(
             mission_id="test_mission",
             agent="test_agent",
@@ -181,7 +181,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             justification="Read local file",
             target="/tmp/file.txt",
         )
-        
+
         is_valid, reason = self.policy.validate_grant(
             grant_id=decision.grant_id,
             capability="evidence.collect",
@@ -201,7 +201,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             justification="Read local file",
             target="/tmp/file.txt",
         )
-        
+
         is_valid, reason = self.policy.validate_grant(
             grant_id=decision.grant_id,
             capability="document.generate",  # Different capability
@@ -221,7 +221,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             justification="Read local file",
             target="/tmp/file.txt",
         )
-        
+
         is_valid, reason = self.policy.validate_grant(
             grant_id=decision.grant_id,
             capability="evidence.collect",
@@ -251,7 +251,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             justification="Read local file",
             target="/tmp/file.txt",
         )
-        
+
         self.assertIsNotNone(decision.constraints)
         self.assertIn("max_runtime_seconds", decision.constraints)
         self.assertIn("max_output_bytes", decision.constraints)
@@ -268,11 +268,11 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             justification="Read local file",
             target="/tmp/file.txt",
         )
-        
+
         self.assertIsNotNone(decision.expires_at)
         expires_at = datetime.fromisoformat(decision.expires_at)
         granted_at = datetime.fromisoformat(decision.decision_at)
-        
+
         # Check that expiration is approximately 60 minutes in the future
         duration = (expires_at - granted_at).total_seconds()
         self.assertAlmostEqual(duration, 60 * 60, delta=5)  # 60 minutes ± 5 seconds
@@ -288,7 +288,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             adapter_id="custom_adapter",
             compliance_frameworks=[ComplianceFramework.SOC_2],
             evidence_quality="synthetic",
-            registered_by="test"
+            registered_by="test",
         )
         self.assertTrue(success)
         self.assertIn("custom.cap", self.policy.capabilities)
@@ -304,7 +304,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             adapter_id="test",
             compliance_frameworks=[ComplianceFramework.SOC_2],
             evidence_quality="artifact",
-            registered_by="test"
+            registered_by="test",
         )
         self.assertFalse(success)
 
@@ -320,16 +320,14 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
             justification="Modify system configuration",
             target="/etc/config",
         )
-        
+
         self.assertEqual(decision.status, AdmissionStatus.PENDING_APPROVAL)
-        
+
         # Approve the request
         approved_decision = self.policy.approve_request(
-            request_id=decision.request_id,
-            approved_by="operator",
-            expires_in_minutes=120
+            request_id=decision.request_id, approved_by="operator", expires_in_minutes=120
         )
-        
+
         self.assertEqual(approved_decision.status, AdmissionStatus.ADMITTED)
         self.assertIsNotNone(approved_decision.grant_id)
         self.assertIn("approved by operator", approved_decision.reason.lower())
@@ -337,10 +335,7 @@ class TestCapabilityAdmissionPolicy(unittest.TestCase):
     def test_approve_nonexistent_request(self):
         """Approving non-existent request should raise error."""
         with self.assertRaises(ValueError):
-            self.policy.approve_request(
-                request_id="nonexistent_request",
-                approved_by="operator"
-            )
+            self.policy.approve_request(request_id="nonexistent_request", approved_by="operator")
 
 
 if __name__ == "__main__":

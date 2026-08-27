@@ -23,11 +23,11 @@ from pathlib import Path
 from typing import Any
 
 from hummbl_governance import (
+    AuditLog,
     CircuitBreaker,
     CostGovernor,
     KillSwitch,
     KillSwitchMode,
-    AuditLog,
     ToolCallAuditor,
     build_tool_transition_receipt,
 )
@@ -59,8 +59,7 @@ def run_with_crewai():
     # 2. Wrap with hummbl-governance (3 lines)
     ks = KillSwitch()
     cb = CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
-    gov = CostGovernor(str(Path(tempfile.mkdtemp()) / "costs.db"),
-                       soft_cap=5.0, hard_cap=10.0)
+    gov = CostGovernor(str(Path(tempfile.mkdtemp()) / "costs.db"), soft_cap=5.0, hard_cap=10.0)
     receipts = []
     hook = make_before_tool_call_guard(ks, gov, receipts)
     register_before_tool_call_hook(hook)
@@ -78,9 +77,7 @@ def run_with_crewai():
             print(f"Result: {output}")
         except CircuitBreakerOpen:
             print("Circuit breaker open — too many failures, fast-failing")
-            ks.engage(KillSwitchMode.HALT_NONCRITICAL,
-                      reason="Circuit breaker opened",
-                      triggered_by="circuit_breaker")
+            ks.engage(KillSwitchMode.HALT_NONCRITICAL, reason="Circuit breaker opened", triggered_by="circuit_breaker")
         except Exception as e:
             print(f"Error: {e}")
     finally:
@@ -107,9 +104,7 @@ def make_before_tool_call_guard(ks, gov, receipts):
             payload = {}
         kill_switch_result = ks.check_task_allowed(str(tool_name))
         budget_status = gov.check_budget_status()
-        terminal_outcome = "blocked" if (
-            not kill_switch_result["allowed"] or _budget_denied(budget_status)
-        ) else None
+        terminal_outcome = "blocked" if (not kill_switch_result["allowed"] or _budget_denied(budget_status)) else None
         receipt = build_tool_transition_receipt(
             agent_id=str(agent_id),
             tool_name=str(tool_name),
@@ -188,6 +183,7 @@ def run_demo_mode():
 
     # Simulate failures triggering circuit breaker
     print("\n=== Run 2: Cascading failures ===")
+
     def failing_kickoff():
         raise ConnectionError("LLM API unavailable")
 
@@ -195,15 +191,13 @@ def run_demo_mode():
         try:
             cb.call(failing_kickoff)
         except ConnectionError:
-            print(f"  Attempt {i+1}: ConnectionError (breaker: {cb.state.name})")
+            print(f"  Attempt {i + 1}: ConnectionError (breaker: {cb.state.name})")
         except CircuitBreakerOpen:
-            print(f"  Attempt {i+1}: CircuitBreakerOpen — fast-fail (breaker: {cb.state.name})")
+            print(f"  Attempt {i + 1}: CircuitBreakerOpen — fast-fail (breaker: {cb.state.name})")
             break
 
     # Kill switch engages automatically
-    ks.engage(KillSwitchMode.HALT_NONCRITICAL,
-              reason="Circuit breaker opened",
-              triggered_by="circuit_breaker")
+    ks.engage(KillSwitchMode.HALT_NONCRITICAL, reason="Circuit breaker opened", triggered_by="circuit_breaker")
     print(f"\n  Kill switch engaged: {ks.mode.name}")
 
     # Subsequent runs are blocked
@@ -228,6 +222,7 @@ def run_demo_mode():
     # Simulate CrewAI per-tool hook governance without requiring CrewAI.
     print("\n=== Per-tool transition receipt ===")
     receipts = []
+
     class DemoToolContext:
         tool_name = "web_search"
         tool_input = {"query": "CrewAI governance"}
@@ -246,6 +241,7 @@ def run_demo_mode():
 if __name__ == "__main__":
     try:
         import crewai  # noqa: F401
+
         run_with_crewai()
     except ImportError:
         run_demo_mode()

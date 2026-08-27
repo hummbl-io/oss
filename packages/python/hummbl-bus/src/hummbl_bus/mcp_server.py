@@ -51,8 +51,7 @@ def read_bus(
     since: str | None = None,
 ) -> list[dict[str, str]]:
     """Read messages from the TSV bus, newest first."""
-    if limit < 0:
-        limit = 0
+    limit = max(limit, 0)
     if not BUS_FILE.exists():
         return []
     rows = []
@@ -92,8 +91,7 @@ def read_bus(
 
 def search_bus(query: str, limit: int = 20) -> list[dict[str, str]]:
     """Search bus messages by content."""
-    if limit < 0:
-        limit = 0
+    limit = max(limit, 0)
     query_lower = query.lower()
     results = []
     if not BUS_FILE.exists():

@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -131,7 +130,9 @@ def run_conformance(verbose: bool = False) -> tuple[int, int, int]:
             if expected == "invalid" and expected_violations:
                 if not expected_violations.issubset(actual_violations):
                     if verbose:
-                        print(f"  [FAIL] {vector_id}: expected violations {expected_violations} not subset of {actual_violations}")
+                        print(
+                            f"  [FAIL] {vector_id}: expected violations {expected_violations} not subset of {actual_violations}"
+                        )
                     failed += 1
                     continue
             passed += 1
@@ -140,7 +141,9 @@ def run_conformance(verbose: bool = False) -> tuple[int, int, int]:
         else:
             failed += 1
             if verbose:
-                print(f"  [FAIL] {vector_id}: expected={expected} actual={actual_result} violations={actual_violations}")
+                print(
+                    f"  [FAIL] {vector_id}: expected={expected} actual={actual_result} violations={actual_violations}"
+                )
                 print(f"         {description}")
 
     return passed, failed, len(vectors)

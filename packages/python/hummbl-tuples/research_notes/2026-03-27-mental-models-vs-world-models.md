@@ -67,9 +67,9 @@ Local HUMMBL material already hints at the distinction:
 
 Useful local anchors:
 
-- [REASONING_SEMANTICS.md](/Users/others/PROJECTS/hummbl-tuples/docs/specs/REASONING_SEMANTICS.md)
-- [ambient_intelligence_reconciliation_2026-03-20.md](/Users/others/founder_mode/docs/research/ambient_intelligence_reconciliation_2026-03-20.md)
-- [R2_unified_world_models_bitter_lesson_2026.md](/Users/others/founder_mode/docs/research/R2_unified_world_models_bitter_lesson_2026.md)
+- [REASONING_SEMANTICS.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/specs/REASONING_SEMANTICS.md)
+- [ambient_intelligence_reconciliation_2026-03-20.md](https://github.com/hummbl-io/oss)
+- [R2_unified_world_models_bitter_lesson_2026.md](https://github.com/hummbl-io/oss)
 
 ## Recommended HUMMBL Position
 

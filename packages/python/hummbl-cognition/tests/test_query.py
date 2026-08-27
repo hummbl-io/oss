@@ -5,8 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
-from hummbl_cognition.ledger_writer import post_entry, read_entries
+from hummbl_cognition.ledger_writer import post_entry
 from hummbl_cognition.models import LedgerEntry, LedgerEntryType, LedgerScope
 from hummbl_cognition.query import (
     active_entries,
@@ -65,29 +64,21 @@ class TestQueryEntries:
         assert len(results) == 3
 
     def test_query_by_type(self, populated_ledger: Path) -> None:
-        results = query_entries(
-            ledger_path=populated_ledger, entry_type="decision"
-        )
+        results = query_entries(ledger_path=populated_ledger, entry_type="decision")
         assert len(results) == 1
         assert results[0].type == "decision"
 
     def test_query_by_scope(self, populated_ledger: Path) -> None:
-        results = query_entries(
-            ledger_path=populated_ledger, scope="module"
-        )
+        results = query_entries(ledger_path=populated_ledger, scope="module")
         assert len(results) == 1
         assert results[0].scope == "module"
 
     def test_query_by_agent(self, populated_ledger: Path) -> None:
-        results = query_entries(
-            ledger_path=populated_ledger, agent="test-agent"
-        )
+        results = query_entries(ledger_path=populated_ledger, agent="test-agent")
         assert len(results) == 3
 
     def test_query_by_tags(self, populated_ledger: Path) -> None:
-        results = query_entries(
-            ledger_path=populated_ledger, tags=["python"]
-        )
+        results = query_entries(ledger_path=populated_ledger, tags=["python"])
         assert len(results) == 2
 
     def test_query_limit(self, populated_ledger: Path) -> None:

@@ -43,10 +43,25 @@ class TestLawAtlasLoading:
     def test_law_ids_present(self) -> None:
         engine = LawEngine()
         expected_ids = {
-            "SL-01", "SL-02", "SL-03", "SL-04", "SL-05",
-            "SL-06", "SL-07", "SL-08", "SL-09", "SL-10",
-            "SL-11", "SL-12", "SL-13", "SL-14", "SL-15",
-            "SL-16", "SL-17", "SL-EXP003", "SL-EXP004",
+            "SL-01",
+            "SL-02",
+            "SL-03",
+            "SL-04",
+            "SL-05",
+            "SL-06",
+            "SL-07",
+            "SL-08",
+            "SL-09",
+            "SL-10",
+            "SL-11",
+            "SL-12",
+            "SL-13",
+            "SL-14",
+            "SL-15",
+            "SL-16",
+            "SL-17",
+            "SL-EXP003",
+            "SL-EXP004",
         }
         actual_ids = {law.law_id for law in engine.list_laws()}
         assert expected_ids == actual_ids, f"Missing: {expected_ids - actual_ids}"
@@ -88,6 +103,7 @@ class TestLawAtlasLoading:
     def test_kernel_boot_loads_atlas(self) -> None:
         """Kernel.boot() must load the atlas automatically."""
         import tempfile
+
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
             assert len(kernel.law.laws) == 19
@@ -186,6 +202,7 @@ class TestLawEvaluationRealAtlas:
     def test_kernel_integration_with_atlas(self) -> None:
         """Full Kernel creates receipt, evaluates against loaded atlas, stores."""
         import tempfile
+
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
             assert len(kernel.law.laws) == 19

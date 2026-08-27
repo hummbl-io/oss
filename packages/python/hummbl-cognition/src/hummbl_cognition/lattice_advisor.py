@@ -36,22 +36,96 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 DOMAIN_KEYWORDS: dict[str, list[str]] = {
-    "P":  ["perspective", "viewpoint", "frame", "lens", "stakeholder", "narrative",
-           "assumption", "identity", "context", "role", "empathy", "worldview"],
-    "IN": ["invert", "reverse", "backwards", "opposite", "failure", "prevent", "avoid",
-           "premortem", "subtraction", "constraint", "negate", "worst case"],
-    "CO": ["combine", "synergy", "integrate", "collaborate", "compose", "merge",
-           "hybrid", "synthesis", "coalition", "network", "complement", "bundle"],
-    "DE": ["decompose", "break down", "root cause", "component", "layer", "hierarchy",
-           "module", "diagnose", "separate", "tree", "analysis", "why", "cause"],
-    "RE": ["recursion", "iterate", "improve", "refine", "feedback", "loop", "repeat",
-           "kaizen", "spiral", "self-similar", "cycle", "increment", "continuous"],
-    "SY": ["system", "leverage", "emergent", "dynamics", "flow", "stock", "complex",
-           "network", "interdependence", "holistic", "interconnect", "feedback loop"],
+    "P": [
+        "perspective",
+        "viewpoint",
+        "frame",
+        "lens",
+        "stakeholder",
+        "narrative",
+        "assumption",
+        "identity",
+        "context",
+        "role",
+        "empathy",
+        "worldview",
+    ],
+    "IN": [
+        "invert",
+        "reverse",
+        "backwards",
+        "opposite",
+        "failure",
+        "prevent",
+        "avoid",
+        "premortem",
+        "subtraction",
+        "constraint",
+        "negate",
+        "worst case",
+    ],
+    "CO": [
+        "combine",
+        "synergy",
+        "integrate",
+        "collaborate",
+        "compose",
+        "merge",
+        "hybrid",
+        "synthesis",
+        "coalition",
+        "network",
+        "complement",
+        "bundle",
+    ],
+    "DE": [
+        "decompose",
+        "break down",
+        "root cause",
+        "component",
+        "layer",
+        "hierarchy",
+        "module",
+        "diagnose",
+        "separate",
+        "tree",
+        "analysis",
+        "why",
+        "cause",
+    ],
+    "RE": [
+        "recursion",
+        "iterate",
+        "improve",
+        "refine",
+        "feedback",
+        "loop",
+        "repeat",
+        "kaizen",
+        "spiral",
+        "self-similar",
+        "cycle",
+        "increment",
+        "continuous",
+    ],
+    "SY": [
+        "system",
+        "leverage",
+        "emergent",
+        "dynamics",
+        "flow",
+        "stock",
+        "complex",
+        "network",
+        "interdependence",
+        "holistic",
+        "interconnect",
+        "feedback loop",
+    ],
 }
 
 DOMAIN_NAMES: dict[str, str] = {
-    "P":  "Perspective",
+    "P": "Perspective",
     "IN": "Inversion",
     "CO": "Composition",
     "DE": "Decomposition",
@@ -75,15 +149,21 @@ def _load_registry() -> dict[str, dict[str, Any]]:
         models = []
         for domain in DOMAIN_NAMES:
             for n in range(1, 21):
-                diff = "beginner" if n <= 7 else ("intermediate" if n <= 14 else "advanced")
-                models.append({
-                    "id": f"{domain}{n}",
-                    "name": f"{DOMAIN_NAMES[domain]} {n}",
-                    "domain": domain,
-                    "domain_name": DOMAIN_NAMES[domain],
-                    "definition": f"{DOMAIN_NAMES[domain]} model {n}",
-                    "difficulty": diff,
-                })
+                diff = (
+                    "beginner"
+                    if n <= 7
+                    else ("intermediate" if n <= 14 else "advanced")
+                )
+                models.append(
+                    {
+                        "id": f"{domain}{n}",
+                        "name": f"{DOMAIN_NAMES[domain]} {n}",
+                        "domain": domain,
+                        "domain_name": DOMAIN_NAMES[domain],
+                        "definition": f"{DOMAIN_NAMES[domain]} model {n}",
+                        "difficulty": diff,
+                    }
+                )
 
     registry: dict[str, dict[str, Any]] = {}
     for m in models:
@@ -172,7 +252,9 @@ class Base120Advisor:
                     for tag in tags:
                         upper_tag = tag.upper()
                         if upper_tag in REGISTRY:
-                            signals[upper_tag] = signals.get(upper_tag, 0.0) + weight * 2.5
+                            signals[upper_tag] = (
+                                signals.get(upper_tag, 0.0) + weight * 2.5
+                            )
 
                     # Model ids mentioned in content
                     for match in id_pattern.finditer(content.upper()):
@@ -201,11 +283,7 @@ class Base120Advisor:
         for kw in keywords:
             if kw in query_lower:
                 score += 1.0
-            elif any(
-                w in kw or kw in w
-                for w in query_lower.split()
-                if len(w) > 3
-            ):
+            elif any(w in kw or kw in w for w in query_lower.split() if len(w) > 3):
                 score += 0.25
 
         # Definition match
@@ -294,9 +372,7 @@ class Base120Advisor:
                 )
                 if first_id:
                     scored.append(
-                        _ModelScore(
-                            model_id=first_id, score=0.1, reasons=["default"]
-                        )
+                        _ModelScore(model_id=first_id, score=0.1, reasons=["default"])
                     )
 
         scored.sort(key=lambda s: (-s.score, s.model_id))

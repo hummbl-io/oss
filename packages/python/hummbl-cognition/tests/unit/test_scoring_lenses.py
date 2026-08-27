@@ -12,7 +12,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.scoring_lenses import (
     BUILTIN_LENSES,
     ScoringLens,
@@ -51,6 +50,7 @@ def _write_tsv(tmp_path: Path, content: str = SAMPLE_TSV) -> Path:
 # ---------------------------------------------------------------------------
 # ScoringLens dataclass
 # ---------------------------------------------------------------------------
+
 
 class TestScoringLens:
     def test_valid_creation(self):
@@ -99,7 +99,9 @@ class TestScoringLens:
 
     def test_custom_tags(self):
         lens = ScoringLens(
-            name="t", description="x", system_prompt="x",
+            name="t",
+            description="x",
+            system_prompt="x",
             tags=("a", "b"),
         )
         assert lens.tags == ("a", "b")
@@ -108,6 +110,7 @@ class TestScoringLens:
 # ---------------------------------------------------------------------------
 # Built-in lenses
 # ---------------------------------------------------------------------------
+
 
 class TestBuiltinLenses:
     def test_four_builtin_lenses(self):
@@ -149,6 +152,7 @@ class TestBuiltinLenses:
 # Lens registration
 # ---------------------------------------------------------------------------
 
+
 class TestLensRegistration:
     def test_register_custom_lens(self):
         custom = ScoringLens(
@@ -186,6 +190,7 @@ class TestLensRegistration:
 # ---------------------------------------------------------------------------
 # TSV loading
 # ---------------------------------------------------------------------------
+
 
 class TestLoadResultsTsv:
     def test_load_valid_tsv(self, tmp_path):
@@ -237,6 +242,7 @@ class TestLoadResultsTsv:
 # Data summarization
 # ---------------------------------------------------------------------------
 
+
 class TestSummarizeData:
     def test_empty_data(self):
         assert summarize_data([]) == "(no data)"
@@ -263,31 +269,44 @@ class TestSummarizeData:
 # Finding parsing
 # ---------------------------------------------------------------------------
 
+
 class TestParseFindings:
     def test_valid_json_array(self):
-        raw = json.dumps([
-            {"id": "F-001", "claim": "Test claim", "confidence": 0.8,
-             "actionable": True, "target": "config", "effort": "low"},
-        ])
+        raw = json.dumps(
+            [
+                {
+                    "id": "F-001",
+                    "claim": "Test claim",
+                    "confidence": 0.8,
+                    "actionable": True,
+                    "target": "config",
+                    "effort": "low",
+                },
+            ]
+        )
         findings = parse_findings(raw, "test")
         assert len(findings) == 1
         assert findings[0]["id"] == "F-001"
         assert findings[0]["category"] == "test"
 
     def test_markdown_fenced_json(self):
-        raw = "```json\n" + json.dumps([
-            {"id": "F-001", "claim": "X", "confidence": 0.7}
-        ]) + "\n```"
+        raw = (
+            "```json\n"
+            + json.dumps([{"id": "F-001", "claim": "X", "confidence": 0.7}])
+            + "\n```"
+        )
         findings = parse_findings(raw, "test")
         assert len(findings) == 1
 
     def test_wrapped_in_findings_key(self):
-        raw = json.dumps({
-            "findings": [
-                {"id": "F-001", "claim": "X"},
-                {"id": "F-002", "claim": "Y"},
-            ]
-        })
+        raw = json.dumps(
+            {
+                "findings": [
+                    {"id": "F-001", "claim": "X"},
+                    {"id": "F-002", "claim": "Y"},
+                ]
+            }
+        )
         findings = parse_findings(raw, "test")
         assert len(findings) == 2
 
@@ -297,9 +316,11 @@ class TestParseFindings:
         assert len(findings) == 1
 
     def test_embedded_json_in_text(self):
-        raw = "Here are the findings:\n" + json.dumps([
-            {"id": "F-001", "claim": "X"}
-        ]) + "\nEnd of analysis."
+        raw = (
+            "Here are the findings:\n"
+            + json.dumps([{"id": "F-001", "claim": "X"}])
+            + "\nEnd of analysis."
+        )
         findings = parse_findings(raw, "test")
         assert len(findings) == 1
 
@@ -311,22 +332,26 @@ class TestParseFindings:
         assert parse_findings("this is not json at all", "test") == []
 
     def test_confidence_clamping(self):
-        raw = json.dumps([
-            {"claim": "X", "confidence": 1.5},
-            {"claim": "Y", "confidence": -0.3},
-        ])
+        raw = json.dumps(
+            [
+                {"claim": "X", "confidence": 1.5},
+                {"claim": "Y", "confidence": -0.3},
+            ]
+        )
         findings = parse_findings(raw, "test")
         assert findings[0]["confidence"] == 1.0
         assert findings[1]["confidence"] == 0.0
 
     def test_effort_normalization(self):
-        raw = json.dumps([
-            {"claim": "A", "effort": "Low"},
-            {"claim": "B", "effort": "HIGH"},
-            {"claim": "C", "effort": "trivial"},
-            {"claim": "D", "effort": "significant"},
-            {"claim": "E", "effort": "whatever"},
-        ])
+        raw = json.dumps(
+            [
+                {"claim": "A", "effort": "Low"},
+                {"claim": "B", "effort": "HIGH"},
+                {"claim": "C", "effort": "trivial"},
+                {"claim": "D", "effort": "significant"},
+                {"claim": "E", "effort": "whatever"},
+            ]
+        )
         findings = parse_findings(raw, "test")
         assert findings[0]["effort"] == "low"
         assert findings[1]["effort"] == "high"
@@ -364,6 +389,7 @@ class TestParseFindings:
 # Helper functions
 # ---------------------------------------------------------------------------
 
+
 class TestHelpers:
     def test_clamp_float_normal(self):
         assert _clamp_float(0.5, 0.0, 1.0) == 0.5
@@ -395,6 +421,7 @@ class TestHelpers:
 # run_lens (with mocked Ollama)
 # ---------------------------------------------------------------------------
 
+
 class TestRunLens:
     def test_dry_run(self, tmp_path):
         p = _write_tsv(tmp_path)
@@ -419,12 +446,26 @@ class TestRunLens:
 
     @patch("hummbl_cognition.scoring_lenses._call_ollama")
     def test_successful_run(self, mock_ollama, tmp_path):
-        mock_ollama.return_value = json.dumps([
-            {"id": "F-001", "claim": "Convergence is fast", "confidence": 0.85,
-             "actionable": True, "target": "training", "effort": "low"},
-            {"id": "F-002", "claim": "Plateau at 1.75", "confidence": 0.7,
-             "actionable": False, "target": "config", "effort": "medium"},
-        ])
+        mock_ollama.return_value = json.dumps(
+            [
+                {
+                    "id": "F-001",
+                    "claim": "Convergence is fast",
+                    "confidence": 0.85,
+                    "actionable": True,
+                    "target": "training",
+                    "effort": "low",
+                },
+                {
+                    "id": "F-002",
+                    "claim": "Plateau at 1.75",
+                    "confidence": 0.7,
+                    "actionable": False,
+                    "target": "config",
+                    "effort": "medium",
+                },
+            ]
+        )
         p = _write_tsv(tmp_path)
         result = run_lens(p, "convergence")
         assert result["error"] is None
@@ -468,12 +509,19 @@ class TestRunLens:
 # Ledger entry conversion
 # ---------------------------------------------------------------------------
 
+
 class TestFindingsToLedgerEntries:
     def test_converts_findings(self):
         findings = [
-            {"id": "F-001", "claim": "Test claim", "confidence": 0.8,
-             "actionable": True, "target": "config", "effort": "low",
-             "category": "convergence"},
+            {
+                "id": "F-001",
+                "claim": "Test claim",
+                "confidence": 0.8,
+                "actionable": True,
+                "target": "config",
+                "effort": "low",
+                "category": "convergence",
+            },
         ]
         entries = findings_to_ledger_entries(findings, "convergence")
         assert len(entries) == 1
@@ -508,6 +556,7 @@ class TestFindingsToLedgerEntries:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 class TestCLI:
     def test_no_command(self, capsys):
         ret = main([])
@@ -532,7 +581,9 @@ class TestCLI:
         assert "prompt" in parsed
 
     def test_run_missing_file(self, tmp_path, capsys):
-        ret = main(["run", "--lens", "convergence", "--data", str(tmp_path / "nope.tsv")])
+        ret = main(
+            ["run", "--lens", "convergence", "--data", str(tmp_path / "nope.tsv")]
+        )
         assert ret == 1
 
     def test_run_bad_lens(self, tmp_path, capsys):
@@ -542,9 +593,9 @@ class TestCLI:
 
     @patch("hummbl_cognition.scoring_lenses._call_ollama")
     def test_run_with_findings(self, mock_ollama, tmp_path, capsys):
-        mock_ollama.return_value = json.dumps([
-            {"id": "F-001", "claim": "Good result", "confidence": 0.9}
-        ])
+        mock_ollama.return_value = json.dumps(
+            [{"id": "F-001", "claim": "Good result", "confidence": 0.9}]
+        )
         p = _write_tsv(tmp_path)
         ret = main(["run", "--lens", "efficiency", "--data", str(p)])
         assert ret == 0

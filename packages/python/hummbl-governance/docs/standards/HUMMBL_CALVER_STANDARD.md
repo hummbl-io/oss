@@ -152,8 +152,8 @@ package metadata. The two are kept in lockstep by the release tool:
 
 ```python
 # Example: hermes_cli/__init__.py pattern
-__version__ = "0.17.0"           # SemVer — bumped per release
-__release_date__ = "2026.6.19"   # CalVer date — updated per release
+__version__ = "0.17.0"  # SemVer — bumped per release
+__release_date__ = "2026.6.19"  # CalVer date — updated per release
 ```
 
 **Rules:**

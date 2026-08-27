@@ -60,19 +60,17 @@ class SequenceEngine:
             except (json.JSONDecodeError, OSError) as exc:
                 logger.error(
                     "Sequence counters file corrupt (%s): %s",
-                    self.counters_file, exc,
+                    self.counters_file,
+                    exc,
                 )
                 raise KernelPanic(
                     KernelInvariant.TEMPORAL,
-                    f"Sequence counters file corrupt: {self.counters_file} — "
-                    f"refusing to reset Lamport counters",
+                    f"Sequence counters file corrupt: {self.counters_file} — refusing to reset Lamport counters",
                 ) from exc
 
     def _save_counters(self) -> None:
         """Save counters to disk."""
-        self.counters_file.write_text(
-            json.dumps(self.counters, sort_keys=True, indent=2)
-        )
+        self.counters_file.write_text(json.dumps(self.counters, sort_keys=True, indent=2))
 
     def next(self, agent_id: str) -> int:
         """Get the next sequence_id for an agent.
@@ -124,12 +122,14 @@ class SequenceEngine:
         for receipt in sorted_receipts:
             seq = receipt.get("sequence_id", 0)
             if prev_seq > 0 and seq != prev_seq + 1:
-                annotated.append({
-                    "_gap": True,
-                    "_expected": prev_seq + 1,
-                    "_actual": seq,
-                    "_missing_count": seq - prev_seq - 1,
-                })
+                annotated.append(
+                    {
+                        "_gap": True,
+                        "_expected": prev_seq + 1,
+                        "_actual": seq,
+                        "_missing_count": seq - prev_seq - 1,
+                    }
+                )
             annotated.append(receipt)
             prev_seq = seq
 

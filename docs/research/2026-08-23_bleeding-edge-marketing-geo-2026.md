@@ -1,7 +1,7 @@
 # Bleeding-Edge Marketing & Distribution Playbook (2026)
 ## Generative Engine Optimization (GEO), Agent-to-Agent (A2A) Marketing & MCP-Driven Distribution
 
-**Target Surfaces:** [`hummbl.io`](file:///<repo-root>/PROJECTS/hummbl-production/web), [`operator.com`](file:///<repo-root>/PROJECTS/hummbl-production/operator/site), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance)  
+**Target Surfaces:** [`hummbl.io`](https://github.com/hummbl-io/hummbl-productionweb), [`operator.com`](https://hummbl.io), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance)  
 **Date:** August 2026  
 **Status:** Advanced Strategy Research  
 
@@ -37,7 +37,7 @@ The brand that wins is not the one with the best pay-per-click ad, but the one w
 Traditional SEO ranks pages; **GEO wins citations in the AI Answer Layer.**
 
 - **The `llms.txt` + `llms-full.txt` Pipeline:**
-  - We already have [`web/llms.txt`](file:///<repo-root>/PROJECTS/hummbl-production/web/llms.txt) and [`llms-full.txt`](file:///<repo-root>/PROJECTS/hummbl-production/web/llms-full.txt). We should expand this to include direct structural summaries of our 34 governance primitives and 99 framework mappings.
+  - We already have [`web/llms.txt`](https://github.com/hummbl-io/hummbl-productionweb/llms.txt) and [`llms-full.txt`](https://github.com/hummbl-io/hummbl-productionweb/llms-full.txt). We should expand this to include direct structural summaries of our 34 governance primitives and 99 framework mappings.
 - **Answer-First H2/Table Chunking:**
   - Structure all documentation with deterministic tables (e.g., *Framework $\to$ Article $\to$ Primitive $\to$ Boundary State*). LLMs reliably extract structured markdown tables verbatim during retrieval-augmented generation.
 - **Citable Quotes & Aphorisms:**
@@ -69,7 +69,7 @@ Instead of forcing users to visit a website to evaluate HUMMBL, **bring HUMMBL d
 In an era saturated with AI-generated marketing slop, **demonstrable rigor is the ultimate differentiator.**
 
 - **The Anti-Marketing Wedge:**
-  - Lean into [ADR-001](file:///<repo-root>/PROJECTS/hummbl-governance/docs/adr/ADR-001-coverage-matrix-not-self-grade.md). Publish essays and teardowns exposing how competitor governance platforms "hallucinate compliance scores."
+  - Lean into [ADR-001](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/adr/ADR-001-coverage-matrix-not-self-grade.md). Publish essays and teardowns exposing how competitor governance platforms "hallucinate compliance scores."
   - Contrast this with HUMMBL’s 4 boundary states (✅ Fulfilled, 🟡 Partial, ⚪ Boundary, ⛔ Out of Scope).
 - **Verifiable Public Artifacts:**
   - Embed live GitHub Actions build badges, TLA+ verification receipts, and test pass counts directly on `hummbl.io`.

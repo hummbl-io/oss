@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -69,36 +68,23 @@ def test_governance_simulation() -> None:
     assert trace, "simulation produced no events"
     for idx, event in enumerate(trace):
         tuple_type = event.get("tuple_type")
-        assert tuple_type in schemas, (
-            f"event[{idx}] has unknown tuple_type {tuple_type!r}"
-        )
+        assert tuple_type in schemas, f"event[{idx}] has unknown tuple_type {tuple_type!r}"
         validator._validate(event, schemas[tuple_type], path=f"trace[{idx}]")
     print(f"Schema validation: OK ({len(trace)} events)")
 
     # --- 2. high-level scenario shape -----------------------------------
     summary = trace_summary(trace)
     assert summary["contracts"] == 3, f"expected 3 contracts, got {summary}"
-    assert summary["scope_denials"] >= 2, (
-        f"expected >= 2 scope denials, got {summary}"
-    )
-    assert summary["probation_entries"] == 1, (
-        f"expected 1 probation entry, got {summary}"
-    )
-    assert summary["probation_exits"] == 1, (
-        f"expected 1 probation exit, got {summary}"
-    )
-    assert summary["evidence_events"] == 3, (
-        f"expected 3 evidence events, got {summary}"
-    )
+    assert summary["scope_denials"] >= 2, f"expected >= 2 scope denials, got {summary}"
+    assert summary["probation_entries"] == 1, f"expected 1 probation entry, got {summary}"
+    assert summary["probation_exits"] == 1, f"expected 1 probation exit, got {summary}"
+    assert summary["evidence_events"] == 3, f"expected 3 evidence events, got {summary}"
     print(f"Scenario shape: OK ({summary})")
 
     # Every agent must end with an EVIDENCE tuple keyed to its task.
-    evidence_task_ids = {
-        e["task_id"] for e in trace if e["tuple_type"] == "EVIDENCE"
-    }
+    evidence_task_ids = {e["task_id"] for e in trace if e["tuple_type"] == "EVIDENCE"}
     assert evidence_task_ids == set(scenario.contracts), (
-        f"evidence task ids {evidence_task_ids} != contracts "
-        f"{set(scenario.contracts)}"
+        f"evidence task ids {evidence_task_ids} != contracts {set(scenario.contracts)}"
     )
     print("Per-agent EVIDENCE coverage: OK")
 

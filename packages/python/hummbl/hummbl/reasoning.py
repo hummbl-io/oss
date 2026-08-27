@@ -30,6 +30,7 @@ class ReasoningTopology(Enum):
            forming cycles and cross-links. Good for iterative refinement,
            combining insights across branches, and meta-reasoning.
     """
+
     CHAIN = "chain"
     TREE = "tree"
     GRAPH = "graph"
@@ -48,6 +49,7 @@ class StepType(Enum):
     REFLECTION:  Meta-reasoning about the process itself. "My hypotheses
                  about depth have been wrong — I should try width instead."
     """
+
     HYPOTHESIS = "hypothesis"
     ACTION = "action"
     OBSERVATION = "observation"
@@ -74,6 +76,7 @@ class ReasoningStep:
         timestamp: Unix timestamp when this step was created.
         confidence: Optional confidence score [0.0, 1.0] for this step.
     """
+
     id: str
     type: StepType
     content: str
@@ -128,6 +131,7 @@ class ReasoningTrace:
         created_at: Unix timestamp when the trace was started.
         tags: Free-form tags for filtering and grouping traces.
     """
+
     id: str
     topology: ReasoningTopology
     steps: list[ReasoningStep] = field(default_factory=list)
@@ -137,9 +141,7 @@ class ReasoningTrace:
     tags: list[str] = field(default_factory=list)
 
     # -- Step index for fast lookups --
-    _step_index: dict[str, int] = field(
-        default_factory=dict, init=False, repr=False
-    )
+    _step_index: dict[str, int] = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self):
         """Build the step index after initialization."""
@@ -166,9 +168,7 @@ class ReasoningTrace:
 
         if step.parent_id is not None:
             if step.parent_id not in self._step_index:
-                raise KeyError(
-                    f"Parent step '{step.parent_id}' not found in trace"
-                )
+                raise KeyError(f"Parent step '{step.parent_id}' not found in trace")
             parent = self.steps[self._step_index[step.parent_id]]
             if step.id not in parent.children_ids:
                 parent.children_ids.append(step.id)
@@ -262,6 +262,7 @@ class ReasoningTrace:
 
 
 # -- Factory helpers --
+
 
 def make_step(
     step_type: StepType,

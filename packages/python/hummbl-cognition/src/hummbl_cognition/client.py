@@ -168,7 +168,8 @@ def main(argv: list[str] | None = None) -> int:
     p_search.add_argument("--since", help="ISO timestamp filter")
     p_search.add_argument("--limit", type=int, default=20, help="Max results")
     p_search.add_argument(
-        "--sources", nargs="*",
+        "--sources",
+        nargs="*",
         choices=["ledger", "bus", "briefings", "findings", "memory_md"],
         help="Memory pools to search",
     )

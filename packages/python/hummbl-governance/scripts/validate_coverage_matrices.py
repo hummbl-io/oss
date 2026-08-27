@@ -34,11 +34,9 @@ for matrix in os.listdir(MATRICES_DIR):
         continue
     matrix_path = os.path.join(MATRICES_DIR, matrix)
     print(f"Validating: {matrix_path}")
-    result = subprocess.run([
-        sys.executable, "-m", "hummbl_governance.compliance_mapper",
-        "--validate", matrix_path,
-        "--repo-root", "."
-    ])
+    result = subprocess.run(
+        [sys.executable, "-m", "hummbl_governance.compliance_mapper", "--validate", matrix_path, "--repo-root", "."]
+    )
     if result.returncode != 0:
         FAILED = 1
 

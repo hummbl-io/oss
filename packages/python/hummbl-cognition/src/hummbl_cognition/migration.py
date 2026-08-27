@@ -34,9 +34,7 @@ def _deterministic_id(content: str, source: str) -> str:
     This ensures that re-importing the same content produces the same ID,
     making migrations idempotent.
     """
-    digest = hashlib.sha256(
-        f"{source}:{content}".encode("utf-8")
-    ).hexdigest()[:12]
+    digest = hashlib.sha256(f"{source}:{content}".encode("utf-8")).hexdigest()[:12]
     return f"clp-{digest}"
 
 
@@ -50,13 +48,18 @@ def _resolve_repo_root() -> Path | None:
             timeout=5,
         ).strip()
         return Path(root) if root else None
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         return None
 
 
 # ---------------------------------------------------------------------------
 # MEMORY.md Import
 # ---------------------------------------------------------------------------
+
 
 def _parse_memory_sections(text: str) -> list[dict[str, Any]]:
     """Parse a MEMORY.md file into sections with bullet content.
@@ -73,10 +76,12 @@ def _parse_memory_sections(text: str) -> list[dict[str, Any]]:
         heading_match = re.match(r"^##\s+(.+)$", line)
         if heading_match:
             if current_heading and current_bullets:
-                sections.append({
-                    "heading": current_heading,
-                    "bullets": current_bullets,
-                })
+                sections.append(
+                    {
+                        "heading": current_heading,
+                        "bullets": current_bullets,
+                    }
+                )
             current_heading = heading_match.group(1).strip()
             current_bullets = []
             continue
@@ -88,10 +93,12 @@ def _parse_memory_sections(text: str) -> list[dict[str, Any]]:
 
     # Flush last section
     if current_heading and current_bullets:
-        sections.append({
-            "heading": current_heading,
-            "bullets": current_bullets,
-        })
+        sections.append(
+            {
+                "heading": current_heading,
+                "bullets": current_bullets,
+            }
+        )
 
     return sections
 
@@ -426,7 +433,9 @@ def import_from_bus_history(
                 except (ValueError, OSError) as e:
                     logger.warning(
                         "Failed to post bus entry %s (line %d): %s",
-                        entry_id, line_num, e,
+                        entry_id,
+                        line_num,
+                        e,
                     )
                     continue
 
@@ -453,6 +462,7 @@ def _sender_to_vendor(sender: str) -> str:
 # ---------------------------------------------------------------------------
 # Git Log Import
 # ---------------------------------------------------------------------------
+
 
 def import_from_git_log(
     *,
@@ -483,7 +493,8 @@ def import_from_git_log(
         All created entries.
     """
     cmd = [
-        "git", "log",
+        "git",
+        "log",
         f"--max-count={max_commits}",
         "--format=%H%n%aI%n%an%n%s",
     ]
@@ -497,7 +508,11 @@ def import_from_git_log(
             text=True,
             timeout=5,
         )
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         logger.warning("Git log failed -- not in a git repo?")
         return []
 
@@ -529,9 +544,7 @@ def import_from_git_log(
         # Normalize date to UTC Z format
         try:
             dt = datetime.fromisoformat(commit_date)
-            timestamp = dt.astimezone(timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            )
+            timestamp = dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         except ValueError:
             timestamp = commit_date
 
@@ -580,7 +593,9 @@ def import_from_git_log(
                 post_entry(entry, ledger_path=ledger_path)
             except (ValueError, OSError) as e:
                 logger.warning(
-                    "Failed to post git entry %s: %s", entry_id, e,
+                    "Failed to post git entry %s: %s",
+                    entry_id,
+                    e,
                 )
                 continue
 

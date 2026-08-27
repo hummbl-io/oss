@@ -18,7 +18,7 @@ Deliverables:
 
 Outputs:
 
-- [TURBOQUANT_ACCESS_AND_IMPLEMENTATION_MEMO.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/TURBOQUANT_ACCESS_AND_IMPLEMENTATION_MEMO.md)
+- [TURBOQUANT_ACCESS_AND_IMPLEMENTATION_MEMO.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/TURBOQUANT_ACCESS_AND_IMPLEMENTATION_MEMO.md)
 - this implementation plan
 
 Exit condition:

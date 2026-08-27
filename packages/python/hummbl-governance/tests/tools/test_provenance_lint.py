@@ -6,9 +6,7 @@ def test_allows_normal_commit_message():
 
 
 def test_blocks_ai_coauthor_trailer():
-    findings = lint_text(
-        "docs: update standard\n\nCo-authored-by: Codex <codex@example.com>"
-    )
+    findings = lint_text("docs: update standard\n\nCo-authored-by: Codex <codex@example.com>")
 
     assert [finding.rule for finding in findings] == ["ai-coauthor-trailer"]
 

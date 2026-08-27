@@ -10,7 +10,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel.doctrine_engine import (
     DoctrineEngine,
     DoctrineInvariant,

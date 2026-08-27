@@ -20,7 +20,6 @@ import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlparse
 
 DEFAULT_PORT = 18791
 DEFAULT_TOKEN_FILE = Path.home() / ".config" / "hummbl" / "hrsi_bridge_token"
@@ -94,9 +93,7 @@ def post_hrsi_to_bridge_url_result(
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
-    req = urllib.request.Request(
-        url, data=data, headers=headers, method="POST"
-    )
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
 
     try:
         with urllib.request.urlopen(req, timeout=10) as response:

@@ -7,11 +7,11 @@ TTL expiry, namespace enforcement, promotion, stats, and atomic I/O.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timedelta, timezone
 from unittest import mock
 
 import pytest
-
 from hummbl_cognition.working_memory import (
     _KEY_PATTERN,
     MAX_CONTENT_LENGTH,
@@ -584,6 +584,7 @@ class TestStoreIO:
         s.put("agent:x", "v", "agent")
         assert p.exists()
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="POSIX permissions not supported on Windows")
     def test_atomic_write_permissions(self, store):
         store.put("agent:x", "v", "agent")
         mode = store.path.stat().st_mode & 0o777
@@ -615,10 +616,7 @@ class TestStoreContentScanning:
 
         fake_key = "sk-" + "b" * 40
         with pytest.raises((ContentScanError, ValueError)):
-            store.put(
-                "agent:x", "clean", "agent",
-                metadata={"note": f"key {fake_key}"}
-            )
+            store.put("agent:x", "clean", "agent", metadata={"note": f"key {fake_key}"})
 
 
 # ---------------------------------------------------------------------------
@@ -627,6 +625,7 @@ class TestStoreContentScanning:
 
 
 class TestStoreLocking:
+    @pytest.mark.skipif(sys.platform == "win32", reason="flock is POSIX-only")
     def test_locked_write_uses_flock(self, store):
         """Verify flock is called during writes (on POSIX)."""
         import fcntl as _fcntl
@@ -649,8 +648,9 @@ class TestStoreLocking:
         """Test the msvcrt code path by mocking fcntl away."""
         mock_msvcrt = mock.MagicMock()
 
-        with mock.patch("hummbl_cognition.working_memory.fcntl", None), mock.patch(
-            "hummbl_cognition.working_memory.msvcrt", mock_msvcrt
+        with (
+            mock.patch("hummbl_cognition.working_memory.fcntl", None),
+            mock.patch("hummbl_cognition.working_memory.msvcrt", mock_msvcrt),
         ):
             store.put("agent:x", "v", "agent")
 

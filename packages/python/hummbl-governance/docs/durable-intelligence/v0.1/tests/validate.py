@@ -16,27 +16,45 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 SCHEMA_PATH = Path(__file__).parent.parent / "session-receipt.schema.json"
 
 REQUIRED_FIELDS = [
-    "schema_version", "session_id", "source_agent", "environment",
-    "tools_available", "repository_or_system_scope", "starting_state",
-    "actions_attempted", "mutations_made", "claims", "decisions",
-    "negative_knowledge", "open_questions", "next_actions",
-    "authority_boundaries", "receipt_destination", "completion_status"
+    "schema_version",
+    "session_id",
+    "source_agent",
+    "environment",
+    "tools_available",
+    "repository_or_system_scope",
+    "starting_state",
+    "actions_attempted",
+    "mutations_made",
+    "claims",
+    "decisions",
+    "negative_knowledge",
+    "open_questions",
+    "next_actions",
+    "authority_boundaries",
+    "receipt_destination",
+    "completion_status",
 ]
 
-VALID_POSTURES = {"observed", "source_reported", "inferred", "provisional",
-                  "verified", "refuted", "unresolved"}
+VALID_POSTURES = {"observed", "source_reported", "inferred", "provisional", "verified", "refuted", "unresolved"}
 
 VALID_COMPLETION = {"COMPLETED", "PARTIAL", "BLOCKED", "INCONCLUSIVE", "SUPERSEDED"}
 
-VALID_DISPOSITIONS = {"CONFIRMED", "REFUTED", "INCONCLUSIVE",
-                      "BLOCKED_MISSING_AUTHORITY", "SUPERSEDED"}
+VALID_DISPOSITIONS = {"CONFIRMED", "REFUTED", "INCONCLUSIVE", "BLOCKED_MISSING_AUTHORITY", "SUPERSEDED"}
 
-VALID_TOOLS = {"shell", "filesystem", "network", "connector", "browser",
-               "test_runner", "deployment", "write_access", "read_only"}
+VALID_TOOLS = {
+    "shell",
+    "filesystem",
+    "network",
+    "connector",
+    "browser",
+    "test_runner",
+    "deployment",
+    "write_access",
+    "read_only",
+}
 
 
 def load_schema() -> dict[str, Any]:
@@ -66,8 +84,7 @@ def _check_mutation_truthfulness(receipt: dict) -> list[str]:
             if artifact_type in action_text and "create" in action_text:
                 # Must have at least one mutation of this type
                 has_mutation = any(
-                    m.get("artifact_type") == artifact_type
-                    for m in mutations if m.get("created") is True
+                    m.get("artifact_type") == artifact_type for m in mutations if m.get("created") is True
                 )
                 if not has_mutation:
                     errors.append(
@@ -98,10 +115,7 @@ def _check_claim_postures(receipt: dict) -> list[str]:
     for claim in receipt.get("claims", []):
         posture = claim.get("posture", "")
         if posture not in VALID_POSTURES:
-            errors.append(
-                f"Claim '{claim.get('claim', '?')[:60]}...' has "
-                f"invalid posture: '{posture}'"
-            )
+            errors.append(f"Claim '{claim.get('claim', '?')[:60]}...' has invalid posture: '{posture}'")
     return errors
 
 

@@ -9,21 +9,21 @@ import threading
 import time
 from http.server import ThreadingHTTPServer
 from pathlib import Path
-from urllib.request import urlopen, Request
 from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from hummbl_cognition import belonging_check as bc
 from hummbl_cognition import hrsi_bridge_server as hs
 from hummbl_cognition import hrsi_checkin as hc
-from hummbl_cognition import belonging_check as bc
-
 
 # ---------------------------------------------------------------------------
 # Test fixture: ephemeral cognition dir + bridge server on a random port
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def isolated_cognition(tmp_path, monkeypatch):
@@ -82,6 +82,7 @@ def running_server(isolated_cognition):
 # Credential loading
 # ---------------------------------------------------------------------------
 
+
 class TestLoadBridgeCredentials:
     def test_env_token(self, monkeypatch):
         monkeypatch.setenv("HRSI_BRIDGE_TOKEN", "my-token")
@@ -96,7 +97,9 @@ class TestLoadBridgeCredentials:
 
     def test_json_token_file(self, tmp_path, monkeypatch):
         token_file = tmp_path / "tokens.json"
-        token_file.write_text(json.dumps({"client-a": "token-a", "client-b": "token-b"}))
+        token_file.write_text(
+            json.dumps({"client-a": "token-a", "client-b": "token-b"})
+        )
         monkeypatch.delenv("HRSI_BRIDGE_TOKEN", raising=False)
         monkeypatch.setenv("HRSI_BRIDGE_TOKEN_FILE", str(token_file))
         creds = hs._load_bridge_credentials()
@@ -114,6 +117,7 @@ class TestLoadBridgeCredentials:
 # ---------------------------------------------------------------------------
 # HTTP endpoint tests
 # ---------------------------------------------------------------------------
+
 
 class TestHealthEndpoint:
     def test_health_unauthenticated(self, running_server):
@@ -161,7 +165,9 @@ class TestPostHrsi:
             assert data["total_cycles"] == 1
 
         # Verify it was written to the cycles file
-        cycles = isolated_cognition["cycles_path"].read_text(encoding="utf-8").splitlines()
+        cycles = (
+            isolated_cognition["cycles_path"].read_text(encoding="utf-8").splitlines()
+        )
         assert len(cycles) == 1
         written = json.loads(cycles[0])
         assert written["hule"] == "Noticed a pattern between bus bridge and HRSI needs"
@@ -181,8 +187,11 @@ class TestPostHrsi:
 
     def test_wrong_token_returns_401(self, running_server):
         body = {
-            "cogstate": "AVAILABLE", "safety": 4, "mattering": 3,
-            "connection": 4, "hule": "test",
+            "cogstate": "AVAILABLE",
+            "safety": 4,
+            "mattering": 3,
+            "connection": 4,
+            "hule": "test",
         }
         req = self._post(running_server["base_url"], body, token="wrong-token")
         with pytest.raises(HTTPError) as exc_info:
@@ -198,8 +207,11 @@ class TestPostHrsi:
 
     def test_invalid_cogstate_returns_400(self, running_server):
         body = {
-            "cogstate": "INVALID", "safety": 4, "mattering": 3,
-            "connection": 4, "hule": "test",
+            "cogstate": "INVALID",
+            "safety": 4,
+            "mattering": 3,
+            "connection": 4,
+            "hule": "test",
         }
         req = self._post(running_server["base_url"], body, running_server["token"])
         with pytest.raises(HTTPError) as exc_info:
@@ -208,8 +220,11 @@ class TestPostHrsi:
 
     def test_score_out_of_range_returns_400(self, running_server):
         body = {
-            "cogstate": "AVAILABLE", "safety": 6, "mattering": 3,
-            "connection": 4, "hule": "test",
+            "cogstate": "AVAILABLE",
+            "safety": 6,
+            "mattering": 3,
+            "connection": 4,
+            "hule": "test",
         }
         req = self._post(running_server["base_url"], body, running_server["token"])
         with pytest.raises(HTTPError) as exc_info:
@@ -218,10 +233,15 @@ class TestPostHrsi:
 
     def test_optional_fields_accepted(self, running_server, isolated_cognition):
         body = {
-            "cogstate": "AVAILABLE", "safety": 5, "mattering": 5,
-            "connection": 5, "hule": "great day",
-            "lens": "bki", "delta": "K+: new insight",
-            "energy": 4, "sleep_hours": 8.0,
+            "cogstate": "AVAILABLE",
+            "safety": 5,
+            "mattering": 5,
+            "connection": 5,
+            "hule": "great day",
+            "lens": "bki",
+            "delta": "K+: new insight",
+            "energy": 4,
+            "sleep_hours": 8.0,
             "relational_note": "Coffee with Dan",
             "origin_machine": "iphone",
         }

@@ -20,7 +20,6 @@ import json
 import tempfile
 from pathlib import Path
 
-
 from hummbl_governance.schema_validator import RefRegistry, SchemaValidator
 
 
@@ -242,11 +241,15 @@ class TestValidateFile:
             schema_path = Path(tmpdir) / "schema.json"
 
             instance_path.write_text(json.dumps({"name": "test"}))
-            schema_path.write_text(json.dumps({
-                "type": "object",
-                "required": ["name"],
-                "properties": {"name": {"type": "string"}},
-            }))
+            schema_path.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "required": ["name"],
+                        "properties": {"name": {"type": "string"}},
+                    }
+                )
+            )
 
             valid, errors = SchemaValidator.validate_file(instance_path, schema_path)
             assert valid is True
@@ -257,10 +260,14 @@ class TestValidateFile:
             schema_path = Path(tmpdir) / "schema.json"
 
             instance_path.write_text(json.dumps({"count": "not a number"}))
-            schema_path.write_text(json.dumps({
-                "type": "object",
-                "properties": {"count": {"type": "integer"}},
-            }))
+            schema_path.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "properties": {"count": {"type": "integer"}},
+                    }
+                )
+            )
 
             valid, errors = SchemaValidator.validate_file(instance_path, schema_path)
             assert valid is False
@@ -555,14 +562,22 @@ class TestRefRegistry:
             schema_path = Path(tmpdir) / "schema.json"
             instance_path = Path(tmpdir) / "data.json"
 
-            refs_path.write_text(json.dumps({
-                "$id": "https://example.com/refs.json",
-                "$defs": {"name": {"type": "string", "minLength": 2}},
-            }))
-            schema_path.write_text(json.dumps({
-                "type": "object",
-                "properties": {"x": {"$ref": "https://example.com/refs.json#/$defs/name"}},
-            }))
+            refs_path.write_text(
+                json.dumps(
+                    {
+                        "$id": "https://example.com/refs.json",
+                        "$defs": {"name": {"type": "string", "minLength": 2}},
+                    }
+                )
+            )
+            schema_path.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "properties": {"x": {"$ref": "https://example.com/refs.json#/$defs/name"}},
+                    }
+                )
+            )
             instance_path.write_text(json.dumps({"x": "ab"}))
 
             refs = json.loads(refs_path.read_text())

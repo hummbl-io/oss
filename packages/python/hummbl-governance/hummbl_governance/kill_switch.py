@@ -121,13 +121,15 @@ class KillSwitch:
         <KillSwitchMode.DISENGAGED: 1>
     """
 
-    DEFAULT_CRITICAL_TASKS: frozenset[str] = frozenset([
-        "safety_monitoring",
-        "data_persistence",
-        "audit_logging",
-        "kill_switch_itself",
-        "cost_tracking",
-    ])
+    DEFAULT_CRITICAL_TASKS: frozenset[str] = frozenset(
+        [
+            "safety_monitoring",
+            "data_persistence",
+            "audit_logging",
+            "kill_switch_itself",
+            "cost_tracking",
+        ]
+    )
 
     def __init__(
         self,
@@ -220,15 +222,11 @@ class KillSwitch:
                 if not cls._verify_signature(data, signature, secret):
                     logger.error("Kill switch state has INVALID HMAC signature")
                     if require_hmac:
-                        raise KillSwitchTamperError(
-                            "Kill switch state verification failed"
-                        )
+                        raise KillSwitchTamperError("Kill switch state verification failed")
                     return ks
             elif require_hmac:
                 logger.error("Kill switch state lacks required HMAC signature")
-                raise KillSwitchTamperError(
-                    "Kill switch state missing mandatory HMAC signature"
-                )
+                raise KillSwitchTamperError("Kill switch state missing mandatory HMAC signature")
             else:
                 logger.warning("Kill switch state has no signature (legacy mode)")
 
@@ -278,9 +276,7 @@ class KillSwitch:
             data["failure_class"] = last_event.failure_class.name
         secret = self._get_signing_secret()
         if secret:
-            data["signature"] = self._compute_signature(
-                {k: v for k, v in data.items() if k != "signature"}, secret
-            )
+            data["signature"] = self._compute_signature({k: v for k, v in data.items() if k != "signature"}, secret)
         elif self._require_hmac:
             logger.error("Signing secret not available but require_hmac=True")
         return data

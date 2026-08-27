@@ -116,7 +116,7 @@ def main(argv: list[str]) -> int:
         print(
             f"\n{len(all_errors)} PEP 639 conflict(s) found. "
             "Remove the License :: trove classifier(s) when using "
-            "`license = \"<SPDX>\"`.",
+            '`license = "<SPDX>"`.',
             file=sys.stderr,
         )
         return 1

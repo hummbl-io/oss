@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.canon_registry import (
     CanonLevel,
     validate_canon_registry,
-    validate_transition,
     validate_operator_approval,
-    validate_review_required,
     validate_promotion,
+    validate_review_required,
+    validate_transition,
 )
 from hummbl_governance.schema_validator import ValidationError
 
@@ -100,16 +99,12 @@ class TestOperatorApproval:
         validate_operator_approval(proposal)
 
     def test_not_approved_fails(self):
-        proposal = _valid_proposal(
-            authority={"operator_approval": False, "approver_id": "op-001"}
-        )
+        proposal = _valid_proposal(authority={"operator_approval": False, "approver_id": "op-001"})
         with pytest.raises(ValueError, match="D5.*NO_AUTO_PROMOTION"):
             validate_operator_approval(proposal)
 
     def test_missing_approver_id_fails(self):
-        proposal = _valid_proposal(
-            authority={"operator_approval": True, "approver_id": ""}
-        )
+        proposal = _valid_proposal(authority={"operator_approval": True, "approver_id": ""})
         with pytest.raises(ValueError, match="approver_id"):
             validate_operator_approval(proposal)
 
@@ -193,9 +188,7 @@ class TestFullPromotion:
         validate_promotion(proposal)
 
     def test_full_promotion_d5_violation(self):
-        proposal = _valid_proposal(
-            authority={"operator_approval": False, "approver_id": "op-001"}
-        )
+        proposal = _valid_proposal(authority={"operator_approval": False, "approver_id": "op-001"})
         with pytest.raises(ValueError, match="D5"):
             validate_promotion(proposal)
 

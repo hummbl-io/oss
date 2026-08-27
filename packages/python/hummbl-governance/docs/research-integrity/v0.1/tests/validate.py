@@ -17,37 +17,63 @@ Uses only Python stdlib.
 import json
 import sys
 
-
 REQUIRED_FIELDS = [
-    "schema_version", "artifact_id", "title", "maturity_state",
-    "claim_postures", "risk_checks", "authorship", "ai_use_disclosure",
-    "independent_review", "reproducibility_manifest",
-    "correction_contact", "version_history"
+    "schema_version",
+    "artifact_id",
+    "title",
+    "maturity_state",
+    "claim_postures",
+    "risk_checks",
+    "authorship",
+    "ai_use_disclosure",
+    "independent_review",
+    "reproducibility_manifest",
+    "correction_contact",
+    "version_history",
 ]
 
 VALID_MATURITY = {
-    "IDEA", "RESEARCH_NOTE", "SOURCE_GROUNDED_CANDIDATE",
-    "INTERNAL_TECHNICAL_REPORT", "REPRODUCIBLE_REPORT",
-    "PREPRINT_CANDIDATE", "SUBMISSION_CANDIDATE",
-    "SUBMITTED", "PEER_REVIEWED",
-    "CORRECTED", "SUPERSEDED", "RETRACTED"
+    "IDEA",
+    "RESEARCH_NOTE",
+    "SOURCE_GROUNDED_CANDIDATE",
+    "INTERNAL_TECHNICAL_REPORT",
+    "REPRODUCIBLE_REPORT",
+    "PREPRINT_CANDIDATE",
+    "SUBMISSION_CANDIDATE",
+    "SUBMITTED",
+    "PEER_REVIEWED",
+    "CORRECTED",
+    "SUPERSEDED",
+    "RETRACTED",
 }
 
 VALID_POSTURES = {
-    "OBSERVATION", "MEASUREMENT", "EXPERIMENTAL_RESULT",
-    "INFERENCE", "HYPOTHESIS", "DESIGN_PROPOSAL",
-    "NORMATIVE_ARGUMENT", "THEORETICAL_CLAIM",
-    "NOVELTY_CLAIM", "EXTERNAL_FACT", "UNVERIFIED"
+    "OBSERVATION",
+    "MEASUREMENT",
+    "EXPERIMENTAL_RESULT",
+    "INFERENCE",
+    "HYPOTHESIS",
+    "DESIGN_PROPOSAL",
+    "NORMATIVE_ARGUMENT",
+    "THEORETICAL_CLAIM",
+    "NOVELTY_CLAIM",
+    "EXTERNAL_FACT",
+    "UNVERIFIED",
 }
 
 VALID_RISK_CLASSES = {f"R{i}" for i in range(1, 16)}
 VALID_RISK_STATUS = {"PASS", "FAIL", "NOT_APPLICABLE", "UNRESOLVED"}
 
 MATURITY_ORDER = [
-    "IDEA", "RESEARCH_NOTE", "SOURCE_GROUNDED_CANDIDATE",
-    "INTERNAL_TECHNICAL_REPORT", "REPRODUCIBLE_REPORT",
-    "PREPRINT_CANDIDATE", "SUBMISSION_CANDIDATE",
-    "SUBMITTED", "PEER_REVIEWED",
+    "IDEA",
+    "RESEARCH_NOTE",
+    "SOURCE_GROUNDED_CANDIDATE",
+    "INTERNAL_TECHNICAL_REPORT",
+    "REPRODUCIBLE_REPORT",
+    "PREPRINT_CANDIDATE",
+    "SUBMISSION_CANDIDATE",
+    "SUBMITTED",
+    "PEER_REVIEWED",
 ]
 
 REPRODUCIBILITY_REQUIRED_FROM = "PREPRINT_CANDIDATE"
@@ -81,10 +107,7 @@ def _check_enums(record: dict) -> list[str]:
 def _check_novelty_discipline(record: dict) -> list[str]:
     """Novelty claims require prior-art review and novelty challenge."""
     errors = []
-    has_novelty = any(
-        cp.get("posture") == "NOVELTY_CLAIM"
-        for cp in record.get("claim_postures", [])
-    )
+    has_novelty = any(cp.get("posture") == "NOVELTY_CLAIM" for cp in record.get("claim_postures", []))
     if not has_novelty:
         return errors
 
@@ -124,9 +147,7 @@ def _check_independent_review(record: dict) -> list[str]:
                 f"but independent_review.review_completed is false/missing"
             )
         if not review.get("reviewer_not_author"):
-            errors.append(
-                f"maturity_state is {state} but independent_review.reviewer_not_author is false/missing"
-            )
+            errors.append(f"maturity_state is {state} but independent_review.reviewer_not_author is false/missing")
     return errors
 
 
@@ -157,9 +178,7 @@ def _check_ai_disclosure(record: dict) -> list[str]:
     material = record.get("ai_use_disclosure", {}).get("material_assistance", [])
 
     if agent_contribs and not material:
-        errors.append(
-            "agent_contributions are listed but ai_use_disclosure.material_assistance is empty"
-        )
+        errors.append("agent_contributions are listed but ai_use_disclosure.material_assistance is empty")
 
     r7 = next((r for r in record.get("risk_checks", []) if r.get("risk_class") == "R7"), None)
     if r7 and r7.get("status") == "FAIL":

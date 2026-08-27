@@ -15,7 +15,6 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-
 BLOCKED_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "ai-coauthor-trailer",
@@ -28,9 +27,7 @@ BLOCKED_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ),
     (
         "generated-by-trailer",
-        re.compile(
-            r"(?im)^(generated-by|authored-with|authored-by|created-with):\s*.+"
-        ),
+        re.compile(r"(?im)^(generated-by|authored-with|authored-by|created-with):\s*.+"),
     ),
     (
         "ai-credit-line",
@@ -141,9 +138,7 @@ def lint_effective_git_identities() -> list[Finding]:
     """Lint effective Git author and committer identities for this commit."""
     findings: list[Finding] = []
     findings.extend(lint_identity_text(_git_identity("GIT_AUTHOR_IDENT"), label="author"))
-    findings.extend(
-        lint_identity_text(_git_identity("GIT_COMMITTER_IDENT"), label="committer")
-    )
+    findings.extend(lint_identity_text(_git_identity("GIT_COMMITTER_IDENT"), label="committer"))
     return findings
 
 
@@ -200,8 +195,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     print(
-        "ERROR: AI authorship attribution is not allowed in HUMMBL commit "
-        "metadata.",
+        "ERROR: AI authorship attribution is not allowed in HUMMBL commit metadata.",
         file=sys.stderr,
     )
     for finding in findings:
@@ -210,8 +204,7 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
     print(
-        "Record AI assistance in internal receipts or PR notes, not commit "
-        "authorship trailers.",
+        "Record AI assistance in internal receipts or PR notes, not commit authorship trailers.",
         file=sys.stderr,
     )
     return 1

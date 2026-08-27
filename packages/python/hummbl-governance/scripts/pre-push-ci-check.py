@@ -134,22 +134,26 @@ def check_sha_pinning(workflow_path: Path, root: Path) -> list[Finding]:
 
         action_name, _, version = ref.partition("@")
         if not version:
-            findings.append(Finding(
-                check="sha-pinning",
-                severity="error",
-                file=str(rel),
-                message=f"line {line_no}: {ref} has no @ref — must be SHA-pinned",
-            ))
+            findings.append(
+                Finding(
+                    check="sha-pinning",
+                    severity="error",
+                    file=str(rel),
+                    message=f"line {line_no}: {ref} has no @ref — must be SHA-pinned",
+                )
+            )
             continue
 
         # Check for mutable refs
         if any(version.endswith(suffix) for suffix in MUTABLE_REFS):
-            findings.append(Finding(
-                check="sha-pinning",
-                severity="error",
-                file=str(rel),
-                message=f"line {line_no}: {ref} uses mutable ref '{version}' — pin to SHA",
-            ))
+            findings.append(
+                Finding(
+                    check="sha-pinning",
+                    severity="error",
+                    file=str(rel),
+                    message=f"line {line_no}: {ref} uses mutable ref '{version}' — pin to SHA",
+                )
+            )
             continue
 
         # Check if it's a SHA (40-char hex)
@@ -157,12 +161,14 @@ def check_sha_pinning(workflow_path: Path, root: Path) -> list[Finding]:
             continue
 
         # Tag refs like v4, v7.0.1 — not SHA-pinned
-        findings.append(Finding(
-            check="sha-pinning",
-            severity="error",
-            file=str(rel),
-            message=f"line {line_no}: {ref} uses tag '{version}' — pin to 40-char SHA",
-        ))
+        findings.append(
+            Finding(
+                check="sha-pinning",
+                severity="error",
+                file=str(rel),
+                message=f"line {line_no}: {ref} uses tag '{version}' — pin to 40-char SHA",
+            )
+        )
 
     return findings
 
@@ -175,19 +181,19 @@ def check_disallowed_actions(workflow_path: Path, root: Path) -> list[Finding]:
 
     for line_no, ref in parse_workflow_uses(text):
         if ref in DISALLOWED_ACTIONS:
-            findings.append(Finding(
-                check="disallowed-actions",
-                severity="error",
-                file=str(rel),
-                message=f"line {line_no}: {ref} is disallowed — use SHA-pinned version",
-            ))
+            findings.append(
+                Finding(
+                    check="disallowed-actions",
+                    severity="error",
+                    file=str(rel),
+                    message=f"line {line_no}: {ref} is disallowed — use SHA-pinned version",
+                )
+            )
 
     return findings
 
 
-def check_branch_protection_names(
-    ci_workflow_path: Path, root: Path
-) -> list[Finding]:
+def check_branch_protection_names(ci_workflow_path: Path, root: Path) -> list[Finding]:
     """Check that the ci aggregate job exists and matches branch protection.
 
     If `gh` CLI is available and authenticated, queries the branch protection
@@ -196,12 +202,14 @@ def check_branch_protection_names(
     """
     findings: list[Finding] = []
     if not ci_workflow_path.exists():
-        findings.append(Finding(
-            check="branch-protection",
-            severity="error",
-            file=".github/workflows/ci.yml",
-            message="primary CI workflow not found",
-        ))
+        findings.append(
+            Finding(
+                check="branch-protection",
+                severity="error",
+                file=".github/workflows/ci.yml",
+                message="primary CI workflow not found",
+            )
+        )
         return findings
 
     text = ci_workflow_path.read_text(encoding="utf-8", errors="replace")
@@ -209,45 +217,60 @@ def check_branch_protection_names(
 
     # The ci aggregate job must exist
     if "ci" not in job_names:
-        findings.append(Finding(
-            check="branch-protection",
-            severity="error",
-            file=".github/workflows/ci.yml",
-            message="no 'ci' aggregate job found — branch protection requires it",
-        ))
+        findings.append(
+            Finding(
+                check="branch-protection",
+                severity="error",
+                file=".github/workflows/ci.yml",
+                message="no 'ci' aggregate job found — branch protection requires it",
+            )
+        )
 
     # Try to query branch protection via gh CLI
     try:
         result = subprocess.run(
-            ["gh", "api", f"repos/{_get_repo_slug(root)}/branches/main/protection",
-             "--jq", ".required_status_checks.contexts[]?"],
-            capture_output=True, text=True, timeout=10,
+            [
+                "gh",
+                "api",
+                f"repos/{_get_repo_slug(root)}/branches/main/protection",
+                "--jq",
+                ".required_status_checks.contexts[]?",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         if result.returncode != 0:
-            findings.append(Finding(
-                check="branch-protection",
-                severity="warning",
-                file=".github/workflows/ci.yml",
-                message="could not query branch protection via gh CLI — skipping cross-check",
-            ))
+            findings.append(
+                Finding(
+                    check="branch-protection",
+                    severity="warning",
+                    file=".github/workflows/ci.yml",
+                    message="could not query branch protection via gh CLI — skipping cross-check",
+                )
+            )
             return findings
 
         required_checks = [c.strip() for c in result.stdout.splitlines() if c.strip()]
         for check_name in required_checks:
             if check_name not in job_names.values() and check_name not in job_names:
-                findings.append(Finding(
-                    check="branch-protection",
-                    severity="error",
-                    file=".github/workflows/ci.yml",
-                    message=f"required check '{check_name}' not found in workflow jobs",
-                ))
+                findings.append(
+                    Finding(
+                        check="branch-protection",
+                        severity="error",
+                        file=".github/workflows/ci.yml",
+                        message=f"required check '{check_name}' not found in workflow jobs",
+                    )
+                )
     except (FileNotFoundError, subprocess.TimeoutExpired):
-        findings.append(Finding(
-            check="branch-protection",
-            severity="warning",
-            file=".github/workflows/ci.yml",
-            message="gh CLI not available — skipping branch protection cross-check",
-        ))
+        findings.append(
+            Finding(
+                check="branch-protection",
+                severity="warning",
+                file=".github/workflows/ci.yml",
+                message="gh CLI not available — skipping branch protection cross-check",
+            )
+        )
 
     return findings
 
@@ -257,7 +280,10 @@ def _get_repo_slug(root: Path) -> str:
     try:
         result = subprocess.run(
             ["git", "remote", "get-url", "origin"],
-            capture_output=True, text=True, cwd=str(root), timeout=5,
+            capture_output=True,
+            text=True,
+            cwd=str(root),
+            timeout=5,
         )
         url = result.stdout.strip()
         # Handle SSH (git@github.com:org/repo.git) and HTTPS (https://github.com/org/repo.git)
@@ -277,20 +303,22 @@ def run_checks(root: Path) -> list[CheckResult]:
     workflows_dir = root / ".github" / "workflows"
 
     if not workflows_dir.exists():
-        results.append(CheckResult(
-            name="workflows-dir",
-            findings=[Finding(
-                check="workflows-dir",
-                severity="error",
-                file=".github/workflows/",
-                message="no .github/workflows/ directory found",
-            )],
-        ))
+        results.append(
+            CheckResult(
+                name="workflows-dir",
+                findings=[
+                    Finding(
+                        check="workflows-dir",
+                        severity="error",
+                        file=".github/workflows/",
+                        message="no .github/workflows/ directory found",
+                    )
+                ],
+            )
+        )
         return results
 
-    workflow_files = sorted(
-        f for f in workflows_dir.iterdir() if f.suffix in (".yml", ".yaml")
-    )
+    workflow_files = sorted(f for f in workflows_dir.iterdir() if f.suffix in (".yml", ".yaml"))
 
     # Check 1: SHA pinning
     sha_findings: list[Finding] = []
@@ -319,7 +347,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--repo", default=".", help="Repository root (default: .)")
     parser.add_argument(
-        "--strict", action="store_true",
+        "--strict",
+        action="store_true",
         help="Exit non-zero if warnings are found (not just errors)",
     )
     return parser.parse_args()

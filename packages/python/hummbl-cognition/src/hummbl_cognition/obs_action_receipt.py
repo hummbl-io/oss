@@ -18,7 +18,6 @@ Reference: issue #1118
 from __future__ import annotations
 
 import hashlib
-import json
 import uuid
 from typing import Any
 
@@ -37,12 +36,29 @@ VALID_CONFIDENCE = {"none", "weak", "moderate", "strong", "unknown"}
 VALID_APPROVAL_STATUS = {"not_required", "pending", "approved", "rejected", "expired"}
 VALID_MODES = {"advisory_only", "human_approved_execution"}
 ALLOWED_FIELDS = {
-    "receipt_id", "timestamp", "incident_id", "telemetry_source", "query_path",
-    "time_window", "incident_context", "agent_hypothesis", "evidence_refs",
-    "confidence", "proposed_action", "authority_required", "human_approval_status",
-    "human_approval_by", "human_approval_timestamp", "executed_action",
-    "execution_actor", "execution_timestamp", "rollback_route",
-    "post_action_validation", "post_incident_learning", "mode", "redacted",
+    "receipt_id",
+    "timestamp",
+    "incident_id",
+    "telemetry_source",
+    "query_path",
+    "time_window",
+    "incident_context",
+    "agent_hypothesis",
+    "evidence_refs",
+    "confidence",
+    "proposed_action",
+    "authority_required",
+    "human_approval_status",
+    "human_approval_by",
+    "human_approval_timestamp",
+    "executed_action",
+    "execution_actor",
+    "execution_timestamp",
+    "rollback_route",
+    "post_action_validation",
+    "post_incident_learning",
+    "mode",
+    "redacted",
     "receipt_hash",
 }
 
@@ -70,10 +86,20 @@ def validate_obs_action_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str
 
     # Required fields
     required = [
-        "receipt_id", "timestamp", "incident_id", "telemetry_source",
-        "query_path", "time_window", "agent_hypothesis", "confidence",
-        "proposed_action", "authority_required", "human_approval_status",
-        "mode", "redacted", "receipt_hash",
+        "receipt_id",
+        "timestamp",
+        "incident_id",
+        "telemetry_source",
+        "query_path",
+        "time_window",
+        "agent_hypothesis",
+        "confidence",
+        "proposed_action",
+        "authority_required",
+        "human_approval_status",
+        "mode",
+        "redacted",
+        "receipt_hash",
     ]
     for field in required:
         if field not in receipt or receipt[field] is None:
@@ -117,7 +143,9 @@ def validate_obs_action_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str
     if not isinstance(approval, str) or not approval.strip():
         errors.append("human_approval_status must be a non-empty string")
     elif approval not in VALID_APPROVAL_STATUS:
-        errors.append(f"human_approval_status: {approval!r} not in {sorted(VALID_APPROVAL_STATUS)}")
+        errors.append(
+            f"human_approval_status: {approval!r} not in {sorted(VALID_APPROVAL_STATUS)}"
+        )
 
     mode = receipt.get("mode")
     if not isinstance(mode, str) or not mode.strip():
@@ -143,12 +171,21 @@ def validate_obs_action_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str
         if not receipt.get("execution_timestamp"):
             errors.append("execution_timestamp is required when executed_action is set")
         if receipt.get("mode") != "human_approved_execution":
-            errors.append("mode must be 'human_approved_execution' when an action is executed")
+            errors.append(
+                "mode must be 'human_approved_execution' when an action is executed"
+            )
         if receipt.get("human_approval_status") != "approved":
-            errors.append("human_approval_status must be 'approved' when an action is executed")
+            errors.append(
+                "human_approval_status must be 'approved' when an action is executed"
+            )
 
-    if receipt.get("mode") == "human_approved_execution" and receipt.get("human_approval_status") != "approved":
-        errors.append("human_approved_execution mode requires human_approval_status=approved")
+    if (
+        receipt.get("mode") == "human_approved_execution"
+        and receipt.get("human_approval_status") != "approved"
+    ):
+        errors.append(
+            "human_approved_execution mode requires human_approval_status=approved"
+        )
 
     # Advisory mode must not have executed_action
     if receipt.get("mode") == "advisory_only" and executed:
@@ -156,12 +193,16 @@ def validate_obs_action_receipt(receipt: dict[str, Any]) -> tuple[bool, list[str
 
     # Redaction check
     if not receipt.get("redacted", True):
-        errors.append("redacted must be true — sensitive data must be redacted before persistence")
+        errors.append(
+            "redacted must be true — sensitive data must be redacted before persistence"
+        )
 
     # Hash verification
     expected_hash = compute_receipt_hash(receipt)
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 

@@ -215,8 +215,7 @@ def test_no_silent_zero_total_state():
     """Counter must report at least one ✅ across the fleet (not all-boundary)."""
     data = _run_counter()
     assert data["fleet_totals"]["✅"] > 0, (
-        "Fleet has zero ✅ Fulfilled rows — either matrices are entirely "
-        "boundary/draft, or the counter is broken"
+        "Fleet has zero ✅ Fulfilled rows — either matrices are entirely boundary/draft, or the counter is broken"
     )
 
 
@@ -375,26 +374,17 @@ def test_readme_counts_match_script_output(matrix_name: str):
     assert slug in parsed, f"No README row found for {slug}"
 
     data = _run_counter()
-    matrix = next(
-        m for m in data["matrices"] if Path(m["path"]).name == matrix_name
-    )
+    matrix = next(m for m in data["matrices"] if Path(m["path"]).name == matrix_name)
     readme = parsed[slug]
     c = matrix["counts"]
     assert readme["rows"] == matrix["rows_counted"], (
         f"{matrix_name}: README Rows={readme['rows']} vs counted={matrix['rows_counted']}"
     )
-    assert readme["✅"] == c["✅"], (
-        f"{matrix_name}: README ✅={readme['✅']} vs counted={c['✅']}"
-    )
-    assert readme["🟡"] == c["🟡"], (
-        f"{matrix_name}: README 🟡={readme['🟡']} vs counted={c['🟡']}"
-    )
-    assert readme["⚪"] == c["⚪"], (
-        f"{matrix_name}: README ⚪={readme['⚪']} vs counted={c['⚪']}"
-    )
+    assert readme["✅"] == c["✅"], f"{matrix_name}: README ✅={readme['✅']} vs counted={c['✅']}"
+    assert readme["🟡"] == c["🟡"], f"{matrix_name}: README 🟡={readme['🟡']} vs counted={c['🟡']}"
+    assert readme["⚪"] == c["⚪"], f"{matrix_name}: README ⚪={readme['⚪']} vs counted={c['⚪']}"
     assert readme["unmarked"] == matrix["unmarked_rows"], (
-        f"{matrix_name}: README Unmarked={readme['unmarked']} "
-        f"vs counted={matrix['unmarked_rows']}"
+        f"{matrix_name}: README Unmarked={readme['unmarked']} vs counted={matrix['unmarked_rows']}"
     )
 
 
@@ -414,9 +404,7 @@ def test_readme_fleet_totals_match_script_output():
     fleet_rows = data["fleet_rows"]
     fleet_unmarked = sum(mx.get("unmarked_rows", 0) for mx in data["matrices"])
 
-    assert int(m.group("rows")) == fleet_rows, (
-        f"README fleet Rows={m.group('rows')} vs counted={fleet_rows}"
-    )
+    assert int(m.group("rows")) == fleet_rows, f"README fleet Rows={m.group('rows')} vs counted={fleet_rows}"
     assert int(m.group("fulfilled")) == fleet["✅"]
     assert int(m.group("partial")) == fleet["🟡"]
     assert int(m.group("boundary")) == fleet["⚪"]

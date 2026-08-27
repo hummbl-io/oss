@@ -17,7 +17,6 @@ Coverage:
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.doctrine_engine import DoctrineInvariant
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
 from hummbl_governance.kernel.receipt_integrity_monitor import (
@@ -30,7 +29,6 @@ from hummbl_governance.kernel.recovery_verifier import (
 from hummbl_governance.kernel.rollback import (
     raise_on_rollback_violation,
 )
-
 
 # ===========================================================================
 # K9 REVERSIBILITY — enum recognition and scoped enforcement
@@ -422,8 +420,9 @@ class TestD7BlocksUngatedAmendment:
 
     def test_d7_source_mentions_receipt(self):
         """The D7 source docstring must mention recorded receipt."""
-        import hummbl_governance.kernel.doctrine_engine as de_mod
         from pathlib import Path
+
+        import hummbl_governance.kernel.doctrine_engine as de_mod
 
         source_path = Path(de_mod.__file__)
         content = source_path.read_text()
@@ -431,8 +430,9 @@ class TestD7BlocksUngatedAmendment:
 
     def test_d7_source_mentions_blocked(self):
         """The D7 source docstring must mention that ungated amendments are blocked."""
-        import hummbl_governance.kernel.doctrine_engine as de_mod
         from pathlib import Path
+
+        import hummbl_governance.kernel.doctrine_engine as de_mod
 
         source_path = Path(de_mod.__file__)
         content = source_path.read_text()

@@ -15,36 +15,40 @@ from hummbl_bus.message_types import CANONICAL_MESSAGE_TYPES
 logger = logging.getLogger(__name__)
 
 # Message types that are inherently foreground (review-gate, binding decisions)
-_FOREGROUND_MESSAGE_TYPES = frozenset({
-    "PROPOSAL",
-    "REVIEW",
-    "ACK",
-    "VETO",
-    "DECISION",
-    "DIRECTIVE",
-    "APPROVE",
-    "REJECT",
-    "HANDOFF",
-    "WIP_START",
-    "WIP_END",
-    "QUESTION",
-    "BLOCKED",
-})
+_FOREGROUND_MESSAGE_TYPES = frozenset(
+    {
+        "PROPOSAL",
+        "REVIEW",
+        "ACK",
+        "VETO",
+        "DECISION",
+        "DIRECTIVE",
+        "APPROVE",
+        "REJECT",
+        "HANDOFF",
+        "WIP_START",
+        "WIP_END",
+        "QUESTION",
+        "BLOCKED",
+    }
+)
 
 # Message types that are inherently background (reporting, monitoring, receipts)
-_BACKGROUND_MESSAGE_TYPES = frozenset({
-    "STATUS",
-    "TASK_COMPLETE",
-    "HEARTBEAT",
-    "ALERT",
-    "RECEIPT",
-    "COMPLETE",
-    "MILESTONE",
-    "SITREP",
-    "VERIFY",
-    "HRSI_CHECKIN",
-    "SKILL_INVOKE",
-})
+_BACKGROUND_MESSAGE_TYPES = frozenset(
+    {
+        "STATUS",
+        "TASK_COMPLETE",
+        "HEARTBEAT",
+        "ALERT",
+        "RECEIPT",
+        "COMPLETE",
+        "MILESTONE",
+        "SITREP",
+        "VERIFY",
+        "HRSI_CHECKIN",
+        "SKILL_INVOKE",
+    }
+)
 
 if _FOREGROUND_MESSAGE_TYPES | _BACKGROUND_MESSAGE_TYPES != CANONICAL_MESSAGE_TYPES:
     raise RuntimeError("lane classifier must classify every canonical bus type")
@@ -75,7 +79,9 @@ _BACKGROUND_PRIORITIES = frozenset({"P2", "P3"})
 # Model tiers per PROPOSAL-012 Component 5
 _TIER_FREE_LOCAL = frozenset({"T0", "T0-FREE", "T3-FREE", "ollama", "local"})
 _TIER_LOW_COST = frozenset({"T1", "T1-LOW", "openrouter", "agy"})
-_TIER_HIGH_STAKES = frozenset({"T2", "T2-ZEN", "T1-BYOK", "anthropic", "gpt-4", "opus", "haiku"})
+_TIER_HIGH_STAKES = frozenset(
+    {"T2", "T2-ZEN", "T1-BYOK", "anthropic", "gpt-4", "opus", "haiku"}
+)
 
 
 def classify_message(msg_type: str, priority: str | None = None) -> str:
@@ -194,7 +200,16 @@ def expected_model_tier(
         return "T0"
 
     # Foreground
-    if mtype in {"PROPOSAL", "REVIEW", "ACK", "VETO", "DECISION", "APPROVE", "REJECT", "BLOCKED"}:
+    if mtype in {
+        "PROPOSAL",
+        "REVIEW",
+        "ACK",
+        "VETO",
+        "DECISION",
+        "APPROVE",
+        "REJECT",
+        "BLOCKED",
+    }:
         return "T2"
 
     if priority is not None and priority.strip().upper() in _FOREGROUND_PRIORITIES:

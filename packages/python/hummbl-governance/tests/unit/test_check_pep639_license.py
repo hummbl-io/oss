@@ -6,7 +6,6 @@ import sys
 import textwrap
 from pathlib import Path
 
-
 # Make scripts importable when running from repo root.
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
@@ -28,34 +27,43 @@ def _write_pyproject(path: Path, body: str) -> None:
 # check_file
 # ---------------------------------------------------------------------------
 
+
 def test_clean_spdx_only(tmp_path: Path):
     f = tmp_path / "pyproject.toml"
-    _write_pyproject(f, """
+    _write_pyproject(
+        f,
+        """
         [project]
         name = "x"
         version = "0.1.0"
         license = "Apache-2.0"
         classifiers = ["Development Status :: 3 - Alpha"]
-    """)
+    """,
+    )
     assert check_file(f) == []
 
 
 def test_clean_classifier_only(tmp_path: Path):
     """Legacy form: no SPDX expression, only classifier — still accepted."""
     f = tmp_path / "pyproject.toml"
-    _write_pyproject(f, """
+    _write_pyproject(
+        f,
+        """
         [project]
         name = "x"
         version = "0.1.0"
         license = {text = "MIT"}
         classifiers = ["License :: OSI Approved :: MIT License"]
-    """)
+    """,
+    )
     assert check_file(f) == []
 
 
 def test_conflict_spdx_and_classifier(tmp_path: Path):
     f = tmp_path / "pyproject.toml"
-    _write_pyproject(f, """
+    _write_pyproject(
+        f,
+        """
         [project]
         name = "x"
         version = "0.1.0"
@@ -64,7 +72,8 @@ def test_conflict_spdx_and_classifier(tmp_path: Path):
             "Development Status :: 3 - Alpha",
             "License :: OSI Approved :: Apache Software License",
         ]
-    """)
+    """,
+    )
     errors = check_file(f)
     assert len(errors) == 1
     assert "PEP 639 conflict" in errors[0]
@@ -73,11 +82,14 @@ def test_conflict_spdx_and_classifier(tmp_path: Path):
 
 def test_no_license_field(tmp_path: Path):
     f = tmp_path / "pyproject.toml"
-    _write_pyproject(f, """
+    _write_pyproject(
+        f,
+        """
         [project]
         name = "x"
         version = "0.1.0"
-    """)
+    """,
+    )
     assert check_file(f) == []
 
 
@@ -90,6 +102,7 @@ def test_missing_file(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # iter_pyproject
 # ---------------------------------------------------------------------------
+
 
 def test_iter_pyproject_finds_nested(tmp_path: Path):
     a = tmp_path / "a" / "pyproject.toml"
@@ -111,27 +124,34 @@ def test_iter_pyproject_explicit_file(tmp_path: Path):
 # main (CLI)
 # ---------------------------------------------------------------------------
 
+
 def test_main_clean_returns_0(tmp_path: Path, capsys):
     f = tmp_path / "pyproject.toml"
-    _write_pyproject(f, """
+    _write_pyproject(
+        f,
+        """
         [project]
         name = "x"
         version = "0.1.0"
         license = "Apache-2.0"
-    """)
+    """,
+    )
     rc = main(["prog", str(tmp_path)])
     assert rc == 0
 
 
 def test_main_conflict_returns_1(tmp_path: Path, capsys):
     f = tmp_path / "pyproject.toml"
-    _write_pyproject(f, """
+    _write_pyproject(
+        f,
+        """
         [project]
         name = "x"
         version = "0.1.0"
         license = "Apache-2.0"
         classifiers = ["License :: OSI Approved :: Apache Software License"]
-    """)
+    """,
+    )
     rc = main(["prog", str(tmp_path)])
     assert rc == 1
     captured = capsys.readouterr()

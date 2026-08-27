@@ -89,24 +89,40 @@ class TestLedgerEntryModel:
 
     def test_content_hash_is_deterministic(self):
         h1 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="test",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="test",
         )
         h2 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="test",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="test",
         )
         assert h1 == h2
         assert len(h1) == 64  # SHA-256 hex
 
     def test_content_hash_changes_with_content(self):
         h1 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="test1",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="test1",
         )
         h2 = compute_content_hash(
-            agent="a", vendor="anthropic", model="m",
-            entry_type="lesson", scope="project", content="test2",
+            agent="a",
+            vendor="anthropic",
+            model="m",
+            entry_type="lesson",
+            scope="project",
+            content="test2",
         )
         assert h1 != h2
 
@@ -155,29 +171,45 @@ class TestLedgerEntryModel:
     def test_invalid_type_rejected(self):
         with pytest.raises(ValueError, match="Invalid type"):
             LedgerEntry.create(
-                agent="a", vendor="anthropic", model="m",
-                entry_type="invalid", scope="project", content="x",
+                agent="a",
+                vendor="anthropic",
+                model="m",
+                entry_type="invalid",
+                scope="project",
+                content="x",
             )
 
     def test_invalid_scope_rejected(self):
         with pytest.raises(ValueError, match="Invalid scope"):
             LedgerEntry.create(
-                agent="a", vendor="anthropic", model="m",
-                entry_type="lesson", scope="invalid", content="x",
+                agent="a",
+                vendor="anthropic",
+                model="m",
+                entry_type="lesson",
+                scope="invalid",
+                content="x",
             )
 
     def test_empty_content_rejected(self):
         with pytest.raises(ValueError, match="Content must be"):
             LedgerEntry.create(
-                agent="a", vendor="anthropic", model="m",
-                entry_type="lesson", scope="project", content="",
+                agent="a",
+                vendor="anthropic",
+                model="m",
+                entry_type="lesson",
+                scope="project",
+                content="",
             )
 
     def test_oversized_content_rejected(self):
         with pytest.raises(ValueError, match="Content must be"):
             LedgerEntry.create(
-                agent="a", vendor="anthropic", model="m",
-                entry_type="lesson", scope="project", content="x" * 4097,
+                agent="a",
+                vendor="anthropic",
+                model="m",
+                entry_type="lesson",
+                scope="project",
+                content="x" * 4097,
             )
 
     def test_confidence_out_of_range_rejected(self):
@@ -310,59 +342,67 @@ class TestHistoricalAliasCompatibility:
     # --- Read backward-compatibility ---
 
     def test_from_dict_accepts_deprecated_type_alias(self):
-        entry = LedgerEntry.from_dict({
-            "id": "clp-deadbeefcafe",
-            "timestamp": "2026-04-09T14:15:00Z",
-            "agent": "claude-code",
-            "vendor": "anthropic",
-            "model": "claude-sonnet-4-6",
-            "type": "inference",  # deprecated alias
-            "scope": "project",
-            "content": "test",
-            "content_hash": "a" * 64,
-        })
+        entry = LedgerEntry.from_dict(
+            {
+                "id": "clp-deadbeefcafe",
+                "timestamp": "2026-04-09T14:15:00Z",
+                "agent": "claude-code",
+                "vendor": "anthropic",
+                "model": "claude-sonnet-4-6",
+                "type": "inference",  # deprecated alias
+                "scope": "project",
+                "content": "test",
+                "content_hash": "a" * 64,
+            }
+        )
         assert entry.type == "inference"
 
     def test_from_dict_accepts_deprecated_scope_alias(self):
-        entry = LedgerEntry.from_dict({
-            "id": "clp-deadbeefcafe",
-            "timestamp": "2026-04-09T14:15:00Z",
-            "agent": "claude-code",
-            "vendor": "anthropic",
-            "model": "claude-sonnet-4-6",
-            "type": "discovery",
-            "scope": "competitive-intelligence",  # deprecated alias
-            "content": "test",
-            "content_hash": "a" * 64,
-        })
+        entry = LedgerEntry.from_dict(
+            {
+                "id": "clp-deadbeefcafe",
+                "timestamp": "2026-04-09T14:15:00Z",
+                "agent": "claude-code",
+                "vendor": "anthropic",
+                "model": "claude-sonnet-4-6",
+                "type": "discovery",
+                "scope": "competitive-intelligence",  # deprecated alias
+                "content": "test",
+                "content_hash": "a" * 64,
+            }
+        )
         assert entry.scope == "competitive-intelligence"
 
     def test_from_dict_normalizes_legacy_field_names(self):
-        entry = LedgerEntry.from_dict({
-            "entry_id": "clp-deadbeefcafe",
-            "ts": "2026-04-09T14:15:00Z",
-            "agent": "claude-code",
-            "vendor": "anthropic",
-            "model": "claude-sonnet-4-6",
-            "type": "discovery",
-            "scope": "project",
-            "content": "test",
-            "hash": "a" * 64,
-        })
+        entry = LedgerEntry.from_dict(
+            {
+                "entry_id": "clp-deadbeefcafe",
+                "ts": "2026-04-09T14:15:00Z",
+                "agent": "claude-code",
+                "vendor": "anthropic",
+                "model": "claude-sonnet-4-6",
+                "type": "discovery",
+                "scope": "project",
+                "content": "test",
+                "hash": "a" * 64,
+            }
+        )
         assert entry.id == "clp-deadbeefcafe"
         assert entry.timestamp == "2026-04-09T14:15:00Z"
         assert entry.content_hash == "a" * 64
 
     def test_from_dict_provides_defaults_for_missing_fields(self):
-        entry = LedgerEntry.from_dict({
-            "id": "clp-deadbeefcafe",
-            "timestamp": "2026-04-09T14:15:00Z",
-            "agent": "claude-code",
-            "type": "discovery",
-            "scope": "project",
-            "content": "test",
-            "content_hash": "a" * 64,
-        })
+        entry = LedgerEntry.from_dict(
+            {
+                "id": "clp-deadbeefcafe",
+                "timestamp": "2026-04-09T14:15:00Z",
+                "agent": "claude-code",
+                "type": "discovery",
+                "scope": "project",
+                "content": "test",
+                "content_hash": "a" * 64,
+            }
+        )
         assert entry.vendor == "human"
         assert entry.model == "unknown"
 
@@ -446,9 +486,7 @@ class TestLedgerWriter:
 
     def test_filter_by_agent(self, tmp_path):
         ledger = tmp_path / "ledger.jsonl"
-        post_entry(
-            _make_entry(agent="claude-code (god-mode)"), ledger_path=ledger
-        )
+        post_entry(_make_entry(agent="claude-code (god-mode)"), ledger_path=ledger)
         post_entry(_make_entry(agent="codex"), ledger_path=ledger)
 
         claude = read_entries(ledger_path=ledger, agent="claude")
@@ -461,9 +499,7 @@ class TestLedgerWriter:
         post_entry(_make_entry(tags=["bus"]), ledger_path=ledger)
         post_entry(_make_entry(tags=["security"]), ledger_path=ledger)
 
-        bus_testing = read_entries(
-            ledger_path=ledger, tags=["bus", "testing"]
-        )
+        bus_testing = read_entries(ledger_path=ledger, tags=["bus", "testing"])
         assert len(bus_testing) == 1
 
     def test_limit_entries(self, tmp_path):
@@ -572,6 +608,7 @@ class TestLedgerWriter:
 
     def test_post_with_valid_claim(self, tmp_path):
         from hummbl_cognition.ledger_writer import _validate_entry_schema
+
         claim = {
             "@context": {"schema": "https://schema.org/"},
             "@type": ["schema:Claim"],
@@ -582,6 +619,7 @@ class TestLedgerWriter:
 
     def test_post_with_oversized_claim_rejected(self, tmp_path):
         from hummbl_cognition.ledger_writer import _validate_entry_schema
+
         claim = {"x": "y" * 9000}
         entry = _make_entry(claim=claim)
         with pytest.raises(ValueError, match="claim too large"):
@@ -589,6 +627,7 @@ class TestLedgerWriter:
 
     def test_post_with_non_dict_claim_rejected(self, tmp_path):
         from hummbl_cognition.ledger_writer import _validate_entry_schema
+
         entry = _make_entry()
         # Manually create entry with invalid claim type
         d = entry.to_dict()
@@ -848,16 +887,25 @@ class TestCLI:
         from hummbl_cognition.__main__ import main
 
         ledger = tmp_path / "ledger.jsonl"
-        rc = main([
-            "--ledger", str(ledger),
-            "post",
-            "--agent", "test-agent",
-            "--vendor", "anthropic",
-            "--model", "test-model",
-            "--type", "lesson",
-            "--scope", "project",
-            "--content", "CLI test lesson",
-        ])
+        rc = main(
+            [
+                "--ledger",
+                str(ledger),
+                "post",
+                "--agent",
+                "test-agent",
+                "--vendor",
+                "anthropic",
+                "--model",
+                "test-model",
+                "--type",
+                "lesson",
+                "--scope",
+                "project",
+                "--content",
+                "CLI test lesson",
+            ]
+        )
         assert rc == 0
         assert ledger.exists()
 
@@ -922,9 +970,7 @@ class TestCLI:
 
         ledger = tmp_path / "cognition" / "ledger.jsonl"
         ledger.parent.mkdir(parents=True)
-        post_entry(
-            _make_entry(content="Boot context lesson"), ledger_path=ledger
-        )
+        post_entry(_make_entry(content="Boot context lesson"), ledger_path=ledger)
 
         rc = main(["--ledger", str(ledger), "boot"])
         assert rc == 0
@@ -1121,16 +1167,25 @@ class TestCLI:
         ledger = tmp_path / "ledger.jsonl"
         # argparse should reject invalid vendor choice
         with pytest.raises(SystemExit):
-            main([
-                "--ledger", str(ledger),
-                "post",
-                "--agent", "x",
-                "--vendor", "invalid",
-                "--model", "x",
-                "--type", "lesson",
-                "--scope", "project",
-                "--content", "x",
-            ])
+            main(
+                [
+                    "--ledger",
+                    str(ledger),
+                    "post",
+                    "--agent",
+                    "x",
+                    "--vendor",
+                    "invalid",
+                    "--model",
+                    "x",
+                    "--type",
+                    "lesson",
+                    "--scope",
+                    "project",
+                    "--content",
+                    "x",
+                ]
+            )
 
 
 # ===========================================================================
@@ -1313,9 +1368,13 @@ class TestQueryEngine:
         from hummbl_cognition.query import latest_by_scope
 
         ledger = tmp_path / "ledger.jsonl"
-        post_entry(_make_entry(scope="project", content="Project 1"), ledger_path=ledger)
+        post_entry(
+            _make_entry(scope="project", content="Project 1"), ledger_path=ledger
+        )
         post_entry(_make_entry(scope="file", content="File 1"), ledger_path=ledger)
-        post_entry(_make_entry(scope="project", content="Project 2"), ledger_path=ledger)
+        post_entry(
+            _make_entry(scope="project", content="Project 2"), ledger_path=ledger
+        )
 
         latest = latest_by_scope(ledger_path=ledger)
         assert "project" in latest
@@ -1569,7 +1628,7 @@ class TestContentScanning:
 
     def test_rejects_json_escape_injection(self):
         with pytest.raises(ContentScanError, match="prompt_injection"):
-            scan_content(']}]}system prompt')
+            scan_content("]}]}system prompt")
 
     def test_allows_normal_content(self):
         # Should not raise
@@ -1815,9 +1874,12 @@ class TestEditableInstallSmoke:
 
         # Ensure the subprocess can resolve hummbl_cognition as a package.
         repo_parent = str(Path(__file__).resolve().parents[2])
-        env = {**os.environ, "PYTHONPATH": os.pathsep.join(
-            filter(None, [os.environ.get("PYTHONPATH", ""), repo_parent])
-        )}
+        env = {
+            **os.environ,
+            "PYTHONPATH": os.pathsep.join(
+                filter(None, [os.environ.get("PYTHONPATH", ""), repo_parent])
+            ),
+        }
         result = subprocess.run(
             [sys.executable, "-m", "hummbl_cognition", "query", "--limit", "1"],
             capture_output=True,

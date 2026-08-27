@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tests for schema registry (issue #37)."""
 
-import json
 import sys
 from pathlib import Path
 

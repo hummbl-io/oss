@@ -25,7 +25,6 @@ from __future__ import annotations
 import threading
 
 import pytest
-
 from hummbl_governance.coordination_bus import (
     MAX_MESSAGE_BYTES,
     MAX_PAYLOAD_FIELDS,
@@ -39,7 +38,6 @@ from hummbl_governance.coordination_bus import (
     sign_message,
     verify_message,
 )
-
 
 # -----------------------------------------------------------------------
 # TestBusWriter
@@ -259,11 +257,7 @@ class TestBusWriterRead:
 
     def test_message_count_skips_malformed(self, tmp_path):
         bus_file = tmp_path / "messages.tsv"
-        bus_file.write_text(
-            "2026-03-20T00:00:00Z\ta\tb\tSTATUS\tok\n"
-            "bad line\n"
-            "2026-03-20T00:01:00Z\tc\td\tACK\tgood\n"
-        )
+        bus_file.write_text("2026-03-20T00:00:00Z\ta\tb\tSTATUS\tok\nbad line\n2026-03-20T00:01:00Z\tc\td\tACK\tgood\n")
         bus = BusWriter(bus_file)
         assert bus.message_count() == 2
 

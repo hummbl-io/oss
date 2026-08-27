@@ -6,12 +6,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.ledger_writer import post_entry
 from hummbl_cognition.models import LedgerEntry
 
 try:
     from hummbl_governance.kill_switch_core import get_kill_switch_core  # noqa: F401
+
     _HAS_KILL_SWITCH_CORE = True
 except ImportError:
     _HAS_KILL_SWITCH_CORE = False
@@ -22,8 +22,11 @@ pytestmark = pytest.mark.allow_ledger_writes
 
 def _make_entry(content: str, **kwargs) -> LedgerEntry:
     defaults = dict(
-        agent="test-agent", vendor="anthropic", model="test-model",
-        entry_type="lesson", scope="project",
+        agent="test-agent",
+        vendor="anthropic",
+        model="test-model",
+        entry_type="lesson",
+        scope="project",
     )
     defaults.update(kwargs)
     return LedgerEntry.create(content=content, **defaults)
@@ -87,8 +90,7 @@ class TestConsolidatorGrouping:
 
         # Create many entries with the same content
         entries = [
-            _make_entry(f"OAuth token refresh failed attempt {i}")
-            for i in range(20)
+            _make_entry(f"OAuth token refresh failed attempt {i}") for i in range(20)
         ]
 
         similarity = _compute_pairwise_similarity(entries)
@@ -122,7 +124,10 @@ class TestConsolidatedIdTracking:
 
 
 class TestKillSwitchHelper:
-    @pytest.mark.skipif(not _HAS_KILL_SWITCH_CORE, reason="hummbl_governance.kill_switch_core not available")
+    @pytest.mark.skipif(
+        not _HAS_KILL_SWITCH_CORE,
+        reason="hummbl_governance.kill_switch_core not available",
+    )
     def test_runtime_error_fails_closed(self):
         from hummbl_cognition.consolidator import _is_kill_switch_engaged
 
@@ -161,7 +166,9 @@ class TestRunConsolidation:
         from hummbl_cognition.consolidator import run_consolidation
         from hummbl_cognition.ledger_writer import read_entries
 
-        mock_ollama.return_value = "OAuth token refresh is a recurring issue in both morning and evening jobs."
+        mock_ollama.return_value = (
+            "OAuth token refresh is a recurring issue in both morning and evening jobs."
+        )
 
         ledger = tmp_path / "ledger.jsonl"
         entries = [
@@ -314,6 +321,7 @@ class TestConsolidatorCLI:
 # L2: Ollama HTTP integration (real HTTP server mock)
 # ---------------------------------------------------------------------------
 
+
 class TestOllamaHTTPIntegration:
     """Test _ollama_generate with real HTTP server mocks."""
 
@@ -333,6 +341,7 @@ class TestOllamaHTTPIntegration:
                 self.send_header("Content-Length", str(len(resp)))
                 self.end_headers()
                 self.wfile.write(resp)
+
             def log_message(self, *a):
                 pass
 
@@ -353,6 +362,7 @@ class TestOllamaHTTPIntegration:
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(b'{"error":"fail"}')
+
             def log_message(self, *a):
                 pass
 
@@ -365,23 +375,29 @@ class TestOllamaHTTPIntegration:
 
     def test_ollama_generate_success(self, fake_ollama):
         from hummbl_cognition.consolidator import _ollama_generate
+
         result = _ollama_generate("test prompt", base_url=fake_ollama)
         assert result == "Synthesized summary."
 
     def test_ollama_generate_server_error(self, failing_ollama):
         from hummbl_cognition.consolidator import _ollama_generate
+
         result = _ollama_generate("test prompt", base_url=failing_ollama)
         assert result is None
 
     def test_ollama_generate_unreachable(self):
         from hummbl_cognition.consolidator import _ollama_generate
+
         result = _ollama_generate(
-            "test prompt", base_url="http://127.0.0.1:1", timeout_s=1,
+            "test prompt",
+            base_url="http://127.0.0.1:1",
+            timeout_s=1,
         )
         assert result is None
 
     def test_synthesize_group(self, fake_ollama):
         from hummbl_cognition.consolidator import _synthesize_group
+
         group = [
             _make_entry("OAuth token refresh failed"),
             _make_entry("OAuth token expired error"),
@@ -391,6 +407,7 @@ class TestOllamaHTTPIntegration:
 
     def test_full_run_with_http_ollama(self, fake_ollama, tmp_path):
         from hummbl_cognition.consolidator import run_consolidation
+
         ledger = tmp_path / "ledger.jsonl"
         entries = [
             _make_entry("OAuth token refresh failed during morning briefing"),
@@ -399,7 +416,9 @@ class TestOllamaHTTPIntegration:
         _write_ledger(ledger, entries)
 
         result = run_consolidation(
-            ledger_path=ledger, base_url=fake_ollama, model="test",
+            ledger_path=ledger,
+            base_url=fake_ollama,
+            model="test",
         )
         if result["groups_found"] > 0:
             assert result["consolidated"] > 0
@@ -408,6 +427,7 @@ class TestOllamaHTTPIntegration:
     def test_full_run_fallback_on_http_error(self, failing_ollama, tmp_path):
         from hummbl_cognition.consolidator import run_consolidation
         from hummbl_cognition.ledger_writer import read_entries
+
         ledger = tmp_path / "ledger.jsonl"
         entries = [
             _make_entry("OAuth token refresh failed during morning briefing"),
@@ -416,20 +436,22 @@ class TestOllamaHTTPIntegration:
         _write_ledger(ledger, entries)
 
         result = run_consolidation(
-            ledger_path=ledger, base_url=failing_ollama, model="test",
+            ledger_path=ledger,
+            base_url=failing_ollama,
+            model="test",
         )
         if result["groups_found"] > 0:
             assert result["consolidated"] > 0
             final = read_entries(ledger_path=ledger, limit=999)
             consolidated = [e for e in final if "consolidated" in e.tags]
             assert any(
-                "Consolidated from related entries" in c.content
-                for c in consolidated
+                "Consolidated from related entries" in c.content for c in consolidated
             )
 
     def test_kill_switch_mid_run(self, fake_ollama, tmp_path):
         """Kill switch engaged between groups should stop processing."""
         from hummbl_cognition.consolidator import run_consolidation
+
         ledger = tmp_path / "ledger.jsonl"
         # Create enough similar entries for multiple groups
         entries = [
@@ -443,6 +465,7 @@ class TestOllamaHTTPIntegration:
         _write_ledger(ledger, entries)
 
         call_count = [0]
+
         def _kill_switch_mid():
             call_count[0] += 1
             return call_count[0] > 1  # Allow first check, block on second
@@ -452,7 +475,9 @@ class TestOllamaHTTPIntegration:
             side_effect=_kill_switch_mid,
         ):
             result = run_consolidation(
-                ledger_path=ledger, base_url=fake_ollama, model="test",
+                ledger_path=ledger,
+                base_url=fake_ollama,
+                model="test",
             )
 
         if result["groups_found"] > 1:

@@ -103,7 +103,7 @@ This matrix is internal starter material. It must not be used as public evidence
 ## Cross-references
 
 - ADR: [`docs/adr/ADR-001-coverage-matrix-not-self-grade.md`](../adr/ADR-001-coverage-matrix-not-self-grade.md)
-- Ethical guidelines overlap UNESCO Recommendation on the Ethics of AI — see [`unesco-ethics-ai.md`](./unesco-ethics-ai.md) (if present)
+- Ethical guidelines overlap UNESCO Recommendation on the Ethics of AI — see [`unesco-ethics-ai.md`](https://github.com/hummbl-io/oss) (if present)
 - Data protection overlaps Rwanda Law No. 058/2021 and GDPR — see [`gdpr.md`](./gdpr.md)
 - Human oversight overlaps EU AI Act Art. 14 and South Korea AI Basic Act Art. 34 — see [`eu-ai-act.md`](./eu-ai-act.md), [`south-korea-ai-basic-act.md`](./south-korea-ai-basic-act.md)
 - Risk management and audit overlap NIST AI RMF and ISO 42001 — see [`nist-ai-rmf.md`](./nist-ai-rmf.md), [`iso-42001.md`](./iso-42001.md)

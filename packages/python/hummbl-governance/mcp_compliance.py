@@ -54,8 +54,8 @@ from pathlib import Path
 from hummbl_governance import ComplianceMapper
 from hummbl_governance import __version__ as _pkg_version
 from hummbl_governance.stride_mapper import (
-    StrideMapper,
     Interaction,
+    StrideMapper,
 )
 
 # ---------------------------------------------------------------------------
@@ -73,69 +73,99 @@ PROTOCOL_VERSION = "2024-11-05"
 
 # NIST CSF 2.0 categories with descriptions
 NIST_CSF_CONTROLS = {
-    "GV": {"name": "Govern", "subcategories": {
-        "GV.OC": "Organizational Context",
-        "GV.RM": "Risk Management Strategy",
-        "GV.RR": "Roles, Responsibilities, and Authorities",
-        "GV.PO": "Policy",
-        "GV.SC": "Supply Chain Risk Management",
-    }},
-    "ID": {"name": "Identify", "subcategories": {
-        "ID.AM": "Asset Management",
-        "ID.RA": "Risk Assessment",
-        "ID.IM": "Improvement",
-    }},
-    "PR": {"name": "Protect", "subcategories": {
-        "PR.AA": "Identity Management, Authentication, and Access Control",
-        "PR.AT": "Awareness and Training",
-        "PR.DS": "Data Security",
-        "PR.PS": "Platform Security",
-        "PR.IR": "Technology Infrastructure Resilience",
-    }},
-    "DE": {"name": "Detect", "subcategories": {
-        "DE.CM": "Continuous Monitoring",
-        "DE.AE": "Adverse Event Analysis",
-    }},
-    "RS": {"name": "Respond", "subcategories": {
-        "RS.MA": "Incident Management",
-        "RS.AN": "Incident Analysis",
-        "RS.CO": "Incident Response Reporting and Communication",
-        "RS.MI": "Incident Mitigation",
-    }},
-    "RC": {"name": "Recover", "subcategories": {
-        "RC.RP": "Incident Recovery Plan Execution",
-        "RC.CO": "Incident Recovery Communication",
-    }},
+    "GV": {
+        "name": "Govern",
+        "subcategories": {
+            "GV.OC": "Organizational Context",
+            "GV.RM": "Risk Management Strategy",
+            "GV.RR": "Roles, Responsibilities, and Authorities",
+            "GV.PO": "Policy",
+            "GV.SC": "Supply Chain Risk Management",
+        },
+    },
+    "ID": {
+        "name": "Identify",
+        "subcategories": {
+            "ID.AM": "Asset Management",
+            "ID.RA": "Risk Assessment",
+            "ID.IM": "Improvement",
+        },
+    },
+    "PR": {
+        "name": "Protect",
+        "subcategories": {
+            "PR.AA": "Identity Management, Authentication, and Access Control",
+            "PR.AT": "Awareness and Training",
+            "PR.DS": "Data Security",
+            "PR.PS": "Platform Security",
+            "PR.IR": "Technology Infrastructure Resilience",
+        },
+    },
+    "DE": {
+        "name": "Detect",
+        "subcategories": {
+            "DE.CM": "Continuous Monitoring",
+            "DE.AE": "Adverse Event Analysis",
+        },
+    },
+    "RS": {
+        "name": "Respond",
+        "subcategories": {
+            "RS.MA": "Incident Management",
+            "RS.AN": "Incident Analysis",
+            "RS.CO": "Incident Response Reporting and Communication",
+            "RS.MI": "Incident Mitigation",
+        },
+    },
+    "RC": {
+        "name": "Recover",
+        "subcategories": {
+            "RC.RP": "Incident Recovery Plan Execution",
+            "RC.CO": "Incident Recovery Communication",
+        },
+    },
 }
 
 # NIST AI RMF categories
 NIST_AI_RMF_CONTROLS = {
-    "GOVERN": {"name": "Govern", "subcategories": {
-        "GOVERN-1": "Policies for AI risk management",
-        "GOVERN-2": "Accountability structures",
-        "GOVERN-3": "Workforce diversity and culture",
-        "GOVERN-4": "Organizational practices and culture",
-        "GOVERN-5": "Processes for ongoing monitoring",
-        "GOVERN-6": "Stakeholder engagement",
-    }},
-    "MAP": {"name": "Map", "subcategories": {
-        "MAP-1": "Context and usage scope",
-        "MAP-2": "Categorization of AI system",
-        "MAP-3": "Benefits and costs",
-        "MAP-5": "Impacts to individuals and communities",
-    }},
-    "MEASURE": {"name": "Measure", "subcategories": {
-        "MEASURE-1": "Appropriate methods and metrics",
-        "MEASURE-2": "AI systems evaluated for trustworthiness",
-        "MEASURE-3": "Mechanisms for tracking metrics",
-        "MEASURE-4": "Feedback mechanisms",
-    }},
-    "MANAGE": {"name": "Manage", "subcategories": {
-        "MANAGE-1": "AI risks are prioritized and acted upon",
-        "MANAGE-2": "Strategies to maximize AI benefits",
-        "MANAGE-3": "AI risks and benefits from third-party entities managed",
-        "MANAGE-4": "Risk treatments documented and monitored",
-    }},
+    "GOVERN": {
+        "name": "Govern",
+        "subcategories": {
+            "GOVERN-1": "Policies for AI risk management",
+            "GOVERN-2": "Accountability structures",
+            "GOVERN-3": "Workforce diversity and culture",
+            "GOVERN-4": "Organizational practices and culture",
+            "GOVERN-5": "Processes for ongoing monitoring",
+            "GOVERN-6": "Stakeholder engagement",
+        },
+    },
+    "MAP": {
+        "name": "Map",
+        "subcategories": {
+            "MAP-1": "Context and usage scope",
+            "MAP-2": "Categorization of AI system",
+            "MAP-3": "Benefits and costs",
+            "MAP-5": "Impacts to individuals and communities",
+        },
+    },
+    "MEASURE": {
+        "name": "Measure",
+        "subcategories": {
+            "MEASURE-1": "Appropriate methods and metrics",
+            "MEASURE-2": "AI systems evaluated for trustworthiness",
+            "MEASURE-3": "Mechanisms for tracking metrics",
+            "MEASURE-4": "Feedback mechanisms",
+        },
+    },
+    "MANAGE": {
+        "name": "Manage",
+        "subcategories": {
+            "MANAGE-1": "AI risks are prioritized and acted upon",
+            "MANAGE-2": "Strategies to maximize AI benefits",
+            "MANAGE-3": "AI risks and benefits from third-party entities managed",
+            "MANAGE-4": "Risk treatments documented and monitored",
+        },
+    },
 }
 
 # SOC 2 Trust Service Criteria
@@ -176,7 +206,8 @@ ISO_CROSSWALK = {
     "ISO27001:A.12": {"nist_csf": "PR.PS", "soc2": "CC7", "description": "Operations security"},
     "ISO27001:A.13": {"nist_csf": "PR.DS", "soc2": "CC6", "description": "Communications security"},
     "ISO27001:A.14": {
-        "nist_csf": "PR.PS", "soc2": "CC8",
+        "nist_csf": "PR.PS",
+        "soc2": "CC8",
         "description": "System acquisition, development, maintenance",
     },
     "ISO27001:A.16": {"nist_csf": "RS.MA", "soc2": "CC7", "description": "Information security incident management"},
@@ -414,16 +445,18 @@ def _iso_crosswalk(governance_dir: str) -> dict:
         if has_evidence:
             iso_covered += 1
 
-        crosswalk_table.append({
-            "iso_control": iso_ctrl,
-            "description": mapping["description"],
-            "nist_csf": nist_csf_id,
-            "nist_ai_rmf": nist_ai_rmf_id,
-            "soc2": soc2_id,
-            "csf_evidence_count": csf_count,
-            "ai_rmf_evidence_count": rmf_count,
-            "has_evidence": has_evidence,
-        })
+        crosswalk_table.append(
+            {
+                "iso_control": iso_ctrl,
+                "description": mapping["description"],
+                "nist_csf": nist_csf_id,
+                "nist_ai_rmf": nist_ai_rmf_id,
+                "soc2": soc2_id,
+                "csf_evidence_count": csf_count,
+                "ai_rmf_evidence_count": rmf_count,
+                "has_evidence": has_evidence,
+            }
+        )
 
     return {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -449,17 +482,19 @@ def _stride_analysis(interactions_raw: list[dict]) -> dict:
     for raw in interactions_raw:
         # Map the input schema to Interaction fields
         auth_level = raw.get("auth_level", "none")
-        interactions.append(Interaction(
-            source=raw.get("source", "unknown"),
-            target=raw.get("target", "unknown"),
-            action=raw.get("data_type", "read"),
-            trust_boundary=raw.get("boundary", False),
-            authenticated=auth_level in ("authenticated", "mTLS", "token", "hmac"),
-            encrypted=auth_level in ("mTLS", "encrypted"),
-            has_delegation_token=auth_level in ("token", "hmac"),
-            has_audit_trail=raw.get("audited", False),
-            has_rate_limit=raw.get("rate_limited", False),
-        ))
+        interactions.append(
+            Interaction(
+                source=raw.get("source", "unknown"),
+                target=raw.get("target", "unknown"),
+                action=raw.get("data_type", "read"),
+                trust_boundary=raw.get("boundary", False),
+                authenticated=auth_level in ("authenticated", "mTLS", "token", "hmac"),
+                encrypted=auth_level in ("mTLS", "encrypted"),
+                has_delegation_token=auth_level in ("token", "hmac"),
+                has_audit_trail=raw.get("audited", False),
+                has_rate_limit=raw.get("rate_limited", False),
+            )
+        )
 
     report = mapper.generate_report(interactions)
     result = report.to_dict()
@@ -719,14 +754,17 @@ def main():
 
         try:
             if method == "initialize":
-                send_response(msg_id, {
-                    "protocolVersion": PROTOCOL_VERSION,
-                    "capabilities": {"tools": {}},
-                    "serverInfo": {
-                        "name": SERVER_NAME,
-                        "version": SERVER_VERSION,
+                send_response(
+                    msg_id,
+                    {
+                        "protocolVersion": PROTOCOL_VERSION,
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {
+                            "name": SERVER_NAME,
+                            "version": SERVER_VERSION,
+                        },
                     },
-                })
+                )
 
             elif method == "notifications/initialized":
                 pass
@@ -738,11 +776,12 @@ def main():
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
                 result = handle_tool(tool_name, arguments)
-                send_response(msg_id, {
-                    "content": [
-                        {"type": "text", "text": json.dumps(result, indent=2, default=str)}
-                    ],
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
+                    },
+                )
 
             elif method == "ping":
                 send_response(msg_id, {})

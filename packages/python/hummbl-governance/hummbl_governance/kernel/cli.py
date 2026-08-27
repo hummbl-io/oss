@@ -84,10 +84,11 @@ def cmd_health(args: argparse.Namespace) -> int:
         identities = kernel.identity.list_identities()
 
         # Add engine-specific details
-        health["receipts_total"] = sum(
-            1 for f in kernel.receipt.receipts_dir.glob("*.jsonl")
-            for _ in f.read_text().strip().split("\n") if _
-        ) if kernel.receipt.receipts_dir.exists() else 0
+        health["receipts_total"] = (
+            sum(1 for f in kernel.receipt.receipts_dir.glob("*.jsonl") for _ in f.read_text().strip().split("\n") if _)
+            if kernel.receipt.receipts_dir.exists()
+            else 0
+        )
 
         health["laws"] = [law.law_id for law in kernel.law.list_laws()]
         health["identities"] = list(identities.keys())

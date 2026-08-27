@@ -46,9 +46,7 @@ def validate_recovery_verifier(verification: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(verification, schema)
     if errors:
-        raise ValidationError(
-            f"Recovery verifier schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Recovery verifier schema validation failed: {'; '.join(errors)}")
 
 
 def validate_root_cause(verification: dict[str, Any]) -> None:
@@ -66,23 +64,15 @@ def validate_root_cause(verification: dict[str, Any]) -> None:
     """
     root_cause = verification.get("root_cause_analysis", {})
     if not isinstance(root_cause, dict):
-        raise ValueError(
-            "Recovery rejected: root_cause_analysis gate missing or invalid"
-        )
+        raise ValueError("Recovery rejected: root_cause_analysis gate missing or invalid")
 
     if not root_cause.get("identified", False):
-        raise ValueError(
-            "Recovery rejected: K10 (RECOVERY) violation — "
-            "root_cause_analysis.identified must be True"
-        )
+        raise ValueError("Recovery rejected: K10 (RECOVERY) violation — root_cause_analysis.identified must be True")
 
     if root_cause.get("fix_applied", False):
         fix_description = root_cause.get("fix_description", "")
         if not fix_description or not isinstance(fix_description, str):
-            raise ValueError(
-                "Recovery rejected: fix_applied is True but fix_description "
-                "is empty or missing"
-            )
+            raise ValueError("Recovery rejected: fix_applied is True but fix_description is empty or missing")
 
 
 def validate_recovery_operator_approval(verification: dict[str, Any]) -> None:
@@ -100,21 +90,14 @@ def validate_recovery_operator_approval(verification: dict[str, Any]) -> None:
     """
     operator_approval = verification.get("operator_approval", {})
     if not isinstance(operator_approval, dict):
-        raise ValueError(
-            "Recovery rejected: operator_approval gate missing or invalid"
-        )
+        raise ValueError("Recovery rejected: operator_approval gate missing or invalid")
 
     if not operator_approval.get("approved", False):
-        raise ValueError(
-            "Recovery rejected: K10 (RECOVERY) violation — "
-            "operator_approval.approved must be True"
-        )
+        raise ValueError("Recovery rejected: K10 (RECOVERY) violation — operator_approval.approved must be True")
 
     approver_id = operator_approval.get("approver_id", "")
     if not isinstance(approver_id, str) or not approver_id.strip():
-        raise ValueError(
-            "Recovery rejected: approver_id must be a non-empty string"
-        )
+        raise ValueError("Recovery rejected: approver_id must be a non-empty string")
 
 
 def validate_recovery(verification: dict[str, Any]) -> None:

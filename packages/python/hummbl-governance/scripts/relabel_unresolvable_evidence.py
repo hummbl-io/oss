@@ -40,9 +40,7 @@ DRAFT_PREFIX = "[DRAFT — planned per ADR-001] "
 GENERATED_MATRIX_REPORTS = {"README.md", "EVIDENCE_VALIDATION.md"}
 
 # Match a backtick-wrapped compliance_mapper invocation
-INVOCATION_RE = re.compile(
-    r"`(compliance_mapper\s+[^`]+)`"
-)
+INVOCATION_RE = re.compile(r"`(compliance_mapper\s+[^`]+)`")
 
 
 def is_unresolvable(invocation: str) -> bool:
@@ -70,7 +68,7 @@ def relabel_file(path: Path, dry_run: bool = False) -> tuple[int, int]:
             return full  # no change
         # Check if already drafted (look 60 chars before the match)
         start = m.start()
-        prefix_window = text[max(0, start - 60):start]
+        prefix_window = text[max(0, start - 60) : start]
         if already_drafted(prefix_window):
             skipped += 1
             return full
@@ -89,9 +87,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args(argv)
 
-    files = sorted(
-        f for f in args.matrix_dir.glob("*.md") if f.name not in GENERATED_MATRIX_REPORTS
-    )
+    files = sorted(f for f in args.matrix_dir.glob("*.md") if f.name not in GENERATED_MATRIX_REPORTS)
     total_relabeled = 0
     total_skipped = 0
     for f in files:

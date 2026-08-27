@@ -32,24 +32,19 @@ class TestInvalidReceipts(unittest.TestCase):
         """Claim says 'verified' but no connector/test_runner/shell in tools."""
         errors = validate_receipt(load_fixture("invalid-unverified-claim.json"))
         self.assertTrue(
-            any("verified" in e and "tools" in e for e in errors),
-            f"Expected capability bounding error: {errors}"
+            any("verified" in e and "tools" in e for e in errors), f"Expected capability bounding error: {errors}"
         )
 
     def test_invalid_mutation_lie(self):
         """Action claims PR creation but mutations_made is empty."""
         errors = validate_receipt(load_fixture("invalid-mutation-lie.json"))
-        self.assertTrue(
-            any("mutations_made" in e for e in errors),
-            f"Expected mutation truthfulness error: {errors}"
-        )
+        self.assertTrue(any("mutations_made" in e for e in errors), f"Expected mutation truthfulness error: {errors}")
 
     def test_invalid_capability_overclaim(self):
         """Only read_only tool but claims verified via connector."""
         errors = validate_receipt(load_fixture("invalid-capability-overclaim.json"))
         self.assertTrue(
-            any("verified" in e and "tools" in e for e in errors),
-            f"Expected capability bounding error: {errors}"
+            any("verified" in e and "tools" in e for e in errors), f"Expected capability bounding error: {errors}"
         )
 
 
@@ -72,7 +67,7 @@ class TestSemanticRules(unittest.TestCase):
             "next_actions": [],
             "authority_boundaries": {"allowed": [], "disallowed": [], "escalation": None},
             "receipt_destination": "github_issue",
-            "completion_status": "COMPLETED"
+            "completion_status": "COMPLETED",
         }
 
     def test_verified_claim_without_tools_fails(self):
@@ -91,27 +86,15 @@ class TestSemanticRules(unittest.TestCase):
 
     def test_mutation_truthfulness_action_without_mutation(self):
         r = self._base_receipt()
-        r["actions_attempted"] = [{
-            "action": "Created PR #999",
-            "result": "succeeded",
-            "evidence_ref": None
-        }]
+        r["actions_attempted"] = [{"action": "Created PR #999", "result": "succeeded", "evidence_ref": None}]
         r["mutations_made"] = []
         errors = validate_receipt(r)
         self.assertTrue(any("mutations_made" in e for e in errors))
 
     def test_mutation_truthfulness_with_mutation_ok(self):
         r = self._base_receipt()
-        r["actions_attempted"] = [{
-            "action": "Created PR #999",
-            "result": "succeeded",
-            "evidence_ref": None
-        }]
-        r["mutations_made"] = [{
-            "artifact_type": "pr",
-            "identifier": "999",
-            "created": True
-        }]
+        r["actions_attempted"] = [{"action": "Created PR #999", "result": "succeeded", "evidence_ref": None}]
+        r["mutations_made"] = [{"artifact_type": "pr", "identifier": "999", "created": True}]
         errors = validate_receipt(r)
         self.assertEqual(errors, [], f"Expected no errors: {errors}")
 

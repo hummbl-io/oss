@@ -15,6 +15,7 @@ pip install -e ".[test]"  # local development
 
 ```python
 import hummbl_governance
+
 print(hummbl_governance.__version__)  # "1.2.2"
 ```
 
@@ -170,7 +171,7 @@ class BudgetStatus:
     hard_cap: float | None
     currency: str
     threshold_percent: float
-    decision: str          # "ALLOW", "WARN", or "DENY"
+    decision: str  # "ALLOW", "WARN", or "DENY"
     rationale: str
 ```
 
@@ -180,8 +181,11 @@ class BudgetStatus:
 gov = CostGovernor(db_path="/tmp/costs.db", soft_cap=10.0, hard_cap=25.0)
 
 gov.record_usage(
-    provider="anthropic", model="claude-sonnet-4-6",
-    tokens_in=1000, tokens_out=500, cost=0.015,
+    provider="anthropic",
+    model="claude-sonnet-4-6",
+    tokens_in=1000,
+    tokens_out=500,
+    cost=0.015,
 )
 
 status = gov.check_budget_status()

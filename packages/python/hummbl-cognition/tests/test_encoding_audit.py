@@ -7,16 +7,16 @@ is not UTF-8 (e.g. Windows with cp1252).
 
 from __future__ import annotations
 
-import json
-import os
 from pathlib import Path
 
-import pytest
-
 from hummbl_cognition.ledger_writer import post_entry, read_entries
-from hummbl_cognition.models import LedgerEntry, LedgerEntryType, LedgerScope
+from hummbl_cognition.models import (
+    LedgerEntry,
+    LedgerEntryType,
+    LedgerScope,
+    SharedState,
+)
 from hummbl_cognition.state_manager import read_state, write_state
-from hummbl_cognition.models import SharedState
 
 
 def _make_entry(**overrides) -> LedgerEntry:

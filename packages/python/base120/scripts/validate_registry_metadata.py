@@ -48,22 +48,26 @@ def load_fm_registry(content: str) -> dict[str, object]:
     return data
 
 
-def _validate_existing_fm(fm_id: str, before_fm: dict[str, object], after_fm: dict[str, object], errors: list[str]) -> None:
+def _validate_existing_fm(
+    fm_id: str, before_fm: dict[str, object], after_fm: dict[str, object], errors: list[str]
+) -> None:
     """Validate a single FM that exists in both before and after registries."""
-    if before_fm.get('name') != after_fm.get('name'):
+    if before_fm.get("name") != after_fm.get("name"):
         errors.append(f"{fm_id}: Name changed (prohibited in v1.0.x)")
 
-    if 'lifecycle_state' in after_fm and after_fm['lifecycle_state'] != 'stable':
+    if "lifecycle_state" in after_fm and after_fm["lifecycle_state"] != "stable":
         errors.append(
             f"{fm_id}: lifecycle_state is '{after_fm['lifecycle_state']}' (must be 'stable' in v1.0.x)"
         )
 
-    for core_field in ['id', 'name']:
+    for core_field in ["id", "name"]:
         if core_field in before_fm and core_field not in after_fm:
             errors.append(f"{fm_id}: Core field '{core_field}' removed (prohibited)")
 
 
-def validate_metadata_only_change(before_content: str, after_content: str) -> tuple[bool, list[str]]:  # type: ignore[type-arg]
+def validate_metadata_only_change(
+    before_content: str, after_content: str
+) -> tuple[bool, list[str]]:  # type: ignore[type-arg]
     """Validate that changes are metadata-only additions.
 
     Returns: (is_valid, error_messages)
@@ -73,11 +77,13 @@ def validate_metadata_only_change(before_content: str, after_content: str) -> tu
     before = load_fm_registry(before_content)
     after = load_fm_registry(after_content)
 
-    before_fms = {fm['id']: fm for fm in before['registry']}
-    after_fms = {fm['id']: fm for fm in after['registry']}
+    before_fms = {fm["id"]: fm for fm in before["registry"]}
+    after_fms = {fm["id"]: fm for fm in after["registry"]}
 
     if len(before_fms) != len(after_fms):
-        errors.append(f"FM count changed: {len(before_fms)} -> {len(after_fms)} (prohibited in v1.0.x)")
+        errors.append(
+            f"FM count changed: {len(before_fms)} -> {len(after_fms)} (prohibited in v1.0.x)"
+        )
 
     removed_fms = set(before_fms.keys()) - set(after_fms.keys())
     if removed_fms:
@@ -85,13 +91,15 @@ def validate_metadata_only_change(before_content: str, after_content: str) -> tu
 
     added_fms = set(after_fms.keys()) - set(before_fms.keys())
     if added_fms:
-        errors.append(f"FMs added: {', '.join(sorted(added_fms))} (prohibited in v1.0.x - escalate to v1.1.0+)")
+        errors.append(
+            f"FMs added: {', '.join(sorted(added_fms))} (prohibited in v1.0.x - escalate to v1.1.0+)"
+        )
 
     for fm_id, before_fm in before_fms.items():
         if fm_id in after_fms:
             _validate_existing_fm(fm_id, before_fm, after_fms[fm_id], errors)
 
-    if before.get('version') != after.get('version'):
+    if before.get("version") != after.get("version"):
         errors.append(
             f"Registry version changed: {before.get('version')} -> {after.get('version')} (must remain v1.0.0)"
         )
@@ -99,7 +107,7 @@ def validate_metadata_only_change(before_content: str, after_content: str) -> tu
     return len(errors) == 0, errors
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <before_file> <after_file>", file=sys.stderr)
         sys.exit(1)
@@ -108,8 +116,7 @@ if __name__ == '__main__':
     after_file = Path(sys.argv[2])
 
     is_valid, errors = validate_metadata_only_change(
-        before_file.read_text(encoding="utf-8"),
-        after_file.read_text(encoding="utf-8")
+        before_file.read_text(encoding="utf-8"), after_file.read_text(encoding="utf-8")
     )
 
     if is_valid:

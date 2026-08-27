@@ -486,11 +486,13 @@ def _acquire_file_lock(f, exclusive: bool = True) -> None:
     """Acquire a file lock (cross-platform: portalocker on Windows, fcntl on Unix)."""
     try:
         import portalocker
+
         flags = portalocker.LOCK_EX if exclusive else portalocker.LOCK_SH
         portalocker.lock(f, flags)
     except ImportError:
         # Fallback to fcntl on Unix
         import fcntl
+
         flags = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         fcntl.flock(f, flags)
 
@@ -499,9 +501,11 @@ def _release_file_lock(f) -> None:
     """Release a file lock (cross-platform)."""
     try:
         import portalocker
+
         portalocker.unlock(f)
     except ImportError:
         import fcntl
+
         fcntl.flock(f, fcntl.LOCK_UN)
 
 
@@ -520,10 +524,14 @@ def append_tuple(
         try:
             import subprocess
 
-            root = subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"],
-                stderr=subprocess.DEVNULL,
-            ).decode().strip()
+            root = (
+                subprocess.check_output(
+                    ["git", "rev-parse", "--show-toplevel"],
+                    stderr=subprocess.DEVNULL,
+                )
+                .decode()
+                .strip()
+            )
             log_path = Path(root) / _DEFAULT_TUPLE_LOG
         except Exception:
             log_path = Path(_DEFAULT_TUPLE_LOG)

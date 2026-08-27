@@ -238,7 +238,11 @@ class AuditLog:
             Tuple of (success, error_code).
         """
         error = self._validate_append(
-            tuple_type, signature, require_signature, verification_id, amendment_of,
+            tuple_type,
+            signature,
+            require_signature,
+            verification_id,
+            amendment_of,
         )
         if error:
             return False, error
@@ -319,13 +323,9 @@ class AuditLog:
         self, intent_id: str, tuple_type: TupleType | None = None, since: str | None = None
     ) -> Iterator[AuditEntry]:
         """Query entries by intent_id."""
-        yield from self._query(
-            lambda e: e.intent_id == intent_id, tuple_type=tuple_type, since=since
-        )
+        yield from self._query(lambda e: e.intent_id == intent_id, tuple_type=tuple_type, since=since)
 
-    def query_by_task(
-        self, task_id: str, tuple_type: TupleType | None = None
-    ) -> Iterator[AuditEntry]:
+    def query_by_task(self, task_id: str, tuple_type: TupleType | None = None) -> Iterator[AuditEntry]:
         """Query entries by task_id."""
         yield from self._query(lambda e: e.task_id == task_id, tuple_type=tuple_type)
 
@@ -335,13 +335,9 @@ class AuditLog:
             return entry
         return None
 
-    def query_by_contract(
-        self, contract_id: str, tuple_type: TupleType | None = None
-    ) -> Iterator[AuditEntry]:
+    def query_by_contract(self, contract_id: str, tuple_type: TupleType | None = None) -> Iterator[AuditEntry]:
         """Query entries by contract_id cross-link."""
-        yield from self._query(
-            lambda e: e.contract_id == contract_id, tuple_type=tuple_type
-        )
+        yield from self._query(lambda e: e.contract_id == contract_id, tuple_type=tuple_type)
 
     def query_amendments(self, entry_id: str) -> Iterator[AuditEntry]:
         """Query all amendments to a given entry."""
@@ -366,9 +362,7 @@ class AuditLog:
         since: str | None = None,
     ) -> Iterator[AuditEntry]:
         """Internal query implementation."""
-        files = sorted(
-            self._base_dir.glob(f"{self._file_prefix}-*.jsonl*"), reverse=True
-        )
+        files = sorted(self._base_dir.glob(f"{self._file_prefix}-*.jsonl*"), reverse=True)
 
         for filepath in files:
             opener = (
@@ -397,7 +391,9 @@ class AuditLog:
             try:
                 date_str = filepath.stem.split("-")[1:4]
                 file_date = datetime(
-                    int(date_str[0]), int(date_str[1]), int(date_str[2]),
+                    int(date_str[0]),
+                    int(date_str[1]),
+                    int(date_str[2]),
                     tzinfo=timezone.utc,
                 )
                 if file_date < cutoff:
@@ -503,9 +499,7 @@ class AuditLog:
         """
         if self._hmac_key is None:
             raise RuntimeError("HMAC key not configured")
-        return hmac.new(
-            self._hmac_key, self.canonical_bytes(entry), sha256
-        ).hexdigest()
+        return hmac.new(self._hmac_key, self.canonical_bytes(entry), sha256).hexdigest()
 
     def verify_entry(self, entry: AuditEntry) -> bool:
         """Verify an entry's HMAC signature against the configured key.

@@ -189,12 +189,14 @@ class TestVerifiedWriterRoundtrip:
 
         # Write multiple entries of different types
         entries_written = []
-        for i, (etype, scope) in enumerate([
-            ("lesson", "project"),
-            ("decision", "module"),
-            ("discovery", "file"),
-            ("convention", "convention"),
-        ]):
+        for i, (etype, scope) in enumerate(
+            [
+                ("lesson", "project"),
+                ("decision", "module"),
+                ("discovery", "file"),
+                ("convention", "convention"),
+            ]
+        ):
             e = post_verified_entry(
                 agent=f"agent-{i}",
                 vendor="anthropic",
@@ -209,9 +211,7 @@ class TestVerifiedWriterRoundtrip:
             entries_written.append(e)
 
         # Query by type
-        decisions = query_entries(
-            ledger_path=ledger, entry_type="decision"
-        )
+        decisions = query_entries(ledger_path=ledger, entry_type="decision")
         assert len(decisions) == 1
         assert decisions[0].type == "decision"
 
@@ -373,11 +373,14 @@ class TestStartupContextIntegration:
         _write_intent_file(cog_dir, "Focus on IDP Phase 1.")
 
         # Create bus with messages targeted at our agent
-        bus = _write_bus_file(tmp_path, [
-            "2026-03-12T10:00:00Z\tcodex\tclaude-code\tTASK_REQUEST\tPlease review PR #186",
-            "2026-03-12T10:05:00Z\tgemini\tall\tSTATUS\tResearch complete",
-            "2026-03-12T10:10:00Z\tkimi-1\tkimi-2\tSTATUS\tNot for claude",
-        ])
+        bus = _write_bus_file(
+            tmp_path,
+            [
+                "2026-03-12T10:00:00Z\tcodex\tclaude-code\tTASK_REQUEST\tPlease review PR #186",
+                "2026-03-12T10:05:00Z\tgemini\tall\tSTATUS\tResearch complete",
+                "2026-03-12T10:10:00Z\tkimi-1\tkimi-2\tSTATUS\tNot for claude",
+            ],
+        )
 
         context = build_startup_context(
             "claude-code",
@@ -396,9 +399,12 @@ class TestStartupContextIntegration:
 
     def test_startup_context_with_aliases(self, tmp_path: Path) -> None:
         """Agent aliases match bus messages."""
-        bus = _write_bus_file(tmp_path, [
-            "2026-03-12T10:00:00Z\tcodex\topus\tSTATUS\tMessage for opus alias",
-        ])
+        bus = _write_bus_file(
+            tmp_path,
+            [
+                "2026-03-12T10:00:00Z\tcodex\topus\tSTATUS\tMessage for opus alias",
+            ],
+        )
         cog_dir = _setup_cognition_dir(tmp_path)
 
         context = build_startup_context(
@@ -428,6 +434,7 @@ class TestStartupContextIntegration:
 
         # File should have restrictive permissions (on POSIX systems)
         import sys
+
         if sys.platform != "win32":
             mode = output.stat().st_mode & 0o777
             assert mode == 0o600
@@ -464,11 +471,14 @@ class TestMigrationRoundtrip:
 
         # Use dynamic timestamps so entries stay within the 14-day boot context window
         today = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        bus = _write_bus_file(tmp_path, [
-            f"{today}\tclaude-code\tall\tDECISION\tUse stdlib-only for all runtime code",
-            f"{today}\tcodex\tall\tMILESTONE\tAll 5000 tests passing",
-            f"{today}\tkimi-1\tall\tSTATUS\tJust a status update",
-        ])
+        bus = _write_bus_file(
+            tmp_path,
+            [
+                f"{today}\tclaude-code\tall\tDECISION\tUse stdlib-only for all runtime code",
+                f"{today}\tcodex\tall\tMILESTONE\tAll 5000 tests passing",
+                f"{today}\tkimi-1\tall\tSTATUS\tJust a status update",
+            ],
+        )
 
         entries = import_from_bus_history(
             bus_path=bus,
@@ -491,9 +501,12 @@ class TestMigrationRoundtrip:
         cog_dir = _setup_cognition_dir(tmp_path)
         ledger = cog_dir / "ledger.jsonl"
 
-        bus = _write_bus_file(tmp_path, [
-            "2026-03-12T09:00:00Z\tclaude-code\tall\tDECISION\tDecision A",
-        ])
+        bus = _write_bus_file(
+            tmp_path,
+            [
+                "2026-03-12T09:00:00Z\tclaude-code\tall\tDECISION\tDecision A",
+            ],
+        )
 
         first = import_from_bus_history(bus_path=bus, ledger_path=ledger)
         second = import_from_bus_history(bus_path=bus, ledger_path=ledger)
@@ -624,10 +637,7 @@ class TestConcurrentWrites:
                     with lock:
                         errors.append(f"thread-{thread_id}: {exc}")
 
-        threads = [
-            threading.Thread(target=writer, args=(t,))
-            for t in range(n_threads)
-        ]
+        threads = [threading.Thread(target=writer, args=(t,)) for t in range(n_threads)]
         for t in threads:
             t.start()
         for t in threads:
@@ -645,12 +655,11 @@ class TestConcurrentWrites:
         """Multiple agents updating status produces consistent state."""
         state_path = tmp_path / "state.json"
 
-        update_agent_status("claude-code", "active", vendor="anthropic",
-                            state_path=state_path)
-        update_agent_status("codex", "active", vendor="openai",
-                            state_path=state_path)
-        update_agent_status("claude-code", "idle",
-                            state_path=state_path)
+        update_agent_status(
+            "claude-code", "active", vendor="anthropic", state_path=state_path
+        )
+        update_agent_status("codex", "active", vendor="openai", state_path=state_path)
+        update_agent_status("claude-code", "idle", state_path=state_path)
 
         state = read_state(state_path=state_path)
         assert state.active_agents["claude-code"]["status"] == "idle"
@@ -855,10 +864,13 @@ class TestFullStackPipeline:
         )
 
         # Create bus with targeted messages
-        bus = _write_bus_file(tmp_path, [
-            "2026-03-13T08:00:00Z\tcodex\tclaude-code\tTASK_REQUEST\tVerify IDP token expiry",
-            "2026-03-13T08:30:00Z\tgemini\tall\tSITREP\tIDP research complete",
-        ])
+        bus = _write_bus_file(
+            tmp_path,
+            [
+                "2026-03-13T08:00:00Z\tcodex\tclaude-code\tTASK_REQUEST\tVerify IDP token expiry",
+                "2026-03-13T08:30:00Z\tgemini\tall\tSITREP\tIDP research complete",
+            ],
+        )
 
         # Build startup context
         output = tmp_path / "startup_out.md"

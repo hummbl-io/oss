@@ -2,7 +2,7 @@
 
 **Audit Date:** 2026-08-23  
 **Auditor:** Gemini (Antigravity paired agent)  
-**Target Repository:** [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance) (v1.4.1 / `docs/pi/ladder-lattice-loop`)  
+**Target Repository:** [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance) (v1.4.1 / `docs/pi/ladder-lattice-loop`)  
 **Scope:** Complete 11-item AI governance, regulatory conformity, and risk audit.
 
 ---
@@ -27,7 +27,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 1. Audit NIST AI RMF Mappings
 - **Status:** **EXCELLENT / PASS**
-- **Artifacts:** [`hummbl_governance/compliance_frameworks.py`](file:///<repo-root>/PROJECTS/hummbl-governance/hummbl_governance/compliance_frameworks.py#L38-L47) (`nist-rmf`, `nist-ai-600`, `nist-csf`), [`docs/coverage/nist-ai-rmf.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/coverage/nist-ai-rmf.md), [`docs/research/2026-08-19_domain120_nist_ai_rmf_crosswalk.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/research/2026-08-19_domain120_nist_ai_rmf_crosswalk.md).
+- **Artifacts:** [`hummbl_governance/compliance_frameworks.py`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancehummbl_governance/compliance_frameworks.py#L38-L47) (`nist-rmf`, `nist-ai-600`, `nist-csf`), [`docs/coverage/nist-ai-rmf.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/coverage/nist-ai-rmf.md), [`docs/research/2026-08-19_domain120_nist_ai_rmf_crosswalk.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/research/2026-08-19_domain120_nist_ai_rmf_crosswalk.md).
 - **Analysis:**
   - Full coverage across the 4 core functions: **GOVERN** (1.1, 1.7), **MAP** (1.1, 2.2), **MEASURE** (2.5, 2.8), **MANAGE** (1.3, 2.4).
   - Explicit rule mapping: `INTENT` tuples map to policy objectives; `CIRCUIT_BREAKER` and `KILLSWITCH` map to risk treatment and execution response plans; `COST_GOVERNOR` maps to impact logging.
@@ -37,7 +37,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 2. Audit ISO/IEC 42001:2023 Conformity
 - **Status:** **SUBSTANTIAL / PARTIAL (Expected Boundary)**
-- **Artifacts:** [`docs/coverage/iso-42001.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/coverage/iso-42001.md), `compliance_frameworks.py` (`iso42001` spec).
+- **Artifacts:** [`docs/coverage/iso-42001.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/coverage/iso-42001.md), `compliance_frameworks.py` (`iso42001` spec).
 - **Analysis:**
   - 38 Annex A reference controls evaluated: **23 Fully Covered (✅)**, **14 Partially Covered (🟡)**, **1 Boundary / HR (⚪)**.
   - A.2 (Policies) and A.3 (Organization) are enforced via `doctrine_engine.py` and `law_engine.py`.
@@ -48,7 +48,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 3. Audit EU AI Act Compliance
 - **Status:** **HIGH RIGOR / VERIFIED**
-- **Artifacts:** [`docs/coverage/eu-ai-act.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/coverage/eu-ai-act.md), `compliance_frameworks.py` (`eu-ai-act` spec).
+- **Artifacts:** [`docs/coverage/eu-ai-act.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/coverage/eu-ai-act.md), `compliance_frameworks.py` (`eu-ai-act` spec).
 - **Analysis:**
   - Mapped specifically against **High-Risk AI Systems (Annex III)** obligations:
     - **Art. 9 (Risk Management)**: Continuous monitoring via `kill_switch.py` and `circuit_breaker.py`.
@@ -62,7 +62,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 4. Audit SOC 2 Trust Services Criteria
 - **Status:** **PASS**
-- **Artifacts:** [`docs/coverage/soc2.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/coverage/soc2.md), `compliance_frameworks.py` (`soc2` spec).
+- **Artifacts:** [`docs/coverage/soc2.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/coverage/soc2.md), `compliance_frameworks.py` (`soc2` spec).
 - **Analysis:**
   - **CC6.1 (Logical Access Security)**: Mapped to Delegation Capability Tokens (`DCT`).
   - **CC6.3 (Identity & Auth)**: Mapped to subject/issuer identity registry.
@@ -83,7 +83,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 6. Audit Data Governance / GDPR / PII Handling
 - **Status:** **PASS WITH NOTED ACTION ITEMS**
-- **Artifacts:** [`docs/coverage/gdpr.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/coverage/gdpr.md), [`docs/coverage/ccpa-cpra.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/coverage/ccpa-cpra.md), `compliance_frameworks.py` (`gdpr` spec).
+- **Artifacts:** [`docs/coverage/gdpr.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/coverage/gdpr.md), [`docs/coverage/ccpa-cpra.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/coverage/ccpa-cpra.md), `compliance_frameworks.py` (`gdpr` spec).
 - **Analysis:**
   - **Art. 30 (Records of Processing)**: Tracked through `DCTX` and `CONTRACT` tuples.
   - **Art. 32 (Security of Processing)**: HMAC-SHA256 signed audit records.
@@ -96,7 +96,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 7. Audit Trail Integrity (Receipts & Chain of Custody)
 - **Status:** **HIGHEST RIGOR / MATHEMATICALLY VERIFIED**
-- **Artifacts:** [`krineia`](file:///<repo-root>/PROJECTS/krineia), [`hummbl_governance/audit_log.py`](file:///<repo-root>/PROJECTS/hummbl-governance/hummbl_governance/audit_log.py), `KRINEIA_INVARIANTS_PAPER.tex`.
+- **Artifacts:** [`krineia`](https://github.com/hummbl-io/krineia), [`hummbl_governance/audit_log.py`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancehummbl_governance/audit_log.py), `KRINEIA_INVARIANTS_PAPER.tex`.
 - **Analysis:**
   - Tamper-evident append-only log with constant-time HMAC verification (`hmac.compare_digest`).
   - Cryptographic hash chaining ($h_i = \text{SHA256}(h_{i-1} \parallel m_i)$) mathematically proven under TLA+ model checking.
@@ -107,7 +107,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 8. Audit Model Documentation & Model Cards
 - **Status:** **PARTIAL / IMPROVEMENT NEEDED**
-- **Artifacts:** [`hummbl-free-models`](file:///<repo-root>/PROJECTS/hummbl-free-models), `hummbl_governance/model_evaluation.py`.
+- **Artifacts:** [`hummbl-free-models`](https://github.com/hummbl-io/hummbl-free-models), `hummbl_governance/model_evaluation.py`.
 - **Analysis:**
   - Model capabilities, pricing, context limits, and endpoint status are thoroughly cataloged (1,780+ endpoints in `hummbl-free-models`).
   - Evaluation harnesses (`hummbl-eval`, `astabench`) track latency, token spend, and compliance scores.
@@ -119,7 +119,7 @@ An exhaustive audit of the 11 compliance dimensions across `hummbl-governance` w
 
 ### 9. Audit Vendor Risk Register Completeness
 - **Status:** **SUBSTANTIAL / 51 VENDORS AUDITED**
-- **Artifacts:** [`_internal/compliance/README.md`](file:///<repo-root>/PROJECTS/hummbl-governance/_internal/compliance/README.md), [`_internal/compliance/vendor-inventory-master-2026-08-21.md`](file:///<repo-root>/PROJECTS/hummbl-governance/_internal/compliance/vendor-inventory-master-2026-08-21.md).
+- **Artifacts:** [`_internal/compliance/README.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance_internal/compliance/README.md), [`_internal/compliance/vendor-inventory-master-2026-08-21.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance_internal/compliance/vendor-inventory-master-2026-08-21.md).
 - **Analysis:**
   - 51 vendor due-diligence reviews completed with structured scoring (A to C), certifications cataloged (SOC 2, ISO 27001, HIPAA, GDPR), and AI training clauses analyzed.
 - **Gaps Identified (Open Actions from Index):**

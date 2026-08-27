@@ -32,6 +32,7 @@ import mcp_reasoning as mcp  # noqa: E402
 
 def fresh_module():
     import mcp_reasoning
+
     importlib.reload(mcp_reasoning)
     return mcp_reasoning
 
@@ -39,6 +40,7 @@ def fresh_module():
 # ---------------------------------------------------------------------------
 # ReasoningEngine tools
 # ---------------------------------------------------------------------------
+
 
 class TestReasoningListModels:
     def test_list_models(self):
@@ -100,46 +102,59 @@ class TestReasoningSystemPrompt:
 # SchemaValidator tools
 # ---------------------------------------------------------------------------
 
+
 class TestSchemaValidate:
     def test_valid_object(self):
-        result = mcp.handle_tool("schema_validate", {
-            "instance": {"name": "Alice", "age": 30},
-            "schema": {
-                "type": "object",
-                "required": ["name"],
-                "properties": {
-                    "name": {"type": "string"},
-                    "age": {"type": "integer"},
+        result = mcp.handle_tool(
+            "schema_validate",
+            {
+                "instance": {"name": "Alice", "age": 30},
+                "schema": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                    },
                 },
             },
-        })
+        )
         assert result["valid"] is True
         assert result["error_count"] == 0
 
     def test_invalid_missing_required(self):
-        result = mcp.handle_tool("schema_validate", {
-            "instance": {"age": 30},
-            "schema": {
-                "type": "object",
-                "required": ["name"],
-                "properties": {"name": {"type": "string"}},
+        result = mcp.handle_tool(
+            "schema_validate",
+            {
+                "instance": {"age": 30},
+                "schema": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {"name": {"type": "string"}},
+                },
             },
-        })
+        )
         assert result["valid"] is False
         assert result["error_count"] > 0
 
     def test_invalid_type(self):
-        result = mcp.handle_tool("schema_validate", {
-            "instance": "hello",
-            "schema": {"type": "integer"},
-        })
+        result = mcp.handle_tool(
+            "schema_validate",
+            {
+                "instance": "hello",
+                "schema": {"type": "integer"},
+            },
+        )
         assert result["valid"] is False
 
     def test_validate_array(self):
-        result = mcp.handle_tool("schema_validate", {
-            "instance": [1, 2, 3],
-            "schema": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
-        })
+        result = mcp.handle_tool(
+            "schema_validate",
+            {
+                "instance": [1, 2, 3],
+                "schema": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+            },
+        )
         assert result["valid"] is True
 
     def test_missing_schema(self):
@@ -153,24 +168,30 @@ class TestSchemaValidate:
 
 class TestSchemaValidateDict:
     def test_valid_dict(self):
-        result = mcp.handle_tool("schema_validate_dict", {
-            "entry": {"event": "auth", "agent": "worker"},
-            "schema": {
-                "type": "object",
-                "required": ["event"],
-                "properties": {"event": {"type": "string"}},
+        result = mcp.handle_tool(
+            "schema_validate_dict",
+            {
+                "entry": {"event": "auth", "agent": "worker"},
+                "schema": {
+                    "type": "object",
+                    "required": ["event"],
+                    "properties": {"event": {"type": "string"}},
+                },
             },
-        })
+        )
         assert result["valid"] is True
 
     def test_invalid_dict(self):
-        result = mcp.handle_tool("schema_validate_dict", {
-            "entry": {"agent": "worker"},
-            "schema": {
-                "type": "object",
-                "required": ["event"],
+        result = mcp.handle_tool(
+            "schema_validate_dict",
+            {
+                "entry": {"agent": "worker"},
+                "schema": {
+                    "type": "object",
+                    "required": ["event"],
+                },
             },
-        })
+        )
         assert result["valid"] is False
 
     def test_missing_entry(self):
@@ -182,15 +203,19 @@ class TestSchemaValidateDict:
 # ContractNetManager tools
 # ---------------------------------------------------------------------------
 
+
 class TestContractAnnounce:
     def test_announce_basic(self):
         m = fresh_module()
-        result = m.handle_tool("contract_announce", {
-            "announcer": "orch",
-            "task_id": "task-1",
-            "requirements": {"skill": "ocr"},
-            "deadline_seconds": 60,
-        })
+        result = m.handle_tool(
+            "contract_announce",
+            {
+                "announcer": "orch",
+                "task_id": "task-1",
+                "requirements": {"skill": "ocr"},
+                "deadline_seconds": 60,
+            },
+        )
         assert "announcement_id" in result
         assert result["phase"] == "bidding"
 
@@ -202,35 +227,47 @@ class TestContractAnnounce:
 class TestContractBid:
     def setup_method(self):
         self.m = fresh_module()
-        result = self.m.handle_tool("contract_announce", {
-            "announcer": "orch",
-            "task_id": "task-bid",
-            "deadline_seconds": 300,
-        })
+        result = self.m.handle_tool(
+            "contract_announce",
+            {
+                "announcer": "orch",
+                "task_id": "task-bid",
+                "deadline_seconds": 300,
+            },
+        )
         self.ann_id = result["announcement_id"]
 
     def test_bid_accepted(self):
-        result = self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "worker-1",
-            "cost": 0.5,
-            "capability": 0.9,
-        })
+        result = self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "worker-1",
+                "cost": 0.5,
+                "capability": 0.9,
+            },
+        )
         assert result["accepted"] is True
 
     def test_bid_multiple_workers(self):
-        self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "worker-1",
-            "cost": 0.5,
-            "capability": 0.9,
-        })
-        result = self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "worker-2",
-            "cost": 0.3,
-            "capability": 0.7,
-        })
+        self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "worker-1",
+                "cost": 0.5,
+                "capability": 0.9,
+            },
+        )
+        result = self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "worker-2",
+                "cost": 0.3,
+                "capability": 0.7,
+            },
+        )
         assert result["accepted"] is True
 
     def test_bid_missing_fields(self):
@@ -238,56 +275,80 @@ class TestContractBid:
         assert "error" in result
 
     def test_bid_nonexistent_announcement(self):
-        result = self.m.handle_tool("contract_bid", {
-            "announcement_id": "nonexistent-id",
-            "bidder": "w1",
-        })
+        result = self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": "nonexistent-id",
+                "bidder": "w1",
+            },
+        )
         assert result["accepted"] is False
 
 
 class TestContractEvaluate:
     def setup_method(self):
         self.m = fresh_module()
-        result = self.m.handle_tool("contract_announce", {
-            "announcer": "orch",
-            "task_id": "task-eval",
-            "deadline_seconds": 300,
-        })
+        result = self.m.handle_tool(
+            "contract_announce",
+            {
+                "announcer": "orch",
+                "task_id": "task-eval",
+                "deadline_seconds": 300,
+            },
+        )
         self.ann_id = result["announcement_id"]
 
     def test_evaluate_lowest_cost(self):
-        self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "w1",
-            "cost": 0.8,
-        })
-        self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "w2",
-            "cost": 0.3,
-        })
-        result = self.m.handle_tool("contract_evaluate", {
-            "announcement_id": self.ann_id,
-            "strategy": "lowest_cost",
-        })
+        self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "w1",
+                "cost": 0.8,
+            },
+        )
+        self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "w2",
+                "cost": 0.3,
+            },
+        )
+        result = self.m.handle_tool(
+            "contract_evaluate",
+            {
+                "announcement_id": self.ann_id,
+                "strategy": "lowest_cost",
+            },
+        )
         assert result["winner"]["bidder"] == "w2"
         assert result["phase"] == "awarded"
 
     def test_evaluate_highest_capability(self):
-        self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "w1",
-            "capability": 0.5,
-        })
-        self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "w2",
-            "capability": 0.9,
-        })
-        result = self.m.handle_tool("contract_evaluate", {
-            "announcement_id": self.ann_id,
-            "strategy": "highest_capability",
-        })
+        self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "w1",
+                "capability": 0.5,
+            },
+        )
+        self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "w2",
+                "capability": 0.9,
+            },
+        )
+        result = self.m.handle_tool(
+            "contract_evaluate",
+            {
+                "announcement_id": self.ann_id,
+                "strategy": "highest_capability",
+            },
+        )
         assert result["winner"]["bidder"] == "w2"
 
     def test_evaluate_no_bids(self):
@@ -307,11 +368,14 @@ class TestContractEvaluate:
 class TestContractStatus:
     def setup_method(self):
         self.m = fresh_module()
-        result = self.m.handle_tool("contract_announce", {
-            "announcer": "orch",
-            "task_id": "task-status",
-            "deadline_seconds": 300,
-        })
+        result = self.m.handle_tool(
+            "contract_announce",
+            {
+                "announcer": "orch",
+                "task_id": "task-status",
+                "deadline_seconds": 300,
+            },
+        )
         self.ann_id = result["announcement_id"]
 
     def test_status_bidding(self):
@@ -321,11 +385,14 @@ class TestContractStatus:
         assert result["bid_count"] == 0
 
     def test_status_with_bid(self):
-        self.m.handle_tool("contract_bid", {
-            "announcement_id": self.ann_id,
-            "bidder": "w1",
-            "cost": 0.5,
-        })
+        self.m.handle_tool(
+            "contract_bid",
+            {
+                "announcement_id": self.ann_id,
+                "bidder": "w1",
+                "cost": 0.5,
+            },
+        )
         result = self.m.handle_tool("contract_status", {"announcement_id": self.ann_id})
         assert result["bid_count"] == 1
 
@@ -349,6 +416,7 @@ class TestContractSummary:
 # ---------------------------------------------------------------------------
 # Protocol-level tests
 # ---------------------------------------------------------------------------
+
 
 class TestProtocol:
     def _call(self, req_obj):
@@ -374,11 +442,13 @@ class TestProtocol:
         assert len(tools) == 10
 
     def test_tools_call_contract_summary(self):
-        resp = self._call({
-            "jsonrpc": "2.0",
-            "id": 3,
-            "method": "tools/call",
-            "params": {"name": "contract_summary", "arguments": {}},
-        })
+        resp = self._call(
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "tools/call",
+                "params": {"name": "contract_summary", "arguments": {}},
+            }
+        )
         content = json.loads(resp["result"]["content"][0]["text"])
         assert "by_phase" in content

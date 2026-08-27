@@ -65,17 +65,13 @@ Pages reviewed for this delta document — captured to confirm what was and was 
 
 ```python
 # OLD (deprecated) — /v1/complete
-{
-  "model": "claude-2",
-  "prompt": "\n\nHuman: Hello\n\nAssistant:",
-  "max_tokens_to_sample": 256
-}
+{"model": "claude-2", "prompt": "\n\nHuman: Hello\n\nAssistant:", "max_tokens_to_sample": 256}
 
 # NEW — /v1/messages
 {
-  "model": "claude-sonnet-4-6",
-  "max_tokens": 256,
-  "messages": [{"role": "user", "content": "Hello"}]
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": "Hello"}],
 }
 ```
 

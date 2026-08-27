@@ -16,9 +16,9 @@
 
 """Tests for LamportClock."""
 
-import pytest
 import threading
 
+import pytest
 from hummbl_governance.lamport_clock import LamportClock, LamportTimestamp
 
 

@@ -106,8 +106,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, help="Input trace file (JSON array)")
     parser.add_argument("--output", help="Output file")
-    parser.add_argument("--format", required=True, choices=["cloudevents", "ndjson"],
-                        help="Output format")
+    parser.add_argument(
+        "--format", required=True, choices=["cloudevents", "ndjson"], help="Output format"
+    )
     args = parser.parse_args(argv)
 
     with Path(args.input).open("r", encoding="utf-8") as f:

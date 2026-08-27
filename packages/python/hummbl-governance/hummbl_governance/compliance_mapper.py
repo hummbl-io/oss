@@ -120,9 +120,7 @@ class ComplianceMapper:
         for file_path in files:
             try:
                 file_date_str = file_path.stem.split("governance-")[-1]
-                file_date = datetime.strptime(file_date_str, "%Y-%m-%d").replace(
-                    tzinfo=timezone.utc
-                )
+                file_date = datetime.strptime(file_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
                 if file_date < cutoff.replace(hour=0, minute=0, second=0, microsecond=0):
                     continue
             except (ValueError, IndexError):
@@ -181,19 +179,23 @@ class ComplianceMapper:
             # CC6.1 & CC6.3: Logical Access and Identity
             if tuple_type == "DCT":
                 access_evidence = evidence.copy()
-                access_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "resources": tuple_data.get("resource_selectors"),
-                    "ops": tuple_data.get("ops_allowed"),
-                })
+                access_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "resources": tuple_data.get("resource_selectors"),
+                        "ops": tuple_data.get("ops_allowed"),
+                    }
+                )
                 report.controls["CC6.1"].append(access_evidence)
 
                 identity_evidence = evidence.copy()
-                identity_evidence.update({
-                    "subject": tuple_data.get("subject"),
-                    "issuer": tuple_data.get("issuer"),
-                })
+                identity_evidence.update(
+                    {
+                        "subject": tuple_data.get("subject"),
+                        "issuer": tuple_data.get("issuer"),
+                    }
+                )
                 report.controls["CC6.3"].append(identity_evidence)
 
         return report
@@ -212,8 +214,8 @@ class ComplianceMapper:
             framework="GDPR",
         )
 
-        report.controls["Art.5"] = []   # Principles — lawfulness, fairness, transparency
-        report.controls["Art.6"] = []   # Lawfulness of processing
+        report.controls["Art.5"] = []  # Principles — lawfulness, fairness, transparency
+        report.controls["Art.6"] = []  # Lawfulness of processing
         report.controls["Art.25"] = []  # Data protection by design and by default
         report.controls["Art.28"] = []  # Processor obligations
         report.controls["Art.30"] = []  # Records of Processing
@@ -230,28 +232,34 @@ class ComplianceMapper:
             # Art.5: Principles — INTENT captures purpose (transparency, purpose limitation)
             if tuple_type == "INTENT":
                 princ_evidence = evidence.copy()
-                princ_evidence.update({
-                    "objective": tuple_data.get("objective"),
-                    "agent": tuple_data.get("agent"),
-                })
+                princ_evidence.update(
+                    {
+                        "objective": tuple_data.get("objective"),
+                        "agent": tuple_data.get("agent"),
+                    }
+                )
                 report.controls["Art.5"].append(princ_evidence)
 
             # Art.6: Lawfulness — CONTRACT tuples prove consent/contract/legitimate interest basis
             if tuple_type == "CONTRACT":
                 law_evidence = evidence.copy()
-                law_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "operations": tuple_data.get("operations"),
-                })
+                law_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "operations": tuple_data.get("operations"),
+                    }
+                )
                 report.controls["Art.6"].append(law_evidence)
 
             # Art.25: Data protection by design — DCT ops_allowed + CapabilityFence restrict scope
             if tuple_type == "DCT":
                 design_evidence = evidence.copy()
-                design_evidence.update({
-                    "ops_allowed": tuple_data.get("ops_allowed"),
-                    "resources": tuple_data.get("resource_selectors"),
-                })
+                design_evidence.update(
+                    {
+                        "ops_allowed": tuple_data.get("ops_allowed"),
+                        "resources": tuple_data.get("resource_selectors"),
+                    }
+                )
                 report.controls["Art.25"].append(design_evidence)
             if tuple_type == "CAPABILITY_FENCE":
                 design_evidence = evidence.copy()
@@ -261,21 +269,25 @@ class ComplianceMapper:
             # Art.28: Processor obligations — DCTX delegation chains prove processor binding
             if tuple_type == "DCTX":
                 proc_evidence = evidence.copy()
-                proc_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                })
+                proc_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                    }
+                )
                 report.controls["Art.28"].append(proc_evidence)
 
             # Art.30: Records of Processing
             if tuple_type in ("DCTX", "CONTRACT", "ATTEST", "EVIDENCE"):
                 processing_evidence = evidence.copy()
-                processing_evidence.update({
-                    "tuple_type": tuple_type,
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                    "event": tuple_data.get("event"),
-                })
+                processing_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                        "event": tuple_data.get("event"),
+                    }
+                )
                 report.controls["Art.30"].append(processing_evidence)
 
             # Art.32: Security of Processing (signed entries prove integrity)
@@ -325,22 +337,26 @@ class ComplianceMapper:
             # ASI01: Agent Goal Hijack -- INTENT tuples prove lifecycle
             if tuple_type == "INTENT":
                 intent_evidence = evidence.copy()
-                intent_evidence.update({
-                    "agent": tuple_data.get("agent"),
-                    "objective": tuple_data.get("objective"),
-                    "phase": tuple_data.get("phase"),
-                })
+                intent_evidence.update(
+                    {
+                        "agent": tuple_data.get("agent"),
+                        "objective": tuple_data.get("objective"),
+                        "phase": tuple_data.get("phase"),
+                    }
+                )
                 report.controls["ASI01"].append(intent_evidence)
 
             # ASI03: Identity & Privilege Abuse -- DCT tuples prove delegation
             if tuple_type == "DCT":
                 dct_evidence = evidence.copy()
-                dct_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "resources": tuple_data.get("resource_selectors"),
-                    "ops": tuple_data.get("ops_allowed"),
-                })
+                dct_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "resources": tuple_data.get("resource_selectors"),
+                        "ops": tuple_data.get("ops_allowed"),
+                    }
+                )
                 report.controls["ASI03"].append(dct_evidence)
 
             # ASI04: Supply Chain -- signed entries prove integrity
@@ -350,25 +366,28 @@ class ComplianceMapper:
             # ASI07: Inter-Agent Comms -- DCTX entries
             if tuple_type == "DCTX":
                 dctx_evidence = evidence.copy()
-                dctx_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                    "event": tuple_data.get("event"),
-                })
+                dctx_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                        "event": tuple_data.get("event"),
+                    }
+                )
                 report.controls["ASI07"].append(dctx_evidence)
 
             # ASI08: Cascading Failures -- circuit breaker + kill switch
             if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
                 failure_evidence = evidence.copy()
-                failure_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                    "adapter": tuple_data.get("adapter"),
-                })
+                failure_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                        "adapter": tuple_data.get("adapter"),
+                    }
+                )
                 report.controls["ASI08"].append(failure_evidence)
 
         return report
-
 
     def generate_nist_rmf_report(self, days: int = 30) -> ComplianceReport:
         """Generate a NIST AI Risk Management Framework compliance report.
@@ -388,17 +407,17 @@ class ComplianceMapper:
         )
 
         # GOVERN function
-        report.controls["GOVERN-1.1"] = []   # AI risk policies — INTENT tuples prove declared objectives
-        report.controls["GOVERN-1.7"] = []   # Risk identification processes — CB/KS events
+        report.controls["GOVERN-1.1"] = []  # AI risk policies — INTENT tuples prove declared objectives
+        report.controls["GOVERN-1.7"] = []  # Risk identification processes — CB/KS events
         # MAP function
-        report.controls["MAP-1.1"] = []      # Organisational context — CONTRACT/DCTX
-        report.controls["MAP-2.2"] = []      # Risk assessment basis — ATTEST/EVIDENCE
+        report.controls["MAP-1.1"] = []  # Organisational context — CONTRACT/DCTX
+        report.controls["MAP-2.2"] = []  # Risk assessment basis — ATTEST/EVIDENCE
         # MEASURE function
         report.controls["MEASURE-2.5"] = []  # Trustworthiness evaluations — signed entries
         report.controls["MEASURE-2.8"] = []  # Impact metrics — COST_GOVERNOR events
         # MANAGE function
-        report.controls["MANAGE-1.3"] = []   # Response plans executed — KILLSWITCH events
-        report.controls["MANAGE-2.4"] = []   # Risk treatment applied — CB state transitions
+        report.controls["MANAGE-1.3"] = []  # Response plans executed — KILLSWITCH events
+        report.controls["MANAGE-2.4"] = []  # Risk treatment applied — CB state transitions
 
         files = self._collect_files(days)
         entries = self._read_entries(files)
@@ -411,21 +430,25 @@ class ComplianceMapper:
             # GOVERN-1.1: Policies — INTENT tuples capture declared objectives
             if tuple_type == "INTENT":
                 intent_evidence = evidence.copy()
-                intent_evidence.update({
-                    "agent": tuple_data.get("agent"),
-                    "objective": tuple_data.get("objective"),
-                    "phase": tuple_data.get("phase"),
-                })
+                intent_evidence.update(
+                    {
+                        "agent": tuple_data.get("agent"),
+                        "objective": tuple_data.get("objective"),
+                        "phase": tuple_data.get("phase"),
+                    }
+                )
                 report.controls["GOVERN-1.1"].append(intent_evidence)
 
             # GOVERN-1.7 & MANAGE-1.3 & MANAGE-2.4: Risk/response — CB + KS events
             if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
                 failure_evidence = evidence.copy()
-                failure_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                    "adapter": tuple_data.get("adapter"),
-                })
+                failure_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                        "adapter": tuple_data.get("adapter"),
+                    }
+                )
                 report.controls["GOVERN-1.7"].append(failure_evidence)
                 if tuple_type == "KILLSWITCH":
                     report.controls["MANAGE-1.3"].append(failure_evidence)
@@ -435,21 +458,25 @@ class ComplianceMapper:
             # MAP-1.1: Organisational context — delegation and contract records
             if tuple_type in ("CONTRACT", "DCTX", "DCT"):
                 context_evidence = evidence.copy()
-                context_evidence.update({
-                    "tuple_type": tuple_type,
-                    "delegator": tuple_data.get("delegator") or tuple_data.get("issuer"),
-                    "delegatee": tuple_data.get("delegatee") or tuple_data.get("subject"),
-                })
+                context_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "delegator": tuple_data.get("delegator") or tuple_data.get("issuer"),
+                        "delegatee": tuple_data.get("delegatee") or tuple_data.get("subject"),
+                    }
+                )
                 report.controls["MAP-1.1"].append(context_evidence)
 
             # MAP-2.2: Risk assessment basis — attested evidence entries
             if tuple_type in ("ATTEST", "EVIDENCE"):
                 attest_evidence = evidence.copy()
-                attest_evidence.update({
-                    "tuple_type": tuple_type,
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                attest_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["MAP-2.2"].append(attest_evidence)
 
             # MEASURE-2.5: Trustworthiness — any signed entry proves integrity
@@ -461,12 +488,14 @@ class ComplianceMapper:
             # MEASURE-2.8: Impact metrics — cost governor events
             if tuple_type == "COST_GOVERNOR":
                 cost_evidence = evidence.copy()
-                cost_evidence.update({
-                    "agent": tuple_data.get("agent"),
-                    "decision": tuple_data.get("decision"),
-                    "spend": tuple_data.get("spend"),
-                    "budget": tuple_data.get("budget"),
-                })
+                cost_evidence.update(
+                    {
+                        "agent": tuple_data.get("agent"),
+                        "decision": tuple_data.get("decision"),
+                        "spend": tuple_data.get("spend"),
+                        "budget": tuple_data.get("budget"),
+                    }
+                )
                 report.controls["MEASURE-2.8"].append(cost_evidence)
 
         return report
@@ -489,7 +518,7 @@ class ComplianceMapper:
             framework="EU_AI_ACT",
         )
 
-        report.controls["Art.9"] = []   # Risk management system
+        report.controls["Art.9"] = []  # Risk management system
         report.controls["Art.10"] = []  # Data and data governance
         report.controls["Art.11"] = []  # Technical documentation
         report.controls["Art.12"] = []  # Record-keeping and logging
@@ -511,21 +540,25 @@ class ComplianceMapper:
             # Art.9: Risk management system — CB and KS events show residual risk controls
             if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
                 risk_evidence = evidence.copy()
-                risk_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                    "adapter": tuple_data.get("adapter"),
-                })
+                risk_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                        "adapter": tuple_data.get("adapter"),
+                    }
+                )
                 report.controls["Art.9"].append(risk_evidence)
 
             # Art.10: Data governance — attested/evidence entries
             if tuple_type in ("ATTEST", "EVIDENCE"):
                 data_evidence = evidence.copy()
-                data_evidence.update({
-                    "tuple_type": tuple_type,
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                data_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["Art.10"].append(data_evidence)
 
             # Art.12: Record-keeping — every signed entry is a tamper-evident log record
@@ -537,31 +570,37 @@ class ComplianceMapper:
             # Art.13: Transparency — INTENT tuples capture purpose and objectives
             if tuple_type == "INTENT":
                 transparency_evidence = evidence.copy()
-                transparency_evidence.update({
-                    "agent": tuple_data.get("agent"),
-                    "objective": tuple_data.get("objective"),
-                    "phase": tuple_data.get("phase"),
-                })
+                transparency_evidence.update(
+                    {
+                        "agent": tuple_data.get("agent"),
+                        "objective": tuple_data.get("objective"),
+                        "phase": tuple_data.get("phase"),
+                    }
+                )
                 report.controls["Art.13"].append(transparency_evidence)
 
             # Art.14: Human oversight — KILLSWITCH with human-initiated halt state
             if tuple_type == "KILLSWITCH":
                 ks_state = tuple_data.get("state", "")
                 oversight_evidence = evidence.copy()
-                oversight_evidence.update({
-                    "state": ks_state,
-                    "human_initiated": ks_state in ("HALT_ALL", "EMERGENCY"),
-                })
+                oversight_evidence.update(
+                    {
+                        "state": ks_state,
+                        "human_initiated": ks_state in ("HALT_ALL", "EMERGENCY"),
+                    }
+                )
                 report.controls["Art.14"].append(oversight_evidence)
 
             # Art.17: Quality management — delegation chain integrity (DCTX entries)
             if tuple_type == "DCTX":
                 qms_evidence = evidence.copy()
-                qms_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                    "event": tuple_data.get("event"),
-                })
+                qms_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                        "event": tuple_data.get("event"),
+                    }
+                )
                 report.controls["Art.17"].append(qms_evidence)
 
             # Art.11: Technical documentation — CONTRACT + ATTEST entries prove documented specs
@@ -573,10 +612,12 @@ class ComplianceMapper:
             # Art.15: Accuracy, robustness, cybersecurity — CB + KS events prove residual risk
             if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
                 robust_evidence = evidence.copy()
-                robust_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                })
+                robust_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                    }
+                )
                 report.controls["Art.15"].append(robust_evidence)
 
             # Art.16: Obligations of providers — DCTX delegation integrity + signed entries
@@ -593,7 +634,6 @@ class ComplianceMapper:
                 report.controls["Art.19"].append(log_evidence)
 
         return report
-
 
     def generate_iso27001_report(self, days: int = 30) -> ComplianceReport:
         """Generate an ISO/IEC 27001:2022 compliance report from governance traces.
@@ -614,11 +654,11 @@ class ComplianceMapper:
             framework="ISO27001",
         )
 
-        report.controls["A.5"] = []   # Information security policies
-        report.controls["A.6"] = []   # Organization of information security
-        report.controls["A.7"] = []   # Human resource security
-        report.controls["A.8"] = []   # Asset management
-        report.controls["A.9"] = []   # Access control
+        report.controls["A.5"] = []  # Information security policies
+        report.controls["A.6"] = []  # Organization of information security
+        report.controls["A.7"] = []  # Human resource security
+        report.controls["A.8"] = []  # Asset management
+        report.controls["A.9"] = []  # Access control
         report.controls["A.12"] = []  # Operations security — logging
 
         files = self._collect_files(days)
@@ -632,50 +672,60 @@ class ComplianceMapper:
             # A.5: Information security policies — INTENT tuples prove stated objectives
             if tuple_type == "INTENT":
                 pol_evidence = evidence.copy()
-                pol_evidence.update({
-                    "agent": tuple_data.get("agent"),
-                    "objective": tuple_data.get("objective"),
-                })
+                pol_evidence.update(
+                    {
+                        "agent": tuple_data.get("agent"),
+                        "objective": tuple_data.get("objective"),
+                    }
+                )
                 report.controls["A.5"].append(pol_evidence)
 
             # A.6: Organization — DCTX delegation chains show organizational structure
             if tuple_type == "DCTX":
                 org_evidence = evidence.copy()
-                org_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                    "event": tuple_data.get("event"),
-                })
+                org_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                        "event": tuple_data.get("event"),
+                    }
+                )
                 report.controls["A.6"].append(org_evidence)
 
             # A.7: Human resource security — identity validation and contract binding
             if tuple_type in ("DCT", "CONTRACT"):
                 hr_evidence = evidence.copy()
-                hr_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "ops": tuple_data.get("ops_allowed") or tuple_data.get("operations"),
-                })
+                hr_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "ops": tuple_data.get("ops_allowed") or tuple_data.get("operations"),
+                    }
+                )
                 report.controls["A.7"].append(hr_evidence)
 
             # A.8: Asset management — DCT resource ownership and ATTEST evidence
             if tuple_type in ("DCT", "ATTEST"):
                 asset_evidence = evidence.copy()
-                asset_evidence.update({
-                    "resources": tuple_data.get("resource_selectors") or tuple_data.get("resources"),
-                    "tuple_type": tuple_type,
-                })
+                asset_evidence.update(
+                    {
+                        "resources": tuple_data.get("resource_selectors") or tuple_data.get("resources"),
+                        "tuple_type": tuple_type,
+                    }
+                )
                 report.controls["A.8"].append(asset_evidence)
 
             # A.9: Access control — DCT ops_allowed and delegation binding
             if tuple_type == "DCT":
                 access_evidence = evidence.copy()
-                access_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "ops_allowed": tuple_data.get("ops_allowed"),
-                    "resources": tuple_data.get("resource_selectors"),
-                })
+                access_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "ops_allowed": tuple_data.get("ops_allowed"),
+                        "resources": tuple_data.get("resource_selectors"),
+                    }
+                )
                 report.controls["A.9"].append(access_evidence)
 
             # A.12: Operations security — signed entries prove logging and monitoring
@@ -707,14 +757,14 @@ class ComplianceMapper:
             framework="ISO42001",
         )
 
-        report.controls["A.2"] = []   # Policies related to AI
-        report.controls["A.3"] = []   # Internal organization
-        report.controls["A.4"] = []   # Resources for AI systems
-        report.controls["A.5"] = []   # Assessing impacts of AI systems
-        report.controls["A.6"] = []   # AI system life cycle
-        report.controls["A.7"] = []   # Data for AI systems
-        report.controls["A.8"] = []   # Information for interested parties
-        report.controls["A.9"] = []   # Use of AI systems
+        report.controls["A.2"] = []  # Policies related to AI
+        report.controls["A.3"] = []  # Internal organization
+        report.controls["A.4"] = []  # Resources for AI systems
+        report.controls["A.5"] = []  # Assessing impacts of AI systems
+        report.controls["A.6"] = []  # AI system life cycle
+        report.controls["A.7"] = []  # Data for AI systems
+        report.controls["A.8"] = []  # Information for interested parties
+        report.controls["A.9"] = []  # Use of AI systems
         report.controls["A.10"] = []  # Third-party + customer relationships
 
         files = self._collect_files(days)
@@ -728,57 +778,69 @@ class ComplianceMapper:
             # A.2: Policies related to AI — INTENT tuples prove stated AI objectives
             if tuple_type == "INTENT":
                 pol_evidence = evidence.copy()
-                pol_evidence.update({
-                    "agent": tuple_data.get("agent"),
-                    "objective": tuple_data.get("objective"),
-                })
+                pol_evidence.update(
+                    {
+                        "agent": tuple_data.get("agent"),
+                        "objective": tuple_data.get("objective"),
+                    }
+                )
                 report.controls["A.2"].append(pol_evidence)
 
             # A.3: Internal organization — DCTX delegation chains show AI roles + responsibilities
             if tuple_type == "DCTX":
                 org_evidence = evidence.copy()
-                org_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                    "event": tuple_data.get("event"),
-                })
+                org_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                        "event": tuple_data.get("event"),
+                    }
+                )
                 report.controls["A.3"].append(org_evidence)
 
             # A.4: Resources for AI systems — DCT resource selectors + ATTEST evidence
             if tuple_type in ("DCT", "ATTEST"):
                 res_evidence = evidence.copy()
-                res_evidence.update({
-                    "resources": tuple_data.get("resource_selectors") or tuple_data.get("resources"),
-                    "tuple_type": tuple_type,
-                })
+                res_evidence.update(
+                    {
+                        "resources": tuple_data.get("resource_selectors") or tuple_data.get("resources"),
+                        "tuple_type": tuple_type,
+                    }
+                )
                 report.controls["A.4"].append(res_evidence)
 
             # A.5: Assessing impacts — ATTEST tuples document impact assessments
             if tuple_type == "ATTEST":
                 impact_evidence = evidence.copy()
-                impact_evidence.update({
-                    "subject": tuple_data.get("subject"),
-                    "claim": tuple_data.get("claim"),
-                })
+                impact_evidence.update(
+                    {
+                        "subject": tuple_data.get("subject"),
+                        "claim": tuple_data.get("claim"),
+                    }
+                )
                 report.controls["A.5"].append(impact_evidence)
 
             # A.6: AI system life cycle — CONTRACT tuples trace lifecycle stages
             if tuple_type == "CONTRACT":
                 lc_evidence = evidence.copy()
-                lc_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "ops": tuple_data.get("ops_allowed") or tuple_data.get("operations"),
-                })
+                lc_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "ops": tuple_data.get("ops_allowed") or tuple_data.get("operations"),
+                    }
+                )
                 report.controls["A.6"].append(lc_evidence)
 
             # A.7: Data for AI systems — DCT with resource selectors shows data governance
             if tuple_type == "DCT":
                 data_evidence = evidence.copy()
-                data_evidence.update({
-                    "resources": tuple_data.get("resource_selectors"),
-                    "ops_allowed": tuple_data.get("ops_allowed"),
-                })
+                data_evidence.update(
+                    {
+                        "resources": tuple_data.get("resource_selectors"),
+                        "ops_allowed": tuple_data.get("ops_allowed"),
+                    }
+                )
                 report.controls["A.7"].append(data_evidence)
 
             # A.8: Information for interested parties — signed entries prove documented info
@@ -790,20 +852,24 @@ class ComplianceMapper:
             # A.9: Use of AI systems — DCT ops_allowed shows use-policy enforcement
             if tuple_type == "DCT":
                 use_evidence = evidence.copy()
-                use_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "ops_allowed": tuple_data.get("ops_allowed"),
-                })
+                use_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "ops_allowed": tuple_data.get("ops_allowed"),
+                    }
+                )
                 report.controls["A.9"].append(use_evidence)
 
             # A.10: Third-party + customer relationships — DCTX delegation to external parties
             if tuple_type == "DCTX":
                 tp_evidence = evidence.copy()
-                tp_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                })
+                tp_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                    }
+                )
                 report.controls["A.10"].append(tp_evidence)
 
         return report
@@ -825,12 +891,12 @@ class ComplianceMapper:
             framework="NIST_CSF",
         )
 
-        report.controls["GOVERN"] = []    # Organizational context and risk strategy
+        report.controls["GOVERN"] = []  # Organizational context and risk strategy
         report.controls["IDENTIFY"] = []  # Asset and risk identification
-        report.controls["PROTECT"] = []   # Safeguards and access controls
-        report.controls["DETECT"] = []    # Continuous monitoring and anomaly detection
-        report.controls["RESPOND"] = []   # Incident response
-        report.controls["RECOVER"] = []   # Restoration and improvement
+        report.controls["PROTECT"] = []  # Safeguards and access controls
+        report.controls["DETECT"] = []  # Continuous monitoring and anomaly detection
+        report.controls["RESPOND"] = []  # Incident response
+        report.controls["RECOVER"] = []  # Restoration and improvement
 
         files = self._collect_files(days)
         entries = self._read_entries(files)
@@ -853,11 +919,13 @@ class ComplianceMapper:
             # IDENTIFY: AgentRegistry identity and DCT asset binding
             if tuple_type in ("DCT", "ATTEST"):
                 id_evidence = evidence.copy()
-                id_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                    "tuple_type": tuple_type,
-                })
+                id_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                        "tuple_type": tuple_type,
+                    }
+                )
                 report.controls["IDENTIFY"].append(id_evidence)
 
             # PROTECT: KillSwitch, CapabilityFence, DCT ops restrictions
@@ -949,76 +1017,92 @@ class ComplianceMapper:
             # Art.53.1.a: Technical documentation -- ATTEST/EVIDENCE tuples document model specs
             if tuple_type in ("ATTEST", "EVIDENCE"):
                 doc_evidence = evidence.copy()
-                doc_evidence.update({
-                    "tuple_type": tuple_type,
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                doc_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["Art.53.1.a"].append(doc_evidence)
 
             # Art.53.1.b: Downstream provider info -- DCTX delegation chains show provider-to-provider info
             if tuple_type == "DCTX":
                 downstream_evidence = evidence.copy()
-                downstream_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                    "event": tuple_data.get("event"),
-                })
+                downstream_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                        "event": tuple_data.get("event"),
+                    }
+                )
                 report.controls["Art.53.1.b"].append(downstream_evidence)
 
             # Art.53.1.c: Copyright policy -- CONTRACT tuples prove policy compliance
             if tuple_type == "CONTRACT":
                 copyright_evidence = evidence.copy()
-                copyright_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "operations": tuple_data.get("operations"),
-                })
+                copyright_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "operations": tuple_data.get("operations"),
+                    }
+                )
                 report.controls["Art.53.1.c"].append(copyright_evidence)
 
             # Art.53.1.d: Training content summary -- ATTEST tuples with training data evidence
             if tuple_type == "ATTEST" and "training" in claim_str:
                 training_evidence = evidence.copy()
-                training_evidence.update({
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                training_evidence.update(
+                    {
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["Art.53.1.d"].append(training_evidence)
 
             # Art.53.2.a: Model evaluation -- ATTEST/EVIDENCE tuples with evaluation results
             if tuple_type in ("ATTEST", "EVIDENCE") and tuple_data.get("outcome"):
                 eval_evidence = evidence.copy()
-                eval_evidence.update({
-                    "tuple_type": tuple_type,
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                eval_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["Art.53.2.a"].append(eval_evidence)
 
             # Art.53.2.b: Risk mitigation -- CIRCUIT_BREAKER/KILLSWITCH events
             if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
                 risk_evidence = evidence.copy()
-                risk_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                })
+                risk_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                    }
+                )
                 report.controls["Art.53.2.b"].append(risk_evidence)
 
             # Art.53.2.c: Adversarial testing -- ATTEST tuples with adversarial test evidence
             if tuple_type == "ATTEST" and "adversarial" in claim_str:
                 adv_evidence = evidence.copy()
-                adv_evidence.update({
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                adv_evidence.update(
+                    {
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["Art.53.2.c"].append(adv_evidence)
 
             # Art.53.2.d: Incident reporting -- KILLSWITCH events (incident response)
             if tuple_type == "KILLSWITCH":
                 incident_evidence = evidence.copy()
-                incident_evidence.update({
-                    "state": tuple_data.get("state"),
-                    "adapter": tuple_data.get("adapter"),
-                })
+                incident_evidence.update(
+                    {
+                        "state": tuple_data.get("state"),
+                        "adapter": tuple_data.get("adapter"),
+                    }
+                )
                 report.controls["Art.53.2.d"].append(incident_evidence)
 
             # Art.53.2.e: Cybersecurity -- signed entries prove integrity
@@ -1050,19 +1134,19 @@ class ComplianceMapper:
         )
 
         # SP 800-53 control families applied to AI systems
-        report.controls["AC-2"] = []   # Account management -- DCT identity binding
-        report.controls["AC-3"] = []   # Access enforcement -- DCT ops_allowed
-        report.controls["AU-2"] = []   # Audit events -- signed entries
-        report.controls["AU-6"] = []   # Audit review -- CB/HEALTH_PROBE events
+        report.controls["AC-2"] = []  # Account management -- DCT identity binding
+        report.controls["AC-3"] = []  # Access enforcement -- DCT ops_allowed
+        report.controls["AU-2"] = []  # Audit events -- signed entries
+        report.controls["AU-6"] = []  # Audit review -- CB/HEALTH_PROBE events
         report.controls["AU-12"] = []  # Audit record generation -- signed entries
-        report.controls["CM-2"] = []   # Baseline configuration -- CONTRACT tuples
-        report.controls["IA-2"] = []   # Identification and authentication -- DCT identity
-        report.controls["RA-3"] = []   # Risk assessment -- CB/KS
-        report.controls["RA-5"] = []   # Vulnerability monitoring -- HEALTH_PROBE/ATTEST
-        report.controls["SA-9"] = []   # External system services -- DCTX delegation
-        report.controls["SC-8"] = []   # Transmission confidentiality -- signed entries
-        report.controls["SI-2"] = []   # Flaw remediation -- CB state transitions
-        report.controls["SI-7"] = []   # Software integrity -- signed entries
+        report.controls["CM-2"] = []  # Baseline configuration -- CONTRACT tuples
+        report.controls["IA-2"] = []  # Identification and authentication -- DCT identity
+        report.controls["RA-3"] = []  # Risk assessment -- CB/KS
+        report.controls["RA-5"] = []  # Vulnerability monitoring -- HEALTH_PROBE/ATTEST
+        report.controls["SA-9"] = []  # External system services -- DCTX delegation
+        report.controls["SC-8"] = []  # Transmission confidentiality -- signed entries
+        report.controls["SI-2"] = []  # Flaw remediation -- CB state transitions
+        report.controls["SI-7"] = []  # Software integrity -- signed entries
         report.controls["SI-10"] = []  # Information input validation -- ATTEST/EVIDENCE
 
         files = self._collect_files(days)
@@ -1076,20 +1160,24 @@ class ComplianceMapper:
             # AC-2 & IA-2: Account management + Identification -- DCT identity binding
             if tuple_type == "DCT":
                 identity_evidence = evidence.copy()
-                identity_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "subject": tuple_data.get("subject"),
-                })
+                identity_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "subject": tuple_data.get("subject"),
+                    }
+                )
                 report.controls["AC-2"].append(identity_evidence)
                 report.controls["IA-2"].append(identity_evidence.copy())
 
             # AC-3: Access enforcement -- DCT ops_allowed restrictions
             if tuple_type == "DCT":
                 ac3_evidence = evidence.copy()
-                ac3_evidence.update({
-                    "ops_allowed": tuple_data.get("ops_allowed"),
-                    "resources": tuple_data.get("resource_selectors"),
-                })
+                ac3_evidence.update(
+                    {
+                        "ops_allowed": tuple_data.get("ops_allowed"),
+                        "resources": tuple_data.get("resource_selectors"),
+                    }
+                )
                 report.controls["AC-3"].append(ac3_evidence)
 
             # AU-2 & AU-12: Audit events and record generation -- signed entries
@@ -1102,47 +1190,57 @@ class ComplianceMapper:
             # AU-6: Audit review -- CB/HEALTH_PROBE/BEHAVIOR_MONITOR events
             if tuple_type in ("CIRCUIT_BREAKER", "HEALTH_PROBE", "BEHAVIOR_MONITOR"):
                 review_evidence = evidence.copy()
-                review_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                })
+                review_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                    }
+                )
                 report.controls["AU-6"].append(review_evidence)
 
             # CM-2: Baseline configuration -- CONTRACT tuples
             if tuple_type == "CONTRACT":
                 cm_evidence = evidence.copy()
-                cm_evidence.update({
-                    "issuer": tuple_data.get("issuer"),
-                    "operations": tuple_data.get("operations"),
-                })
+                cm_evidence.update(
+                    {
+                        "issuer": tuple_data.get("issuer"),
+                        "operations": tuple_data.get("operations"),
+                    }
+                )
                 report.controls["CM-2"].append(cm_evidence)
 
             # RA-3: Risk assessment -- CB/KS
             if tuple_type in ("CIRCUIT_BREAKER", "KILLSWITCH"):
                 ra_evidence = evidence.copy()
-                ra_evidence.update({
-                    "tuple_type": tuple_type,
-                    "state": tuple_data.get("state"),
-                })
+                ra_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "state": tuple_data.get("state"),
+                    }
+                )
                 report.controls["RA-3"].append(ra_evidence)
 
             # RA-5: Vulnerability monitoring -- HEALTH_PROBE/ATTEST/EVIDENCE
             if tuple_type in ("HEALTH_PROBE", "ATTEST", "EVIDENCE"):
                 vuln_evidence = evidence.copy()
-                vuln_evidence.update({
-                    "tuple_type": tuple_type,
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                vuln_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["RA-5"].append(vuln_evidence)
 
             # SA-9: External system services -- DCTX delegation
             if tuple_type == "DCTX":
                 sa_evidence = evidence.copy()
-                sa_evidence.update({
-                    "delegator": tuple_data.get("delegator"),
-                    "delegatee": tuple_data.get("delegatee"),
-                })
+                sa_evidence.update(
+                    {
+                        "delegator": tuple_data.get("delegator"),
+                        "delegatee": tuple_data.get("delegatee"),
+                    }
+                )
                 report.controls["SA-9"].append(sa_evidence)
 
             # SC-8 & SI-7: Transmission confidentiality + Software integrity -- signed entries
@@ -1155,20 +1253,24 @@ class ComplianceMapper:
             # SI-2: Flaw remediation -- CB state transitions
             if tuple_type == "CIRCUIT_BREAKER":
                 si2_evidence = evidence.copy()
-                si2_evidence.update({
-                    "state": tuple_data.get("state"),
-                    "adapter": tuple_data.get("adapter"),
-                })
+                si2_evidence.update(
+                    {
+                        "state": tuple_data.get("state"),
+                        "adapter": tuple_data.get("adapter"),
+                    }
+                )
                 report.controls["SI-2"].append(si2_evidence)
 
             # SI-10: Information input validation -- ATTEST/EVIDENCE
             if tuple_type in ("ATTEST", "EVIDENCE"):
                 si10_evidence = evidence.copy()
-                si10_evidence.update({
-                    "tuple_type": tuple_type,
-                    "claim": tuple_data.get("claim"),
-                    "outcome": tuple_data.get("outcome"),
-                })
+                si10_evidence.update(
+                    {
+                        "tuple_type": tuple_type,
+                        "claim": tuple_data.get("claim"),
+                        "outcome": tuple_data.get("outcome"),
+                    }
+                )
                 report.controls["SI-10"].append(si10_evidence)
 
         return report
@@ -1221,20 +1323,21 @@ class ComplianceMapper:
             total_controls = len(fw_report.controls)
             controls_with_evidence = sum(1 for v in fw_report.controls.values() if v)
             total_evidence = sum(len(v) for v in fw_report.controls.values())
-            summary.append({
-                "framework": framework,
-                "total_controls": total_controls,
-                "controls_with_evidence": controls_with_evidence,
-                "total_evidence": total_evidence,
-            })
+            summary.append(
+                {
+                    "framework": framework,
+                    "total_controls": total_controls,
+                    "controls_with_evidence": controls_with_evidence,
+                    "total_evidence": total_evidence,
+                }
+            )
 
         report = ComplianceReport(
             generated_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
             framework="CROSSWALK",
         )
         report.controls["entries"] = [
-            {"entry_id": eid, "frameworks": fw_map}
-            for eid, fw_map in sorted(crosswalk.items())
+            {"entry_id": eid, "frameworks": fw_map} for eid, fw_map in sorted(crosswalk.items())
         ]
         report.controls["summary"] = summary
 
@@ -1243,32 +1346,43 @@ class ComplianceMapper:
 
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="Map governance traces to compliance controls."
-    )
-    parser.add_argument(
-        "--days", type=int, default=7, help="Number of days to include in report"
-    )
+    parser = argparse.ArgumentParser(description="Map governance traces to compliance controls.")
+    parser.add_argument("--days", type=int, default=7, help="Number of days to include in report")
     parser.add_argument(
         "--framework",
-        choices=["soc2", "gdpr", "owasp", "nist-rmf", "eu-ai-act", "iso27001", "iso42001", "nist-csf", "gpai", "cosais", "crosswalk"],
+        choices=[
+            "soc2",
+            "gdpr",
+            "owasp",
+            "nist-rmf",
+            "eu-ai-act",
+            "iso27001",
+            "iso42001",
+            "nist-csf",
+            "gpai",
+            "cosais",
+            "crosswalk",
+        ],
         default="soc2",
         help="Compliance framework",
     )
-    parser.add_argument(
-        "--dir", type=str, default="governance", help="Governance directory"
-    )
+    parser.add_argument("--dir", type=str, default="governance", help="Governance directory")
     parser.add_argument("--output", type=str, help="Output JSON file path")
     parser.add_argument(
-        "--validate", type=str, metavar="MATRIX.md",
+        "--validate",
+        type=str,
+        metavar="MATRIX.md",
         help="Validate a coverage matrix .md file and report pass/fail per cell",
     )
     parser.add_argument(
-        "--repo-root", type=str, default=".",
+        "--repo-root",
+        type=str,
+        default=".",
         help="Repository root for resolving relative evidence paths (default: CWD)",
     )
     parser.add_argument(
-        "--validate-json", action="store_true",
+        "--validate-json",
+        action="store_true",
         help="Output validation results as JSON instead of terminal table",
     )
 
@@ -1377,9 +1491,7 @@ def _parse_matrix_rows(text: str) -> list[dict]:
             continue
         next_line = lines[idx].strip() if idx < len(lines) else ""
         next_cells = [c.strip() for c in next_line.strip("|").split("|")]
-        next_is_separator = next_line.startswith("|") and all(
-            set(c) <= set("-: ") for c in next_cells if c
-        )
+        next_is_separator = next_line.startswith("|") and all(set(c) <= set("-: ") for c in next_cells if c)
         header_join = " ".join(cells).lower()
         if next_is_separator and "glyph" in header_join and "state" in header_join:
             in_legend = True
@@ -1418,19 +1530,17 @@ def _parse_matrix_rows(text: str) -> list[dict]:
             continue
         requirement = cells[1] if len(cells) > 1 else ""
         coverage = cells[coverage_idx] if coverage_idx is not None else ""
-        evidence = (
-            cells[coverage_idx + 1]
-            if coverage_idx is not None and coverage_idx + 1 < len(cells)
-            else ""
+        evidence = cells[coverage_idx + 1] if coverage_idx is not None and coverage_idx + 1 < len(cells) else ""
+        rows.append(
+            {
+                "state": state,
+                "control_id": cells[0],
+                "requirement": requirement,
+                "coverage": coverage,
+                "evidence": evidence,
+                "line_no": idx,
+            }
         )
-        rows.append({
-            "state": state,
-            "control_id": cells[0],
-            "requirement": requirement,
-            "coverage": coverage,
-            "evidence": evidence,
-            "line_no": idx,
-        })
     return rows
 
 
@@ -1450,8 +1560,7 @@ def _extract_refs(cell: str) -> list[str]:
             continue
         has_slash = "/" in token
         has_ext = any(
-            token.endswith(ext)
-            for ext in (".py", ".md", ".ts", ".tsv", ".jsonl", ".json", ".yml", ".yaml", ".toml")
+            token.endswith(ext) for ext in (".py", ".md", ".ts", ".tsv", ".jsonl", ".json", ".yml", ".yaml", ".toml")
         )
         if has_slash or has_ext:
             refs.append(token)
@@ -1498,28 +1607,32 @@ def _validate_matrix(matrix_path: str, *, repo_root: str = ".", json_output: boo
         refs = [r for r in refs if not (r in seen or seen.add(r))]
         if not refs:
             rows_without_refs += 1
-            row_results.append({
-                "control_id": row["control_id"],
-                "line_no": row["line_no"],
-                "refs": [],
-                "status": "fail",
-                "detail": "no evidence references found in row",
-            })
+            row_results.append(
+                {
+                    "control_id": row["control_id"],
+                    "line_no": row["line_no"],
+                    "refs": [],
+                    "status": "fail",
+                    "detail": "no evidence references found in row",
+                }
+            )
             row_failed += 1
             continue
         resolutions = [_resolve_evidence(r, root) for r in refs]
         all_pass = all(res["status"] in ("pass", "tier2", "external") for res in resolutions)
-        row_results.append({
-            "control_id": row["control_id"],
-            "line_no": row["line_no"],
-            "refs": [{"ref": r, **res} for r, res in zip(refs, resolutions)],
-            "status": "pass" if all_pass else "fail",
-            "detail": (
-                "all refs resolve"
-                if all_pass
-                else f"{sum(1 for r in resolutions if r['status'] == 'fail')} of {len(resolutions)} refs unresolved"
-            ),
-        })
+        row_results.append(
+            {
+                "control_id": row["control_id"],
+                "line_no": row["line_no"],
+                "refs": [{"ref": r, **res} for r, res in zip(refs, resolutions)],
+                "status": "pass" if all_pass else "fail",
+                "detail": (
+                    "all refs resolve"
+                    if all_pass
+                    else f"{sum(1 for r in resolutions if r['status'] == 'fail')} of {len(resolutions)} refs unresolved"
+                ),
+            }
+        )
         if all_pass:
             row_passed += 1
         else:
@@ -1537,17 +1650,14 @@ def _validate_matrix(matrix_path: str, *, repo_root: str = ".", json_output: boo
             "rows_passed": row_passed,
             "rows_failed": row_failed,
             "rows_without_refs": rows_without_refs,
-            "coverage_pct": (
-                round(100.0 * row_passed / len(fulfilled_rows), 1)
-                if fulfilled_rows
-                else 0.0
-            ),
+            "coverage_pct": (round(100.0 * row_passed / len(fulfilled_rows), 1) if fulfilled_rows else 0.0),
         },
         "rows": row_results,
     }
 
     if json_output:
         import json as _json
+
         print(_json.dumps(summary, indent=2, ensure_ascii=False))
     else:
         print(f"Matrix: {path.name}")
@@ -1620,16 +1730,10 @@ def _resolve_evidence(ref: str, repo_root: Path) -> dict:
         if candidate.exists():
             return {"path": _display_path(candidate, root), "status": "pass", "detail": "file exists"}
 
-    if not ref.endswith(
-        (".py", ".md", ".ts", ".tsv", ".jsonl", ".json", ".yml", ".yaml", ".toml")
-    ):
+    if not ref.endswith((".py", ".md", ".ts", ".tsv", ".jsonl", ".json", ".yml", ".yaml", ".toml")):
         for candidate in candidates:
             for ext in (".py", ".md"):
-                ext_candidate = (
-                    candidate.with_suffix(ext)
-                    if candidate.suffix
-                    else Path(str(candidate) + ext)
-                )
+                ext_candidate = candidate.with_suffix(ext) if candidate.suffix else Path(str(candidate) + ext)
                 if ext_candidate.exists():
                     return {
                         "path": _display_path(ext_candidate, root),

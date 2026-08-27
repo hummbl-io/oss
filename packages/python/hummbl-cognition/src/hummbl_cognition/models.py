@@ -52,21 +52,25 @@ class LedgerScope(str, Enum):
 # Canonical values for new writes (pre-append lint uses these).
 # Historical aliases are accepted during read via from_dict normalizations
 # but rejected for new entries to prevent schema drift accumulation.
-CANONICAL_LEDGER_TYPES: frozenset[str] = frozenset({
-    LedgerEntryType.LESSON.value,
-    LedgerEntryType.DECISION.value,
-    LedgerEntryType.DISCOVERY.value,
-    LedgerEntryType.CORRECTION.value,
-    LedgerEntryType.CONVENTION.value,
-})
+CANONICAL_LEDGER_TYPES: frozenset[str] = frozenset(
+    {
+        LedgerEntryType.LESSON.value,
+        LedgerEntryType.DECISION.value,
+        LedgerEntryType.DISCOVERY.value,
+        LedgerEntryType.CORRECTION.value,
+        LedgerEntryType.CONVENTION.value,
+    }
+)
 
-CANONICAL_LEDGER_SCOPES: frozenset[str] = frozenset({
-    LedgerScope.PROJECT.value,
-    LedgerScope.MODULE.value,
-    LedgerScope.FILE.value,
-    LedgerScope.CONVENTION.value,
-    LedgerScope.PROCESS.value,
-})
+CANONICAL_LEDGER_SCOPES: frozenset[str] = frozenset(
+    {
+        LedgerScope.PROJECT.value,
+        LedgerScope.MODULE.value,
+        LedgerScope.FILE.value,
+        LedgerScope.CONVENTION.value,
+        LedgerScope.PROCESS.value,
+    }
+)
 
 
 class AssuranceLevel(str, Enum):
@@ -148,9 +152,16 @@ class IntelType(str, Enum):
 
 
 # Allowed vendor identifiers
-VALID_VENDORS = frozenset({
-    "anthropic", "openai", "google", "moonshot", "local", "human",
-})
+VALID_VENDORS = frozenset(
+    {
+        "anthropic",
+        "openai",
+        "google",
+        "moonshot",
+        "local",
+        "human",
+    }
+)
 
 # Valid color team names (from ColorTeam enum)
 VALID_COLOR_TEAMS = frozenset({e.value for e in ColorTeam})
@@ -256,14 +267,22 @@ class LedgerEntry:
     assurance_level: str | None = None  # SELF, PEER, or VERIFIED
     signature: str | None = None  # HMAC-SHA256 hex (optional)
     links: tuple[str, ...] = ()  # Related entry IDs (max 20, Zettelkasten-style)
-    claim: dict[str, Any] | None = None  # Optional JSON-LD schema:Claim (ADR-FM-048 Phase 0)
+    claim: dict[str, Any] | None = (
+        None  # Optional JSON-LD schema:Claim (ADR-FM-048 Phase 0)
+    )
     # Color team extension (v1.1.0 — see color-team-engine registry)
     color_team: str | None = None  # ColorTeam value (e.g., "red", "lavender", "amber")
-    intel_types_consumed: tuple[str, ...] = ()  # IntelType values consumed during exercise
+    intel_types_consumed: tuple[
+        str, ...
+    ] = ()  # IntelType values consumed during exercise
     intel_types_produced: tuple[str, ...] = ()  # IntelType values produced as findings
-    exercise_role: str | None = None  # Role from color registry (e.g., "offense", "defense", "referee")
+    exercise_role: str | None = (
+        None  # Role from color registry (e.g., "offense", "defense", "referee")
+    )
     # CLP v1.1 extensions (v1.1.1 — hash-chaining, bi-temporal, belief-DAG)
-    previous_hash: str | None = None  # SHA-256 of preceding ledger entry line (cryptographic chain)
+    previous_hash: str | None = (
+        None  # SHA-256 of preceding ledger entry line (cryptographic chain)
+    )
     valid_time: str | None = None  # ISO 8601 UTC when fact was valid in reality
     contests: str | None = None  # ID of entry this disputes/contests
 
@@ -271,8 +290,7 @@ class LedgerEntry:
         """Validate entry fields."""
         if not _is_valid_id(self.id):
             raise ValueError(
-                f"Invalid entry ID format: {self.id!r} "
-                "(expected clp-<12 hex chars>)"
+                f"Invalid entry ID format: {self.id!r} (expected clp-<12 hex chars>)"
             )
         if self.vendor not in VALID_VENDORS:
             raise ValueError(
@@ -290,43 +308,34 @@ class LedgerEntry:
                 f"(expected one of {[e.value for e in LedgerScope]})"
             )
         if not self.content or len(self.content) > 4096:
-            raise ValueError(
-                f"Content must be 1-4096 chars, got {len(self.content)}"
-            )
+            raise ValueError(f"Content must be 1-4096 chars, got {len(self.content)}")
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError(
-                f"Confidence must be 0.0-1.0, got {self.confidence}"
-            )
+            raise ValueError(f"Confidence must be 0.0-1.0, got {self.confidence}")
         if len(self.tags) > 10:
             raise ValueError(f"Maximum 10 tags, got {len(self.tags)}")
         if self.assurance_level is not None:
             if self.assurance_level not in {e.value for e in AssuranceLevel}:
-                raise ValueError(
-                    f"Invalid assurance_level: {self.assurance_level!r}"
-                )
+                raise ValueError(f"Invalid assurance_level: {self.assurance_level!r}")
         if self.supersedes is not None and not self.supersedes.startswith("clp-"):
-            raise ValueError(
-                f"supersedes must be a valid CLP ID: {self.supersedes!r}"
-            )
+            raise ValueError(f"supersedes must be a valid CLP ID: {self.supersedes!r}")
         if len(self.links) > 20:
             raise ValueError(f"Maximum 20 links, got {len(self.links)}")
         for link_id in self.links:
             if not link_id.startswith("clp-") or len(link_id) != 16:
                 raise ValueError(
-                    f"Invalid link ID format: {link_id!r} "
-                    "(expected clp-<12 hex chars>)"
+                    f"Invalid link ID format: {link_id!r} (expected clp-<12 hex chars>)"
                 )
         if self.contests is not None and not _is_valid_id(self.contests):
-            raise ValueError(
-                f"contests must be a valid CLP ID: {self.contests!r}"
-            )
+            raise ValueError(f"contests must be a valid CLP ID: {self.contests!r}")
         if self.valid_time is not None:
             if not self.valid_time.endswith("Z") or "T" not in self.valid_time:
                 raise ValueError(
                     f"valid_time must be ISO 8601 UTC with Z suffix: {self.valid_time!r}"
                 )
         if self.previous_hash is not None:
-            if len(self.previous_hash) != 64 or not all(c in "0123456789abcdef" for c in self.previous_hash.lower()):
+            if len(self.previous_hash) != 64 or not all(
+                c in "0123456789abcdef" for c in self.previous_hash.lower()
+            ):
                 raise ValueError(
                     f"previous_hash must be 64 hex chars SHA-256 digest: {self.previous_hash!r}"
                 )

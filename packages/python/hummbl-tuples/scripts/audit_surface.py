@@ -22,7 +22,14 @@ from typing import Any
 
 # Minimum fields required for reliable auditing (7 fields)
 MINIMUM_FIELDS = {
-    "tuple_type", "id", "time", "state", "agent", "intent_id", "task_id", "tuple_data"
+    "tuple_type",
+    "id",
+    "time",
+    "state",
+    "agent",
+    "intent_id",
+    "task_id",
+    "tuple_data",
 }
 
 # Recommended fields (9 fields — minimum + drift + tier)
@@ -89,8 +96,12 @@ def audit_trace(trace: list[dict[str, Any]], level: str = "recommended") -> dict
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, help="Input trace file (JSON array)")
-    parser.add_argument("--level", choices=["minimum", "recommended", "full"],
-                        default="recommended", help="Audit level (default: recommended)")
+    parser.add_argument(
+        "--level",
+        choices=["minimum", "recommended", "full"],
+        default="recommended",
+        help="Audit level (default: recommended)",
+    )
     args = parser.parse_args(argv)
 
     with Path(args.input).open("r", encoding="utf-8") as f:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tests for ATTEST separate class evaluation (issue #30)."""
 
-import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -22,6 +21,7 @@ def test_evidence_schema_exists():
 def test_attest_schema_has_tuple_data():
     """The ATTEST schema should have a tuple_data field for domain-specific fields."""
     import json
+
     schema = REPO_ROOT / "schemas" / "attest.schema.json"
     data = json.loads(schema.read_text(encoding="utf-8"))
     props = data.get("properties", {})
@@ -31,6 +31,7 @@ def test_attest_schema_has_tuple_data():
 def test_attest_schema_has_intent_id():
     """The ATTEST schema should have an intent_id field (governance link)."""
     import json
+
     schema = REPO_ROOT / "schemas" / "attest.schema.json"
     data = json.loads(schema.read_text(encoding="utf-8"))
     props = data.get("properties", {})

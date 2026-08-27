@@ -55,9 +55,7 @@ def validate_rollback(declaration: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(declaration, schema)
     if errors:
-        raise ValidationError(
-            f"Rollback schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Rollback schema validation failed: {'; '.join(errors)}")
 
 
 def validate_reversibility(declaration: dict[str, Any]) -> None:
@@ -80,8 +78,7 @@ def validate_reversibility(declaration: dict[str, Any]) -> None:
         rollback_plan = declaration.get("rollback_plan")
         if not isinstance(rollback_plan, dict):
             raise ValueError(
-                f"Rollback declaration rejected: rollback_plan required for "
-                f"reversibility='{reversibility}'"
+                f"Rollback declaration rejected: rollback_plan required for reversibility='{reversibility}'"
             )
 
         steps = rollback_plan.get("rollback_steps")
@@ -95,22 +92,19 @@ def validate_reversibility(declaration: dict[str, Any]) -> None:
         acceptance = declaration.get("irreversibility_acceptance")
         if not isinstance(acceptance, dict):
             raise ValueError(
-                "Rollback declaration rejected: irreversibility_acceptance "
-                "required for reversibility='irreversible'"
+                "Rollback declaration rejected: irreversibility_acceptance required for reversibility='irreversible'"
             )
 
         risk_description = acceptance.get("risk_description")
         if not risk_description or not isinstance(risk_description, str):
             raise ValueError(
-                "Rollback declaration rejected: irreversibility_acceptance "
-                "must include a non-empty risk_description"
+                "Rollback declaration rejected: irreversibility_acceptance must include a non-empty risk_description"
             )
 
         acceptor_id = acceptance.get("acceptor_id")
         if not acceptor_id or not isinstance(acceptor_id, str):
             raise ValueError(
-                "Rollback declaration rejected: irreversibility_acceptance "
-                "must include a non-empty acceptor_id"
+                "Rollback declaration rejected: irreversibility_acceptance must include a non-empty acceptor_id"
             )
 
 

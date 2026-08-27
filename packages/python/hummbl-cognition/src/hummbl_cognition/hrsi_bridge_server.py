@@ -14,7 +14,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import hmac
 import json
 import logging
@@ -28,15 +27,15 @@ from typing import Any
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from hummbl_cognition.hrsi_checkin import (
-    CYCLES_PATH,
-    get_status,
-    record_cycle,
-)
 from hummbl_cognition.belonging_check import (
     BASELINE_PATH,
     COGSTATE_VALUES,
     SCORE_RANGE,
+)
+from hummbl_cognition.hrsi_checkin import (
+    CYCLES_PATH,
+    get_status,
+    record_cycle,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +47,7 @@ MAX_REQUEST_BODY = 1_048_576
 # ---------------------------------------------------------------------------
 # Credential loading (mirrors bus bridge_server._load_bridge_credentials)
 # ---------------------------------------------------------------------------
+
 
 def _load_bridge_credentials() -> dict[str, str]:
     """Load rotatable client credentials from env or an external file.
@@ -79,7 +79,9 @@ def _load_bridge_credentials() -> dict[str, str]:
         isinstance(k, str) and isinstance(v, str) and v.strip()
         for k, v in parsed.items()
     ):
-        logger.error("HRSI_BRIDGE_TOKEN_FILE must contain a client-to-token JSON object")
+        logger.error(
+            "HRSI_BRIDGE_TOKEN_FILE must contain a client-to-token JSON object"
+        )
         return {}
     return {k: v.strip() for k, v in parsed.items()}
 
@@ -87,6 +89,7 @@ def _load_bridge_credentials() -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # Tailscale IP detection (mirrors bus bridge_server.get_tailscale_ip)
 # ---------------------------------------------------------------------------
+
 
 def get_tailscale_ip() -> str | None:
     """Detect the local Tailscale IPv4 address."""
@@ -122,6 +125,7 @@ def get_tailscale_ip() -> str | None:
 # ---------------------------------------------------------------------------
 # Request handler
 # ---------------------------------------------------------------------------
+
 
 class HRSIBridgeHandler(BaseHTTPRequestHandler):
     """HTTP handler for receiving remote HRSI check-ins."""
@@ -233,11 +237,17 @@ class HRSIBridgeHandler(BaseHTTPRequestHandler):
             # Validate ranges
             if cogstate not in COGSTATE_VALUES:
                 self._json_response(
-                    {"error": f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}"},
+                    {
+                        "error": f"cogstate must be one of {sorted(COGSTATE_VALUES)}, got {cogstate!r}"
+                    },
                     status=400,
                 )
                 return
-            for name, val in [("safety", safety), ("mattering", mattering), ("connection", connection)]:
+            for name, val in [
+                ("safety", safety),
+                ("mattering", mattering),
+                ("connection", connection),
+            ]:
                 if val not in SCORE_RANGE:
                     self._json_response(
                         {"error": f"{name} must be 1-5, got {val}"},
@@ -245,7 +255,9 @@ class HRSIBridgeHandler(BaseHTTPRequestHandler):
                     )
                     return
             if energy is not None and energy not in SCORE_RANGE:
-                self._json_response({"error": f"energy must be 1-5, got {energy}"}, status=400)
+                self._json_response(
+                    {"error": f"energy must be 1-5, got {energy}"}, status=400
+                )
                 return
             if sleep_hours is not None and not (0 <= sleep_hours <= 24):
                 self._json_response(
@@ -277,15 +289,17 @@ class HRSIBridgeHandler(BaseHTTPRequestHandler):
             )
 
             status = get_status()
-            self._json_response({
-                "status": "ok",
-                "cycle": cycle,
-                "gap1_qualifying_days": status["gap1_qualifying_days"],
-                "gap1_closed": status["gap1_closed"],
-                "current_streak": status["current_streak"],
-                "total_cycles": status["total_cycles"],
-                "origin_machine": origin_machine,
-            })
+            self._json_response(
+                {
+                    "status": "ok",
+                    "cycle": cycle,
+                    "gap1_qualifying_days": status["gap1_qualifying_days"],
+                    "gap1_closed": status["gap1_closed"],
+                    "current_streak": status["current_streak"],
+                    "total_cycles": status["total_cycles"],
+                    "origin_machine": origin_machine,
+                }
+            )
 
         except json.JSONDecodeError:
             self.send_error(400, "Invalid JSON")
@@ -304,14 +318,16 @@ class HRSIBridgeHandler(BaseHTTPRequestHandler):
 
         if path == "/health":
             credentials = _load_bridge_credentials()
-            self._json_response({
-                "status": "up",
-                "service": "hrsi-bridge",
-                "version": "1.0",
-                "auth_enabled": bool(credentials),
-                "cycles_path": str(CYCLES_PATH),
-                "baseline_path": str(BASELINE_PATH),
-            })
+            self._json_response(
+                {
+                    "status": "up",
+                    "service": "hrsi-bridge",
+                    "version": "1.0",
+                    "auth_enabled": bool(credentials),
+                    "cycles_path": str(CYCLES_PATH),
+                    "baseline_path": str(BASELINE_PATH),
+                }
+            )
             return
 
         if path in ("/hrsi/status", "/hrsi-checkin/status"):
@@ -328,7 +344,9 @@ class HRSIBridgeHandler(BaseHTTPRequestHandler):
                 self._json_response({"cycle": None, "message": "no cycles logged"})
                 return
             lines = [
-                l for l in CYCLES_PATH.read_text(encoding="utf-8").splitlines() if l.strip()
+                l
+                for l in CYCLES_PATH.read_text(encoding="utf-8").splitlines()
+                if l.strip()
             ]
             if not lines:
                 self._json_response({"cycle": None, "message": "empty ledger"})
@@ -343,6 +361,7 @@ class HRSIBridgeHandler(BaseHTTPRequestHandler):
 # ---------------------------------------------------------------------------
 # Server runner
 # ---------------------------------------------------------------------------
+
 
 def run_server(port: int = DEFAULT_PORT, bind_all: bool = False) -> None:
     if bind_all:
@@ -362,9 +381,13 @@ def run_server(port: int = DEFAULT_PORT, bind_all: bool = False) -> None:
     print(f"HRSI Bridge Server running on http://{host}:{port}")
     print("Endpoints: POST /hrsi, GET /health, GET /hrsi/status, GET /hrsi/last")
     if credentials:
-        print("Auth: POST/GET endpoints require Authorization: Bearer <HRSI_BRIDGE_TOKEN>")
+        print(
+            "Auth: POST/GET endpoints require Authorization: Bearer <HRSI_BRIDGE_TOKEN>"
+        )
     else:
-        print("Auth: FAIL-CLOSED — configure HRSI_BRIDGE_TOKEN or HRSI_BRIDGE_TOKEN_FILE")
+        print(
+            "Auth: FAIL-CLOSED — configure HRSI_BRIDGE_TOKEN or HRSI_BRIDGE_TOKEN_FILE"
+        )
     print("Press Ctrl+C to stop")
 
     try:
@@ -379,11 +402,16 @@ if __name__ == "__main__":  # pragma: no cover
         description="HRSI Bridge Server for cross-machine HRSI check-ins"
     )
     parser.add_argument(
-        "--port", "-p", type=int, default=DEFAULT_PORT,
+        "--port",
+        "-p",
+        type=int,
+        default=DEFAULT_PORT,
         help=f"Port to listen on (default: {DEFAULT_PORT})",
     )
     parser.add_argument(
-        "--bind-all", "-a", action="store_true",
+        "--bind-all",
+        "-a",
+        action="store_true",
         help="Bind to all interfaces (default: Tailscale only)",
     )
     args = parser.parse_args()

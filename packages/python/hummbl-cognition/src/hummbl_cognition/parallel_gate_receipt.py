@@ -17,7 +17,6 @@ issue's runner, join, fallback, or serial-versus-parallel trial criteria.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from datetime import datetime
 from typing import Any
@@ -36,9 +35,18 @@ VALID_STATUS = {"pass", "fail", "skipped", "error"}
 VALID_SEVERITY = {"critical", "high", "medium", "low"}
 VALID_BACKOFF = {"exponential", "linear", "fixed", "none"}
 ALLOWED_FIELDS = {
-    "gate_name", "run_id", "timestamp", "status", "duration_ms",
-    "receipt_hash", "deterministic_seed", "findings", "environment",
-    "timeout_ms", "retry_count", "retry_backoff",
+    "gate_name",
+    "run_id",
+    "timestamp",
+    "status",
+    "duration_ms",
+    "receipt_hash",
+    "deterministic_seed",
+    "findings",
+    "environment",
+    "timeout_ms",
+    "retry_count",
+    "retry_backoff",
 }
 
 
@@ -49,8 +57,7 @@ class ParallelGateReceiptError(Exception):
 def compute_gate_receipt_hash(receipt: dict[str, Any]) -> str:
     """Compute deterministic SHA-256 excluding volatile timestamp/hash fields."""
     stripped = {
-        k: v for k, v in receipt.items()
-        if k not in {"receipt_hash", "timestamp"}
+        k: v for k, v in receipt.items() if k not in {"receipt_hash", "timestamp"}
     }
     digest = hashlib.sha256(_canonical_json(stripped).encode("utf-8")).hexdigest()
     return f"sha256:{digest}"
@@ -58,19 +65,24 @@ def compute_gate_receipt_hash(receipt: dict[str, Any]) -> str:
 
 def _sort_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Sort findings by file, then line (deterministic order)."""
+
     def key(finding: dict[str, Any]) -> tuple[str, int]:
         file_value = finding.get("file")
         line_value = finding.get("line")
         return (
             file_value if isinstance(file_value, str) else "",
-            line_value if isinstance(line_value, int) and not isinstance(line_value, bool) else -1,
+            line_value
+            if isinstance(line_value, int) and not isinstance(line_value, bool)
+            else -1,
         )
 
     return sorted(findings, key=key)
 
 
 def _valid_timestamp(value: str) -> bool:
-    if "T" not in value or not (value.endswith("Z") or re.search(r"[+-]\d\d:\d\d$", value)):
+    if "T" not in value or not (
+        value.endswith("Z") or re.search(r"[+-]\d\d:\d\d$", value)
+    ):
         return False
     try:
         datetime.fromisoformat(value[:-1] + "+00:00" if value.endswith("Z") else value)
@@ -90,8 +102,13 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
     errors: list[str] = []
 
     required = [
-        "gate_name", "run_id", "timestamp", "status",
-        "duration_ms", "receipt_hash", "deterministic_seed",
+        "gate_name",
+        "run_id",
+        "timestamp",
+        "status",
+        "duration_ms",
+        "receipt_hash",
+        "deterministic_seed",
     ]
     for field in required:
         if field not in receipt or receipt[field] is None:
@@ -101,8 +118,17 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
     if unexpected:
         errors.append(f"unexpected fields: {unexpected}")
 
-    for field in ("gate_name", "run_id", "timestamp", "status", "receipt_hash", "deterministic_seed"):
-        if field in receipt and (not isinstance(receipt[field], str) or not receipt[field].strip()):
+    for field in (
+        "gate_name",
+        "run_id",
+        "timestamp",
+        "status",
+        "receipt_hash",
+        "deterministic_seed",
+    ):
+        if field in receipt and (
+            not isinstance(receipt[field], str) or not receipt[field].strip()
+        ):
             errors.append(f"{field} must be a non-empty string")
 
     if errors:
@@ -132,13 +158,17 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
                 if req not in f:
                     errors.append(f"finding {i}: missing required field '{req}'")
             if not _valid_relative_path(f.get("file")):
-                errors.append(f"finding {i}: file must be a non-empty relative POSIX path")
+                errors.append(
+                    f"finding {i}: file must be a non-empty relative POSIX path"
+                )
             for field in ("rule", "message"):
                 if not isinstance(f.get(field), str) or not f[field].strip():
                     errors.append(f"finding {i}: {field} must be a non-empty string")
             severity = f.get("severity", "")
             if severity not in VALID_SEVERITY:
-                errors.append(f"finding {i}: severity '{severity}' not in {sorted(VALID_SEVERITY)}")
+                errors.append(
+                    f"finding {i}: severity '{severity}' not in {sorted(VALID_SEVERITY)}"
+                )
             line = f.get("line", 0)
             if not isinstance(line, int) or isinstance(line, bool) or line < 1:
                 errors.append(f"finding {i}: line must be a positive integer")
@@ -148,7 +178,11 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
 
     # Retry validation
     retry_count = receipt.get("retry_count", 0)
-    if not isinstance(retry_count, int) or isinstance(retry_count, bool) or retry_count < 0:
+    if (
+        not isinstance(retry_count, int)
+        or isinstance(retry_count, bool)
+        or retry_count < 0
+    ):
         errors.append("retry_count must be a non-negative integer")
 
     backoff = receipt.get("retry_backoff", "exponential")
@@ -165,7 +199,9 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
     # Deterministic seed
     seed = receipt.get("deterministic_seed", "")
     if not seed:
-        errors.append("deterministic_seed must be a non-empty string (use 'none' if no randomization)")
+        errors.append(
+            "deterministic_seed must be a non-empty string (use 'none' if no randomization)"
+        )
 
     # Duration
     duration = receipt.get("duration_ms", 0)
@@ -181,7 +217,9 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
                 set(environment) - {"runner", "python_version", "dependencies_hash"}
             )
             if unexpected_environment:
-                errors.append(f"environment has unexpected fields: {unexpected_environment}")
+                errors.append(
+                    f"environment has unexpected fields: {unexpected_environment}"
+                )
             for field in ("runner", "python_version", "dependencies_hash"):
                 if field in environment and not isinstance(environment[field], str):
                     errors.append(f"environment.{field} must be a string")
@@ -189,15 +227,21 @@ def validate_parallel_gate_receipt(receipt: dict[str, Any]) -> tuple[bool, list[
             if isinstance(dependency_hash, str) and not re.fullmatch(
                 r"sha256:[a-f0-9]{64}", dependency_hash
             ):
-                errors.append("environment.dependencies_hash must match sha256:<64 lowercase hex>")
+                errors.append(
+                    "environment.dependencies_hash must match sha256:<64 lowercase hex>"
+                )
 
     # Hash verification
     expected_hash = compute_gate_receipt_hash(receipt)
     stored_hash = receipt.get("receipt_hash", "")
-    if isinstance(stored_hash, str) and not re.fullmatch(r"sha256:[a-f0-9]{64}", stored_hash):
+    if isinstance(stored_hash, str) and not re.fullmatch(
+        r"sha256:[a-f0-9]{64}", stored_hash
+    ):
         errors.append("receipt_hash must match sha256:<64 lowercase hex>")
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 

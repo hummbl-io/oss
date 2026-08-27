@@ -1,9 +1,10 @@
 """Tests for ModelRegistry."""
+
 from __future__ import annotations
 
 import tempfile
-import pytest
 
+import pytest
 from hummbl_governance.kernel.model_registry import (
     ModelEntry,
     ModelRegistry,
@@ -28,9 +29,7 @@ class TestModelRegistry:
         reg = ModelRegistry()
 
         assert reg.registry_path == default_registry_path()
-        assert reg.registry_path == (
-            tmp_path / "hummbl-governance" / "model_registry" / "models.jsonl"
-        )
+        assert reg.registry_path == (tmp_path / "hummbl-governance" / "model_registry" / "models.jsonl")
         assert not str(reg.registry_path).startswith(".kernel")
 
     def test_register_and_list(self):
@@ -77,11 +76,17 @@ class TestModelRegistry:
         with tempfile.TemporaryDirectory() as tmp:
             reg = ModelRegistry(registry_path=f"{tmp}/models.jsonl")
             reg.register(
-                model_id="bad", task="t", params_m=1.0, checkpoint_path="/a",
+                model_id="bad",
+                task="t",
+                params_m=1.0,
+                checkpoint_path="/a",
                 metrics={"val_ppl": 30.0},
             )
             reg.register(
-                model_id="good", task="t", params_m=1.0, checkpoint_path="/b",
+                model_id="good",
+                task="t",
+                params_m=1.0,
+                checkpoint_path="/b",
                 metrics={"val_ppl": 15.0},
             )
 
@@ -127,16 +132,27 @@ class TestModelRegistry:
         with tempfile.TemporaryDirectory() as tmp:
             reg = ModelRegistry(registry_path=f"{tmp}/models.jsonl")
             reg.register(
-                model_id="ancestor", task="t", params_m=1.0, checkpoint_path="/a",
+                model_id="ancestor",
+                task="t",
+                params_m=1.0,
+                checkpoint_path="/a",
                 metrics={"val_ppl": 25.0},
             )
             reg.register(
-                model_id="child", task="t", params_m=1.0, checkpoint_path="/b",
-                parent_id="ancestor", metrics={"val_ppl": 20.0},
+                model_id="child",
+                task="t",
+                params_m=1.0,
+                checkpoint_path="/b",
+                parent_id="ancestor",
+                metrics={"val_ppl": 20.0},
             )
             reg.register(
-                model_id="grandchild", task="t", params_m=1.0, checkpoint_path="/c",
-                parent_id="child", metrics={"val_ppl": 18.0},
+                model_id="grandchild",
+                task="t",
+                params_m=1.0,
+                checkpoint_path="/c",
+                parent_id="child",
+                metrics={"val_ppl": 18.0},
             )
 
             chain = reg.lineage("grandchild")

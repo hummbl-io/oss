@@ -207,7 +207,9 @@ def score_evidence_backed(title: str, body: str) -> CriterionScore:
     if hits >= 3:
         return CriterionScore("evidence_backed", 3, 3, "concrete citations present")
     if hits == 2:
-        return CriterionScore("evidence_backed", 2, 3, "specific reference but incomplete")
+        return CriterionScore(
+            "evidence_backed", 2, 3, "specific reference but incomplete"
+        )
     if hits == 1:
         return CriterionScore("evidence_backed", 1, 3, "vague reference")
     return CriterionScore("evidence_backed", 0, 3, "no evidence cited")
@@ -249,11 +251,15 @@ def score_non_duplicate(
         if sim > best:
             best = sim
     if best >= 0.8:
-        return CriterionScore("non_duplicate", 0, 3, f"near-identical to existing (sim={best:.2f})")
+        return CriterionScore(
+            "non_duplicate", 0, 3, f"near-identical to existing (sim={best:.2f})"
+        )
     if best >= 0.5:
         return CriterionScore("non_duplicate", 1, 3, f"likely overlap (sim={best:.2f})")
     if best >= 0.2:
-        return CriterionScore("non_duplicate", 2, 3, f"partial overlap (sim={best:.2f})")
+        return CriterionScore(
+            "non_duplicate", 2, 3, f"partial overlap (sim={best:.2f})"
+        )
     return CriterionScore("non_duplicate", 3, 3, "no overlap with existing issues")
 
 
@@ -294,10 +300,16 @@ def score_severity_appropriate(title: str, body: str) -> CriterionScore:
     has_severity = bool(_SEVERITY_PATTERN.search(text))
     has_justification = _count_markers(text, _SEVERITY_JUSTIFICATION_MARKERS) > 0
     if has_severity and has_justification:
-        return CriterionScore("severity_appropriate", 2, 2, "severity present and justified")
+        return CriterionScore(
+            "severity_appropriate", 2, 2, "severity present and justified"
+        )
     if has_severity:
-        return CriterionScore("severity_appropriate", 1, 2, "severity present but weakly justified")
-    return CriterionScore("severity_appropriate", 0, 2, "severity missing or unjustified")
+        return CriterionScore(
+            "severity_appropriate", 1, 2, "severity present but weakly justified"
+        )
+    return CriterionScore(
+        "severity_appropriate", 0, 2, "severity missing or unjustified"
+    )
 
 
 # ---------------------------------------------------------------------------

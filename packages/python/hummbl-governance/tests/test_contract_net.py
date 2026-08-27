@@ -96,7 +96,7 @@ class TestEvaluation:
         mgr = ContractNetManager()
         ann_id = mgr.announce("orch", "task-1")
         mgr.submit_bid(ann_id, Bid(bidder="w1", cost=10.0, capability=0.5))  # ratio=20
-        mgr.submit_bid(ann_id, Bid(bidder="w2", cost=2.0, capability=0.8))   # ratio=2.5
+        mgr.submit_bid(ann_id, Bid(bidder="w2", cost=2.0, capability=0.8))  # ratio=2.5
         winner = mgr.evaluate(ann_id, strategy="best_ratio")
         assert winner.bidder == "w2"
 

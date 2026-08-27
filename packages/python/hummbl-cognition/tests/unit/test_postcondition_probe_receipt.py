@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator, FormatChecker
+import pytest
 
 from hummbl_cognition.postcondition_probe_receipt import (
     PostconditionProbeError,
@@ -12,6 +12,10 @@ from hummbl_cognition.postcondition_probe_receipt import (
     create_postcondition_probe,
     validate_postcondition_probe,
 )
+
+jsonschema = pytest.importorskip("jsonschema")
+Draft202012Validator = jsonschema.Draft202012Validator
+FormatChecker = jsonschema.FormatChecker
 
 
 def _verified_receipt() -> dict:
@@ -153,7 +157,9 @@ def test_schema_matches_runtime_nonempty_and_cross_field_invariants():
 
     def not_verified_without_failure(receipt):
         receipt["verification_result"]["status"] = "not_verified"
-        receipt["verification_result"]["observed_state"] = "verification command timed out"
+        receipt["verification_result"]["observed_state"] = (
+            "verification command timed out"
+        )
         receipt["failure_class"] = "none"
 
     mutations.extend(
@@ -210,7 +216,9 @@ def test_validate_rejects_bad_nested_captured_at():
     valid, errors = validate_postcondition_probe(receipt)
 
     assert not valid
-    assert any("before_state.captured_at must be an RFC3339 date-time" in e for e in errors)
+    assert any(
+        "before_state.captured_at must be an RFC3339 date-time" in e for e in errors
+    )
 
 
 def test_validate_rejects_timezoneless_nested_captured_at():
@@ -221,7 +229,9 @@ def test_validate_rejects_timezoneless_nested_captured_at():
     valid, errors = validate_postcondition_probe(receipt)
 
     assert not valid
-    assert any("after_state.captured_at must be an RFC3339 date-time" in e for e in errors)
+    assert any(
+        "after_state.captured_at must be an RFC3339 date-time" in e for e in errors
+    )
 
 
 def test_validate_accepts_valid_nested_captured_at():
@@ -322,7 +332,10 @@ def test_negative_check_failed_requires_checked_true():
     valid, errors = validate_postcondition_probe(receipt)
 
     assert not valid
-    assert any("negative_check.result='failed' requires negative_check.checked=True" in e for e in errors)
+    assert any(
+        "negative_check.result='failed' requires negative_check.checked=True" in e
+        for e in errors
+    )
 
 
 def test_non_none_failure_class_requires_operator_override_ref():

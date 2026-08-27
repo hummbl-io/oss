@@ -282,7 +282,9 @@ def test_validate_rejects_bad_oldest_required_timestamp():
     valid, errors = validate_compliance_log_gap_receipt(receipt)
 
     assert not valid
-    assert any("oldest_required_timestamp must be an RFC3339 date-time" in e for e in errors)
+    assert any(
+        "oldest_required_timestamp must be an RFC3339 date-time" in e for e in errors
+    )
 
 
 def test_validate_rejects_bad_last_successful_export_at():
@@ -293,7 +295,9 @@ def test_validate_rejects_bad_last_successful_export_at():
     valid, errors = validate_compliance_log_gap_receipt(receipt)
 
     assert not valid
-    assert any("last_successful_export_at must be an RFC3339 date-time" in e for e in errors)
+    assert any(
+        "last_successful_export_at must be an RFC3339 date-time" in e for e in errors
+    )
 
 
 def test_validate_accepts_empty_last_successful_export_at():

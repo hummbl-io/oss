@@ -22,17 +22,16 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-
 from hummbl_governance.compliance_mapper import (
     ComplianceMapper,
     ComplianceReport,
     main,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _today_str() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -151,6 +150,7 @@ def _killswitch_entry(entry_id: str = "e6") -> dict:
 # TestComplianceReport
 # ---------------------------------------------------------------------------
 
+
 class TestComplianceReport:
     def test_creation(self):
         report = ComplianceReport(
@@ -199,6 +199,7 @@ class TestComplianceReport:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperSOC2
 # ---------------------------------------------------------------------------
+
 
 class TestComplianceMapperSOC2:
     def test_generates_report(self, tmp_path):
@@ -258,6 +259,7 @@ class TestComplianceMapperSOC2:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperGDPR
 # ---------------------------------------------------------------------------
+
 
 class TestComplianceMapperGDPR:
     def test_dctx_maps_to_art30(self, tmp_path):
@@ -327,6 +329,7 @@ class TestComplianceMapperGDPR:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperOWASP
 # ---------------------------------------------------------------------------
+
 
 class TestComplianceMapperOWASP:
     def test_all_10_controls_initialized(self, tmp_path):
@@ -399,6 +402,7 @@ class TestComplianceMapperOWASP:
 # TestParseRobustness
 # ---------------------------------------------------------------------------
 
+
 class TestParseRobustness:
     def test_malformed_jsonl_line_skipped(self, tmp_path):
         fp = tmp_path / f"governance-{_today_str()}.jsonl"
@@ -427,6 +431,7 @@ class TestParseRobustness:
 # TestDefaultDir
 # ---------------------------------------------------------------------------
 
+
 class TestDefaultDir:
     def test_default_governance_dir(self):
         mapper = ComplianceMapper()
@@ -444,6 +449,7 @@ class TestDefaultDir:
 # ---------------------------------------------------------------------------
 # TestCLI
 # ---------------------------------------------------------------------------
+
 
 class TestCLI:
     def test_framework_soc2(self, tmp_path):
@@ -494,6 +500,7 @@ class TestCLI:
 # Fixtures shared between NIST/EU tests
 # ---------------------------------------------------------------------------
 
+
 def _attest_entry(entry_id: str = "e7") -> dict:
     return {
         "entry_id": entry_id,
@@ -530,6 +537,7 @@ def _cost_governor_entry(entry_id: str = "e8") -> dict:
 # TestComplianceMapperNISTRMF
 # ---------------------------------------------------------------------------
 
+
 class TestComplianceMapperNISTRMF:
     def test_all_controls_initialized(self, tmp_path):
         _write_governance_file(tmp_path, _today_str(), [])
@@ -537,10 +545,14 @@ class TestComplianceMapperNISTRMF:
         report = mapper.generate_nist_rmf_report(days=30)
         assert report.framework == "NIST_AI_RMF"
         expected = {
-            "GOVERN-1.1", "GOVERN-1.7",
-            "MAP-1.1", "MAP-2.2",
-            "MEASURE-2.5", "MEASURE-2.8",
-            "MANAGE-1.3", "MANAGE-2.4",
+            "GOVERN-1.1",
+            "GOVERN-1.7",
+            "MAP-1.1",
+            "MAP-2.2",
+            "MEASURE-2.5",
+            "MEASURE-2.8",
+            "MANAGE-1.3",
+            "MANAGE-2.4",
         }
         assert set(report.controls.keys()) == expected
 
@@ -645,7 +657,8 @@ class TestComplianceMapperNISTRMF:
 
     def test_multiple_entries_accumulate(self, tmp_path):
         _write_governance_file(
-            tmp_path, _today_str(),
+            tmp_path,
+            _today_str(),
             [_intent_entry("e1"), _intent_entry("e2"), _circuit_breaker_entry("e3")],
         )
         mapper = ComplianceMapper(governance_dir=tmp_path)
@@ -677,6 +690,7 @@ class TestComplianceMapperNISTRMF:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperEUAIAct
 # ---------------------------------------------------------------------------
+
 
 class TestComplianceMapperEUAIAct:
     def test_all_controls_initialized(self, tmp_path):
@@ -799,7 +813,8 @@ class TestComplianceMapperEUAIAct:
 
     def test_multiple_entries_accumulate(self, tmp_path):
         _write_governance_file(
-            tmp_path, _today_str(),
+            tmp_path,
+            _today_str(),
             [_killswitch_entry("e1"), _killswitch_entry("e2"), _dctx_entry("e3")],
         )
         mapper = ComplianceMapper(governance_dir=tmp_path)
@@ -938,8 +953,15 @@ class TestComplianceMapperISO42001:
         report = mapper.generate_iso42001_report(days=30)
         assert report.framework == "ISO42001"
         assert set(report.controls.keys()) == {
-            "A.2", "A.3", "A.4", "A.5", "A.6",
-            "A.7", "A.8", "A.9", "A.10",
+            "A.2",
+            "A.3",
+            "A.4",
+            "A.5",
+            "A.6",
+            "A.7",
+            "A.8",
+            "A.9",
+            "A.10",
         }
 
     def test_iso42001_intent_maps_to_a2(self, tmp_path):
@@ -1137,8 +1159,15 @@ class TestComplianceMapperGPAI:
         report = mapper.generate_gpai_report(days=30)
         assert report.framework == "EU_AI_ACT_GPAI"
         expected = {
-            "Art.53.1.a", "Art.53.1.b", "Art.53.1.c", "Art.53.1.d",
-            "Art.53.2.a", "Art.53.2.b", "Art.53.2.c", "Art.53.2.d", "Art.53.2.e",
+            "Art.53.1.a",
+            "Art.53.1.b",
+            "Art.53.1.c",
+            "Art.53.1.d",
+            "Art.53.2.a",
+            "Art.53.2.b",
+            "Art.53.2.c",
+            "Art.53.2.d",
+            "Art.53.2.e",
         }
         assert set(report.controls.keys()) == expected
 
@@ -1264,9 +1293,20 @@ class TestComplianceMapperCOSAiS:
         report = mapper.generate_cosais_report(days=30)
         assert report.framework == "NIST_COSAIS"
         expected = {
-            "AC-2", "AC-3", "AU-2", "AU-6", "AU-12",
-            "CM-2", "IA-2", "RA-3", "RA-5", "SA-9",
-            "SC-8", "SI-2", "SI-7", "SI-10",
+            "AC-2",
+            "AC-3",
+            "AU-2",
+            "AU-6",
+            "AU-12",
+            "CM-2",
+            "IA-2",
+            "RA-3",
+            "RA-5",
+            "SA-9",
+            "SC-8",
+            "SI-2",
+            "SI-7",
+            "SI-10",
         }
         assert set(report.controls.keys()) == expected
 
@@ -1405,8 +1445,16 @@ class TestComplianceMapperCrosswalk:
         report = mapper.generate_crosswalk_report(days=30)
         summary_frameworks = {s["framework"] for s in report.controls["summary"]}
         expected = {
-            "SOC2", "GDPR", "OWASP_AGENTIC", "NIST_AI_RMF", "EU_AI_ACT",
-            "EU_AI_ACT_GPAI", "ISO27001", "ISO42001", "NIST_CSF", "NIST_COSAIS",
+            "SOC2",
+            "GDPR",
+            "OWASP_AGENTIC",
+            "NIST_AI_RMF",
+            "EU_AI_ACT",
+            "EU_AI_ACT_GPAI",
+            "ISO27001",
+            "ISO42001",
+            "NIST_CSF",
+            "NIST_COSAIS",
         }
         assert summary_frameworks == expected
 
@@ -1442,7 +1490,8 @@ class TestComplianceMapperCrosswalk:
 
     def test_crosswalk_multiple_entries_accumulate(self, tmp_path):
         _write_governance_file(
-            tmp_path, _today_str(),
+            tmp_path,
+            _today_str(),
             [_dct_entry("e1"), _dctx_entry("e2"), _intent_entry("e3")],
         )
         mapper = ComplianceMapper(governance_dir=tmp_path)

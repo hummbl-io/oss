@@ -22,7 +22,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from hummbl_governance import (
     ApprovalAlreadyDecidedError,
     ApprovalError,
@@ -296,15 +295,9 @@ class TestApprovalGate:
         assert result["request_id"] is not None
 
     def test_requires_approval_static(self):
-        assert ApprovalManager.requires_approval(
-            "test", RiskLevel.LOW, RiskLevel.MEDIUM
-        ) is False
-        assert ApprovalManager.requires_approval(
-            "test", RiskLevel.MEDIUM, RiskLevel.MEDIUM
-        ) is True
-        assert ApprovalManager.requires_approval(
-            "test", RiskLevel.CRITICAL, RiskLevel.HIGH
-        ) is True
+        assert ApprovalManager.requires_approval("test", RiskLevel.LOW, RiskLevel.MEDIUM) is False
+        assert ApprovalManager.requires_approval("test", RiskLevel.MEDIUM, RiskLevel.MEDIUM) is True
+        assert ApprovalManager.requires_approval("test", RiskLevel.CRITICAL, RiskLevel.HIGH) is True
 
 
 class TestApprovalListing:
@@ -451,9 +444,7 @@ class TestApprovalAuditIntegration:
         mock_audit = MagicMock()
         mock_audit.append.return_value = (True, None)
         mgr = ApprovalManager(audit_log=mock_audit)
-        mgr.request_approval(
-            agent_id="a", action="t", action_args="", risk_level=RiskLevel.LOW, justification="j"
-        )
+        mgr.request_approval(agent_id="a", action="t", action_args="", risk_level=RiskLevel.LOW, justification="j")
         assert mock_audit.append.called
         call_args = mock_audit.append.call_args
         assert call_args.kwargs["tuple_data"]["event"] == "approval_requested"
@@ -511,8 +502,12 @@ class TestApprovalBackgroundExpiration:
     def test_background_expire_loop(self):
         mgr = ApprovalManager(auto_expire_interval=0.1)
         mgr.request_approval(
-            agent_id="a", action="t", action_args="", risk_level=RiskLevel.LOW,
-            justification="j", timeout_seconds=0.05,
+            agent_id="a",
+            action="t",
+            action_args="",
+            risk_level=RiskLevel.LOW,
+            justification="j",
+            timeout_seconds=0.05,
         )
         # Wait for the background sweep (runs every 0.1s) to fire.
         # 0.3s is 3x the interval — enough margin for the sweep to fire

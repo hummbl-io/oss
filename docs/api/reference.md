@@ -1,7 +1,9 @@
 # HUMMBL API Reference
 
+**HUMMBL** = **H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
+
 Base URL: `https://api.hummbl.io`
-OpenAPI spec: [`api/openapi.yaml`](../../api/openapi.yaml)
+OpenAPI spec: [`api/openapi.yaml`](https://github.com/hummbl-io/oss)
 MCP server: `npm install -g @hummbl/mcp-server`
 
 HUMMBL APIs are organized into four families plus a resources layer. Every
@@ -353,5 +355,5 @@ All errors return a sanitized `ErrorResponse` (no internal details):
 ### See also
 
 - [APIs hub](https://hummbl.io/apis) - the card-based documentation index
-- [OpenAPI 3.1 spec](../../api/openapi.yaml) - machine-readable surface
-- [MCP server](../../mcp-server/README.md) - HUMMBL as Model Context Protocol tools
+- [OpenAPI 3.1 spec](https://github.com/hummbl-io/oss) - machine-readable surface
+- [MCP server](https://github.com/hummbl-io/oss) - HUMMBL as Model Context Protocol tools

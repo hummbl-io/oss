@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 HIGH_IMPACT_PATTERNS = [
     re.compile(r"\b\d{2,7}\s+(?:tests|modules|features|checks|claims|verifications)\b", re.IGNORECASE),
     re.compile(r"\bzero\s+(?:risk|vulnerability|dependency|bugs?|security|defect)s?\b", re.IGNORECASE),
@@ -156,7 +155,7 @@ def compile_report(root: Path) -> dict[str, Any]:
     if tracked_changes:
         warnings.append(f"tracked diff files: {len(tracked_changes)}")
         for changed in tracked_changes:
-            candidate = (root / changed)
+            candidate = root / changed
             if str(candidate).endswith((".md", ".txt", ".rst")) and candidate.exists():
                 findings.append(
                     {

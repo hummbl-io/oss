@@ -36,7 +36,9 @@ class CritiqueConfig:
     minimum_score: float = 0.0
 
 
-def parse_critique(text: str, *, config: CritiqueConfig | None = None) -> CritiqueResult:
+def parse_critique(
+    text: str, *, config: CritiqueConfig | None = None
+) -> CritiqueResult:
     cfg = config or CritiqueConfig()
     try:
         data = json.loads(text)
@@ -45,7 +47,9 @@ def parse_critique(text: str, *, config: CritiqueConfig | None = None) -> Critiq
         return CritiqueResult(score=score, raw=text)
 
     if isinstance(data, int | float):
-        return CritiqueResult(score=_clamp_score(float(data), default=cfg.default_score), raw=text)
+        return CritiqueResult(
+            score=_clamp_score(float(data), default=cfg.default_score), raw=text
+        )
     if not isinstance(data, dict):
         return CritiqueResult(score=cfg.default_score, raw=text)
 

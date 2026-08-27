@@ -53,7 +53,11 @@ def _resolve_bus_path(override: str | Path | None = None) -> Path:
         ).strip()
         if root:
             return Path(root) / DEFAULT_BUS_PATH
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
 
     return Path(DEFAULT_BUS_PATH)
@@ -67,9 +71,12 @@ def _resolve_startup_output_path(
     if override:
         return Path(override)
 
-    safe_agent = "".join(
-        ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in agent_id
-    ).strip("_") or "agent"
+    safe_agent = (
+        "".join(
+            ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in agent_id
+        ).strip("_")
+        or "agent"
+    )
 
     try:
         import subprocess
@@ -82,7 +89,11 @@ def _resolve_startup_output_path(
         ).strip()
         if root:
             return Path(root) / DEFAULT_STARTUP_DIR / f"{safe_agent}.md"
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
 
     return Path(DEFAULT_STARTUP_DIR) / f"{safe_agent}.md"
@@ -125,6 +136,7 @@ def read_recent_bus_inbox(
 
             # Unwrap ASI07 signing envelope if present
             from hummbl_bus.message_signing import unwrap_signing_envelope
+
             message = unwrap_signing_envelope(message)
 
             matches.append(

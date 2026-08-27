@@ -1,12 +1,13 @@
 """Test configuration for BIF test suite."""
+
 import sys
 from pathlib import Path
 
 # Make mcp_server importable from repo root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
 import mcp_server
+import pytest
 
 
 @pytest.fixture(autouse=True)

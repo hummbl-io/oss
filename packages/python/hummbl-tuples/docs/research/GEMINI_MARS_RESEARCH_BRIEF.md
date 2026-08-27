@@ -6,7 +6,7 @@ Status: active external research packet for Mars-domain exploration
 
 This brief is for Gemini.
 
-It is separate from the Windows-local [MARS_PRE_FLIGHT.md](C:\Users\Owner\PROJECTS\yolo-playground\MARS_PRE_FLIGHT.md) ops checklist.
+It is separate from the Windows-local [MARS_PRE_FLIGHT.md](https://github.com/hummbl-io/oss) ops checklist.
 That file is an internal launch/ops metaphor.
 This brief is for real domain research.
 

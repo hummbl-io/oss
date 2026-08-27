@@ -38,10 +38,12 @@ SERVER_NAME = "cognitive-ledger"
 SERVER_VERSION = "0.1.0"
 PROTOCOL_VERSION = "2024-11-05"
 
-LEDGER_DIR = Path(os.environ.get(
-    "CLP_STATE_DIR",
-    DEFAULT_COGNITION_DIR,
-))
+LEDGER_DIR = Path(
+    os.environ.get(
+        "CLP_STATE_DIR",
+        DEFAULT_COGNITION_DIR,
+    )
+)
 LEDGER_FILE = LEDGER_DIR / "ledger.jsonl"
 INDEX_FILE = LEDGER_DIR / "index.json"
 
@@ -84,10 +86,9 @@ def _check_and_rebuild_if_stale(indexer: BM25Index) -> None:
         _rebuild_index(indexer)
         return
     from datetime import datetime
+
     try:
-        built_dt = datetime.fromisoformat(
-            built_at.replace("Z", "+00:00")
-        ).timestamp()
+        built_dt = datetime.fromisoformat(built_at.replace("Z", "+00:00")).timestamp()
     except ValueError:
         # Malformed build timestamp — index is corrupt/untrustworthy.
         # Rebuild rather than silently serving a stale index (PR #1533 regression).
@@ -125,8 +126,15 @@ TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string", "description": "Search query (natural language or keywords)"},
-                "limit": {"type": "integer", "description": "Max results (default: 10)", "default": 10},
+                "query": {
+                    "type": "string",
+                    "description": "Search query (natural language or keywords)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results (default: 10)",
+                    "default": 10,
+                },
             },
             "required": ["query"],
         },
@@ -138,10 +146,21 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "agent": {"type": "string", "description": "Filter by agent ID"},
-                "entry_type": {"type": "string", "description": "Filter by type (observation, decision, convention, question, finding)"},
+                "entry_type": {
+                    "type": "string",
+                    "description": "Filter by type (observation, decision, convention, question, finding)",
+                },
                 "scope": {"type": "string", "description": "Filter by scope"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "Filter by tags (AND logic)"},
-                "limit": {"type": "integer", "description": "Max results (default: 20)", "default": 20},
+                "tags": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Filter by tags (AND logic)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results (default: 20)",
+                    "default": 20,
+                },
             },
             "required": [],
         },
@@ -153,14 +172,50 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "title": {"type": "string", "description": "Entry title"},
-                "content": {"type": "string", "description": "Entry content (the knowledge to persist)"},
-                "entry_type": {"type": "string", "enum": ["lesson", "decision", "discovery", "correction", "convention"], "description": "Entry type (canonical LedgerEntryType)"},
-                "agent": {"type": "string", "description": "Agent ID (default: mcp-client)", "default": "mcp-client"},
-                "vendor": {"type": "string", "description": "Vendor (anthropic|openai|google|moonshot|local|human). If omitted, resolves from COGNITION_VENDOR env var; missing both → error."},
-                "model": {"type": "string", "description": "Model identifier. If omitted, resolves from COGNITION_MODEL env var; missing both → error."},
-                "confidence": {"type": "number", "description": "Confidence 0.0-1.0 (default: 0.7)", "default": 0.7},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "Tags for categorization (max 10)"},
-                "scope": {"type": "string", "enum": ["project", "module", "file", "convention", "process"], "description": "Scope (default: project)", "default": "project"},
+                "content": {
+                    "type": "string",
+                    "description": "Entry content (the knowledge to persist)",
+                },
+                "entry_type": {
+                    "type": "string",
+                    "enum": [
+                        "lesson",
+                        "decision",
+                        "discovery",
+                        "correction",
+                        "convention",
+                    ],
+                    "description": "Entry type (canonical LedgerEntryType)",
+                },
+                "agent": {
+                    "type": "string",
+                    "description": "Agent ID (default: mcp-client)",
+                    "default": "mcp-client",
+                },
+                "vendor": {
+                    "type": "string",
+                    "description": "Vendor (anthropic|openai|google|moonshot|local|human). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
+                },
+                "model": {
+                    "type": "string",
+                    "description": "Model identifier. If omitted, resolves from COGNITION_MODEL env var; missing both → error.",
+                },
+                "confidence": {
+                    "type": "number",
+                    "description": "Confidence 0.0-1.0 (default: 0.7)",
+                    "default": 0.7,
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Tags for categorization (max 10)",
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": ["project", "module", "file", "convention", "process"],
+                    "description": "Scope (default: project)",
+                    "default": "project",
+                },
             },
             "required": ["title", "content", "entry_type"],
         },
@@ -176,7 +231,11 @@ TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "max_entries": {"type": "integer", "description": "Max entries to return (default: 15)", "default": 15},
+                "max_entries": {
+                    "type": "integer",
+                    "description": "Max entries to return (default: 15)",
+                    "default": 15,
+                },
             },
             "required": [],
         },
@@ -232,7 +291,9 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             kwargs["tags"] = arguments["tags"]
         limit = arguments.get("limit", 20)
         try:
-            entries = list(query_entries(ledger_path=str(LEDGER_FILE), **kwargs))[:limit]
+            entries = list(query_entries(ledger_path=str(LEDGER_FILE), **kwargs))[
+                :limit
+            ]
             return {
                 "count": len(entries),
                 "entries": [
@@ -340,7 +401,11 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                     "status": "healthy" if index_exists else "missing — run reindex",
                 },
                 "ledger_file": str(LEDGER_FILE),
-                "last_modified": str(datetime.fromtimestamp(LEDGER_FILE.stat().st_mtime, tz=timezone.utc)) if LEDGER_FILE.exists() else "n/a",
+                "last_modified": str(
+                    datetime.fromtimestamp(LEDGER_FILE.stat().st_mtime, tz=timezone.utc)
+                )
+                if LEDGER_FILE.exists()
+                else "n/a",
             }
         except Exception as e:
             return {"error": f"Stats failed: {e}"}
@@ -348,6 +413,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     elif name == "boot_context":
         try:
             from hummbl_cognition.boot_context import build_boot_context
+
             max_entries = arguments.get("max_entries", 15)
             # build_boot_context takes `cognition_dir` (positional), not
             # `ledger_path`/`index_path`. The function resolves both files
@@ -376,7 +442,10 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             return {
                 "count": len(recent),
                 "entries": [
-                    {"title": e.get("title", ""), "content": str(e.get("content", ""))[:300]}
+                    {
+                        "title": e.get("title", ""),
+                        "content": str(e.get("content", ""))[:300],
+                    }
                     for e in recent
                 ],
             }
@@ -410,7 +479,11 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             idx.save()
             global _indexer
             _indexer = idx
-            return {"reindexed": True, "entries_indexed": len(entries), "index_file": str(INDEX_FILE)}
+            return {
+                "reindexed": True,
+                "entries_indexed": len(entries),
+                "index_file": str(INDEX_FILE),
+            }
         except Exception as e:
             return {"error": f"Reindex failed: {e}"}
 
@@ -428,7 +501,11 @@ def send_response(msg_id: Any, result: Any) -> None:
 
 
 def send_error(msg_id: Any, code: int, message: str) -> None:
-    response = {"jsonrpc": "2.0", "id": msg_id, "error": {"code": code, "message": message}}
+    response = {
+        "jsonrpc": "2.0",
+        "id": msg_id,
+        "error": {"code": code, "message": message},
+    }
     sys.stdout.write(json.dumps(response) + "\n")
     sys.stdout.flush()
 
@@ -451,11 +528,14 @@ def main() -> None:
 
         try:
             if method == "initialize":
-                send_response(msg_id, {
-                    "protocolVersion": PROTOCOL_VERSION,
-                    "capabilities": {"tools": {}},
-                    "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "protocolVersion": PROTOCOL_VERSION,
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                    },
+                )
             elif method == "notifications/initialized":
                 pass
             elif method == "tools/list":
@@ -464,9 +544,17 @@ def main() -> None:
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
                 result = handle_tool(tool_name, arguments)
-                send_response(msg_id, {
-                    "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
-                })
+                send_response(
+                    msg_id,
+                    {
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": json.dumps(result, indent=2, default=str),
+                            }
+                        ],
+                    },
+                )
             elif method == "ping":
                 send_response(msg_id, {})
             else:

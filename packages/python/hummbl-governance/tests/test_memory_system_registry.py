@@ -4,9 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
-
 from scripts.validate_memory_system_registry import validate_registry
-
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "docs" / "memory_system_registry.candidate.json"
@@ -17,7 +15,9 @@ def _registry() -> dict:
     return json.loads(REGISTRY.read_text(encoding="utf-8"))
 
 
-@pytest.mark.skip(reason="Registry references standalone-repo paths (cognition/, memory_house/, memory-city/) not migrated to monorepo")
+@pytest.mark.skip(
+    reason="Registry references standalone-repo paths (cognition/, memory_house/, memory-city/) not migrated to monorepo"
+)
 def test_memory_system_registry_validates():
     # In CI only hummbl-governance is checked out; cross-repo path existence
     # (hummbl-governance, local-home) is verified locally, not in CI.

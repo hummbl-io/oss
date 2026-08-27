@@ -11,7 +11,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.schema_validator import (
     validate,
     validate_entry_dict,
@@ -348,11 +347,15 @@ class TestValidateFile:
         instance = tmp_path / "data.json"
         schema = tmp_path / "schema.json"
         instance.write_text(json.dumps({"name": "Alice"}))
-        schema.write_text(json.dumps({
-            "type": "object",
-            "required": ["name"],
-            "properties": {"name": {"type": "string"}},
-        }))
+        schema.write_text(
+            json.dumps(
+                {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {"name": {"type": "string"}},
+                }
+            )
+        )
         is_valid, errors = validate_file(instance, schema)
         assert is_valid is True
         assert errors == []
@@ -361,10 +364,14 @@ class TestValidateFile:
         instance = tmp_path / "data.json"
         schema = tmp_path / "schema.json"
         instance.write_text(json.dumps({"name": 42}))
-        schema.write_text(json.dumps({
-            "type": "object",
-            "properties": {"name": {"type": "string"}},
-        }))
+        schema.write_text(
+            json.dumps(
+                {
+                    "type": "object",
+                    "properties": {"name": {"type": "string"}},
+                }
+            )
+        )
         is_valid, errors = validate_file(instance, schema)
         assert is_valid is False
         assert len(errors) == 1
@@ -405,9 +412,7 @@ class TestSchemaIntegration:
                 "content": {"type": "string", "minLength": 1},
             },
         }
-        is_valid, errors = validate_entry_dict(
-            self._valid_entry_dict(), schema=schema
-        )
+        is_valid, errors = validate_entry_dict(self._valid_entry_dict(), schema=schema)
         assert is_valid is True
 
     def test_invalid_entry_with_explicit_schema(self):
@@ -433,9 +438,7 @@ class TestSchemaIntegration:
                 "updated_by": {"type": "string"},
             },
         }
-        is_valid, errors = validate_state_dict(
-            self._valid_state_dict(), schema=schema
-        )
+        is_valid, errors = validate_state_dict(self._valid_state_dict(), schema=schema)
         assert is_valid is True
 
     def test_entry_against_real_schema(self):
@@ -475,8 +478,10 @@ class TestSchemaIntegration:
         import subprocess as _sp
 
         from hummbl_cognition.schema_validator import _load_default_schema
+
         monkeypatch.setattr(
-            _sp, "check_output",
+            _sp,
+            "check_output",
             lambda *a, **kw: (_ for _ in ()).throw(_sp.CalledProcessError(1, "git")),
         )
         # Change to tmp dir so relative fallback also fails
@@ -522,9 +527,7 @@ class TestEdgeCases:
                 },
             },
         }
-        errors = validate(
-            {"level1": {"level2": {"value": "not_int"}}}, schema
-        )
+        errors = validate({"level1": {"level2": {"value": "not_int"}}}, schema)
         assert len(errors) == 1
         assert "level1.level2.value" in errors[0]
 

@@ -51,7 +51,9 @@ def run_race(
     for candidate in candidates:
         started = time.monotonic()
         try:
-            candidate_prompt = "\n".join(part for part in (candidate.prompt_prefix, prompt) if part)
+            candidate_prompt = "\n".join(
+                part for part in (candidate.prompt_prefix, prompt) if part
+            )
             output = candidate.adapter(candidate_prompt)
             score = score_fn(prompt, output)
             results.append(

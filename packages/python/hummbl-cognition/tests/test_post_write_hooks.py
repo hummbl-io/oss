@@ -14,19 +14,17 @@ Verifies:
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.models import (
     LedgerEntry,
     LedgerEntryType,
     LedgerScope,
 )
 from hummbl_cognition.post_write_hooks import (
-    PRIOR_ART_TRIGGER_TYPES,
     OPEN_QUESTION_TRIGGER_TYPES,
+    PRIOR_ART_TRIGGER_TYPES,
     build_open_question_query,
     build_prior_art_query,
     fire_post_write_hooks,
@@ -56,6 +54,7 @@ def _empty_queue(path: Path) -> Path:
 # ---------------------------------------------------------------------------
 # Query builders
 # ---------------------------------------------------------------------------
+
 
 class TestBuildPriorArtQuery:
     def test_produces_well_formed_query(self) -> None:
@@ -109,6 +108,7 @@ class TestBuildOpenQuestionQuery:
 # Hook dispatch
 # ---------------------------------------------------------------------------
 
+
 class TestFirePostWriteHooks:
     def test_discovery_fires_both_hooks(self, tmp_path: Path) -> None:
         queue_path = _empty_queue(tmp_path / "research_queue.json")
@@ -160,7 +160,9 @@ class TestFirePostWriteHooks:
         # Still only 2 items, not 4
         assert len(queue) == 2
 
-    def test_global_opt_out(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_global_opt_out(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         monkeypatch.setenv("CLP_POST_WRITE_HOOKS", "off")
         queue_path = tmp_path / "research_queue.json"
         entry = _make_entry()
@@ -168,7 +170,9 @@ class TestFirePostWriteHooks:
         assert fired == []
         assert not queue_path.exists()
 
-    def test_prior_art_opt_out(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_prior_art_opt_out(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         monkeypatch.setenv("CLP_HOOK_PRIOR_ART", "off")
         queue_path = _empty_queue(tmp_path / "research_queue.json")
         entry = _make_entry()
@@ -178,7 +182,9 @@ class TestFirePostWriteHooks:
         assert len(queue) == 1
         assert queue[0]["hook"] == "open_question"
 
-    def test_open_question_opt_out(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_open_question_opt_out(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         monkeypatch.setenv("CLP_HOOK_OPEN_QUESTION", "off")
         queue_path = tmp_path / "research_queue.json"
         entry = _make_entry()
@@ -189,6 +195,7 @@ class TestFirePostWriteHooks:
 # ---------------------------------------------------------------------------
 # Integration: post_entry fires hooks
 # ---------------------------------------------------------------------------
+
 
 class TestPostEntryHookIntegration:
     def test_post_entry_fires_hooks_for_discovery(
@@ -207,11 +214,13 @@ class TestPostEntryHookIntegration:
             str(tmp_queue),
         )
         from hummbl_cognition.ledger_writer import post_entry
+
         entry = _make_entry(entry_type=LedgerEntryType.DISCOVERY)
         post_entry(entry, ledger_path=tmp_ledger_path)
         # Hook fires in a daemon thread — wait for queue to be written.
         # Retry loop handles Windows file locking during temp+rename write.
         import time
+
         queue = []
         for _ in range(30):
             try:
@@ -236,6 +245,7 @@ class TestPostEntryHookIntegration:
             str(tmp_queue),
         )
         from hummbl_cognition.ledger_writer import post_entry
+
         entry = _make_entry(entry_type=LedgerEntryType.LESSON)
         post_entry(entry, ledger_path=tmp_ledger_path)
         # No queue file should be created (lesson doesn't trigger hooks)
@@ -247,10 +257,12 @@ class TestPostEntryHookIntegration:
         # Sabotage the hook to raise — post must still succeed
         def boom(*a, **kw):
             raise RuntimeError("hook exploded")
+
         monkeypatch.setattr(
             "hummbl_cognition.post_write_hooks.fire_post_write_hooks", boom
         )
         from hummbl_cognition.ledger_writer import post_entry
+
         entry = _make_entry()
         result = post_entry(entry, ledger_path=tmp_ledger_path)
         # Entry was still posted
@@ -262,6 +274,7 @@ class TestPostEntryHookIntegration:
 # ---------------------------------------------------------------------------
 # Trigger type constants
 # ---------------------------------------------------------------------------
+
 
 class TestTriggerTypes:
     def test_prior_art_triggers(self) -> None:

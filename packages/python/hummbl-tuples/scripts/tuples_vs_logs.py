@@ -23,9 +23,9 @@ from typing import Any
 
 # Scale definitions
 SCALES = {
-    "small": 100,      # small incident
-    "medium": 1000,    # medium workflow
-    "large": 10000,    # large system
+    "small": 100,  # small incident
+    "medium": 1000,  # medium workflow
+    "large": 10000,  # large system
 }
 
 
@@ -35,19 +35,21 @@ def generate_tuples(n: int) -> list[dict[str, Any]]:
     for i in range(n):
         tuple_type = ["CONTRACT", "DCT", "EVIDENCE", "SYSTEM", "ATTEST"][i % 5]
         state = "ok" if i % 10 != 0 else "blocked"  # 10% blocked
-        tuples.append({
-            "tuple_type": tuple_type,
-            "id": f"tuple-{i:06d}",
-            "time": f"2026-07-01T{(i % 86400):02d}:{((i * 7) % 60):02d}:{((i * 13) % 60):02d}Z",
-            "state": state,
-            "drift": 0.0 if i % 5 != 0 else round(i * 0.001 % 1, 3),
-            "tier": 1 + (i % 3),
-            "agent": f"agent-{i % 10:02d}",
-            "tool": f"tool-{i % 5}",
-            "intent_id": f"intent-{i % 50:03d}",
-            "task_id": f"task-{i % 100:03d}",
-            "tuple_data": {"payload": f"data-{i}", "index": i},
-        })
+        tuples.append(
+            {
+                "tuple_type": tuple_type,
+                "id": f"tuple-{i:06d}",
+                "time": f"2026-07-01T{(i % 86400):02d}:{((i * 7) % 60):02d}:{((i * 13) % 60):02d}Z",
+                "state": state,
+                "drift": 0.0 if i % 5 != 0 else round(i * 0.001 % 1, 3),
+                "tier": 1 + (i % 3),
+                "agent": f"agent-{i % 10:02d}",
+                "tool": f"tool-{i % 5}",
+                "intent_id": f"intent-{i % 50:03d}",
+                "task_id": f"task-{i % 100:03d}",
+                "tuple_data": {"payload": f"data-{i}", "index": i},
+            }
+        )
     return tuples
 
 
@@ -55,17 +57,19 @@ def tuples_to_untyped_logs(tuples: list[dict[str, Any]]) -> list[dict[str, Any]]
     """Convert tuples to untyped log format (flat key-value, no schema)."""
     logs = []
     for t in tuples:
-        logs.append({
-            "timestamp": t["time"],
-            "event": t["tuple_type"].lower(),
-            "event_id": t["id"],
-            "agent": t["agent"],
-            "status": t["state"],
-            "tool": t["tool"],
-            "intent": t["intent_id"],
-            "task": t["task_id"],
-            "payload": t["tuple_data"],
-        })
+        logs.append(
+            {
+                "timestamp": t["time"],
+                "event": t["tuple_type"].lower(),
+                "event_id": t["id"],
+                "agent": t["agent"],
+                "status": t["state"],
+                "tool": t["tool"],
+                "intent": t["intent_id"],
+                "task": t["task_id"],
+                "payload": t["tuple_data"],
+            }
+        )
     return logs
 
 
@@ -74,7 +78,16 @@ def measure_validation_time(data: list[dict[str, Any]], is_tuple: bool) -> float
     start = time.perf_counter()
     if is_tuple:
         # Validate tuples: check required fields
-        required = {"tuple_type", "id", "time", "state", "agent", "intent_id", "task_id", "tuple_data"}
+        required = {
+            "tuple_type",
+            "id",
+            "time",
+            "state",
+            "agent",
+            "intent_id",
+            "task_id",
+            "tuple_data",
+        }
         for t in data:
             missing = required - set(t.keys())
             assert not missing, f"Tuple {t.get('id')} missing fields: {missing}"
@@ -105,7 +118,9 @@ def measure_query_scope_violations(data: list[dict[str, Any]], is_tuple: bool) -
     return elapsed, len(violations)
 
 
-def measure_query_by_agent(data: list[dict[str, Any]], is_tuple: bool, agent_id: str) -> tuple[float, int]:
+def measure_query_by_agent(
+    data: list[dict[str, Any]], is_tuple: bool, agent_id: str
+) -> tuple[float, int]:
     """Measure query performance for finding events by a specific agent."""
     start = time.perf_counter()
     if is_tuple:
@@ -135,8 +150,12 @@ def run_comparison(scale_name: str, n: int) -> dict[str, Any]:
     log_query_time, log_violations = measure_query_scope_violations(logs, is_tuple=False)
 
     # Measure query: by agent
-    tuple_agent_time, tuple_agent_count = measure_query_by_agent(tuples, is_tuple=True, agent_id="agent-05")
-    log_agent_time, log_agent_count = measure_query_by_agent(logs, is_tuple=False, agent_id="agent-05")
+    tuple_agent_time, tuple_agent_count = measure_query_by_agent(
+        tuples, is_tuple=True, agent_id="agent-05"
+    )
+    log_agent_time, log_agent_count = measure_query_by_agent(
+        logs, is_tuple=False, agent_id="agent-05"
+    )
 
     return {
         "scale": scale_name,
@@ -163,14 +182,15 @@ def run_comparison(scale_name: str, n: int) -> dict[str, Any]:
             "validation_time_ratio": round(tuple_validation / max(log_validation, 0.000001), 2),
             "storage_ratio": round(tuple_size / max(log_size, 1), 2),
             "query_violations_ratio": round(tuple_query_time / max(log_query_time, 0.000001), 2),
-        }
+        },
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scales", default="small,medium,large",
-                        help="Comma-separated scale names")
+    parser.add_argument(
+        "--scales", default="small,medium,large", help="Comma-separated scale names"
+    )
     parser.add_argument("--output", help="Output JSON file for results")
     args = parser.parse_args(argv)
 
@@ -186,15 +206,21 @@ def main(argv: list[str] | None = None) -> int:
         result = run_comparison(name, n)
         results.append(result)
 
-        print(f"  Tuples:   validation={result['tuples']['validation_time_s']}s, "
-              f"storage={result['tuples']['storage_kb']}KB, "
-              f"query_violations={result['tuples']['query_scope_violations_s']}s")
-        print(f"  Logs:     validation={result['untyped_logs']['validation_time_s']}s, "
-              f"storage={result['untyped_logs']['storage_kb']}KB, "
-              f"query_violations={result['untyped_logs']['query_scope_violations_s']}s")
-        print(f"  Ratios:   validation={result['delta']['validation_time_ratio']}x, "
-              f"storage={result['delta']['storage_ratio']}x, "
-              f"query={result['delta']['query_violations_ratio']}x")
+        print(
+            f"  Tuples:   validation={result['tuples']['validation_time_s']}s, "
+            f"storage={result['tuples']['storage_kb']}KB, "
+            f"query_violations={result['tuples']['query_scope_violations_s']}s"
+        )
+        print(
+            f"  Logs:     validation={result['untyped_logs']['validation_time_s']}s, "
+            f"storage={result['untyped_logs']['storage_kb']}KB, "
+            f"query_violations={result['untyped_logs']['query_scope_violations_s']}s"
+        )
+        print(
+            f"  Ratios:   validation={result['delta']['validation_time_ratio']}x, "
+            f"storage={result['delta']['storage_ratio']}x, "
+            f"query={result['delta']['query_violations_ratio']}x"
+        )
 
     output = {
         "benchmark": "tuples_vs_untyped_logs",

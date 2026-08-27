@@ -19,7 +19,6 @@
 from datetime import datetime, timezone
 
 import pytest
-
 from hummbl_governance.cost_governor import (
     BudgetStatus,
     CostGovernor,
@@ -45,8 +44,11 @@ class TestUsageRecord:
 
     def test_create_with_meta(self):
         record = UsageRecord.create(
-            provider="openai", model="gpt-4o",
-            tokens_in=100, tokens_out=50, cost=0.01,
+            provider="openai",
+            model="gpt-4o",
+            tokens_in=100,
+            tokens_out=50,
+            cost=0.01,
             meta={"task": "summarize"},
         )
         assert record.meta == {"task": "summarize"}
@@ -146,7 +148,9 @@ class TestBudgetAlert:
     def test_alert_callback_called(self):
         alerts = []
         gov = CostGovernor(
-            ":memory:", soft_cap=10.0, hard_cap=20.0,
+            ":memory:",
+            soft_cap=10.0,
+            hard_cap=20.0,
             on_budget_alert=lambda s: alerts.append(s),
         )
         gov.record_usage("anthropic", "claude-4", 1000, 500, 15.0)
@@ -156,7 +160,9 @@ class TestBudgetAlert:
     def test_no_alert_under_threshold(self):
         alerts = []
         gov = CostGovernor(
-            ":memory:", soft_cap=100.0, hard_cap=200.0,
+            ":memory:",
+            soft_cap=100.0,
+            hard_cap=200.0,
             on_budget_alert=lambda s: alerts.append(s),
         )
         gov.record_usage("anthropic", "claude-4", 1000, 500, 1.0)
@@ -168,9 +174,13 @@ class TestBudgetStatusSerialization:
 
     def test_to_dict(self):
         status = BudgetStatus(
-            current_spend=42.0, soft_cap=50.0, hard_cap=100.0,
-            currency="USD", threshold_percent=84.0,
-            decision="WARN", rationale="test",
+            current_spend=42.0,
+            soft_cap=50.0,
+            hard_cap=100.0,
+            currency="USD",
+            threshold_percent=84.0,
+            decision="WARN",
+            rationale="test",
         )
         d = status.to_dict()
         assert d["decision"] == "WARN"
@@ -204,6 +214,7 @@ class TestCostGovernorCleanup:
         assert gov.count() == 2
         # Cleanup with 'before' set to far future removes everything
         from datetime import timedelta
+
         future = datetime.now(timezone.utc) + timedelta(days=365)
         deleted = gov.cleanup(before=future)
         assert deleted == 2
@@ -237,6 +248,7 @@ class TestCostGovernorCleanup:
         gov.record_usage("anthropic", "claude-4", 100, 50, 1.0)
         now = datetime.now(timezone.utc)
         from datetime import timedelta
+
         start = now - timedelta(minutes=5)
         end = now + timedelta(minutes=5)
         count = gov.count(start=start, end=end)
@@ -245,7 +257,9 @@ class TestCostGovernorCleanup:
     def test_alert_callback_on_deny(self):
         alerts = []
         gov = CostGovernor(
-            ":memory:", soft_cap=1.0, hard_cap=2.0,
+            ":memory:",
+            soft_cap=1.0,
+            hard_cap=2.0,
             on_budget_alert=lambda s: alerts.append(s),
         )
         gov.record_usage("anthropic", "claude-4", 100, 50, 5.0)

@@ -16,8 +16,7 @@
 
 """Tests for BehaviorMonitor."""
 
-
-from hummbl_governance.reward_monitor import BehaviorMonitor, _shannon_entropy, _js_divergence
+from hummbl_governance.reward_monitor import BehaviorMonitor, _js_divergence, _shannon_entropy
 
 
 class TestMathHelpers:

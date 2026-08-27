@@ -10,13 +10,12 @@ Run: python reference_impl/python/generate_conformance_vectors.py
 """
 
 import json
-import hashlib
 import sys
 from pathlib import Path
 
 # Add parent dir to path for import
 sys.path.insert(0, str(Path(__file__).parent))
-from canonical_serialization import canonical_json, canonical_hash
+from canonical_serialization import canonical_hash, canonical_json
 
 
 def content_hash(d: dict) -> str:

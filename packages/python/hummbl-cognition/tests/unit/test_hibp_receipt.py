@@ -49,7 +49,9 @@ def test_hibp_receipt_rejects_findings_summary_extra_keys():
     valid, errors = validate_hibp_receipt(receipt)
 
     assert not valid
-    assert any("findings_summary" in error and "unexpected fields" in error for error in errors)
+    assert any(
+        "findings_summary" in error and "unexpected fields" in error for error in errors
+    )
 
 
 def test_hibp_password_range_requires_approval_for_lookup():

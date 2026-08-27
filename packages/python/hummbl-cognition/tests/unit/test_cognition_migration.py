@@ -10,7 +10,6 @@ import textwrap
 from unittest.mock import patch
 
 import pytest
-
 from hummbl_cognition.migration import (
     _author_to_vendor,
     _commit_prefix_to_type,
@@ -273,7 +272,8 @@ class TestVendorMappers:
 class TestImportFromMemoryMd:
     def test_dry_run_basic(self, tmp_path):
         memory = tmp_path / "MEMORY.md"
-        memory.write_text(textwrap.dedent("""\
+        memory.write_text(
+            textwrap.dedent("""\
             # Memory
 
             ## Project Info
@@ -282,7 +282,8 @@ class TestImportFromMemoryMd:
 
             ## Gotchas
             - Watch out for singletons leaking between tests
-        """))
+        """)
+        )
 
         entries = import_from_memory_md(memory, dry_run=True)
         assert len(entries) == 3
@@ -310,9 +311,7 @@ class TestImportFromMemoryMd:
         memory.write_text("## Test\n- Entry one\n- Entry two\n")
         ledger = tmp_path / "ledger.jsonl"
 
-        entries = import_from_memory_md(
-            memory, ledger_path=ledger, dry_run=False
-        )
+        entries = import_from_memory_md(memory, ledger_path=ledger, dry_run=False)
         assert len(entries) == 2
         assert ledger.exists()
         lines = ledger.read_text().strip().split("\n")
@@ -365,10 +364,13 @@ class TestImportFromBusHistory:
         return bus
 
     def test_dry_run_basic(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tclaude-code\tall\tDECISION\tUse JSONL for storage",
-            "2026-03-01T11:00:00Z\tkimi-1\tall\tMILESTONE\tPhase A complete",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tclaude-code\tall\tDECISION\tUse JSONL for storage",
+                "2026-03-01T11:00:00Z\tkimi-1\tall\tMILESTONE\tPhase A complete",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert len(entries) == 2
         assert entries[0].type == "decision"
@@ -377,18 +379,24 @@ class TestImportFromBusHistory:
         assert entries[1].vendor == "moonshot"
 
     def test_filters_by_type(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tSTATUS\tI'm alive",
-            "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tReal decision",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tSTATUS\tI'm alive",
+                "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tReal decision",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert len(entries) == 1
         assert entries[0].type == "decision"
 
     def test_custom_msg_types(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tSTATUS\tI'm alive",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tSTATUS\tI'm alive",
+            ],
+        )
         entries = import_from_bus_history(
             bus_path=bus, msg_types={"STATUS"}, dry_run=True
         )
@@ -396,10 +404,13 @@ class TestImportFromBusHistory:
         assert len(entries) == 1
 
     def test_filters_by_since(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-02-01T10:00:00Z\tagent\tall\tDECISION\tOld decision",
-            "2026-03-15T10:00:00Z\tagent\tall\tDECISION\tNew decision",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-02-01T10:00:00Z\tagent\tall\tDECISION\tOld decision",
+                "2026-03-15T10:00:00Z\tagent\tall\tDECISION\tNew decision",
+            ],
+        )
         entries = import_from_bus_history(
             bus_path=bus, since="2026-03-01T00:00:00Z", dry_run=True
         )
@@ -423,30 +434,42 @@ class TestImportFromBusHistory:
         assert len(entries) == 1
 
     def test_skips_header_row(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tReal entry",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tReal entry",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert len(entries) == 1
 
     def test_unescapes_newlines(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tLine1\\nLine2",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tLine1\\nLine2",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert "Line1\nLine2" in entries[0].content
 
     def test_evidence_includes_line_number(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tEntry",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tDECISION\tEntry",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert entries[0].evidence.startswith("bus:line:")
 
     def test_writes_to_ledger(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tclaude\tall\tDECISION\tTest",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tclaude\tall\tDECISION\tTest",
+            ],
+        )
         ledger = tmp_path / "ledger.jsonl"
         entries = import_from_bus_history(
             bus_path=bus, ledger_path=ledger, dry_run=False
@@ -455,25 +478,34 @@ class TestImportFromBusHistory:
         assert ledger.exists()
 
     def test_idempotent(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tclaude\tall\tDECISION\tTest",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tclaude\tall\tDECISION\tTest",
+            ],
+        )
         ledger = tmp_path / "ledger.jsonl"
         import_from_bus_history(bus_path=bus, ledger_path=ledger)
         entries2 = import_from_bus_history(bus_path=bus, ledger_path=ledger)
         assert len(entries2) == 0
 
     def test_empty_message_skipped(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tDECISION\t",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tDECISION\t",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert len(entries) == 0
 
     def test_correction_type_mapped(self, tmp_path):
-        bus = self._make_bus_file(tmp_path, [
-            "2026-03-01T10:00:00Z\tagent\tall\tCORRECTION\tFixed an error",
-        ])
+        bus = self._make_bus_file(
+            tmp_path,
+            [
+                "2026-03-01T10:00:00Z\tagent\tall\tCORRECTION\tFixed an error",
+            ],
+        )
         entries = import_from_bus_history(bus_path=bus, dry_run=True)
         assert entries[0].type == "correction"
 
@@ -493,12 +525,26 @@ class TestImportFromGitLog:
         return "\n".join(lines) + "\n"
 
     def test_dry_run_basic(self, tmp_path):
-        git_output = self._mock_git_output([
-            ("abc123def456", "2026-03-01T10:00:00+00:00", "Reuben", "feat: add feature"),
-            ("def789ghi012", "2026-03-01T11:00:00+00:00", "Claude", "fix: resolve bug"),
-        ])
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        git_output = self._mock_git_output(
+            [
+                (
+                    "abc123def456",
+                    "2026-03-01T10:00:00+00:00",
+                    "Reuben",
+                    "feat: add feature",
+                ),
+                (
+                    "def789ghi012",
+                    "2026-03-01T11:00:00+00:00",
+                    "Claude",
+                    "fix: resolve bug",
+                ),
+            ]
+        )
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(dry_run=True)
 
         assert len(entries) == 2
@@ -508,22 +554,30 @@ class TestImportFromGitLog:
         assert entries[1].vendor == "anthropic"  # Claude -> anthropic
 
     def test_evidence_has_commit_hash(self, tmp_path):
-        git_output = self._mock_git_output([
-            ("abcdef123456", "2026-03-01T10:00:00+00:00", "Dev", "feat: test"),
-        ])
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        git_output = self._mock_git_output(
+            [
+                ("abcdef123456", "2026-03-01T10:00:00+00:00", "Dev", "feat: test"),
+            ]
+        )
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(dry_run=True)
 
         assert entries[0].evidence == "commit:abcdef123456"
 
     def test_normalizes_to_utc(self):
         # Timezone offset should be normalized to Z
-        git_output = self._mock_git_output([
-            ("aabbccddee00", "2026-03-01T15:00:00-05:00", "Dev", "feat: tz test"),
-        ])
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        git_output = self._mock_git_output(
+            [
+                ("aabbccddee00", "2026-03-01T15:00:00-05:00", "Dev", "feat: tz test"),
+            ]
+        )
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(dry_run=True)
 
         assert entries[0].timestamp.endswith("Z")
@@ -531,77 +585,108 @@ class TestImportFromGitLog:
 
     def test_git_not_available(self):
         import subprocess
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    side_effect=subprocess.CalledProcessError(1, "git")):
+
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            side_effect=subprocess.CalledProcessError(1, "git"),
+        ):
             entries = import_from_git_log(dry_run=True)
         assert entries == []
 
     def test_empty_output(self):
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=""):
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output", return_value=""
+        ):
             entries = import_from_git_log(dry_run=True)
         assert entries == []
 
     def test_skips_empty_subject(self):
-        git_output = self._mock_git_output([
-            ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", ""),
-        ])
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        git_output = self._mock_git_output(
+            [
+                ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", ""),
+            ]
+        )
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(dry_run=True)
         assert entries == []
 
     def test_writes_to_ledger(self, tmp_path):
-        git_output = self._mock_git_output([
-            ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: test write"),
-        ])
+        git_output = self._mock_git_output(
+            [
+                (
+                    "aabbccddee00",
+                    "2026-03-01T10:00:00+00:00",
+                    "Dev",
+                    "feat: test write",
+                ),
+            ]
+        )
         ledger = tmp_path / "ledger.jsonl"
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(ledger_path=ledger, dry_run=False)
         assert len(entries) == 1
         assert ledger.exists()
 
     def test_idempotent(self, tmp_path):
-        git_output = self._mock_git_output([
-            ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: test"),
-        ])
+        git_output = self._mock_git_output(
+            [
+                ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: test"),
+            ]
+        )
         ledger = tmp_path / "ledger.jsonl"
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             import_from_git_log(ledger_path=ledger)
             entries2 = import_from_git_log(ledger_path=ledger)
         assert len(entries2) == 0
 
     def test_since_passed_to_git(self):
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value="") as mock:
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output", return_value=""
+        ) as mock:
             import_from_git_log(since="2026-03-01", dry_run=True)
         cmd = mock.call_args[0][0]
         assert "--since=2026-03-01" in cmd
 
     def test_max_commits_passed_to_git(self):
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value="") as mock:
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output", return_value=""
+        ) as mock:
             import_from_git_log(max_commits=50, dry_run=True)
         cmd = mock.call_args[0][0]
         assert "--max-count=50" in cmd
 
     def test_tags_include_imported_and_git_log(self):
-        git_output = self._mock_git_output([
-            ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: tagged"),
-        ])
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        git_output = self._mock_git_output(
+            [
+                ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: tagged"),
+            ]
+        )
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(dry_run=True)
         assert "imported" in entries[0].tags
         assert "git-log" in entries[0].tags
 
     def test_assurance_level_is_verified(self):
-        git_output = self._mock_git_output([
-            ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: level"),
-        ])
-        with patch("hummbl_cognition.migration.subprocess.check_output",
-                    return_value=git_output):
+        git_output = self._mock_git_output(
+            [
+                ("aabbccddee00", "2026-03-01T10:00:00+00:00", "Dev", "feat: level"),
+            ]
+        )
+        with patch(
+            "hummbl_cognition.migration.subprocess.check_output",
+            return_value=git_output,
+        ):
             entries = import_from_git_log(dry_run=True)
         assert entries[0].assurance_level == "VERIFIED"

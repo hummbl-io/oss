@@ -29,7 +29,9 @@ _OPERATORS = {
     "TRANSFORM",
     "CONTEXT_RESET",
 }
-_CONDITION_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(<=|>=|==|!=|<|>)\s*(.+?)\s*$")
+_CONDITION_RE = re.compile(
+    r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(<=|>=|==|!=|<|>)\s*(.+?)\s*$"
+)
 
 
 class ParseError(ValueError):
@@ -89,16 +91,22 @@ class _Parser:
             self.skip_separators()
             if self.match_word("ELSE"):
                 else_body = tuple(self.parse_block())
-            return Program(kind="if", condition=condition, body=tuple(body), else_body=else_body)
+            return Program(
+                kind="if", condition=condition, body=tuple(body), else_body=else_body
+            )
         if name not in _OPERATORS:
             raise ParseError(f"Unknown operator: {name}")
         params = self.parse_params()
-        return Program(kind="node", operator=name.lower(), params=params, body=(), condition=None)
+        return Program(
+            kind="node", operator=name.lower(), params=params, body=(), condition=None
+        )
 
     def parse_identifier(self) -> str:
         self.skip_ws()
         start = self.pos
-        while not self.at_end() and (self.source[self.pos].isalnum() or self.source[self.pos] == "_"):
+        while not self.at_end() and (
+            self.source[self.pos].isalnum() or self.source[self.pos] == "_"
+        ):
             self.pos += 1
         if start == self.pos:
             raise ParseError(f"Expected identifier near: {self.remaining()!r}")
@@ -142,7 +150,9 @@ class _Parser:
         if not match:
             raise ParseError(f"Invalid IF condition: {content!r}")
         metric, operator, raw_value = match.groups()
-        return Condition(metric=metric, operator=operator, value=parse_value(raw_value.strip()))
+        return Condition(
+            metric=metric, operator=operator, value=parse_value(raw_value.strip())
+        )
 
     def parse_block(self) -> list[Program]:
         self.skip_ws()
@@ -201,9 +211,11 @@ class _Parser:
     def match_word(self, word: str) -> bool:
         self.skip_ws()
         end = self.pos + len(word)
-        if self.source[self.pos:end].upper() != word:
+        if self.source[self.pos : end].upper() != word:
             return False
-        if end < len(self.source) and (self.source[end].isalnum() or self.source[end] == "_"):
+        if end < len(self.source) and (
+            self.source[end].isalnum() or self.source[end] == "_"
+        ):
             return False
         self.pos = end
         return True

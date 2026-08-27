@@ -17,18 +17,17 @@ import json
 
 from hummbl_governance.primitives.basen_tuple import (
     BaseNTuple,
+    _sha256,
+    create_chain_tuple,
     create_evidence_tuple,
     create_governed_tuple,
     create_read_evidence_tuple,
-    create_chain_tuple,
     create_revocation_tuple,
+    generate_ed25519_keypair,
     sign_tuple,
     sign_tuple_ed25519,
     verify_tuple,
-    generate_ed25519_keypair,
-    _sha256,
 )
-
 
 # Common test secrets
 TEST_HMAC_SECRET = b"test_secret_32_bytes_long_enough!!"
@@ -99,9 +98,7 @@ class AdversarialTupleGenerator:
     def ed25519_tampered_content(self) -> BaseNTuple:
         """Ed25519 signed tuple with tampered content."""
         t = create_governed_tuple(
-            "agent", "tool", {"x": 1},
-            contract_id="c1", dct_id="d1",
-            evidence={"ops_executed": ["read"]}
+            "agent", "tool", {"x": 1}, contract_id="c1", dct_id="d1", evidence={"ops_executed": ["read"]}
         )
         signed = sign_tuple_ed25519(t, self.ed25519_priv)
         d = signed.to_dict()
@@ -495,8 +492,10 @@ if __name__ == "__main__":
         if name in attacks:
             t = attacks[name]
             valid, err = verify_tuple(
-                t, contract_ops_allowed=["read"],
-                secret=TEST_HMAC_SECRET, ed25519_public_key=TEST_ED25519_PUB,
+                t,
+                contract_ops_allowed=["read"],
+                secret=TEST_HMAC_SECRET,
+                ed25519_public_key=TEST_ED25519_PUB,
             )
             status = "PASS" if (valid, err) == expected else "FAIL"
             print(f"  {status} {name}: got=({valid}, {err}), expected={expected}")

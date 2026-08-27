@@ -39,9 +39,7 @@ from pathlib import Path
 # Actual compliance_mapper CLI surface (parsed from main() argparse).
 # These are the only flags that resolve. Anything else cited is unresolvable.
 COMPLIANCE_MAPPER_FLAGS = {"--days", "--framework", "--dir", "--output"}
-COMPLIANCE_MAPPER_FRAMEWORKS = {
-    "soc2", "gdpr", "owasp", "nist-rmf", "eu-ai-act", "iso27001", "nist-csf"
-}
+COMPLIANCE_MAPPER_FRAMEWORKS = {"soc2", "gdpr", "owasp", "nist-rmf", "eu-ai-act", "iso27001", "nist-csf"}
 
 # Patterns to extract code references from matrix files.
 BACKTICK_RE = re.compile(r"`([^`\n]+)`")
@@ -132,11 +130,13 @@ def scan_matrix(path: Path, repo_root: Path = REPO_ROOT) -> dict:
         if kind == "other" and len(ref) < 5:
             # Skip noise like `id`, `N/A`
             continue
-        refs.append({
-            "ref": ref,
-            "kind": kind,
-            "status": status,
-        })
+        refs.append(
+            {
+                "ref": ref,
+                "kind": kind,
+                "status": status,
+            }
+        )
 
     return {
         "path": str(path),
@@ -149,13 +149,10 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--matrix-dir", type=Path, default=Path("docs/coverage"))
     p.add_argument("--format", choices=("human", "json"), default="human")
-    p.add_argument("--strict", action="store_true",
-                   help="Exit 1 if any unresolvable refs found")
+    p.add_argument("--strict", action="store_true", help="Exit 1 if any unresolvable refs found")
     args = p.parse_args(argv)
 
-    files = sorted(
-        f for f in args.matrix_dir.glob("*.md") if f.name not in GENERATED_MATRIX_REPORTS
-    )
+    files = sorted(f for f in args.matrix_dir.glob("*.md") if f.name not in GENERATED_MATRIX_REPORTS)
     fleet_unresolvable = 0
     results = []
     for f in files:

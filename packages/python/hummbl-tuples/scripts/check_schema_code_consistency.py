@@ -75,7 +75,9 @@ def _extract_schema_fields(schema: dict[str, Any]) -> tuple[set[str], set[str], 
     return required, properties, tuple_type
 
 
-def _get_dataclass_fields(module_path: str, class_name: str) -> tuple[set[str], set[str], str | None, str | None]:
+def _get_dataclass_fields(
+    module_path: str, class_name: str
+) -> tuple[set[str], set[str], str | None, str | None]:
     """Import a dataclass and extract (all_fields, data_fields, tuple_type_default, import_error).
 
     Returns (set(), set(), None, None) if the class is found and imported
@@ -91,7 +93,9 @@ def _get_dataclass_fields(module_path: str, class_name: str) -> tuple[set[str], 
             import_error = f"{module_path}.{class_name} not found or not a dataclass"
             return set(), set(), None, import_error
     except Exception as exc:
-        import_error = f"Failed to import {module_path}.{class_name}: {exc}\n{traceback.format_exc()}"
+        import_error = (
+            f"Failed to import {module_path}.{class_name}: {exc}\n{traceback.format_exc()}"
+        )
         logger.error(import_error)
         return set(), set(), None, import_error
 
@@ -144,20 +148,26 @@ def check_consistency(strict: bool = False) -> list[dict[str, str]]:
 
         module_path, class_name = SCHEMA_TO_CLASS[filename]
         schema_required, schema_props, schema_tuple_type = _extract_schema_fields(schema)
-        cls_fields, cls_data_fields, cls_tuple_type, import_error = _get_dataclass_fields(module_path, class_name)
+        cls_fields, cls_data_fields, cls_tuple_type, import_error = _get_dataclass_fields(
+            module_path, class_name
+        )
 
         if not cls_fields:
-            violations.append({
-                "gate": "G-CLASS-EXISTS",
-                "message": f"{filename}: cannot import {module_path}.{class_name}",
-                "severity": "error",
-            })
-            if import_error:
-                violations.append({
-                    "gate": "G-CLASS-IMPORT-ERROR",
-                    "message": f"{filename}: {import_error}",
+            violations.append(
+                {
+                    "gate": "G-CLASS-EXISTS",
+                    "message": f"{filename}: cannot import {module_path}.{class_name}",
                     "severity": "error",
-                })
+                }
+            )
+            if import_error:
+                violations.append(
+                    {
+                        "gate": "G-CLASS-IMPORT-ERROR",
+                        "message": f"{filename}: {import_error}",
+                        "severity": "error",
+                    }
+                )
             continue
 
         # Check: schema required fields should be in dataclass fields
@@ -167,11 +177,13 @@ def check_consistency(strict: bool = False) -> list[dict[str, str]]:
         schema_required_checkable = schema_required - envelope_dynamic
         missing_in_class = schema_required_checkable - cls_fields
         if missing_in_class:
-            violations.append({
-                "gate": "G-SCHEMA-REQUIRED-IN-CLASS",
-                "message": f"{filename}: schema requires {missing_in_class} but {class_name} does not have these fields",
-                "severity": "error",
-            })
+            violations.append(
+                {
+                    "gate": "G-SCHEMA-REQUIRED-IN-CLASS",
+                    "message": f"{filename}: schema requires {missing_in_class} but {class_name} does not have these fields",
+                    "severity": "error",
+                }
+            )
 
         # Check: dataclass data fields should be in schema properties or required
         # (allow extra class fields not in schema — they may be optional)
@@ -180,19 +192,23 @@ def check_consistency(strict: bool = False) -> list[dict[str, str]]:
         schema_all_data = schema_all - {"tuple_type", "id", "time", "tuple_data"}
         missing_in_schema = cls_data_fields - schema_all_data
         if missing_in_schema:
-            violations.append({
-                "gate": "G-CLASS-FIELDS-IN-SCHEMA",
-                "message": f"{filename}: {class_name} has data fields {missing_in_schema} not in schema properties",
-                "severity": "warning",
-            })
+            violations.append(
+                {
+                    "gate": "G-CLASS-FIELDS-IN-SCHEMA",
+                    "message": f"{filename}: {class_name} has data fields {missing_in_schema} not in schema properties",
+                    "severity": "warning",
+                }
+            )
 
         # Check: tuple_type const matches
         if schema_tuple_type and cls_tuple_type and schema_tuple_type != cls_tuple_type:
-            violations.append({
-                "gate": "G-TUPLE-TYPE-MATCH",
-                "message": f"{filename}: schema tuple_type='{schema_tuple_type}' but {class_name} tuple_type='{cls_tuple_type}'",
-                "severity": "error",
-            })
+            violations.append(
+                {
+                    "gate": "G-TUPLE-TYPE-MATCH",
+                    "message": f"{filename}: schema tuple_type='{schema_tuple_type}' but {class_name} tuple_type='{cls_tuple_type}'",
+                    "severity": "error",
+                }
+            )
 
     if not strict:
         violations = [v for v in violations if v["severity"] == "error"]
@@ -217,7 +233,9 @@ def main(argv: list[str] | None = None) -> int:
         print("schema-code consistency check passed — no drift detected")
         return 0
 
-    print(f"schema-code consistency check found {len(errors)} error(s), {len(warnings)} warning(s):")
+    print(
+        f"schema-code consistency check found {len(errors)} error(s), {len(warnings)} warning(s):"
+    )
     for v in violations:
         print(f"  [{v['severity'].upper()}] {v['gate']}: {v['message']}")
 

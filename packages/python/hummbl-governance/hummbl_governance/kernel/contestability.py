@@ -64,9 +64,7 @@ def validate_contestability(contest: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(contest, schema)
     if errors:
-        raise ValidationError(
-            f"Contestability schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Contestability schema validation failed: {'; '.join(errors)}")
 
 
 def validate_contest_evidence(contest: dict[str, Any]) -> None:
@@ -93,9 +91,7 @@ def validate_contest_evidence(contest: dict[str, Any]) -> None:
 
     evidence = contest.get("contest_evidence", {})
     if not isinstance(evidence, dict):
-        raise ValueError(
-            "Contest rejected: contest_evidence must be present and valid"
-        )
+        raise ValueError("Contest rejected: contest_evidence must be present and valid")
 
     evidence_refs = evidence.get("evidence_refs", [])
     if not isinstance(evidence_refs, list) or len(evidence_refs) == 0:
@@ -129,15 +125,11 @@ def validate_review_consistency(contest: dict[str, Any]) -> None:
 
         reviewer_id = review.get("reviewer_id", "")
         if not reviewer_id or not isinstance(reviewer_id, str):
-            raise ValueError(
-                "Contest rejected: review.reviewer_id must be a non-empty string"
-            )
+            raise ValueError("Contest rejected: review.reviewer_id must be a non-empty string")
 
         review_outcome = review.get("review_outcome", "")
         if not review_outcome:
-            raise ValueError(
-                "Contest rejected: review.review_outcome must be present"
-            )
+            raise ValueError("Contest rejected: review.review_outcome must be present")
 
 
 def validate_contest(contest: dict[str, Any]) -> None:

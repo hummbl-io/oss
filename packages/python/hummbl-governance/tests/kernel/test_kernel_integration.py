@@ -36,7 +36,6 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-
 from hummbl_governance.kernel import (
     Kernel,
 )
@@ -53,6 +52,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # ===========================================================================
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
+
 
 class TestCrossEngineIntegration:
     """Test engines interacting in realistic scenarios."""

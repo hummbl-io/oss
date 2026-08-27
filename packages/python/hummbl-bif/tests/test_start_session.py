@@ -1,6 +1,7 @@
 """Tests for bif_start_session tool."""
+
 import json
-import pytest
+
 import mcp_server
 from mcp_server import tool_bif_start_session
 

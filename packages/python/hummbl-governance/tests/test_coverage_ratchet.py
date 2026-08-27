@@ -7,6 +7,7 @@ Verifies:
 4. --init-baseline creates a valid baseline file
 5. Missing baseline file exits with code 2
 """
+
 from __future__ import annotations
 
 import json
@@ -176,7 +177,10 @@ class TestCoverageRatchetRowIdentity:
         ]
         _make_report(report, validated=2, fulfilled=10, failed=8, row_results=rows)
         _make_baseline(
-            baseline, validated=2, fulfilled=10, pct=20.0,
+            baseline,
+            validated=2,
+            fulfilled=10,
+            pct=20.0,
             validated_rows=[
                 {"matrix": "test-matrix.md", "control_id": "Art. 5"},
                 {"matrix": "test-matrix.md", "control_id": "Art. 29"},
@@ -200,7 +204,10 @@ class TestCoverageRatchetRowIdentity:
         ]
         _make_report(report, validated=2, fulfilled=10, failed=8, row_results=rows)
         _make_baseline(
-            baseline, validated=2, fulfilled=10, pct=20.0,
+            baseline,
+            validated=2,
+            fulfilled=10,
+            pct=20.0,
             validated_rows=[
                 {"matrix": "test-matrix.md", "control_id": "Art. 5"},
                 {"matrix": "test-matrix.md", "control_id": "Art. 29"},
@@ -222,7 +229,10 @@ class TestCoverageRatchetRowIdentity:
         ]
         _make_report(report, validated=3, fulfilled=10, failed=7, row_results=rows)
         _make_baseline(
-            baseline, validated=2, fulfilled=10, pct=20.0,
+            baseline,
+            validated=2,
+            fulfilled=10,
+            pct=20.0,
             validated_rows=[
                 {"matrix": "test-matrix.md", "control_id": "Art. 5"},
                 {"matrix": "test-matrix.md", "control_id": "Art. 29"},
@@ -276,8 +286,12 @@ class TestCoverageRatchetBaselineLowering:
         _make_baseline(baseline, validated=10, fulfilled=100, pct=10.0)
         _make_report(report, validated=5, fulfilled=100, failed=95)
         rc, output = _run_ratchet(
-            str(baseline), str(report), "--init-baseline",
-            "--force-lower", "--reason", "matrix restructured, rows removed",
+            str(baseline),
+            str(report),
+            "--init-baseline",
+            "--force-lower",
+            "--reason",
+            "matrix restructured, rows removed",
         )
         assert rc == 0
         assert "BASELINE SET" in output
@@ -294,7 +308,10 @@ class TestCoverageRatchetBaselineLowering:
         _make_baseline(baseline, validated=10, fulfilled=100, pct=10.0)
         _make_report(report, validated=5, fulfilled=100, failed=95)
         rc, output = _run_ratchet(
-            str(baseline), str(report), "--init-baseline", "--force-lower",
+            str(baseline),
+            str(report),
+            "--init-baseline",
+            "--force-lower",
         )
         assert rc == 1
         assert "reason" in output.lower()

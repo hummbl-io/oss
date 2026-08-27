@@ -39,6 +39,7 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 SESSIONS_DIR = Path(tempfile.gettempdir()) / "bif-sessions"
 
 import os as _os
+
 _env_sessions = _os.environ.get("BIF_SESSIONS_DIR")
 if _env_sessions:
     SESSIONS_DIR = Path(_env_sessions)
@@ -51,10 +52,26 @@ PHASES = {
         "name": "FOUNDATION",
         "description": "Domain orientation -- what it is, how it works, what's current",
         "batches": {
-            1: {"name": "Core Reference", "what_to_capture": "Official API/product docs, llms.txt or equivalent, site map of all available documentation", "priority": "Critical"},
-            2: {"name": "Protocol / Architecture", "what_to_capture": "How the system works under the hood -- architecture, data flow, core abstractions", "priority": "Critical"},
-            3: {"name": "Tooling Docs", "what_to_capture": "CLI tools, SDKs, IDE integrations, developer experience layer", "priority": "Critical"},
-            4: {"name": "Delta Document", "what_to_capture": "What's changed recently -- new features, deprecations, migration guides, breaking changes vs. your current knowledge", "priority": "Critical"},
+            1: {
+                "name": "Core Reference",
+                "what_to_capture": "Official API/product docs, llms.txt or equivalent, site map of all available documentation",
+                "priority": "Critical",
+            },
+            2: {
+                "name": "Protocol / Architecture",
+                "what_to_capture": "How the system works under the hood -- architecture, data flow, core abstractions",
+                "priority": "Critical",
+            },
+            3: {
+                "name": "Tooling Docs",
+                "what_to_capture": "CLI tools, SDKs, IDE integrations, developer experience layer",
+                "priority": "Critical",
+            },
+            4: {
+                "name": "Delta Document",
+                "what_to_capture": "What's changed recently -- new features, deprecations, migration guides, breaking changes vs. your current knowledge",
+                "priority": "Critical",
+            },
         },
         "exit_criteria": "You can explain the product's architecture, use its primary API, and know what's current vs. outdated.",
     },
@@ -62,9 +79,21 @@ PHASES = {
         "name": "TECHNIQUE",
         "description": "Methods and mastery -- how to use it well, how to avoid mistakes, what the experts think",
         "batches": {
-            5: {"name": "Best Practices", "what_to_capture": "Official best practices, techniques, patterns. The 'how to use this well' docs.", "priority": "High"},
-            6: {"name": "Production Hardening", "what_to_capture": "Guardrails, error handling, security, reliability, monitoring. The 'don't ship without this' docs.", "priority": "High"},
-            7: {"name": "Thought Leadership", "what_to_capture": "Engineering blog posts, conference talks, case studies. How the creators think about their product.", "priority": "High"},
+            5: {
+                "name": "Best Practices",
+                "what_to_capture": "Official best practices, techniques, patterns. The 'how to use this well' docs.",
+                "priority": "High",
+            },
+            6: {
+                "name": "Production Hardening",
+                "what_to_capture": "Guardrails, error handling, security, reliability, monitoring. The 'don't ship without this' docs.",
+                "priority": "High",
+            },
+            7: {
+                "name": "Thought Leadership",
+                "what_to_capture": "Engineering blog posts, conference talks, case studies. How the creators think about their product.",
+                "priority": "High",
+            },
         },
         "exit_criteria": "You can build production-quality implementations and articulate why certain patterns work better than others.",
     },
@@ -72,9 +101,21 @@ PHASES = {
         "name": "SOURCE",
         "description": "Study the creators -- primary sources, documentation, actual usage",
         "batches": {
-            8: {"name": "Production Configs", "what_to_capture": "System prompts, default configurations, internal settings the creators actually use", "priority": "Medium-High"},
-            9: {"name": "Code Repositories", "what_to_capture": "What repos to clone, directory structures, key files, how to use them", "priority": "Medium-High"},
-            10: {"name": "Research & Philosophy", "what_to_capture": "Why the product works this way -- research papers, design decisions, safety frameworks, model cards", "priority": "Medium"},
+            8: {
+                "name": "Production Configs",
+                "what_to_capture": "System prompts, default configurations, internal settings the creators actually use",
+                "priority": "Medium-High",
+            },
+            9: {
+                "name": "Code Repositories",
+                "what_to_capture": "What repos to clone, directory structures, key files, how to use them",
+                "priority": "Medium-High",
+            },
+            10: {
+                "name": "Research & Philosophy",
+                "what_to_capture": "Why the product works this way -- research papers, design decisions, safety frameworks, model cards",
+                "priority": "Medium",
+            },
         },
         "exit_criteria": "You understand not just how to use it, but why it was built this way and how the creators use it themselves.",
     },
@@ -82,11 +123,31 @@ PHASES = {
         "name": "ECOSYSTEM",
         "description": "Expand outward -- community, tools, integrations, competitive context",
         "batches": {
-            11: {"name": "Cookbooks & Deep-Dives", "what_to_capture": "Hands-on implementations, notebooks, worked examples", "priority": "As needed"},
-            12: {"name": "Integrations & Ecosystem", "what_to_capture": "Complementary tools, plugins, server galleries, partner docs", "priority": "As needed"},
-            13: {"name": "Consumer/Product Docs", "what_to_capture": "End-user documentation, pricing, plans, feature availability", "priority": "As needed"},
-            14: {"name": "Community Analysis", "what_to_capture": "Expert commentary, benchmarks, comparisons, leaked internals", "priority": "As needed"},
-            15: {"name": "Competitive Context", "what_to_capture": "How this compares to alternatives -- for positioning and decision-making", "priority": "As needed"},
+            11: {
+                "name": "Cookbooks & Deep-Dives",
+                "what_to_capture": "Hands-on implementations, notebooks, worked examples",
+                "priority": "As needed",
+            },
+            12: {
+                "name": "Integrations & Ecosystem",
+                "what_to_capture": "Complementary tools, plugins, server galleries, partner docs",
+                "priority": "As needed",
+            },
+            13: {
+                "name": "Consumer/Product Docs",
+                "what_to_capture": "End-user documentation, pricing, plans, feature availability",
+                "priority": "As needed",
+            },
+            14: {
+                "name": "Community Analysis",
+                "what_to_capture": "Expert commentary, benchmarks, comparisons, leaked internals",
+                "priority": "As needed",
+            },
+            15: {
+                "name": "Competitive Context",
+                "what_to_capture": "How this compares to alternatives -- for positioning and decision-making",
+                "priority": "As needed",
+            },
         },
         "exit_criteria": "You can operate as a subject matter expert, make architectural decisions, create content, and advise others.",
     },
@@ -105,13 +166,25 @@ BATCH_EXECUTION_STEPS = [
 # Quality checklist items (from FRAMEWORK.md Section 3.3)
 QUALITY_CHECKS = [
     {"id": "metadata", "label": "Metadata header present (source URL, fetch date, purpose)"},
-    {"id": "structured", "label": "Structured with headers -- scannable, any section findable in 10 seconds"},
-    {"id": "code_examples", "label": "Code examples included where applicable (current model IDs and syntax)"},
+    {
+        "id": "structured",
+        "label": "Structured with headers -- scannable, any section findable in 10 seconds",
+    },
+    {
+        "id": "code_examples",
+        "label": "Code examples included where applicable (current model IDs and syntax)",
+    },
     {"id": "tables", "label": "Tables for comparisons (models, features, pricing, options)"},
-    {"id": "no_stale", "label": "No stale information (model names, API endpoints, features all current)"},
+    {
+        "id": "no_stale",
+        "label": "No stale information (model names, API endpoints, features all current)",
+    },
     {"id": "sitemap", "label": "Site map captured if this is a docs source"},
     {"id": "delta", "label": "Delta noted -- what's new vs. what a reader might already know"},
-    {"id": "actionable", "label": "Actionable -- a developer could use this to start building immediately"},
+    {
+        "id": "actionable",
+        "label": "Actionable -- a developer could use this to start building immediately",
+    },
     {"id": "self_contained", "label": "Self-contained -- usable without opening external links"},
     {"id": "token_budget", "label": "Under context budget (target: under 50K tokens per file)"},
 ]
@@ -150,10 +223,14 @@ def _parse_template_batches(content):
             continue
         parts = [p.strip() for p in line.split("|")[1:-1]]
         if len(parts) >= 4:
-            batches.append({
-                "batch": parts[0], "phase": parts[1],
-                "name": parts[2], "sources": parts[3],
-            })
+            batches.append(
+                {
+                    "batch": parts[0],
+                    "phase": parts[1],
+                    "name": parts[2],
+                    "sources": parts[3],
+                }
+            )
     return batches
 
 
@@ -259,9 +336,7 @@ def tool_bif_start_session(arguments):
     for i, step in enumerate(BATCH_EXECUTION_STEPS, 1):
         prompt_template += f"{i}. {step}\n"
 
-    prompt_template += (
-        "\n**Source priority (use this order):**\n"
-    )
+    prompt_template += "\n**Source priority (use this order):**\n"
     for i, src in enumerate(SOURCE_PRIORITY, 1):
         prompt_template += f"{i}. {src}\n"
 
@@ -292,8 +367,7 @@ def tool_bif_start_session(arguments):
         "phase_1_prompt": prompt_template,
         "pre_ingestion_checklist": pre_checklist,
         "phases_overview": {
-            str(k): {"name": v["name"], "description": v["description"]}
-            for k, v in PHASES.items()
+            str(k): {"name": v["name"], "description": v["description"]} for k, v in PHASES.items()
         },
     }
 
@@ -311,7 +385,9 @@ def tool_bif_get_template(arguments):
 
     if not batch_info:
         valid = sorted(phase["batches"].keys())
-        return {"error": f"Batch {batch_num} not found in Phase {phase_num}. Valid batches: {valid}"}
+        return {
+            "error": f"Batch {batch_num} not found in Phase {phase_num}. Valid batches: {valid}"
+        }
 
     # Build the template
     template = {
@@ -371,8 +447,11 @@ def _check_metadata(content):
 def _check_structure(lines):
     """Check for sufficient section headers."""
     count = sum(1 for line in lines if line.startswith("## "))
-    return {"check": "structured", "passed": count >= 2,
-            "detail": f"Found {count} ## headers (minimum 2 required)"}
+    return {
+        "check": "structured",
+        "passed": count >= 2,
+        "detail": f"Found {count} ## headers (minimum 2 required)",
+    }
 
 
 def _check_code_examples(content):
@@ -380,8 +459,11 @@ def _check_code_examples(content):
     blocks = content.count("```")
     ok = blocks >= 2
     suffix = " (acceptable)" if ok else " (consider adding examples)"
-    return {"check": "code_examples", "passed": ok,
-            "detail": f"Found {blocks // 2} code blocks{suffix}"}
+    return {
+        "check": "code_examples",
+        "passed": ok,
+        "detail": f"Found {blocks // 2} code blocks{suffix}",
+    }
 
 
 def _check_tables(lines):
@@ -389,8 +471,7 @@ def _check_tables(lines):
     rows = sum(1 for line in lines if line.strip().startswith("|") and "|" in line[1:])
     ok = rows >= 3
     suffix = " (acceptable)" if ok else " (consider adding comparison tables)"
-    return {"check": "tables", "passed": ok,
-            "detail": f"Found {rows} table rows{suffix}"}
+    return {"check": "tables", "passed": ok, "detail": f"Found {rows} table rows{suffix}"}
 
 
 def _check_sitemap(content):
@@ -398,15 +479,21 @@ def _check_sitemap(content):
     lower = content.lower()
     ok = "site map" in lower or "sitemap" in lower or "navigation" in lower
     suffix = " -- found" if ok else " -- missing"
-    return {"check": "sitemap", "passed": ok,
-            "detail": f"Phase 1 should include documentation site map{suffix}"}
+    return {
+        "check": "sitemap",
+        "passed": ok,
+        "detail": f"Phase 1 should include documentation site map{suffix}",
+    }
 
 
 def _check_references(content):
     """Check for URL references."""
     count = content.count("http://") + content.count("https://")
-    return {"check": "references", "passed": count > 0,
-            "detail": f"Found {count} URLs for reference"}
+    return {
+        "check": "references",
+        "passed": count > 0,
+        "detail": f"Found {count} URLs for reference",
+    }
 
 
 def _check_token_budget(content):
@@ -414,8 +501,11 @@ def _check_token_budget(content):
     tokens = len(content) // 4
     ok = tokens < 50000
     suffix = " (under 50K limit)" if ok else " (OVER 50K limit -- split into sub-batches)"
-    return {"check": "token_budget", "passed": ok,
-            "detail": f"~{tokens:,} estimated tokens{suffix}"}
+    return {
+        "check": "token_budget",
+        "passed": ok,
+        "detail": f"~{tokens:,} estimated tokens{suffix}",
+    }
 
 
 def _check_title(lines):
@@ -428,8 +518,11 @@ def _check_title(lines):
 def _check_formatting(content):
     """Check for horizontal rule separators."""
     ok = "---" in content
-    detail = ("Has horizontal rules for section separation" if ok
-              else "Consider adding --- separators between major sections")
+    detail = (
+        "Has horizontal rules for section separation"
+        if ok
+        else "Consider adding --- separators between major sections"
+    )
     return {"check": "formatting", "passed": ok, "detail": detail}
 
 
@@ -453,12 +546,14 @@ def tool_bif_validate_batch(arguments):
     ]
     if phase_num == 1:
         checks.append(_check_sitemap(batch_content))
-    checks.extend([
-        _check_references(batch_content),
-        _check_token_budget(batch_content),
-        _check_title(lines),
-        _check_formatting(batch_content),
-    ])
+    checks.extend(
+        [
+            _check_references(batch_content),
+            _check_token_budget(batch_content),
+            _check_title(lines),
+            _check_formatting(batch_content),
+        ]
+    )
 
     passed = sum(1 for c in checks if c["passed"])
     failed = len(checks) - passed
@@ -483,13 +578,15 @@ def _list_all_sessions():
     for f in sorted(SESSIONS_DIR.iterdir()):
         if f.suffix == ".json":
             s = json.loads(f.read_text())
-            sessions.append({
-                "session_id": s["session_id"],
-                "domain": s["domain"],
-                "created_at": s["created_at"],
-                "completed": len(s.get("completed_batches", [])),
-                "target": s["target_batches"],
-            })
+            sessions.append(
+                {
+                    "session_id": s["session_id"],
+                    "domain": s["domain"],
+                    "created_at": s["created_at"],
+                    "completed": len(s.get("completed_batches", [])),
+                    "target": s["target_batches"],
+                }
+            )
     return {"sessions": sessions, "count": len(sessions)}
 
 
@@ -559,32 +656,38 @@ def tool_bif_list_templates(arguments):
 
     result = []
     for key, tmpl in templates.items():
-        result.append({
-            "template_id": key,
-            "description": tmpl["description"],
-            "file": tmpl["file"],
-            "batch_count": len(tmpl["batches"]),
-            "batches": tmpl["batches"],
-        })
+        result.append(
+            {
+                "template_id": key,
+                "description": tmpl["description"],
+                "file": tmpl["file"],
+                "batch_count": len(tmpl["batches"]),
+                "batches": tmpl["batches"],
+            }
+        )
 
     # Also include the generic BIF phases as a "generic" template
     generic_batches = []
     for phase_num, phase in PHASES.items():
         for batch_num, batch in phase["batches"].items():
-            generic_batches.append({
-                "batch": str(batch_num),
-                "phase": phase["name"],
-                "name": batch["name"],
-                "sources": batch["what_to_capture"][:60] + "...",
-            })
+            generic_batches.append(
+                {
+                    "batch": str(batch_num),
+                    "phase": phase["name"],
+                    "name": batch["name"],
+                    "sources": batch["what_to_capture"][:60] + "...",
+                }
+            )
 
-    result.append({
-        "template_id": "generic",
-        "description": "Generic BIF template (all 4 phases, 15 batches)",
-        "file": None,
-        "batch_count": len(generic_batches),
-        "batches": generic_batches,
-    })
+    result.append(
+        {
+            "template_id": "generic",
+            "description": "Generic BIF template (all 4 phases, 15 batches)",
+            "file": None,
+            "batch_count": len(generic_batches),
+            "batches": generic_batches,
+        }
+    )
 
     return {"templates": result, "count": len(result)}
 
@@ -713,11 +816,14 @@ def send_error(msg_id, code, message):
 
 def _handle_initialize(msg_id):
     """Handle MCP initialize request."""
-    send_response(msg_id, {
-        "protocolVersion": PROTOCOL_VERSION,
-        "capabilities": {"tools": {}},
-        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-    })
+    send_response(
+        msg_id,
+        {
+            "protocolVersion": PROTOCOL_VERSION,
+            "capabilities": {"tools": {}},
+            "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+        },
+    )
 
 
 def _handle_tools_call(msg_id, params):
@@ -726,11 +832,12 @@ def _handle_tools_call(msg_id, params):
     arguments = params.get("arguments", {})
     handler = TOOL_HANDLERS.get(tool_name)
     result = handler(arguments) if handler else {"error": f"Unknown tool: {tool_name}"}
-    send_response(msg_id, {
-        "content": [
-            {"type": "text", "text": json.dumps(result, indent=2, default=str)}
-        ],
-    })
+    send_response(
+        msg_id,
+        {
+            "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
+        },
+    )
 
 
 # Method dispatch table
@@ -769,7 +876,8 @@ def main():
                 send_error(msg_id, -32601, f"Method not found: {method}")
         except Exception as e:
             send_error(
-                msg_id, -32603,
+                msg_id,
+                -32603,
                 f"Internal error: {e}\n{traceback.format_exc()}",
             )
 

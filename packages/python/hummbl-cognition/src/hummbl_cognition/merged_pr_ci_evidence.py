@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 class EvidenceTier(str):
     """Evidence quality tier for CI status."""
+
     CONNECTOR_VERIFIED = "connector_verified"
     DECLARED_IN_PR = "declared_in_pr"
     DECLARED_IN_COMMIT = "declared_in_commit"
@@ -163,27 +164,46 @@ def _run_gh(
         return None
 
 
-def _get_pr_info(repo: str, pr_number: int, errors: list[str] | None = None) -> dict[str, Any] | None:
+def _get_pr_info(
+    repo: str, pr_number: int, errors: list[str] | None = None
+) -> dict[str, Any] | None:
     """Fetch PR metadata including merge commit SHA and head SHA."""
-    result = _run_gh([
-        "pr", "view", str(pr_number),
-        "--repo", repo,
-        "--json", "number,mergeCommit,headRefOid,baseRefName,headRefName,body,state",
-    ], errors=errors)
+    result = _run_gh(
+        [
+            "pr",
+            "view",
+            str(pr_number),
+            "--repo",
+            repo,
+            "--json",
+            "number,mergeCommit,headRefOid,baseRefName,headRefName,body,state",
+        ],
+        errors=errors,
+    )
     if result and isinstance(result, dict):
         return result
     return None
 
 
-def _get_workflow_runs_for_sha(repo: str, sha: str, errors: list[str] | None = None) -> list[dict[str, Any]]:
+def _get_workflow_runs_for_sha(
+    repo: str, sha: str, errors: list[str] | None = None
+) -> list[dict[str, Any]]:
     """Fetch workflow runs for a specific commit SHA."""
-    result = _run_gh([
-        "run", "list",
-        "--repo", repo,
-        "--commit", sha,
-        "--limit", "20",
-        "--json", "conclusion,status,workflowName,url,headSha,startedAt,updatedAt,databaseId",
-    ], errors=errors)
+    result = _run_gh(
+        [
+            "run",
+            "list",
+            "--repo",
+            repo,
+            "--commit",
+            sha,
+            "--limit",
+            "20",
+            "--json",
+            "conclusion,status,workflowName,url,headSha,startedAt,updatedAt,databaseId",
+        ],
+        errors=errors,
+    )
     if result and isinstance(result, list):
         return result
     return []
@@ -299,9 +319,13 @@ def _get_check_runs_for_ref(repo: str, ref: str) -> list[dict[str, Any]]:
 
 def _get_commit_message(repo: str, sha: str, errors: list[str] | None = None) -> str:
     """Fetch the commit message for a specific SHA via gh API."""
-    result = _run_gh([
-        "api", f"repos/{repo}/commits/{sha}",
-    ], errors=errors)
+    result = _run_gh(
+        [
+            "api",
+            f"repos/{repo}/commits/{sha}",
+        ],
+        errors=errors,
+    )
     if isinstance(result, dict):
         commit = result.get("commit", {})
         if isinstance(commit, dict):
@@ -325,9 +349,7 @@ def _determine_evidence_tier(
         # Check if all runs have a definitive conclusion
         all_completed = all(
             r.get("status") == "completed" for r in workflow_runs
-        ) and all(
-            s.get("status") == "completed" for s in check_suites
-        )
+        ) and all(s.get("status") == "completed" for s in check_suites)
         if all_completed:
             return EvidenceTier.CONNECTOR_VERIFIED
         return EvidenceTier.INCONCLUSIVE
@@ -335,14 +357,26 @@ def _determine_evidence_tier(
     # No connector evidence — check if PR body declares CI status
     if pr_body and any(
         marker in pr_body.lower()
-        for marker in ("ci pass", "ci green", "tests pass", "all checks pass", "ci: pass")
+        for marker in (
+            "ci pass",
+            "ci green",
+            "tests pass",
+            "all checks pass",
+            "ci: pass",
+        )
     ):
         return EvidenceTier.DECLARED_IN_PR
 
     # No connector evidence — check if commit message declares CI status
     if commit_message and any(
         marker in commit_message.lower()
-        for marker in ("ci pass", "ci green", "tests pass", "all checks pass", "ci: pass")
+        for marker in (
+            "ci pass",
+            "ci green",
+            "tests pass",
+            "all checks pass",
+            "ci: pass",
+        )
     ):
         return EvidenceTier.DECLARED_IN_COMMIT
 
@@ -427,7 +461,9 @@ def extract_ci_evidence(
         evidence.evidence_tier = EvidenceTier.MISSING
         evidence.ci_status = "missing"
         evidence.release_recommendation, evidence.required_human_approval = (
-            _determine_release_recommendation(evidence.evidence_tier, evidence.ci_status)
+            _determine_release_recommendation(
+                evidence.evidence_tier, evidence.ci_status
+            )
         )
         return evidence
 
@@ -449,7 +485,9 @@ def extract_ci_evidence(
         evidence.evidence_tier = EvidenceTier.MISSING
         evidence.ci_status = "missing"
         evidence.release_recommendation, evidence.required_human_approval = (
-            _determine_release_recommendation(evidence.evidence_tier, evidence.ci_status)
+            _determine_release_recommendation(
+                evidence.evidence_tier, evidence.ci_status
+            )
         )
         return evidence
 
@@ -459,40 +497,46 @@ def extract_ci_evidence(
     if sha_to_check:
         workflow_runs = _get_workflow_runs_for_sha(repo, sha_to_check, evidence.errors)
         for run in workflow_runs:
-            evidence.ci_evidence.append(CIEvidence(
-                source="workflow_run",
-                workflow_name=run.get("workflowName", ""),
-                run_url=run.get("url", ""),
-                status=run.get("status", ""),
-                conclusion=run.get("conclusion", ""),
-                head_sha=run.get("headSha", ""),
-                started_at=run.get("startedAt", ""),
-                completed_at=run.get("updatedAt", ""),
-                lookup_method=f"gh run list --commit {sha_to_check}",
-            ))
+            evidence.ci_evidence.append(
+                CIEvidence(
+                    source="workflow_run",
+                    workflow_name=run.get("workflowName", ""),
+                    run_url=run.get("url", ""),
+                    status=run.get("status", ""),
+                    conclusion=run.get("conclusion", ""),
+                    head_sha=run.get("headSha", ""),
+                    started_at=run.get("startedAt", ""),
+                    completed_at=run.get("updatedAt", ""),
+                    lookup_method=f"gh run list --commit {sha_to_check}",
+                )
+            )
 
     # Step 3: Fetch check suites for the merge commit SHA
     check_suites: list[dict[str, Any]] = []
     if sha_to_check:
         check_suites = _get_check_suites_for_sha(repo, sha_to_check, evidence.errors)
         for suite in check_suites:
-            evidence.ci_evidence.append(CIEvidence(
-                source="check_suite",
-                workflow_name=suite.get("app", {}).get("name", ""),
-                run_url=suite.get("html_url", ""),
-                status=suite.get("status", ""),
-                conclusion=suite.get("conclusion", ""),
-                head_sha=suite.get("head_sha", ""),
-                started_at=suite.get("created_at", ""),
-                completed_at=suite.get("updated_at", ""),
-                lookup_method=f"gh api repos/{repo}/commits/{sha_to_check}/check-suites",
-            ))
+            evidence.ci_evidence.append(
+                CIEvidence(
+                    source="check_suite",
+                    workflow_name=suite.get("app", {}).get("name", ""),
+                    run_url=suite.get("html_url", ""),
+                    status=suite.get("status", ""),
+                    conclusion=suite.get("conclusion", ""),
+                    head_sha=suite.get("head_sha", ""),
+                    started_at=suite.get("created_at", ""),
+                    completed_at=suite.get("updated_at", ""),
+                    lookup_method=f"gh api repos/{repo}/commits/{sha_to_check}/check-suites",
+                )
+            )
 
     # Step 4: Determine evidence tier
     # Fetch commit message to check for declared_in_commit tier
     commit_message = ""
     if evidence.merge_commit_sha:
-        commit_message = _get_commit_message(repo, evidence.merge_commit_sha, evidence.errors)
+        commit_message = _get_commit_message(
+            repo, evidence.merge_commit_sha, evidence.errors
+        )
     evidence.evidence_tier = _determine_evidence_tier(
         workflow_runs, check_suites, pr_body, commit_message
     )

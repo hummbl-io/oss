@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from trace_diff import diff_traces, _tuple_key, _tuple_fingerprint, _field_diff, format_summary
+from trace_diff import _field_diff, _tuple_fingerprint, _tuple_key, diff_traces, format_summary
 
 
 def test_tuple_key():

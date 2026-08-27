@@ -83,9 +83,9 @@ Use the strongest wording supported by the evidence:
 
 Before public use of stronger record language, create or update:
 
-- [WORLD_RECORD_BASELINES.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/WORLD_RECORD_BASELINES.md)
-- [WORLD_RECORD_HISTORY.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/WORLD_RECORD_HISTORY.md)
-- [TRAINING_RUN_LEDGER.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/TRAINING_RUN_LEDGER.md)
+- [WORLD_RECORD_BASELINES.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/WORLD_RECORD_BASELINES.md)
+- [WORLD_RECORD_HISTORY.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/WORLD_RECORD_HISTORY.md)
+- [TRAINING_RUN_LEDGER.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/TRAINING_RUN_LEDGER.md)
 
 ## Working Policy
 

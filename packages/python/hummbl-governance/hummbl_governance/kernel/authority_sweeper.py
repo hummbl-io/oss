@@ -46,9 +46,7 @@ def validate_authority_sweeper(sweep_record: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(sweep_record, schema)
     if errors:
-        raise ValidationError(
-            f"Authority sweeper schema validation failed: {'; '.join(errors)}"
-        )
+        raise ValidationError(f"Authority sweeper schema validation failed: {'; '.join(errors)}")
 
 
 def validate_operator_approval(sweep_record: dict[str, Any]) -> None:
@@ -65,9 +63,7 @@ def validate_operator_approval(sweep_record: dict[str, Any]) -> None:
     """
     authority = sweep_record.get("authority", {})
     if not isinstance(authority, dict):
-        raise ValueError(
-            "Authority sweeper rejected: authority gate missing or invalid"
-        )
+        raise ValueError("Authority sweeper rejected: authority gate missing or invalid")
 
     if not authority.get("operator_approval", False):
         raise ValueError(
@@ -77,9 +73,7 @@ def validate_operator_approval(sweep_record: dict[str, Any]) -> None:
 
     operator_id = authority.get("sweep_operator_id", "")
     if not operator_id or not isinstance(operator_id, str):
-        raise ValueError(
-            "Authority sweeper rejected: sweep_operator_id must be a non-empty string"
-        )
+        raise ValueError("Authority sweeper rejected: sweep_operator_id must be a non-empty string")
 
 
 def validate_revocation_consistency(sweep_record: dict[str, Any]) -> None:
@@ -98,9 +92,7 @@ def validate_revocation_consistency(sweep_record: dict[str, Any]) -> None:
     grants_revoked = sweep_record.get("grants_revoked", 0)
 
     if not isinstance(revocations, list):
-        raise ValueError(
-            "Authority sweeper rejected: revocations must be a list"
-        )
+        raise ValueError("Authority sweeper rejected: revocations must be a list")
 
     if len(revocations) != grants_revoked:
         raise ValueError(
@@ -110,14 +102,9 @@ def validate_revocation_consistency(sweep_record: dict[str, Any]) -> None:
 
     for i, rev in enumerate(revocations):
         if not isinstance(rev, dict):
-            raise ValueError(
-                f"Authority sweeper rejected: revocation[{i}] is not a dict"
-            )
+            raise ValueError(f"Authority sweeper rejected: revocation[{i}] is not a dict")
         if "notification_sent" not in rev:
-            raise ValueError(
-                f"Authority sweeper rejected: revocation[{i}] missing "
-                f"notification_sent field"
-            )
+            raise ValueError(f"Authority sweeper rejected: revocation[{i}] missing notification_sent field")
 
 
 def validate_sweep(sweep_record: dict[str, Any]) -> None:

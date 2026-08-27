@@ -83,8 +83,7 @@ class DelegationTokenManager:
                     break
             if secret is None:
                 logger.warning(
-                    "No signing secret configured, using ephemeral key. "
-                    "Tokens will be invalid after process restart."
+                    "No signing secret configured, using ephemeral key. Tokens will be invalid after process restart."
                 )
                 secret = os.urandom(32)
         self._secret = secret
@@ -117,9 +116,7 @@ class DelegationTokenManager:
             raise TypeError("issuer must be a non-empty exact string")
         if type(subject) is not str or not subject:
             raise TypeError("subject must be a non-empty exact string")
-        if type(ops_allowed) is not list or not all(
-            type(operation) is str and operation for operation in ops_allowed
-        ):
+        if type(ops_allowed) is not list or not all(type(operation) is str and operation for operation in ops_allowed):
             raise TypeError("ops_allowed must be a list of non-empty exact strings")
         if type(binding) is not TokenBinding:
             raise TypeError("binding must be an exact TokenBinding")
@@ -132,17 +129,19 @@ class DelegationTokenManager:
             expiry_dt = datetime.now(timezone.utc) + timedelta(minutes=expiry_minutes)
             expiry = expiry_dt.isoformat().replace("+00:00", "Z")
 
-        token = _normalized_token_snapshot(DelegationToken(
-            token_id=str(uuid.uuid4()),
-            issuer=issuer,
-            subject=subject,
-            resource_selectors=tuple(resource_selectors or []),
-            ops_allowed=tuple(ops_allowed),
-            caveats=tuple(caveats or []),
-            expiry=expiry,
-            binding=binding,
-            signature="",
-        ))
+        token = _normalized_token_snapshot(
+            DelegationToken(
+                token_id=str(uuid.uuid4()),
+                issuer=issuer,
+                subject=subject,
+                resource_selectors=tuple(resource_selectors or []),
+                ops_allowed=tuple(ops_allowed),
+                caveats=tuple(caveats or []),
+                expiry=expiry,
+                binding=binding,
+                signature="",
+            )
+        )
 
         sig = _compute_signature(token.to_dict(), self._secret)
 
@@ -188,9 +187,7 @@ class DelegationTokenManager:
             Signed DelegationToken.
         """
         binding = TokenBinding(task_id=task_id, contract_id=contract_id)
-        selectors = [
-            ResourceSelector(resource_type="*", resource_id=r) for r in resources
-        ]
+        selectors = [ResourceSelector(resource_type="*", resource_id=r) for r in resources]
         return self.create_token(
             issuer=issuer,
             subject=subject,
@@ -242,10 +239,7 @@ class DelegationTokenManager:
             expected_subject,
             expected_issuer,
         )
-        if any(
-            value is not None and (type(value) is not str or not value)
-            for value in expected_values
-        ):
+        if any(value is not None and (type(value) is not str or not value) for value in expected_values):
             return None, E_BINDING_MISMATCH
         try:
             snapshot = _normalized_token_snapshot(token)
@@ -255,11 +249,7 @@ class DelegationTokenManager:
                 return None, E_TOKEN_EXPIRED
             if expected_issuer is not None and snapshot.issuer != expected_issuer:
                 return None, E_BINDING_MISMATCH
-            if (
-                expected_task_id is not None
-                or expected_contract_id is not None
-                or expected_subject is not None
-            ):
+            if expected_task_id is not None or expected_contract_id is not None or expected_subject is not None:
                 valid, error = self._validate_binding(
                     snapshot,
                     expected_task_id,
@@ -281,11 +271,7 @@ class DelegationTokenManager:
         expected_subject: str | None,
     ) -> tuple[bool, str | None]:
         """Validate token binding against expected values."""
-        task_id = (
-            expected_task_id
-            if expected_task_id is not None
-            else (token.binding.task_id if token.binding else "")
-        )
+        task_id = expected_task_id if expected_task_id is not None else (token.binding.task_id if token.binding else "")
         contract_id = (
             expected_contract_id
             if expected_contract_id is not None
@@ -311,10 +297,7 @@ class DelegationTokenManager:
         if type(requested_op) is not str or not requested_op:
             return False, E_DCT_VIOLATION
         for tools in (allowed_tools, denied_tools):
-            if tools is not None and (
-                type(tools) is not list
-                or not all(type(tool) is str and tool for tool in tools)
-            ):
+            if tools is not None and (type(tools) is not list or not all(type(tool) is str and tool for tool in tools)):
                 return False, E_DCT_VIOLATION
         snapshot, error = self.authenticate_token(token)
         if snapshot is None:
@@ -343,9 +326,7 @@ def _normalized_token_snapshot(token: DelegationToken) -> DelegationToken:
             raise TypeError(f"{name} must be a string")
     if token.expiry is not None and type(token.expiry) is not str:
         raise TypeError("expiry must be a string or None")
-    if type(token.ops_allowed) is not tuple or not all(
-        type(operation) is str for operation in token.ops_allowed
-    ):
+    if type(token.ops_allowed) is not tuple or not all(type(operation) is str for operation in token.ops_allowed):
         raise TypeError("ops_allowed must be a tuple of strings")
     if type(token.resource_selectors) is not tuple:
         raise TypeError("resource_selectors must be a tuple")

@@ -13,21 +13,19 @@ Standard library only: Python 3.11+ (asyncio, urllib, http.server, sqlite3, json
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import http.server
 import json
 import logging
 import os
 import socketserver
 import ssl
-import sys
 import threading
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,6 +37,7 @@ logger = logging.getLogger("situation_daemon")
 # ---------------------------------------------------------------------------
 # Data Models & Triage Schema
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class TelemetryEvent:
@@ -60,6 +59,7 @@ class TelemetryEvent:
 # ---------------------------------------------------------------------------
 # Deduplication & State Store (Memory + SQLite)
 # ---------------------------------------------------------------------------
+
 
 class EventStore:
     def __init__(self, db_path: str = ":memory:", ttl_seconds: int = 7200):
@@ -94,10 +94,7 @@ class EventStore:
 
     def _purge_expired(self) -> None:
         now = time.time()
-        expired = [
-            eid for eid, t in self._event_timestamps.items()
-            if (now - t) > self.ttl_seconds
-        ]
+        expired = [eid for eid, t in self._event_timestamps.items() if (now - t) > self.ttl_seconds]
         for eid in expired:
             self._events.pop(eid, None)
             self._event_timestamps.pop(eid, None)
@@ -106,6 +103,7 @@ class EventStore:
 # ---------------------------------------------------------------------------
 # HTTP Helpers (Zero Third-Party Dependencies)
 # ---------------------------------------------------------------------------
+
 
 def fetch_json(url: str, headers: Optional[Dict[str, str]] = None, timeout: float = 8.0) -> Optional[Any]:
     req_headers = {
@@ -130,6 +128,7 @@ def fetch_json(url: str, headers: Optional[Dict[str, str]] = None, timeout: floa
 # ---------------------------------------------------------------------------
 # Feed Ingestion Workers
 # ---------------------------------------------------------------------------
+
 
 class BaseWorker:
     name: str = "base"
@@ -160,6 +159,7 @@ class BaseWorker:
 
 class AviationSquawkWorker(BaseWorker):
     """Monitors live emergency transponder squawks (7700 emergency, 7600 lost comms, 7500 hijack)."""
+
     name = "aviation_squawk"
     interval_seconds = 15.0
 
@@ -181,7 +181,7 @@ class AviationSquawkWorker(BaseWorker):
                 hex_id = ac.get("hex", "").strip().upper()
                 if not hex_id:
                     continue
-                
+
                 # Fingerprint per aircraft + squawk code
                 event_id = f"squawk_{code}_{hex_id}"
                 callsign = ac.get("flight", "UNKNOWN").strip()
@@ -210,6 +210,7 @@ class AviationSquawkWorker(BaseWorker):
 
 class SeismicWorker(BaseWorker):
     """Monitors USGS real-time global earthquake feeds (M4.5+ and significant events)."""
+
     name = "seismic_usgs"
     interval_seconds = 45.0
 
@@ -265,6 +266,7 @@ class SeismicWorker(BaseWorker):
 
 class SpaceWeatherWorker(BaseWorker):
     """Monitors NOAA Space Weather Prediction Center planetary geomagnetic storm and solar flare alerts."""
+
     name = "space_weather"
     interval_seconds = 60.0
 
@@ -283,7 +285,7 @@ class SpaceWeatherWorker(BaseWorker):
                 continue
 
             event_id = f"swpc_{msg_id}"
-            
+
             # Simple keyword triage
             if "WARNING: Geomagnetic Storm Category G5" in msg or "WARNING: Solar Radiation Storm Category S5" in msg:
                 severity = "P0_CRITICAL"
@@ -319,6 +321,7 @@ class SpaceWeatherWorker(BaseWorker):
 # Multi-Channel Alert Dispatcher
 # ---------------------------------------------------------------------------
 
+
 class AlertDispatcher:
     def __init__(self, webhook_urls: Optional[List[str]] = None):
         self.webhook_urls = webhook_urls or []
@@ -327,8 +330,8 @@ class AlertDispatcher:
         # 1. Console / Terminal SITREP output
         colors = {
             "P0_CRITICAL": "\033[91;1m",  # Bold Red
-            "P1_HIGH": "\033[93;1m",      # Bold Yellow
-            "P2_ADVISORY": "\033[94m",    # Blue
+            "P1_HIGH": "\033[93;1m",  # Bold Yellow
+            "P2_ADVISORY": "\033[94m",  # Blue
         }
         reset = "\033[0m"
         color = colors.get(event.severity, "")
@@ -344,18 +347,26 @@ class AlertDispatcher:
             threading.Thread(target=self._send_webhooks, args=(event,), daemon=True).start()
 
     def _send_webhooks(self, event: TelemetryEvent) -> None:
-        payload = json.dumps({
-            "content": f"**[{event.severity}] {event.title}**\n{event.summary}\n`Timestamp: {event.timestamp}`",
-            "embeds": [{
-                "title": event.title,
-                "description": event.summary,
-                "color": 15158332 if "P0" in event.severity else 15105570,
-                "fields": [
-                    {"name": "Domain", "value": event.domain, "inline": True},
-                    {"name": "Coordinates", "value": f"{event.latitude},{event.longitude}" if event.latitude else "N/A", "inline": True},
-                ]
-            }]
-        }).encode("utf-8")
+        payload = json.dumps(
+            {
+                "content": f"**[{event.severity}] {event.title}**\n{event.summary}\n`Timestamp: {event.timestamp}`",
+                "embeds": [
+                    {
+                        "title": event.title,
+                        "description": event.summary,
+                        "color": 15158332 if "P0" in event.severity else 15105570,
+                        "fields": [
+                            {"name": "Domain", "value": event.domain, "inline": True},
+                            {
+                                "name": "Coordinates",
+                                "value": f"{event.latitude},{event.longitude}" if event.latitude else "N/A",
+                                "inline": True,
+                            },
+                        ],
+                    }
+                ],
+            }
+        ).encode("utf-8")
 
         for url in self.webhook_urls:
             try:
@@ -364,7 +375,7 @@ class AlertDispatcher:
                     data=payload,
                     headers={"Content-Type": "application/json", "User-Agent": "HUMMBL-SituationDaemon/1.0"},
                 )
-                with urllib.request.urlopen(req, timeout=5.0) as resp:
+                with urllib.request.urlopen(req, timeout=5.0):
                     pass
             except Exception as e:
                 logger.debug("Webhook delivery failed to %s: %s", url, e)
@@ -451,7 +462,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       try {
         const res = await fetch('/api/events');
         const events = await res.json();
-        
+
         // Update stats
         document.getElementById('stat-events').innerText = `${events.length} Active Events`;
         document.getElementById('stat-uptime').innerText = `Uptime: ${Math.floor((Date.now() - startTime)/1000)}s`;
@@ -481,7 +492,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           if (ev.latitude !== null && ev.longitude !== null) {
             const color = ev.severity === 'P0_CRITICAL' ? '#ef4444' : ev.severity === 'P1_HIGH' ? '#f59e0b' : '#3b82f6';
             const radius = ev.domain === 'seismic' ? Math.max(6, (ev.metadata.mag || 4) * 2.5) : 6;
-            
+
             const marker = L.circleMarker([ev.latitude, ev.longitude], {
               radius: radius,
               color: color,
@@ -489,7 +500,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
               fillOpacity: 0.6,
               weight: 2
             }).bindPopup(`<b>${ev.title}</b><br/>${ev.summary}<br/><small>${ev.timestamp}</small>`);
-            
+
             marker.addTo(map);
             markers.push(marker);
           }
@@ -505,6 +516,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </body>
 </html>
 """
+
 
 class SituationHTTPHandler(http.server.BaseHTTPRequestHandler):
     store: Optional[EventStore] = None
@@ -549,7 +561,7 @@ def run_http_server(store: EventStore, port: int = 8765) -> socketserver.TCPServ
     handler = SituationHTTPHandler
     handler.store = store
     handler.start_time = time.time()
-    
+
     # Threading server
     class ReusableServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         allow_reuse_address = True
@@ -564,6 +576,7 @@ def run_http_server(store: EventStore, port: int = 8765) -> socketserver.TCPServ
 # ---------------------------------------------------------------------------
 # Daemon Core Orchestrator
 # ---------------------------------------------------------------------------
+
 
 class SituationDaemon:
     def __init__(self, port: int = 8765, webhook_urls: Optional[List[str]] = None):
@@ -580,11 +593,11 @@ class SituationDaemon:
     async def start(self) -> None:
         logger.info("Initializing HUMMBL Situation Monitoring Daemon...")
         self.http_server = run_http_server(self.store, port=self.port)
-        
+
         # Start all polling workers concurrently
         tasks = [asyncio.create_task(w.run_loop()) for w in self.workers]
         logger.info("All telemetry workers engaged (%d workers active).", len(self.workers))
-        
+
         try:
             await asyncio.gather(*tasks)
         except asyncio.CancelledError:

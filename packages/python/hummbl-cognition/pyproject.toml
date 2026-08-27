@@ -56,6 +56,9 @@ hummbl_cognition = ["schemas/*.json", "seed_registries/*.jsonl", "data/*.json"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+    "allow_ledger_writes: mark test to allow writing to ledger test artifacts",
+]
 
 [project.scripts]
 hummbl-cognition = "hummbl_cognition.__main__:main"

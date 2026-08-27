@@ -5,16 +5,12 @@ pass once that module lands on main. Expected to fail with ImportError
 until then.
 """
 
-import json
-
 import pytest
 
 # Guard import — module may not exist yet (PR #470)
 try:
-    from hummbl_cognition.mcp_cognitive_state import (
-        handle_request,
-        MCP_TOOLS,
-    )
+    from hummbl_cognition.mcp_cognitive_state import handle_request
+
     _MODULE_AVAILABLE = True
 except ImportError:
     _MODULE_AVAILABLE = False
@@ -28,6 +24,7 @@ pytestmark = pytest.mark.skipif(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _req(method, params=None, req_id=1):
     return {"jsonrpc": "2.0", "id": req_id, "method": method, "params": params or {}}
@@ -123,13 +120,9 @@ class TestToolCallsMissingArgs:
 
 class TestNotifications:
     def test_initialized_notification_returns_none(self):
-        resp = handle_request(
-            {"jsonrpc": "2.0", "method": "notifications/initialized"}
-        )
+        resp = handle_request({"jsonrpc": "2.0", "method": "notifications/initialized"})
         assert resp is None
 
     def test_cancelled_notification_returns_none(self):
-        resp = handle_request(
-            {"jsonrpc": "2.0", "method": "notifications/cancelled"}
-        )
+        resp = handle_request({"jsonrpc": "2.0", "method": "notifications/cancelled"})
         assert resp is None

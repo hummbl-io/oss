@@ -50,8 +50,7 @@ def validate_policy(registry: dict) -> list[str]:
         # Fail-closed: revoked keys must not be usable
         if key_status == "revoked":
             violations.append(
-                f"revoked key for '{ident}' is still in registry"
-                " — remove or mark revoked with no allowed_uses"
+                f"revoked key for '{ident}' is still in registry — remove or mark revoked with no allowed_uses"
             )
 
         # Fail-closed: pending keys have no fingerprint
@@ -66,13 +65,11 @@ def validate_policy(registry: dict) -> list[str]:
         if identity_class in ("agent_author", "agent_reviewer"):
             if "human_final_review" in allowed_uses:
                 violations.append(
-                    f"agent '{ident}' has human_final_review in allowed_uses"
-                    " — agents cannot perform human final review"
+                    f"agent '{ident}' has human_final_review in allowed_uses — agents cannot perform human final review"
                 )
             if max_tier >= 3:
                 violations.append(
-                    f"agent '{ident}' has max_tier={max_tier}"
-                    " — agents cannot act at tier 3+ (human final review)"
+                    f"agent '{ident}' has max_tier={max_tier} — agents cannot act at tier 3+ (human final review)"
                 )
 
         # Human reviewers can have human_final_review

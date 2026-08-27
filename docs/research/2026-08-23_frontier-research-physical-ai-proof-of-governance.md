@@ -2,7 +2,7 @@
 
 **Research Focus:** Divergent technical landscape at the intersection of Embodied/Physical AI, Formal Verification (TLA+), and Cryptographic Proofs of Governance.  
 **Date:** August 2026  
-**Canonical Surface:** [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`hummbl-physical-ai`](file:///<repo-root>/PROJECTS/hummbl-physical-ai), [`krineia`](file:///<repo-root>/PROJECTS/krineia)  
+**Canonical Surface:** [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`hummbl-physical-ai`](https://github.com/hummbl-io/hummbl-physical-ai), [`krineia`](https://github.com/hummbl-io/krineia)  
 
 ---
 
@@ -36,7 +36,7 @@ The industry in 2026 is rapidly converging on three structural pillars that mirr
   - Papers like *TraceFix* (arXiv:2602) demonstrate synthesizing and repairing agent coordination protocols at design time using **TLA+** and the **TLC model checker**.
   - These formal specifications are compiled directly into **runtime topology monitors**. If an agent attempts a tool transition or message sequence not permitted by the verified TLA+ state space, the operation is deterministically aborted before execution.
 - **Direct HUMMBL Mapping:**
-  - This validates [`krineia`](file:///<repo-root>/PROJECTS/krineia) and our TLA+ specs in `hummbl-governance`. We are not merely writing tests; we are writing formally checked state invariants that govern agent communication buses.
+  - This validates [`krineia`](https://github.com/hummbl-io/krineia) and our TLA+ specs in `hummbl-governance`. We are not merely writing tests; we are writing formally checked state invariants that govern agent communication buses.
 
 ---
 
@@ -46,7 +46,7 @@ The industry in 2026 is rapidly converging on three structural pillars that mirr
   - Physical AI architectures enforce a strict separation between the **AI Planner** (stochastic GPU compute) and the **Safety Kernel** (deterministic, safety-certified compute, e.g., NVIDIA IGX Thor / Halos).
   - The Safety Kernel continuously computes **Hamilton-Jacobi reachability analysis** and safe-state invariant envelopes. Even if the AI model commands an aggressive motor actuation, the Safety Kernel vetoes the signal at the hardware boundary.
 - **Direct HUMMBL Mapping:**
-  - [`hummbl-physical-ai`](file:///<repo-root>/PROJECTS/hummbl-physical-ai) and our `kill_switch.py` / `circuit_breaker.py` are the pure-software equivalents of this hardware safety island. The doctrine is identical: **the planner never holds execution authority; the safety kernel arbitrates all state transitions.**
+  - [`hummbl-physical-ai`](https://github.com/hummbl-io/hummbl-physical-ai) and our `kill_switch.py` / `circuit_breaker.py` are the pure-software equivalents of this hardware safety island. The doctrine is identical: **the planner never holds execution authority; the safety kernel arbitrates all state transitions.**
 
 ---
 

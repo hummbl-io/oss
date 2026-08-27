@@ -22,21 +22,21 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 # Import the module under test directly
 MCP_PATH = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(MCP_PATH))
 
 import mcp_identity as mcp  # noqa: E402
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def fresh_module():
     """Re-import to get a clean server state between test classes."""
     import mcp_identity
+
     importlib.reload(mcp_identity)
     return mcp_identity
 
@@ -44,6 +44,7 @@ def fresh_module():
 # ---------------------------------------------------------------------------
 # Identity tools
 # ---------------------------------------------------------------------------
+
 
 class TestIdentityRegister:
     def test_register_basic(self):
@@ -55,11 +56,14 @@ class TestIdentityRegister:
 
     def test_register_with_aliases(self):
         m = fresh_module()
-        result = m.handle_tool("identity_register", {
-            "agent_id": "agent-2",
-            "trust_tier": "medium",
-            "aliases": ["a2", "worker"],
-        })
+        result = m.handle_tool(
+            "identity_register",
+            {
+                "agent_id": "agent-2",
+                "trust_tier": "medium",
+                "aliases": ["a2", "worker"],
+            },
+        )
         assert result["registered"] is True
         assert result["aliases"] == ["a2", "worker"]
 
@@ -132,18 +136,22 @@ class TestIdentityValidate:
 # Delegation tools
 # ---------------------------------------------------------------------------
 
+
 class TestDelegationCreate:
     def setup_method(self):
         self.m = fresh_module()
 
     def test_create_basic(self):
-        result = self.m.handle_tool("delegation_create", {
-            "issuer": "orchestrator",
-            "subject": "worker",
-            "ops_allowed": ["read", "write"],
-            "task_id": "task-1",
-            "contract_id": "contract-1",
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orchestrator",
+                "subject": "worker",
+                "ops_allowed": ["read", "write"],
+                "task_id": "task-1",
+                "contract_id": "contract-1",
+            },
+        )
         assert "token_id" in result
         assert result["issuer"] == "orchestrator"
         assert result["subject"] == "worker"
@@ -152,40 +160,52 @@ class TestDelegationCreate:
         assert "..." in result["signature"]  # truncated
 
     def test_create_missing_issuer(self):
-        result = self.m.handle_tool("delegation_create", {
-            "subject": "worker",
-            "ops_allowed": ["read"],
-            "task_id": "task-1",
-            "contract_id": "contract-1",
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "subject": "worker",
+                "ops_allowed": ["read"],
+                "task_id": "task-1",
+                "contract_id": "contract-1",
+            },
+        )
         assert "error" in result
 
     def test_create_missing_binding(self):
-        result = self.m.handle_tool("delegation_create", {
-            "issuer": "orch",
-            "subject": "worker",
-            "ops_allowed": ["read"],
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": ["read"],
+            },
+        )
         assert "error" in result
 
     def test_create_empty_ops(self):
-        result = self.m.handle_tool("delegation_create", {
-            "issuer": "orch",
-            "subject": "worker",
-            "ops_allowed": [],
-            "task_id": "t1",
-            "contract_id": "c1",
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": [],
+                "task_id": "t1",
+                "contract_id": "c1",
+            },
+        )
         assert "error" in result
 
     def test_create_stores_token(self):
-        result = self.m.handle_tool("delegation_create", {
-            "issuer": "orch",
-            "subject": "worker",
-            "ops_allowed": ["execute"],
-            "task_id": "t1",
-            "contract_id": "c1",
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": ["execute"],
+                "task_id": "t1",
+                "contract_id": "c1",
+            },
+        )
         token_id = result["token_id"]
         assert token_id in self.m._tokens
 
@@ -193,13 +213,16 @@ class TestDelegationCreate:
 class TestDelegationValidate:
     def setup_method(self):
         self.m = fresh_module()
-        result = self.m.handle_tool("delegation_create", {
-            "issuer": "orch",
-            "subject": "worker",
-            "ops_allowed": ["read"],
-            "task_id": "t1",
-            "contract_id": "c1",
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": ["read"],
+                "task_id": "t1",
+                "contract_id": "c1",
+            },
+        )
         self.token_id = result["token_id"]
 
     def test_validate_valid_token(self):
@@ -220,27 +243,36 @@ class TestDelegationValidate:
 class TestDelegationCheckOp:
     def setup_method(self):
         self.m = fresh_module()
-        result = self.m.handle_tool("delegation_create", {
-            "issuer": "orch",
-            "subject": "worker",
-            "ops_allowed": ["read", "query"],
-            "task_id": "t1",
-            "contract_id": "c1",
-        })
+        result = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": ["read", "query"],
+                "task_id": "t1",
+                "contract_id": "c1",
+            },
+        )
         self.token_id = result["token_id"]
 
     def test_allowed_op(self):
-        result = self.m.handle_tool("delegation_check_op", {
-            "token_id": self.token_id,
-            "requested_op": "read",
-        })
+        result = self.m.handle_tool(
+            "delegation_check_op",
+            {
+                "token_id": self.token_id,
+                "requested_op": "read",
+            },
+        )
         assert result["allowed"] is True
 
     def test_disallowed_op(self):
-        result = self.m.handle_tool("delegation_check_op", {
-            "token_id": self.token_id,
-            "requested_op": "delete",
-        })
+        result = self.m.handle_tool(
+            "delegation_check_op",
+            {
+                "token_id": self.token_id,
+                "requested_op": "delete",
+            },
+        )
         assert result["allowed"] is False
 
     def test_missing_token_id(self):
@@ -251,6 +283,7 @@ class TestDelegationCheckOp:
 # ---------------------------------------------------------------------------
 # Lamport Clock tools
 # ---------------------------------------------------------------------------
+
 
 class TestLamportClock:
     def setup_method(self):
@@ -272,31 +305,40 @@ class TestLamportClock:
         assert "error" in result
 
     def test_compare_ts1_before_ts2(self):
-        result = self.m.handle_tool("lamport_compare", {
-            "ts1_time": 1,
-            "ts1_agent": "a",
-            "ts2_time": 5,
-            "ts2_agent": "b",
-        })
+        result = self.m.handle_tool(
+            "lamport_compare",
+            {
+                "ts1_time": 1,
+                "ts1_agent": "a",
+                "ts2_time": 5,
+                "ts2_agent": "b",
+            },
+        )
         assert result["ordering"] == "ts1_before_ts2"
         assert result["happened_before"] is True
 
     def test_compare_ts2_before_ts1(self):
-        result = self.m.handle_tool("lamport_compare", {
-            "ts1_time": 10,
-            "ts1_agent": "a",
-            "ts2_time": 3,
-            "ts2_agent": "b",
-        })
+        result = self.m.handle_tool(
+            "lamport_compare",
+            {
+                "ts1_time": 10,
+                "ts1_agent": "a",
+                "ts2_time": 3,
+                "ts2_agent": "b",
+            },
+        )
         assert result["ordering"] == "ts2_before_ts1"
 
     def test_compare_concurrent(self):
-        result = self.m.handle_tool("lamport_compare", {
-            "ts1_time": 5,
-            "ts1_agent": "x",
-            "ts2_time": 5,
-            "ts2_agent": "x",
-        })
+        result = self.m.handle_tool(
+            "lamport_compare",
+            {
+                "ts1_time": 5,
+                "ts1_agent": "x",
+                "ts2_time": 5,
+                "ts2_agent": "x",
+            },
+        )
         assert result["ordering"] == "concurrent"
 
     def test_compare_missing_times(self):
@@ -307,6 +349,7 @@ class TestLamportClock:
 # ---------------------------------------------------------------------------
 # Protocol-level tests (subprocess)
 # ---------------------------------------------------------------------------
+
 
 class TestProtocol:
     def _call(self, req_obj):
@@ -337,11 +380,13 @@ class TestProtocol:
         assert "error" in resp
 
     def test_tools_call_identity_list(self):
-        resp = self._call({
-            "jsonrpc": "2.0",
-            "id": 4,
-            "method": "tools/call",
-            "params": {"name": "identity_list", "arguments": {}},
-        })
+        resp = self._call(
+            {
+                "jsonrpc": "2.0",
+                "id": 4,
+                "method": "tools/call",
+                "params": {"name": "identity_list", "arguments": {}},
+            }
+        )
         content = json.loads(resp["result"]["content"][0]["text"])
         assert "agents" in content

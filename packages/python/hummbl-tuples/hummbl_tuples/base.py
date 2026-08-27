@@ -4,7 +4,7 @@ import dataclasses
 import hashlib
 import json
 import uuid
-from dataclasses import dataclass, fields, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Type, TypeVar
 
@@ -105,8 +105,7 @@ class TypedTuple:
         """
         if not hasattr(type(self), "previous_hash"):
             raise TypeError(
-                f"{type(self).__name__} does not support hash chaining "
-                "(no previous_hash field)"
+                f"{type(self).__name__} does not support hash chaining (no previous_hash field)"
             )
         updates: Dict[str, Any] = {}
         for f in fields(self):
@@ -126,8 +125,7 @@ class TypedTuple:
         """
         if not hasattr(type(self), "previous_hash"):
             raise TypeError(
-                f"{type(self).__name__} does not support hash chaining "
-                "(no previous_hash field)"
+                f"{type(self).__name__} does not support hash chaining (no previous_hash field)"
             )
         return getattr(self, "previous_hash") == predecessor_hash
 
@@ -142,9 +140,7 @@ class TypedTuple:
         Raises ValueError with field-level detail if input is invalid.
         """
         if not isinstance(data, dict):
-            raise ValueError(
-                f"{cls.__name__}.from_dict() expected dict, got {type(data).__name__}"
-            )
+            raise ValueError(f"{cls.__name__}.from_dict() expected dict, got {type(data).__name__}")
         flat: Dict[str, Any] = {}
         envelope_names = set(cls._envelope_fields())
         for key, value in data.items():
@@ -157,17 +153,15 @@ class TypedTuple:
         kwargs = {k: v for k, v in flat.items() if k in valid}
         # Check for required fields without defaults.
         for f in fields(cls):
-            if (f.default is f.default_factory is dataclasses.MISSING
-                    and f.name not in kwargs):
-                raise ValueError(
-                    f"{cls.__name__}.from_dict(): missing required field '{f.name}'"
-                )
+            if f.default is f.default_factory is dataclasses.MISSING and f.name not in kwargs:
+                raise ValueError(f"{cls.__name__}.from_dict(): missing required field '{f.name}'")
         return cls(**kwargs)
 
 
 # ---------------------------------------------------------------------------
 # Domain-specific envelope base classes
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class IDPTuple(TypedTuple):
@@ -195,10 +189,20 @@ class IDPTuple(TypedTuple):
 
     @classmethod
     def _envelope_fields(cls) -> tuple[str, ...]:
-        return ("tuple_type", "id", "time",
-                "state", "drift", "tier", "agent", "tool",
-                "intent_id", "task_id",
-                "signature", "previous_hash")
+        return (
+            "tuple_type",
+            "id",
+            "time",
+            "state",
+            "drift",
+            "tier",
+            "agent",
+            "tool",
+            "intent_id",
+            "task_id",
+            "signature",
+            "previous_hash",
+        )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -215,8 +219,7 @@ class BaseNTuple(TypedTuple):
 
     @classmethod
     def _envelope_fields(cls) -> tuple[str, ...]:
-        return ("tuple_type", "id", "time",
-                "problem_id", "run_id", "control_mode")
+        return ("tuple_type", "id", "time", "problem_id", "run_id", "control_mode")
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

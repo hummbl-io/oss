@@ -36,7 +36,6 @@ and hummbl-admission-controlled-state#5 (route admission registry).
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import uuid
 from datetime import datetime, timezone
@@ -55,19 +54,41 @@ __all__ = [
 
 VALID_VENDORS = {"openai", "anthropic", "google", "aws", "azure", "github", "other"}
 VALID_SURFACES = {
-    "api", "chat", "code", "cowork", "github-agent",
-    "bedrock", "vertex", "foundry", "other",
+    "api",
+    "chat",
+    "code",
+    "cowork",
+    "github-agent",
+    "bedrock",
+    "vertex",
+    "foundry",
+    "other",
 }
 VALID_EVENT_CLASS = {"incident", "health_check", "degradation", "recovery"}
 VALID_ERROR_TYPE = {
-    "none", "overloaded_error", "rate_limit_error", "api_error",
-    "timeout", "silent_drop", "auth_error", "not_found", "other",
+    "none",
+    "overloaded_error",
+    "rate_limit_error",
+    "api_error",
+    "timeout",
+    "silent_drop",
+    "auth_error",
+    "not_found",
+    "other",
 }
 VALID_RETRY_POLICY = {
-    "none", "retry_with_backoff", "retry_once", "fail_fast", "circuit_breaker_open",
+    "none",
+    "retry_with_backoff",
+    "retry_once",
+    "fail_fast",
+    "circuit_breaker_open",
 }
 VALID_FAILOVER_POLICY = {
-    "none", "switch_model", "switch_vendor", "queue_and_wait", "escalate",
+    "none",
+    "switch_model",
+    "switch_vendor",
+    "queue_and_wait",
+    "escalate",
 }
 
 # Error-type → allowed retry policies. Enforces the 529-vs-429 distinction.
@@ -79,10 +100,23 @@ _SILENT_DROP_RETRY = {"circuit_breaker_open"}
 _RECEIPT_ID_RE = re.compile(r"^route-evt-[a-f0-9-]+$")
 
 ALLOWED_FIELDS = {
-    "receipt_id", "timestamp", "vendor", "model", "surface", "event_class",
-    "status_code", "error_type", "retry_policy", "failover_policy",
-    "incident_ref", "first_seen_at", "last_seen_at", "occurrence_count",
-    "evidence_refs", "notes", "receipt_hash",
+    "receipt_id",
+    "timestamp",
+    "vendor",
+    "model",
+    "surface",
+    "event_class",
+    "status_code",
+    "error_type",
+    "retry_policy",
+    "failover_policy",
+    "incident_ref",
+    "first_seen_at",
+    "last_seen_at",
+    "occurrence_count",
+    "evidence_refs",
+    "notes",
+    "receipt_hash",
 }
 
 
@@ -153,9 +187,18 @@ def validate_route_event_receipt(receipt: dict[str, Any]) -> tuple[bool, list[st
     errors: list[str] = []
 
     required = [
-        "receipt_id", "timestamp", "vendor", "model", "surface",
-        "event_class", "status_code", "error_type", "retry_policy",
-        "failover_policy", "occurrence_count", "receipt_hash",
+        "receipt_id",
+        "timestamp",
+        "vendor",
+        "model",
+        "surface",
+        "event_class",
+        "status_code",
+        "error_type",
+        "retry_policy",
+        "failover_policy",
+        "occurrence_count",
+        "receipt_hash",
     ]
     for field in required:
         if field not in receipt or receipt[field] is None:
@@ -186,7 +229,10 @@ def validate_route_event_receipt(receipt: dict[str, Any]) -> tuple[bool, list[st
         errors.append("model must be a non-empty string")
     if not isinstance(receipt.get("status_code"), int) or receipt["status_code"] < 0:
         errors.append("status_code must be a non-negative integer")
-    if not isinstance(receipt.get("occurrence_count"), int) or receipt["occurrence_count"] < 1:
+    if (
+        not isinstance(receipt.get("occurrence_count"), int)
+        or receipt["occurrence_count"] < 1
+    ):
         errors.append("occurrence_count must be an integer >= 1")
     if not isinstance(receipt.get("receipt_hash"), str):
         errors.append("receipt_hash must be a string")
@@ -333,7 +379,9 @@ def validate_route_event_receipt(receipt: dict[str, Any]) -> tuple[bool, list[st
     # Hash verification
     expected_hash = compute_receipt_hash(receipt)
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 

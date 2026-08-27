@@ -6,13 +6,12 @@ import json
 from pathlib import Path
 
 import pytest
-
+from hummbl_cognition.models import SharedState
 from hummbl_cognition.state_manager import (
     ConcurrencyError,
     read_state,
     write_state,
 )
-from hummbl_cognition.models import SharedState
 
 
 class TestReadState:
@@ -28,9 +27,7 @@ class TestReadState:
         assert read.version == 5
         assert read.updated_by == "agent-1"
 
-    def test_read_corrupt_json_returns_default(
-        self, tmp_state_path: Path
-    ) -> None:
+    def test_read_corrupt_json_returns_default(self, tmp_state_path: Path) -> None:
         tmp_state_path.parent.mkdir(parents=True, exist_ok=True)
         tmp_state_path.write_text("{invalid json", encoding="utf-8")
         state = read_state(tmp_state_path)
@@ -60,9 +57,7 @@ class TestWriteState:
         write_state(state, state_path=state_path)
         assert state_path.exists()
 
-    def test_write_with_matching_expected_version(
-        self, tmp_state_path: Path
-    ) -> None:
+    def test_write_with_matching_expected_version(self, tmp_state_path: Path) -> None:
         s1 = SharedState(version=1)
         write_state(s1, state_path=tmp_state_path)
         s2 = SharedState(version=2)

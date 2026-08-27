@@ -1,18 +1,18 @@
 """Tests for MCP JSON-RPC protocol handlers."""
-import json
+
 import io
-import sys
-import pytest
+import json
 from unittest.mock import patch
+
 from mcp_server import (
-    send_response,
-    send_error,
-    _handle_initialize,
-    _handle_tools_call,
-    TOOLS,
+    PROTOCOL_VERSION,
     SERVER_NAME,
     SERVER_VERSION,
-    PROTOCOL_VERSION,
+    TOOLS,
+    _handle_initialize,
+    _handle_tools_call,
+    send_error,
+    send_response,
 )
 
 
@@ -50,24 +50,25 @@ class TestMCPProtocol:
 
     def test_tools_call_start_session(self):
         response = capture_response(
-            _handle_tools_call, "call-1",
-            {"name": "bif_start_session", "arguments": {"domain": "TestDomain"}}
+            _handle_tools_call,
+            "call-1",
+            {"name": "bif_start_session", "arguments": {"domain": "TestDomain"}},
         )
         content = json.loads(response["result"]["content"][0]["text"])
         assert "session_id" in content
 
     def test_tools_call_get_template(self):
         response = capture_response(
-            _handle_tools_call, "call-2",
-            {"name": "bif_get_template", "arguments": {"phase": 1, "batch_number": 1}}
+            _handle_tools_call,
+            "call-2",
+            {"name": "bif_get_template", "arguments": {"phase": 1, "batch_number": 1}},
         )
         content = json.loads(response["result"]["content"][0]["text"])
         assert "batch_name" in content
 
     def test_tools_call_unknown_tool_returns_error_in_content(self):
         response = capture_response(
-            _handle_tools_call, "call-3",
-            {"name": "nonexistent_tool", "arguments": {}}
+            _handle_tools_call, "call-3", {"name": "nonexistent_tool", "arguments": {}}
         )
         content = json.loads(response["result"]["content"][0]["text"])
         assert "error" in content

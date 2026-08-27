@@ -39,6 +39,7 @@ MAX_PREDICT = 2048
 # ScoringLens dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class ScoringLens:
     """A named analytical lens with a prompt template for scoring experiment data.
@@ -60,9 +61,7 @@ class ScoringLens:
                 f"Lens name must be alphanumeric (hyphens/underscores allowed): {self.name!r}"
             )
         if not 0.0 <= self.temperature <= 2.0:
-            raise ValueError(
-                f"Temperature must be 0.0-2.0, got {self.temperature}"
-            )
+            raise ValueError(f"Temperature must be 0.0-2.0, got {self.temperature}")
         if not self.system_prompt:
             raise ValueError("system_prompt cannot be empty")
 
@@ -222,6 +221,7 @@ def list_lenses() -> list[dict[str, Any]]:
 # TSV data loading
 # ---------------------------------------------------------------------------
 
+
 def load_results_tsv(path: str | Path) -> list[dict[str, str]]:
     """Load experiment results from a TSV file.
 
@@ -288,6 +288,7 @@ def summarize_data(rows: list[dict[str, str]], max_rows: int = 50) -> str:
 # Ollama interaction
 # ---------------------------------------------------------------------------
 
+
 def _call_ollama(
     system_prompt: str,
     user_prompt: str,
@@ -332,6 +333,7 @@ def _call_ollama(
 # Response parsing
 # ---------------------------------------------------------------------------
 
+
 def parse_findings(raw: str, lens_name: str) -> list[dict[str, Any]]:
     """Parse LLM response into structured findings.
 
@@ -353,7 +355,7 @@ def parse_findings(raw: str, lens_name: str) -> list[dict[str, Any]]:
     if text.startswith("```"):
         # Remove opening fence (possibly with language tag)
         first_newline = text.index("\n") if "\n" in text else len(text)
-        text = text[first_newline + 1:]
+        text = text[first_newline + 1 :]
     if text.endswith("```"):
         text = text[:-3]
     text = text.strip()
@@ -374,7 +376,7 @@ def parse_findings(raw: str, lens_name: str) -> list[dict[str, Any]]:
         end = text.rfind("]")
         if start != -1 and end > start:
             try:
-                findings = json.loads(text[start:end + 1])
+                findings = json.loads(text[start : end + 1])
             except json.JSONDecodeError:
                 logger.warning("Failed to parse findings from LLM response")
                 return []
@@ -384,15 +386,17 @@ def parse_findings(raw: str, lens_name: str) -> list[dict[str, Any]]:
     for i, f in enumerate(findings):
         if not isinstance(f, dict):
             continue
-        validated.append({
-            "id": f.get("id", f"SL-{i + 1:03d}"),
-            "claim": str(f.get("claim", ""))[:200],
-            "confidence": _clamp_float(f.get("confidence", 0.5), 0.0, 1.0),
-            "actionable": bool(f.get("actionable", True)),
-            "target": str(f.get("target", "unknown")),
-            "effort": _normalize_effort(f.get("effort", "medium")),
-            "category": lens_name,
-        })
+        validated.append(
+            {
+                "id": f.get("id", f"SL-{i + 1:03d}"),
+                "claim": str(f.get("claim", ""))[:200],
+                "confidence": _clamp_float(f.get("confidence", 0.5), 0.0, 1.0),
+                "actionable": bool(f.get("actionable", True)),
+                "target": str(f.get("target", "unknown")),
+                "effort": _normalize_effort(f.get("effort", "medium")),
+                "category": lens_name,
+            }
+        )
 
     return validated
 
@@ -419,6 +423,7 @@ def _normalize_effort(value: Any) -> str:
 # ---------------------------------------------------------------------------
 # Main runner
 # ---------------------------------------------------------------------------
+
 
 def run_lens(
     data_path: str | Path,
@@ -528,6 +533,7 @@ def findings_to_ledger_entries(
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(
         level=logging.INFO,
@@ -543,15 +549,22 @@ def main(argv: list[str] | None = None) -> int:
     p_run = subparsers.add_parser("run", help="Run a scoring lens on experiment data")
     p_run.add_argument("--lens", required=True, help="Lens name to apply")
     p_run.add_argument("--data", required=True, help="Path to results.tsv")
-    p_run.add_argument("--model", default=DEFAULT_MODEL, help=f"Ollama model (default: {DEFAULT_MODEL})")
+    p_run.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Ollama model (default: {DEFAULT_MODEL})",
+    )
     p_run.add_argument(
         "--ollama-url",
         default=DEFAULT_OLLAMA_URL,
         help=f"Ollama base URL (default: {DEFAULT_OLLAMA_URL})",
     )
-    p_run.add_argument("--dry-run", action="store_true", help="Build prompt without calling LLM")
     p_run.add_argument(
-        "--to-ledger", action="store_true",
+        "--dry-run", action="store_true", help="Build prompt without calling LLM"
+    )
+    p_run.add_argument(
+        "--to-ledger",
+        action="store_true",
         help="Also output findings as ledger entries for Open Brain ingestion",
     )
 
@@ -568,7 +581,9 @@ def main(argv: list[str] | None = None) -> int:
         lenses = list_lenses()
         for lens in lenses:
             tags = ", ".join(lens["tags"]) if lens["tags"] else ""
-            print(f"  {lens['name']:15s} T={lens['temperature']:.1f}  {lens['description']}")
+            print(
+                f"  {lens['name']:15s} T={lens['temperature']:.1f}  {lens['description']}"
+            )
             if tags:
                 print(f"  {'':15s} tags: {tags}")
         return 0

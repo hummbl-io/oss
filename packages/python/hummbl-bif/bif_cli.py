@@ -13,7 +13,6 @@ Usage:
 """
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -24,11 +23,11 @@ _REPO_ROOT = Path(__file__).parent
 sys.path.insert(0, str(_REPO_ROOT))
 
 from mcp_server import (  # noqa: E402
-    tool_bif_start_session,
     tool_bif_get_template,
-    tool_bif_validate_batch,
-    tool_bif_session_status,
     tool_bif_list_templates,
+    tool_bif_session_status,
+    tool_bif_start_session,
+    tool_bif_validate_batch,
 )
 
 
@@ -87,7 +86,7 @@ def cmd_status(args: argparse.Namespace) -> None:
             print("  No sessions found.")
             return
         print(f"  {'Session ID':<12}  {'Domain':<30}  {'Progress'}")
-        print(f"  {'-'*12}  {'-'*30}  {'-'*10}")
+        print(f"  {'-' * 12}  {'-' * 30}  {'-' * 10}")
         for s in sessions:
             progress = f"{s['completed']}/{s['target']}"
             print(f"  {s['session_id']:<12}  {s['domain']:<30}  {progress}")
@@ -106,7 +105,9 @@ def cmd_status(args: argparse.Namespace) -> None:
         nb = result.get("next_batch")
         if nb:
             print()
-            print(f"Next batch  : #{nb['batch_number']} — {nb['name']} (Phase {nb['phase']}: {nb['phase_name']})")
+            print(
+                f"Next batch  : #{nb['batch_number']} — {nb['name']} (Phase {nb['phase']}: {nb['phase_name']})"
+            )
             print(f"Objective   : {nb['what_to_capture']}")
 
 
@@ -183,14 +184,20 @@ def build_parser() -> argparse.ArgumentParser:
     # start
     p_start = sub.add_parser("start", help="Start a new ingestion session")
     p_start.add_argument("domain", help="Domain to ingest (e.g. 'Anthropic')")
-    p_start.add_argument("--batches", type=int, default=None,
-                         dest="batches", metavar="N",
-                         help="Target number of batches (default: 10)")
+    p_start.add_argument(
+        "--batches",
+        type=int,
+        default=None,
+        dest="batches",
+        metavar="N",
+        help="Target number of batches (default: 10)",
+    )
 
     # status
     p_status = sub.add_parser("status", help="Show session progress")
-    p_status.add_argument("session_id", nargs="?", default=None,
-                          help="Session ID (omit to list all sessions)")
+    p_status.add_argument(
+        "session_id", nargs="?", default=None, help="Session ID (omit to list all sessions)"
+    )
 
     # template
     p_template = sub.add_parser("template", help="Get the prompt for a phase/batch")
@@ -214,9 +221,11 @@ def main() -> None:
     # Support BIF_SESSIONS_DIR override for test isolation (applied before any
     # tool function is called so SESSIONS_DIR in mcp_server reflects it).
     import os
+
     _env_sessions = os.environ.get("BIF_SESSIONS_DIR")
     if _env_sessions:
         import mcp_server as _mcp
+
         _mcp.SESSIONS_DIR = Path(_env_sessions)
 
     parser = build_parser()

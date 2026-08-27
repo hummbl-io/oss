@@ -8,6 +8,7 @@ which evaluates to True whenever canonicalize returns None (since
 None != "any-string" is always True). This meant every unknown
 sender was incorrectly reported as valid.
 """
+
 from __future__ import annotations
 
 from hummbl_governance.identity import AgentRegistry

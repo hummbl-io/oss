@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 from scripts.detect_duplicate_prs import (
+    classify_branch,
     find_duplicates,
     parse_issue_number,
-    classify_branch,
 )
 
 

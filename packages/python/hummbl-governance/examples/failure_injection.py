@@ -53,9 +53,9 @@ def main():
         try:
             breaker.call(unreliable_service, True)
         except CircuitBreakerOpen:
-            print(f"  Call {i+1}: REJECTED (breaker open)")
+            print(f"  Call {i + 1}: REJECTED (breaker open)")
         except ConnectionError:
-            print(f"  Call {i+1}: FAILED (state={breaker.state.name}, failures={breaker.failure_count})")
+            print(f"  Call {i + 1}: FAILED (state={breaker.state.name}, failures={breaker.failure_count})")
 
     print(f"\nBreaker state: {breaker.state.name}")
     assert breaker.state == CircuitBreakerState.OPEN

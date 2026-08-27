@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields as dc_fields
+from dataclasses import dataclass
+from dataclasses import fields as dc_fields
 from typing import Any, Dict, Optional, Type, TypeVar
 
 from .base import TypedTuple
@@ -27,8 +28,16 @@ class TraceArtifact(TypedTuple):
     def _envelope_fields(cls) -> tuple[str, ...]:
         # Traces use artifact_type instead of tuple_type in their envelope,
         # but Layer 1 id and time are still present.
-        return ("tuple_type", "id", "time", "artifact_type", "lifecycle_stage",
-                "trace_source", "trace_visibility", "governance_status")
+        return (
+            "tuple_type",
+            "id",
+            "time",
+            "artifact_type",
+            "lifecycle_stage",
+            "trace_source",
+            "trace_visibility",
+            "governance_status",
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         """Produce the canonical envelope + payload dict."""
@@ -37,8 +46,13 @@ class TraceArtifact(TypedTuple):
         envelope["id"] = self.id
         envelope["time"] = self.time
         # Trace-specific envelope (artifact_type replaces tuple_type)
-        trace_envelope = ("artifact_type", "lifecycle_stage", "trace_source",
-                          "trace_visibility", "governance_status")
+        trace_envelope = (
+            "artifact_type",
+            "lifecycle_stage",
+            "trace_source",
+            "trace_visibility",
+            "governance_status",
+        )
         for name in trace_envelope:
             val = getattr(self, name)
             if val is not None:

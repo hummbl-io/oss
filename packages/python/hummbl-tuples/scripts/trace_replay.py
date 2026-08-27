@@ -109,13 +109,15 @@ class TraceReplay:
                     "tools_used": set(),
                     "tuple_types": set(),
                 }
-            states[agent]["events"].append({
-                "index": i,
-                "id": t.get("id", ""),
-                "tuple_type": t.get("tuple_type", ""),
-                "state": t.get("state", ""),
-                "time": t.get("time", ""),
-            })
+            states[agent]["events"].append(
+                {
+                    "index": i,
+                    "id": t.get("id", ""),
+                    "tuple_type": t.get("tuple_type", ""),
+                    "state": t.get("state", ""),
+                    "time": t.get("time", ""),
+                }
+            )
             if t.get("state"):
                 states[agent]["states_seen"].add(t["state"])
             if t.get("tool"):
@@ -175,7 +177,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input", required=True, help="Input trace file (JSON array)")
     parser.add_argument("--step", action="store_true", help="Step through events one at a time")
     parser.add_argument("--goto", type=int, help="Jump to a specific event index")
-    parser.add_argument("--list-agents", action="store_true", help="List unique agents in the trace")
+    parser.add_argument(
+        "--list-agents", action="store_true", help="List unique agents in the trace"
+    )
     parser.add_argument("--filter-agent", help="Filter events by agent ID")
     parser.add_argument("--checkpoint", type=int, help="Create a checkpoint at the given index")
     parser.add_argument("--output", help="Output file for checkpoint or filtered results")
@@ -187,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.summary:
         s = replay.summary()
-        print(f"Trace Summary")
+        print("Trace Summary")
         print(f"  Total events: {s['total_events']}")
         print(f"  Agents: {', '.join(s['agents'])}")
         print(f"  Tuple types: {', '.join(s['tuple_types'])}")
@@ -232,7 +236,7 @@ def main(argv: list[str] | None = None) -> int:
         if event:
             print(replay.format_event(event, args.goto))
         else:
-            print(f"Index {args.goto} out of range (0-{len(trace)-1})")
+            print(f"Index {args.goto} out of range (0-{len(trace) - 1})")
         return 0
 
     if args.step:
@@ -252,7 +256,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Trace: {s['total_events']} events, {len(s['agents'])} agents")
     if replay.current:
         print(replay.format_event(replay.current, replay.cursor))
-    print(f"\nUse --step, --goto N, --list-agents, --filter-agent ID, --checkpoint N, or --summary")
+    print("\nUse --step, --goto N, --list-agents, --filter-agent ID, --checkpoint N, or --summary")
     return 0
 
 

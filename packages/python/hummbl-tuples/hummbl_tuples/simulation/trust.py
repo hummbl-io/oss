@@ -41,9 +41,7 @@ class TrustModel:
 
     def penalize(self, agent_id: str, severity: float = 1.0) -> float:
         current = self.scores[agent_id]
-        self.scores[agent_id] = max(
-            self.min_trust, current - self.violation_penalty * severity
-        )
+        self.scores[agent_id] = max(self.min_trust, current - self.violation_penalty * severity)
         return self.scores[agent_id]
 
     def reward(self, agent_id: str) -> float:
@@ -76,10 +74,7 @@ class ProbationPolicy:
     def should_exit(self, trust: float, clean_streak: int, on_probation: bool) -> bool:
         if not on_probation:
             return False
-        return (
-            trust >= self.exit_threshold
-            and clean_streak >= self.consecutive_clean_required
-        )
+        return trust >= self.exit_threshold and clean_streak >= self.consecutive_clean_required
 
     def filtered_ops(self, ops_allowed: list[str]) -> list[str]:
         return [

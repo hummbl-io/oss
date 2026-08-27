@@ -8,8 +8,7 @@ from typing import Protocol
 
 
 class Queryable(Protocol):
-    def query(self, text: str, limit: int = 5) -> object:
-        ...
+    def query(self, text: str, limit: int = 5) -> object: ...
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,6 @@ import stat
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import pytest
-
 from hummbl_bus.bus_writer import (
     _cross_process_lock,
     _validate_kimi_constraints,

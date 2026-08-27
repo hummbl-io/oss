@@ -34,8 +34,8 @@ from __future__ import annotations
 
 import logging
 import math
-import time
 import threading
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -46,7 +46,7 @@ from hummbl_governance.statistical_framework import (
     bootstrap_confidence_interval,
     calculate_effect_size,
     ks_test,
-    population_stability_index
+    population_stability_index,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,15 +56,16 @@ logger = logging.getLogger(__name__)
 # Data types
 # ---------------------------------------------------------------------------
 
+
 class BenchmarkState(Enum):
     """Benchmark lifecycle states."""
 
-    INIT = auto()          # Constructed, not yet setup
-    SETUP = auto()         # Preparing to run (loading models, data)
-    RUNNING = auto()       # Actively executing benchmark
-    TEARDOWN = auto()      # Cleanup in progress
-    COMPLETE = auto()      # Successfully completed
-    ERROR = auto()         # Unrecoverable error
+    INIT = auto()  # Constructed, not yet setup
+    SETUP = auto()  # Preparing to run (loading models, data)
+    RUNNING = auto()  # Actively executing benchmark
+    TEARDOWN = auto()  # Cleanup in progress
+    COMPLETE = auto()  # Successfully completed
+    ERROR = auto()  # Unrecoverable error
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,11 +74,11 @@ class BenchmarkConfig:
 
     name: str = "unnamed"
     description: str = ""
-    iterations: int = 100                # Number of benchmark iterations
-    warmup_iterations: int = 10          # Warmup iterations before measurement
-    confidence_level: float = 0.95       # For confidence intervals
-    bootstrap_samples: int = 10000       # For bootstrap CI
-    random_seed: Optional[int] = None    # For reproducibility
+    iterations: int = 100  # Number of benchmark iterations
+    warmup_iterations: int = 10  # Warmup iterations before measurement
+    confidence_level: float = 0.95  # For confidence intervals
+    bootstrap_samples: int = 10000  # For bootstrap CI
+    random_seed: Optional[int] = None  # For reproducibility
     tags: Dict[str, str] = field(default_factory=dict)
 
 
@@ -107,9 +108,7 @@ class BenchmarkResult:
     setup_duration_seconds: float = 0.0
     teardown_duration_seconds: float = 0.0
     error_message: str = ""
-    timestamp: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    )
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
 
 
 @dataclass(slots=True)
@@ -127,6 +126,7 @@ class _BenchmarkMetrics:
 # ---------------------------------------------------------------------------
 # Base class
 # ---------------------------------------------------------------------------
+
 
 class BaseBenchmark(ABC):
     """Abstract base for all benchmark runners.
@@ -243,13 +243,15 @@ class BaseBenchmark(ABC):
 
                 # Build result with statistical analysis
                 result = self._build_result(
-                    total_duration=total_duration,
-                    setup_duration=setup_duration,
-                    teardown_duration=teardown_duration
+                    total_duration=total_duration, setup_duration=setup_duration, teardown_duration=teardown_duration
                 )
 
-                logger.info("Benchmark %s complete: %d iterations, %d errors",
-                           self.name, self._config.iterations, self._metrics.errors)
+                logger.info(
+                    "Benchmark %s complete: %d iterations, %d errors",
+                    self.name,
+                    self._config.iterations,
+                    self._metrics.errors,
+                )
 
                 return result
 
@@ -264,7 +266,7 @@ class BaseBenchmark(ABC):
                     state=BenchmarkState.ERROR,
                     metrics={},
                     total_duration_seconds=time.monotonic() - self._metrics.start_time,
-                    error_message=str(exc)
+                    error_message=str(exc),
                 )
 
     # -- Hooks ----------------------------------------------------------------
@@ -301,30 +303,19 @@ class BaseBenchmark(ABC):
 
     # -- Result building ------------------------------------------------------
 
-    def _build_result(
-        self,
-        total_duration: float,
-        setup_duration: float,
-        teardown_duration: float
-    ) -> BenchmarkResult:
+    def _build_result(self, total_duration: float, setup_duration: float, teardown_duration: float) -> BenchmarkResult:
         """Build BenchmarkResult with statistical analysis."""
         metrics: Dict[str, MetricResult] = {}
 
         # Process execution time metric
         if self._metrics.execution_times:
             metrics["execution_time"] = self._build_metric_result(
-                "execution_time",
-                self._metrics.execution_times,
-                unit="seconds"
+                "execution_time", self._metrics.execution_times, unit="seconds"
             )
 
         # Process custom metrics
         for metric_name, values in self._metrics.custom_metrics.items():
-            metrics[metric_name] = self._build_metric_result(
-                metric_name,
-                values,
-                unit=""
-            )
+            metrics[metric_name] = self._build_metric_result(metric_name, values, unit="")
 
         return BenchmarkResult(
             config=self._config,
@@ -332,15 +323,10 @@ class BaseBenchmark(ABC):
             metrics=metrics,
             total_duration_seconds=total_duration,
             setup_duration_seconds=setup_duration,
-            teardown_duration_seconds=teardown_duration
+            teardown_duration_seconds=teardown_duration,
         )
 
-    def _build_metric_result(
-        self,
-        name: str,
-        values: List[float],
-        unit: str
-    ) -> MetricResult:
+    def _build_metric_result(self, name: str, values: List[float], unit: str) -> MetricResult:
         """Build MetricResult with statistical analysis."""
         if not values:
             raise ValueError(f"No values for metric {name}")
@@ -361,7 +347,7 @@ class BaseBenchmark(ABC):
                     values=values,
                     confidence_level=self._config.confidence_level,
                     n_bootstrap=self._config.bootstrap_samples,
-                    random_seed=self._config.random_seed
+                    random_seed=self._config.random_seed,
                 )
             except Exception as exc:
                 logger.warning("Bootstrap CI failed for %s: %s", name, exc)
@@ -375,7 +361,7 @@ class BaseBenchmark(ABC):
             min=min_val,
             max=max_val,
             confidence_interval=ci,
-            unit=unit
+            unit=unit,
         )
 
 
@@ -383,10 +369,9 @@ class BaseBenchmark(ABC):
 # Comparison utilities
 # ---------------------------------------------------------------------------
 
+
 def compare_benchmarks(
-    result_a: BenchmarkResult,
-    result_b: BenchmarkResult,
-    metric_name: str = "execution_time"
+    result_a: BenchmarkResult, result_b: BenchmarkResult, metric_name: str = "execution_time"
 ) -> Dict[str, Any]:
     """Compare two benchmark results for statistical significance.
 

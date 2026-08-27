@@ -25,6 +25,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from hummbl_cognition.boot_context import build_boot_context
 from hummbl_cognition.ledger_writer import (
@@ -53,11 +54,13 @@ from hummbl_cognition.verified_writer import post_verified_entry
 
 def _build_claim(args: argparse.Namespace) -> dict[str, Any] | None:
     """Build JSON-LD schema:Claim from CLI args if any claim fields are present."""
-    if not any([
-        getattr(args, "claim_status", None),
-        getattr(args, "expires", None),
-        getattr(args, "supersedes_entry", None),
-    ]):
+    if not any(
+        [
+            getattr(args, "claim_status", None),
+            getattr(args, "expires", None),
+            getattr(args, "supersedes_entry", None),
+        ]
+    ):
         return None
     claim: dict[str, Any] = {
         "@context": {
@@ -67,7 +70,9 @@ def _build_claim(args: argparse.Namespace) -> dict[str, Any] | None:
         "@type": ["schema:Claim", "hummbl:AgentClaim"],
     }
     if args.claim_status:
-        claim["hummbl:epistemicStatus"] = f"hummbl:Epistemic{args.claim_status.capitalize()}"
+        claim["hummbl:epistemicStatus"] = (
+            f"hummbl:Epistemic{args.claim_status.capitalize()}"
+        )
     if getattr(args, "expires", None):
         claim["schema:expires"] = args.expires
     if getattr(args, "supersedes_entry", None):
@@ -242,19 +247,24 @@ def cmd_report(args: argparse.Namespace) -> int:
     by_class = errors["by_class"]
     remediation = report["remediation"]
 
-    print(f"# CLP Validation Report\n")
+    print("# CLP Validation Report\n")
     print(f"- Ledger: `{report['ledger_path']}`")
     print(f"- Total lines: {report['total_lines']}")
     print(f"- Valid entries: {report['valid_entries']}")
     print(f"- Validation errors: {errors['total']}")
     print()
 
-    if errors['total'] == 0:
+    if errors["total"] == 0:
         print("All entries valid.")
         return 0
 
     print("## Errors by Class\n")
-    for cls_name in ("signature_mismatch", "content_hash_mismatch", "parse_error", "other"):
+    for cls_name in (
+        "signature_mismatch",
+        "content_hash_mismatch",
+        "parse_error",
+        "other",
+    ):
         data = by_class.get(cls_name, {})
         count = data.get("count", 0)
         if count == 0:
@@ -401,7 +411,9 @@ def cmd_search(args: argparse.Namespace) -> int:
             score_str = f"{r.score:.3f}"
             meta = r.metadata
             agent_str = f" ({meta.get('agent', '')})" if meta.get("agent") else ""
-            ts_str = f" {meta.get('timestamp', '')[:10]}" if meta.get("timestamp") else ""
+            ts_str = (
+                f" {meta.get('timestamp', '')[:10]}" if meta.get("timestamp") else ""
+            )
             print(f"{i:2d}. {source_tag:12s} score={score_str}{agent_str}{ts_str}")
             # Wrap content to ~80 chars
             content = r.content.replace("\n", " ")[:200]
@@ -617,13 +629,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_post.add_argument(
         "--type",
         required=True,
-        choices=[entry_type.value for entry_type in LedgerEntryType if entry_type.value in CANONICAL_LEDGER_TYPES],
+        choices=[
+            entry_type.value
+            for entry_type in LedgerEntryType
+            if entry_type.value in CANONICAL_LEDGER_TYPES
+        ],
         help="Entry type (canonical only; historical aliases rejected for new writes)",
     )
     p_post.add_argument(
         "--scope",
         required=True,
-        choices=[scope.value for scope in LedgerScope if scope.value in CANONICAL_LEDGER_SCOPES],
+        choices=[
+            scope.value
+            for scope in LedgerScope
+            if scope.value in CANONICAL_LEDGER_SCOPES
+        ],
         help="Entry scope (canonical only; historical aliases rejected for new writes)",
     )
     p_post.add_argument("--content", required=True, help="Knowledge content")
@@ -640,7 +660,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_post.add_argument(
         "--claim-status",
-        choices=["observed", "hypothesized", "supported", "contested", "falsified", "deprecated", "canonical"],
+        choices=[
+            "observed",
+            "hypothesized",
+            "supported",
+            "contested",
+            "falsified",
+            "deprecated",
+            "canonical",
+        ],
         help="Epistemic status for the claim (ADR-FM-048)",
     )
     p_post.add_argument(
@@ -688,13 +716,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_post_verified.add_argument(
         "--type",
         required=True,
-        choices=[entry_type.value for entry_type in LedgerEntryType if entry_type.value in CANONICAL_LEDGER_TYPES],
+        choices=[
+            entry_type.value
+            for entry_type in LedgerEntryType
+            if entry_type.value in CANONICAL_LEDGER_TYPES
+        ],
         help="Entry type (canonical only; historical aliases rejected for new writes)",
     )
     p_post_verified.add_argument(
         "--scope",
         required=True,
-        choices=[scope.value for scope in LedgerScope if scope.value in CANONICAL_LEDGER_SCOPES],
+        choices=[
+            scope.value
+            for scope in LedgerScope
+            if scope.value in CANONICAL_LEDGER_SCOPES
+        ],
         help="Entry scope (canonical only; historical aliases rejected for new writes)",
     )
     p_post_verified.add_argument("--content", required=True, help="Knowledge content")
@@ -718,7 +754,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_post_verified.add_argument(
         "--claim-status",
-        choices=["observed", "hypothesized", "supported", "contested", "falsified", "deprecated", "canonical"],
+        choices=[
+            "observed",
+            "hypothesized",
+            "supported",
+            "contested",
+            "falsified",
+            "deprecated",
+            "canonical",
+        ],
         help="Epistemic status for the claim (ADR-FM-048)",
     )
     p_post_verified.add_argument(
@@ -821,16 +865,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     # validate
     p_validate = subparsers.add_parser("validate", help="Validate ledger integrity")
-    p_validate.add_argument("--report", action="store_true", help="Generate structured report")
+    p_validate.add_argument(
+        "--report", action="store_true", help="Generate structured report"
+    )
 
     # report
-    p_report = subparsers.add_parser("report", help="Generate structured CLP validation report (JSON/Markdown)")
-    p_report.add_argument("--json", action="store_true", help="Output as JSON instead of Markdown")
+    p_report = subparsers.add_parser(
+        "report", help="Generate structured CLP validation report (JSON/Markdown)"
+    )
+    p_report.add_argument(
+        "--json", action="store_true", help="Output as JSON instead of Markdown"
+    )
 
     # state & status alias
     p_state = subparsers.add_parser("state", help="Show shared state")
     p_state.add_argument("--state", help="Override state.json path")
-    p_status = subparsers.add_parser("status", help="Show shared state (alias for state)")
+    p_status = subparsers.add_parser(
+        "status", help="Show shared state (alias for state)"
+    )
     p_status.add_argument("--state", help="Override state.json path")
 
     # boot
@@ -922,6 +974,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "belonging-check":
         from hummbl_cognition.belonging_check import run_cli as bc_run_cli
+
         # Pass remaining argv after the subcommand
         idx = (argv or sys.argv[1:]).index("belonging-check") + 1
         remaining = (argv or sys.argv[1:])[idx:]
@@ -929,6 +982,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "hrsi-checkin":
         from hummbl_cognition.hrsi_checkin import run_cli as hc_run_cli
+
         idx = (argv or sys.argv[1:]).index("hrsi-checkin") + 1
         remaining = (argv or sys.argv[1:])[idx:]
         return hc_run_cli(remaining)

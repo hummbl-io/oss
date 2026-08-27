@@ -184,11 +184,17 @@ def _resolve_path(rel_path: str) -> Path:
     try:
         root = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL, text=True, timeout=5,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=5,
         ).strip()
         if root:
             return Path(root) / rel_path
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
     return Path(rel_path)
 
@@ -215,11 +221,15 @@ def load_research_queue(path: str | Path | None = None) -> list[dict[str, Any]]:
     try:
         data = json.loads(queue_path.read_text(encoding="utf-8"))
         if not isinstance(data, list):
-            logger.warning("Queue file %s is not a JSON array, using DEFAULT_QUEUE", queue_path)
+            logger.warning(
+                "Queue file %s is not a JSON array, using DEFAULT_QUEUE", queue_path
+            )
             return list(DEFAULT_QUEUE)
         return data
     except (json.JSONDecodeError, OSError) as exc:
-        logger.warning("Failed to load queue file %s: %s, using DEFAULT_QUEUE", queue_path, exc)
+        logger.warning(
+            "Failed to load queue file %s: %s, using DEFAULT_QUEUE", queue_path, exc
+        )
         return list(DEFAULT_QUEUE)
 
 
@@ -299,7 +309,9 @@ def _is_kill_switch_engaged() -> bool:
     try:
         return bool(get_kill_switch_core().engaged)
     except Exception as exc:
-        logger.warning("Kill switch check failed; blocking research as fail-closed: %s", exc)
+        logger.warning(
+            "Kill switch check failed; blocking research as fail-closed: %s", exc
+        )
         return True
 
 
@@ -361,10 +373,10 @@ def _ollama_research(
 Answer the following research question with specific, actionable findings.
 Structure your response as numbered findings (1-5 key points).
 Each finding should be concrete and implementable, not abstract.
-Domain: {question['domain']}
+Domain: {question["domain"]}
 
 Research Question:
-{question['query']}
+{question["query"]}
 
 Findings:"""
 
@@ -457,7 +469,8 @@ def _ingest_finding(
     conn = HTTPConnection(host, port, timeout=30)
     try:
         body = json.dumps(
-            {"entries": [entry.to_dict()]}, separators=(",", ":"),
+            {"entries": [entry.to_dict()]},
+            separators=(",", ":"),
         ).encode("utf-8")
         headers["Content-Length"] = str(len(body))
         conn.request("POST", "/ingest", body=body, headers=headers)
@@ -486,8 +499,12 @@ def run_processor(
     """
     if _is_kill_switch_engaged():
         logger.warning("Kill switch engaged, skipping research")
-        return {"processed": 0, "skipped": 0, "errors": ["kill switch engaged"],
-                "questions": []}
+        return {
+            "processed": 0,
+            "skipped": 0,
+            "errors": ["kill switch engaged"],
+            "questions": [],
+        }
 
     if queue is None:
         queue = load_research_queue()
@@ -498,10 +515,7 @@ def run_processor(
 
     # Sort by tier (priority), then filter to those needing processing
     sorted_queue = sorted(queue, key=lambda q: q.get("tier", 99))
-    to_process = [
-        q for q in sorted_queue
-        if _should_reprocess(q, processed_state)
-    ]
+    to_process = [q for q in sorted_queue if _should_reprocess(q, processed_state)]
 
     # Cap per run
     to_process = to_process[:max_per_run]
@@ -533,7 +547,9 @@ def run_processor(
 
         # Call Ollama
         findings = _ollama_research(
-            question, model=model, base_url=ollama_url,
+            question,
+            model=model,
+            base_url=ollama_url,
         )
         if not findings:
             result["errors"].append(f"{qid}: Ollama call failed")
@@ -577,14 +593,8 @@ def processor_status(
     state = _load_state(state_path)
     processed = state.get("processed", {})
 
-    pending = [
-        q["id"] for q in queue
-        if _should_reprocess(q, processed)
-    ]
-    completed = [
-        q["id"] for q in queue
-        if not _should_reprocess(q, processed)
-    ]
+    pending = [q["id"] for q in queue if _should_reprocess(q, processed)]
+    completed = [q["id"] for q in queue if not _should_reprocess(q, processed)]
 
     return {
         "total_questions": len(queue),
@@ -611,15 +621,17 @@ def list_queue(
     for q in queue:
         qid = q["id"]
         p = processed.get(qid, {})
-        items.append({
-            "id": qid,
-            "domain": q["domain"],
-            "tier": q.get("tier", 3),
-            "recurrence": q.get("recurrence", "once"),
-            "status": "pending" if _should_reprocess(q, processed) else "done",
-            "last_processed": p.get("last_processed"),
-            "query": q["query"][:100],
-        })
+        items.append(
+            {
+                "id": qid,
+                "domain": q["domain"],
+                "tier": q.get("tier", 3),
+                "recurrence": q.get("recurrence", "once"),
+                "status": "pending" if _should_reprocess(q, processed) else "done",
+                "last_processed": p.get("last_processed"),
+                "query": q["query"][:100],
+            }
+        )
     return items
 
 
@@ -633,18 +645,32 @@ def main(argv: list[str] | None = None) -> int:
         description="Research Queue Processor -- local LLM research for Open Brain",
     )
     parser.add_argument(
-        "--brain-url", default=DEFAULT_OPEN_BRAIN_URL,
+        "--brain-url",
+        default=DEFAULT_OPEN_BRAIN_URL,
         help=f"Open Brain URL (default: {DEFAULT_OPEN_BRAIN_URL})",
     )
 
     subparsers = parser.add_subparsers(dest="command")
 
     p_run = subparsers.add_parser("run", help="Process research questions")
-    p_run.add_argument("--dry-run", action="store_true", help="Show what would be processed")
-    p_run.add_argument("--model", default=DEFAULT_MODEL, help=f"Ollama model (default: {DEFAULT_MODEL})")
-    p_run.add_argument("--ollama-url", default=DEFAULT_OLLAMA_URL, help="Ollama base URL")
+    p_run.add_argument(
+        "--dry-run", action="store_true", help="Show what would be processed"
+    )
+    p_run.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Ollama model (default: {DEFAULT_MODEL})",
+    )
+    p_run.add_argument(
+        "--ollama-url", default=DEFAULT_OLLAMA_URL, help="Ollama base URL"
+    )
     p_run.add_argument("--state-file", help="Override state file")
-    p_run.add_argument("--max", type=int, default=MAX_PER_RUN, help=f"Max questions per run (default: {MAX_PER_RUN})")
+    p_run.add_argument(
+        "--max",
+        type=int,
+        default=MAX_PER_RUN,
+        help=f"Max questions per run (default: {MAX_PER_RUN})",
+    )
 
     p_status = subparsers.add_parser("status", help="Show processor status")
     p_status.add_argument("--state-file", help="Override state file")

@@ -19,7 +19,6 @@
 from __future__ import annotations
 
 import pytest
-
 from base120.engine import FAMILIES, Engine
 from base120.models import ApplyResult, Operator
 
@@ -32,6 +31,7 @@ def engine() -> Engine:
 # ---------------------------------------------------------------------------
 # Operator loading
 # ---------------------------------------------------------------------------
+
 
 class TestOperatorLoading:
     def test_list_returns_120_operators(self, engine: Engine):
@@ -70,6 +70,7 @@ class TestOperatorLoading:
 # get()
 # ---------------------------------------------------------------------------
 
+
 class TestGet:
     def test_get_p6(self, engine: Engine):
         op = engine.get("P6")
@@ -103,6 +104,7 @@ class TestGet:
 # list() filtering
 # ---------------------------------------------------------------------------
 
+
 class TestList:
     def test_filter_p_family(self, engine: Engine):
         ops = engine.list(family="P")
@@ -126,6 +128,7 @@ class TestList:
 # families()
 # ---------------------------------------------------------------------------
 
+
 class TestFamilies:
     def test_returns_6_families(self, engine: Engine):
         assert len(engine.families()) == 6
@@ -137,6 +140,7 @@ class TestFamilies:
 # ---------------------------------------------------------------------------
 # prompt()
 # ---------------------------------------------------------------------------
+
 
 class TestPrompt:
     def test_returns_string(self, engine: Engine):
@@ -172,6 +176,7 @@ class TestPrompt:
 # ---------------------------------------------------------------------------
 # record()
 # ---------------------------------------------------------------------------
+
 
 class TestRecord:
     def test_returns_apply_result(self, engine: Engine):

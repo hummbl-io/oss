@@ -2,7 +2,7 @@
 **Subject:** Discovery of Local Repositories, Historical Page Decommissions, and Multi-Platform Distribution Infrastructure  
 **Date:** 2026-08-23  
 **Status:** Complete Research Archive  
-**Target Repositories:** [`hummbl-production`](file:///<repo-root>/PROJECTS/hummbl-production), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`oss`](file:///<repo-root>/PROJECTS/oss)  
+**Target Repositories:** [`hummbl-production`](https://github.com/hummbl-io/hummbl-production), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`oss`](https://github.com/hummbl-io/oss)  
 
 ---
 

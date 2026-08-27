@@ -48,16 +48,41 @@ def populated_audit_dir(tmp_path):
     d = tmp_path / "audit"
     d.mkdir()
     entries = [
-        {"entry_id": "e1", "timestamp": "2026-01-01T00:00:00Z", "tuple_type": "DCT",
-         "agent_id": "claude-code", "action": "read"},
-        {"entry_id": "e2", "timestamp": "2026-01-01T00:01:00Z", "tuple_type": "INTENT",
-         "agent_id": "codex", "action": "write"},
-        {"entry_id": "e3", "timestamp": "2026-01-01T00:02:00Z", "tuple_type": "ATTEST",
-         "agent_id": "claude-code", "action": "verify"},
-        {"entry_id": "e4", "timestamp": "2026-01-01T00:03:00Z", "tuple_type": "CIRCUIT_BREAKER",
-         "agent_id": "system", "action": "trip"},
-        {"entry_id": "e5", "timestamp": "2026-01-01T00:04:00Z", "tuple_type": "KILLSWITCH",
-         "agent_id": "human", "action": "engage"},
+        {
+            "entry_id": "e1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "tuple_type": "DCT",
+            "agent_id": "claude-code",
+            "action": "read",
+        },
+        {
+            "entry_id": "e2",
+            "timestamp": "2026-01-01T00:01:00Z",
+            "tuple_type": "INTENT",
+            "agent_id": "codex",
+            "action": "write",
+        },
+        {
+            "entry_id": "e3",
+            "timestamp": "2026-01-01T00:02:00Z",
+            "tuple_type": "ATTEST",
+            "agent_id": "claude-code",
+            "action": "verify",
+        },
+        {
+            "entry_id": "e4",
+            "timestamp": "2026-01-01T00:03:00Z",
+            "tuple_type": "CIRCUIT_BREAKER",
+            "agent_id": "system",
+            "action": "trip",
+        },
+        {
+            "entry_id": "e5",
+            "timestamp": "2026-01-01T00:04:00Z",
+            "tuple_type": "KILLSWITCH",
+            "agent_id": "human",
+            "action": "engage",
+        },
     ]
     logfile = d / "governance-2026-01-01.jsonl"
     with open(logfile, "w") as f:
@@ -126,8 +151,7 @@ def test_soc2_assess_with_entries_higher_coverage(tmp_path):
     populated_dir = tmp_path / "populated"
     populated_dir.mkdir()
     entries = [
-        {"entry_id": f"e{i}", "timestamp": "2026-01-01T00:00:00Z",
-         "tuple_type": t, "agent_id": "a", "action": "x"}
+        {"entry_id": f"e{i}", "timestamp": "2026-01-01T00:00:00Z", "tuple_type": t, "agent_id": "a", "action": "x"}
         for i, t in enumerate(["DCT", "INTENT", "ATTEST", "CIRCUIT_BREAKER", "KILLSWITCH"])
     ]
     with open(populated_dir / "governance-2026-01-01.jsonl", "w") as f:
@@ -182,10 +206,22 @@ def test_stride_analysis_empty_interactions():
 
 
 def test_stride_analysis_unauthenticated_interaction():
-    result = mcp_compliance.handle_tool("stride_analysis", {"interactions": [
-        {"source": "agent-a", "target": "database", "data_type": "write",
-         "auth_level": "none", "boundary": True, "audited": False, "rate_limited": False},
-    ]})
+    result = mcp_compliance.handle_tool(
+        "stride_analysis",
+        {
+            "interactions": [
+                {
+                    "source": "agent-a",
+                    "target": "database",
+                    "data_type": "write",
+                    "auth_level": "none",
+                    "boundary": True,
+                    "audited": False,
+                    "rate_limited": False,
+                },
+            ]
+        },
+    )
     assert "findings" in result or "by_severity" in result
     # Unauthenticated cross-boundary write should produce findings
     total = sum(result["by_severity"].values())
@@ -193,17 +229,36 @@ def test_stride_analysis_unauthenticated_interaction():
 
 
 def test_stride_analysis_authenticated_interaction():
-    result = mcp_compliance.handle_tool("stride_analysis", {"interactions": [
-        {"source": "claude-code", "target": "api", "data_type": "read",
-         "auth_level": "hmac", "boundary": False, "audited": True, "rate_limited": True},
-    ]})
+    result = mcp_compliance.handle_tool(
+        "stride_analysis",
+        {
+            "interactions": [
+                {
+                    "source": "claude-code",
+                    "target": "api",
+                    "data_type": "read",
+                    "auth_level": "hmac",
+                    "boundary": False,
+                    "audited": True,
+                    "rate_limited": True,
+                },
+            ]
+        },
+    )
     assert "by_severity" in result
 
 
 def test_stride_analysis_multiple_interactions():
     interactions = [
-        {"source": f"agent-{i}", "target": "resource", "data_type": "read",
-         "auth_level": "token", "boundary": i % 2 == 0, "audited": True, "rate_limited": False}
+        {
+            "source": f"agent-{i}",
+            "target": "resource",
+            "data_type": "read",
+            "auth_level": "token",
+            "boundary": i % 2 == 0,
+            "audited": True,
+            "rate_limited": False,
+        }
         for i in range(5)
     ]
     result = mcp_compliance.handle_tool("stride_analysis", {"interactions": interactions})
@@ -220,45 +275,60 @@ def test_stride_analysis_severity_keys():
 # compliance_evidence_export
 # ---------------------------------------------------------------------------
 def test_compliance_evidence_export_all(empty_audit_dir):
-    result = mcp_compliance.handle_tool("compliance_evidence_export", {
-        "governance_dir": empty_audit_dir,
-        "framework": "all",
-    })
+    result = mcp_compliance.handle_tool(
+        "compliance_evidence_export",
+        {
+            "governance_dir": empty_audit_dir,
+            "framework": "all",
+        },
+    )
     assert "evidence" in result
     assert "total_evidence_items" in result
 
 
 def test_compliance_evidence_export_soc2_only(empty_audit_dir):
-    result = mcp_compliance.handle_tool("compliance_evidence_export", {
-        "governance_dir": empty_audit_dir,
-        "framework": "soc2",
-    })
+    result = mcp_compliance.handle_tool(
+        "compliance_evidence_export",
+        {
+            "governance_dir": empty_audit_dir,
+            "framework": "soc2",
+        },
+    )
     assert "soc2" in result["evidence"]
     assert "nist" not in result["evidence"]
 
 
 def test_compliance_evidence_export_nist_only(empty_audit_dir):
-    result = mcp_compliance.handle_tool("compliance_evidence_export", {
-        "governance_dir": empty_audit_dir,
-        "framework": "nist",
-    })
+    result = mcp_compliance.handle_tool(
+        "compliance_evidence_export",
+        {
+            "governance_dir": empty_audit_dir,
+            "framework": "nist",
+        },
+    )
     assert "nist" in result["evidence"]
     assert "soc2" not in result["evidence"]
 
 
 def test_compliance_evidence_export_owasp(empty_audit_dir):
-    result = mcp_compliance.handle_tool("compliance_evidence_export", {
-        "governance_dir": empty_audit_dir,
-        "framework": "owasp",
-    })
+    result = mcp_compliance.handle_tool(
+        "compliance_evidence_export",
+        {
+            "governance_dir": empty_audit_dir,
+            "framework": "owasp",
+        },
+    )
     assert "owasp_agentic" in result["evidence"]
 
 
 def test_compliance_evidence_export_iso(empty_audit_dir):
-    result = mcp_compliance.handle_tool("compliance_evidence_export", {
-        "governance_dir": empty_audit_dir,
-        "framework": "iso",
-    })
+    result = mcp_compliance.handle_tool(
+        "compliance_evidence_export",
+        {
+            "governance_dir": empty_audit_dir,
+            "framework": "iso",
+        },
+    )
     assert "iso_crosswalk" in result["evidence"]
 
 
@@ -306,19 +376,23 @@ def _rpc_compliance(messages):
 
 
 def test_compliance_protocol_initialize():
-    responses = _rpc_compliance([
-        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-    ])
+    responses = _rpc_compliance(
+        [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+        ]
+    )
     assert any(r.get("id") == 1 and "result" in r for r in responses)
     r = next(r for r in responses if r.get("id") == 1)
     assert r["result"]["serverInfo"]["name"] == "hummbl-compliance"
 
 
 def test_compliance_protocol_tools_list():
-    responses = _rpc_compliance([
-        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-        {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-    ])
+    responses = _rpc_compliance(
+        [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+        ]
+    )
     tools_resp = next(r for r in responses if r.get("id") == 2)
     names = {t["name"] for t in tools_resp["result"]["tools"]}
     assert "nist_map_controls" in names

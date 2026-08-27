@@ -1,6 +1,5 @@
 from tools.vendor_ip_risk_lint import lint_markdown, parse_vendor_rows
 
-
 REGISTER = "\n".join(
     [
         "# AI Vendor IP Risk Register",
@@ -47,9 +46,7 @@ def test_blocks_yellow_sensitive_tier_without_owner_approval():
 
     findings = lint_markdown(markdown)
 
-    assert [finding.rule for finding in findings] == [
-        "yellow-sensitive-without-approval"
-    ]
+    assert [finding.rule for finding in findings] == ["yellow-sensitive-without-approval"]
 
 
 def test_blocks_missing_source_url():

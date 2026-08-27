@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_bus.bus_policy import reset_bus_policy
 
 

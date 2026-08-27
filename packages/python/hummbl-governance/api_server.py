@@ -42,18 +42,18 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hummbl_governance import (
-    KillSwitch,
-    KillSwitchMode,
+    AuditLog,
     CircuitBreaker,
     CostGovernor,
-    AuditLog,
+    KillSwitch,
+    KillSwitchMode,
     ReasoningEngine,
 )
 
@@ -96,6 +96,7 @@ def _cors_origin() -> str | None:
     protection that gates access to the kill switch endpoint.
     """
     return os.environ.get("GOVERNANCE_API_CORS_ORIGIN", "").strip() or None
+
 
 # Singletons
 _ks = None
@@ -200,30 +201,34 @@ class GovernanceHandler(BaseHTTPRequestHandler):
 
     def _get_status(self, params):
         budget = _cg.check_budget_status()
-        self._json_response({
-            "kill_switch": {"mode": _ks.mode.name, "engaged": _ks.engaged},
-            "circuit_breaker": {"state": _cb.state.name, "failure_count": _cb.failure_count},
-            "cost_governor": {
-                "daily_spend": getattr(budget, "current_spend", 0),
-                "decision": (
-                    getattr(budget, "decision", "UNKNOWN").name
-                    if hasattr(getattr(budget, "decision", None), "name")
-                    else str(getattr(budget, "decision", "UNKNOWN"))
-                ),
-            },
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        self._json_response(
+            {
+                "kill_switch": {"mode": _ks.mode.name, "engaged": _ks.engaged},
+                "circuit_breaker": {"state": _cb.state.name, "failure_count": _cb.failure_count},
+                "cost_governor": {
+                    "daily_spend": getattr(budget, "current_spend", 0),
+                    "decision": (
+                        getattr(budget, "decision", "UNKNOWN").name
+                        if hasattr(getattr(budget, "decision", None), "name")
+                        else str(getattr(budget, "decision", "UNKNOWN"))
+                    ),
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
     def _get_kill_switch(self, params):
         status = _ks.get_status()
         self._json_response(status)
 
     def _get_circuit_breaker(self, params):
-        self._json_response({
-            "state": _cb.state.name,
-            "failure_count": _cb.failure_count,
-            "success_count": getattr(_cb, "success_count", 0),
-        })
+        self._json_response(
+            {
+                "state": _cb.state.name,
+                "failure_count": _cb.failure_count,
+                "success_count": getattr(_cb, "success_count", 0),
+            }
+        )
 
     def _get_cost_check(self, params):
         budget = _cg.check_budget_status()
@@ -242,20 +247,24 @@ class GovernanceHandler(BaseHTTPRequestHandler):
             entries = list(_al.query_by_intent(intent_id))
         elif task_id:
             entries = list(_al.query_by_task(task_id))
-        self._json_response({
-            "count": len(entries),
-            "entries": [
-                {k: str(v) for k, v in (e.__dict__ if hasattr(e, "__dict__") else {"data": str(e)}).items()}
-                for e in entries[:50]
-            ],
-        })
+        self._json_response(
+            {
+                "count": len(entries),
+                "entries": [
+                    {k: str(v) for k, v in (e.__dict__ if hasattr(e, "__dict__") else {"data": str(e)}).items()}
+                    for e in entries[:50]
+                ],
+            }
+        )
 
     def _get_health(self, params):
-        self._json_response({
-            "healthy": not _ks.engaged and _cb.state.name == "CLOSED",
-            "kill_switch": _ks.mode.name,
-            "circuit_breaker": _cb.state.name,
-        })
+        self._json_response(
+            {
+                "healthy": not _ks.engaged and _cb.state.name == "CLOSED",
+                "kill_switch": _ks.mode.name,
+                "circuit_breaker": _cb.state.name,
+            }
+        )
 
     def _get_score(self, params):
         score = _compute_governance_score()
@@ -337,7 +346,7 @@ class GovernanceHandler(BaseHTTPRequestHandler):
             if not model_code:
                 self._json_response({"error": "Missing model code"}, 400)
                 return
-            
+
             model = _re.get_model(model_code)
             if not model:
                 self._json_response({"error": f"Unknown model code: {model_code}"}, 404)
@@ -350,20 +359,22 @@ class GovernanceHandler(BaseHTTPRequestHandler):
 
             # Generate Prompt
             prompt = _re.generate_system_prompt(model_code, depth=body.get("depth", 1))
-            
+
             # For now, return the prompt and model metadata.
             # In a real deployment, this would call the LLM adapter.
-            self._json_response({
-                "ok": True,
-                "data": {
-                    "model": model.code,
-                    "name": model.name,
-                    "transformation": model.transformation,
-                    "definition": model.definition,
-                    "system_prompt": prompt,
-                    "status": "prompt_generated_awaiting_adapter"
+            self._json_response(
+                {
+                    "ok": True,
+                    "data": {
+                        "model": model.code,
+                        "name": model.name,
+                        "transformation": model.transformation,
+                        "definition": model.definition,
+                        "system_prompt": prompt,
+                        "status": "prompt_generated_awaiting_adapter",
+                    },
                 }
-            })
+            )
 
         else:
             self._json_response({"error": f"Not found: {path}"}, 404)

@@ -1,5 +1,5 @@
 """Tests for bif_list_templates tool."""
-import pytest
+
 from mcp_server import tool_bif_list_templates
 
 
@@ -32,5 +32,7 @@ class TestListTemplates:
     def test_domain_templates_loaded_from_disk(self):
         result = tool_bif_list_templates({})
         # Should include ai-ml-platform, cloud-platform, etc. from templates/
-        domain_ids = [t["template_id"] for t in result["templates"] if t["template_id"] != "generic"]
+        domain_ids = [
+            t["template_id"] for t in result["templates"] if t["template_id"] != "generic"
+        ]
         assert len(domain_ids) >= 1

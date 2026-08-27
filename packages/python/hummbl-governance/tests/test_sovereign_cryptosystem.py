@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import secrets
-import pytest
 
+import pytest
 from hummbl_governance.sovereign_cryptosystem import SovereignCryptosystem
 
 

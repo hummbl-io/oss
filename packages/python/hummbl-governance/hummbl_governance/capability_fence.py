@@ -73,8 +73,7 @@ class CapabilityDenied(Exception):
         self.reason = reason
         detail = f"; reason={reason}" if reason else ""
         super().__init__(
-            f"Capability denied: {capability!r} "
-            f"(allowed={sorted(allowed)}, denied={sorted(denied)}{detail})"
+            f"Capability denied: {capability!r} (allowed={sorted(allowed)}, denied={sorted(denied)}{detail})"
         )
 
 
@@ -263,16 +262,9 @@ class CapabilityFence:
             "expected_task_id": expected_task_id,
             "expected_contract_id": expected_contract_id,
         }
-        invalid_expectations = [
-            name
-            for name, value in expected_values.items()
-            if type(value) is not str or not value
-        ]
+        invalid_expectations = [name for name, value in expected_values.items() if type(value) is not str or not value]
         if invalid_expectations:
-            raise ValueError(
-                "Delegation token expectations must be non-empty strings: "
-                f"{sorted(invalid_expectations)}"
-            )
+            raise ValueError(f"Delegation token expectations must be non-empty strings: {sorted(invalid_expectations)}")
 
         snapshot, error = token_manager.authenticate_token(
             token,
@@ -329,22 +321,16 @@ class CapabilityFence:
 
         if capability in self._denied:
             return "deny", f"{capability!r} is in denied set"
-        if capability not in self._allowed and (
-            self._allowed or not self._allow_all_if_empty
-        ):
+        if capability not in self._allowed and (self._allowed or not self._allow_all_if_empty):
             return "deny", f"{capability!r} is not in allowed set"
 
         try:
-            runtime_context = (
-                {} if context is None else _validated_runtime_json(context)
-            )
+            runtime_context = {} if context is None else _validated_runtime_json(context)
         except (TypeError, ValueError) as exc:
             return "deny", f"context must contain only safe JSON values: {exc}"
         if type(runtime_context) is not dict:
             return "deny", "context must be a plain mapping"
-        resource_selectors = (
-            authenticated_token.resource_selectors if authenticated_token else ()
-        )
+        resource_selectors = authenticated_token.resource_selectors if authenticated_token else ()
         if resource_selectors:
             if resource_type is None or resource_id is None:
                 return "deny", "resource_type and resource_id are required"
@@ -422,9 +408,7 @@ def _normalized_capability_set(
     """Freeze capability configuration after exact-string validation."""
     if values is None:
         return frozenset()
-    if type(values) is not list or not all(
-        type(value) is str and value for value in values
-    ):
+    if type(values) is not list or not all(type(value) is str and value for value in values):
         raise TypeError(f"{name} must be a list of non-empty exact strings")
     return frozenset(values)
 

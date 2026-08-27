@@ -17,11 +17,9 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from hummbl.reasoning import (
-    ReasoningStep,
     ReasoningTopology,
     ReasoningTrace,
     StepType,
-    make_step,
     make_trace,
 )
 
@@ -37,6 +35,7 @@ class StepSpec:
         required: Whether the protocol enforces this step.
         metadata_keys: Domain-specific metadata keys expected at this step.
     """
+
     type: StepType
     name: str
     description: str = ""
@@ -59,6 +58,7 @@ class ReasoningProtocol:
         topology: The default topology for traces following this protocol.
         domain: The reasoning domain this protocol belongs to.
     """
+
     name: str
     description: str
     step_specs: list[StepSpec]
@@ -93,18 +93,13 @@ class ReasoningProtocol:
 
         if spec_idx < len(required_specs):
             missing = [s.name for s in required_specs[spec_idx:]]
-            violations.append(
-                f"Missing required steps: {', '.join(missing)}"
-            )
+            violations.append(f"Missing required steps: {', '.join(missing)}")
 
         # Check metadata keys against the corresponding occurrence of each
         # step type in the protocol, rather than every step of that type.
         # This matters for protocols with repeated step types, e.g. two
         # ACTION steps where only the first requires a commit hash.
-        steps_by_type = {
-            step_type: trace.get_steps_by_type(step_type)
-            for step_type in StepType
-        }
+        steps_by_type = {step_type: trace.get_steps_by_type(step_type) for step_type in StepType}
         occurrence_by_type: dict[StepType, int] = defaultdict(int)
 
         for spec in self.step_specs:
@@ -123,8 +118,7 @@ class ReasoningProtocol:
             for key in spec.metadata_keys:
                 if key not in step.metadata:
                     violations.append(
-                        f"Step '{step.id}' ({spec.name}) missing "
-                        f"metadata key '{key}'"
+                        f"Step '{step.id}' ({spec.name}) missing metadata key '{key}'"
                     )
 
         return violations
@@ -143,6 +137,7 @@ class ReasoningProtocol:
 # ---------------------------------------------------------------------------
 # Built-in protocols
 # ---------------------------------------------------------------------------
+
 
 class ScientificMethod(ReasoningProtocol):
     """The autoresearch experiment loop as a formal reasoning protocol.
@@ -183,24 +178,19 @@ class ScientificMethod(ReasoningProtocol):
                 StepSpec(
                     type=StepType.ACTION,
                     name="modify_code",
-                    description=(
-                        "Modify train.py to implement the hypothesis."
-                    ),
+                    description=("Modify train.py to implement the hypothesis."),
                     metadata_keys=["commit_hash"],
                 ),
                 StepSpec(
                     type=StepType.ACTION,
                     name="run_experiment",
-                    description=(
-                        "Run the training script and collect results."
-                    ),
+                    description=("Run the training script and collect results."),
                 ),
                 StepSpec(
                     type=StepType.OBSERVATION,
                     name="read_results",
                     description=(
-                        "Extract val_bpb, peak_vram_mb, and other metrics "
-                        "from the run log."
+                        "Extract val_bpb, peak_vram_mb, and other metrics from the run log."
                     ),
                     metadata_keys=["val_bpb", "peak_vram_mb"],
                 ),
@@ -362,8 +352,7 @@ class HypothesisExploration(ReasoningProtocol):
                     type=StepType.HYPOTHESIS,
                     name="generate_hypotheses",
                     description=(
-                        "Generate multiple competing hypotheses. "
-                        "Each becomes a branch in the tree."
+                        "Generate multiple competing hypotheses. Each becomes a branch in the tree."
                     ),
                 ),
                 StepSpec(

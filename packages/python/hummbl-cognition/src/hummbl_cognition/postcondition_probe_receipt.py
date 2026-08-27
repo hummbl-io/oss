@@ -25,7 +25,6 @@ Reference: issue #1117 (CI postcondition probes / false-green prevention)
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import uuid
 from datetime import datetime
@@ -184,14 +183,25 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
         errors.append(
             f"timestamp must be an RFC3339 date-time string (got {receipt['timestamp']!r})"
         )
-    if not isinstance(receipt.get("claimed_action"), str) or not receipt["claimed_action"].strip():
+    if (
+        not isinstance(receipt.get("claimed_action"), str)
+        or not receipt["claimed_action"].strip()
+    ):
         errors.append("claimed_action must be a non-empty string")
-    if not isinstance(receipt.get("declared_side_effect"), str) or not receipt["declared_side_effect"].strip():
+    if (
+        not isinstance(receipt.get("declared_side_effect"), str)
+        or not receipt["declared_side_effect"].strip()
+    ):
         errors.append("declared_side_effect must be a non-empty string")
     if not isinstance(receipt.get("evidence_locator"), str):
         errors.append("evidence_locator must be a string")
-    if not isinstance(receipt.get("verification_command"), str) or not receipt["verification_command"].strip():
-        errors.append("verification_command must be a non-empty string (must be replayable)")
+    if (
+        not isinstance(receipt.get("verification_command"), str)
+        or not receipt["verification_command"].strip()
+    ):
+        errors.append(
+            "verification_command must be a non-empty string (must be replayable)"
+        )
     if not isinstance(receipt.get("receipt_hash"), str):
         errors.append("receipt_hash must be a string")
 
@@ -206,10 +216,17 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
                 errors.append(
                     f"expected_artifact.kind: {kind!r} not in {sorted(VALID_ARTIFACT_KIND)}"
                 )
-            if not isinstance(artifact.get("locator"), str) or not artifact["locator"].strip():
+            if (
+                not isinstance(artifact.get("locator"), str)
+                or not artifact["locator"].strip()
+            ):
                 errors.append("expected_artifact.locator must be a non-empty string")
-            if "content_marker" in artifact and not isinstance(artifact["content_marker"], str):
-                errors.append("expected_artifact.content_marker must be a string if present")
+            if "content_marker" in artifact and not isinstance(
+                artifact["content_marker"], str
+            ):
+                errors.append(
+                    "expected_artifact.content_marker must be a string if present"
+                )
     else:
         errors.append("expected_artifact must be an object")
 
@@ -227,9 +244,13 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
             if not isinstance(vr.get("observed_state"), str):
                 errors.append("verification_result.observed_state must be a string")
             if "exit_code" in vr and not isinstance(vr["exit_code"], int):
-                errors.append("verification_result.exit_code must be an integer if present")
+                errors.append(
+                    "verification_result.exit_code must be an integer if present"
+                )
             if "latency_ms" in vr and not isinstance(vr["latency_ms"], int):
-                errors.append("verification_result.latency_ms must be an integer if present")
+                errors.append(
+                    "verification_result.latency_ms must be an integer if present"
+                )
     else:
         errors.append("verification_result must be an object")
 
@@ -246,7 +267,9 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
             cap = state.get("captured_at")
             if cap is not None:
                 if not isinstance(cap, str):
-                    errors.append(f"{state_field}.captured_at must be a string if present")
+                    errors.append(
+                        f"{state_field}.captured_at must be a string if present"
+                    )
                 elif not _is_valid_iso8601(cap):
                     errors.append(
                         f"{state_field}.captured_at must be an RFC3339 date-time string (got {cap!r})"
@@ -273,12 +296,14 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
     # failure_class enum
     fc = receipt.get("failure_class")
     if fc not in VALID_FAILURE_CLASS:
-        errors.append(
-            f"failure_class: {fc!r} not in {sorted(VALID_FAILURE_CLASS)}"
-        )
+        errors.append(f"failure_class: {fc!r} not in {sorted(VALID_FAILURE_CLASS)}")
 
     # Cross-field invariants
-    status = receipt.get("verification_result", {}).get("status") if isinstance(receipt.get("verification_result"), dict) else None
+    status = (
+        receipt.get("verification_result", {}).get("status")
+        if isinstance(receipt.get("verification_result"), dict)
+        else None
+    )
     fc_value = receipt.get("failure_class")
 
     # verified status implies failure_class none
@@ -300,7 +325,11 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
         )
 
     # negative_check.failed implies negative_violation
-    nc_result = receipt.get("negative_check", {}).get("result") if isinstance(receipt.get("negative_check"), dict) else None
+    nc_result = (
+        receipt.get("negative_check", {}).get("result")
+        if isinstance(receipt.get("negative_check"), dict)
+        else None
+    )
     if nc_result == "failed" and fc_value != "negative_violation":
         errors.append(
             "negative_check.result='failed' requires failure_class='negative_violation'"
@@ -308,7 +337,9 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
 
     # failed negative check means checked must be true
     if nc_result == "failed" and not receipt.get("negative_check", {}).get("checked"):
-        errors.append("negative_check.result='failed' requires negative_check.checked=True")
+        errors.append(
+            "negative_check.result='failed' requires negative_check.checked=True"
+        )
 
     # Non-none failure_class requires operator_override_ref OR pipeline must fail.
     # The probe cannot force pipeline failure from inside the receipt, so the
@@ -327,7 +358,9 @@ def validate_postcondition_probe(receipt: dict[str, Any]) -> tuple[bool, list[st
     # Hash verification
     expected_hash = compute_receipt_hash(receipt)
     if receipt.get("receipt_hash") != expected_hash:
-        errors.append("receipt_hash does not match computed hash — receipt may be tampered")
+        errors.append(
+            "receipt_hash does not match computed hash — receipt may be tampered"
+        )
 
     return len(errors) == 0, errors
 
@@ -383,7 +416,8 @@ def create_postcondition_probe(
         "verification_result": verification_result,
         "before_state": before_state or {},
         "after_state": after_state or {},
-        "negative_check": negative_check or {"checked": False, "result": "not_applicable"},
+        "negative_check": negative_check
+        or {"checked": False, "result": "not_applicable"},
         "failure_class": failure_class,
     }
 

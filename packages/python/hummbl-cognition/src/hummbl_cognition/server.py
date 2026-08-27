@@ -284,7 +284,11 @@ class OpenBrainState:
     def consolidate(self, *, dry_run: bool = False) -> dict[str, Any]:
         """Run ledger consolidation with a file lock to prevent concurrent runs."""
         # Determine lock path next to the ledger
-        lock_dir = Path(self.ledger_path).parent if self.ledger_path else Path("_state/cognition")
+        lock_dir = (
+            Path(self.ledger_path).parent
+            if self.ledger_path
+            else Path("_state/cognition")
+        )
         lock_dir.mkdir(parents=True, exist_ok=True)
         lock_path = lock_dir / "consolidator.lock"
 
@@ -365,7 +369,7 @@ def _make_handler(state: OpenBrainState, *, auth_token: str | None = None) -> ty
             elif self.path.startswith("/lineage/"):
                 if not self._check_auth():
                     return
-                entry_id = self.path[len("/lineage/"):].strip()
+                entry_id = self.path[len("/lineage/") :].strip()
                 result = state.get_lineage(entry_id)
                 if "error" in result:
                     self._send_json(result, 404)
@@ -477,11 +481,14 @@ def main(argv: list[str] | None = None) -> int:
         description="Open Brain HTTP Server -- knowledge compiler for multi-agent systems",
     )
     parser.add_argument(
-        "--host", default=DEFAULT_HOST,
+        "--host",
+        default=DEFAULT_HOST,
         help=f"Bind address (default: {DEFAULT_HOST})",
     )
     parser.add_argument(
-        "--port", type=int, default=DEFAULT_PORT,
+        "--port",
+        type=int,
+        default=DEFAULT_PORT,
         help=f"Port (default: {DEFAULT_PORT})",
     )
     parser.add_argument(

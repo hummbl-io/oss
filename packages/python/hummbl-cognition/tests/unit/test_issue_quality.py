@@ -31,7 +31,6 @@ from hummbl_cognition.issue_quality import (
 )
 from hummbl_cognition.issue_quality import main as cli_main
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -124,7 +123,9 @@ class TestNonDuplicate:
         assert result.score == 0
 
     def test_distinct_scores_three(self):
-        existing = [{"title": "Refactor bar module", "body": "Refactor bar for clarity"}]
+        existing = [
+            {"title": "Refactor bar module", "body": "Refactor bar for clarity"}
+        ]
         result = score_non_duplicate(
             "Fix the foo bug", "The foo is broken in tests", existing
         )
@@ -238,7 +239,9 @@ class TestScoreIssue:
 
 class TestCLI:
     def test_score_text_output(self, capsys):
-        rc = cli_main(["score", "--title", "Fix foo regression", "--body", HIGH_QUALITY_BODY])
+        rc = cli_main(
+            ["score", "--title", "Fix foo regression", "--body", HIGH_QUALITY_BODY]
+        )
         captured = capsys.readouterr()
         assert rc == 0
         assert "Disposition:" in captured.out

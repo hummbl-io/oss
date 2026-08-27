@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from jsonschema import Draft7Validator, FormatChecker
+import pytest
 
 from hummbl_cognition.parallel_gate_receipt import (
     compute_gate_receipt_hash,
@@ -11,8 +11,16 @@ from hummbl_cognition.parallel_gate_receipt import (
     validate_parallel_gate_receipt,
 )
 
+jsonschema = pytest.importorskip("jsonschema")
+Draft7Validator = jsonschema.Draft7Validator
+FormatChecker = jsonschema.FormatChecker
+
 _SCHEMA_PATH = (
-    Path(__file__).parents[2] / "src" / "hummbl_cognition" / "schemas" / "parallel_gate_receipt.schema.json"
+    Path(__file__).parents[2]
+    / "src"
+    / "hummbl_cognition"
+    / "schemas"
+    / "parallel_gate_receipt.schema.json"
 )
 
 
@@ -37,10 +45,18 @@ def _finding(**overrides) -> dict:
 
 def test_parallel_gate_hash_excludes_timestamp():
     a = create_parallel_gate_receipt(
-        gate_name="unit", run_id="run-1", status="pass", duration_ms=1, timestamp="2026-07-04T00:00:00Z"
+        gate_name="unit",
+        run_id="run-1",
+        status="pass",
+        duration_ms=1,
+        timestamp="2026-07-04T00:00:00Z",
     )
     b = create_parallel_gate_receipt(
-        gate_name="unit", run_id="run-1", status="pass", duration_ms=1, timestamp="2026-07-04T00:01:00Z"
+        gate_name="unit",
+        run_id="run-1",
+        status="pass",
+        duration_ms=1,
+        timestamp="2026-07-04T00:01:00Z",
     )
 
     assert a["receipt_hash"] == b["receipt_hash"]
@@ -54,8 +70,20 @@ def test_parallel_gate_rejects_unsorted_findings():
         status="fail",
         duration_ms=1,
         findings=[
-            {"file": "b.py", "line": 2, "rule": "R", "severity": "high", "message": "b"},
-            {"file": "a.py", "line": 1, "rule": "R", "severity": "high", "message": "a"},
+            {
+                "file": "b.py",
+                "line": 2,
+                "rule": "R",
+                "severity": "high",
+                "message": "b",
+            },
+            {
+                "file": "a.py",
+                "line": 1,
+                "rule": "R",
+                "severity": "high",
+                "message": "a",
+            },
         ],
     )
     receipt["findings"] = list(reversed(receipt["findings"]))

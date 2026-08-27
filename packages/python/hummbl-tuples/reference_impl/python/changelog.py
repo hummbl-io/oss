@@ -36,36 +36,37 @@ Semantic versioning derived from changelog:
 from __future__ import annotations
 
 import json
-import hashlib
+
+# Add parent dir to path for canonical serialization
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
-# Add parent dir to path for canonical serialization
-import sys
 sys.path.insert(0, str(Path(__file__).parent))
-from canonical_serialization import canonical_json, canonical_hash
-
+from canonical_serialization import canonical_hash, canonical_json
 
 # ---------------------------------------------------------------------------
 # Operation types
 # ---------------------------------------------------------------------------
 
-CHANGELOG_OPERATION_TYPES = frozenset({
-    "GENERATE",
-    "PROMOTE",
-    "DEMOTE",
-    "LINK",
-    "UNLINK",
-    "RATIFY",
-    "DEPRECATE",
-    "RESTORE",
-    "LATTICE_INIT",
-    "LATTICE_FROZEN",
-    "COMPOSITION_ADMIT",
-    "COMPOSITION_REJECT",
-})
+CHANGELOG_OPERATION_TYPES = frozenset(
+    {
+        "GENERATE",
+        "PROMOTE",
+        "DEMOTE",
+        "LINK",
+        "UNLINK",
+        "RATIFY",
+        "DEPRECATE",
+        "RESTORE",
+        "LATTICE_INIT",
+        "LATTICE_FROZEN",
+        "COMPOSITION_ADMIT",
+        "COMPOSITION_REJECT",
+    }
+)
 
 # Semantic versioning impact per operation type
 VERSION_IMPACT = {
@@ -87,6 +88,7 @@ VERSION_IMPACT = {
 # ---------------------------------------------------------------------------
 # Changelog entry
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ChangelogEntry:
@@ -134,6 +136,7 @@ class ChangelogEntry:
 # ---------------------------------------------------------------------------
 # Changelog (append-only JSONL)
 # ---------------------------------------------------------------------------
+
 
 class Changelog:
     """Append-only JSONL changelog for a Domain120 lattice.
@@ -247,6 +250,7 @@ class Changelog:
 # ---------------------------------------------------------------------------
 # Convenience functions
 # ---------------------------------------------------------------------------
+
 
 def now_utc() -> str:
     """Current UTC timestamp in ISO 8601 format."""

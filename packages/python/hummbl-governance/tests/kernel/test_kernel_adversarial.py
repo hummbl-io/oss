@@ -37,7 +37,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel import (
     IdentityEngine,
     Kernel,
@@ -58,6 +57,7 @@ def _make_kernel(tmpdir: Path) -> Kernel:
 # ===========================================================================
 # 1. ADVERSARIAL EVALS
 # ===========================================================================
+
 
 class TestAdversarialReceiptEngine:
     """Try to forge receipts, bypass signatures, or corrupt chains."""
@@ -113,6 +113,7 @@ class TestAdversarialReceiptEngine:
             engine.store(receipt)
             assert len(engine.list_for_agent("attacker")) == 1
 
+
 class TestAdversarialIdentityEngine:
     """Try to escalate privileges, claim roles without permission."""
 
@@ -152,6 +153,7 @@ class TestAdversarialIdentityEngine:
             engine.register("agent")
             assert engine.demote_role("agent", "AI-PE", "reason") is False
 
+
 class TestAdversarialAuthorityEngine:
     """Try to exercise authority without holding the role."""
 
@@ -160,7 +162,10 @@ class TestAdversarialAuthorityEngine:
             kernel = _make_kernel(Path(tmpdir))
             kernel.identity.register("rogue")
             check = kernel.exercise_authority(
-                agent_id="rogue", role_id="AI-CCO", authority="BLOCK_MERGE", context={},
+                agent_id="rogue",
+                role_id="AI-CCO",
+                authority="BLOCK_MERGE",
+                context={},
             )
             assert check.permitted is False
 
@@ -170,6 +175,7 @@ class TestAdversarialAuthorityEngine:
             kernel.identity.register("agent")
             check = kernel.check_authority("agent", "FAKE-ROLE", "DO_ANYTHING", {})
             assert check.permitted is False
+
 
 class TestAdversarialSequenceEngine:
     """Try to manipulate sequence ordering."""

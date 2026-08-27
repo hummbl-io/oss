@@ -5,7 +5,7 @@
 **Host Machine:** `self-hosted-runner-2` (Windows 10.0.26200)  
 **Session Window:** `2026-08-23T14:45:00Z` to `2026-08-23T16:33:00Z`  
 **AIP Probation Status:** `COMPLIANT_RESEARCH_ONLY` (Streak: Active, Zero Violations)  
-**Canonical Output:** [`<repo-root>/PROJECTS\hummbl-governance\docs\research\2026-08-23_session_forensics_manifest_1372b0f4.md`](file:///<repo-root>/PROJECTS/hummbl-governance/docs/research)  
+**Canonical Output:** [`<repo-root>/PROJECTS\hummbl-governance\docs\research\2026-08-23_session_forensics_manifest_1372b0f4.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/research)  
 
 ---
 
@@ -24,9 +24,9 @@ All operations strictly adhered to the **AIP Research-Only Boundary**:
 
 1. **`14:45Z` — Ingestion & Schematization:**
    - Ingested 80-section ChatGPT archive on open governance questions.
-   - Built [`governance_question.schema.json`](file:///<repo-root>/PROJECTS/hummbl-governance/schemas/governance_question.schema.json) and [`capability_manifest.schema.json`](file:///<repo-root>/PROJECTS/hummbl-governance/schemas/capability_manifest.schema.json).
+   - Built [`governance_question.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/governance_question.schema.json) and [`capability_manifest.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/capability_manifest.schema.json).
 2. **`15:10Z` — Batch 2 Compliance Audit:**
-   - Resumed interrupted Devin audit across 18 frameworks, 99 jurisdictional matrices, 51 vendor reviews $\to$ [`batch2-compliance-gaps.md`](file:///<repo-root>/PROJECTS/hummbl-governance/batch2-compliance-gaps.md).
+   - Resumed interrupted Devin audit across 18 frameworks, 99 jurisdictional matrices, 51 vendor reviews $\to$ [`batch2-compliance-gaps.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancebatch2-compliance-gaps.md).
 3. **`15:29Z` — Foundational Essay Authored:**
    - Formulated *Completeness Over Score* and *The Inversion of Vanity* (Epistemology of Humility / *humus* grounding).
 4. **`15:37Z` — Claude Sonnet 4.6 (Thinking) Peer Review:**
@@ -34,8 +34,8 @@ All operations strictly adhered to the **AIP Research-Only Boundary**:
 5. **`15:47Z` — Multi-Subagent Infrastructure Discovery:**
    - Deployed 5 parallel subagents discovering Cloudflare Pages targets (`hummbl-production.pages.dev`, `operator-site.pages.dev`), 2026-08-11 page decommissions, and Mintlify status.
 6. **`16:03Z` — Domain Audits & Lookbook Prototype:**
-   - Audited `kernelclothing.com` (0 records); built standalone prototype [`kernelclothing-prototype.html`](file:///<repo-root>/.gemini/antigravity-cli/brain/1372b0f4-d179-44ef-8671-99fc161fca6d/kernelclothing-prototype.html).
-   - Audited [`governed-compression`](file:///<repo-root>/PROJECTS/governed-compression) (14/14 tests passing); evaluated air-gapped KV-cache memory role.
+   - Audited `kernelclothing.com` (0 records); built standalone prototype [`kernelclothing-prototype.html`](https://github.com/hummbl-io/oss).
+   - Audited [`governed-compression`](https://github.com/hummbl-io/governed-compression) (14/14 tests passing); evaluated air-gapped KV-cache memory role.
 7. **`16:13Z` — Frontier & Air-Gapped Research:**
    - Formulated B2A GEO marketing strategies, Physical AI safety kernels (Halos/IGX), and Bio-Digital / Organoid intelligence governance.
    - Defined the 5.1MB `HUMMBL-AGK-01` Air-Gapped Minimal Kit, 378KB pure runtime tier, and 12KB micro-kernel tier.
@@ -44,7 +44,7 @@ All operations strictly adhered to the **AIP Research-Only Boundary**:
 9. **`16:30Z` — Master Archival & Verification:**
    - Preserved all 22 artifacts to `hummbl-governance/docs/research/` and `oss/docs/research/`.
 10. **`16:31Z` — AAR & AAR-Followthrough:**
-    - Authored standardized After Action Report and generated goal-harness seed file [`session-20260823-followthrough.json`](file:///<repo-root>/.agents/goal-harness/seeds/session-20260823-followthrough.json).
+    - Authored standardized After Action Report and generated goal-harness seed file [`session-20260823-followthrough.json`](https://github.com/hummbl-io/oss).
 
 ---
 
@@ -98,7 +98,7 @@ All mutations strictly conformed to research, schema, and agent state boundaries
 
 1. **Zero Third-Party Dependency Invariant:**
    - *Claim:* `hummbl-governance`, `base120`, and `hummbl-kernel` require 0 third-party production dependencies.
-   - *Evidence:* [`hummbl-governance/pyproject.toml`](file:///<repo-root>/PROJECTS/hummbl-governance/pyproject.toml) line 28 (`dependencies = []`), [`base120/pyproject.toml`](file:///<repo-root>/PROJECTS/base120/pyproject.toml) line 25 (`dependencies = []`), [`kernel/pyproject.toml`](file:///<repo-root>/PROJECTS/kernel/pyproject.toml) line 28 (`dependencies = []`).
+   - *Evidence:* [`hummbl-governance/pyproject.toml`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancepyproject.toml) line 28 (`dependencies = []`), [`base120/pyproject.toml`](https://github.com/hummbl-io/base120pyproject.toml) line 25 (`dependencies = []`), [`kernel/pyproject.toml`](https://github.com/hummbl-io/kernelpyproject.toml) line 28 (`dependencies = []`).
    - *Status:* **VERIFIED.**
 2. **Deterministic Test Integrity:**
    - *Claim:* `governed-compression` passes 14/14 unit tests in 0.23s.
@@ -106,7 +106,7 @@ All mutations strictly conformed to research, schema, and agent state boundaries
    - *Status:* **VERIFIED.**
 3. **Formal State Space Verification:**
    - *Claim:* KRINEIA formal specifications verify invariants $K_1$ through $K_{11}$ across 1.4M+ states.
-   - *Evidence:* [`krineia/papers/krineia-invariants/tla/KRINEIA.tla`](file:///<repo-root>/PROJECTS/krineia/papers/krineia-invariants/tla/KRINEIA.tla) and TLC config files.
+   - *Evidence:* [`krineia/papers/krineia-invariants/tla/KRINEIA.tla`](https://github.com/hummbl-io/krineiapapers/krineia-invariants/tla/KRINEIA.tla) and TLC config files.
    - *Status:* **VERIFIED.**
 
 ---

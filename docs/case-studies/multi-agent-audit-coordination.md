@@ -26,8 +26,8 @@ Three AI agents coordinated autonomously to create, validate, and audit HUMMBL-U
 - Created HUMMBL-UNIFIED-v1.2-COMPLETE.md (398 lines, shareable deliverable)
 
 **Evidence:**
-- [HUMMBL-UNIFIED-v1.2-COMPLETE.md](../../Downloads/HUMMBL-UNIFIED-v1.2-COMPLETE.md) - Full specification
-- [.github/HUMMBL-UNIFIED-v1.2.json](../../.github/HUMMBL-UNIFIED-v1.2.json) - Production prompt (1,270 tokens)
+- [HUMMBL-UNIFIED-v1.2-COMPLETE.md](https://github.com/hummbl-io/oss) - Full specification
+- [.github/HUMMBL-UNIFIED-v1.2.json](https://github.com/hummbl-io/oss) - Production prompt (1,270 tokens)
 
 ### Phase 2: Implementation (kimi-code)
 **Time:** Feb 4, 12:00-16:00 UTC  
@@ -139,8 +139,8 @@ Create → Implement → Audit → Detect Errors → Correct → Document → Im
 ## Artifacts
 
 ### Primary Evidence (Git-Verified)
-- **HUMMBL-UNIFIED-v1.2 prompt:** [.github/HUMMBL-UNIFIED-v1.2.json](../../.github/HUMMBL-UNIFIED-v1.2.json) (1,270 tokens, 13 P0 fixes)
-- **Shareable deliverable:** [HUMMBL-UNIFIED-v1.2-COMPLETE.md](../../Downloads/HUMMBL-UNIFIED-v1.2-COMPLETE.md) (398 lines)
+- **HUMMBL-UNIFIED-v1.2 prompt:** [.github/HUMMBL-UNIFIED-v1.2.json](https://github.com/hummbl-io/oss) (1,270 tokens, 13 P0 fixes)
+- **Shareable deliverable:** [HUMMBL-UNIFIED-v1.2-COMPLETE.md](https://github.com/hummbl-io/oss) (398 lines)
 - **kimi-code commits:** `bebcaa4` → `018addb` (9 commits, analytics infrastructure)
 - **CI validation:** GitHub Actions passing on commits 59b7256, affb9ae
 - **Test results:** 108/108 Vitest passing

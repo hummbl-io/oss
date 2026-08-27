@@ -4,7 +4,7 @@
 **Target Environment:** Air-gapped enclaves, SCIF environments, offline military/financial compute zones  
 **Governing Policy:** Zero Third-Party Production Runtime Dependencies  
 **Date:** August 2026  
-**Canonical Surface:** [`oss`](file:///<repo-root>/PROJECTS/oss), [`hummbl-governance`](file:///<repo-root>/PROJECTS/hummbl-governance), [`krineia`](file:///<repo-root>/PROJECTS/krineia)  
+**Canonical Surface:** [`oss`](https://github.com/hummbl-io/oss), [`hummbl-governance`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance), [`krineia`](https://github.com/hummbl-io/krineia)  
 
 ---
 

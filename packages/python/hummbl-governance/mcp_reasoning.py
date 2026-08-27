@@ -42,9 +42,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hummbl_governance import __version__ as _pkg_version
+from hummbl_governance.contract_net import Bid, ContractNetManager
 from hummbl_governance.reasoning import ReasoningEngine
 from hummbl_governance.schema_validator import SchemaValidator
-from hummbl_governance.contract_net import ContractNetManager, Bid
 
 SERVER_NAME = "hummbl-reasoning"
 SERVER_VERSION = _pkg_version
@@ -59,6 +59,7 @@ _contract_mgr = ContractNetManager()
 # ---------------------------------------------------------------------------
 # Tool handlers
 # ---------------------------------------------------------------------------
+
 
 def _reasoning_list_models(args: dict) -> dict:
     models = _reasoning.models
@@ -398,6 +399,7 @@ _TOOL_SCHEMAS = [
 # Protocol helpers
 # ---------------------------------------------------------------------------
 
+
 def _ok(request_id, result):
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
@@ -412,11 +414,14 @@ def handle_request(req: dict) -> dict:
     params = req.get("params", {})
 
     if method == "initialize":
-        return _ok(req_id, {
-            "protocolVersion": PROTOCOL_VERSION,
-            "capabilities": {"tools": {}},
-            "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-        })
+        return _ok(
+            req_id,
+            {
+                "protocolVersion": PROTOCOL_VERSION,
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+            },
+        )
 
     if method == "tools/list":
         return _ok(req_id, {"tools": _TOOL_SCHEMAS})
@@ -429,9 +434,7 @@ def handle_request(req: dict) -> dict:
             return _err(req_id, -32601, f"Unknown tool: {tool_name}")
         try:
             result = handler(tool_args)
-            return _ok(req_id, {
-                "content": [{"type": "text", "text": json.dumps(result, default=str)}]
-            })
+            return _ok(req_id, {"content": [{"type": "text", "text": json.dumps(result, default=str)}]})
         except Exception:
             tb = traceback.format_exc()
             return _err(req_id, -32000, tb)

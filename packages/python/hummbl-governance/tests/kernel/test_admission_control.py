@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_governance.kernel.admission_control import (
     validate_admission,
     validate_admission_control,
@@ -219,12 +218,7 @@ class TestInvariant:
             validate_admission_control(proposal)
 
 
-SCHEMA_PATH = (
-    Path(__file__).parent.parent.parent
-    / "hummbl_governance"
-    / "data"
-    / "admission_control.schema.json"
-)
+SCHEMA_PATH = Path(__file__).parent.parent.parent / "hummbl_governance" / "data" / "admission_control.schema.json"
 
 
 class TestSchemaFile:

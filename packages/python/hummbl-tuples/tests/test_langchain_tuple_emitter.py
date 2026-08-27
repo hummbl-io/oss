@@ -6,7 +6,6 @@ from pathlib import Path
 from reference_impl.langchain_tuple_emitter import LangChainTupleEmitter, emit_langchain_event
 from reference_impl.validate_examples import _validate
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS_DIR = REPO_ROOT / "schemas"
 

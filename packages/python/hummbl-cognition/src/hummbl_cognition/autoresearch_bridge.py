@@ -48,11 +48,17 @@ def _resolve_path(rel_path: str) -> Path:
     try:
         root = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL, text=True, timeout=5,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=5,
         ).strip()
         if root:
             return Path(root) / rel_path
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
         pass
     return Path(rel_path)
 
@@ -74,11 +80,16 @@ def _git_clone_or_pull(repo_url: str, repo_dir: Path) -> bool:
         try:
             result = subprocess.run(
                 ["git", "pull", "--ff-only"],
-                cwd=str(repo_dir), env=env,
-                capture_output=True, text=True, timeout=30,
+                cwd=str(repo_dir),
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
-                logger.warning("git pull failed (rc=%d): %s", result.returncode, result.stderr)
+                logger.warning(
+                    "git pull failed (rc=%d): %s", result.returncode, result.stderr
+                )
                 return False
             logger.info("Pulled latest from %s", repo_url)
             return True
@@ -91,10 +102,14 @@ def _git_clone_or_pull(repo_url: str, repo_dir: Path) -> bool:
             result = subprocess.run(
                 ["git", "clone", "--depth=1", repo_url, str(repo_dir)],
                 env=env,
-                capture_output=True, text=True, timeout=60,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
             if result.returncode != 0:
-                logger.warning("git clone failed (rc=%d): %s", result.returncode, result.stderr)
+                logger.warning(
+                    "git clone failed (rc=%d): %s", result.returncode, result.stderr
+                )
                 return False
             logger.info("Cloned %s to %s", repo_url, repo_dir)
             return True
@@ -362,7 +377,9 @@ def bridge_status(
         from urllib.parse import urlparse
 
         parsed = urlparse(brain_url)
-        conn = HTTPConnection(parsed.hostname or "127.0.0.1", parsed.port or 11435, timeout=5)
+        conn = HTTPConnection(
+            parsed.hostname or "127.0.0.1", parsed.port or 11435, timeout=5
+        )
         conn.request("GET", "/health")
         resp = conn.getresponse()
         brain_ok = resp.status == 200
@@ -388,14 +405,17 @@ def main(argv: list[str] | None = None) -> int:
         description="Autoresearch Bridge -- ingest findings into Open Brain",
     )
     parser.add_argument(
-        "--brain-url", default=DEFAULT_OPEN_BRAIN_URL,
+        "--brain-url",
+        default=DEFAULT_OPEN_BRAIN_URL,
         help=f"Open Brain URL (default: {DEFAULT_OPEN_BRAIN_URL})",
     )
 
     subparsers = parser.add_subparsers(dest="command")
 
     p_run = subparsers.add_parser("run", help="Run bridge pass")
-    p_run.add_argument("--dry-run", action="store_true", help="Show what would be ingested")
+    p_run.add_argument(
+        "--dry-run", action="store_true", help="Show what would be ingested"
+    )
     p_run.add_argument("--repo-dir", help="Override repo directory")
     p_run.add_argument("--state-file", help="Override state file")
 

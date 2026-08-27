@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.agent_resource_registry_entry import (
     AgentResourceRegistryError,
     compute_entry_hash,
@@ -81,8 +80,15 @@ def _rejected_entry() -> dict:
         last_reviewed_at="2026-07-04T00:00:00Z",
         resource_name="Raw Shell Execution (unrestricted)",
         publish_authority="disabled",
-        blocked_contexts=["development", "testing", "production", "research",
-                          "briefing", "governance", "external_facing"],
+        blocked_contexts=[
+            "development",
+            "testing",
+            "production",
+            "research",
+            "briefing",
+            "governance",
+            "external_facing",
+        ],
         rejection_reason="Unrestricted shell execution bypasses all guardrails.",
         migration_decision="reject_migration",
         reviewed_by="operator",
@@ -411,7 +417,9 @@ def test_secrets_required_requires_medium_risk_or_higher():
     valid, errors = validate_registry_entry(entry)
 
     assert not valid
-    assert any("secrets_required=true requires risk_class >= 'medium'" in e for e in errors)
+    assert any(
+        "secrets_required=true requires risk_class >= 'medium'" in e for e in errors
+    )
 
 
 def test_migration_migrate_requires_migration_target():
@@ -423,7 +431,10 @@ def test_migration_migrate_requires_migration_target():
     valid, errors = validate_registry_entry(entry)
 
     assert not valid
-    assert any("migration_decision=migrate requires a non-empty migration_target" in e for e in errors)
+    assert any(
+        "migration_decision=migrate requires a non-empty migration_target" in e
+        for e in errors
+    )
 
 
 def test_allowed_and_blocked_contexts_must_not_overlap():
@@ -494,7 +505,13 @@ def test_create_omits_empty_optional_fields():
 
 def test_seed_registry_all_entries_valid():
     """All fixture entries in the seed registry must validate."""
-    seed_path = Path(__file__).parent.parent.parent / "src" / "hummbl_cognition" / "seed_registries" / "agent_resource_registry_seed.jsonl"
+    seed_path = (
+        Path(__file__).parent.parent.parent
+        / "src"
+        / "hummbl_cognition"
+        / "seed_registries"
+        / "agent_resource_registry_seed.jsonl"
+    )
 
     entries = []
     with open(seed_path) as f:
@@ -512,7 +529,13 @@ def test_seed_registry_all_entries_valid():
 
 def test_seed_registry_contains_vertex_ai_extensions_candidate():
     """The Vertex AI Extensions entry must be present as a candidate (migration hold)."""
-    seed_path = Path(__file__).parent.parent.parent / "src" / "hummbl_cognition" / "seed_registries" / "agent_resource_registry_seed.jsonl"
+    seed_path = (
+        Path(__file__).parent.parent.parent
+        / "src"
+        / "hummbl_cognition"
+        / "seed_registries"
+        / "agent_resource_registry_seed.jsonl"
+    )
 
     with open(seed_path) as f:
         entries = [json.loads(l.strip()) for l in f if l.strip()]
@@ -529,6 +552,7 @@ def test_seed_registry_contains_vertex_ai_extensions_candidate():
 
 
 # --- #1687: Namespace audit batch validation tests ---
+
 
 class TestValidateRegistryBatch:
     """Tests for cross-entry and cross-registry collision detection (#1687)."""
@@ -595,15 +619,31 @@ class TestValidateRegistryBatch:
 
     def test_seed_registry_passes_batch_validation(self):
         """The 4 seed entries should pass batch validation with real agent IDs."""
-        seed_path = Path(__file__).parent.parent.parent / "src" / "hummbl_cognition" / "seed_registries" / "agent_resource_registry_seed.jsonl"
+        seed_path = (
+            Path(__file__).parent.parent.parent
+            / "src"
+            / "hummbl_cognition"
+            / "seed_registries"
+            / "agent_resource_registry_seed.jsonl"
+        )
 
         with open(seed_path) as f:
             entries = [json.loads(l.strip()) for l in f if l.strip()]
 
         # Use real canonical agent IDs from agent_identity.py
         known_agents = {
-            "claude", "codex", "gemini", "dashboard", "human", "sov",
-            "dan", "opencode", "soma", "echo", "apex", "devin",
+            "claude",
+            "codex",
+            "gemini",
+            "dashboard",
+            "human",
+            "sov",
+            "dan",
+            "opencode",
+            "soma",
+            "echo",
+            "apex",
+            "devin",
         }
         ok, errors = validate_registry_batch(entries, known_agent_ids=known_agents)
         assert ok, f"Seed registry has collisions: {errors}"
@@ -611,6 +651,7 @@ class TestValidateRegistryBatch:
 
 
 # --- #1686: Discovery receipt schema tests ---
+
 
 def _valid_receipt() -> dict:
     return create_discovery_receipt(

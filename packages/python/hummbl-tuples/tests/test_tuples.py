@@ -16,28 +16,28 @@ from pathlib import Path
 
 import hummbl_tuples
 from hummbl_tuples import (
+    AttestTuple,
+    BaseProfileIssuedTuple,
     ContractTuple,
+    ControlModeSetTuple,
     DCTTuple,
     DCTXTuple,
-    PromotionReceiptTuple,
-    RevocationTuple,
     EvidenceTuple,
-    AttestTuple,
-    SystemTuple,
+    ExperimentRunAssignedTuple,
+    HitlOverrideTuple,
     ModelCandidateTuple,
     ModelSelectedTuple,
+    PathComparisonTuple,
+    PosttrainingTrace,
+    PretrainingTrace,
+    PromotionReceiptTuple,
+    ReasoningPathTuple,
+    RegistryVersionPinnedTuple,
+    RevocationTuple,
+    SystemTuple,
+    TraceEvidenceTuple,
     TransformationCandidateTuple,
     TransformationSelectedTuple,
-    HitlOverrideTuple,
-    ReasoningPathTuple,
-    PathComparisonTuple,
-    TraceEvidenceTuple,
-    BaseProfileIssuedTuple,
-    ControlModeSetTuple,
-    ExperimentRunAssignedTuple,
-    RegistryVersionPinnedTuple,
-    PretrainingTrace,
-    PosttrainingTrace,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -45,13 +45,14 @@ SCHEMAS_DIR = REPO_ROOT / "schemas"
 
 # Import the stdlib validator for schema checks
 import sys
+
 sys.path.insert(0, str(REPO_ROOT / "reference_impl"))
 from validate_examples import ValidationError, _check_schema_features, _validate
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _validate_against_schema(instance_dict: dict, schema_name: str) -> None:
     """Validate a dict against a named schema file."""
@@ -89,10 +90,12 @@ def test_unsupported_schema_keywords_fail_loudly():
 # IDP Tuple Tests
 # ---------------------------------------------------------------------------
 
+
 class TestContractTuple:
     def test_construction(self):
         ct = ContractTuple(
-            intent_id="i-1", task_id="t-1",
+            intent_id="i-1",
+            task_id="t-1",
             objective="Do the thing",
             allowed_tools=["read", "write"],
             outputs=["result"],
@@ -104,8 +107,12 @@ class TestContractTuple:
 
     def test_immutability(self):
         ct = ContractTuple(
-            intent_id="i-1", task_id="t-1",
-            objective="x", allowed_tools=[], outputs=[], risk_tier="LOW",
+            intent_id="i-1",
+            task_id="t-1",
+            objective="x",
+            allowed_tools=[],
+            outputs=[],
+            risk_tier="LOW",
         )
         try:
             ct.objective = "changed"
@@ -115,8 +122,12 @@ class TestContractTuple:
 
     def test_envelope_shape(self):
         ct = ContractTuple(
-            intent_id="i-1", task_id="t-1",
-            objective="x", allowed_tools=["a"], outputs=["b"], risk_tier="MED",
+            intent_id="i-1",
+            task_id="t-1",
+            objective="x",
+            allowed_tools=["a"],
+            outputs=["b"],
+            risk_tier="MED",
             max_subdelegation_depth=2,
         )
         d = ct.to_dict()
@@ -129,8 +140,13 @@ class TestContractTuple:
 
     def test_round_trip(self):
         ct = ContractTuple(
-            intent_id="i-1", task_id="t-1", time="2026-01-01T00:00:00Z",
-            objective="obj", allowed_tools=["r"], outputs=["o"], risk_tier="LOW",
+            intent_id="i-1",
+            task_id="t-1",
+            time="2026-01-01T00:00:00Z",
+            objective="obj",
+            allowed_tools=["r"],
+            outputs=["o"],
+            risk_tier="LOW",
         )
         d = ct.to_dict()
         ct2 = ContractTuple.from_dict(d)
@@ -139,16 +155,25 @@ class TestContractTuple:
 
     def test_hash_determinism(self):
         kwargs = dict(
-            id="fixed-id", time="2026-01-01T00:00:00Z",
-            intent_id="i", task_id="t",
-            objective="o", allowed_tools=[], outputs=[], risk_tier="L",
+            id="fixed-id",
+            time="2026-01-01T00:00:00Z",
+            intent_id="i",
+            task_id="t",
+            objective="o",
+            allowed_tools=[],
+            outputs=[],
+            risk_tier="L",
         )
         assert ContractTuple(**kwargs).hash == ContractTuple(**kwargs).hash
 
     def test_schema_validation(self):
         ct = ContractTuple(
-            intent_id="i-1", task_id="t-1",
-            objective="x", allowed_tools=["a"], outputs=["b"], risk_tier="LOW",
+            intent_id="i-1",
+            task_id="t-1",
+            objective="x",
+            allowed_tools=["a"],
+            outputs=["b"],
+            risk_tier="LOW",
         )
         _validate_against_schema(ct.to_dict(), "contract.schema.json")
 
@@ -156,9 +181,13 @@ class TestContractTuple:
 class TestDCTTuple:
     def test_envelope_and_schema(self):
         dct = DCTTuple(
-            intent_id="i-1", task_id="t-1",
-            issuer="gov", subject="agent-1", ops_allowed=["train"],
-            event="issued", token_id="tok-1",
+            intent_id="i-1",
+            task_id="t-1",
+            issuer="gov",
+            subject="agent-1",
+            ops_allowed=["train"],
+            event="issued",
+            token_id="tok-1",
         )
         d = dct.to_dict()
         assert d["tuple_data"]["issuer"] == "gov"
@@ -167,8 +196,12 @@ class TestDCTTuple:
 
     def test_round_trip(self):
         dct = DCTTuple(
-            intent_id="i", task_id="t", time="2026-01-01T00:00:00Z",
-            issuer="a", subject="b", ops_allowed=["x"],
+            intent_id="i",
+            task_id="t",
+            time="2026-01-01T00:00:00Z",
+            issuer="a",
+            subject="b",
+            ops_allowed=["x"],
         )
         assert DCTTuple.from_dict(dct.to_dict()).hash == dct.hash
 
@@ -176,8 +209,11 @@ class TestDCTTuple:
 class TestDCTXTuple:
     def test_envelope_and_schema(self):
         dx = DCTXTuple(
-            intent_id="i-1", task_id="t-1",
-            event="issued", status="PROPOSED", chain_depth=0,
+            intent_id="i-1",
+            task_id="t-1",
+            event="issued",
+            status="PROPOSED",
+            chain_depth=0,
         )
         d = dx.to_dict()
         assert d["tuple_data"]["event"] == "issued"
@@ -187,7 +223,8 @@ class TestDCTXTuple:
 class TestPromotionReceiptTuple:
     def test_envelope_and_schema(self):
         receipt = PromotionReceiptTuple(
-            intent_id="i-1", task_id="candidate-1",
+            intent_id="i-1",
+            task_id="candidate-1",
             candidate_id="candidate-1",
             rung_from="local",
             rung_to="linux-1gpu",
@@ -205,7 +242,8 @@ class TestPromotionReceiptTuple:
 class TestRevocationTuple:
     def test_envelope_and_schema(self):
         revocation = RevocationTuple(
-            intent_id="i-1", task_id="task-1",
+            intent_id="i-1",
+            task_id="task-1",
             token_id="token-1",
             subject="agent-1",
             revoked_by="kill-switch",
@@ -220,8 +258,11 @@ class TestRevocationTuple:
 class TestEvidenceTuple:
     def test_envelope_and_schema(self):
         ev = EvidenceTuple(
-            intent_id="i-1", task_id="t-1",
-            event="task_completed", duration_s=12.5, warnings_count=0,
+            intent_id="i-1",
+            task_id="t-1",
+            event="task_completed",
+            duration_s=12.5,
+            warnings_count=0,
         )
         d = ev.to_dict()
         assert d["tuple_data"]["duration_s"] == 12.5
@@ -231,9 +272,13 @@ class TestEvidenceTuple:
 class TestAttestTuple:
     def test_envelope_and_schema(self):
         at = AttestTuple(
-            intent_id="i-1", task_id="t-1",
-            event="verified", evidence_hash="abc123", verifier_id="v-1",
-            passed=True, findings=["all criteria met"],
+            intent_id="i-1",
+            task_id="t-1",
+            event="verified",
+            evidence_hash="abc123",
+            verifier_id="v-1",
+            passed=True,
+            findings=["all criteria met"],
         )
         d = at.to_dict()
         assert d["tuple_data"]["passed"] is True
@@ -243,8 +288,10 @@ class TestAttestTuple:
 class TestSystemTuple:
     def test_envelope_and_schema(self):
         st = SystemTuple(
-            intent_id="i-1", task_id="t-1",
-            event="adapter_invoked", adapter="openai",
+            intent_id="i-1",
+            task_id="t-1",
+            event="adapter_invoked",
+            adapter="openai",
             required_capability="chat",
         )
         d = st.to_dict()
@@ -257,12 +304,17 @@ class TestSystemTuple:
 # BaseN Tuple Tests
 # ---------------------------------------------------------------------------
 
+
 class TestModelCandidateTuple:
     def test_envelope_and_schema(self):
         mc = ModelCandidateTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            transformation_id="t1", mental_model_id="m1",
-            candidate_rank=1, proposed_by="agent",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            transformation_id="t1",
+            mental_model_id="m1",
+            candidate_rank=1,
+            proposed_by="agent",
         )
         d = mc.to_dict()
         assert d["control_mode"] == "AI_AUTONOMOUS"
@@ -273,18 +325,26 @@ class TestModelCandidateTuple:
 class TestModelSelectedTuple:
     def test_envelope_and_schema(self):
         ms = ModelSelectedTuple(
-            problem_id="p1", run_id="r1", control_mode="HITL_CONTROLLED",
-            transformation_id="t1", mental_model_id="m1",
-            selected_by="human", selection_rationale="best fit",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="HITL_CONTROLLED",
+            transformation_id="t1",
+            mental_model_id="m1",
+            selected_by="human",
+            selection_rationale="best fit",
         )
         d = ms.to_dict()
         _validate_against_schema(d, "model_selected.schema.json")
 
     def test_round_trip(self):
         ms = ModelSelectedTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            transformation_id="t1", mental_model_id="m1",
-            selected_by="agent", selection_rationale="r",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            transformation_id="t1",
+            mental_model_id="m1",
+            selected_by="agent",
+            selection_rationale="r",
         )
         assert ModelSelectedTuple.from_dict(ms.to_dict()).hash == ms.hash
 
@@ -292,9 +352,13 @@ class TestModelSelectedTuple:
 class TestTransformationCandidateTuple:
     def test_schema(self):
         tc = TransformationCandidateTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            transformation_id="t1", candidate_rank=1,
-            proposed_by="agent", selection_rationale="r",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            transformation_id="t1",
+            candidate_rank=1,
+            proposed_by="agent",
+            selection_rationale="r",
         )
         _validate_against_schema(tc.to_dict(), "transformation_candidate.schema.json")
 
@@ -302,8 +366,12 @@ class TestTransformationCandidateTuple:
 class TestTransformationSelectedTuple:
     def test_schema(self):
         ts = TransformationSelectedTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            transformation_id="t1", selected_by="agent", selection_rationale="r",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            transformation_id="t1",
+            selected_by="agent",
+            selection_rationale="r",
         )
         _validate_against_schema(ts.to_dict(), "transformation_selected.schema.json")
 
@@ -311,9 +379,13 @@ class TestTransformationSelectedTuple:
 class TestHitlOverrideTuple:
     def test_schema(self):
         ho = HitlOverrideTuple(
-            problem_id="p1", run_id="r1", control_mode="HITL_CONTROLLED",
-            overridden_tuple_id="prev-1", override_type="MODEL_CHANGE",
-            human_actor="researcher", override_reason="better model available",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="HITL_CONTROLLED",
+            overridden_tuple_id="prev-1",
+            override_type="MODEL_CHANGE",
+            human_actor="researcher",
+            override_reason="better model available",
         )
         _validate_against_schema(ho.to_dict(), "hitl_override.schema.json")
 
@@ -321,8 +393,11 @@ class TestHitlOverrideTuple:
 class TestReasoningPathTuple:
     def test_schema(self):
         rp = ReasoningPathTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            path_id="path-1", constructed_by="agent",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            path_id="path-1",
+            constructed_by="agent",
             path_steps=[
                 {"step_index": 1, "transformation_id": "t1", "mental_model_id": "m1"},
                 {"step_index": 2, "transformation_id": "t2", "mental_model_id": "m2"},
@@ -335,10 +410,14 @@ class TestReasoningPathTuple:
 class TestPathComparisonTuple:
     def test_schema(self):
         pc = PathComparisonTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            path_a_id="a", path_b_id="b",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            path_a_id="a",
+            path_b_id="b",
             comparison_basis="task_success",
-            preferred_path="A", decided_by="agent",
+            preferred_path="A",
+            decided_by="agent",
         )
         _validate_against_schema(pc.to_dict(), "path_comparison.schema.json")
 
@@ -346,8 +425,11 @@ class TestPathComparisonTuple:
 class TestTraceEvidenceTuple:
     def test_schema(self):
         te = TraceEvidenceTuple(
-            problem_id="p1", run_id="r1", control_mode="AI_AUTONOMOUS",
-            path_id="path-1", claim="Model improves task success",
+            problem_id="p1",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
+            path_id="path-1",
+            claim="Model improves task success",
             evidence_status="SUPPORTED",
             metric_bundle={"task_success": 0.92, "token_cost": 12000},
         )
@@ -357,6 +439,7 @@ class TestTraceEvidenceTuple:
 # ---------------------------------------------------------------------------
 # Nodezero Tuple Tests
 # ---------------------------------------------------------------------------
+
 
 class TestBaseProfileIssuedTuple:
     def test_schema(self):
@@ -369,7 +452,8 @@ class TestBaseProfileIssuedTuple:
 class TestControlModeSetTuple:
     def test_schema(self):
         cm = ControlModeSetTuple(
-            run_id="r1", control_mode="AI_AUTONOMOUS",
+            run_id="r1",
+            control_mode="AI_AUTONOMOUS",
             rationale="baseline run",
         )
         _validate_against_schema(cm.to_dict(), "control_mode_set.schema.json")
@@ -378,8 +462,10 @@ class TestControlModeSetTuple:
 class TestExperimentRunAssignedTuple:
     def test_schema(self):
         er = ExperimentRunAssignedTuple(
-            problem_id="p1", run_id="r1",
-            assignee="agent-1", control_mode="AI_AUTONOMOUS",
+            problem_id="p1",
+            run_id="r1",
+            assignee="agent-1",
+            control_mode="AI_AUTONOMOUS",
         )
         d = er.to_dict()
         assert d["problem_id"] == "p1"
@@ -400,12 +486,15 @@ class TestRegistryVersionPinnedTuple:
 # Trace Artifact Tests
 # ---------------------------------------------------------------------------
 
+
 class TestPretrainingTrace:
     def test_envelope_shape(self):
         pt = PretrainingTrace(
-            trace_source="human", trace_visibility="explicit",
+            trace_source="human",
+            trace_visibility="explicit",
             governance_status="draft",
-            objective="train reasoning", corpus_role="training",
+            objective="train reasoning",
+            corpus_role="training",
         )
         d = pt.to_dict()
         assert d["artifact_type"] == "reasoning_trace"
@@ -419,9 +508,11 @@ class TestPretrainingTrace:
 
     def test_round_trip(self):
         pt = PretrainingTrace(
-            trace_source="human", trace_visibility="explicit",
+            trace_source="human",
+            trace_visibility="explicit",
             governance_status="draft",
-            objective="o", corpus_role="c",
+            objective="o",
+            corpus_role="c",
         )
         pt2 = PretrainingTrace.from_dict(pt.to_dict())
         assert pt2.corpus_role == pt.corpus_role
@@ -431,9 +522,11 @@ class TestPosttrainingTrace:
     def test_schema(self):
         pt = PosttrainingTrace(
             lifecycle_stage="sft",
-            trace_source="human", trace_visibility="explicit",
+            trace_source="human",
+            trace_visibility="explicit",
             governance_status="trusted",
-            objective="fine-tune", trace_role="supervision",
+            objective="fine-tune",
+            trace_role="supervision",
         )
         _validate_against_schema(pt.to_dict(), "posttraining_trace.schema.json")
 
@@ -442,21 +535,27 @@ class TestPosttrainingTrace:
 # Cross-cutting tests
 # ---------------------------------------------------------------------------
 
+
 class TestLayer1Universal:
     """Verify Layer 1 fields (id, time) are present on ALL tuple families."""
 
     def test_idp_has_layer1(self):
-        ct = ContractTuple(intent_id="i", task_id="t",
-                           objective="x", allowed_tools=[], outputs=[], risk_tier="L")
+        ct = ContractTuple(
+            intent_id="i", task_id="t", objective="x", allowed_tools=[], outputs=[], risk_tier="L"
+        )
         d = ct.to_dict()
         assert "id" in d and len(d["id"]) > 0
         assert "time" in d and "T" in d["time"]
 
     def test_basen_has_layer1(self):
         ms = ModelSelectedTuple(
-            problem_id="p", run_id="r", control_mode="AI_AUTONOMOUS",
-            transformation_id="t", mental_model_id="m",
-            selected_by="agent", selection_rationale="r",
+            problem_id="p",
+            run_id="r",
+            control_mode="AI_AUTONOMOUS",
+            transformation_id="t",
+            mental_model_id="m",
+            selected_by="agent",
+            selection_rationale="r",
         )
         d = ms.to_dict()
         assert "id" in d and len(d["id"]) > 0
@@ -470,8 +569,11 @@ class TestLayer1Universal:
 
     def test_trace_has_layer1(self):
         pt = PretrainingTrace(
-            trace_source="human", trace_visibility="explicit",
-            governance_status="draft", objective="o", corpus_role="c",
+            trace_source="human",
+            trace_visibility="explicit",
+            governance_status="draft",
+            objective="o",
+            corpus_role="c",
         )
         d = pt.to_dict()
         assert "id" in d
@@ -482,8 +584,9 @@ class TestLayer2Governance:
     """Verify Layer 2 fields are present on IDP tuples and absent on research tuples."""
 
     def test_idp_has_layer2(self):
-        ct = ContractTuple(intent_id="i", task_id="t",
-                           objective="x", allowed_tools=[], outputs=[], risk_tier="L")
+        ct = ContractTuple(
+            intent_id="i", task_id="t", objective="x", allowed_tools=[], outputs=[], risk_tier="L"
+        )
         d = ct.to_dict()
         assert "state" in d
         assert "drift" in d
@@ -493,9 +596,13 @@ class TestLayer2Governance:
 
     def test_basen_no_layer2(self):
         ms = ModelSelectedTuple(
-            problem_id="p", run_id="r", control_mode="AI_AUTONOMOUS",
-            transformation_id="t", mental_model_id="m",
-            selected_by="agent", selection_rationale="r",
+            problem_id="p",
+            run_id="r",
+            control_mode="AI_AUTONOMOUS",
+            transformation_id="t",
+            mental_model_id="m",
+            selected_by="agent",
+            selection_rationale="r",
         )
         d = ms.to_dict()
         assert "state" not in d
@@ -514,39 +621,51 @@ class TestSchemaValidationNegative:
 
     def test_missing_required_field(self):
         """CONTRACT without tuple_type should fail validation."""
-        bad = {"id": "x", "time": "2026-01-01T00:00:00Z",
-               "intent_id": "i", "task_id": "t", "tuple_data": {}}
+        bad = {
+            "id": "x",
+            "time": "2026-01-01T00:00:00Z",
+            "intent_id": "i",
+            "task_id": "t",
+            "tuple_data": {},
+        }
         import pytest
+
         with pytest.raises(Exception):
             _validate_against_schema(bad, "contract.schema.json")
 
     def test_invalid_state_enum(self):
         """Layer 2 state must be ok/blocked/error."""
-        ct = ContractTuple(intent_id="i", task_id="t",
-                           objective="x", allowed_tools=[], outputs=[], risk_tier="L")
+        ct = ContractTuple(
+            intent_id="i", task_id="t", objective="x", allowed_tools=[], outputs=[], risk_tier="L"
+        )
         d = ct.to_dict()
         d["state"] = "invalid_state"
         import pytest
+
         with pytest.raises(Exception):
             _validate_against_schema(d, "contract.schema.json")
 
     def test_negative_drift(self):
         """Drift must be >= 0."""
-        ct = ContractTuple(intent_id="i", task_id="t",
-                           objective="x", allowed_tools=[], outputs=[], risk_tier="L")
+        ct = ContractTuple(
+            intent_id="i", task_id="t", objective="x", allowed_tools=[], outputs=[], risk_tier="L"
+        )
         d = ct.to_dict()
         d["drift"] = -0.5
         import pytest
+
         with pytest.raises(Exception):
             _validate_against_schema(d, "contract.schema.json")
 
     def test_empty_id_rejected(self):
         """id must have minLength 1."""
-        ct = ContractTuple(intent_id="i", task_id="t",
-                           objective="x", allowed_tools=[], outputs=[], risk_tier="L")
+        ct = ContractTuple(
+            intent_id="i", task_id="t", objective="x", allowed_tools=[], outputs=[], risk_tier="L"
+        )
         d = ct.to_dict()
         d["id"] = ""
         import pytest
+
         with pytest.raises(Exception):
             _validate_against_schema(d, "contract.schema.json")
 
@@ -556,11 +675,13 @@ class TestFromDictErrors:
 
     def test_non_dict_input(self):
         import pytest
+
         with pytest.raises(ValueError, match="expected dict"):
             ContractTuple.from_dict("not a dict")
 
     def test_non_dict_input_list(self):
         import pytest
+
         with pytest.raises(ValueError, match="expected dict"):
             ContractTuple.from_dict([1, 2, 3])
 
@@ -570,10 +691,11 @@ class TestSchemaCoverage:
 
     def test_all_examples_validate(self):
         """Replicates make validate as a pytest test."""
-        from pathlib import Path
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
-            "validator", str(REPO_ROOT / "reference_impl" / "validate_examples.py"))
+            "validator", str(REPO_ROOT / "reference_impl" / "validate_examples.py")
+        )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         assert mod.main() == 0
@@ -589,7 +711,8 @@ class TestGovernanceChain:
 
     def test_chain(self):
         contract = ContractTuple(
-            intent_id="intent-1", task_id="task-1",
+            intent_id="intent-1",
+            task_id="task-1",
             objective="Generate morning briefing",
             allowed_tools=["briefing:generate"],
             outputs=["briefing content"],
@@ -597,24 +720,32 @@ class TestGovernanceChain:
         )
 
         dct = DCTTuple(
-            intent_id="intent-1", task_id="task-1",
-            issuer="governor", subject="agent-1",
+            intent_id="intent-1",
+            task_id="task-1",
+            issuer="governor",
+            subject="agent-1",
             ops_allowed=["briefing:generate"],
             event="issued",
         )
 
         dctx = DCTXTuple(
-            intent_id="intent-1", task_id="task-1",
-            event="issued", status="PROPOSED", chain_depth=0,
+            intent_id="intent-1",
+            task_id="task-1",
+            event="issued",
+            status="PROPOSED",
+            chain_depth=0,
         )
 
         evidence = EvidenceTuple(
-            intent_id="intent-1", task_id="task-1",
-            event="task_completed", duration_s=3.2,
+            intent_id="intent-1",
+            task_id="task-1",
+            event="task_completed",
+            duration_s=3.2,
         )
 
         attest = AttestTuple(
-            intent_id="intent-1", task_id="task-1",
+            intent_id="intent-1",
+            task_id="task-1",
             event="verified",
             evidence_hash=evidence.hash,
             verifier_id="governor",
@@ -640,6 +771,7 @@ class TestGovernanceChain:
 # ---------------------------------------------------------------------------
 # MM_APPLIED Experimental Schema Tests
 # ---------------------------------------------------------------------------
+
 
 class TestMMAppliedSchema:
     """Tests for schemas/experimental/mm_applied.schema.json.
@@ -686,6 +818,7 @@ class TestMMAppliedSchema:
     def test_mutating_without_dct_id_rejected(self):
         """Codex P1: mutates=true must require invoker.dct_id."""
         import pytest
+
         bad = self._mutating_example()
         del bad["tuple_data"]["invoker"]["dct_id"]
         with pytest.raises(Exception):
@@ -694,6 +827,7 @@ class TestMMAppliedSchema:
     def test_mutating_without_wm_state_after_rejected(self):
         """Codex P2: mutates=true must require tuple_data.wm_state_after."""
         import pytest
+
         bad = self._mutating_example()
         del bad["tuple_data"]["wm_state_after"]
         with pytest.raises(Exception):
@@ -702,6 +836,7 @@ class TestMMAppliedSchema:
     def test_readonly_with_wm_state_after_rejected(self):
         """Codex P2: mutates=false must omit wm_state_after."""
         import pytest
+
         bad = self._readonly_example()
         bad["tuple_data"]["wm_state_after"] = {"version": "wm-v2"}
         with pytest.raises(Exception):
@@ -710,6 +845,7 @@ class TestMMAppliedSchema:
     def test_invalid_operator_code_pattern_rejected(self):
         """Validator must enforce pattern: ^(P|IN|CO|DE|RE|SY)\\.[0-9]{2}$."""
         import pytest
+
         bad = self._mutating_example()
         bad["tuple_data"]["operator"]["code"] = "XX.99"
         with pytest.raises(Exception):
@@ -718,6 +854,7 @@ class TestMMAppliedSchema:
     def test_invalid_uuid_format_rejected(self):
         """Validator must enforce format: uuid on id."""
         import pytest
+
         bad = self._mutating_example()
         bad["id"] = "not-a-uuid"
         with pytest.raises(Exception):
@@ -726,6 +863,7 @@ class TestMMAppliedSchema:
     def test_confidence_above_maximum_rejected(self):
         """Validator must enforce maximum: 1.0 on confidence."""
         import pytest
+
         bad = self._mutating_example()
         bad["tuple_data"]["justification"]["confidence"] = 1.5
         with pytest.raises(Exception):
@@ -734,6 +872,7 @@ class TestMMAppliedSchema:
     def test_belonging_score_above_maximum_rejected(self):
         """Validator must enforce maximum: 1.0 on invoker.belonging_score."""
         import pytest
+
         bad = self._mutating_example()
         bad["tuple_data"]["invoker"]["belonging_score"] = 2.0
         with pytest.raises(Exception):
@@ -742,6 +881,7 @@ class TestMMAppliedSchema:
     def test_alternatives_considered_pattern_enforced(self):
         """Each item in alternatives_considered must match operator code pattern."""
         import pytest
+
         bad = self._mutating_example()
         bad["tuple_data"]["justification"]["alternatives_considered"] = ["RE.04", "BAD"]
         with pytest.raises(Exception):

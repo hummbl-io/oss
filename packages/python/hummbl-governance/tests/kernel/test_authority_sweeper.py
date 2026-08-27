@@ -7,7 +7,6 @@ Enforces K6 (AUTHORITY): expired grants must be revoked with operator approval.
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.authority_sweeper import (
     build_sweep_record,
     find_expired_grants,
@@ -18,7 +17,6 @@ from hummbl_governance.kernel.authority_sweeper import (
     validate_sweep,
 )
 from hummbl_governance.schema_validator import ValidationError
-
 
 NOW = "2026-07-15T12:00:00Z"
 

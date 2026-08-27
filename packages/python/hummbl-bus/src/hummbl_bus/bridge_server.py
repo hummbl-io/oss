@@ -166,8 +166,7 @@ class BusBridgeHandler(BaseHTTPRequestHandler):
             except (ValueError, IndexError):
                 self.send_error(400, "Invalid 'n' parameter")
                 return
-            if n < 0:
-                n = 0
+            n = max(n, 0)
             date = params.get("date", [None])[0]
             self._serve_bus_lines(n=n, date=date)
 
@@ -181,8 +180,7 @@ class BusBridgeHandler(BaseHTTPRequestHandler):
             except (ValueError, IndexError):
                 self.send_error(400, "Invalid 'n' parameter")
                 return
-            if n < 0:
-                n = 0
+            n = max(n, 0)
             self._serve_bus_lines(n=n, pattern=pattern)
 
         else:

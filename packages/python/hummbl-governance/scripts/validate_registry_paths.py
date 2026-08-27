@@ -11,6 +11,7 @@ Usage::
 
 Exit code 0 = all exists:true paths verified, 1 = mismatches found.
 """
+
 from __future__ import annotations
 
 import glob
@@ -63,13 +64,9 @@ def validate(registry_path: Path, repo_root: Path) -> int:
             actual = resolved.exists()
         checked += 1
         if declared and not actual:
-            mismatches.append(
-                f"  entries[{ei}].paths[{pi}] path={rel} exists=true but NOT FOUND on disk"
-            )
+            mismatches.append(f"  entries[{ei}].paths[{pi}] path={rel} exists=true but NOT FOUND on disk")
         elif not declared and actual:
-            mismatches.append(
-                f"  entries[{ei}].paths[{pi}] path={rel} exists=false but FOUND on disk"
-            )
+            mismatches.append(f"  entries[{ei}].paths[{pi}] path={rel} exists=false but FOUND on disk")
     print(f"Checked {checked} paths in {registry_path.name}")
     if mismatches:
         print(f"FAIL: {len(mismatches)} mismatch(es):")

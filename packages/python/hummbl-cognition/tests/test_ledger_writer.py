@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.ledger_writer import (
     post_entry,
     read_entries,
@@ -36,6 +35,7 @@ def _make_entry(**overrides) -> LedgerEntry:
 # post_entry
 # ---------------------------------------------------------------------------
 
+
 class TestPostEntry:
     def test_post_single_entry(self, tmp_ledger_path: Path) -> None:
         entry = _make_entry()
@@ -63,9 +63,7 @@ class TestPostEntry:
         # First entry should not have previous_hash set
         assert result.previous_hash is None
 
-    def test_hash_chaining_subsequent_entries(
-        self, tmp_ledger_path: Path
-    ) -> None:
+    def test_hash_chaining_subsequent_entries(self, tmp_ledger_path: Path) -> None:
         e1 = _make_entry(content="First entry")
         r1 = post_entry(e1, ledger_path=tmp_ledger_path)
 
@@ -128,6 +126,7 @@ class TestPostEntry:
 # read_entries
 # ---------------------------------------------------------------------------
 
+
 class TestReadEntries:
     def test_read_empty_ledger(self, tmp_ledger_path: Path) -> None:
         entries = read_entries(ledger_path=tmp_ledger_path)
@@ -156,9 +155,7 @@ class TestReadEntries:
             _make_entry(entry_type=LedgerEntryType.DECISION, content="decision"),
             ledger_path=tmp_ledger_path,
         )
-        lessons = read_entries(
-            ledger_path=tmp_ledger_path, entry_type="lesson"
-        )
+        lessons = read_entries(ledger_path=tmp_ledger_path, entry_type="lesson")
         assert len(lessons) == 1
         assert lessons[0].type == "lesson"
 
@@ -171,9 +168,7 @@ class TestReadEntries:
             _make_entry(scope=LedgerScope.MODULE, content="module"),
             ledger_path=tmp_ledger_path,
         )
-        project_entries = read_entries(
-            ledger_path=tmp_ledger_path, scope="project"
-        )
+        project_entries = read_entries(ledger_path=tmp_ledger_path, scope="project")
         assert len(project_entries) == 1
         assert project_entries[0].scope == "project"
 
@@ -205,7 +200,7 @@ class TestReadEntries:
 
     def test_read_preserves_hash_chain(self, tmp_ledger_path: Path) -> None:
         e1 = _make_entry(content="First")
-        r1 = post_entry(e1, ledger_path=tmp_ledger_path)
+        post_entry(e1, ledger_path=tmp_ledger_path)
         e2 = _make_entry(content="Second")
         post_entry(e2, ledger_path=tmp_ledger_path)
 

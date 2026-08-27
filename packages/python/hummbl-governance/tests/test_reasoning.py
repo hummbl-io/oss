@@ -106,6 +106,7 @@ def test_parse_invalid_output_graceful():
 def _make_engine(*codes_and_names) -> "ReasoningEngine":
     """Helper: build an engine with given (code, name) model pairs."""
     import tempfile
+
     models = [
         {
             "code": code,
@@ -182,6 +183,7 @@ def test_reasoning_engine_corrupt_json_file(tmp_path):
 
 def test_apply_result_metadata_default():
     from hummbl_governance.reasoning import ApplyResult
+
     result = ApplyResult(
         model="DE1",
         name="5 Whys",

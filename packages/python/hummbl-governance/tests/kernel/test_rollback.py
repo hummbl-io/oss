@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.rollback import (
     Reversibility,
-    validate_rollback,
     validate_reversibility,
+    validate_rollback,
     validate_rollback_declaration,
 )
 from hummbl_governance.schema_validator import ValidationError
@@ -108,16 +107,12 @@ class TestReversibilityReversible:
             validate_reversibility(declaration)
 
     def test_reversible_empty_steps_fails(self):
-        declaration = _valid_reversible(
-            rollback_plan={"rollback_steps": [], "checkpoint_ref": "ckpt-001"}
-        )
+        declaration = _valid_reversible(rollback_plan={"rollback_steps": [], "checkpoint_ref": "ckpt-001"})
         with pytest.raises(ValueError, match="at least one rollback_step"):
             validate_reversibility(declaration)
 
     def test_reversible_missing_steps_fails(self):
-        declaration = _valid_reversible(
-            rollback_plan={"checkpoint_ref": "ckpt-001"}
-        )
+        declaration = _valid_reversible(rollback_plan={"checkpoint_ref": "ckpt-001"})
         with pytest.raises(ValueError, match="at least one rollback_step"):
             validate_reversibility(declaration)
 
@@ -127,9 +122,7 @@ class TestReversibilityPartiallyReversible:
         declaration = _valid_reversible(
             reversibility="partially_reversible",
             rollback_plan={
-                "rollback_steps": [
-                    {"step_id": "step-1", "description": "Restore config"}
-                ],
+                "rollback_steps": [{"step_id": "step-1", "description": "Restore config"}],
                 "partial_rollback_scope": ["config"],
             },
         )
@@ -206,9 +199,7 @@ class TestFullValidation:
         declaration = _valid_reversible(
             reversibility="partially_reversible",
             rollback_plan={
-                "rollback_steps": [
-                    {"step_id": "step-1", "description": "Restore config"}
-                ],
+                "rollback_steps": [{"step_id": "step-1", "description": "Restore config"}],
                 "partial_rollback_scope": ["config"],
             },
         )
@@ -235,9 +226,7 @@ class TestFullValidation:
 
 class TestEdgeCases:
     def test_empty_steps_list_rejected(self):
-        declaration = _valid_reversible(
-            rollback_plan={"rollback_steps": []}
-        )
+        declaration = _valid_reversible(rollback_plan={"rollback_steps": []})
         with pytest.raises(ValueError, match="at least one rollback_step"):
             validate_reversibility(declaration)
 

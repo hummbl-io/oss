@@ -1,15 +1,13 @@
 """Tests for issueops_harvest module."""
 
 import json
-from pathlib import Path
 
 import pytest
-
 from hummbl_cognition.issueops_harvest import (
     HarvestResult,
-    load_candidates,
     create_issue_via_gh,
     harvest,
+    load_candidates,
 )
 
 
@@ -111,9 +109,17 @@ class TestHarvestDryRun:
 
     def test_near_duplicate_detection(self):
         candidates = [
-            {"repo": "hummbl-io/arbiter", "title": "security: align reporting contacts"},
+            {
+                "repo": "hummbl-io/arbiter",
+                "title": "security: align reporting contacts",
+            },
         ]
-        existing = [{"number": 50, "title": "security: align reporting contacts with org policy"}]
+        existing = [
+            {
+                "number": 50,
+                "title": "security: align reporting contacts with org policy",
+            }
+        ]
         existing_map = {"hummbl-io/arbiter": existing}
         result = harvest(
             candidates=candidates,

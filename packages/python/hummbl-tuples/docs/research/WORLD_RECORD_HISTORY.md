@@ -49,8 +49,8 @@ These runs exist, but should not be promoted without clarification:
 Current Windows docs and earlier local summaries lag the broader canonical repo evidence:
 
 - the earlier local ledger focused on the YOLO scratch workspace and missed the canonical repo’s `0.366786` recorded best and `0.368805` archived raw-log best
-- [ASCENSION_FINAL_REPORT.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/ASCENSION_FINAL_REPORT.md) cites `0.373112`, which is now behind both the canonical archived 3600s receipt (`0.368805`) and the canonical recorded best (`0.366786`)
-- [MESH_SITREP_2026-03-27.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/MESH_SITREP_2026-03-27.md) cites `0.434891`, which is behind the canonical archived 600s receipt (`0.425410`)
+- [ASCENSION_FINAL_REPORT.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/ASCENSION_FINAL_REPORT.md) cites `0.373112`, which is now behind both the canonical archived 3600s receipt (`0.368805`) and the canonical recorded best (`0.366786`)
+- [MESH_SITREP_2026-03-27.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/MESH_SITREP_2026-03-27.md) cites `0.434891`, which is behind the canonical archived 600s receipt (`0.425410`)
 
 ## Usage
 
@@ -60,4 +60,4 @@ Use this file for:
 - public-claim draft hygiene
 - checking whether a doc headline has gone stale
 
-Use [TRAINING_RUN_LEDGER.md](/Users/others/PROJECTS/hummbl-tuples/docs/research/TRAINING_RUN_LEDGER.md) for the more complete ranked receipt table.
+Use [TRAINING_RUN_LEDGER.md](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples/docs/research/TRAINING_RUN_LEDGER.md) for the more complete ranked receipt table.

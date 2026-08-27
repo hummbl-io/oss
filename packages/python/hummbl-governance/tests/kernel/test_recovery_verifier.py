@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import pytest
-
 from hummbl_governance.kernel.recovery_verifier import (
+    validate_recovery,
+    validate_recovery_operator_approval,
     validate_recovery_verifier,
     validate_root_cause,
-    validate_recovery_operator_approval,
-    validate_recovery,
 )
 from hummbl_governance.schema_validator import ValidationError
 
@@ -84,9 +83,7 @@ class TestSchemaValidation:
             validate_recovery_verifier(verification)
 
     def test_empty_evidence_refs_fails(self):
-        verification = _valid_verification(
-            evidence={"evidence_refs": []}
-        )
+        verification = _valid_verification(evidence={"evidence_refs": []})
         with pytest.raises(ValidationError):
             validate_recovery_verifier(verification)
 
