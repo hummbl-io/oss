@@ -586,7 +586,7 @@ register_framework(FrameworkSpec(
                 ("subject", "subject"),
             )),
         )),
-        ControlSpec("AC-16", "Cross-organization access", (
+        ControlSpec("AC-21", "Information sharing", (
             _rule("DCT", extract=(
                 ("issuer", "issuer"),
                 ("subject", "subject"),

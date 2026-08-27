@@ -1,11 +1,9 @@
-Subagent ac59765a completed successfully:
-
 # NIST SP 800-53 Rev 5 — Security Control Family Mapping for `hummbl-io/oss`
 
 **Audit type:** Read-only static code / documentation review  
 **Scope:** `packages/python/*` (14 packages) and `.github/workflows` in `hummbl-io/oss`  
 **Framework:** NIST SP 800-53 Rev 5 control families  
-**Date:** Current as of repository state under `C:\Users\Owner\AppData\Local\Temp\anvil-audit\oss`
+**Date:** Current as of the audited repository snapshot
 
 ---
 
