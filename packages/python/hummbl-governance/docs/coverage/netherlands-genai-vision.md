@@ -4,7 +4,7 @@
 **Effective**: January 18, 2024 (published January 2024; presented to Dutch Parliament via Kamerbrief)
 **Source**: https://www.government.nl/site/binaries/site-content/collections/documents/2024/01/17/government-wide-vision-on-generative-ai-of-the-netherlands/Government-wide+vision+on+generative+AI+of+the+Netherlands.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

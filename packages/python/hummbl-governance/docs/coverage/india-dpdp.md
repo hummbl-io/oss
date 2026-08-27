@@ -4,7 +4,7 @@
 **Effective**: Enacted 11 August 2023; commencement notified in phases (core obligations effective 2025–2026 per DPDP Rules 2025)
 **Source**: https://www.meity.gov.in/writereaddata/files/Digital%20Personal%20Data%20Protection%20Act%2C%202023.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

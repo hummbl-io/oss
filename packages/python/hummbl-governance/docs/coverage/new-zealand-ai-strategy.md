@@ -4,7 +4,7 @@
 **Effective**: July 8, 2025
 **Source**: https://www.mbie.govt.nz/dmsdocument/30888-new-zealands-strategy-for-artificial-intelligence-investing-with-confidence
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -4,7 +4,7 @@
 **Effective**: March 11, 2025 (published March 3, 2025; full enforcement September 2, 2025)
 **Source**: https://www.unesco.org/ethics-ai/en/elsalvador
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -4,7 +4,7 @@
 **Effective**: December 2020 (updated 2021)
 **Source**: https://www.lamoncloa.gob.es/presidente/actividad/Documents/PlanNacionalInteligenciaArtificial.pdf
 **Last reviewed**: 2026-06-26
-**Reviewer**: devin (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: devin (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

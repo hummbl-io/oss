@@ -4,7 +4,7 @@
 **Effective**: February 20, 2026
 **Source**: https://www.government.se/contentassets/4e6b2d34f81048d688c35c831065395f/swedens-ai-strategy.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

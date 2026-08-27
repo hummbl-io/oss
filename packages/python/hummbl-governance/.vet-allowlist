@@ -1,0 +1,36 @@
+# .vet-allowlist — files exempt from sensitive data scanning
+#
+# These files contain patterns that are legitimate (test fixtures, architecture
+# documentation, public contact info) and should not be flagged by the scanner.
+
+# --- Test fixtures: fake SSNs, example emails, test data ---
+tests/test_output_validator.py
+tests/test_approval.py
+tests/test_agent_toolset_scaffold.py
+tests/tools/test_provenance_lint.py
+tests/unit/test_check_untracked_tests.py
+tests/fixtures/slack/*.json
+tests/test_matrix_validator.py
+
+# --- Research integrity fixtures: test data ---
+docs/research-integrity/v0.1/fixtures/*.json
+docs/research-integrity/v0.1/tests/test_validator.py
+
+# --- Governance docs with public contact emails ---
+SECURITY.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+
+# --- Architecture docs: _state/coordination is a documented path, not a secret ---
+hummbl_governance/compliance_mapper.py
+scripts/build_evidence_validation_report.py
+docs/coverage/EVIDENCE_VALIDATION.json
+docs/coverage/EVIDENCE_VALIDATION.md
+
+# --- Scanner itself: contains pattern definitions ---
+scripts/scan-sensitive-pre-commit.py
+tests/test_scan_sensitive.py
+
+# --- Public contact emails (reuben@hummbl.io, noreply@hummbl.io, research@hummbl.io) ---
+docs/schemas/research-integrity/v0.1/fixtures/valid-technical-report.json
+tools/provenance_lint.py

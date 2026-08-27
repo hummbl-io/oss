@@ -4,7 +4,7 @@
 **Effective**: July 25, 2025 (signed by Minister for Enterprise, Tourism and Employment 25 July 2025; published in Iris Oifigiúil 29 July 2025)
 **Source**: https://www.irishstatutebook.ie/eli/2025/si/366/made/en/pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

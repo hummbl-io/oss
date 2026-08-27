@@ -4,7 +4,7 @@
 **Effective**: Staggered — October 1, 2026 (Secs. 1, 2, 7–15, 26, 37–38); January 1, 2027 (Secs. 4–6, 19–22); July 1, 2027 (Secs. 3, 33, 36); October 1, 2027 (AEDT deployer disclosures, Secs. 9–11); January 1, 2028 (Sec. 39)
 **Source**: https://www.cga.ct.gov/
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -3,7 +3,7 @@
 **Standard**: G7 Hiroshima AI Process International Code of Conduct for Organizations Developing Advanced AI Systems (October 30, 2023)
 **Source**: https://www.mofa.go.jp/files/100573472.pdf
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v1.2.2
 
 ## Boundary disclaimer

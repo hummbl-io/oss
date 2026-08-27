@@ -4,7 +4,7 @@
 **Effective**: October 21, 2020 (announced at Global AI Summit, Riyadh; Royal approval July 17, 2020)
 **Source**: https://sdaia.gov.sa/en/SDAIA/about/Pages/NationalStrategyForAI.aspx
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

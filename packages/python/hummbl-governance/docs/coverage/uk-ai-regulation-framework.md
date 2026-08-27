@@ -4,7 +4,7 @@
 **Effective**: 29 March 2023 (non-statutory, principles-based; sectoral regulators implement on a voluntary/discretionary basis)
 **Source**: https://www.gov.uk/government/publications/ai-regulation-a-pro-innovation-approach
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

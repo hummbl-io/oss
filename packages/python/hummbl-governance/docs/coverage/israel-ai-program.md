@@ -4,7 +4,7 @@
 **Effective**: May 14, 2025 (Phase II launch; multi-year program 2021–2026)
 **Source**: https://innovationisrael.org.il/en/wp-content/uploads/sites/3/2025/05/AI-National-Program-ENG-14-5-25.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -4,7 +4,7 @@
 **Effective**: January 1, 2023 (original VCDPA); 2026 amendments effective per Chapter 820
 **Source**: https://law.lis.virginia.gov/vacode/title59.1/chapter53/
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

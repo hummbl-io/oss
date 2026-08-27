@@ -4,7 +4,7 @@
 **OJ reference**: published 4 May 2016; applicable 25 May 2018
 **Source**: https://eur-lex.europa.eu/eli/reg/2016/679/oj
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

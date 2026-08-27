@@ -4,7 +4,7 @@
 **Effective**: August 2, 2025 (enacted 14 May 2025; in force 2 August 2025 per EU AI Act Art. 113)
 **Source**: https://regulations.ai/regulations/RAI-DK-NA-SPAILXX-2025
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

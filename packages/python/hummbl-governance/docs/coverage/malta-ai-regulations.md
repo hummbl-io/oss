@@ -4,7 +4,7 @@
 **Effective**: 2 August 2026 (bulk of provisions align with EU AI Act application date); enacted 10 October 2025
 **Source**: https://legislation.mt/eli/ln/2025/226/eng
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

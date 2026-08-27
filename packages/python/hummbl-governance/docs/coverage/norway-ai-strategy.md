@@ -4,7 +4,7 @@
 **Effective**: January 14, 2020
 **Source**: https://www.regjeringen.no/en/documents/nasjonal-strategi-for-kunstig-intelligens/id2685594/
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

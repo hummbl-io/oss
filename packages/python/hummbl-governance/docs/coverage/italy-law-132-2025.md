@@ -4,7 +4,7 @@
 **Effective**: October 10, 2025
 **Source**: https://www.normattiva.it/eli/id/2025/09/25/25G00143/CONSOLIDATED
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

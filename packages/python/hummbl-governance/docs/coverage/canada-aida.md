@@ -4,7 +4,7 @@
 **Effective**: Pending (not in force; Bill C-27 died on Order Paper, Jan 2025 prorogation; not reintroduced)
 **Source**: https://ised-isde.canada.ca/site/ised/en/legislation/initiatives/digital-charter-implementation-act-2023
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

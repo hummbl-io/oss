@@ -4,7 +4,7 @@
 **Effective**: 23 November 2021 (non-binding recommendation to 193 Member States)
 **Source**: https://unesdoc.unesco.org/48231/pf0000381137
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

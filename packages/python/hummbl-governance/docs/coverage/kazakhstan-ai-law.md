@@ -4,7 +4,7 @@
 **Effective**: January 18, 2026 (60 days after first official publication; signed November 17, 2025)
 **Source**: https://so-ipr.com/news-events/publications/kazakhstan-enacts-first-ai-law-central-asia (legal text: https://adilet.zan.kz/eng/docs/Z2500000230)
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer
