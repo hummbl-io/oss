@@ -4,7 +4,7 @@
 **Effective**: 2020 (voluntary guidance; referenced as 2024 edition per latest PDPC listing)
 **Source**: https://www.pdpc.gov.sg/help-and-resources/2020/01/model-ai-governance-framework
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

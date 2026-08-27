@@ -4,7 +4,7 @@
 **Effective**: 2021 (updated 2024)
 **Source**: https://www.pcpd.org.hk/english/resources_privacy/publications_and_reports/files/guidance_on_ai_eng.pdf
 **Last reviewed**: 2026-06-26
-**Reviewer**: devin (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: devin (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

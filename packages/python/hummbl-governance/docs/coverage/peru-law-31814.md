@@ -4,7 +4,7 @@
 **Effective**: September 9, 2025 (publication); 90 business days thereafter (full force, approx. January 13, 2026)
 **Source**: https://www.gob.pe/institucion/pcm/normas-legales/7133522-115-2025-pcm
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

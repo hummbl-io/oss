@@ -3,7 +3,7 @@
 **Standard**: NIST AI Risk Management Framework 1.0 (NIST AI 100-1) — January 2023
 **Source**: https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -4,7 +4,7 @@
 **Effective**: September 16, 2025 (90 days after adjournment of the First Special Session of the 132nd Legislature; signed June 12, 2025)
 **Source**: https://legislature.maine.gov/statutes/10/title10sec1500-DD.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

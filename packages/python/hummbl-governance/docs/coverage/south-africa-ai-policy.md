@@ -4,7 +4,7 @@
 **Effective**: 2024 (draft for public consultation)
 **Source**: https://www.gov.za/sites/default/files/gcis_document/202404/national-ai-policy-framework.pdf
 **Last reviewed**: 2026-06-26
-**Reviewer**: devin (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: devin (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

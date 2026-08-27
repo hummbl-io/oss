@@ -1,0 +1,10 @@
+{
+  "_comment": "Vetting config for hummbl-governance. Operator name is intentional for SEO/GEO/AEO. (deprecated domain) is deprecated (no longer owned) — keep flagged so we catch stale references.",
+  "disable_patterns": [
+    "full name 'Reuben Paul Bowlby'",
+    "full name 'Reuben Bowlby'",
+    "full name 'Paul Verderber'"
+  ],
+  "severity_overrides": {},
+  "custom_patterns": []
+}

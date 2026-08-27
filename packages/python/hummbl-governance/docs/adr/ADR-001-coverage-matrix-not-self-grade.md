@@ -4,7 +4,7 @@
 - **Date:** 2026-05-14
 - **Decision owner:** Reuben Bowlby (operator)
 - **Steward:** HUMMBL, LLC
-- **Authors:** claude-code (huxley)
+- **Authors:** claude-code (host-C)
 - **Supersedes:** implicit pre-2026-05-14 framing of "governance score / A+ rubric"
 - **Superseded by:** none
 - **Related:** `hummbl-governance#26` (methodology issue), `feedback_no_self_grades_on_public_surface.md` (operator memory rule), `hummbl-production#241` (claim_status: hold), `hummbl-production#242` (claim_status: retired)
@@ -167,7 +167,7 @@ The existing 5 mapping docs (`gdpr-mapping.md`, `iso27001-mapping.md`, `nist-csf
 ## References
 
 - Methodology issue: [hummbl-governance#26](https://github.com/hummbl-io/hummbl-governance/issues/26)
-- Memory rule: `feedback_no_self_grades_on_public_surface.md` (huxley)
+- Memory rule: `feedback_no_self_grades_on_public_surface.md` (host-C)
 - Compliance status retirement: [hummbl-production#242](https://github.com/hummbl-io/hummbl-production/pull/242)
 - Original A+ rubric shipment: [hummbl-governance@6a47ca2](https://github.com/hummbl-io/hummbl-governance/commit/6a47ca2) + [hummbl-production@9d297b2](https://github.com/hummbl-io/hummbl-production/commit/9d297b2)
 - Bus DECISION: 2026-05-14T~09:05Z `[lane=marketing/claude/no-self-grades]`

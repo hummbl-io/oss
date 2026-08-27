@@ -3,7 +3,7 @@
 **Standard**: Singapore Model AI Governance Framework (2nd ed., 2020) + Model AI Governance Framework for Generative AI (May 2024) + IMDA / AI Verify guidance
 **Source**: https://www.imda.gov.sg/-/media/imda/files/sgs/-/media/imda/files/programmes/ai-verify/model-ai-governance-framework-for-generative-ai
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

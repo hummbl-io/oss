@@ -3,7 +3,7 @@
 **Standard**: STRIDE — Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege (Shostack, 2014)
 **Source**: Shostack, A. (2014). *Threat Modeling: Designing for Security*. John Wiley & Sons. ISBN 978-1-118-80999-0
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

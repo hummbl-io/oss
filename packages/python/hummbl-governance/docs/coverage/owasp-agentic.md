@@ -3,7 +3,7 @@
 **Standard**: OWASP Top 10 for Agentic Applications (December 2025) — ASI01 through ASI10
 **Source**: https://owasp.org/www-project-agentic-threats/
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

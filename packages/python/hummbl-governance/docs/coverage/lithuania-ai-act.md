@@ -4,7 +4,7 @@
 **Effective**: April 1, 2025 (enacted Jan 14, 2025; published TAR Jan 22, 2025; certain provisions phased in Aug 2, 2025)
 **Source**: https://www.e-tar.lt/portal/it/legalAct/9c30a402d88811efa5ddd96c482819f5
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

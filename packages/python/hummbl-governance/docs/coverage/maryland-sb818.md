@@ -4,7 +4,7 @@
 **Effective**: July 1, 2024 (staged compliance deadlines through July 1, 2027)
 **Source**: https://mgaleg.maryland.gov/2024RS/chapters_noln/CH_496_sb0818e.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

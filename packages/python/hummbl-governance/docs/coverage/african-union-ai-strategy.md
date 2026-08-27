@@ -4,7 +4,7 @@
 **Effective**: July 18–19, 2024 (endorsement); implementation period 2025–2030
 **Source**: https://au.int/en/documents/20240809/continental-artificial-intelligence-strategy
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

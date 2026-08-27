@@ -4,7 +4,7 @@
 **Effective**: January 14, 2026 (promulgated; Art. 20 — takes effect on promulgation date; passed by Legislative Yuan December 23, 2025)
 **Source**: https://law.nstc.gov.tw/EngLawContent.aspx?id=10099&lan=E
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -4,7 +4,7 @@
 **Effective**: Pending — Senate approved 10 December 2024; entry into force 1 year after publication per Art. 45 (Chamber of Deputies may amend)
 **Source**: https://regulations.ai/regulations/brazil-2023-05-pl2338
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

@@ -4,7 +4,7 @@
 **Effective**: 2019 (updated through 2025)
 **Source**: https://vm.fi/en/ai
 **Last reviewed**: 2026-06-26
-**Reviewer**: devin (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: devin (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

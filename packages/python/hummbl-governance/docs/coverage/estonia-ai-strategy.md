@@ -4,7 +4,7 @@
 **Effective**: 2019–2021 (extended through 2025)
 **Source**: https://www.mkm.ee/en/national-artificial-intelligence-strategy-estonia-kratt
 **Last reviewed**: 2026-06-26
-**Reviewer**: devin (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: devin (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

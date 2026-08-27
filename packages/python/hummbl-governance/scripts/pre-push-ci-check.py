@@ -260,7 +260,7 @@ def _get_repo_slug(root: Path) -> str:
             capture_output=True, text=True, cwd=str(root), timeout=5,
         )
         url = result.stdout.strip()
-        # Handle SSH (git@github.com:org/repo.git) and HTTPS (https://github.com/org/repo.git)
+        # Handle SSH (git+github.com:org/repo.git) and HTTPS (https://github.com/org/repo.git)
         if url.startswith("git@"):
             path = url.split(":", 1)[1]
         else:

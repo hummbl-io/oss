@@ -4,7 +4,7 @@
 **Effective**: HB 2394 May 21, 2024 · SB 1295 2024 · HB 2678 2025 · HB 2175 July 1, 2026
 **Source**: https://www.recordinglaw.com/us-laws/ai-laws/arizona-ai-laws/
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

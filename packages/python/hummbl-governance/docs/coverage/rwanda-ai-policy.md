@@ -4,7 +4,7 @@
 **Effective**: April 20, 2023
 **Source**: https://www.minict.gov.rw/fileadmin/templates/Policies_and_Strategies/National_AI_Policy.pdf
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

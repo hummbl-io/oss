@@ -4,7 +4,7 @@
 **Effective**: Opened for signature September 5, 2024; entry into force pending (requires 5 ratifications incl. at least 3 CoE member states)
 **Source**: https://www.coe.int/en/web/artificial-intelligence/framework-convention
 **Last reviewed**: 2026-06-25
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v0.8.0
 
 ## Boundary disclaimer

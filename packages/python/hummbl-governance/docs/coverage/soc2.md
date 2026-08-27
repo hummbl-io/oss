@@ -3,7 +3,7 @@
 **Standard**: SOC 2 — AICPA Trust Services Criteria (2017, updated 2022). Used by service organizations to report on internal controls relevant to security, availability, processing integrity, confidentiality, privacy.
 **Source**: https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2
 **Last reviewed**: 2026-05-14
-**Reviewer**: claude-code (huxley) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+**Reviewer**: claude-code (host-C) per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 **HUMMBL version**: hummbl-governance v1.2.2
 
 ## Boundary disclaimer
