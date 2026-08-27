@@ -2,7 +2,7 @@
 
 Status: Governed (v1)
 Schema: [`hummbl_governance/data/evidence_readiness_review_receipt.schema.json`](../hummbl_governance/data/evidence_readiness_review_receipt.schema.json)
-`$id`: `https://hummbl.dev/schemas/evidence-readiness-review-receipt.v1.json`
+`$id`: `https://hummbl.io/schemas/evidence-readiness-review-receipt.v1.json`
 Date: 2026-05-15 (draft) · 2026-06-22 (promoted to governed v1, hummbl-governance#67)
 
 ## Purpose
