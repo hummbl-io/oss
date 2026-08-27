@@ -2,7 +2,7 @@
 
 **Status:** live v1.0 internal (promoted 2026-06-23 per ARTIFACT_STACK_PROMOTION_PACKET.md; private — not for external publication)
 **Owner:** Operator
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 2)
 **Reader:** Operator + Board (Operator, Future Self, Governance Officer, Risk Officer, Stakeholder Proxy)

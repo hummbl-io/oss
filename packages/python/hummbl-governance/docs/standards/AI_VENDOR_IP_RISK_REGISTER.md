@@ -2,7 +2,7 @@
 
 **Status:** initial governed register
 **Owner:** Reuben Bowlby
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Last reviewed:** 2026-06-30
 
 This register classifies AI vendors and agent tools for IP-sensitive HUMMBL work. It is not legal advice. It is an operational control for authorship, inventorship, trade-secret, copyright, and diligence risk.

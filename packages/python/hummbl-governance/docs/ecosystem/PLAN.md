@@ -8,7 +8,7 @@
 
 ## 1. Situation
 
-The HUMMBL Research Institute maintains 35 repositories under the `hummbl-*` namespace on Gitea.
+The HUMMBL, LLC maintains 35 repositories under the `hummbl-*` namespace on Gitea.
 Six of those repos contain production-quality source code that is currently either unexported,
 under-tested, or not yet published to PyPI. The remainder are research documents, scaffolds, or
 experimental notebooks. This plan covers the next two quarters of ecosystem work.

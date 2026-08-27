@@ -128,7 +128,7 @@ Every wave-1 artifact followed the same structure. Extracting as a template for 
 # <Artifact Type>: <Subject>
 
 **Status:** live v1.0 (public|private)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** YYYY-MM-DD
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item N)
 **Reader:** <target reader>
@@ -253,7 +253,7 @@ Items 11-14 (doctrine, charter, evidence pack, playbook) are pending in the mani
 ### Wave 2 (Days 11-14)
 
 5. **Item 11**: Doctrine: AI governance principles
-6. **Item 12**: Charter: HUMMBL Research Institute
+6. **Item 12**: Charter: HUMMBL, LLC
 7. **Item 13**: Evidence pack: fleet governance rollout
 8. **Item 14**: Playbook: claims change protocol
 

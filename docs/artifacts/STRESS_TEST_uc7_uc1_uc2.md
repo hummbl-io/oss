@@ -1,7 +1,7 @@
 # Stress-Test: UC-7, UC-1, UC-2 — Primitive Readiness, Competitive Reality, and Honest Reassessment
 
 **Status:** live v1.0 (private — pre-decision)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-08-24
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md
 **Reader:** Operator (go/no-go on the three preliminary picks)

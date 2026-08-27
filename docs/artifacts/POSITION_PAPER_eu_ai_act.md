@@ -1,7 +1,7 @@
 # Position Paper: HUMMBL EU AI Act Readiness
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 9)
 **Reader:** compliance buyer at an EU-operating AI-native team evaluating governance vendors for EU AI Act readiness

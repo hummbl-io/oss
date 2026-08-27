@@ -1,7 +1,7 @@
 # HUMMBL Init Standard v0.1
 
 **Status:** v0.1
-**Steward:** HUMMBL Research Institute
+**Steward:** HUMMBL, LLC
 **Approving human:** Reuben Bowlby
 **Source of record:** git
 **Depends on:** HUMMBL Repo Standard v0.1
@@ -318,7 +318,7 @@ docs/adr/ADR-<number>-<kebab-title>.md
 - **Status:** proposed | accepted | superseded | deprecated
 - **Date:** YYYY-MM-DD
 - **Decision owner:** <name>
-- **Steward:** HUMMBL Research Institute
+- **Steward:** HUMMBL, LLC
 - **Supersedes:** <ADR-number or none>
 
 ## Context

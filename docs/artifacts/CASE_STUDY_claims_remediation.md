@@ -1,7 +1,7 @@
 # Case Study: Claims Remediation 2026-06-23
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 7)
 **Reader:** enterprise buyer evaluating AI governance vendors; analyst covering AI governance

@@ -3,7 +3,7 @@
 - **Status:** accepted
 - **Date:** 2026-05-14
 - **Decision owner:** Reuben Bowlby (operator)
-- **Steward:** HUMMBL Research Institute
+- **Steward:** HUMMBL, LLC
 - **Authors:** claude-code (huxley)
 - **Supersedes:** implicit pre-2026-05-14 framing of "governance score / A+ rubric"
 - **Superseded by:** none

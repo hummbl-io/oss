@@ -1,7 +1,7 @@
 # Position Paper: HUMMBL NIST AI RMF Alignment
 
 **Status:** live v1.0 (public)
-**Author:** Operator, HUMMBL Research Institute
+**Author:** Operator, HUMMBL, LLC
 **Date:** 2026-06-23
 **Tracking:** docs/artifacts/ARTIFACT_MANIFEST.md (item 10)
 **Reader:** compliance buyer at a US-operating AI-native team evaluating governance vendors for NIST AI RMF alignment
