@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts 14 Python packages under `packages/python/<name>/`.
+Currently hosts 20 Python packages under `packages/python/<name>/`.
 
 ## Packages
 
@@ -15,14 +15,20 @@ Currently hosts 14 Python packages under `packages/python/<name>/`.
 | hummbl | `packages/python/hummbl/` | Pre-release (0.1.0) | Structured reasoning framework for AI agents |
 | hummbl-bif | `packages/python/hummbl-bif/` | Published (1.0.1) | Batch Ingestion Framework for technical knowledge acquisition |
 | hummbl-tuples | `packages/python/hummbl-tuples/` | Published (0.2.0) | HUMMBL Typed Tuples governance model |
-| hummbl-bus | `packages/python/hummbl-bus/` | Published (0.2.0) | Secure append-only TSV coordination bus for multi-agent systems |
+| hummbl-bus | `packages/python/hummbl-bus/` | Published (0.1.0) | Secure append-only TSV coordination bus for multi-agent systems |
 | hummbl-cognition | `packages/python/hummbl-cognition/` | Published (0.1.0) | Cognitive Ledger Protocol (CLP) and Open Brain server |
 | governed-compression | `packages/python/governed-compression/` | Published (0.1.0) | Governed compression experiments (numpy dependency exception) |
-| hummbl-compass | `packages/python/hummbl-compass/` | Pre-release (0.1.0) | Directional navigation & multi-agent routing algorithms |
-| hummbl-free-models | `packages/python/hummbl-free-models/` | Pre-release (0.1.0) | Open-weights & free-tier model registry generator |
-| hummbl-rubric-templates | `packages/python/hummbl-rubric-templates/` | Pre-release (0.1.0) | Standard evaluation rubric templates & automated validators |
-| hummbl-taxonomy | `packages/python/hummbl-taxonomy/` | Pre-release (0.1.0) | Governed intelligence tier taxonomy & classifier |
-| hummbl-validation | `packages/python/hummbl-validation/` | Pre-release (0.1.0) | Invariant & schema validation primitives |
+| hummbl-lattice | `packages/python/hummbl-lattice/` | Pre-release (0.1.0) | Domain-specific reasoning operator lattices for the Domain120 framework |
+| hummbl-contracts | `packages/python/hummbl-contracts/` | Pre-release (0.1.0) | HUMMBL contract schemas and stdlib-only JSON Schema validator |
+| hummbl-axis | `packages/python/hummbl-axis/` | Pre-release (0.1.0) | Ladder that selects which Atlas contradiction to act on |
+| hummbl-intel | `packages/python/hummbl-intel/` | Pre-release (0.1.0) | INT taxonomy framework for agent intelligence collection |
+| hummbl-lint-config | `packages/python/hummbl-lint-config/` | Pre-release (0.1.0) | Shared ruff lint configuration for the HUMMBL fleet |
+| idp-spec | `packages/python/idp-spec/` | Pre-release (0.1.0) | Intelligent Delegation Profile — deterministic delegation for multi-agent systems |
+| hummbl-compass | `packages/python/hummbl-compass/` | Pre-release (0.1.0) | HUMMBL Directional Navigation & Multi-Agent Routing Algorithms |
+| hummbl-free-models | `packages/python/hummbl-free-models/` | Pre-release (0.1.0) | HUMMBL Open-Weights & Free-Tier Model Registry Generator |
+| hummbl-rubric-templates | `packages/python/hummbl-rubric-templates/` | Pre-release (0.1.0) | HUMMBL Standard Evaluation Rubric Templates & Automated Validators |
+| hummbl-taxonomy | `packages/python/hummbl-taxonomy/` | Pre-release (0.1.0) | HUMMBL Governed Intelligence Tier Taxonomy & Classifier |
+| hummbl-validation | `packages/python/hummbl-validation/` | Pre-release (0.1.0) | HUMMBL Invariant & Schema Validation Primitives |
 
 ## Setup
 
@@ -46,11 +52,11 @@ cd packages/python/hummbl-tuples && python -m pytest tests/ -v
 cd packages/python/hummbl-bus && python -m pytest tests/ -v
 cd packages/python/hummbl-cognition && python -m pytest tests/ -v
 cd packages/python/governed-compression && python -m pytest tests/ -v
-cd packages/python/hummbl-compass && python -m pytest tests/ -v
-cd packages/python/hummbl-free-models && python -m pytest tests/ -v
-cd packages/python/hummbl-rubric-templates && python -m pytest tests/ -v
-cd packages/python/hummbl-taxonomy && python -m pytest tests/ -v
-cd packages/python/hummbl-validation && python -m pytest tests/ -v
+cd packages/python/hummbl-lattice && python -m pytest tests/ -v
+cd packages/python/hummbl-contracts && python -m pytest tests/ -v
+cd packages/python/hummbl-axis && python -m pytest tests/ -v
+cd packages/python/hummbl-intel && python -m pytest tests/ -v
+cd packages/python/idp-spec && python -m pytest tests/ -v
 ```
 
 ## CI
@@ -66,6 +72,7 @@ cd packages/python/hummbl-validation && python -m pytest tests/ -v
   - **Exception**: `governed-compression` requires `numpy>=1.26` for array operations (documented in its `pyproject.toml`)
 - Test dependencies in `[test]` extras only
 - Apache 2.0 license (packages); MIT OR Apache-2.0 (repo level)
+- **pyproject.toml template**: `.github/PYPROJECT_TEMPLATE.toml` — copy this when creating a new package to get correct license/author/classifiers/URLs
 - Commit format: Conventional Commits
 - AI agents may assist with research, review, patch preparation, and operational coordination, but must not be credited in Git commit authorship metadata or commit-message trailers. Do not add `Co-authored-by`, `Generated-by`, `Authored-with`, or equivalent AI/vendor/agent attribution to commits.
 
@@ -115,3 +122,15 @@ assert pathlib.Path(dest).read_bytes() == verify.stdout, "Byte mismatch"
 **Never use** `Out-File -Encoding utf8` (adds BOM, transcodes through CP1252) or `git show ... > file` in PowerShell (same transcoding issue). If you must use the shell, use `cmd /c "git show ... > file"` which doesn't transcode.
 
 Origin: 2026-08-27 session — mojibake introduced by `Out-File -Encoding utf8` was not caught by a flawed verification check (`chr(0xe7) in text` tested for the wrong codepoint). The correct check is byte-for-byte comparison against the git blob.
+
+## Shell patterns to avoid (Tailscale CLI interception)
+
+On hosts with Tailscale installed, the `tailscale` CLI binary intercepts certain shell patterns that match its subcommand syntax, causing unexpected output or failed commands:
+
+- **`;;` in case statements**: Tailscale's CLI parser can interpret `;;` as a subcommand boundary. Use Python for multi-branch logic instead of shell `case` statements.
+- **`tail -N` in piped commands**: The `tail` binary is shadowed or intercepted. Use the `read` tool (with `offset`/`limit`) instead of piping through `tail -3`, `tail -5`, etc.
+- **`head -N` in piped commands**: Same issue — use `read` tool or Python `subprocess` with line slicing instead.
+
+When a shell command returns Tailscale help text instead of expected output, this is the likely cause. Switch to the `read` tool or Python-based alternatives.
+
+Origin: 2026-08-28 session — repeated Tailscale CLI output appeared in 3+ shell calls during the oss Phase 3 migration, including one failed command loop.

@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hummbl.dev/schemas/memory-v1.schema.json",
+  "title": "Agent Memory Entry",
+  "description": "Standardized schema for agent memory entries across the ecosystem",
+  "type": "object",
+  "required": ["id", "timestamp", "agent", "type", "content"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this memory entry",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO 8601 timestamp when memory was created",
+      "format": "date-time"
+    },
+    "agent": {
+      "type": "string",
+      "description": "Name of the agent that created this memory",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "type": {
+      "type": "string",
+      "description": "Type of memory entry",
+      "enum": ["observation", "decision", "fact", "pattern", "error", "success", "hypothesis", "feedback"]
+    },
+    "content": {
+      "type": "string",
+      "description": "The actual memory content",
+      "minLength": 1,
+      "maxLength": 8192
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags for categorization and retrieval",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "uniqueItems": true,
+      "maxItems": 20
+    },
+    "importance": {
+      "type": "number",
+      "description": "Importance score (0.0 = low, 1.0 = critical)",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.5
+    },
+    "references": {
+      "type": "array",
+      "description": "IDs of related memory entries",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 50
+    },
+    "context": {
+      "type": "object",
+      "description": "Additional context metadata",
+      "properties": {
+        "task_id": {"type": "string"},
+        "session_id": {"type": "string"},
+        "user": {"type": "string"},
+        "location": {"type": "string"}
+      }
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp when this memory should be garbage collected",
+      "format": "date-time"
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "Whether this memory has been verified/validated",
+      "default": false
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "enum": ["v1"],
+      "default": "v1"
+    }
+  },
+  "examples": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "timestamp": "2026-02-13T18:00:00Z",
+      "agent": "cost-optimizer",
+      "type": "observation",
+      "content": "API costs exceeded budget threshold by 15% during morning briefing",
+      "tags": ["cost", "budget", "alert"],
+      "importance": 0.9,
+      "references": [],
+      "context": {
+        "task_id": "briefing-2026-02-13",
+        "session_id": "session-123"
+      },
+      "expires_at": "2026-05-13T18:00:00Z",
+      "verified": true,
+      "version": "v1"
+    }
+  ]
+}

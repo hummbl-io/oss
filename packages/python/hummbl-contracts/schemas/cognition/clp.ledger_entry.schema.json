@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cognition/clp.ledger_entry.schema.json",
+  "title": "CLP Ledger Entry",
+  "description": "Cognitive Ledger Protocol v1.0 -- append-only shared memory entry for multi-agent coordination.",
+  "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "agent",
+    "vendor",
+    "model",
+    "type",
+    "scope",
+    "content",
+    "content_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^clp-[a-f0-9]{12}$",
+      "description": "Unique entry identifier (clp- prefix + 12 hex chars)"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "ISO 8601 UTC timestamp with Z suffix"
+    },
+    "agent": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Agent identifier (e.g., 'claude-code (god-mode)')"
+    },
+    "vendor": {
+      "type": "string",
+      "enum": ["anthropic", "openai", "google", "moonshot", "local", "human", "meta", "mistral", "cohere"],
+      "description": "Vendor identifier"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Model identifier (e.g., 'claude-opus-4-6')"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["lesson", "decision", "discovery", "correction", "convention"],
+      "description": "Type of knowledge being recorded"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["project", "module", "file", "convention", "process"],
+      "description": "Scope of the knowledge entry"
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "The actual knowledge content"
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hex of canonical content fields"
+    },
+    "evidence": {
+      "type": ["string", "null"],
+      "description": "Link to supporting artifact"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Confidence score (default 0.9)"
+    },
+    "supersedes": {
+      "type": ["string", "null"],
+      "description": "ID of entry this corrects"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "description": "Categorization tags"
+    },
+    "assurance_level": {
+      "type": ["string", "null"],
+      "enum": ["SELF", "PEER", "VERIFIED", null],
+      "description": "Trust level of the entry"
+    },
+    "signature": {
+      "type": ["string", "null"],
+      "description": "HMAC-SHA256 hex (optional)"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target_id", "relation"],
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "description": "ID of the linked entry"
+          },
+          "relation": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "extends", "supersedes", "related"],
+            "description": "Relationship type"
+          },
+          "note": {
+            "type": ["string", "null"],
+            "description": "Optional annotation"
+          }
+        }
+      },
+      "description": "Zettelkasten-style links to other entries"
+    }
+  },
+  "additionalProperties": false
+}

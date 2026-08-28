@@ -20,6 +20,12 @@ Public monorepo for HUMMBL open-source packages. Consolidation in progress.
 | `governed-compression` | Python | [![PyPI](https://img.shields.io/pypi/v/governed-compression)](https://pypi.org/project/governed-compression/) | Live — governed vector and KV-cache compression |
 | `hummbl` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl)](https://pypi.org/project/hummbl/) | Pending first release — structured reasoning framework for AI agents |
 | `hummbl-kernel` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-kernel)](https://pypi.org/project/hummbl-kernel/) | Pending first release — orchestration kernel for workflow execution |
+| `hummbl-lattice` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-lattice)](https://pypi.org/project/hummbl-lattice/) | Pending first release — domain-specific reasoning operator lattices for Domain120 |
+| `hummbl-contracts` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-contracts)](https://pypi.org/project/hummbl-contracts/) | Pending first release — contract schemas and stdlib-only JSON Schema validator |
+| `hummbl-axis` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-axis)](https://pypi.org/project/hummbl-axis/) | Pending first release — ladder that selects which Atlas contradiction to act on |
+| `hummbl-intel` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-intel)](https://pypi.org/project/hummbl-intel/) | Pending first release — INT taxonomy framework for agent intelligence collection |
+| `hummbl-lint-config` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-lint-config)](https://pypi.org/project/hummbl-lint-config/) | Pending first release — shared ruff lint configuration for the HUMMBL fleet |
+| `idp-spec` | Python | [![PyPI](https://img.shields.io/pypi/v/idp-spec)](https://pypi.org/project/idp-spec/) | Pending first release — Intelligent Delegation Profile for multi-agent systems |
 
 ## Why a monorepo
 
