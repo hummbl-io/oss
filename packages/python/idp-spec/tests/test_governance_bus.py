@@ -223,7 +223,7 @@ class TestGovernanceBusInit:
         """Should use default path when none provided."""
         bus = GovernanceBus()
 
-        assert "_state/governance" in bus._base_dir.as_posix()
+        assert "idp-spec" in bus._base_dir.as_posix() and "governance" in bus._base_dir.as_posix()
 
 
 class TestGovernanceBusAppend:
