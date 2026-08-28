@@ -20,6 +20,7 @@ Public monorepo for HUMMBL open-source packages. Consolidation in progress.
 | `governed-compression` | Python | [![PyPI](https://img.shields.io/pypi/v/governed-compression)](https://pypi.org/project/governed-compression/) | Live — governed vector and KV-cache compression |
 | `hummbl` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl)](https://pypi.org/project/hummbl/) | Pending first release — structured reasoning framework for AI agents |
 | `hummbl-kernel` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-kernel)](https://pypi.org/project/hummbl-kernel/) | Pending first release — orchestration kernel for workflow execution |
+| `hummbl-intel` | Python | [![PyPI](https://img.shields.io/pypi/v/hummbl-intel)](https://pypi.org/project/hummbl-intel/) | Pending first release — INT taxonomy framework for agent intelligence collection |
 
 ## Why a monorepo
 
