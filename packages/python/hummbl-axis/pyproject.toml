@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-axis"
+version = "0.1.0"
+description = "Ladder that selects which Atlas contradiction to act on"
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-axis/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-axis/"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+axis = "hummbl_axis.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

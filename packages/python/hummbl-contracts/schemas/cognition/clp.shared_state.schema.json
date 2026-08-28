@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/cognition/clp.shared_state.schema.json",
+  "title": "CLP Shared State",
+  "description": "Cognitive Ledger Protocol v1.0 -- mutable snapshot of multi-agent coordination state. Overwritten atomically with optimistic concurrency via version field.",
+  "type": "object",
+  "required": ["version", "updated_at", "updated_by"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically increasing version for optimistic concurrency"
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "ISO 8601 UTC timestamp of last update"
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "Agent that last updated this state"
+    },
+    "active_agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Map of agent_id -> agent state"
+    },
+    "claimed_files": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Map of file_path -> claim metadata"
+    },
+    "active_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Pending decisions requiring resolution"
+    },
+    "sprint": {
+      "type": "object",
+      "description": "Current sprint state"
+    },
+    "flags": {
+      "type": "object",
+      "description": "Feature flags and runtime configuration"
+    }
+  },
+  "additionalProperties": false
+}

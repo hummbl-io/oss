@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://factorio-agent.system/schemas/action_envelope.json",
+  "title": "Action Envelope",
+  "description": "Schema for agent action requests in the Factorio system",
+  "type": "object",
+  "required": [
+    "action_id",
+    "agent_id",
+    "timestamp",
+    "action_type",
+    "payload"
+  ],
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "description": "Unique identifier for this action",
+      "pattern": "^[a-z0-9_-]{8,32}$"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent submitting the action"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "BUILD",
+        "CONNECT",
+        "DISCONNECT",
+        "CONFIGURE",
+        "QUERY",
+        "DESTROY"
+      ],
+      "description": "Type of action being requested"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Action-specific parameters",
+      "additionalProperties": true
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "OpenTelemetry trace ID for observability"
+    },
+    "budget_allocation": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Budget allocated for this action"
+    },
+    "receipt_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether a receipt must be logged before execution"
+    }
+  },
+  "additionalProperties": false
+}

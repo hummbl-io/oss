@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://hummbl.dev/schemas/governor_decision_record.schema.json",
+  "title": "HUMMBL Governor Decision Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_id",
+    "request_id",
+    "timestamp",
+    "governor",
+    "decision",
+    "action",
+    "reason",
+    "violated_rule",
+    "constraints",
+    "halt_required"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "decision_id": {
+      "type": "string",
+      "description": "Stable unique identifier for this decision (UUID v4 recommended)"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Must match the request_id from the inter-agent request"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Decision creation time (ISO 8601)"
+    },
+    "governor": {
+      "type": "string",
+      "const": "HUMMBL_GOVERNOR"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "AUTHORIZE",
+        "DENY",
+        "REQUEST_CLARIFICATION",
+        "ESCALATE",
+        "TERMINATE_RUN"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "EXECUTE_COMMAND.GIT",
+        "EXECUTE_COMMAND.NODE",
+        "EXECUTE_COMMAND.OPENCLAW",
+        "EXECUTE_COMMAND.SECURITY",
+        "EXECUTE_COMMAND.FSWATCH",
+        "EXECUTE_COMMAND.LSOF",
+        "EXECUTE_COMMAND.NETSTAT",
+        "EXECUTE_COMMAND.PFCTL",
+        "EXECUTE_COMMAND.OPENSSL"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "AUTHORIZED",
+        "ALLOWLIST_MISSING",
+        "COMMAND_NOT_ALLOWLISTED",
+        "FREEZE_ACK_REQUIRED"
+      ]
+    },
+    "violated_rule": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "FREEZE_STATUS_MISSING",
+        "PROCESS_POLICY_ALLOWLIST"
+      ],
+      "default": "NONE"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ALLOWLIST_ONLY",
+          "REPO_CWD_ONLY",
+          "SAFE_PATH_ONLY"
+        ]
+      },
+      "default": []
+    },
+    "halt_required": {
+      "type": "boolean",
+      "description": "If true, all subordinate agents MUST halt immediately"
+    }
+  }
+}

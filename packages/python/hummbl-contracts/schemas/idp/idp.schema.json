@@ -1,0 +1,607 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.ai/schemas/idp/v0.1.0/idp.schema.json",
+  "title": "IDP v0.1 Schema Definitions",
+  "description": "JSON Schema definitions for Intelligent Delegation Profile tuple types",
+  "definitions": {
+    "DCTX": {
+      "type": "object",
+      "title": "Delegation Context",
+      "description": "Full context of a single delegation event",
+      "required": [
+        "intent_id",
+        "task_id",
+        "delegator_id",
+        "delegatee_id",
+        "contract_id",
+        "risk_tier",
+        "chain_depth",
+        "budget",
+        "created_at",
+        "status"
+      ],
+      "properties": {
+        "intent_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Root intent identifier shared across delegation tree"
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this specific task delegation"
+        },
+        "parent_task_id": {
+          "type": ["string", "null"],
+          "format": "uuid",
+          "description": "Reference to parent task (null for root delegations)"
+        },
+        "delegator_id": {
+          "type": "string",
+          "description": "Agent issuing the delegation"
+        },
+        "delegatee_id": {
+          "type": "string",
+          "description": "Agent receiving the delegation"
+        },
+        "contract_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Reference to CONTRACT tuple defining task requirements"
+        },
+        "verification_id": {
+          "type": ["string", "null"],
+          "format": "uuid",
+          "description": "Reference to ATTEST tuple (null until verified)"
+        },
+        "capability_token_id": {
+          "type": ["string", "null"],
+          "format": "uuid",
+          "description": "Reference to DCT tuple granting capabilities"
+        },
+        "risk_tier": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+          "description": "Risk classification"
+        },
+        "chain_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of subdelegation levels (0 = root)"
+        },
+        "budget": {
+          "type": "object",
+          "required": ["max_tokens", "max_cost_usd", "max_wall_time_seconds"],
+          "properties": {
+            "max_tokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_cost_usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_wall_time_seconds": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Delegation creation timestamp"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PROPOSED", "ISSUED", "RUNNING", "EVIDENCE_READY", "VERIFIED", "REPLANNED", "FAILED"],
+          "description": "Current delegation state"
+        }
+      }
+    },
+    "CONTRACT": {
+      "type": "object",
+      "title": "Task Contract",
+      "description": "Objective acceptance criteria for a delegated task",
+      "required": [
+        "contract_id",
+        "objective",
+        "inputs",
+        "outputs",
+        "acceptance_tests",
+        "risk_tier",
+        "evidence_requirements"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this contract"
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable task description"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "required"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "schema": {
+                "type": ["object", "null"],
+                "description": "JSON Schema for input validation"
+              },
+              "required": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "required"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "schema": {
+                "type": ["object", "null"],
+                "description": "JSON Schema for output validation"
+              },
+              "required": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "acceptance_tests": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["test_id", "description", "assertion", "required"],
+            "properties": {
+              "test_id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "assertion": {
+                "type": "string",
+                "description": "Executable predicate for verification"
+              },
+              "required": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "non_goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "risk_tier": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        },
+        "allowed_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "denied_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "max_subdelegation_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 3
+        },
+        "evidence_requirements": {
+          "type": "object",
+          "required": ["required_artifacts", "tool_trace_required", "logs_required"],
+          "properties": {
+            "required_artifacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tool_trace_required": {
+              "type": "boolean"
+            },
+            "logs_required": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "EVIDENCE": {
+      "type": "object",
+      "title": "Task Evidence",
+      "description": "Artifacts produced during task execution",
+      "required": ["task_id", "artifacts", "produced_at"],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Reference to DCTX task this evidence supports"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["artifact_id", "type", "content_hash"],
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": {
+                "type": "string"
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$",
+                "description": "SHA256 hash of artifact content"
+              },
+              "uri": {
+                "type": ["string", "null"],
+                "format": "uri"
+              },
+              "metadata": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "tool_trace": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tool_id", "invocation_id", "timestamp", "inputs", "outputs"],
+            "properties": {
+              "tool_id": {
+                "type": "string"
+              },
+              "invocation_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "inputs": {
+                "type": "object"
+              },
+              "outputs": {
+                "type": "object"
+              },
+              "error": {
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "default": []
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "level", "message"],
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "level": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+              },
+              "message": {
+                "type": "string"
+              },
+              "context": {
+                "type": "object"
+              }
+            }
+          },
+          "default": []
+        },
+        "produced_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Evidence collection timestamp"
+        }
+      }
+    },
+    "ATTEST": {
+      "type": "object",
+      "title": "Verification Attestation",
+      "description": "Record of task verification outcome",
+      "required": [
+        "attestation_id",
+        "task_id",
+        "issuer_id",
+        "checks_performed",
+        "evidence_hashes",
+        "result",
+        "timestamp"
+      ],
+      "properties": {
+        "attestation_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this attestation"
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Reference to DCTX task being verified"
+        },
+        "issuer_id": {
+          "type": "string",
+          "description": "Agent performing verification (typically delegator)"
+        },
+        "checks_performed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["test_id", "assertion", "passed"],
+            "properties": {
+              "test_id": {
+                "type": "string"
+              },
+              "assertion": {
+                "type": "string"
+              },
+              "passed": {
+                "type": "boolean"
+              },
+              "details": {
+                "type": ["string", "null"]
+              }
+            }
+          }
+        },
+        "evidence_hashes": {
+          "type": "object",
+          "required": ["artifacts"],
+          "properties": {
+            "artifacts": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "tool_trace_hash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "logs_hash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "result": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "INCONCLUSIVE"],
+          "description": "Overall verification outcome"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Attestation creation timestamp"
+        },
+        "parent_attestation_id": {
+          "type": ["string", "null"],
+          "format": "uuid",
+          "description": "Reference to parent task's attestation (null for root)"
+        },
+        "signature": {
+          "type": ["string", "null"],
+          "description": "Optional cryptographic signature for non-repudiation"
+        }
+      }
+    },
+    "DCT": {
+      "type": "object",
+      "title": "Delegation Capability Token",
+      "description": "Grants specific capabilities to an agent for task execution",
+      "required": [
+        "token_id",
+        "issuer",
+        "subject",
+        "resource_selectors",
+        "ops_allowed",
+        "binding"
+      ],
+      "properties": {
+        "token_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this capability token"
+        },
+        "issuer": {
+          "type": "string",
+          "description": "Agent granting the capability"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Agent receiving the capability"
+        },
+        "resource_selectors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["resource_type"],
+            "properties": {
+              "resource_type": {
+                "type": "string"
+              },
+              "resource_id": {
+                "type": "string",
+                "description": "Specific resource ID or wildcard"
+              },
+              "constraints": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "ops_allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["caveat_id", "type", "parameters"],
+            "properties": {
+              "caveat_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["TIME_BOUND", "RATE_LIMIT", "APPROVAL_REQUIRED", "AUDIT_REQUIRED"]
+              },
+              "parameters": {
+                "type": "object"
+              }
+            }
+          },
+          "default": []
+        },
+        "expiry": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Token expiration timestamp (null = no expiry)"
+        },
+        "binding": {
+          "type": "object",
+          "required": ["task_id", "contract_id"],
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "contract_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    "Envelope": {
+      "type": "object",
+      "title": "MCP/A2A Envelope",
+      "description": "Message envelope for IDP protocol messages",
+      "required": [
+        "protocol",
+        "message_id",
+        "sender",
+        "recipient",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "const": "IDP/1.0"
+        },
+        "message_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sender": {
+          "type": "string",
+          "description": "Agent identifier of sender"
+        },
+        "recipient": {
+          "type": "string",
+          "description": "Agent identifier of recipient"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["DELEGATE", "ACCEPT", "REJECT", "EVIDENCE_SUBMIT", "ATTEST", "REPLAN", "ABORT"]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "dctx": {
+              "oneOf": [
+                { "$ref": "#/definitions/DCTX" },
+                { "type": "null" }
+              ]
+            },
+            "contract": {
+              "oneOf": [
+                { "$ref": "#/definitions/CONTRACT" },
+                { "type": "null" }
+              ]
+            },
+            "evidence": {
+              "oneOf": [
+                { "$ref": "#/definitions/EVIDENCE" },
+                { "type": "null" }
+              ]
+            },
+            "attest": {
+              "oneOf": [
+                { "$ref": "#/definitions/ATTEST" },
+                { "type": "null" }
+              ]
+            },
+            "dct": {
+              "oneOf": [
+                { "$ref": "#/definitions/DCT" },
+                { "type": "null" }
+              ]
+            }
+          }
+        },
+        "signature": {
+          "type": ["string", "null"],
+          "description": "Optional cryptographic signature"
+        }
+      }
+    }
+  }
+}

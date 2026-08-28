@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-lint-config"
+version = "0.1.0"
+description = "Shared ruff lint configuration for the HUMMBL fleet"
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-lint-config/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-lint-config/"
+
+[tool.setuptools]
+packages = ["hummbl_lint_config"]
+
+[tool.setuptools.package-data]
+hummbl_lint_config = ["ruff.toml"]

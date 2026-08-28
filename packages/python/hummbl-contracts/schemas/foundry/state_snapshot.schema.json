@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://factorio-agent.system/schemas/state_snapshot.json",
+  "title": "State Snapshot",
+  "description": "Schema for factory state snapshots (for replay/rollback)",
+  "type": "object",
+  "required": [
+    "snapshot_id",
+    "timestamp",
+    "tick",
+    "entities",
+    "edges"
+  ],
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "Unique snapshot identifier"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Simulation tick number"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entity"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "budget_remaining": {
+      "type": "number",
+      "minimum": 0
+    },
+    "checksum": {
+      "type": "string",
+      "description": "SHA-256 checksum for integrity verification"
+    }
+  },
+  "$defs": {
+    "entity": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "position"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "source",
+            "transform",
+            "sink",
+            "buffer",
+            "controller"
+          ]
+        },
+        "position": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
+        },
+        "state": {
+          "type": "object"
+        },
+        "inventory": {
+          "type": "object"
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": [
+        "id",
+        "source",
+        "target",
+        "capacity"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "current_load": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "saturated": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

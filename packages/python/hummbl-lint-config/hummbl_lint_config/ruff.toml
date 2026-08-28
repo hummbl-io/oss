@@ -1,0 +1,23 @@
+# HUMMBL Fleet Shared Lint Configuration
+# Repos extend this via: extend = "hummbl-lint-config/ruff.toml"
+# Or install the package and use: extend = "hummbl_lint_config/ruff.toml"
+
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = [
+    "PLW1514",  # missing encoding on open()
+    "B904",     # raise ... from err in except blocks
+    "SIM",      # simplifications
+    "I",        # isort import ordering
+    "UP",       # pyupgrade — deprecated Python patterns
+]
+ignore = [
+    "SIM108",   # if-else to ternary (readability)
+    "SIM117",   # nested with statements (readability)
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["PLR2004"]  # magic numbers OK in tests
+"evals/*" = ["PLR2004"]

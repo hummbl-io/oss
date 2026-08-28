@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/eal.validation.report.v1.json",
+  "title": "EAL Validation Report v1",
+  "description": "Deterministic validation report for EAL conformance outputs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "classification",
+    "primary_reason_code",
+    "reason_codes",
+    "contract_ref",
+    "receipt_ref",
+    "evaluated_epoch",
+    "validator_profile"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "eal.validation.report.v1"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "INVALID",
+        "INVALIDATED",
+        "INDETERMINATE"
+      ]
+    },
+    "primary_reason_code": {
+      "$ref": "#/$defs/reason_code"
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reason_code"
+      }
+    },
+    "contract_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "contract_hash"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_hash": {
+          "type": "string",
+          "pattern": "^sha256:.+"
+        }
+      }
+    },
+    "receipt_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_id",
+        "receipt_hash"
+      ],
+      "properties": {
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_hash": {
+          "type": "string",
+          "pattern": "^sha256:.+"
+        }
+      }
+    },
+    "evaluated_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "origin_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validator_profile": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "E_OK_VALID",
+        "E_INPUT_MALFORMED",
+        "E_EVIDENCE_MISSING",
+        "E_EPOCH_AMBIGUOUS",
+        "E_SIG_INVALID",
+        "E_HASH_MISMATCH",
+        "E_CONTRACT_VERSION_COLLISION",
+        "E_ACTION_OUT_OF_SPACE",
+        "E_BOUNDARY_MISMATCH",
+        "E_LOG_CHAIN_BREAK",
+        "E_LOG_SEQUENCE_GAP",
+        "E_REPLAY_DETECTED",
+        "E_EPOCH_INVALIDATED"
+      ]
+    },
+    "indeterminate_reason_code": {
+      "type": "string",
+      "enum": [
+        "E_INPUT_MALFORMED",
+        "E_EVIDENCE_MISSING",
+        "E_EPOCH_AMBIGUOUS"
+      ]
+    },
+    "invalid_reason_code": {
+      "type": "string",
+      "enum": [
+        "E_SIG_INVALID",
+        "E_HASH_MISMATCH",
+        "E_CONTRACT_VERSION_COLLISION",
+        "E_ACTION_OUT_OF_SPACE",
+        "E_BOUNDARY_MISMATCH",
+        "E_LOG_CHAIN_BREAK",
+        "E_LOG_SEQUENCE_GAP",
+        "E_REPLAY_DETECTED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "classification": {
+            "const": "VALID"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "primary_reason_code": {
+            "const": "E_OK_VALID"
+          },
+          "reason_codes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "const": "E_OK_VALID"
+              }
+            ],
+            "items": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "classification": {
+            "const": "INDETERMINATE"
+          }
+        }
+      },
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_INPUT_MALFORMED"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_INPUT_MALFORMED"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_EVIDENCE_MISSING"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_EVIDENCE_MISSING"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_EPOCH_AMBIGUOUS"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_EPOCH_AMBIGUOUS"
+                },
+                "minContains": 1
+              }
+            }
+          }
+        ],
+        "properties": {
+          "primary_reason_code": {
+            "$ref": "#/$defs/indeterminate_reason_code"
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/indeterminate_reason_code"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "classification": {
+            "const": "INVALID"
+          }
+        }
+      },
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_SIG_INVALID"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_SIG_INVALID"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_HASH_MISMATCH"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_HASH_MISMATCH"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_CONTRACT_VERSION_COLLISION"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_CONTRACT_VERSION_COLLISION"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_ACTION_OUT_OF_SPACE"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_ACTION_OUT_OF_SPACE"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_BOUNDARY_MISMATCH"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_BOUNDARY_MISMATCH"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_LOG_CHAIN_BREAK"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_LOG_CHAIN_BREAK"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_LOG_SEQUENCE_GAP"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_LOG_SEQUENCE_GAP"
+                },
+                "minContains": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "primary_reason_code": {
+                "const": "E_REPLAY_DETECTED"
+              },
+              "reason_codes": {
+                "contains": {
+                  "const": "E_REPLAY_DETECTED"
+                },
+                "minContains": 1
+              }
+            }
+          }
+        ],
+        "properties": {
+          "primary_reason_code": {
+            "$ref": "#/$defs/invalid_reason_code"
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/invalid_reason_code"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "classification": {
+            "const": "INVALIDATED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "origin_epoch"
+        ],
+        "properties": {
+          "primary_reason_code": {
+            "const": "E_EPOCH_INVALIDATED"
+          },
+          "reason_codes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {
+                "const": "E_EPOCH_INVALIDATED"
+              }
+            ],
+            "items": false
+          }
+        }
+      }
+    }
+  ]
+}
