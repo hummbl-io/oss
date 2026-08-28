@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts 9 Python packages under `packages/python/<name>/`.
+Currently hosts 14 Python packages under `packages/python/<name>/`.
 
 ## Packages
 
@@ -15,9 +15,14 @@ Currently hosts 9 Python packages under `packages/python/<name>/`.
 | hummbl | `packages/python/hummbl/` | Pre-release (0.1.0) | Structured reasoning framework for AI agents |
 | hummbl-bif | `packages/python/hummbl-bif/` | Published (1.0.1) | Batch Ingestion Framework for technical knowledge acquisition |
 | hummbl-tuples | `packages/python/hummbl-tuples/` | Published (0.2.0) | HUMMBL Typed Tuples governance model |
-| hummbl-bus | `packages/python/hummbl-bus/` | Published (0.1.0) | Secure append-only TSV coordination bus for multi-agent systems |
+| hummbl-bus | `packages/python/hummbl-bus/` | Published (0.2.0) | Secure append-only TSV coordination bus for multi-agent systems |
 | hummbl-cognition | `packages/python/hummbl-cognition/` | Published (0.1.0) | Cognitive Ledger Protocol (CLP) and Open Brain server |
 | governed-compression | `packages/python/governed-compression/` | Published (0.1.0) | Governed compression experiments (numpy dependency exception) |
+| hummbl-compass | `packages/python/hummbl-compass/` | Pre-release (0.1.0) | Directional navigation & multi-agent routing algorithms |
+| hummbl-free-models | `packages/python/hummbl-free-models/` | Pre-release (0.1.0) | Open-weights & free-tier model registry generator |
+| hummbl-rubric-templates | `packages/python/hummbl-rubric-templates/` | Pre-release (0.1.0) | Standard evaluation rubric templates & automated validators |
+| hummbl-taxonomy | `packages/python/hummbl-taxonomy/` | Pre-release (0.1.0) | Governed intelligence tier taxonomy & classifier |
+| hummbl-validation | `packages/python/hummbl-validation/` | Pre-release (0.1.0) | Invariant & schema validation primitives |
 
 ## Setup
 
@@ -41,6 +46,11 @@ cd packages/python/hummbl-tuples && python -m pytest tests/ -v
 cd packages/python/hummbl-bus && python -m pytest tests/ -v
 cd packages/python/hummbl-cognition && python -m pytest tests/ -v
 cd packages/python/governed-compression && python -m pytest tests/ -v
+cd packages/python/hummbl-compass && python -m pytest tests/ -v
+cd packages/python/hummbl-free-models && python -m pytest tests/ -v
+cd packages/python/hummbl-rubric-templates && python -m pytest tests/ -v
+cd packages/python/hummbl-taxonomy && python -m pytest tests/ -v
+cd packages/python/hummbl-validation && python -m pytest tests/ -v
 ```
 
 ## CI

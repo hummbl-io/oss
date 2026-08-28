@@ -39,6 +39,7 @@ governance = [
 ]
 test = [
     "pytest>=7.0",
+    "pytest-timeout>=2.3",
     "coverage>=7.0",
     "mypy>=1.8",
     "jsonschema>=4.0",
@@ -57,6 +58,7 @@ hummbl_cognition = ["schemas/*.json", "seed_registries/*.jsonl", "data/*.json"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+addopts = "--timeout=60"
 markers = [
     "allow_ledger_writes: mark test to allow writing to ledger test artifacts",
 ]
