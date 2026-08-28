@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [base120, governed-compression, hummbl, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-free-models, hummbl-governance, hummbl-kernel, hummbl-rubric-templates, hummbl-taxonomy, hummbl-tuples, hummbl-validation]
+        package: [base120, governed-compression, hummbl, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-free-models, hummbl-governance, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-taxonomy, hummbl-tuples, hummbl-validation, idp-spec]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -81,6 +81,9 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.13"
+
+      - name: Check LICENSE/pyproject.toml consistency
+        run: python .github/scripts/check_license_consistency.py
 
       - name: Install pip-audit
         run: pip install pip-audit
