@@ -17,6 +17,7 @@ authors = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -52,6 +53,7 @@ hummbl-physical-mcp = "mcp_physical:main"
 Homepage = "https://github.com/hummbl-io/oss"
 Repository = "https://github.com/hummbl-io/oss"
 Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-governance/"
 
 [tool.setuptools.packages.find]
 include = ["hummbl_governance*"]

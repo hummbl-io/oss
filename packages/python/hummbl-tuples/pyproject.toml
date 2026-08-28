@@ -10,6 +10,7 @@ keywords = ["tuples", "governance", "ai", "agents", "hummbl", "delegation", "evi
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
