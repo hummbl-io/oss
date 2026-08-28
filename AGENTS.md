@@ -67,6 +67,7 @@ cd packages/python/idp-spec && python -m pytest tests/ -v
   - **Exception**: `governed-compression` requires `numpy>=1.26` for array operations (documented in its `pyproject.toml`)
 - Test dependencies in `[test]` extras only
 - Apache 2.0 license (packages); MIT OR Apache-2.0 (repo level)
+- **pyproject.toml template**: `.github/PYPROJECT_TEMPLATE.toml` — copy this when creating a new package to get correct license/author/classifiers/URLs
 - Commit format: Conventional Commits
 - AI agents may assist with research, review, patch preparation, and operational coordination, but must not be credited in Git commit authorship metadata or commit-message trailers. Do not add `Co-authored-by`, `Generated-by`, `Authored-with`, or equivalent AI/vendor/agent attribution to commits.
 
@@ -116,3 +117,15 @@ assert pathlib.Path(dest).read_bytes() == verify.stdout, "Byte mismatch"
 **Never use** `Out-File -Encoding utf8` (adds BOM, transcodes through CP1252) or `git show ... > file` in PowerShell (same transcoding issue). If you must use the shell, use `cmd /c "git show ... > file"` which doesn't transcode.
 
 Origin: 2026-08-27 session — mojibake introduced by `Out-File -Encoding utf8` was not caught by a flawed verification check (`chr(0xe7) in text` tested for the wrong codepoint). The correct check is byte-for-byte comparison against the git blob.
+
+## Shell patterns to avoid (Tailscale CLI interception)
+
+On hosts with Tailscale installed, the `tailscale` CLI binary intercepts certain shell patterns that match its subcommand syntax, causing unexpected output or failed commands:
+
+- **`;;` in case statements**: Tailscale's CLI parser can interpret `;;` as a subcommand boundary. Use Python for multi-branch logic instead of shell `case` statements.
+- **`tail -N` in piped commands**: The `tail` binary is shadowed or intercepted. Use the `read` tool (with `offset`/`limit`) instead of piping through `tail -3`, `tail -5`, etc.
+- **`head -N` in piped commands**: Same issue — use `read` tool or Python `subprocess` with line slicing instead.
+
+When a shell command returns Tailscale help text instead of expected output, this is the likely cause. Switch to the `read` tool or Python-based alternatives.
+
+Origin: 2026-08-28 session — repeated Tailscale CLI output appeared in 3+ shell calls during the oss Phase 3 migration, including one failed command loop.

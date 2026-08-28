@@ -1,0 +1,61 @@
+# pyproject.toml template for new packages in hummbl-io/oss
+#
+# Copy this file to packages/python/<package-name>/pyproject.toml and fill in
+# the placeholder values (marked with <angle-brackets>). Delete this comment
+# block before committing.
+#
+# Conventions (match hummbl-validation and repo root):
+# - License: MIT OR Apache-2.0 (dual-licensed, matching repo root)
+# - Author: HUMMBL Open Source <oss@hummbl.io>
+# - Status: Pre-Alpha (Development Status :: 2 - Pre-Alpha) for new packages
+# - Zero third-party runtime dependencies (stdlib only)
+# - Test deps in [project.optional-dependencies] test extra
+# - All URLs point to hummbl-io/oss monorepo
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "<package-name>"
+version = "0.1.0"
+description = "<one-line description>"
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/<package-name>/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/<package-name>/"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+# --- Package layout (choose one) ---
+
+# Option A: flat layout (package code in <package_name>/ at repo root)
+# [tool.setuptools]
+# packages = ["<package_name>"]
+
+# Option B: src layout (package code in src/<package_name>/)
+# [tool.setuptools.packages.find]
+# where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
