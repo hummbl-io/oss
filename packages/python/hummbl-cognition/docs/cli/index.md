@@ -276,7 +276,7 @@ Remote Open Brain client CLI (`client.py:150-242`).
 ### Global flag
 
 ```
---url <url>   Server URL (default: OPEN_BRAIN_URL env or http://100.109.69.16:11435)
+--url <url>   Server URL (default: OPEN_BRAIN_URL env or http://localhost:11435)
 ```
 
 ### `client search`

@@ -1,7 +1,8 @@
 """Open Brain HTTP Server -- serves the knowledge compiler over the network.
 
-Runs on nodezero, accessible by all machines in the hub-and-spoke system
-via Tailscale. Stdlib-only (http.server).
+Runs on a designated hub host, accessible by all machines in the
+hub-and-spoke system via Tailscale (or any private network). Stdlib-only
+(http.server).
 
 Endpoints:
     GET  /status          -- index stats, uptime, entry count
@@ -15,7 +16,7 @@ Endpoints:
 
 Usage:
     python -m hummbl_cognition.server --port 11435 --host 0.0.0.0
-    python -m hummbl_cognition.server --bind 100.117.251.32:11435
+    python -m hummbl_cognition.server --bind 100.64.0.1:11435
 
 Default port 11435 (Ollama is 11434 — adjacent by convention).
 """

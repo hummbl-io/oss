@@ -1,16 +1,16 @@
 """Open Brain Client -- query the remote brain from any machine.
 
-Connects to the Open Brain server on nodezero (or any host) via HTTP.
+Connects to the Open Brain server on a configured host via HTTP.
 Stdlib-only.
 
 Usage:
     from hummbl_cognition.client import OpenBrainClient
 
-    brain = OpenBrainClient()  # Uses OPEN_BRAIN_URL env or default
+    brain = OpenBrainClient()  # Uses OPEN_BRAIN_URL env or localhost default
     results = brain.search("OAuth token refresh")
 
     # Or with explicit URL
-    brain = OpenBrainClient("http://100.117.251.32:11435")
+    brain = OpenBrainClient("http://100.64.0.1:11435")
 
 CLI:
     python -m hummbl_cognition.client search "OAuth refresh"
@@ -28,7 +28,7 @@ from http.client import HTTPConnection
 from typing import Any
 from urllib.parse import urlparse
 
-DEFAULT_URL = "http://100.117.251.32:11435"
+DEFAULT_URL = "http://localhost:11435"
 
 # Max response body to read (10 MB) — prevents memory exhaustion
 MAX_RESPONSE_SIZE = 10 * 1_048_576
