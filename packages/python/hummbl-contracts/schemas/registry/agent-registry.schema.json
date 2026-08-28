@@ -1,0 +1,360 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/agent-registry/v2.0.0/agent-registry.schema.json",
+  "title": "HUMMBL Agent Registry",
+  "description": "Schema for the HUMMBL Agent Registry -- a curated, governance-scored catalog of AI CLI agents, runtimes, frameworks, and supporting infrastructure.",
+  "type": "object",
+  "required": ["metadata", "agents"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "$ref": "#/$defs/RegistryMetadata"
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Agent"
+      },
+      "minItems": 1,
+      "description": "Array of registered agents"
+    }
+  },
+
+  "$defs": {
+
+    "RegistryMetadata": {
+      "type": "object",
+      "description": "Top-level registry metadata",
+      "required": ["version", "generated_at", "total_agents", "categories", "hummbl_levels", "caes_levels"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "SemVer version of the registry dataset"
+        },
+        "generated_at": {
+          "type": "string",
+          "description": "ISO 8601 date or datetime of generation"
+        },
+        "generated_by": {
+          "type": "string",
+          "description": "Provenance: who/what generated this dataset"
+        },
+        "base_dataset": {
+          "type": "string",
+          "description": "Reference to the upstream dataset this was derived from, if any"
+        },
+        "scope": {
+          "type": "string",
+          "description": "Human-readable description of what this registry covers"
+        },
+        "total_agents": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of agents in this registry"
+        },
+        "categories": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of distinct categories"
+        },
+        "hummbl_levels": {
+          "type": "object",
+          "description": "HUMMBL governance level definitions (L0-L4)",
+          "required": ["L0", "L1", "L2", "L3", "L4"],
+          "properties": {
+            "L0": { "type": "string" },
+            "L1": { "type": "string" },
+            "L2": { "type": "string" },
+            "L3": { "type": "string" },
+            "L4": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "caes_levels": {
+          "type": "object",
+          "description": "CAES compliance level definitions (L1-L3)",
+          "required": ["L1", "L2", "L3"],
+          "properties": {
+            "L1": { "type": "string" },
+            "L2": { "type": "string" },
+            "L3": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "changelog": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of changes from previous version"
+        }
+      }
+    },
+
+    "Agent": {
+      "type": "object",
+      "description": "A single agent, runtime, framework, or tool in the registry",
+      "required": [
+        "id", "name", "vendor", "category", "type", "description",
+        "status", "license", "primary_language",
+        "execution", "governance", "hummbl", "caes", "interop", "community"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$",
+          "description": "Unique lowercase kebab-case identifier",
+          "examples": ["claude-code", "aider", "auto-gpt"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable display name"
+        },
+        "vendor": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Organization or individual that maintains this agent"
+        },
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Sub-type within category (e.g., 'Dev Agent', 'Agent Framework', 'Terminal AI Chat')"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Concise description of what the agent does"
+        },
+        "status": {
+          "$ref": "#/$defs/AgentStatus"
+        },
+        "license": {
+          "type": "string",
+          "description": "SPDX license identifier or 'commercial' / 'free-api'",
+          "examples": ["MIT", "Apache-2.0", "GPL-3.0", "commercial", "free-api"]
+        },
+        "primary_language": {
+          "type": "string",
+          "description": "Primary implementation language",
+          "examples": ["Python", "TypeScript", "Go", "Rust", "Java"]
+        },
+        "execution": {
+          "$ref": "#/$defs/ExecutionProfile"
+        },
+        "governance": {
+          "$ref": "#/$defs/GovernanceProfile"
+        },
+        "hummbl": {
+          "$ref": "#/$defs/HummblAssessment"
+        },
+        "caes": {
+          "$ref": "#/$defs/CaesAssessment"
+        },
+        "interop": {
+          "$ref": "#/$defs/InteropProfile"
+        },
+        "community": {
+          "$ref": "#/$defs/CommunityProfile"
+        }
+      }
+    },
+
+    "Category": {
+      "type": "string",
+      "enum": [
+        "Coding / Dev Agents",
+        "General-Purpose Autonomous Agents",
+        "Agent Frameworks",
+        "Chat / Terminal Interfaces",
+        "Research / Knowledge Agents",
+        "Security / Analysis Agents",
+        "Workflow Orchestration",
+        "Inference Runtimes",
+        "Agent Observability",
+        "Multi-Agent Orchestrators"
+      ],
+      "description": "Registry category"
+    },
+
+    "AgentStatus": {
+      "type": "string",
+      "enum": ["active", "archived", "dead", "beta"],
+      "description": "Lifecycle status: active (maintained), archived (no longer maintained but usable), dead (abandoned/defunct), beta (pre-release)"
+    },
+
+    "ExecutionProfile": {
+      "type": "object",
+      "description": "How the agent runs and where",
+      "required": ["offline_capable", "local_model_support", "sandboxed", "mcp_support", "a2a_support", "execution_model"],
+      "additionalProperties": false,
+      "properties": {
+        "offline_capable": {
+          "type": "boolean",
+          "description": "Can run fully offline (no network required)"
+        },
+        "local_model_support": {
+          "type": "boolean",
+          "description": "Supports local model inference (Ollama, llama.cpp, etc.)"
+        },
+        "sandboxed": {
+          "type": "boolean",
+          "description": "Runs in a sandboxed/isolated environment by default"
+        },
+        "mcp_support": {
+          "type": "boolean",
+          "description": "Supports Model Context Protocol (MCP) for tool/resource integration"
+        },
+        "a2a_support": {
+          "type": "boolean",
+          "description": "Supports Agent-to-Agent (A2A) protocol for inter-agent communication"
+        },
+        "execution_model": {
+          "type": "string",
+          "enum": ["cli", "cloud", "container", "daemon", "hybrid"],
+          "description": "Primary execution model: cli (terminal command), cloud (remote-only), container (Docker/isolated), daemon (long-running local process), hybrid (local+cloud)"
+        }
+      }
+    },
+
+    "GovernanceProfile": {
+      "type": "object",
+      "description": "Governance and compliance capabilities",
+      "required": ["source_available", "audit_trail", "cost_controls", "human_approval_gates", "tool_determinism", "model_determinism"],
+      "additionalProperties": false,
+      "properties": {
+        "source_available": {
+          "type": "boolean",
+          "description": "Source code is publicly available for audit"
+        },
+        "audit_trail": {
+          "type": "boolean",
+          "description": "Produces structured execution logs or audit trail"
+        },
+        "cost_controls": {
+          "type": "boolean",
+          "description": "Built-in cost/budget controls or limits"
+        },
+        "human_approval_gates": {
+          "type": "boolean",
+          "description": "Supports human-in-the-loop approval before executing actions"
+        },
+        "tool_determinism": {
+          "$ref": "#/$defs/DeterminismLevel",
+          "description": "Reproducibility of orchestration/tool-calling logic (independent of LLM output)"
+        },
+        "model_determinism": {
+          "$ref": "#/$defs/DeterminismLevel",
+          "description": "Reproducibility of model outputs (affected by temperature, sampling, etc.)"
+        }
+      }
+    },
+
+    "DeterminismLevel": {
+      "type": "string",
+      "enum": ["high", "medium", "low", "n/a"],
+      "description": "Determinism rating: high (reproducible), medium (mostly reproducible), low (non-deterministic), n/a (not applicable)"
+    },
+
+    "HummblAssessment": {
+      "type": "object",
+      "description": "HUMMBL governance compatibility assessment",
+      "required": ["level", "level_name", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["L0", "L1", "L2", "L3", "L4"],
+          "description": "HUMMBL governance level (L0=Listed through L4=Native)"
+        },
+        "level_name": {
+          "type": "string",
+          "enum": ["Listed", "Auditable", "Governed", "Orchestrable", "HUMMBL Native"],
+          "description": "Human-readable level name"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Brief justification for the assigned level"
+        }
+      }
+    },
+
+    "CaesAssessment": {
+      "type": "object",
+      "description": "CAES (Coordination and Execution Standard) compliance assessment",
+      "required": ["level", "level_name", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["L1", "L2", "L3"],
+          "description": "CAES compliance level"
+        },
+        "level_name": {
+          "type": "string",
+          "enum": ["Opaque", "Traceable", "Auditable"],
+          "description": "Human-readable level name"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Brief justification for the assigned level"
+        }
+      }
+    },
+
+    "InteropProfile": {
+      "type": "object",
+      "description": "Interoperability capabilities",
+      "required": ["protocols", "multi_model"],
+      "additionalProperties": false,
+      "properties": {
+        "protocols": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Supported interop protocols (mcp, a2a, openai-compat, rest-api, prefect, etc.)"
+        },
+        "multi_model": {
+          "type": "boolean",
+          "description": "Supports switching between multiple LLM providers/models"
+        }
+      }
+    },
+
+    "CommunityProfile": {
+      "type": "object",
+      "description": "Community health and accessibility information",
+      "required": ["github_url", "github_stars", "last_release", "pricing"],
+      "additionalProperties": false,
+      "properties": {
+        "github_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "GitHub repository URL, or null for closed-source"
+        },
+        "github_stars": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Approximate GitHub star count, or null if no public repo"
+        },
+        "last_release": {
+          "type": "string",
+          "description": "Approximate date of last release (YYYY-MM or YYYY-MM-DD)"
+        },
+        "pricing": {
+          "type": "string",
+          "enum": ["free", "open-source", "freemium", "subscription", "usage-based", "commercial"],
+          "description": "Pricing model"
+        }
+      }
+    }
+  }
+}

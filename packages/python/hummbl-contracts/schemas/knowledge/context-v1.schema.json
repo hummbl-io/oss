@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hummbl.dev/schemas/context-v1.schema.json",
+  "title": "Agent Context State",
+  "description": "Current context window state and token budget tracking for agents",
+  "type": "object",
+  "required": ["agent", "updated_at", "tokens"],
+  "properties": {
+    "agent": {
+      "type": "string",
+      "description": "Agent name",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Current session identifier"
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "Last update timestamp",
+      "format": "date-time"
+    },
+    "tokens": {
+      "type": "object",
+      "description": "Token budget tracking",
+      "required": ["used", "limit", "model"],
+      "properties": {
+        "used": {
+          "type": "integer",
+          "description": "Tokens used in current context",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum context window size",
+          "minimum": 1
+        },
+        "model": {
+          "type": "string",
+          "description": "Model being used (affects limits)",
+          "examples": ["sonnet-4.5", "opus-4.6", "haiku-4.5"]
+        },
+        "utilization": {
+          "type": "number",
+          "description": "Percentage of context used (0.0-1.0)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      }
+    },
+    "memory_summary": {
+      "type": "object",
+      "description": "Summary of loaded memories",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of memories in context"
+        },
+        "oldest": {
+          "type": "string",
+          "description": "Timestamp of oldest memory",
+          "format": "date-time"
+        },
+        "newest": {
+          "type": "string",
+          "description": "Timestamp of newest memory",
+          "format": "date-time"
+        },
+        "compressed": {
+          "type": "boolean",
+          "description": "Whether memories have been compressed"
+        }
+      }
+    },
+    "active_tasks": {
+      "type": "array",
+      "description": "Currently active task IDs",
+      "items": {"type": "string"},
+      "maxItems": 10
+    },
+    "working_memory": {
+      "type": "array",
+      "description": "Short-term working memory (ephemeral)",
+      "items": {
+        "type": "object",
+        "required": ["key", "value"],
+        "properties": {
+          "key": {"type": "string"},
+          "value": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      },
+      "maxItems": 20
+    },
+    "compression_history": {
+      "type": "array",
+      "description": "History of context compression events",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {"type": "string", "format": "date-time"},
+          "tokens_before": {"type": "integer"},
+          "tokens_after": {"type": "integer"},
+          "memories_compressed": {"type": "integer"}
+        }
+      },
+      "maxItems": 10
+    },
+    "version": {
+      "type": "string",
+      "enum": ["v1"],
+      "default": "v1"
+    }
+  },
+  "examples": [
+    {
+      "agent": "knowledge-curator",
+      "session_id": "session-abc123",
+      "updated_at": "2026-02-13T18:05:00Z",
+      "tokens": {
+        "used": 45000,
+        "limit": 200000,
+        "model": "sonnet-4.5",
+        "utilization": 0.225
+      },
+      "memory_summary": {
+        "count": 127,
+        "oldest": "2026-02-01T08:00:00Z",
+        "newest": "2026-02-13T18:00:00Z",
+        "compressed": false
+      },
+      "active_tasks": ["task-001", "task-002"],
+      "working_memory": [
+        {
+          "key": "current_focus",
+          "value": "gap-remediation",
+          "timestamp": "2026-02-13T18:05:00Z"
+        }
+      ],
+      "compression_history": [],
+      "version": "v1"
+    }
+  ]
+}
