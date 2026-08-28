@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts 9 Python packages under `packages/python/<name>/`.
+Currently hosts 10 Python packages under `packages/python/<name>/`.
 
 ## Packages
 
@@ -18,6 +18,7 @@ Currently hosts 9 Python packages under `packages/python/<name>/`.
 | hummbl-bus | `packages/python/hummbl-bus/` | Published (0.1.0) | Secure append-only TSV coordination bus for multi-agent systems |
 | hummbl-cognition | `packages/python/hummbl-cognition/` | Published (0.1.0) | Cognitive Ledger Protocol (CLP) and Open Brain server |
 | governed-compression | `packages/python/governed-compression/` | Published (0.1.0) | Governed compression experiments (numpy dependency exception) |
+| hummbl-lint-config | `packages/python/hummbl-lint-config/` | Pre-release (0.1.0) | Shared ruff lint configuration for the HUMMBL fleet |
 
 ## Setup
 
