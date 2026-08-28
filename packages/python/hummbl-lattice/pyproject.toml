@@ -1,0 +1,43 @@
+[project]
+name = "hummbl-lattice"
+version = "0.1.0"
+description = "Domain-specific reasoning operator lattices — validation, rating, and cohort tooling for the Domain120 framework"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+keywords = ["lattice", "domain120", "reasoning", "operators", "triz", "kappa", "validation", "hummbl"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-lattice/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-lattice/"
+
+[project.scripts]
+hummbl-lattice = "hummbl_lattice.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=8.3.4,<10.0", "ruff>=0.4,<1.0"]
+
+[build-system]
+requires = ["setuptools>=61.0,<80.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hummbl_lattice*"]

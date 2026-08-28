@@ -1,0 +1,38 @@
+{
+  "title": "hummbl-lattice: Domain-Specific Reasoning Operator Lattices — Validation, Rating, and Cohort Tooling",
+  "description": "Python library for building, validating, and rating Domain120 lattices — domain-specific reasoning operator sets that generalize TRIZ's 40-principle structure across arbitrary domains of practice. Provides lattice data models, a validator with 6 ratification checks, a Fleiss' kappa calculator for inter-rater reliability (Severe Test 2), and CLI tooling. Stdlib-only, zero third-party dependencies. Part of the HUMMBL governance infrastructure program.",
+  "creators": [
+    {
+      "name": "Bowlby, Reuben",
+      "orcid": "0009-0002-5620-1103",
+      "affiliation": "HUMMBL"
+    }
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "reasoning operators",
+    "domain-specific knowledge",
+    "TRIZ",
+    "cognitive transformations",
+    "knowledge engineering",
+    "AI governance",
+    "inter-rater reliability",
+    "Fleiss kappa",
+    "lattice validation"
+  ],
+  "related_identifiers": [
+    {
+      "scheme": "url",
+      "identifier": "https://github.com/hummbl-io/oss",
+      "relation": "isSupplementTo"
+    },
+    {
+      "scheme": "url",
+      "identifier": "https://pypi.org/project/hummbl-lattice/",
+      "relation": "isIdenticalTo"
+    }
+  ],
+  "access_right": "open",
+  "upload_type": "software",
+  "version": "0.1.0"
+}

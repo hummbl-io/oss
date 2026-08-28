@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+title: "hummbl-lattice: Domain-Specific Reasoning Operator Lattices"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: Reuben
+    family-names: Bowlby
+    orcid: "https://orcid.org/0009-0002-5620-1103"
+    affiliation: HUMMBL
+version: 0.1.0
+date-released: "2026-08-19"
+license: Apache-2.0
+repository-code: "https://github.com/hummbl-io/oss"
+keywords:
+  - reasoning operators
+  - domain-specific knowledge
+  - TRIZ
+  - cognitive transformations
+  - knowledge engineering
+  - AI governance
+  - inter-rater reliability
+  - Fleiss kappa
+abstract: >-
+  Python library for building, validating, and rating Domain120 lattices —
+  domain-specific reasoning operator sets that generalize TRIZ's 40-principle
+  structure across arbitrary domains of practice. Provides lattice data models,
+  a validator with 6 ratification checks, a Fleiss' kappa calculator for
+  inter-rater reliability (Severe Test 2), and CLI tooling.
