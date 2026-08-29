@@ -8,6 +8,7 @@ name: PyPI Download Tracker
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: pypi-download-tracker
@@ -20,12 +21,22 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          fetch-depth: 0
           persist-credentials: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.13"
+
+      - name: Use download data branch
+        run: |
+          if git fetch origin data/pypi-downloads:data/pypi-downloads; then
+            git switch data/pypi-downloads
+            git merge --no-edit origin/main
+          else
+            git switch -c data/pypi-downloads
+          fi
 
       - name: Collect today's download stats
         run: python tools/scripts/pypi_download_tracker.py
@@ -53,7 +64,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "chore: daily PyPI download stats $(date -u +%Y-%m-%d)"
-            git push
+            git push origin data/pypi-downloads
           fi
 
       - name: Print trend report

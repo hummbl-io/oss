@@ -44,7 +44,8 @@ per-language publishing workflow.
 
 Daily PyPI download stats are collected automatically by
 [`tools/scripts/pypi_download_tracker.py`](tools/scripts/pypi_download_tracker.py)
-and stored in [`tools/data/pypi-downloads.csv`](tools/data/pypi-downloads.csv).
+and stored on the
+[`data/pypi-downloads` branch](https://github.com/hummbl-io/oss/blob/data/pypi-downloads/tools/data/pypi-downloads.csv).
 A GitHub Actions workflow runs daily at 12:00 UTC, appends a snapshot, and
 auto-creates an issue labeled `adoption-signal` if download patterns deviate
 from the established baseline (spikes, sustained growth, or new activity on
