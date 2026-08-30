@@ -59,7 +59,10 @@ class TestKappaCalculator:
 
     def test_perfect_agreement(self):
         """If all raters agree, kappa should be high."""
-        path = tempfile.mktemp(suffix=".csv")
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".csv", delete=False, encoding="utf-8"
+        ) as f:
+            path = f.name
         try:
             with open(path, "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
@@ -78,7 +81,10 @@ class TestKappaCalculator:
         """If raters are random, kappa should be near 0."""
         import random
         random.seed(123)
-        path = tempfile.mktemp(suffix=".csv")
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".csv", delete=False, encoding="utf-8"
+        ) as f:
+            path = f.name
         try:
             with open(path, "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
