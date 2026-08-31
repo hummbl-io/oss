@@ -208,6 +208,7 @@ amendments.
 | 2026-08-21 | Document cost governor as commons-protection mechanism | GOVSIM (arXiv 2404.16698) validates runtime cost governance as necessary for sustainable fleet operation |
 | 2026-08-31 | Point fleet mapping at `docs/STANDARDS-CROSSWALK.md` | Engineering-mapping index for IETF / NIST AI RMF / ISO 42001 (ADR-001 / LANDING-013). Does not rewrite this file's IETF cell. |
 | 2026-08-31 | Pointer only: mapped-family primitive walk + Microsoft ACS coverage matrix | See `docs/STANDARDS-CROSSWALK-MAPPED.md` and `packages/python/hummbl-governance/docs/coverage/microsoft-acs.md`. Open question 4 (ACS verdicts on the circuit breaker) remains open. |
+| 2026-08-31 | Pointer only: standards Rumsfeld map | See `docs/STANDARDS-RUMSFELD.md`. Organizing index (KK/KU/UK/UU). Does not decide open question 4 or resolve named unknown-knowns. |
 
 ---
 

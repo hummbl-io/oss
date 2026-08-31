@@ -4,6 +4,7 @@
 **Date:** 2026-08-31
 **Last reviewed:** 2026-08-31
 **Scope:** primitive↔family overlay for six families that already have ADR-001 coverage matrices
+**Organizing map:** [`docs/STANDARDS-RUMSFELD.md`](./STANDARDS-RUMSFELD.md) (KK/KU/UK/UU index for this walk and the first-touch coverage files). Not a replacement.
 **Sibling:** [`docs/STANDARDS-CROSSWALK.md`](./STANDARDS-CROSSWALK.md) (IETF / NIST AI RMF / ISO 42001). That path **404s on `main`**; it exists only on PR 92. This file is still the right landing path for the already-mapped-family walk.
 
 This file does **not** replace the per-framework coverage matrices. Those remain the complete control-row workpapers. This is a second primitive-level walk: one row per inventory entry, IDs copied from the cited coverage files only.
@@ -31,6 +32,7 @@ HUMMBL version on this tree: **hummbl-governance v1.4.2** (`packages/python/humm
 | [`packages/python/hummbl-governance/docs/coverage/owasp-agentic.md`](../packages/python/hummbl-governance/docs/coverage/owasp-agentic.md) | OWASP Agentic Top 10 (ASI01–ASI10) | Last reviewed **2026-05-14**, v**0.8.0** |
 | [`docs/STANDARDS-CROSSWALK.md`](./STANDARDS-CROSSWALK.md) | Sibling walk: IETF / NIST AI RMF / ISO 42001 | **404 on `main`**; PR 92 only |
 | [`packages/python/hummbl-governance/docs/coverage/ietf.md`](../packages/python/hummbl-governance/docs/coverage/ietf.md) | IETF ADR-001 matrix (PR 92) | First SCITT / RFC 9943 mapping; **not a column here** |
+| [`docs/STANDARDS-RUMSFELD.md`](./STANDARDS-RUMSFELD.md) | Organizing 2×2 (KK/KU/UK/UU) | Index of this walk + first-touch files; not a score |
 | [`packages/python/hummbl-governance/docs/coverage/README.md`](../packages/python/hummbl-governance/docs/coverage/README.md) | Mechanical index | Counts from `scripts/count_coverage_rows.py` only |
 
 This walk does **not** silently upgrade those files’ ✅ counts, last-reviewed dates, or version headers, and it does **not** fork them. Four of the six column sources are 2026-05-14 / v0.8.0; `owasp-llm.md` is 2026-05-14 / **v1.2.2**. P27–P34 stay `silent` in every column because those modules are not named in the cited files.

@@ -172,6 +172,7 @@ A row is **validated** when ALL of its evidence references resolve to an existin
 
 - [STANDARDS-CROSSWALK.md](../../../../../docs/STANDARDS-CROSSWALK.md) — fleet-level primitive↔IETF/NIST/ISO engineering mapping (2026-08-31); does not replace these control-row matrices
 - [ADR-001 — Coverage matrix, not self-grade](../adr/ADR-001-coverage-matrix-not-self-grade.md)
+- [STANDARDS-RUMSFELD.md](../../../../../docs/STANDARDS-RUMSFELD.md) — organizing KK/KU/UK/UU map for the mapped walk and 2026-08-31 first-touch files (not a score; not a replacement for these matrices)
 - [STANDARDS-CROSSWALK-MAPPED.md](../../../../../docs/STANDARDS-CROSSWALK-MAPPED.md) — primitive↔family overlay for already-mapped EU / GDPR / ISO 27001 / NIST CSF / OWASP families (sibling to `docs/STANDARDS-CROSSWALK.md`)
 - RFC 8693 token-exchange `act` / `may_act` is a follow-on for `ietf.md` (PR 92); it is not in this PR and is not a row in [`mcp-authorization.md`](./mcp-authorization.md)
 - [Evidence Validation Report](./EVIDENCE_VALIDATION.md) — current hardening state per matrix
