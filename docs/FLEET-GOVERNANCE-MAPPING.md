@@ -205,6 +205,7 @@ amendments.
 | 2026-08-21 | Preemptive EU AI Act provider/deployer self-classification | Article 25 cannot absorb fleet orchestration; self-classification is lower risk than waiting for regulatory interpretation |
 | 2026-08-21 | Audit delegation tokens against IETF HDP/DCT drafts | Align wire format before drafts ratify; avoid costly refactoring (see DELEGATION-IETF-GAP-ANALYSIS.md) |
 | 2026-08-21 | Document cost governor as commons-protection mechanism | GOVSIM (arXiv 2404.16698) validates runtime cost governance as necessary for sustainable fleet operation |
+| 2026-08-31 | Point fleet mapping at `docs/STANDARDS-CROSSWALK.md` | Engineering-mapping index for IETF / NIST AI RMF / ISO 42001 (ADR-001 / LANDING-013). Does not rewrite this file's IETF cell. |
 
 ---
 

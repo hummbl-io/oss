@@ -4,7 +4,7 @@ Every applicable control across every named framework, row-by-row.
 Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness, not score**.
 
 **HUMMBL version**: hummbl-governance v0.8.0
-**Last index update**: 2026-06-25
+**Last index update**: 2026-08-31 (IETF matrix added; remaining matrices last reviewed 2026-05-14 / 2026-06-25 against v0.8.0)
 **Coverage state legend**: ✅ Fulfilled · 🟡 Partial · ⚪ Boundary · ⛔ Out of scope
 
 ---
@@ -21,6 +21,7 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 | ISO/IEC 42001:2023 | 38 Annex A controls + Clauses 4–10 | 45 | 25 | 18 | 2 | 0 | [`iso-42001.md`](./iso-42001.md) |
 | NIST AI RMF 1.0 | ~70 subcategories (4 Functions) | 72 | 38 | 27 | 7 | 0 | [`nist-ai-rmf.md`](./nist-ai-rmf.md) |
 | NIST CSF 2.0 | 106 subcategories (6 Functions) | 106 | 56 | 38 | 12 | 0 | [`nist-csf.md`](./nist-csf.md) |
+| IETF (live I-Ds + RFC 9943/9942; DCT not IETF) | 15 named artifacts (2026-08-31 Datatracker snapshot) | 15 | 0 | 7 | 6 | 0 | [`ietf.md`](./ietf.md) |
 | SOC 2 (TSC 2017/2022) | ~61 TSC criteria (CC + A + PI + C + P) | 51 | 33 | 14 | 4 | 0 | [`soc2.md`](./soc2.md) |
 | OWASP LLM Top 10 (2025) | 10 risk categories | 10 | 8 | 2 | 0 | 0 | [`owasp-llm.md`](./owasp-llm.md) |
 | Colorado AI Act (SB 24-205) | 18 obligations | 18 | 16 | 2 | 0 | 0 | [`colorado-ai-act.md`](./colorado-ai-act.md) |
@@ -110,9 +111,9 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 | Hong Kong Ethical AI Framework (PCPD) | 13 obligations (7 principles) | 13 | 13 | 0 | 0 | 0 | [`hong-kong-ai-guidelines.md`](./hong-kong-ai-guidelines.md) |
 | Belgium AI Strategy | 15 obligations (6 strategic areas) | 15 | 10 | 3 | 2 | 0 | [`belgium-ai-strategy.md`](./belgium-ai-strategy.md) |
 | Ophthalmic AI Screening (HAW-2026-001) | 38 controls (EU AI Act Annex III, FDA SaMD, NIST AI RMF, ISO 42001, HIPAA) | 38 | 18 | 14 | 6 | 0 | [`ophthalmic-ai.md`](./ophthalmic-ai.md) |
-| **FLEET (95 frameworks)** | **~2862 controls in source standards** | **2862 data rows** | **1520** | **640** | **701** | **1** | — |
+| **FLEET (96 frameworks)** | **~2877 controls in source standards** | **2877 data rows** | **1520** | **647** | **707** | **1** | — |
 
-> **These counts are enumeration evidence, not a score.** "Rows" is the count of data rows in each matrix file (some matrices include both Clause-level and Annex/control-level rows, so row count may exceed the source-standard surface count). ✅ + 🟡 + ⚪ + Unmarked = Rows for each matrix. The **Unmarked** column counts data rows in the matrix file that do NOT yet have a state glyph assigned — these are drafting gaps per ADR-001 row invariant (every row must be ✅/🟡/⚪/⛔). Surfacing them is intentional: PR #28 review identified silent unmarked-row dropping as a Goodhart channel (`feedback_no_self_grades_on_public_surface.md`). There is no implied "258 / 661 = 39%" coverage rate — the denominator includes 206 ⚪ Boundary rows (control is customer/regulator responsibility) and 42 Unmarked rows (drafting gap, not implemented coverage). Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md), HUMMBL does not publish self-issued grades against external frameworks; the matrices are row-by-row receipts.
+> **These counts are enumeration evidence, not a score.** "Rows" is the count of data rows in each matrix file (some matrices include both Clause-level and Annex/control-level rows, so row count may exceed the source-standard surface count). ✅ + 🟡 + ⚪ + ⛔ + Unmarked = Rows for each matrix. The **Unmarked** column counts data rows in the matrix file that do NOT yet have a state glyph assigned — these are drafting gaps per ADR-001 row invariant (every row must be ✅/🟡/⚪/⛔). Surfacing them is intentional: PR #28 review identified silent unmarked-row dropping as a Goodhart channel (`feedback_no_self_grades_on_public_surface.md`). There is no implied coverage rate. Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md), HUMMBL does not publish self-issued grades against external frameworks; the matrices are row-by-row receipts.
 
 ---
 
@@ -120,7 +121,7 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 
 These matrices are internal coverage scaffolds, not public claim support yet. Do not use the aggregate counts or headline language externally until row counts, evidence cells, command examples, and boundary classifications pass validation plus operator/legal review.
 
-The **1520 ✅ Fulfilled** rows concentrate in the technical / measurement / access-control / audit-trail / lifecycle / data-governance surfaces where software primitives do the work. The **640 🟡 Partial** rows are where HUMMBL provides the technical primitive and the customer organization provides the policy, contract, or program completion. The **701 ⚪ Boundary** rows are organizational structures, regulatory institutions, civil/criminal liability mechanisms, member-state legislative regimes, and physical-security controls that no software product can implement. (Counts mechanically generated; see [`scripts/count_coverage_rows.py`](../../scripts/count_coverage_rows.py).)
+The **1520 ✅ Fulfilled** rows concentrate in the technical / measurement / access-control / audit-trail / lifecycle / data-governance surfaces where software primitives do the work. The **647 🟡 Partial** rows are where HUMMBL provides the technical primitive and the customer organization provides the policy, contract, or program completion. The **707 ⚪ Boundary** rows are organizational structures, regulatory institutions, civil/criminal liability mechanisms, member-state legislative regimes, and physical-security controls that no software product can implement. (Counts mechanically generated; see [`scripts/count_coverage_rows.py`](../../scripts/count_coverage_rows.py).)
 
 > **Note on count discrepancy:** The fleet total of 1520 ✅ Fulfilled rows (from `count_coverage_rows.py`) counts all rows marked with the ✅ glyph. The [`EVIDENCE_VALIDATION.md`](./EVIDENCE_VALIDATION.md) report shows 1496 validated fulfilled rows — a stricter count that includes only ✅ rows whose evidence references actually resolve to existing artifacts. The delta is partly in `eu-ai-act.md` (Annex rows III, IV, V, VI, VIII, IX that carry the ✅ glyph but have no backtick-quoted evidence references) and partly in `ophthalmic-ai.md` (draft skeleton, evidence cells not yet validated). These are hardening gaps — the rows are marked fulfilled but lack resolvable evidence artifacts. Both numbers are correct for their respective purposes.
 
@@ -162,6 +163,7 @@ A row is **validated** when ALL of its evidence references resolve to an existin
 
 ## Related artifacts
 
+- [STANDARDS-CROSSWALK.md](../../../../../docs/STANDARDS-CROSSWALK.md) — fleet-level primitive↔IETF/NIST/ISO engineering mapping (2026-08-31); does not replace these control-row matrices
 - [ADR-001 — Coverage matrix, not self-grade](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 - [Evidence Validation Report](./EVIDENCE_VALIDATION.md) — current hardening state per matrix
 - [Compliance-mapper module](../../hummbl_governance/compliance_mapper.py) — runtime evidence generators + matrix validator
