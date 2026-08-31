@@ -11,10 +11,12 @@ validator. They are not claimed comprehension results.
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import os
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 
@@ -144,8 +146,12 @@ class TestUnrunTemplate(unittest.TestCase):
         self.assertFalse(computed["all_boundaries_at_least_1"])
 
     def test_unrun_cli_exits_zero(self):
-        code = validator.main([str(TEMPLATE_PATH)])
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            code = validator.main([str(TEMPLATE_PATH)])
         self.assertEqual(code, 0)
+        self.assertIn("UNRUN preparation", stdout.getvalue())
+        self.assertIn("threshold_met: false", stdout.getvalue())
 
     def test_unrun_with_participants_is_rejected(self):
         data = json.loads(TEMPLATE_PATH.read_text(encoding="utf-8"))
@@ -235,7 +241,11 @@ class TestFiveParticipantReceipt(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "passing.json"
             path.write_text(json.dumps(receipt), encoding="utf-8")
-            self.assertEqual(validator.main([str(path)]), 0)
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                code = validator.main([str(path)])
+            self.assertEqual(code, 0)
+            self.assertIn("threshold_met: true", stdout.getvalue())
 
     def test_cli_aggregate_mismatch_exits_one(self):
         receipt = _base_receipt(failing_high_score_participants())
@@ -243,7 +253,12 @@ class TestFiveParticipantReceipt(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "mismatch.json"
             path.write_text(json.dumps(receipt), encoding="utf-8")
-            self.assertEqual(validator.main([str(path)]), 1)
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                code = validator.main([str(path)])
+            self.assertEqual(code, 1)
+            self.assertIn("aggregate.threshold_met", stdout.getvalue())
+            self.assertIn('"threshold_met": false', stdout.getvalue())
 
 
 class TestFieldValidation(unittest.TestCase):
@@ -334,7 +349,11 @@ class TestFieldValidation(unittest.TestCase):
         self.assertTrue(any("exactly 5" in issue for issue in issues))
 
     def test_missing_file_exits_one(self):
-        self.assertEqual(validator.main(["/tmp/does-not-exist-landing-receipt.json"]), 1)
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            code = validator.main(["/tmp/does-not-exist-landing-receipt.json"])
+        self.assertEqual(code, 1)
+        self.assertIn("file not found", stderr.getvalue())
 
 
 class TestProtocolDoesNotClaimResults(unittest.TestCase):
