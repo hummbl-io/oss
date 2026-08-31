@@ -59,7 +59,7 @@ void ex-post with unfavorable interpretations).
 | **Kill switch** | Govern 1.7 (decommissioning) | Annex A (lifecycle controls) | Art. 14 (human oversight) | FAccT 2024 — real-time monitoring | Not standardized |
 | **Circuit breaker** | Manage 1.1 (proceed/stop decision) | Clause 8 (operational controls) | Art. 9 (risk mgmt), Art. 15 (robustness) | Swiss Cheese Model (arXiv 2408.02205) | Microsoft ACS `deny`/`escalate` verdicts |
 | **Cost governor** | Govern 1.3 (risk tolerance) | Clause 6 (planning) | Art. 9 (risk mgmt) | GOVSIM commons failure (arXiv 2404.16698) | Not standardized |
-| **Delegation tokens** | Govern 2.1 (roles/responsibilities) | Annex A (accountability) | Art. 25 (value chain responsibilities) | FAccT 2024 — agent identifiers | HDP (IETF provenance); DeepMind DCT (paper, not IETF); AAT (`draft-niyikiza-oauth-attenuating-agent-tokens-01`) |
+| **Delegation tokens** | Govern 2.1 (roles/responsibilities) | Annex A (accountability) | Art. 25 (value chain responsibilities) | FAccT 2024 — agent identifiers | HDP (IETF provenance); DeepMind DCT (paper, not IETF); AAT (`draft-niyikiza-oauth-attenuating-agent-tokens-01`); `delegation_chain` JWT (`draft-liu-oauth-chain-delegation-00`) |
 | **Agent fleet as unit** | **No coverage** | **No coverage** | **No coverage** | Federated governance (emerging) | ADCS spec |
 
 ### Sources
@@ -104,6 +104,7 @@ Related work is three layers, not one IETF token:
 - **HDP (Human Delegation Provenance)** — IETF provenance draft
 - **DCT (Delegation Capability Tokens)** — DeepMind paper (not IETF)
 - **AAT** — `draft-niyikiza-oauth-attenuating-agent-tokens-01`
+- **`delegation_chain` JWT** — `draft-liu-oauth-chain-delegation-00`
 
 HUMMBL's design principles match (time-bounding, least-privilege, signed)
 but the wire format diverges (HMAC-SHA256 symmetric vs. Ed25519
