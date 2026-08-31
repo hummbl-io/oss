@@ -27,7 +27,7 @@ classifiers = [
 # The package performs array operations that fundamentally require numpy.
 dependencies = [
   "numpy>=2.4.6",
-  "hummbl-governance>=1.4.1",
+  "hummbl-governance>=1.4.2",
 ]
 
 [project.urls]
