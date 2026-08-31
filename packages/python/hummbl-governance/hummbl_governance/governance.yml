@@ -10,7 +10,7 @@
 
 package:
   name: hummbl-governance
-  version: 1.4.1
+  version: 1.4.2
   license: Apache-2.0
   publisher: HUMMBL, LLC
   description: Governance primitives for AI agent orchestration
@@ -79,4 +79,4 @@ provenance:
   license: Apache-2.0
   supply_chain_risk: none
   dependencies: zero
-  tests: 2314
+  tests: 2463  # public oss CI passed on Python 3.13 (3 skipped); not a production-use count; not a 3.11–3.13 matrix
