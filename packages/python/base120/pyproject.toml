@@ -22,6 +22,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+keywords = ["mental-models", "reasoning", "structured-thinking", "cognitive-operators", "decision-making"]
 
 [project.urls]
 Homepage = "https://hummbl.io"

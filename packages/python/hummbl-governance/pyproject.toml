@@ -52,6 +52,7 @@ hummbl-physical-mcp = "mcp_physical:main"
 Homepage = "https://github.com/hummbl-io/oss"
 Repository = "https://github.com/hummbl-io/oss"
 Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-governance/"
 
 [tool.setuptools.packages.find]
 include = ["hummbl_governance*"]
