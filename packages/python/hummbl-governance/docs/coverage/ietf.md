@@ -68,7 +68,9 @@ Investigated on this tree (hummbl-governance v1.4.2):
 4. **Signing is HMAC-SHA256 with a shared secret** (`HUMMBL_SIGNING_SECRET` or `DCT_SECRET`). AAT-01: "Symmetric algorithms (HS256, HS384, HS512) MUST NOT be used for AAT". WIMSE workload-creds-02: algorithms used with symmetric keys MUST NOT be used on WIT. Those MUSTs are unmet.
 5. **Receipts are HMAC JSON/TSV**, not COSE_Sign1 and not RFC 9942 receipts (not header params 394 `receipts` / 395 `vds` / 396 `vdp`).
 
-This matrix does not enumerate EU AI Act / Regulation (EU) 2026/1744, NIST AI 600-1 Action IDs, or NISTIR 8605D. Those are foreign overlays on [`docs/STANDARDS-CROSSWALK.md`](../../../../../docs/STANDARDS-CROSSWALK.md). COSAiS 8605D has no overlay control IDs yet (targeted 2027); no numbers are invented here.
+This matrix is the **first SCITT / RFC 9943 mapping in this corpus** (none existed in `docs/coverage/` before 2026-08-31). HMAC receipts remain Partial, not Fulfilled.
+
+This matrix does not enumerate EU AI Act / Regulation (EU) 2026/1744, NIST AI 600-1 Action IDs, or NISTIR 8605D. Those are foreign overlays on [`docs/STANDARDS-CROSSWALK.md`](../../../../../docs/STANDARDS-CROSSWALK.md). COSAiS 8605D has no overlay control IDs yet (targeted 2027); no numbers are invented here. Annex III / Art. 6(2) Chapter III §§1–3 high-risk application is **2 December 2027** per Recital 40; this file does not treat 2 August 2026 as the current high-risk date.
 
 ## Draft coverage summary (not public claim)
 

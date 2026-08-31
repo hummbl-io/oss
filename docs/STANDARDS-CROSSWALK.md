@@ -3,6 +3,8 @@
 **Status:** internal engineering mapping
 **Date:** 2026-08-31
 **Scope:** IETF (named live drafts/RFCs), NIST AI RMF 1.0, ISO/IEC 42001:2023
+**Landing path (do not change):** `docs/STANDARDS-CROSSWALK.md` in **hummbl-io/oss**. This is not a provider-governance file. That repo is an orphaned 2026-08-15 recovery; it has no later `STANDARDS_CROSSWALK` than April v0.1.
+
 **Supersedes:** April 2026 `STANDARDS_CROSSWALK_v0.1` (provider-governance, 8 capabilities at header level) for IETF / NIST / ISO. CMMC is out of this file.
 
 This is the fleet-level index April asked for. It does **not** replace the per-framework coverage matrices. Those remain the complete control-row workpapers.
@@ -23,7 +25,7 @@ HUMMBL version on this tree: **hummbl-governance v1.4.2** (`packages/python/humm
 |---|---|---|
 | [`packages/python/hummbl-governance/docs/coverage/nist-ai-rmf.md`](../packages/python/hummbl-governance/docs/coverage/nist-ai-rmf.md) | Full NIST AI RMF 1.0 subcategory rows | Last reviewed **2026-05-14**, HUMMBL v**0.8.0**, **draft** |
 | [`packages/python/hummbl-governance/docs/coverage/iso-42001.md`](../packages/python/hummbl-governance/docs/coverage/iso-42001.md) | ISO/IEC 42001:2023 clauses 4–10 + Annex A | Same draft caveat (2026-05-14 / v0.8.0) |
-| [`packages/python/hummbl-governance/docs/coverage/ietf.md`](../packages/python/hummbl-governance/docs/coverage/ietf.md) | ADR-001 matrix: one row per named live IETF artifact | Added 2026-08-31; IETF was missing from the coverage folder |
+| [`packages/python/hummbl-governance/docs/coverage/ietf.md`](../packages/python/hummbl-governance/docs/coverage/ietf.md) | ADR-001 matrix: one row per named live IETF artifact | Added 2026-08-31; **first SCITT / RFC 9943 mapping in this corpus** (none existed before). IETF was missing from the coverage folder |
 | [`docs/DELEGATION-IETF-GAP-ANALYSIS.md`](./DELEGATION-IETF-GAP-ANALYSIS.md) | HMAC vs HDP/AAT/AIMS narrative | Use whichever copy is **on this tree**. Do not fight PR 89 if that rewrite lands later. |
 | [`docs/FLEET-GOVERNANCE-MAPPING.md`](./FLEET-GOVERNANCE-MAPPING.md) | Fleet-as-unit positioning | This crosswalk does not rewrite it |
 | [`packages/python/hummbl-governance/docs/coverage/README.md`](../packages/python/hummbl-governance/docs/coverage/README.md) | Mechanical index of all coverage matrices | Counts from `scripts/count_coverage_rows.py` only |
@@ -45,7 +47,7 @@ Do not invent versions or authorship.
 
 These are citations only. They do not get columns in §5.
 
-- **EU AI Act / Digital Omnibus (foreign).** Regulation (EU) 2026/1744 (Digital Omnibus on AI), 8 July 2026, OJ L 24.7.2026, ELI [http://data.europa.eu/eli/reg/2026/1744/oj](http://data.europa.eu/eli/reg/2026/1744/oj). **Recital 40** of that instrument (official EUR-Lex HTML) sets Chapter III Sections 1–3 application to **2 December 2027** for systems high-risk under Art. 6(2) and Annex III, and **2 August 2028** for Art. 6(1) and Annex I. The general application date **2 August 2026 was not moved**. Control rows remain in [`eu-ai-act.md`](../packages/python/hummbl-governance/docs/coverage/eu-ai-act.md) (last reviewed 2026-05-14, before OJ publication).
+- **EU AI Act / Digital Omnibus (foreign).** Regulation (EU) 2026/1744 (Digital Omnibus on AI), 8 July 2026, OJ L 24.7.2026, ELI [http://data.europa.eu/eli/reg/2026/1744/oj](http://data.europa.eu/eli/reg/2026/1744/oj). **Recital 40** (official EUR-Lex HTML) is the current high-risk schedule for this walk: Chapter III Sections 1–3 apply **2 December 2027** for systems high-risk under Art. 6(2) and Annex III, and **2 August 2028** for Art. 6(1) and Annex I. **Do not treat 2 August 2026 as the current Annex III / Art. 6(2) high-risk date** — that “Big Day” reading is stale (the date has passed). Recital 40 records that the **general** application date 2 August 2026 was not moved; that is not the high-risk Chapter III §§1–3 date for Annex III. Control rows remain in [`eu-ai-act.md`](../packages/python/hummbl-governance/docs/coverage/eu-ai-act.md) (last reviewed 2026-05-14, before OJ publication).
 - **COSAiS / NISTIR 8605D.** NISTIR 8605D “Using Agentic AI: Single Agent and Multi-Agent” — series targeted to finalize in **2027**; **no overlay control IDs yet**. No 8605D numbers are invented here. Fleet-as-unit remains `silent` until that series publishes IDs.
 
 ## 4. Coverage legend for this file
@@ -123,10 +125,13 @@ INCITS/AI community walks (not this matrix): ISO/IEC 23894 and ISO/IEC 42005 on 
 2. **No append-only hop chain in the token.** `DelegationToken` is a single JSON object. `DelegationContext` tracks in-process depth; it is not an HDP/AAT/asor hop array carried on the wire.
 3. **`authenticate_token` does not evaluate caveats.** Caveats are stored on the token and evaluated by `CapabilityFence` (P13) when a `caveat_validator` is supplied. Callers that only call `authenticate_token` / `validate_token` do not enforce caveats.
 4. **GAP-001** — no production-use receipt in `landing-claims.json`. Package `docs/public-claims.md` still lists production-use as “needs receipt.” This mapping does not mint that receipt.
-5. **ISO 42001 certification strategy is unresolved.** This file does not decide whether to pursue registrar certification. ISO 42001 remains an organizational AIMS; the library can at most supply evidence substrate. **A.10.4** is not mapped: in-tree `iso-42001.md` stops at A.10.3; the paid PDF was not opened, so no A.10.4 title is asserted.
+5. **ISO 42001 certification strategy is unresolved.** [`FLEET-GOVERNANCE-MAPPING.md`](./FLEET-GOVERNANCE-MAPPING.md) (2026-08-21 §4.1) still recommends that HUMMBL pursue ISO 42001 certification. Coverage matrices and LANDING-013 say HUMMBL is not a certification body and the AIMS is the customer’s. This walk **names** that contradiction and does **not** resolve it (no rewrite of the fleet doc; no cert-strategy decision). **A.10.4** remains unverified: in-tree `iso-42001.md` stops at A.10.3; the paid PDF was not opened, so no A.10.4 title is asserted.
 6. **Coverage matrices last reviewed 2026-05-14 against hummbl-governance v0.8.0.** NIST and ISO row evidence in those files may lag v1.4.2 primitives (P27–P34). `eu-ai-act.md` predates OJ publication of Regulation (EU) 2026/1744. Re-review is a follow-on; this PR does not rewrite those ~95 files.
 7. **IETF agent-delegation drafts are not WG-adopted.** Treating them as ratifiable MUSTs for product crypto is premature; treating HMAC as satisfying those MUSTs is false. Both remain true. WIMSE WIT/WIC/identifier remain identity credentials, not a substitute for HDP/AAT hop protocols.
 8. **COSAiS / NISTIR 8605D** has no overlay control IDs yet (series targeted to finalize in 2027). Fleet-as-unit stays `silent` in IETF, NIST AI RMF 1.0 Core, and ISO 42001 until that series publishes IDs. No 8605D numbers are invented here.
+9. **Founder-mode GaaS landscape treated 2 August 2026 as the EU AI Act high-risk “Big Day.”** That date has passed. Current high-risk schedule for Annex III / Art. 6(2) Chapter III §§1–3 is **2 December 2027** per Recital 40 of Regulation (EU) 2026/1744. This walk does not leave “Aug 2026 high-risk” as current. The founder-mode GaaS landscape artifact is **not rewritten here**.
+10. **No prior SCITT / RFC 9943 mapping in this corpus.** [`ietf.md`](../packages/python/hummbl-governance/docs/coverage/ietf.md) is the first. HMAC receipts remain `partial` (not COSE_Sign1 / not labels 394/395/396). This PR does not invent a SCITT profile.
+11. **Main `FLEET-GOVERNANCE-MAPPING.md` / `DELEGATION-IETF-GAP-ANALYSIS.md` still treat DCT as IETF** until PR 89 merges. This walk keeps **DCT is not IETF** and does not reintroduce the HDP/DCT/`delegation_chain` lump. PR 89 owns the fleet/delegation rewrite; this PR does not fight it.
 
 ## 8. Product language (from April v0.1, still in force)
 
