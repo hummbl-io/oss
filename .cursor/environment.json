@@ -1,0 +1,5 @@
+{
+  "name": "hummbl-io/oss",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh"
+}
