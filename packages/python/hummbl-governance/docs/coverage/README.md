@@ -3,7 +3,7 @@
 Every applicable control across every named framework, row-by-row.
 Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness, not score**.
 
-**HUMMBL version**: hummbl-governance v0.8.0 (existing matrices last reviewed 2026-05-14; four 2026-08-31 first-touch files mapped against v1.4.2)
+**HUMMBL version**: hummbl-governance v0.8.0 (existing matrices last reviewed 2026-05-14; seven 2026-08-31 first-touch files mapped against v1.4.2)
 **Last index update**: 2026-08-31
 **Coverage state legend**: ✅ Fulfilled · 🟡 Partial · ⚪ Boundary · ⛔ Out of scope
 
@@ -115,7 +115,10 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 | Microsoft ACS 0.3.1-beta | 8 intervention points + 5 verdicts + 3 properties | 16 | 0 | 12 | 4 | 0 | [`microsoft-acs.md`](./microsoft-acs.md) |
 | CMMC 2.0 | 14 public domains (practice IDs not invented) | 19 | 0 | 8 | 11 | 0 | [`cmmc-2.md`](./cmmc-2.md) |
 | ISO/IEC 42006:2025 | certification-body competence (not an AIMS control set) | 12 | 0 | 0 | 11 | 0 | [`iso-42006.md`](./iso-42006.md) |
-| **FLEET (99 frameworks)** | **~2923 controls in source standards** | **2923 data rows** | **1520** | **668** | **733** | **1** | — |
+| MCP Authorization (2026-07-28) | RS/client/AS + PRM/CIMD/DCR + token/errors + STDIO-vs-HTTP | 13 | 0 | 1 | 12 | 0 | [`mcp-authorization.md`](./mcp-authorization.md) |
+| ETSI EN 304 223 V2.1.1 | 13 principles + 5 phases; TS 104 158-1/2 document-level | 19 | 0 | 10 | 9 | 0 | [`etsi-en-304-223.md`](./etsi-en-304-223.md) |
+| NISTIR 8605 COSAiS | watch only (8605 / A / B / C / 8605D); no overlay IDs | 10 | 0 | 0 | 10 | 0 | [`nistir-8605.md`](./nistir-8605.md) |
+| **FLEET (102 frameworks)** | **~2965 controls in source standards** | **2965 data rows** | **1520** | **679** | **764** | **1** | — |
 
 > **These counts are enumeration evidence, not a score.** "Rows" is the count of data rows in each matrix file (some matrices include both Clause-level and Annex/control-level rows, so row count may exceed the source-standard surface count). ✅ + 🟡 + ⚪ + ⛔ + Unmarked = Rows for each matrix. The **Unmarked** column counts data rows in the matrix file that do NOT yet have a state glyph assigned — these are drafting gaps per ADR-001 row invariant (every row must be ✅/🟡/⚪/⛔). Surfacing them is intentional: PR #28 review identified silent unmarked-row dropping as a Goodhart channel (`feedback_no_self_grades_on_public_surface.md`). There is no implied coverage rate. Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md), HUMMBL does not publish self-issued grades against external frameworks; the matrices are row-by-row receipts.
 
@@ -125,7 +128,7 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 
 These matrices are internal coverage scaffolds, not public claim support yet. Do not use the aggregate counts or headline language externally until row counts, evidence cells, command examples, and boundary classifications pass validation plus operator/legal review.
 
-The **1520 ✅ Fulfilled** rows concentrate in the technical / measurement / access-control / audit-trail / lifecycle / data-governance surfaces where software primitives do the work. The **668 🟡 Partial** rows are where HUMMBL provides the technical primitive and the customer organization provides the policy, contract, or program completion. The **733 ⚪ Boundary** rows are organizational structures, regulatory institutions, civil/criminal liability mechanisms, member-state legislative regimes, and physical-security controls that no software product can implement. (Counts mechanically generated; see [`scripts/count_coverage_rows.py`](../../scripts/count_coverage_rows.py). Existing-matrix ✅ counts were not upgraded in the 2026-08-31 pass.)
+The **1520 ✅ Fulfilled** rows concentrate in the technical / measurement / access-control / audit-trail / lifecycle / data-governance surfaces where software primitives do the work. The **679 🟡 Partial** rows are where HUMMBL provides the technical primitive and the customer organization provides the policy, contract, or program completion. The **764 ⚪ Boundary** rows are organizational structures, regulatory institutions, civil/criminal liability mechanisms, member-state legislative regimes, and physical-security controls that no software product can implement. (Counts mechanically generated; see [`scripts/count_coverage_rows.py`](../../scripts/count_coverage_rows.py). Existing-matrix ✅ counts were not upgraded in the 2026-08-31 pass.)
 
 > **Note on count discrepancy:** The fleet total of 1520 ✅ Fulfilled rows (from `count_coverage_rows.py`) counts all rows marked with the ✅ glyph. The [`EVIDENCE_VALIDATION.md`](./EVIDENCE_VALIDATION.md) report shows 1496 validated fulfilled rows — a stricter count that includes only ✅ rows whose evidence references actually resolve to existing artifacts. The delta is partly in `eu-ai-act.md` (Annex rows III, IV, V, VI, VIII, IX that carry the ✅ glyph but have no backtick-quoted evidence references) and partly in `ophthalmic-ai.md` (draft skeleton, evidence cells not yet validated). These are hardening gaps — the rows are marked fulfilled but lack resolvable evidence artifacts. Both numbers are correct for their respective purposes.
 
@@ -170,6 +173,7 @@ A row is **validated** when ALL of its evidence references resolve to an existin
 - [STANDARDS-CROSSWALK.md](../../../../../docs/STANDARDS-CROSSWALK.md) — fleet-level primitive↔IETF/NIST/ISO engineering mapping (2026-08-31); does not replace these control-row matrices
 - [ADR-001 — Coverage matrix, not self-grade](../adr/ADR-001-coverage-matrix-not-self-grade.md)
 - [STANDARDS-CROSSWALK-MAPPED.md](../../../../../docs/STANDARDS-CROSSWALK-MAPPED.md) — primitive↔family overlay for already-mapped EU / GDPR / ISO 27001 / NIST CSF / OWASP families (sibling to `docs/STANDARDS-CROSSWALK.md`)
+- RFC 8693 token-exchange `act` / `may_act` is a follow-on for `ietf.md` (PR 92); it is not in this PR and is not a row in [`mcp-authorization.md`](./mcp-authorization.md)
 - [Evidence Validation Report](./EVIDENCE_VALIDATION.md) — current hardening state per matrix
 - [Compliance-mapper module](../../hummbl_governance/compliance_mapper.py) — runtime evidence generators + matrix validator
 - Prior partial mapping docs (now starter material, superseded by the matrices above):

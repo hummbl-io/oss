@@ -125,7 +125,7 @@ Every inventory entry gets a row. Support artifacts P23 / P24 / P26 stay `silent
 4. **OWASP files are risk catalogs, not regulations.** `maps` means platform-layer overlap named in those files; application-layer remainder stays customer (LLM01/LLM04 🟡; ASI02/ASI06/ASI09 🟡; ASI05 ⚪).
 5. **ISO 27001 certification and EU AI Act Notified Body assessment remain customer/third-party.** See each matrix header.
 6. **Sibling IETF walk is out of scope.** Do not fight PR 89 (IETF rewrite) or PR 92 (IETF/NIST/ISO primitive crosswalk).
-7. **2026 first-touch families** (CEN-CENELEC JTC 21, Microsoft ACS, CMMC 2.0, ISO/IEC 42006) are **not columns here**. They have new coverage files under `docs/coverage/`.
+7. **2026 first-touch families** (CEN-CENELEC JTC 21, Microsoft ACS, CMMC 2.0, ISO/IEC 42006, MCP Authorization 2026-07-28, ETSI EN 304 223, NISTIR 8605 COSAiS) are **not columns here**. They have new coverage files under `docs/coverage/`.
 
 ## 8. Product language
 
