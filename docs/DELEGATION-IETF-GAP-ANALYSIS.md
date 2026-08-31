@@ -1,5 +1,7 @@
 # Delegation IETF Gap Analysis
 
+*Supersedes the 2026-08-21 fleet/Devin audit at this path. That audit treated DeepMind DCT and an OAuth chain-delegation draft as IETF peers; this revision uses live Datatracker status as of 2026-08-31 (HDP-01, AIMS-03, AAT-01).*
+
 **Status:** Analysis (not a claim of alignment or certification)
 **Date:** 2026-08-31
 **Scope:** HMAC-SHA256 `DelegationToken` in `hummbl-governance` 1.4.2 vs live IETF/IRTF drafts for agent identity, capability attenuation, and delegation provenance
