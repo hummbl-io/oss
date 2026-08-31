@@ -4,7 +4,7 @@
 **Date:** 2026-08-31
 **Last reviewed:** 2026-08-31
 **Scope:** primitive↔family overlay for six families that already have ADR-001 coverage matrices
-**Sibling:** [`docs/STANDARDS-CROSSWALK.md`](./STANDARDS-CROSSWALK.md) (IETF / NIST AI RMF / ISO 42001; may land via PR 92 — path is reserved even if that file is not on this tree)
+**Sibling:** [`docs/STANDARDS-CROSSWALK.md`](./STANDARDS-CROSSWALK.md) (IETF / NIST AI RMF / ISO 42001). That path **404s on `main`**; it exists only on PR 92. This file is still the right landing path for the already-mapped-family walk.
 
 This file does **not** replace the per-framework coverage matrices. Those remain the complete control-row workpapers. This is a second primitive-level walk: one row per inventory entry, IDs copied from the cited coverage files only.
 
@@ -27,13 +27,15 @@ HUMMBL version on this tree: **hummbl-governance v1.4.2** (`packages/python/humm
 | [`packages/python/hummbl-governance/docs/coverage/gdpr.md`](../packages/python/hummbl-governance/docs/coverage/gdpr.md) | GDPR 99 articles | Same draft caveat (2026-05-14 / v0.8.0) |
 | [`packages/python/hummbl-governance/docs/coverage/iso-27001.md`](../packages/python/hummbl-governance/docs/coverage/iso-27001.md) | ISO/IEC 27001:2022 Clauses 4–10 + Annex A | Same draft caveat |
 | [`packages/python/hummbl-governance/docs/coverage/nist-csf.md`](../packages/python/hummbl-governance/docs/coverage/nist-csf.md) | NIST CSF 2.0 106 subcategories | Same draft caveat |
-| [`packages/python/hummbl-governance/docs/coverage/owasp-llm.md`](../packages/python/hummbl-governance/docs/coverage/owasp-llm.md) | OWASP LLM Top 10 (2025) | Last reviewed 2026-05-14; HUMMBL version field in that file is v1.2.2 |
-| [`packages/python/hummbl-governance/docs/coverage/owasp-agentic.md`](../packages/python/hummbl-governance/docs/coverage/owasp-agentic.md) | OWASP Agentic Top 10 (ASI01–ASI10) | Same draft caveat (2026-05-14 / v0.8.0) |
-| [`docs/STANDARDS-CROSSWALK.md`](./STANDARDS-CROSSWALK.md) | Sibling walk: IETF / NIST AI RMF / ISO 42001 | Path reserved; may exist only on PR 92 |
+| [`packages/python/hummbl-governance/docs/coverage/owasp-llm.md`](../packages/python/hummbl-governance/docs/coverage/owasp-llm.md) | OWASP LLM Top 10 (2025) | Last reviewed **2026-05-14**; header version **v1.2.2** (not upgraded) |
+| [`packages/python/hummbl-governance/docs/coverage/owasp-agentic.md`](../packages/python/hummbl-governance/docs/coverage/owasp-agentic.md) | OWASP Agentic Top 10 (ASI01–ASI10) | Last reviewed **2026-05-14**, v**0.8.0** |
+| [`docs/STANDARDS-CROSSWALK.md`](./STANDARDS-CROSSWALK.md) | Sibling walk: IETF / NIST AI RMF / ISO 42001 | **404 on `main`**; PR 92 only |
 | [`packages/python/hummbl-governance/docs/coverage/ietf.md`](../packages/python/hummbl-governance/docs/coverage/ietf.md) | IETF ADR-001 matrix (PR 92) | First SCITT / RFC 9943 mapping; **not a column here** |
 | [`packages/python/hummbl-governance/docs/coverage/README.md`](../packages/python/hummbl-governance/docs/coverage/README.md) | Mechanical index | Counts from `scripts/count_coverage_rows.py` only |
 
-The six coverage files above last reviewed **2026-05-14** against hummbl-governance **v0.8.0**. This walk does **not** silently upgrade their ✅ counts or rewrite those matrices. P27–P34 were added after that review; they stay `silent` in every column because those IDs are not named in the cited files.
+This walk does **not** silently upgrade those files’ ✅ counts, last-reviewed dates, or version headers, and it does **not** fork them. Four of the six column sources are 2026-05-14 / v0.8.0; `owasp-llm.md` is 2026-05-14 / **v1.2.2**. P27–P34 stay `silent` in every column because those modules are not named in the cited files.
+
+**Out of this primitive table** (coverage files already exist; do not fork): [`soc2.md`](../packages/python/hummbl-governance/docs/coverage/soc2.md) (2026-05-14 / **v1.2.2**), [`iso-iec-23894.md`](../packages/python/hummbl-governance/docs/coverage/iso-iec-23894.md), [`iso-iec-42005.md`](../packages/python/hummbl-governance/docs/coverage/iso-iec-42005.md), [`iso-iec-5338.md`](../packages/python/hummbl-governance/docs/coverage/iso-iec-5338.md) (those three last reviewed **2026-06-25** / v0.8.0). CMMC was absent from `coverage/` until [`cmmc-2.md`](../packages/python/hummbl-governance/docs/coverage/cmmc-2.md) in this PR; it is not a column here.
 
 ## 3. Family facts (2026-08-31)
 
@@ -71,21 +73,21 @@ Every inventory entry gets a row. Support artifacts P23 / P24 / P26 stay `silent
 
 | ID | Primitive | EU AI Act | GDPR | ISO 27001:2022 | NIST CSF 2.0 | OWASP LLM | OWASP Agentic | Notes / gap |
 |---|---|---|---|---|---|---|---|---|
-| P1 | `kernel` — receipts, identity, roles, laws, evidence, sequence, authority, schedule | `partial` Art. 9, Art. 12 | `partial` Art. 24, Art. 30 | `partial` Clause 7.5, A.8.15 | `partial` PR.PS-04 | `silent` | `silent` | OS substrate; cited matrices name `audit_log` / bus, not `kernel` |
+| P1 | `kernel` — receipts, identity, roles, laws, evidence, sequence, authority, schedule | `silent` | `silent` | `partial` A.5.1 | `partial` GV.RR-03, GV.PO-01, GV.PO-02, GV.OV-03 | `silent` | `silent` | EU/GDPR/OWASP files do not name `kernel`. ISO A.5.1 and those CSF cells name `kernel/*.py` engines only. Art. 9/12 and PR.PS-04 name `audit_log` / bus, not this primitive |
 | P2 | `kill_switch` — four halt modes | `maps` Art. 5, Art. 14; `partial` Art. 20, Art. 93 | `maps` Art. 22; `partial` Art. 21 | `maps` A.5.26; `partial` A.5.24 | `maps` RS.MI-01; `partial` RS.MI-02 | `maps` LLM06:2025, LLM10:2025; `partial` LLM01:2025 | `maps` ASI01, ASI10; `partial` ASI06 | Halt primitive; corrective-action / eradication policy is org |
 | P3 | `circuit_breaker` | `maps` Art. 15; `partial` Art. 5, Art. 93 | `maps` Art. 32 | `partial` A.5.29, A.8.6 | `maps` PR.IR-03 | `maps` LLM10:2025 | `maps` ASI08, ASI10 | CLOSED/HALF_OPEN/OPEN; not a cert control |
-| P4 | `cost_governor` — ALLOW/WARN/DENY | `partial` Art. 51 | `silent` | `partial` A.8.6 | `partial` GV.RM-02, PR.IR-04 | `maps` LLM10:2025 | `maps` ASI10 | Compute/budget caps; FLOP classification and risk appetite are org |
-| P5 | `delegation` — HMAC-SHA256 capability tokens | `maps` Art. 14, Art. 86; `partial` Art. 25 | `maps` Art. 22, Art. 29; `partial` Art. 19, Art. 28 | `maps` A.5.3, A.5.15, A.5.18, A.8.2, A.8.3, A.8.5 | `maps` GV.RR-01, PR.AA-01–PR.AA-05 | `maps` LLM06:2025; `partial` LLM01:2025 | `maps` ASI03, ASI07; `partial` ASI02, ASI05 | HMAC tokens; DPA / legal contract remains org. DCT-the-paper is not IETF |
+| P4 | `cost_governor` — ALLOW/WARN/DENY | `partial` Art. 51 | `silent` | `partial` A.8.6 | `partial` GV.RM-02, PR.IR-04 | `maps` LLM10:2025 | `silent` | Compute/budget caps; FLOP classification and risk appetite are org. `owasp-agentic.md` does not name this module — Agentic cell stays `silent` |
+| P5 | `delegation` — HMAC-SHA256 capability tokens | `maps` Art. 14, Art. 86; `partial` Art. 25 | `maps` Art. 19, Art. 22, Art. 29; `partial` Art. 28 | `maps` A.5.3, A.5.15, A.5.18, A.8.2, A.8.3, A.8.5 | `maps` GV.RR-01, PR.AA-01–PR.AA-05 | `maps` LLM06:2025; `partial` LLM01:2025 | `maps` ASI03, ASI07; `partial` ASI02 | HMAC tokens; DPA / legal contract remains org. DCT-the-paper is not IETF. ASI05 names `delegation.py` on a Boundary row — not treated as `maps`/`partial` here |
 | P6 | `audit_log` | `maps` Art. 9, Art. 18, Art. 19; `partial` Art. 17 | `maps` Art. 5, Art. 7, Art. 15–Art. 17, Art. 24 | `maps` A.5.28, A.5.33, A.8.15 | `maps` PR.PS-04, DE.CM-03 | `maps` LLM02:2025, LLM09:2025 | `maps` ASI07; `partial` ASI06, ASI09 | Append-only JSONL; retention configuration is org |
 | P7 | `identity` — agent registry, trust tiers | `silent` | `silent` | `partial` A.5.16 | `partial` GV.OC-02 | `silent` | `maps` ASI03, ASI10; `partial` ASI06 | EU/GDPR/LLM matrices do not name `identity.py` |
 | P8 | `schema_validator` | `maps` Art. 10 | `maps` Art. 9, Art. 10, Art. 25; `partial` Art. 6, Art. 8 | `maps` A.5.12 | `maps` ID.AM-05 | `maps` LLM02:2025, LLM03:2025, LLM05:2025 | `partial` ASI02 | Structural validation; lawful-basis determination is org |
 | P9 | `coordination_bus` | `maps` Art. 9, Art. 12, Art. 19, Art. 72 | `maps` Art. 5, Art. 24, Art. 30 | `maps` A.5.28, A.8.15, A.8.16 | `maps` PR.PS-04; `partial` DE.CM-01 | `maps` LLM09:2025 | `silent` | Append-only TSV + HMAC; Agentic matrix does not name the bus |
 | P10 | `compliance_mapper` | `maps` Art. 8, Art. 11, Art. 13, Art. 21, Art. 47; `partial` Art. 4, Art. 6, Art. 40, Art. 43 | `maps` Art. 13–Art. 15, Art. 20, Art. 30, Art. 31 | `partial` A.5.31, A.5.36 | `partial` GV.OC-03 | `silent` | `maps` ASI01, ASI03 | Mapping mechanism; legal interpretation is org |
 | P11 | `health_probe` | `partial` Art. 89 | `silent` | `partial` A.5.30 | `partial` GV.OV-03, PR.IR-04 | `silent` | `silent` | Monitoring substrate; Commission powers / BCM are org |
-| P12 | `output_validator` | `silent` | `silent` | `partial` A.5.10, A.8.7, A.8.12 | `silent` | `maps` LLM05:2025 | `silent` | Named in ISO 27001 + LLM05; EU/GDPR/CSF/Agentic files do not name it |
-| P13 | `capability_fence` | `silent` | `maps` Art. 10 | `partial` A.5.10, A.8.7, A.8.12 | `partial` PR.PS-05, PR.IR-01 | `silent` | `silent` | Soft sandbox; OS-level isolation is platform (ASI05 is Boundary in the Agentic matrix) |
+| P12 | `output_validator` | `silent` | `silent` | `partial` A.5.10, A.8.7, A.8.12 | `silent` | `silent` | `silent` | Named in ISO 27001 A.5.10 / A.8.7 / A.8.12. `owasp-llm.md` LLM05 evidence is `schema_validator.py` + CI, not this module |
+| P13 | `capability_fence` | `silent` | `maps` Art. 10 | `partial` A.5.10, A.8.7, A.8.12 | `partial` PR.PS-05, PR.IR-01 | `silent` | `silent` | `eu-ai-act.md` does not name this module — EU cell stays `silent`. GDPR Art. 10 evidence does. ASI05 is Boundary and does not name the fence |
 | P14 | `stride_mapper` | `silent` | `silent` | `partial` A.5.7 | `maps` ID.RA-03; `partial` GV.RM-06, ID.RA-02 | `silent` | `maps` ASI01 | Threat categories; residual-risk acceptance is org |
-| P15 | `lifecycle` — NIST-shaped orchestrator | `silent` | `silent` | `partial` A.5.30 | `partial` GV.RM-03, GV.SC-09, ID.RA-05, RC.RP-02, RC.RP-04 | `silent` | `silent` | Composes P2/P3/P4/P5/P6/P7/P11; EU/GDPR/OWASP files do not name `lifecycle.py` |
+| P15 | `lifecycle` — NIST-shaped orchestrator | `silent` | `silent` | `partial` A.5.30 | `partial` GV.RM-03, GV.SC-09, ID.RA-05, ID.IM-04, ID.AM-08, RC.RP-02, RC.RP-04 | `silent` | `silent` | `gdpr.md` does not name `lifecycle.py`. `owasp-agentic.md` uses “lifecycle” only as INTENT-tuple narrative, not this module. ISO A.5.30 and the listed CSF cells do name `lifecycle.py` |
 | P16 | `contract_net` | `silent` | `silent` | `silent` | `partial` GV.SC-05 | `silent` | `silent` | Task-allocation protocol; only CSF supplier-contract cell names it |
 | P17 | `convergence_guard` | `silent` | `silent` | `silent` | `silent` | `silent` | `silent` | Not named in the six cited matrices |
 | P18 | `reward_monitor` | `silent` | `silent` | `silent` | `silent` | `silent` | `silent` | Not named in the six cited matrices |
@@ -117,9 +119,9 @@ Every inventory entry gets a row. Support artifacts P23 / P24 / P26 stay `silent
 
 ## 7. Named residual gaps
 
-1. **Cited matrices last reviewed 2026-05-14 against v0.8.0.** This walk does not rewrite them or upgrade their ✅ counts. P27–P34 stay `silent`.
+1. **Cited column matrices keep their own headers.** Four are 2026-05-14 / v0.8.0; `owasp-llm.md` is 2026-05-14 / v1.2.2. This walk does not rewrite them or upgrade their ✅ counts. P27–P34 stay `silent`.
 2. **`eu-ai-act.md` Art. 113 / high-risk dates predates Regulation (EU) 2026/1744.** Recital 40 (2 December 2027 for Annex III / Art. 6(2) Chapter III §§1–3) is a foreign overlay here; the 126-row file is not edited.
-3. **Several primitives are unnamed in one or more families** (P12/P13 in EU; P7 in EU/GDPR/LLM; P16–P21, P25, P27–P34 everywhere in this set). Unnamed ≠ “does not apply”; it means the 2026-05-14 workpaper did not cite that module.
+3. **Several primitives are unnamed in one or more families** (P1/P12/P13 in EU; P15 in GDPR and Agentic; P4 in Agentic — `cost_governor` is not in `owasp-agentic.md`; P7 in EU/GDPR/LLM; P12 in LLM — LLM05 cites `schema_validator`, not `output_validator`; P16–P21, P25, P27–P34 everywhere in this set). Unnamed ≠ “does not apply”; it means the cited workpaper did not name that module.
 4. **OWASP files are risk catalogs, not regulations.** `maps` means platform-layer overlap named in those files; application-layer remainder stays customer (LLM01/LLM04 🟡; ASI02/ASI06/ASI09 🟡; ASI05 ⚪).
 5. **ISO 27001 certification and EU AI Act Notified Body assessment remain customer/third-party.** See each matrix header.
 6. **Sibling IETF walk is out of scope.** Do not fight PR 89 (IETF rewrite) or PR 92 (IETF/NIST/ISO primitive crosswalk).
