@@ -29,6 +29,7 @@ import subprocess
 import sys
 import threading
 import uuid
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
@@ -186,9 +187,9 @@ def _validate_bus_path(path: str | Path, *, source: str = "env_override") -> Pat
 def _append_tsv_line(bus_path: str | Path, tsv_line: str) -> None:
     """Append a preformatted TSV line to the coordination bus under lock.
 
-    Simplified version of hummbl-governance's _append_tsv_line. Privileged-type
-    verification (DECISION/DIRECTIVE) is handled by callers that check
-    PRIVILEGED_TYPES before calling this function. Malformed lines are
+    Simplified version of hummbl-governance's _append_tsv_line. Privileged
+    types (DECISION/DIRECTIVE) are rejected here; they must go through
+    post_message() with a live principal proof. Malformed lines are
     rejected to dead-letter.
     """
     resolved_bus_path = Path(bus_path)
@@ -206,6 +207,13 @@ def _append_tsv_line(bus_path: str | Path, tsv_line: str) -> None:
                 payload={"line_preview": _redact_secrets(stripped[:200])},
             )
             return
+        from .authority import PRIVILEGED_TYPES
+
+        if parts[3].strip().upper() in PRIVILEGED_TYPES:
+            raise PermissionError(
+                "privileged bus types (DECISION/DIRECTIVE) cannot be appended "
+                "without a live principal proof; use post_message()"
+            )
 
     with (
         _cross_process_lock(resolved_bus_path),
@@ -1054,6 +1062,9 @@ def post_structured_event(
     enforce_message_type: bool = False,
     known_message_types: set[str] | None = None,
     validate: bool = True,
+    principal_proof: str | Mapping[str, object] | None = None,
+    request_id: str | None = None,
+    nonce_dir: str | Path | None = None,
 ) -> None:
     """Post a structured bus event while preserving the 5-column TSV format."""
     if timestamp is not None:
@@ -1093,6 +1104,9 @@ def post_structured_event(
         enforce_message_type=enforce_message_type,
         known_message_types=known_message_types,
         validate=validate,
+        principal_proof=principal_proof,
+        request_id=request_id,
+        nonce_dir=nonce_dir,
     )
 
 
@@ -1329,6 +1343,54 @@ def read_verified_messages(
     return entries
 
 
+def _enforce_privileged_principal(
+    *,
+    from_id: str,
+    to_id: str,
+    msg_type: str,
+    message: str,
+    principal_proof: str | Mapping[str, object] | None,
+    request_id: str | None,
+    nonce_dir: str | Path | None,
+) -> None:
+    """Reject DECISION/DIRECTIVE writes unless a live principal proof verifies.
+
+    These types are operator-authority records. A caller-supplied ``from``
+    field, HMAC bus signature, or bridge bearer token is not proof that the
+    operator authored the write. Fail closed even when ``validate=False``.
+    """
+    from .authority import (
+        PRIVILEGED_TYPES,
+        principal_authorizes,
+        resolve_nonce_dir,
+        verify_principal_proof,
+    )
+
+    if msg_type.strip().upper() not in PRIVILEGED_TYPES:
+        return
+
+    verified = verify_principal_proof(
+        principal_proof,
+        sender=from_id,
+        recipient=to_id,
+        msg_type=msg_type,
+        message=message,
+        request_id=request_id,
+        nonce_dir=nonce_dir if nonce_dir is not None else resolve_nonce_dir(),
+    )
+    if not principal_authorizes(
+        verified,
+        sender=from_id,
+        recipient=to_id,
+        msg_type=msg_type,
+        message=message,
+        request_id=verified.request_id,
+    ):
+        raise PermissionError(
+            "principal proof does not authorize this privileged bus write"
+        )
+
+
 def post_message(
     bus_path: str | Path,
     from_id: str,
@@ -1348,6 +1410,9 @@ def post_message(
     enforce_message_type: bool = False,
     known_message_types: set[str] | None = None,
     validate: bool = True,
+    principal_proof: str | Mapping[str, object] | None = None,
+    request_id: str | None = None,
+    nonce_dir: str | Path | None = None,
 ) -> None:
     r"""Post a message to the coordination bus with TSV-safe encoding.
 
@@ -1361,9 +1426,14 @@ def post_message(
         correlation_id: Optional correlation ID for traceability.
         secret: Optional HMAC-SHA256 key (32+ bytes).
         validate: If True (default), validate fields before writing.
+        principal_proof: Required for DECISION/DIRECTIVE. Operator principal
+            proof bound to this write request (JSON string or dict).
+        request_id: Proof-bound request id; required with principal_proof.
+        nonce_dir: Optional nonce receipt directory for principal proofs.
 
     Raises:
         ValueError: If validate=True and a required field is empty
+        PermissionError: If a privileged type is posted without a valid proof
         OSError: If file write fails
     """
     bus_path = Path(bus_path)
@@ -1413,6 +1483,19 @@ def post_message(
             )
         # Kimi-specific constraints (identity + message type)
         _validate_kimi_constraints(from_id, msg_type)
+
+    # Privileged types require a live operator principal proof. This is not
+    # optional and is not skipped when validate=False — a from-field or HMAC
+    # signature is not operator authorship.
+    _enforce_privileged_principal(
+        from_id=from_id,
+        to_id=to_id,
+        msg_type=msg_type,
+        message=message,
+        principal_proof=principal_proof,
+        request_id=request_id,
+        nonce_dir=nonce_dir,
+    )
 
     # Generate timestamp if not provided; normalize to UTC if caller-supplied
     if timestamp is None:

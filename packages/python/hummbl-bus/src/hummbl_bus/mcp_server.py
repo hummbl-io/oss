@@ -314,6 +314,8 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
                 "type": arguments["type"],
                 "message": arguments["message"][:200],
             }
+        except PermissionError as exc:
+            return {"posted": False, "error": str(exc)}
         except ImportError:
             # Fallback: direct append with platform-appropriate locking
             try:
@@ -329,6 +331,13 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
             frm = arguments.get("from_agent", "mcp-client")
             to = arguments.get("to", "all")
             mtype = arguments["type"]
+            from .authority import PRIVILEGED_TYPES
+
+            if str(mtype).strip().upper() in PRIVILEGED_TYPES:
+                return {
+                    "posted": False,
+                    "error": "privileged bus write requires authenticated principal proof",
+                }
             msg = arguments["message"].replace("\t", " ").replace("\n", " ")
             line = f"{ts}\t{frm}\t{to}\t{mtype}\t{msg}\n"
             BUS_FILE.parent.mkdir(parents=True, exist_ok=True)
