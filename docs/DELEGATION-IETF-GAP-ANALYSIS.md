@@ -1,191 +1,166 @@
-# HUMMBL Delegation Tokens — IETF Standards Gap Analysis
+# Delegation IETF Gap Analysis
 
-**Status:** Audit (no code changes)
-**Date:** 2026-08-21
-**Auditor:** HUMMBL fleet (devin)
-**HUMMBL code reviewed:** `hummbl_governance/delegation.py` (421 lines), `hummbl_governance/_types.py` (DelegationToken, TokenBinding, ResourceSelector, Caveat)
-**IETF drafts reviewed:** HDP v0.1, DCT v1.0.0, OAuth Chain Delegation v0.00
+**Status:** Analysis (not a claim of alignment or certification)
+**Date:** 2026-08-31
+**Scope:** HMAC-SHA256 `DelegationToken` in `hummbl-governance` 1.4.2 vs live IETF/IRTF drafts for agent identity, capability attenuation, and delegation provenance
+**Canonical code:** `packages/python/hummbl-governance/hummbl_governance/delegation.py` and `_types.py` in [hummbl-io/oss](https://github.com/hummbl-io/oss) (tag `hummbl-governance/v1.4.2`)
+**Why this file exists:** `docs/FLEET-GOVERNANCE-MAPPING.md` (2026-08-21) cited this path. It was not in the org.
 
-## Purpose
+## Do not infer
 
-Three concurrent IETF/standards-track drafts are standardizing cryptographic delegation chains for AI agents. HUMMBL's delegation tokens predate these drafts but align with their design principles. This audit identifies where HUMMBL's wire format diverges from the emerging standards and recommends alignment actions to avoid costly refactoring when the drafts ratify.
+- This is not IETF alignment, RFC compliance, or a wire-format commitment.
+- LANDING-008 already bounds the public claim: HMAC verifies integrity and authenticity inside a shared-secret trust domain. It is not public-key attribution, public verifiability, or non-repudiation.
+- LANDING-013 already bounds certification: HUMMBL does not determine legal applicability or confer compliance.
+- Internet-Drafts are works in progress. They expire. Citing them as "the standard" is false.
 
-**No code changes are made in this audit.** This is a gap analysis only.
+## 1. What HUMMBL actually ships
 
----
+`DelegationToken` is a frozen dataclass signed with HMAC-SHA256 over `json.dumps(..., sort_keys=True, separators=(",", ":"))`. Canonicalization is sorted-key JSON, not RFC 8785 JCS and not JWS.
 
-## 1. HUMMBL's current implementation
+| Field | Role |
+| --- | --- |
+| `token_id` | UUID |
+| `issuer` / `subject` | Granting agent / receiving agent (opaque strings) |
+| `ops_allowed` | Exact-string operations |
+| `resource_selectors` | `resource_type`, `resource_id`, free-form `constraints` |
+| `caveats` | `TIME_BOUND`, `RATE_LIMIT`, `APPROVAL_REQUIRED`, `AUDIT_REQUIRED` |
+| `expiry` | ISO-8601; default 120 minutes; `None` = no expiry |
+| `binding` | `TokenBinding(task_id, contract_id)` |
+| `signature` | HMAC-SHA256 hex digest |
 
-Source: `hummbl_governance/delegation.py` (read in full, 421 lines)
+Behavior that is real in code:
 
-| Property | HUMMBL implementation |
-|----------|----------------------|
-| **Signing algorithm** | HMAC-SHA256 (symmetric) |
-| **Key model** | Shared secret (`HUMMBL_SIGNING_SECRET` or `DCT_SECRET` env var, or ephemeral) |
-| **Token format** | Custom dataclass (`DelegationToken`) serialized to JSON dict |
-| **Token fields** | `token_id` (UUID v4), `issuer`, `subject`, `resource_selectors`, `ops_allowed`, `caveats`, `expiry` (ISO 8601), `binding` (task_id + contract_id), `signature` |
-| **Chain structure** | None — single token, no delegation chain |
-| **Verification** | HMAC-SHA256 signature check + expiry check + binding validation + least-privilege check |
-| **Attenuation** | Per-token: `ops_allowed` and `resource_selectors` constrain what the subject can do. No chain-level monotonic attenuation (no chain exists). |
-| **Session binding** | `binding.task_id` + `binding.contract_id` (not a session ID, but task-scoped) |
-| **Offline verifiability** | Yes — HMAC verification requires only the shared secret |
-| **Expiry** | ISO 8601 timestamp, default 120 minutes |
-| **Revocation** | None — token expires or is invalidated by process restart (ephemeral key) |
-| **Canonicalization** | `json.dumps(data, sort_keys=True, separators=(",", ":"))` — sorted-key JSON, not RFC 8785 JCS |
-| **Stdlib-only** | Yes — zero third-party dependencies (HMAC, hashlib, json, uuid from stdlib) |
+- Fail-closed authentication (`authenticate_token` returns a detached snapshot; callers must enforce the snapshot).
+- Least-privilege check (`check_least_privilege`) against `ops_allowed`.
+- Binding check against task, contract, and subject.
+- Stdlib-only. Secret from constructor, `HUMMBL_SIGNING_SECRET`, `DCT_SECRET`, or an ephemeral key with a warning.
+- Error code `E_DCT_VIOLATION` (`HummblError.DCT_VIOLATION`).
 
----
+Behavior that is not in this module:
 
-## 2. IETF drafts — comparison matrix
+- No `chain` / hop array.
+- No parent-token hash.
+- No derive/attenuate API (a holder cannot mint a narrower child offline).
+- No proof-of-possession of a holder key.
+- No WIMSE, SPIFFE, OAuth, or JWT encoding.
+- Caveats are stored and serialized; `check_least_privilege` does not evaluate them.
 
-| Dimension | HUMMBL | HDP v0.1 | DCT v1.0.0 | OAuth Chain Delegation v0.00 |
-|-----------|--------|----------|------------|------------------------------|
-| **Signing algorithm** | HMAC-SHA256 (symmetric) | Ed25519 (asymmetric) | Ed25519 (asymmetric) | Algorithm-agnostic JWS (RS256, ES256, etc.) |
-| **Key model** | Shared secret | Single issuer key (root + all hops) | Per-agent keys (delegator signs) | AS key (mandatory) + optional agent key |
-| **Token format** | Custom dataclass/JSON | Custom JSON (6 fields, not JWT) | Custom header/payload/sig (not JWT) | JWT claim extension (RFC 7519) |
-| **Chain structure** | None (single token) | Append-only array within single token | Linked tokens via parent token ID | Ordered array in JWT claim (most-recent-first) |
-| **Attenuation** | Per-token ops_allowed | Fixed at issuance, no per-hop narrowing | Monotonic: child MUST have <= parent permissions | AS enforces scope subset at each hop |
-| **Session binding** | task_id + contract_id | session_id (REQUIRED, >=128 bits entropy) | Not specified | Not specified (DPoP/mTLS instead) |
-| **Offline verifiability** | Yes (shared secret) | Yes (issuer pubkey only) | Implied (per-token); chain traversal may need parent tokens | No (AS metadata, WIT/SPIFFE resolution) |
-| **Expiry** | ISO 8601, default 120 min | Unix ms, default 24 hours | Header timestamp, no default | JWT `exp` claim, no default |
-| **Revocation** | None | None (token expiry or session end) | None | Standard OAuth revocation |
-| **Canonicalization** | Sorted-key JSON | RFC 8785 JCS | Not specified | RFC 8785 JCS |
-| **Normative strength** | N/A (HUMMBL internal) | RFC 2119 MUST/SHOULD | Design invariants (no RFC 2119) | RFC 2119 MUST/SHOULD |
-| **Standardization status** | Production (PyPI v1.2.2) | IETF Informational, expires 2027-02-04 | Zenodo working paper, not IETF | IETF Standards Track intended, expires 2026-12-08 |
+Naming note: the code already calls this a "delegation capability token" and uses `DCT_SECRET` / `DCT_VIOLATION`. That name tracks the DeepMind DCT paper, not an IETF draft.
 
----
+## 2. Live documents as of 2026-08-31
 
-## 3. Gaps identified
+| Document | Kind | Date | Status | Expires | What it actually specifies |
+| --- | --- | --- | --- | --- | --- |
+| [draft-helixar-hdp-agentic-delegation-01](https://datatracker.ietf.org/doc/html/draft-helixar-hdp-agentic-delegation-01) | IETF I-D, Informational, Network WG (individual) | 2026-08-03 | Active | 2027-02-04 | Human Delegation Provenance v0.1. Append-only hop chain. Ed25519. Offline verify with issuer public key + `session_id`. Explicitly **not** runtime enforcement. |
+| [draft-klrc-aiagent-auth-03](https://datatracker.ietf.org/doc/html/draft-klrc-aiagent-auth-03) | IETF I-D, Informational | 2026-07-06 | Active | 2027-01-07 | AIMS: a **framework**, not a token format. Compose WIMSE, SPIFFE, OAuth 2.0, SSF. Static API keys are an antipattern. |
+| [draft-niyikiza-oauth-attenuating-agent-tokens-01](https://datatracker.ietf.org/doc/html/draft-niyikiza-oauth-attenuating-agent-tokens-01) | IETF I-D, **Standards Track**, OAuth | 2026-06-15 | Active | 2026-12-17 | Attenuating Authorization Tokens (AAT). JWT/JWS. Ed25519 MUST. Per-holder `cnf.jwk`. Offline derive. PoP JWT. HMAC/HS256 **MUST NOT**. |
+| [draft-asor-wimse-agent-delegation-chain-00](https://datatracker.ietf.org/doc/html/draft-asor-wimse-agent-delegation-chain-00) | IETF I-D | 2026-08-27 | Active | (6 months) | JWT access-token profile with cryptographic parent commitment and offline attenuation. Companion to AIMS. Fetch of full text timed out on 2026-08-31; treat details as pending a second pass. |
+| [draft-haberkamp-ipp-01](https://datatracker.ietf.org/doc/html/draft-haberkamp-ipp-01) | IETF I-D | 2026-07 | Active | | Intent Provenance Protocol. HDP §1.3: same problem space, **not interoperable** with HDP. |
+| Tomasev et al., Delegation Capability Tokens | arXiv **2602.11865** | 2026-02-12 | Paper | n/a | **Not IETF.** Cited by Intent Token and AAT drafts as independent prior art. |
 
-### Gap 1: Symmetric vs. asymmetric signing (CRITICAL)
+### Correction to the Aug 21 mapping
 
-**HUMMBL:** HMAC-SHA256 with shared secret.
-**All three drafts:** Ed25519 or JWS asymmetric signing.
+`docs/FLEET-GOVERNANCE-MAPPING.md` listed "IETF HDP, DCT, `delegation_chain` JWT" as one emerging-standards cell. That collapses three layers and one non-IETF paper:
 
-**Impact:** HUMMBL's symmetric model cannot support per-agent non-repudiation (any holder of the shared secret can forge any token). The IETF drafts require asymmetric keys so that each agent's signature is independently verifiable against that agent's public key.
+- **HDP** is IETF, and it is provenance, not capability.
+- **DCT** is DeepMind, February 2026. HUMMBL borrowed the name.
+- **AAT / WIMSE agent-delegation-chain** are the IETF capability-chain drafts. They did not exist as cited "DCT."
 
-**Risk if unaligned:** When the IETF drafts ratify, HUMMBL tokens will not be interoperable with any standards-compliant verifier. External systems cannot verify HUMMBL tokens without the shared secret, which defeats the purpose of a delegation chain.
+## 3. Three layers, not one gap
 
-**Alignment options:**
-- **A (full alignment):** Migrate to Ed25519. Add `cryptography` dependency (breaks stdlib-only constraint) or use `hashlib` + manual Ed25519 (not in stdlib until Python 3.12+ `cryptography` — actually Ed25519 is NOT in stdlib). This is a breaking change.
-- **B (hybrid):** Keep HMAC-SHA256 for internal fleet use; add an Ed25519-signed wrapper for external/standards-compliant interoperability. Two verification paths.
-- **C (defer):** Wait for IETF ratification. The drafts may change significantly (HDP is Informational from a single author; DCT is a Zenodo paper with no IETF standing). Re-audit quarterly.
+| Layer | Question | IETF home | HUMMBL today |
+| --- | --- | --- | --- |
+| Identity | Who is this agent, cryptographically? | AIMS + WIMSE/SPIFFE (WIT, WIC, SVID) | Opaque `issuer` / `subject` strings |
+| Capability | What may it do, and can that shrink at each hop? | AAT (and WIMSE delegation-chain) | Single HMAC token; `ops_allowed` + selectors; no derive |
+| Provenance | Who authorized this hop, under what intent, in an offline-verifiable chain? | HDP (and IPP) | No hop chain. Receipts (separate primitive) record evidence after the fact |
 
-**Recommendation:** **B (hybrid).** HUMMBL's stdlib-only constraint is a competitive advantage (zero dependencies, easy audit). Breaking it for pre-ratified drafts is premature. Add an Ed25519 wrapper for external interop when the drafts are closer to ratification. Monitor quarterly.
+The Aug 21 doc treated HMAC vs Ed25519 as the whole gap. Crypto is one row. The larger miss is that HDP refuses to be a capability system (HDP §10.1, §12.4) and AAT refuses HMAC (AAT §8.13: symmetric algorithms MUST NOT, because they cannot provide per-holder PoP).
 
-### Gap 2: No delegation chain (CRITICAL)
+## 4. Gap register
 
-**HUMMBL:** Single token, no chain. Each `create_token` call produces an independent token.
-**All three drafts:** Append-only chain (HDP), linked tokens (DCT), or ordered array (OAuth).
+IDs are this analysis's, not GAP-001 (that is the landing-page production-use receipt).
 
-**Impact:** HUMMBL cannot prove the full delegation path from human principal -> orchestrator -> sub-agent -> tool-executor. Each token is a point-in-time capability, not a link in a chain. This means:
-- No audit trail of how a sub-agent received its authority
-- No cascade revocation (revoking a parent does not revoke children)
-- No `max_hops` delegation budget
+### G-IETF-1 — No append-only hop chain
 
-**Risk if unaligned:** HUMMBL's governance primitives are positioned as fleet-scoped, but without a delegation chain, the "fleet" dimension of delegation is unprovable. The FAccT 2024 paper identifies "agent identifiers + real-time monitoring + activity logging" as the minimum visibility stack — HUMMBL has identifiers and monitoring but the activity logging is per-token, not per-chain.
+HDP `chain[]` records `seq`, `agent_id`, `action_summary`, `parent_hop`, `hop_signature`. AAT records `del_depth`, `par_hash`, per-holder keys. HUMMBL has one signed blob. A multi-agent path is not reconstructable from the token.
 
-**Alignment options:**
-- **A (full alignment):** Add a `chain` field to `DelegationToken` (list of hop records). Each delegation appends a hop. Breaking change to the dataclass.
-- **B (external chain):** Keep `DelegationToken` as-is; add a separate `DelegationChain` class that links tokens via `parent_token_id`. Non-breaking.
-- **C (defer):** HUMMBL's current per-token model is sufficient for internal fleet use. Add chain support when external interop is needed.
+### G-IETF-2 — Shared secret vs public verification
 
-**Recommendation:** **B (external chain).** Non-breaking, preserves the current API, and adds chain tracking as a layer. The `DelegationChain` class can reference existing tokens by `token_id` and enforce monotonic attenuation (child's `ops_allowed` must be a subset of parent's).
+HDP and AAT verify with an Ed25519 public key. HUMMBL verify requires the HMAC secret. Anyone who can verify can also mint. LANDING-008 already says this. Cross-organization verify is out of scope for the current primitive.
 
-### Gap 3: Canonicalization (MODERATE)
+### G-IETF-3 — No holder proof-of-possession
 
-**HUMMBL:** `json.dumps(data, sort_keys=True, separators=(",", ":"))`
-**HDP + OAuth:** RFC 8785 JSON Canonicalization Scheme (JCS)
-**DCT:** Not specified
+AAT §5: presentation without PoP is replayable because tokens flow through model context. HUMMBL tokens are bearer-with-HMAC inside the trust domain. Possession of the token bytes plus the shared secret is enough. There is no `cnf.jwk`.
 
-**Impact:** HUMMBL's sorted-key JSON is close to RFC 8785 but not identical. RFC 8785 specifies additional rules for number formatting, string escaping, and key ordering that Python's `json.dumps` does not follow by default. A token signed by HUMMBL would fail RFC 8785 verification by a standards-compliant verifier.
+### G-IETF-4 — No offline attenuation
 
-**Risk if unaligned:** Low for internal use (HUMMBL verifies its own tokens). High for external interop (a standards-compliant verifier would reject the signature).
+AAT §6: a holder derives a child with `tools(child) ⊆ tools(parent)`, tighter TTL, and `par_hash`. HUMMBL `create_token` always mints from the manager's secret. A worker cannot pass a narrower token onward without the issuer secret. Caveats exist on the object but are not a derivation protocol.
 
-**Alignment options:**
-- **A (full alignment):** Implement RFC 8785 JCS in stdlib. ~100 lines of Python. No third-party dependency needed.
-- **B (defer):** Keep sorted-key JSON for internal use. Switch to JCS when adding the Ed25519 external wrapper (Gap 1 option B).
+### G-IETF-5 — No workload identifier
 
-**Recommendation:** **A (full alignment).** RFC 8785 JCS is implementable in stdlib (~100 lines), and adopting it now means the canonicalization layer is ready when the signing layer migrates. Low cost, high readiness.
+AIMS §6: agents MUST have a WIMSE identifier (MAY be a SPIFFE ID). HUMMBL `issuer`/`subject` have no URI scheme, no trust domain, no key binding.
 
-### Gap 4: Session binding (LOW)
+### G-IETF-6 — Canonicalization and encoding
 
-**HUMMBL:** `binding.task_id` + `binding.contract_id`
-**HDP:** `session_id` (REQUIRED, >=128 bits entropy)
-**DCT + OAuth:** Not specified
+HDP signs RFC 8785 JCS. AAT is JWS compact serialization; PoP payload is JCS. HUMMBL is `sort_keys` JSON + hex HMAC. Not interchangeable. A naive "wrap our dict in a JWT" would still fail AAT's algorithm and `cnf` rules.
 
-**Impact:** HUMMBL's task/contract binding is stronger than HDP's session binding in some dimensions (task-scoped, not just session-scoped) but weaker in others (no entropy requirement, no replay defense across sessions with the same task ID).
+### G-IETF-7 — Replay surface
 
-**Risk if unaligned:** Low. HUMMBL's binding model is a superset of HDP's in functionality (task + contract > session alone). The gap is the entropy requirement, which is a SHOULD in HDP, not a MUST.
+HDP: `expires_at` (24h default) + unguessable `session_id` (≥128 bits entropy). AAT: TTL monotonicity + PoP `jti` (stateful for side-effecting tools). HUMMBL: expiry (default 120 min, or none) + task/contract binding if the caller passes expected IDs. No session identifier. `expiry=None` is a protocol hole relative to every draft.
 
-**Recommendation:** **No action needed.** HUMMBL's binding model is functionally adequate. If aligning with HDP for external interop, add a `session_id` field to the binding as an optional supplement to task/contract.
+### G-IETF-8 — Mapping error (documentation)
 
-### Gap 5: Per-hop attenuation (LOW for now, MEDIUM if chain is added)
+Citing DCT as IETF, and citing a missing analysis file, overstated the standards position. This file closes the second; the mapping table still needs a one-line fix.
 
-**HUMMBL:** Per-token `ops_allowed` (no chain, so no per-hop attenuation)
-**DCT + OAuth:** Monotonic attenuation (child MUST have <= parent permissions)
-**HDP:** Fixed at issuance, no per-hop narrowing
+### G-IETF-9 — HDP v0.1 is closer than the mapping claimed
 
-**Impact:** If HUMMBL adds a delegation chain (Gap 2), it should also add monotonic attenuation enforcement. Without it, a sub-agent could delegate more permissions than it received.
+HDP §4.2: in v0.1 **the issuer produces every hop signature with a single key**. Per-agent hop signing is "planned for a future version." That is a single trust-domain signer, like HUMMBL's single secret, plus public verify. The Ed25519 swap is smaller than "append-only chain + public verify + later per-agent keys." Do not collapse those.
 
-**Recommendation:** **Defer until chain is added.** If Gap 2 option B is implemented, add attenuation enforcement to the `DelegationChain` class: `child.ops_allowed` must be a subset of `parent.ops_allowed`.
+### G-IETF-10 — HDP is evidence, not a gate
 
-### Gap 6: Expiry format (LOW)
+HDP §10.1: "An agent that exceeds its declared scope is still a bad actor; HDP creates an evidence trail, not a capability boundary." HUMMBL `check_least_privilege` **is** a capability boundary (inside the secret domain). Complement, not substitute. HDP §10.4 (chain truncation / omitted hops) is the hole HUMMBL receipts could fill if they bound hop count. They do not, today, bind to an HDP token.
 
-**HUMMBL:** ISO 8601 (`2026-08-21T14:30:00Z`)
-**HDP:** Unix milliseconds
-**DCT:** Header timestamp (format not specified)
-**OAuth:** JWT `exp` claim (NumericDate = Unix seconds)
+## 5. What HUMMBL has that the drafts do not require
 
-**Impact:** Format conversion is trivial. No architectural gap.
+- Runtime deny on `ops_allowed` (AAT requires an enforcement point; HDP refuses to be one).
+- Fail-closed exact-type snapshots before verify (defense against container subclasses).
+- Task/contract binding as a first-class field.
+- Stdlib-only, Alpha, zero Core runtime deps (LANDING-005).
+- Default lifetime 120 minutes, tighter than HDP's 24h example.
 
-**Recommendation:** **No action needed for internal use.** Convert to Unix milliseconds in the Ed25519 external wrapper if aligning with HDP.
+These are product facts, not IETF credits.
 
----
+## 6. Decisions this analysis supports (and does not make)
 
-## 4. Summary of recommendations
+Supported without further research:
 
-| Gap | Severity | Recommendation | Effort | When |
-|-----|----------|----------------|--------|------|
-| 1. Symmetric vs. asymmetric | CRITICAL | B: Hybrid (HMAC internal + Ed25519 wrapper) | Medium | When drafts ratify or external interop needed |
-| 2. No delegation chain | CRITICAL | B: External `DelegationChain` class | Medium | When fleet audit trail is needed |
-| 3. Canonicalization | MODERATE | A: Implement RFC 8785 JCS in stdlib | Low (~100 lines) | Now (readiness for Gap 1) |
-| 4. Session binding | LOW | No action | None | N/A |
-| 5. Per-hop attenuation | LOW/MEDIUM | Defer until chain is added | Low | With Gap 2 |
-| 6. Expiry format | LOW | No action for internal; convert in wrapper | Trivial | With Gap 1 |
+1. Stop saying "IETF DCT." Say DeepMind DCT (paper) vs HUMMBL HMAC DCT (code) vs IETF AAT (draft).
+2. Do not claim wire compatibility with HDP, AAT, or AIMS.
+3. Keep LANDING-008 language. If we add Ed25519 later, that is a new claim with a new receipt.
 
-**Net recommendation:** Implement Gap 3 (RFC 8785 JCS) now as a low-cost readiness step. Defer Gaps 1 and 2 until the IETF drafts are closer to ratification or external interoperability is required. Monitor drafts quarterly.
+Not decided here (product / BETS):
 
----
+- Whether to implement an HDP **profile** as an export (provenance wrapper around an existing HMAC token) vs native Ed25519 HDP.
+- Whether AAT is a 2026 engineering target. It is Standards Track and expires 2026-12-17; ignoring it is a choice, not an accident.
+- Whether `expiry=None` should be removed from the public API.
 
-## 5. Drafts status and monitoring schedule
+## 7. Recommended next engineering (ordered)
 
-| Draft | Status | Expires | Monitoring |
-|-------|--------|---------|------------|
-| HDP v0.1 | IETF Informational, single author (Helixar) | 2027-02-04 | Quarterly check on ietf.org. Watch for WG adoption or version bump. |
-| DCT v1.0.0 | Zenodo working paper, not IETF | N/A | Check Substr8 Labs GitHub for updates. Lowest standardization tier. |
-| OAuth Chain Delegation v0.00 | IETF Standards Track intended, 4 authors (Alibaba, Cisco, Okta) | 2026-12-08 | Quarterly check. Highest ratification probability. Watch for WG adoption. |
+1. **Fix the mapping citation** in `docs/FLEET-GOVERNANCE-MAPPING.md`: point here; split HDP / AAT / DCT-paper.
+2. **Ban `expiry=None` on issued tokens** or document it as a non-interop mode. Every live draft requires `exp`.
+3. **If cross-org verify is a 2026 goal:** Ed25519 root signature on an otherwise unchanged token is the smallest HDP-shaped step. It does not give hop chains or PoP.
+4. **If multi-hop least privilege is a 2026 goal:** that is AAT, not HDP. HMAC cannot grow into AAT without replacing the crypto and adding derive + `par_hash` + PoP.
+5. **Receipts vs HDP hops:** decide which primitive is the execution audit trail. HDP wants `action_summary` per hop in the token. HUMMBL currently splits capability (token) and evidence (receipt). Mixing them in marketing is G-IETF-10.
 
-**Re-audit trigger:** Any draft reaches WG adoption, or any draft publishes a new version with breaking changes to token format or verification model.
+## 8. Sources
 
----
+Primary:
 
-## 6. What HUMMBL has that the drafts do not
+- HUMMBL `delegation.py` / `_types.py` as fetched from `hummbl-io/oss` on 2026-08-31
+- [LANDING-008 / LANDING-009 / LANDING-013](https://hummbl.io/manifest/landing-claims.json) (`as_of` 2026-08-26)
+- HDP-01, AIMS-03, AAT-01 as fetched from IETF Datatracker on 2026-08-31
 
-HUMMBL's implementation has features the IETF drafts are silent on:
+Secondary:
 
-1. **Stdlib-only constraint** — HUMMBL runs with zero third-party dependencies. All three drafts require Ed25519, which is not in Python's stdlib. HUMMBL's HMAC-SHA256 approach is a deliberate engineering choice that preserves the stdlib-only invariant.
-
-2. **Task/contract binding** — HUMMBL's `TokenBinding(task_id, contract_id)` binds tokens to specific tasks and contracts. HDP has `session_id` but no task/contract binding. DCT and OAuth have neither.
-
-3. **Caveats** — HUMMBL's `Caveat` type supports constraints on token use (e.g., "only between 09:00-17:00"). None of the three drafts have a caveat mechanism.
-
-4. **Resource selectors** — HUMMBL's `ResourceSelector(resource_type, resource_id, constraints)` provides fine-grained resource access control. HDP has `authorized_resources` (a flat list). DCT mentions "fine-grained permission model" but does not specify the structure. OAuth has `scope` (string) and `delegated_policy` (object).
-
-5. **Fail-closed authentication** — HUMMBL's `authenticate_token` rejects on any anomaly (subclass detection, non-JSON values, signature mismatch). The drafts specify verification pipelines but do not mandate fail-closed behavior on unexpected input types.
-
-These are HUMMBL design advantages that should be preserved in any alignment work.
-
----
-
-*Audit basis: HUMMBL `hummbl_governance/delegation.py` (421 lines, read in full) + IETF HDP v0.1, DCT v1.0.0, OAuth Chain Delegation v0.00 (extracted via browser-scraper subagent, 2026-08-21). No code changes made.*
+- `docs/FLEET-GOVERNANCE-MAPPING.md` (2026-08-21)
+- `founder-mode/docs/research/gaas_compliance_landscape_2026.md` (2026-03-22; stale vs current draft revs)
