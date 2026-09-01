@@ -110,7 +110,7 @@ def init_services():
     global _ks, _cb, _cg, _al, _re
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     (STATE_DIR / "audit").mkdir(exist_ok=True)
-    _ks = KillSwitch(state_dir=STATE_DIR)
+    _ks = KillSwitch.load_from_file(STATE_DIR)
     _cb = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
     _cg = CostGovernor(db_path=str(DB_PATH))
     _al = AuditLog(base_dir=str(STATE_DIR / "audit"))
