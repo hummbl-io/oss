@@ -26,7 +26,7 @@ classifiers = [
 # exception to the monorepo's "zero third-party runtime dependencies" convention.
 # The package performs array operations that fundamentally require numpy.
 dependencies = [
-  "numpy>=1.26",
+  "numpy>=2.4.6",
   "hummbl-governance>=1.4.1",
 ]
 
