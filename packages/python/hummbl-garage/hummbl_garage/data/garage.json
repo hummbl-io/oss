@@ -1,0 +1,190 @@
+{
+  "version": "0.1.0",
+  "description": "HUMMBL livery presets — automotive-inspired color + typography schemes",
+
+  "presets": [
+    {
+      "id": "martini",
+      "name": "Martini",
+      "description": "Italian racing blue with white stripes",
+      "paint_codes": ["#1B3A6B", "#E5E7EB", "#DC2626"],
+      "primary": "#1B3A6B",
+      "secondary": "#E5E7EB",
+      "accent": "#DC2626",
+      "typography": "grotesk",
+      "era": "1970s-1990s",
+      "origin": "Martini Racing Lancia Stratos / Porsche 917"
+    },
+    {
+      "id": "gulf",
+      "name": "Gulf",
+      "description": "Gulf orange and blue",
+      "paint_codes": ["#F37820", "#E5E7EB", "#1E3A8A"],
+      "primary": "#1E3A8A",
+      "secondary": "#F37820",
+      "accent": "#E5E7EB",
+      "typography": "grotesk",
+      "era": "1960s-1970s",
+      "origin": "Gulf Oil Ford GT40"
+    },
+    {
+      "id": "john_player_special",
+      "name": "John Player Special",
+      "description": "Black and gold, Lotus F1",
+      "paint_codes": ["#0A0A0A", "#D4AF37", "#1A1A20"],
+      "primary": "#0A0A0A",
+      "secondary": "#D4AF37",
+      "accent": "#D4AF37",
+      "typography": "serif",
+      "era": "1970s-1980s",
+      "origin": "JPS Lotus 72/79"
+    },
+    {
+      "id": "rothmans",
+      "name": "Rothmans",
+      "description": "White, blue, red, gold stripes",
+      "paint_codes": ["#E5E7EB", "#1E3A8A", "#DC2626", "#D4AF37"],
+      "primary": "#E5E7EB",
+      "secondary": "#1E3A8A",
+      "accent": "#DC2626",
+      "typography": "grotesk",
+      "era": "1980s-1990s",
+      "origin": "Rothmans Porsche 956/962"
+    },
+    {
+      "id": "marlboro",
+      "name": "Marlboro",
+      "description": "Red and white, McLaren",
+      "paint_codes": ["#DC2626", "#E5E7EB", "#F3F4F6"],
+      "primary": "#DC2626",
+      "secondary": "#E5E7EB",
+      "accent": "#1A1A20",
+      "typography": "grotesk",
+      "era": "1970s-1990s",
+      "origin": "Marlboro McLaren M23/MP4"
+    },
+    {
+      "id": "castrol",
+      "name": "Castrol",
+      "description": "Green and red, classic oil brand",
+      "paint_codes": ["#1B5E20", "#DC2626", "#E5E7EB"],
+      "primary": "#1B5E20",
+      "secondary": "#DC2626",
+      "accent": "#E5E7EB",
+      "typography": "grotesk",
+      "era": "1990s-2000s",
+      "origin": "Castrol Toyota Castrol Team"
+    }
+  ],
+
+  "cockpit_presets": [
+    {
+      "id": "leclerc",
+      "name": "Leclerc",
+      "description": "Clean, large readouts, minimal clutter",
+      "density": "low",
+      "font_scale": 1.3,
+      "panels_visible": 3
+    },
+    {
+      "id": "vettel",
+      "name": "Vettel",
+      "description": "Dense, maximum information per screen",
+      "density": "high",
+      "font_scale": 0.9,
+      "panels_visible": 6
+    },
+    {
+      "id": "tesla",
+      "name": "Tesla",
+      "description": "Minimal HUD, only critical metrics",
+      "density": "minimal",
+      "font_scale": 1.0,
+      "panels_visible": 2
+    }
+  ],
+
+  "manettino_modes": [
+    {"id": "cautious", "name": "Cautious", "description": "Conservative tool use, verbose logging, no side effects without confirmation"},
+    {"id": "balanced", "name": "Balanced", "description": "Default operating mode — standard tool use with receipts"},
+    {"id": "aggressive", "name": "Aggressive", "description": "Maximum autonomy, side effects allowed, minimal confirmation gates"}
+  ],
+
+  "watch_dial_finishes": [
+    {"id": "flat", "trust_tier": "PROBATIONARY", "description": "Flat matte finish — entry level, no decoration"},
+    {"id": "sunburst", "trust_tier": "MEDIUM", "description": "Sunburst radial pattern — core tier, catches light"},
+    {"id": "guilloche", "trust_tier": "MEDIUM-HIGH", "description": "Guilloché engine-turned pattern — high tier, intricate"},
+    {"id": "enamel", "trust_tier": "TRUSTED", "description": "Grand feu enamel — haute horology, permanent and luminous"},
+    {"id": "skelton", "trust_tier": "OWNER", "description": "Skeletonized — Reuben only, everything visible"}
+  ],
+
+  "watch_hand_colors": [
+    {"state": "working", "color": "#2563EB", "description": "Blue — actively processing"},
+    {"state": "waiting", "color": "#D97706", "description": "Amber — waiting for input or dependency"},
+    {"state": "blocked", "color": "#DC2626", "description": "Red — blocked, needs intervention"},
+    {"state": "completed", "color": "#22C55E", "description": "Green — task completed successfully"},
+    {"state": "idle", "color": "#6B7280", "description": "Gray — idle, no active task"}
+  ],
+
+  "watch_complications": [
+    {"id": "token_budget", "name": "Token Budget", "description": "Remaining context window as percentage"},
+    {"id": "trust_tier", "name": "Trust Tier", "description": "Current trust tier with dial finish"},
+    {"id": "current_task", "name": "Current Task", "description": "Active task name or 'idle'"},
+    {"id": "error_count", "name": "Error Count", "description": "Errors in current session"}
+  ],
+
+  "failure_states": [
+    {
+      "id": "degraded",
+      "name": "Degraded",
+      "visual_treatment": "wabi-sabi + glitch-rendered, still functional",
+      "operational_meaning": "Partial capability loss, agent continues",
+      "color": "#D97706",
+      "icon": "⚠"
+    },
+    {
+      "id": "broken",
+      "name": "Broken",
+      "visual_treatment": "kintsugi gold seam, recovery in progress",
+      "operational_meaning": "Agent halted, repair underway, visible recovery",
+      "color": "#D4AF37",
+      "icon": "✕"
+    },
+    {
+      "id": "dead",
+      "name": "Dead",
+      "visual_treatment": "death screen, canonical, successor spawned",
+      "operational_meaning": "Agent terminated, environment preserved, successor inherits",
+      "color": "#DC2626",
+      "icon": "☠"
+    }
+  ],
+
+  "api_classes": [
+    {"id": "D", "min": 100, "max": 299, "name": "Class D", "description": "Entry level — limited capability"},
+    {"id": "C", "min": 300, "max": 499, "name": "Class C", "description": "Standard — basic tool use"},
+    {"id": "B", "min": 500, "max": 699, "name": "Class B", "description": "Competent — reliable execution"},
+    {"id": "A", "min": 700, "max": 799, "name": "Class A", "description": "Advanced — multi-step reasoning"},
+    {"id": "S1", "min": 800, "max": 899, "name": "Class S1", "description": "Superior — autonomous operation"},
+    {"id": "S2", "min": 900, "max": 949, "name": "Class S2", "description": "Exceptional — near-optimal"},
+    {"id": "R", "min": 950, "max": 999, "name": "Class R", "description": "Racing — theoretical maximum"}
+  ],
+
+  "api_subratings": [
+    {"id": "reasoning_speed", "name": "Reasoning Speed", "max": 10, "description": "Tokens/sec for reasoning tasks"},
+    {"id": "tool_accuracy", "name": "Tool-Use Accuracy", "max": 10, "description": "Correct tool selection and arguments"},
+    {"id": "context_efficiency", "name": "Context/Launch", "max": 10, "description": "Context window utilization efficiency"},
+    {"id": "latency", "name": "Latency/Launch", "max": 10, "description": "Time to first useful output"},
+    {"id": "safety", "name": "Safety/Braking", "max": 10, "description": "Guardrail adherence and refusal quality"},
+    {"id": "composite", "name": "Composite", "max": 10, "description": "Overall execution quality"}
+  ],
+
+  "upgrade_priority": [
+    "context",
+    "tools",
+    "safety",
+    "runtime",
+    "model",
+    "observability"
+  ]
+}
