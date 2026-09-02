@@ -1,17 +1,27 @@
 # HUMMBL OSS
 
+**Govern what AI agents can do. Prove what they did.**
+
+HUMMBL is open-source governance infrastructure for agentic AI: scoped
+delegation, kill switches, circuit breakers, and verifiable receipts that
+run inside your Python environment.
+
+That sentence is the public definition. It is the same sentence as
+[hummbl.io](https://hummbl.io). Do not invent a second one in this README,
+package blurbs, or agent briefs.
+
 **HUMMBL** = **H**ighly **U**seful **M**ental **M**odel **B**ase **L**anguage.
-Base120 (120 mental models across 6 transformation families) is the "Base
-Language" for reasoning. HUMMBL wraps those models in governance,
-coordination, and operational infrastructure.
+Base120 (120 mental models across 6 transformation families) is the substrate
+those governance primitives sit on. It is not a competing product story.
 
 Public monorepo for HUMMBL open-source **Python** packages, plus a Lean
 sketch under `packages/lean/`. Consolidation in progress. There is no
 `packages/node/` or `packages/rust/` tree in this repository yet.
 
 Inventory below is the tree at HEAD. PyPI "Live" means a wheel exists on
-the registry; it does not mean production-supported. One public product
-sentence across hummbl.io and this README is still open (`#79`).
+the registry; it does not mean production-supported. Identity leftovers
+(PyPI org blurb, `arbiter-dev` fate, foreign install names on other surfaces)
+remain on `#79`.
 
 ## Packages
 
@@ -49,7 +59,7 @@ sentence across hummbl.io and this README is still open (`#79`).
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
 
-Canonical install names owned by HUMMBL:
+Canonical install names owned by HUMMBL and recommended from this repo:
 
 ```text
 pip install base120
@@ -58,7 +68,9 @@ pip install hummbl-governance
 
 Do not document `pip install arbiter`, `agent-governance`, or
 `base120-mcp` from this repo. Those names are not HUMMBL org projects
-on PyPI (`#79`).
+on PyPI (`#79`). Other live wheels from this tree (`hummbl-bus`,
+`hummbl-cognition`, and the rest of the Live column) may be installed by
+name; they are not the two names used on the public landing page.
 
 ## Why a monorepo
 
