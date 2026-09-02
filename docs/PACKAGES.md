@@ -1,9 +1,11 @@
 # HUMMBL OSS — Published Packages
 
-**Scope:** Packages published (or being prepared for publication) from this
-monorepo. This document describes public release state only. Internal
-migration planning, unpublished-repo inventories, and org-wide scan results
-are tracked privately and are not published here.
+**Scope:** Packages in this monorepo and their public release state.
+Internal migration planning, unpublished-repo inventories, and org-wide
+scan results stay private.
+
+**As of:** 2026-09-02, tree `packages/python/` = 25 packages.
+Versions below are `pyproject.toml` on `main`.
 
 ## Name-collision warning (PyPI + npm)
 
@@ -21,112 +23,121 @@ each registry's author/repository/maintainer fields.
 | `randy` | Francis Horsman (Bitbucket `sys-git/randy`) | deestan (`deestan/randy`) |
 | `mcp-server` | (not on PyPI) | Melvin Carvalho (`sandy-mount/mcp-server`) |
 
-This is exactly the collision risk that the scoped `@hummbl/*` naming
-decision (see `MONOREPO-DESIGN.md` section 4.2) eliminates on npm. On PyPI,
-HUMMBL's packages use the `hummbl-*` prefix, which is distinctive enough to
-avoid collisions; the colliding names above are unprefixed common words.
+HUMMBL PyPI packages use the `hummbl-*` prefix except `base120`,
+`governed-compression`, and `idp-spec`. On npm, future packages use
+`@hummbl/*`. Canonical install names from this repo:
+
+```text
+pip install base120
+pip install hummbl-governance
+```
+
+Do not document `pip install arbiter`, `agent-governance`, or `base120-mcp`.
 
 ---
 
 ## 1. PyPI (Python)
 
-### Live — verified HUMMBL-owned
+### Live — wheel on the registry, HUMMBL-owned
 
-| Package | Version | Notes |
-|---------|---------|-------|
-| `hummbl-governance` | 1.4.1 | Governance primitives — kill switch, circuit breaker, audit log, identity registry, capability fence, output validator, etc. |
-| `hummbl-bus` | 0.1.0 | Secure append-only TSV coordination bus. |
-| `hummbl-cognition` | 0.1.0 | Cognitive Ledger Protocol + Open Brain server. |
-| `hummbl-tuples` | 0.2.0 | Typed Tuples governance model (polyglot: also being ported to Go, Rust, TypeScript). |
-| `hummbl-bif` | 1.0.1 | Batch Ingestion Framework. |
-| `base120` | 3.0.0 | 120 reasoning operators — stdlib-only, tuple-native. |
-| `governed-compression` | 0.1.0 | Governed vector + KV-cache compression (ML). CPU reference implementation for quantization methods. Runtime dependency: `hummbl-governance>=1.1.0` (cross-package dependency — see `MONOREPO-DESIGN.md` section 7). |
+Ownership last verified in fleet audits 2026-08-30 / 2026-08-31.
+Tree versions checked 2026-09-02.
+
+| Package | Tree | PyPI | Notes |
+|---------|------|------|-------|
+| `hummbl-governance` | 1.4.2 | 1.4.2 | Governance primitives. |
+| `base120` | 3.0.0 | 3.0.0 | 120 reasoning operators. PyPI project URL may still point at the legacy standalone repo. |
+| `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
+| `hummbl-tuples` | 0.2.0 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. |
+| `hummbl-bus` | 0.2.0 | 0.2.0 | TSV coordination bus. 0.2.0 was uploaded 2026-08-27 with **no** `python/hummbl-bus/v0.2.0` tag in this repo. Further bus publishes wait on the tag contract in `RELEASE.md`. |
+| `hummbl-cognition` | 0.1.0 | 0.1.0 | CLP + Open Brain. Live license field may still say MIT vs tree Apache-2.0. |
+| `governed-compression` | 0.1.0 | 0.1.0 | Compression experiments. Live summary may still say "Private research surface". |
+| `hummbl` | 0.1.0 | 0.1.0 | Shipped 2026-08-25. |
+| `hummbl-kernel` | 0.1.0 | 0.1.0 | Shipped 2026-08-25. |
+
+### In-tree — not on PyPI (no trusted-publishing tag yet)
+
+| Package | Tree | Notes |
+|---------|------|-------|
+| `hummbl-lattice` | 0.1.0 | Domain120 lattices |
+| `hummbl-contracts` | 0.1.0 | Contract schemas + stdlib validator |
+| `hummbl-axis` | 0.1.0 | Atlas contradiction ladder |
+| `hummbl-intel` | 0.1.0 | INT taxonomy |
+| `hummbl-lint-config` | 0.1.0 | Shared ruff config |
+| `idp-spec` | 0.1.0 | Intelligent Delegation Profile |
+| `hummbl-compass` | 0.1.0 | Navigation / routing |
+| `hummbl-free-models` | 0.1.0 | Open-weights registry |
+| `hummbl-rubric-templates` | 0.1.0 | Eval rubrics |
+| `hummbl-taxonomy` | 0.1.0 | Intelligence-tier taxonomy |
+| `hummbl-validation` | 0.1.0 | Invariant / schema primitives |
+| `hummbl-design-tokens` | 0.1.0 | Visual identity tokens |
+| `hummbl-heraldry` | 0.1.0 | Procedural heraldry |
+| `hummbl-garage` | 0.1.0 | API / livery / failure aesthetics |
+| `hummbl-identity` | 0.1.0 | Identity facade |
+| `hummbl-validation-framework` | 0.1.0 | Design-system validation tests |
 
 ### Excluded (not HUMMBL's)
 
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|
-| `OBLITERATUS` | 0.0.1 | Pliny (pliny-lab) | Reserved-name placeholder, no functionality. Not HUMMBL's — do not migrate. |
-
-**Name collisions (NOT HUMMBL's — do not migrate):** the following PyPI
-package names were previously listed as HUMMBL's in an earlier draft of
-this document but are unrelated packages by other authors, verified
-2026-08-21 via PyPI author/repository fields:
-
-- `arbiter` v1.1.2 → R.A. Stern (`rastern/arbiter`)
-- `arcana` v0.10.19 → `arcana.readthedocs.io`
-- `crab` v0.5.1 → Graham Bell (`grahambell/crab`)
-- `randy` v0.9.3 → Francis Horsman (Bitbucket `sys-git/randy`)
-- `hermes-agent` v0.19.0 → Nous Research
-
-These are unprefixed common-word names. HUMMBL's packages use the
-`hummbl-*` prefix, which avoids this collision class on PyPI.
+| `OBLITERATUS` | 0.0.1 | Pliny (pliny-lab) | Reserved-name placeholder. Not HUMMBL's. |
+| `arbiter` | — | R.A. Stern | Collision. Do not `pip install arbiter` from HUMMBL docs. |
+| `agent-governance` | — | not HUMMBL org | Collision / foreign owner. |
 
 ---
 
 ## 2. npm (JavaScript/TypeScript)
 
-### Live: none currently
+### Live: none
 
-All previously-published HUMMBL npm packages were **deprecated by the
+There is no `packages/node/` tree in this monorepo.
+
+Previously published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
 
 - `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
 - `hummbl-bibliography` v1.0.0 — deprecated ("Package no longer supported")
 
-The `@hummbl` scope still exists (operator owns it under the `hummbl-io`
-npm account with `write` permission). Future HUMMBL npm packages publish
-fresh under `@hummbl/*` from this monorepo.
+The `@hummbl` scope still exists. Future npm packages publish under
+`@hummbl/*` from this monorepo **after** a `packages/node/` tree exists.
 
-**Name collisions (NOT HUMMBL's — never were):** the following unscoped
-npm package names were previously listed as HUMMBL's in an earlier draft
-of this document but are unrelated packages by other authors, verified
-2026-08-21 via the npm registry `repository` and `maintainers` fields:
+**Name collisions (NOT HUMMBL's):** `mcp-server`, `hermes-agent`,
+`arbiter`, `arcana`, `crab`, `randy` on npm.
 
-- `mcp-server` v0.0.9 → Melvin Carvalho (`sandy-mount/mcp-server`)
-- `hermes-agent` v0.20.4 → `wrtensi/hermes-agent-npm`
-- `arbiter` v2.0.2 → `skbolton/Arbiter`
-- `arcana` v0.0.2 → `flipactual/arcana`
-- `crab` v1.13.0 → `kossnocorp/crab`
-- `randy` v1.5.1 → `deestan/randy`
+---
 
-These are common-word package names squatted/published by other authors.
-This collision risk is the reason HUMMBL publishes under the `@hummbl/`
-scope going forward.
+## 3. Other languages in this repo
+
+| Tree | Status |
+|------|--------|
+| `packages/lean/hummbl-formalization` | Present. Not in Python CI. Not a PyPI package. Do not call runtime packages "formally verified". |
+| `packages/node/`, `packages/rust/`, `packages/go/`, `packages/jvm/` | **Absent.** |
 
 ---
 
 ## Monorepo consolidation status
 
-The `hummbl-io/oss` repo is the target monorepo for HUMMBL's published,
-open-source packages. Packages are added here as they are prepared for (or
-already have) public release; unpublished/internal work is not staged into
-this document ahead of release.
-
-### Recommended package layout (polyglot)
+`hummbl-io/oss` is the target monorepo for public HUMMBL packages.
+Recommended future layout (not current tree):
 
 ```
 oss/
 ├── packages/
-│   ├── python/          # PyPI packages
-│   ├── node/             # npm packages (@hummbl/* scope)
-│   ├── rust/              # crates.io
-│   ├── go/                # Go module proxy
-│   └── jvm/               # Maven Central
-├── papers/               # arXiv/Zenodo
-├── docs/                 # Mintlify
-├── sites/                # GitHub Pages
-├── cli/                  # Scoop/Winget/Homebrew manifests
-└── .github/workflows/    # One CI for all languages
+│   ├── python/          # exists
+│   ├── lean/            # exists
+│   ├── node/            # not present
+│   ├── rust/            # not present
+│   └── go/              # not present
+├── docs/
+└── .github/workflows/
 ```
 
-### Per-language publishing workflow
+### Per-language publishing (current)
 
-- **Python**: `uv publish` / `twine upload` from `packages/python/<name>/`
-- **npm**: `npm publish` from `packages/node/<name>/`
-- **Rust**: `cargo publish` from `packages/rust/<name>/`
-- **Go**: tag-based publishing (Go module proxy fetches from git tags)
-- **JVM**: `gradle publish` to Maven Central
-- **Nix**: publish flakes to FlakeHub or nixpkgs PR
-- **TeX**: submit to arXiv, deposit to Zenodo with DOI
-- **CLI**: auto-generate Scoop/Winget/Homebrew manifests on release
+- **Python**: GitHub Actions trusted publishing from
+  `.github/workflows/publish-pypi.yml`. Tag shape:
+  `python/<package>/v<version>`. See `RELEASE.md`.
+- **npm / crates / Go / JVM / Nix**: no publish workflow in this repo yet.
+
+Do not use local `twine upload` for packages that should come from this
+repo.
