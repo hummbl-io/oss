@@ -29,6 +29,7 @@ Currently hosts 20 Python packages under `packages/python/<name>/`.
 | hummbl-rubric-templates | `packages/python/hummbl-rubric-templates/` | Pre-release (0.1.0) | HUMMBL Standard Evaluation Rubric Templates & Automated Validators |
 | hummbl-taxonomy | `packages/python/hummbl-taxonomy/` | Pre-release (0.1.0) | HUMMBL Governed Intelligence Tier Taxonomy & Classifier |
 | hummbl-validation | `packages/python/hummbl-validation/` | Pre-release (0.1.0) | HUMMBL Invariant & Schema Validation Primitives |
+| hummbl-design-tokens | `packages/python/hummbl-design-tokens/` | Pre-release (0.1.0) | HUMMBL Design Token System — fleet visual identity source of truth |
 
 ## Setup
 
