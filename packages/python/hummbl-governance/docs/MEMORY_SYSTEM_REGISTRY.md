@@ -48,8 +48,8 @@ validator.
 
 | Check | Result |
 | --- | --- |
-| `~/projects/PROJECTS/memory-city` | absent |
-| `~/projects/PROJECTS/memory-civilization` | absent |
+| `<local-path>` | absent |
+| `<local-path>` | absent |
 | `gh repo list hummbl-dev` for `memory|civilization|city` | no matching repos returned |
 | `gh repo list foundermode-ai` for `memory|civilization|city` | no matching repos returned |
 
