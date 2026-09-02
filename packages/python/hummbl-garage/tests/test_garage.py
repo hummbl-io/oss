@@ -369,3 +369,158 @@ class TestCLI:
         assert rc == 0
         assert "Broken" in out
         assert "kintsugi" in out.lower()
+
+
+# Goodhart mitigation tests
+
+
+class TestGoodhartMitigation:
+    def test_terminal_value_defined(self):
+        from hummbl_garage.goodhart import TERMINAL_VALUE
+        assert "routing decisions" in TERMINAL_VALUE
+        assert "task completion" in TERMINAL_VALUE
+
+    def test_usage_policy_defined(self):
+        from hummbl_garage.goodhart import USAGE_POLICY
+        assert "DESCRIPTIVE" in USAGE_POLICY
+        assert "not PRESCRIPTIVE" in USAGE_POLICY
+
+    def test_proxy_chain_defined(self):
+        from hummbl_garage.goodhart import PROXY_CHAIN
+        assert "API score" in PROXY_CHAIN
+        assert "terminal value" in PROXY_CHAIN
+
+    def test_goodhart_risk_documented(self):
+        from hummbl_garage.goodhart import GOODHART_RISK
+        assert "composite" in GOODHART_RISK
+        assert "inflated" in GOODHART_RISK
+
+
+class TestGamingDetector:
+    def test_no_alerts_with_insufficient_data(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector(min_tasks=3)
+        api = AgentPerformanceIndex(composite=8.0)
+        alerts = detector.check_agent("devin", api)
+        assert alerts == []
+
+    def test_no_alerts_when_matched(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector(divergence_threshold=2.0, min_tasks=3)
+        for i in range(5):
+            detector.record_outcome_simple("devin", f"task-{i}", True, 7.0)
+        api = AgentPerformanceIndex(composite=7.0)
+        alerts = detector.check_agent("devin", api)
+        assert alerts == []
+
+    def test_alerts_on_composite_inflation(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector(divergence_threshold=2.0, min_tasks=3)
+        for i in range(5):
+            detector.record_outcome_simple("devin", f"task-{i}", True, 4.5)
+        api = AgentPerformanceIndex(composite=9.5)
+        alerts = detector.check_agent("devin", api)
+        assert len(alerts) == 1
+        assert alerts[0].alert_type == "composite_inflation"
+        assert alerts[0].severity == "high"
+
+    def test_alerts_on_subrating_divergence(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector(divergence_threshold=2.0, min_tasks=3)
+        for i in range(4):
+            detector.record_outcome_simple(
+                "devin", f"reasoning-{i}", True, 5.0,
+                exercises=["reasoning_speed"],
+            )
+        api = AgentPerformanceIndex(reasoning_speed=9.0, composite=5.0)
+        alerts = detector.check_agent("devin", api)
+        reasoning_alerts = [a for a in alerts if a.alert_type == "divergence"]
+        assert len(reasoning_alerts) >= 1
+
+    def test_severity_low(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector(divergence_threshold=2.0, min_tasks=3)
+        for i in range(5):
+            detector.record_outcome_simple("devin", f"task-{i}", True, 6.0)
+        api = AgentPerformanceIndex(composite=8.5)
+        alerts = detector.check_agent("devin", api)
+        assert len(alerts) == 1
+        assert alerts[0].severity == "low"
+
+    def test_agent_outcomes_filtering(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector()
+        detector.record_outcome_simple("devin", "t1", True, 8.0)
+        detector.record_outcome_simple("devin", "t2", True, 7.0)
+        detector.record_outcome_simple("codex", "t3", True, 9.0)
+        devin_outcomes = detector.agent_outcomes("devin")
+        assert len(devin_outcomes) == 2
+
+    def test_clear(self):
+        from hummbl_garage.goodhart import GamingDetector
+        detector = GamingDetector()
+        detector.record_outcome_simple("devin", "t1", True, 8.0)
+        assert len(detector.all_outcomes()) == 1
+        detector.clear()
+        assert len(detector.all_outcomes()) == 0
+
+
+class TestHeldOutEvaluator:
+    def test_add_and_get_task(self):
+        from hummbl_garage.goodhart import HeldOutTask, HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        task = HeldOutTask("eval-001", "Debug", {"reasoning_speed": 7}, "hard", "reasoning")
+        evaluator.add_task(task)
+        assert evaluator.get_task("eval-001") is not None
+        assert evaluator.get_task("nonexistent") is None
+
+    def test_task_ids(self):
+        from hummbl_garage.goodhart import HeldOutTask, HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        evaluator.add_task(HeldOutTask("t1", "d", {}, "easy", "cat"))
+        evaluator.add_task(HeldOutTask("t2", "d", {}, "easy", "cat"))
+        ids = evaluator.task_ids()
+        assert "t1" in ids and "t2" in ids
+
+    def test_evaluate_records_result(self):
+        from hummbl_garage.goodhart import HeldOutTask, HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        evaluator.add_task(HeldOutTask("t1", "d", {"reasoning_speed": 7}, "medium", "reasoning"))
+        result = evaluator.evaluate("devin", "t1", 8.5, True)
+        assert result["agent_name"] == "devin"
+        assert result["human_quality_score"] == 8.5
+        assert len(evaluator.all_results()) == 1
+
+    def test_evaluate_unknown_task(self):
+        from hummbl_garage.goodhart import HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        result = evaluator.evaluate("devin", "nonexistent", 8.0, True)
+        assert "error" in result
+
+    def test_correlation_insufficient_data(self):
+        from hummbl_garage.goodhart import HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        api = AgentPerformanceIndex(composite=8.0)
+        result = evaluator.correlation_with_api("devin", api)
+        assert result["assessment"] == "insufficient_data"
+
+    def test_correlation_correlated(self):
+        from hummbl_garage.goodhart import HeldOutTask, HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        for i in range(5):
+            evaluator.add_task(HeldOutTask(f"t{i}", "d", {}, "medium", "cat"))
+            evaluator.evaluate("devin", f"t{i}", 8.0, True)
+        api = AgentPerformanceIndex(composite=8.0)
+        result = evaluator.correlation_with_api("devin", api)
+        assert result["assessment"] == "correlated"
+
+    def test_correlation_uncorrelated(self):
+        from hummbl_garage.goodhart import HeldOutTask, HeldOutEvaluator
+        evaluator = HeldOutEvaluator()
+        for i in range(5):
+            evaluator.add_task(HeldOutTask(f"t{i}", "d", {}, "medium", "cat"))
+            evaluator.evaluate("devin", f"t{i}", 3.0, True)
+        api = AgentPerformanceIndex(composite=9.0)
+        result = evaluator.correlation_with_api("devin", api)
+        assert result["assessment"] == "uncorrelated"
+        assert result["divergence"] > 2.0

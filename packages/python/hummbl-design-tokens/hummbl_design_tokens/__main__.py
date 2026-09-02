@@ -56,7 +56,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
         ldir = outdir / "liveries"
         ldir.mkdir(exist_ok=True)
         for agent in ts.agent_names():
-            p = ldir / f"{agent}.yaml"
+            p = ldir / f"{agent}.json"
             p.write_text(generate_livery(ts, agent))
             written.append(str(p))
 
@@ -144,7 +144,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="hummbl-design-tokens", description="HUMMBL design token system")
-    parser.add_argument("--tokens", default=None, help="Path to tokens.yaml (default: bundled)")
+    parser.add_argument("--tokens", default=None, help="Path to tokens.json (default: bundled)")
     sub = parser.add_subparsers(dest="command", required=True)
 
     gen = sub.add_parser("generate", help="Generate output formats")

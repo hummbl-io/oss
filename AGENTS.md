@@ -32,6 +32,8 @@ Currently hosts 20 Python packages under `packages/python/<name>/`.
 | hummbl-design-tokens | `packages/python/hummbl-design-tokens/` | Pre-release (0.1.0) | HUMMBL Design Token System — fleet visual identity source of truth |
 | hummbl-heraldry | `packages/python/hummbl-heraldry/` | Pre-release (0.1.0) | HUMMBL Procedural Heraldic Identity System — SHA-256 agent arms generator |
 | hummbl-garage | `packages/python/hummbl-garage/` | Pre-release (0.1.0) | HUMMBL Garage — Agent Performance Index, livery presets, watch faces, failure aesthetics |
+| hummbl-identity | `packages/python/hummbl-identity/` | Pre-release (0.1.0) | HUMMBL Identity — unified agent identity facade (design-tokens + heraldry + garage) |
+| hummbl-validation-framework | `packages/python/hummbl-validation-framework/` | Pre-release (0.1.0) | HUMMBL Validation Framework — external validation tests for the design system |
 
 ## Setup
 

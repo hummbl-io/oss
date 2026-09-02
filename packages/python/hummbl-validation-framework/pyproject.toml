@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-validation-framework"
+version = "0.1.0"
+description = "HUMMBL Validation Framework — external validation tests for the design system"
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Repository = "https://github.com/hummbl-io/oss"
+
+[tool.setuptools]
+packages = ["hummbl_validation_framework"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

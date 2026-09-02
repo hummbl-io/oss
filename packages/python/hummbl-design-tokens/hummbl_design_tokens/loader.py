@@ -1,6 +1,6 @@
 """Token loader and system facade for HUMMBL design tokens.
 
-Loads the canonical tokens.yaml and provides typed access to all token groups.
+Loads the canonical tokens.json and provides typed access to all token groups.
 """
 
 from __future__ import annotations
@@ -9,24 +9,24 @@ import os
 from pathlib import Path
 from typing import Any
 
-import yaml
+import json
 
 _DATA_DIR = Path(__file__).parent / "data"
-_TOKENS_FILE = _DATA_DIR / "tokens.yaml"
+_TOKENS_FILE = _DATA_DIR / "tokens.json"
 
 
 def load_tokens(path: str | Path | None = None) -> dict[str, Any]:
-    """Load the canonical tokens.yaml file.
+    """Load the canonical tokens.json file.
 
     Args:
         path: Override path to a tokens file. If None, uses the bundled default.
 
     Returns:
-        Parsed YAML as a nested dict.
+        Parsed JSON as a nested dict.
     """
     p = Path(path) if path else _TOKENS_FILE
     with open(p) as f:
-        return yaml.safe_load(f)
+        return json.load(f)
 
 
 class TokenSystem:
