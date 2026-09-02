@@ -4,7 +4,7 @@ Bus Bridge Client - Post messages to remote machine's coordination bus.
 
 Usage:
     python -m hummbl_bus.bridge_client <host> <from> <to> <type> <message>
-    python -m hummbl_bus.bridge_client 100.120.13.37 kimi-mini kimi-mbp STATUS "Hello from Mac Mini"
+    python -m hummbl_bus.bridge_client 100.64.0.1 agent-a agent-b STATUS "Hello from agent A"
 """
 
 import argparse

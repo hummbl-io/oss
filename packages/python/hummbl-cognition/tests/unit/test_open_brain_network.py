@@ -317,7 +317,7 @@ class TestOpenBrainClientOffline:
 
         monkeypatch.delenv("OPEN_BRAIN_URL", raising=False)
         client = OpenBrainClient()
-        assert client.host == "100.117.251.32"
+        assert client.host == "localhost"
         assert client.port == 11435
 
 

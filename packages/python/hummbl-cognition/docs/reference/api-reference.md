@@ -466,7 +466,7 @@ Read recent retrieval events, most recent first.
 ## `client.py` — Open Brain HTTP client
 
 `client.py:246` lines. Stdlib-only HTTP. Default server
-`http://100.109.69.16:11435` (`client.py:31`).
+`http://localhost:11435` (`client.py:31`).
 
 ### `OpenBrainClient(url=None, *, timeout=30, token=None)`
 
@@ -512,7 +512,7 @@ secondary brains to federate findings to the primary brain.
 ```python
 from hummbl_cognition.client import OpenBrainClient
 
-brain = OpenBrainClient("http://100.109.69.16:11435")
+brain = OpenBrainClient("http://100.64.0.1:11435")
 for r in brain.search("OAuth refresh", limit=5):
     print(r["score"], r["content"][:80])
 ```

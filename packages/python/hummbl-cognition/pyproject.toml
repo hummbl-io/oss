@@ -39,6 +39,7 @@ governance = [
 ]
 test = [
     "pytest>=7.0",
+    "pytest-timeout>=2.3",
     "coverage>=7.0",
     "mypy>=1.8",
     "jsonschema>=4.0",

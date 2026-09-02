@@ -12,40 +12,64 @@ from hummbl_cognition.models import LedgerEntry, LedgerEntryType, LedgerScope
 pytestmark = pytest.mark.allow_ledger_writes
 
 
+@pytest.mark.timeout(120)
 def test_ledger_concurrency():
-    ledger_path = Path("tests/chaos/ledger_chaos.jsonl")
-    if ledger_path.exists():
-        os.remove(ledger_path)
+    # 100 threads x 50 iterations = 5,000 post_entry() calls. This test is
+    # scoped to LEDGER write concurrency, not the post-write-hooks queue
+    # subsystem -- so hooks are disabled for the duration.
+    #
+    # Why this matters: post_entry() fires post-write hooks in an UNTRACKED
+    # daemon thread per call (ledger_writer.py _safe_hook), and this test's
+    # own t.join() loop only waits on its 100 stress_worker threads, not on
+    # the up-to-5,000 hook threads each post_entry() spawns. Without this
+    # env var, those hook threads serialize on post_write_hooks._QUEUE_LOCK
+    # doing real JSON file I/O, and can still be draining that backlog long
+    # after this test returns -- bleeding into whichever test runs next and
+    # making ITS timeout fail nondeterministically depending on machine
+    # load. Disabling hooks here makes each spawned thread a near-instant
+    # no-op and keeps this test's stress limited to what it's meant to
+    # measure: the ledger file's own concurrency safety.
+    prior_hooks_setting = os.environ.get("CLP_POST_WRITE_HOOKS")
+    os.environ["CLP_POST_WRITE_HOOKS"] = "off"
+    try:
+        ledger_path = Path("tests/chaos/ledger_chaos.jsonl")
+        if ledger_path.exists():
+            os.remove(ledger_path)
 
-    num_threads = 100
-    iterations = 50
-    errors = []
+        num_threads = 100
+        iterations = 50
+        errors = []
 
-    def stress_worker(thread_id):
-        try:
-            for i in range(iterations):
-                entry = LedgerEntry.create(
-                    agent=f"thread_{thread_id}",
-                    vendor="local",
-                    model="chaos-model",
-                    entry_type=LedgerEntryType.DISCOVERY,
-                    scope=LedgerScope.PROJECT,
-                    content=f"Chaos content from thread {thread_id} iteration {i}",
-                )
-                post_entry(entry, ledger_path=ledger_path)
-                if random.random() < 0.05:
-                    time.sleep(0.001)
-        except Exception as e:
-            errors.append(f"Thread {thread_id} failed: {e}")
+        def stress_worker(thread_id):
+            try:
+                for i in range(iterations):
+                    entry = LedgerEntry.create(
+                        agent=f"thread_{thread_id}",
+                        vendor="local",
+                        model="chaos-model",
+                        entry_type=LedgerEntryType.DISCOVERY,
+                        scope=LedgerScope.PROJECT,
+                        content=f"Chaos content from thread {thread_id} iteration {i}",
+                    )
+                    post_entry(entry, ledger_path=ledger_path)
+                    if random.random() < 0.05:
+                        time.sleep(0.001)
+            except Exception as e:
+                errors.append(f"Thread {thread_id} failed: {e}")
 
-    threads = []
-    for i in range(num_threads):
-        t = threading.Thread(target=stress_worker, args=(i,))
-        threads.append(t)
-        t.start()
+        threads = []
+        for i in range(num_threads):
+            t = threading.Thread(target=stress_worker, args=(i,))
+            threads.append(t)
+            t.start()
 
-    for t in threads:
-        t.join()
+        for t in threads:
+            t.join()
+    finally:
+        if prior_hooks_setting is None:
+            os.environ.pop("CLP_POST_WRITE_HOOKS", None)
+        else:
+            os.environ["CLP_POST_WRITE_HOOKS"] = prior_hooks_setting
 
     if errors:
         print(f"Ledger Chaos Exceptions: {len(errors)}")

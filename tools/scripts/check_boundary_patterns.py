@@ -43,6 +43,21 @@ DENYDIR_NAMES = {
 # File extensions to scan for content-based checks (fleet topology files).
 SCAN_EXTENSIONS = {".json", ".yaml", ".yml"}
 
+# File extensions to scan for embedded internal IP addresses (docs, source,
+# config -- anywhere a hardcoded Tailscale IP could leak into a default
+# value or example command).
+IP_SCAN_EXTENSIONS = {".py", ".md", ".json", ".yaml", ".yml", ".toml", ".cfg", ".ini", ".txt"}
+
+# Tailscale CGNAT range (100.64.0.0/10, RFC 6598). Matches 100.64.0.0
+# through 100.127.255.255.
+CGNAT_IP_PATTERN = re.compile(
+    r"\b100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.\d{1,3}\.\d{1,3}\b"
+)
+
+# Documentation placeholder IP already adopted as convention across this
+# repo's docs/tests (first address of the CGNAT block). Not a leak.
+ALLOWED_EXAMPLE_IPS = {"100.64.0.1"}
+
 # Dirs to skip entirely.
 SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", "node_modules",
              ".venv", "venv", "dist", "build", ".eggs", ".mypy_cache"}
@@ -104,6 +119,38 @@ def check_fleet_topology(root: Path) -> list[tuple[str, str]]:
     return hits
 
 
+def check_internal_ips(root: Path) -> list[tuple[str, str]]:
+    """Check for hardcoded Tailscale/CGNAT IPs (real fleet machine addresses).
+
+    Skips the .git directory and standard build/venv dirs. Unlike
+    check_filenames, this DOES scan packages/ -- a real machine IP baked
+    into a package default (e.g. a client's fallback URL) is exactly the
+    kind of internal-infra leak the boundary policy prohibits, regardless
+    of whether it's "source code" or "docs".
+    """
+    hits = []
+    for path in sorted(root.rglob("*")):
+        if any(part in SKIP_DIRS for part in path.parts):
+            continue
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in IP_SCAN_EXTENSIONS:
+            continue
+        if path.name == "check_boundary_patterns.py":
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for match in CGNAT_IP_PATTERN.finditer(text):
+            ip = match.group(0)
+            if ip in ALLOWED_EXAMPLE_IPS:
+                continue
+            hits.append((str(path), f"hardcoded Tailscale/CGNAT IP '{ip}' (internal infra)"))
+            break  # one hit per file is enough to flag it
+    return hits
+
+
 def main() -> int:
     root = Path(".")
     total_hits = 0
@@ -113,6 +160,10 @@ def main() -> int:
         total_hits += 1
 
     for path_str, desc in check_fleet_topology(root):
+        print(f"[DENY] {path_str}: {desc}")
+        total_hits += 1
+
+    for path_str, desc in check_internal_ips(root):
         print(f"[DENY] {path_str}: {desc}")
         total_hits += 1
 

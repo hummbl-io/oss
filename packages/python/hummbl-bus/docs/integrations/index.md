@@ -331,7 +331,7 @@ On transient failure, the message is spooled for later retry. On permanent failu
 When `OPEN_BRAIN_RELAY_URL` is set, every local bus write is also forwarded to the Open Brain server's `/bus/post` endpoint (best-effort, never raises):
 
 ```bash
-export OPEN_BRAIN_RELAY_URL="http://100.109.69.16:11435"
+export OPEN_BRAIN_RELAY_URL="http://100.64.0.1:11435"
 export OPEN_BRAIN_TOKEN="relay-token"
 ```
 
