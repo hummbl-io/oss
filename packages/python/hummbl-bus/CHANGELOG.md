@@ -7,6 +7,17 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- MCP server stdio encoding: `mcp_server.py` now reconfigures `sys.stdin` and
+  `sys.stdout` to UTF-8 at startup. On Windows, these default to the system
+  codepage (CP1252), which corrupted non-ASCII JSON-RPC payloads (em-dashes,
+  smart quotes, accented characters) via mojibake before `json.loads` ever
+  saw them. The write path (`bus_writer.py`) was already UTF-8-correct; the
+  corruption was upstream, at stdin decode time. The fix is a no-op on POSIX
+  where stdin/stdout are already UTF-8. Added `tests/test_mcp_server.py` with
+  a subprocess regression test that round-trips an em-dash through the MCP
+  server and verifies no CP1252 mojibake in the bus file or read response.
+
 ### Added
 - Promoted 5 bus modules from founder-mode (archived):
   - `autonomy_ladder.py` — autonomy tier labels and action validation (7 functions)
