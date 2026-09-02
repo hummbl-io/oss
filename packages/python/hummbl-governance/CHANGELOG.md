@@ -17,6 +17,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Security
 
+- Kill switch persisted state is restored on construction when `state_dir` is
+  set. MCP, REST, sandbox, and agent-monitor boot paths previously created a
+  fresh `DISENGAGED` instance after every process restart, so an operator
+  `HALT_ALL`/`EMERGENCY` did not survive deploy or crash. HMAC tamper checks
+  are unchanged when a signing secret is configured.
+
 - **BREAKING**: `CapabilityFence.from_delegation_token()` now cryptographically
   verifies delegation tokens instead of trusting `ops_allowed` at face value.
   Previously, a tampered/forged token was silently accepted, and a token with

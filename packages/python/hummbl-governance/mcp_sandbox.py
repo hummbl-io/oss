@@ -86,7 +86,7 @@ class Sandbox:
         state_dir = STATE_DIR / sandbox_id
         state_dir.mkdir(parents=True, exist_ok=True)
 
-        self.kill_switch = KillSwitch(state_dir=state_dir)
+        self.kill_switch = KillSwitch.load_from_file(state_dir)
         self.circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=30)
         self.audit = AuditLog(base_dir=str(state_dir / "audit"))
 

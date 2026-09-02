@@ -221,6 +221,37 @@ class TestPersistence:
             loaded = KillSwitch.load_from_file(state_dir, require_hmac=False)
             assert loaded.mode == KillSwitchMode.DISENGAGED
 
+    def test_constructor_with_state_dir_restores_engaged_mode(self):
+        """Production boot path: KillSwitch(state_dir=...) must restore HALT_ALL.
+
+        Previously __init__ always started DISENGAGED even when state_dir was
+        set, so MCP/API process restart silently cleared an emergency halt.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            state_dir = Path(tmpdir)
+            ks = KillSwitch(state_dir=state_dir, require_hmac=False)
+            ks.engage(KillSwitchMode.HALT_ALL, "budget exceeded", "governor")
+            restarted = KillSwitch(state_dir=state_dir, require_hmac=False)
+            assert restarted.mode == KillSwitchMode.HALT_ALL
+            assert restarted.engaged is True
+            result = restarted.check_task_allowed("data_export")
+            assert result["allowed"] is False
+            assert result["action"] == "block"
+
+    def test_unsigned_state_restored_when_no_signing_secret(self, monkeypatch):
+        """HMAC cannot be enforced without a key; persist+restart must not
+        drop HALT_ALL just because HUMMBL_SIGNING_SECRET was never set.
+        """
+        monkeypatch.delenv("HUMMBL_SIGNING_SECRET", raising=False)
+        monkeypatch.delenv("DCT_SECRET", raising=False)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            state_dir = Path(tmpdir)
+            ks = KillSwitch(state_dir=state_dir, require_hmac=True)
+            ks.engage(KillSwitchMode.EMERGENCY, "incident", "operator")
+            restarted = KillSwitch(state_dir=state_dir, require_hmac=True)
+            assert restarted.mode == KillSwitchMode.EMERGENCY
+            assert restarted.check_task_allowed("safety_monitoring")["allowed"] is False
+
 
 class TestConcurrencyToctou:
     """Concurrency tests for the TOCTOU fix in check_task_allowed (issue #317).

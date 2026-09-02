@@ -171,6 +171,35 @@ def test_kill_switch_disengage():
     assert result["disengaged"] is True
 
 
+def test_kill_switch_survives_process_restart():
+    """Simulated MCP server recycle must keep an engaged HALT_ALL.
+
+    get_kill_switch() used to construct a fresh DISENGAGED instance and
+    ignore kill_switch_state.json, so a deploy/crash would lift the halt.
+    """
+    mcp_server.handle_tool(
+        "kill_switch_engage",
+        {
+            "mode": "HALT_ALL",
+            "reason": "incident halt",
+            "confirm": True,
+            "triggered_by": "pytest",
+        },
+    )
+    state_file = Path(mcp_server.STATE_DIR) / "kill_switch_state.json"
+    assert state_file.exists()
+    payload = json.loads(state_file.read_text(encoding="utf-8"))
+    assert payload["mode"] == "HALT_ALL"
+
+    mcp_server._instances.clear()
+
+    status = mcp_server.handle_tool("kill_switch_status", {})
+    assert status["status"]["engaged"] is True
+    assert status["status"]["mode"] == "HALT_ALL"
+    ks = mcp_server.get_kill_switch()
+    assert ks.check_task_allowed("data_export")["allowed"] is False
+
+
 # ---------------------------------------------------------------------------
 # circuit_breaker_status
 # ---------------------------------------------------------------------------

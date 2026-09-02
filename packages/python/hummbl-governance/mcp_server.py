@@ -93,7 +93,7 @@ def _ensure_dirs():
 def get_kill_switch():
     if "ks" not in _instances:
         _ensure_dirs()
-        _instances["ks"] = KillSwitch(state_dir=Path(STATE_DIR))
+        _instances["ks"] = KillSwitch.load_from_file(Path(STATE_DIR))
     return _instances["ks"]
 
 

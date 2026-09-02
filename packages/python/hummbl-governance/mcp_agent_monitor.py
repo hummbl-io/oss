@@ -66,7 +66,7 @@ _lineage = EvolutionLineage()
 
 # Lifecycle wired with default primitives
 _state_dir = Path(os.environ.get("MONITOR_STATE_DIR", tempfile.mkdtemp(prefix="hummbl-monitor-")))
-_ks = KillSwitch(state_dir=_state_dir)
+_ks = KillSwitch.load_from_file(_state_dir)
 _cb = CircuitBreaker()
 _cg = CostGovernor(db_path=":memory:")
 _reg = AgentRegistry()
