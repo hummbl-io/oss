@@ -1,7 +1,7 @@
 # BaseN Rubric Duration Receipt 2026-03-27
 
 Status: duration extension beyond the 2-epoch rubric record  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Baseline Record Before This Pass
 
