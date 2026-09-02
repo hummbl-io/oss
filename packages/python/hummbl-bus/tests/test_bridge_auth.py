@@ -148,6 +148,8 @@ class TestPathTraversalRejected:
 
     def test_client_supplied_bus_path_rejected(self, monkeypatch):
         monkeypatch.setenv("BUS_BRIDGE_ALLOW_NO_AUTH", "1")
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN", raising=False)
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN_FILE", raising=False)
         with mock.patch("hummbl_bus.bridge_server.post_message") as mock_post:
             handler = _make_post_handler(
                 body={
