@@ -59,7 +59,7 @@ void ex-post with unfavorable interpretations).
 | **Kill switch** | Govern 1.7 (decommissioning) | Annex A (lifecycle controls) | Art. 14 (human oversight) | FAccT 2024 — real-time monitoring | Not standardized |
 | **Circuit breaker** | Manage 1.1 (proceed/stop decision) | Clause 8 (operational controls) | Art. 9 (risk mgmt), Art. 15 (robustness) | Swiss Cheese Model (arXiv 2408.02205) | Microsoft ACS `deny`/`escalate` verdicts |
 | **Cost governor** | Govern 1.3 (risk tolerance) | Clause 6 (planning) | Art. 9 (risk mgmt) | GOVSIM commons failure (arXiv 2404.16698) | Not standardized |
-| **Delegation tokens** | Govern 2.1 (roles/responsibilities) | Annex A (accountability) | Art. 25 (value chain responsibilities) | FAccT 2024 — agent identifiers | IETF HDP, DCT, `delegation_chain` JWT |
+| **Delegation tokens** | Govern 2.1 (roles/responsibilities) | Annex A (accountability) | Art. 25 (value chain responsibilities) | FAccT 2024 — agent identifiers | HDP (IETF provenance); DeepMind DCT (paper, not IETF); AAT (`draft-niyikiza-oauth-attenuating-agent-tokens-01`); `delegation_chain` JWT (`draft-liu-oauth-chain-delegation-00`) |
 | **Agent fleet as unit** | **No coverage** | **No coverage** | **No coverage** | Federated governance (emerging) | ADCS spec |
 
 ### Sources
@@ -100,11 +100,11 @@ HUMMBL's delegation tokens implement:
 - Least-privilege enforcement (ops_allowed, resource_selectors, caveats)
 - Fail-closed authentication (rejects on any anomaly)
 
-Three concurrent IETF Internet Drafts are standardizing cryptographic
-delegation chains for AI agents:
-- **HDP (Human Delegation Provenance)** — Ed25519 signed, append-only chain
-- **DCT (Delegation Capability Tokens)** — monotonic attenuation, Ed25519
-- **`delegation_chain` JWT claim** — OAuth-compatible multi-hop delegation
+Related work is three layers, not one IETF token:
+- **HDP (Human Delegation Provenance)** — IETF provenance draft
+- **DCT (Delegation Capability Tokens)** — DeepMind paper (not IETF)
+- **AAT** — `draft-niyikiza-oauth-attenuating-agent-tokens-01`
+- **`delegation_chain` JWT** — `draft-liu-oauth-chain-delegation-00`
 
 HUMMBL's design principles match (time-bounding, least-privilege, signed)
 but the wire format diverges (HMAC-SHA256 symmetric vs. Ed25519
@@ -204,6 +204,7 @@ amendments.
 | 2026-08-21 | Pursue ISO 42001 + NIST AI RMF dual adoption | Official crosswalk enables dual compliance; AIMS provides audit wrapper, NIST provides operating model |
 | 2026-08-21 | Preemptive EU AI Act provider/deployer self-classification | Article 25 cannot absorb fleet orchestration; self-classification is lower risk than waiting for regulatory interpretation |
 | 2026-08-21 | Audit delegation tokens against IETF HDP/DCT drafts | Align wire format before drafts ratify; avoid costly refactoring (see DELEGATION-IETF-GAP-ANALYSIS.md) |
+| 2026-08-31 | IETF delegation gap analysis landed; DCT is not IETF | Analysis at `docs/DELEGATION-IETF-GAP-ANALYSIS.md` (not a claim of alignment). HDP = IETF provenance; DCT = DeepMind paper; AAT = `draft-niyikiza-oauth-attenuating-agent-tokens-01` |
 | 2026-08-21 | Document cost governor as commons-protection mechanism | GOVSIM (arXiv 2404.16698) validates runtime cost governance as necessary for sustainable fleet operation |
 
 ---
@@ -215,9 +216,10 @@ amendments.
 2. **EU AI Act Digital Omnibus amendments** (May 2026) — may alter
    provider/deployer accountability structure. Re-audit when reflected
    in EU AI Act Service Desk resources.
-3. **IETF delegation drafts ratification** — HDP, DCT, `delegation_chain`
-   JWT are working documents. Check quarterly; engage if HUMMBL's design
-   diverges from the draft trajectory.
+3. **IETF delegation drafts ratification** — HDP is an IETF provenance
+   draft; DCT is a DeepMind paper (not IETF); AAT is
+   `draft-niyikiza-oauth-attenuating-agent-tokens-01`. Check quarterly;
+   engage if HUMMBL's design diverges from the draft trajectory.
 4. **Microsoft ACS alignment** — should HUMMBL's circuit breaker adopt
    the ACS verdict model (`allow`/`warn`/`deny`/`escalate`/`transform`)
    for interoperability with ACS-adapter frameworks (LangChain, CrewAI,
