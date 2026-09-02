@@ -1,0 +1,136 @@
+{
+  "version": "0.1.0",
+  "description": "HUMMBL heraldic grammar — constrained vocabulary for procedural agent arms",
+
+  "shield_shapes": [
+    {"id": "heater", "name": "Heater", "description": "Classic triangular shield, default heraldic shape"},
+    {"id": "kite", "name": "Norman Kite", "description": "Almond-shaped, rounded top tapering to point"},
+    {"id": "swiss", "name": "Swiss", "description": "Square-topped with rounded base"},
+    {"id": "french", "name": "French", "description": "Taller, pointed base, 17th century"},
+    {"id": "lozenge", "name": "Lozenge", "description": "Diamond-shaped, traditionally for women's arms"},
+    {"id": "oval", "name": "Oval", "description": "Ecclesiastical/continental"},
+    {"id": "square", "name": "Square", "description": "Modern square shield"}
+  ],
+
+  "tinctures": [
+    {"id": "or", "name": "Or", "category": "metal", "hex": "#E6B800", "description": "Gold/Yellow"},
+    {"id": "argent", "name": "Argent", "category": "metal", "hex": "#E5E7EB", "description": "Silver/White"},
+    {"id": "gules", "name": "Gules", "category": "color", "hex": "#DC2626", "description": "Red"},
+    {"id": "azure", "name": "Azure", "category": "color", "hex": "#2563EB", "description": "Blue"},
+    {"id": "sable", "name": "Sable", "category": "color", "hex": "#1A1A20", "description": "Black"},
+    {"id": "vert", "name": "Vert", "category": "color", "hex": "#22C55E", "description": "Green"},
+    {"id": "purpure", "name": "Purpure", "category": "color", "hex": "#7C3AED", "description": "Purple"},
+    {"id": "ermine", "name": "Ermine", "category": "fur", "hex": "#F3F4F6", "description": "White with black tails pattern"},
+    {"id": "vair", "name": "Vair", "category": "fur", "hex": "#93C5FD", "description": "Blue-white bell pattern"}
+  ],
+
+  "divisions": [
+    {"id": "solid", "name": "Solid", "blazon": "", "description": "Undivided field"},
+    {"id": "per_pale", "name": "Per Pale", "blazon": "per pale", "description": "Vertical division"},
+    {"id": "per_fess", "name": "Per Fess", "blazon": "per fess", "description": "Horizontal division"},
+    {"id": "per_bend", "name": "Per Bend", "blazon": "per bend", "description": "Diagonal dexter division"},
+    {"id": "per_bend_sinister", "name": "Per Bend Sinister", "blazon": "per bend sinister", "description": "Diagonal sinister division"},
+    {"id": "per_chevron", "name": "Per Chevron", "blazon": "per chevron", "description": "Chevron division"},
+    {"id": "per_saltire", "name": "Per Saltire", "blazon": "per saltire", "description": "X division"},
+    {"id": "quarterly", "name": "Quarterly", "blazon": "quarterly", "description": "Four quarters"},
+    {"id": "per_pall", "name": "Per Pall", "blazon": "per pall", "description": "Y division, three parts"},
+    {"id": "gyronny", "name": "Gyronny", "blazon": "gyronny", "description": "Triangular wedges"}
+  ],
+
+  "ordinaries": [
+    {"id": "none", "name": "None", "blazon": "", "description": "No ordinary"},
+    {"id": "pale", "name": "Pale", "blazon": "a pale", "description": "Vertical band"},
+    {"id": "fess", "name": "Fess", "blazon": "a fess", "description": "Horizontal band"},
+    {"id": "bend", "name": "Bend", "blazon": "a bend", "description": "Diagonal band"},
+    {"id": "chevron", "name": "Chevron", "blazon": "a chevron", "description": "Inverted V"},
+    {"id": "cross", "name": "Cross", "blazon": "a cross", "description": "Cross"},
+    {"id": "saltire", "name": "Saltire", "blazon": "a saltire", "description": "X cross"},
+    {"id": "chief", "name": "Chief", "blazon": "a chief", "description": "Top band"}
+  ],
+
+  "charges": [
+    {"id": "none", "name": "None", "blazon": "", "description": "No charge"},
+    {"id": "lion_rampant", "name": "Lion Rampant", "blazon": "a lion rampant", "description": "Lion standing on hind legs"},
+    {"id": "lion_passant", "name": "Lion Passant", "blazon": "a lion passant", "description": "Lion walking"},
+    {"id": "eagle_displayed", "name": "Eagle Displayed", "blazon": "an eagle displayed", "description": "Eagle with spread wings"},
+    {"id": "mullet", "name": "Mullet", "blazon": "a mullet", "description": "Five-pointed star"},
+    {"id": "crescent", "name": "Crescent", "blazon": "a crescent", "description": "Waxing moon"},
+    {"id": "fleur_de_lis", "name": "Fleur-de-lis", "blazon": "a fleur-de-lis", "description": "Lily flower"},
+    {"id": "cross_moline", "name": "Cross Moline", "blazon": "a cross moline", "description": "Cross with forked ends"},
+    {"id": "sword", "name": "Sword", "blazon": "a sword", "description": "Vertical sword"},
+    {"id": "tower", "name": "Tower", "blazon": "a tower", "description": "Castle tower"},
+    {"id": "cogwheel", "name": "Cogwheel", "blazon": "a cogwheel", "description": "Engineer's cogwheel"},
+    {"id": "compass", "name": "Compass", "blazon": "a compass", "description": "Navigation compass"},
+    {"id": "knot", "name": "Knot", "blazon": "a knot", "description": "Heraldic knot"},
+    {"id": "annulet", "name": "Annulet", "blazon": "an annulet", "description": "Ring"},
+    {"id": "rose", "name": "Rose", "blazon": "a rose", "description": "Heraldic rose"},
+    {"id": "martlet", "name": "Martlet", "blazon": "a martlet", "description": "Swallow without feet"},
+    {"id": "escallop", "name": "Escallop", "blazon": "an escallop", "description": "Scallop shell"},
+    {"id": "key", "name": "Key", "blazon": "a key", "description": "Vertical key"},
+    {"id": "anchor", "name": "Anchor", "blazon": "an anchor", "description": "Naval anchor"},
+    {"id": "lightning_bolt", "name": "Lightning Bolt", "blazon": "a lightning bolt", "description": "Bolt of lightning"},
+    {"id": "gear", "name": "Gear", "blazon": "a gear", "description": "Mechanical gear"},
+    {"id": "scroll", "name": "Scroll", "blazon": "a scroll", "description": "Parchment scroll"},
+    {"id": "lens", "name": "Lens", "blazon": "a lens", "description": "Magnifying lens"},
+    {"id": "wrench", "name": "Wrench", "blazon": "a wrench", "description": "Mechanical wrench"},
+    {"id": "star", "name": "Star", "blazon": "a star", "description": "Six-pointed star"},
+    {"id": "pall", "name": "Pall", "blazon": "a pall", "description": "Y-shaped charge"},
+    {"id": "pall_reversed", "name": "Pall Reversed", "blazon": "a pall reversed", "description": "Inverted Y charge"},
+    {"id": "caduceus", "name": "Caduceus", "blazon": "a caduceus", "description": "Herald's staff with serpents"},
+    {"id": "divining_rod", "name": "Divining Rod", "blazon": "a divining rod", "description": "Forked dowsing rod"},
+    {"id": "eye", "name": "Eye", "blazon": "an eye", "description": "All-seeing eye"}
+  ],
+
+  "cadency_marks": [
+    {"id": "none", "trust_tier": "OWNER", "blazon": "", "description": "Head of house — no differencing"},
+    {"id": "label", "trust_tier": "TRUSTED", "blazon": "a label of three points", "description": "Horizontal bar with three vertical tabs"},
+    {"id": "crescent", "trust_tier": "MEDIUM-HIGH", "blazon": "a crescent for difference", "description": "Waxing moon cadency mark"},
+    {"id": "mullet", "trust_tier": "MEDIUM", "blazon": "a mullet for difference", "description": "Star cadency mark"},
+    {"id": "bordure_compony", "trust_tier": "PROBATIONARY", "blazon": "a bordure compony", "description": "Checkered border, mark of bastardy"}
+  ],
+
+  "role_badges": [
+    {"id": "star", "role": "coordinator", "icon": "★", "description": "Fleet coordinator"},
+    {"id": "gear", "role": "engineer", "icon": "⚙", "description": "Engineering"},
+    {"id": "scroll", "role": "memory", "icon": "📜", "description": "Memory and synthesis"},
+    {"id": "lens", "role": "scanner", "icon": "🔍", "description": "Canonical surface scanning"},
+    {"id": "compass", "role": "research", "icon": "🧭", "description": "Research and navigation"},
+    {"id": "wrench", "role": "ops", "icon": "🔧", "description": "Operations and remediation"}
+  ],
+
+  "host_patches": [
+    {"id": "delta", "name": "Delta", "description": "Arch Linux workstation, primary host"},
+    {"id": "anvil", "name": "Anvil", "description": "Windows 11, Gitea and fleet services"},
+    {"id": "hummbl-vps", "name": "VPS", "description": "Ubuntu 24.04 VPS, bus host"},
+    {"id": "beachhead", "name": "Beachhead", "description": "Ubuntu VPS, CI runners"},
+    {"id": "slate", "name": "Slate", "description": "Ubuntu 24.04 Surface Pro, mobile"}
+  ],
+
+  "ics_flags": [
+    {"bus_type": "PROPOSAL", "ics_letter": "P", "ics_name": "Papa", "color_scheme": "blue-white-blue vertical"},
+    {"bus_type": "ACK", "ics_letter": "A", "ics_name": "Alfa", "color_scheme": "white-blue swallowtail"},
+    {"bus_type": "STATUS", "ics_letter": "S", "ics_name": "Sierra", "color_scheme": "white-blue-white with center square"},
+    {"bus_type": "SITREP", "ics_letter": null, "ics_name": "Custom", "color_scheme": "red-white-red horizontal"},
+    {"bus_type": "BLOCKED", "ics_letter": "B", "ics_name": "Bravo", "color_scheme": "red swallowtail"},
+    {"bus_type": "DECISION", "ics_letter": "D", "ics_name": "Delta", "color_scheme": "yellow-blue-yellow with center square"},
+    {"bus_type": "QUESTION", "ics_letter": "Q", "ics_name": "Quebec", "color_scheme": "yellow"},
+    {"bus_type": "MILESTONE", "ics_letter": "M", "ics_name": "Mike", "color_scheme": "blue-white"},
+    {"bus_type": "SKILL_INVOKE", "ics_letter": null, "ics_name": "Custom", "color_scheme": "green-white-green (SOPA style)"}
+  ],
+
+  "fleet_arms": {
+    "name": "HUMMBL LLC",
+    "blazon": "Sable, a pall reversed between in chief two mullets Argent and in base a cogwheel Or",
+    "description": "Dark field (the void), pall (fleet structure: agents, hosts, bus), stars (guidance), cogwheel (engineering)",
+    "shield": "heater",
+    "field": "sable",
+    "division": "solid",
+    "ordinary": "pall_reversed",
+    "ordinary_tincture": "argent",
+    "charges": [
+      {"charge": "mullet", "position": "chief dexter", "tincture": "argent"},
+      {"charge": "mullet", "position": "chief sinister", "tincture": "argent"},
+      {"charge": "cogwheel", "position": "base", "tincture": "or"}
+    ]
+  }
+}
