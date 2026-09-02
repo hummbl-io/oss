@@ -198,10 +198,10 @@ def generate_typescript_module(ts: TokenSystem) -> str:
 
 
 def generate_livery(ts: TokenSystem, agent_name: str) -> str:
-    """Generate a livery YAML for a specific agent."""
-    import yaml as _yaml
+    """Generate a livery JSON for a specific agent."""
+    import json as _json
     livery = ts.agent_livery(agent_name)
-    return _yaml.dump(livery, default_flow_style=False, sort_keys=False)
+    return _json.dumps(livery, indent=2, ensure_ascii=False) + "\n"
 
 
 def generate_swatches_html(ts: TokenSystem) -> str:

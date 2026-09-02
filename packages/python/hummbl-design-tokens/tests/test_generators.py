@@ -125,15 +125,15 @@ class TestLivery:
     def test_generates(self):
         ts = TokenSystem()
         out = generate_livery(ts, "devin")
-        assert "agent: devin" in out
-        assert "accent:" in out
-        assert "insignia:" in out
+        assert '"agent": "devin"' in out
+        assert '"accent"' in out
+        assert '"insignia"' in out
 
     def test_all_agents(self):
         ts = TokenSystem()
         for name in ts.agent_names():
             out = generate_livery(ts, name)
-            assert f"agent: {name}" in out
+            assert f'"agent": "{name}"' in out
 
 
 class TestSwatches:

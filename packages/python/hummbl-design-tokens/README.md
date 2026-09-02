@@ -14,8 +14,9 @@ python -m hummbl_design_tokens generate --all --outdir ./output
 
 ## Token source
 
-All tokens are authored in `hummbl_design_tokens/data/tokens.yaml`. This is the
-canonical source — every output format is derived from it.
+All tokens are authored in `hummbl_design_tokens/data/tokens.json`. This is the
+canonical source — every output format is derived from it. JSON is used instead
+of YAML to maintain zero third-party runtime dependencies (stdlib only).
 
 ## Outputs
 
@@ -25,7 +26,7 @@ canonical source — every output format is derived from it.
 | CSS custom properties | `hummbl-tokens.css` | Web dashboards |
 | Python color module | `colors.py` | Python applications |
 | TypeScript color module | `colors.ts` | TypeScript/JavaScript applications |
-| Livery configs | `liveries/<agent>.yaml` | Per-agent livery definitions |
+| Livery configs | `liveries/<agent>.json` | Per-agent livery definitions |
 | Documentation swatches | `swatches.html` | Visual reference page |
 
 ## Design decisions
