@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [base120, governed-compression, hummbl, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-free-models, hummbl-governance, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-taxonomy, hummbl-tuples, hummbl-validation, idp-spec]
+        package: [base120, governed-compression, hummbl, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
