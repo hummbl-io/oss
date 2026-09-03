@@ -103,7 +103,7 @@ It was not:
 - serving as the authoritative TinyStories ledger
 - materially updating `autoresearch-reports`
 
-That work remained centered on Windows, especially `C:\Users\Owner\autoresearch-win-rtx` (now archived — see [issue #75](https://github.com/hummbl-dev/hummbl-tuples/issues/75); active authority is `autoresearch-pipeline`).
+That work remained centered on Windows, especially `<local-path>/autoresearch-win-rtx` (now archived — see [issue #75](https://github.com/hummbl-dev/hummbl-tuples/issues/75); active authority is `autoresearch-pipeline`).
 
 ## Practical Interpretation
 

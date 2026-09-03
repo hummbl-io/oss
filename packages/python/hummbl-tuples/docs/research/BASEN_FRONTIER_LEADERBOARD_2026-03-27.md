@@ -1,7 +1,7 @@
 # BaseN Frontier Leaderboard 2026-03-27
 
 Status: canonical frontier snapshot for the current BaseN proof loop  
-Scope: Windows experiments in `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: Windows experiments in `<local-path>/autoresearch-yolo`
 
 This document compresses the current best-known BaseN checkpoints into one scoreboard.
 It is intentionally selective.

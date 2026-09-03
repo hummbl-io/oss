@@ -5,9 +5,9 @@ Scope: exact code-level changes needed in the March 27 Windows BaseN alignment s
 
 Primary Windows targets:
 
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\hummbl_basen_sft.py`
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\hummbl_sft.py`
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\hummbl_sft_dataset.py`
+- `<local-path>/autoresearch-yolo\hummbl_basen_sft.py`
+- `<local-path>/autoresearch-yolo\hummbl_sft.py`
+- `<local-path>/autoresearch-yolo\hummbl_sft_dataset.py`
 
 ## 1. Delta 1: Add corpus validation gate
 

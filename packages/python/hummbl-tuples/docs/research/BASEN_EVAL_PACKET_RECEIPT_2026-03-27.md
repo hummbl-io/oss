@@ -1,7 +1,7 @@
 # BaseN Eval Packet Receipt 2026-03-27
 
 Status: first executable pre/post-style eval packet on Windows  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>/autoresearch-yolo`
 
 ## Packet Shape
 
