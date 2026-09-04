@@ -423,7 +423,7 @@ def test_known_known_requires_current_evidence_and_corroboration() -> None:
 def test_native_evidence_path_must_be_relative_and_content_addressed() -> None:
     manifest = _manifest()
     envelope = _attempt(manifest)
-    envelope["native_evidence"]["storage_ref"] = "C:/Users/example/private.json"
+    envelope["native_evidence"]["storage_ref"] = "/tmp/private.json"
     _rehash(envelope)
 
     errors = validate_envelope(envelope, manifest)
@@ -2251,7 +2251,7 @@ def test_security_collector_name_requires_canonical_form(collector_name: str) ->
                 "".join(("pass", "word")) + "@example.invalid/private",
             )
         ),
-        "file:///C:/Users/Owner/private",
+        "file:///tmp/private",
         "https:/example.invalid/private",
         "https:example.invalid/private",
         "ssh:git.example.invalid/repo",
