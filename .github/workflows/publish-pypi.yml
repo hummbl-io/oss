@@ -18,31 +18,7 @@ name: Publish to PyPI
 "on":
   push:
     tags:
-      - "python/base120/v*"
-      - "python/governed-compression/v*"
-      - "python/hummbl/v*"
-      - "python/hummbl-axis/v*"
-      - "python/hummbl-bif/v*"
-      - "python/hummbl-bus/v*"
-      - "python/hummbl-cognition/v*"
-      - "python/hummbl-compass/v*"
-      - "python/hummbl-contracts/v*"
-      - "python/hummbl-design-tokens/v*"
-      - "python/hummbl-free-models/v*"
-      - "python/hummbl-garage/v*"
-      - "python/hummbl-governance/v*"
-      - "python/hummbl-heraldry/v*"
-      - "python/hummbl-identity/v*"
-      - "python/hummbl-intel/v*"
-      - "python/hummbl-kernel/v*"
-      - "python/hummbl-lattice/v*"
-      - "python/hummbl-lint-config/v*"
-      - "python/hummbl-rubric-templates/v*"
-      - "python/hummbl-taxonomy/v*"
-      - "python/hummbl-tuples/v*"
-      - "python/hummbl-validation/v*"
-      - "python/hummbl-validation-framework/v*"
-      - "python/idp-spec/v*"
+      - "python/*/v*"
 
 
 concurrency:
