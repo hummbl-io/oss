@@ -26,7 +26,7 @@ exactly one JSONL line in `ledger.jsonl`.
 | `id` | `str` | yes | Format `clp-<12 hex chars>` (`^clp-[a-f0-9]{12}$`) | `ledger_writer.py:481-482` |
 | `timestamp` | `str` | yes | ISO 8601, e.g. `2026-06-25T14:30:00Z` | `ledger_writer.py:475`; written by `feedback_tracker.py:92` style |
 | `agent` | `str` | yes | Agent identifier (e.g. `claude-code`, `consolidator`); substring-filtered in queries | `ledger_writer.py:567-568`, `query.py` `agent` filter |
-| `vendor` | `str` | yes | One of `anthropic`, `google`, `human`, `local`, `moonshot`, `openai` | `ledger_writer.py:485-487` |
+| `vendor` | `str` | yes | One of `anthropic`, `google`, `human`, `local`, `moonshot`, `openai`, `zai` | `ledger_writer.py:485-487` |
 | `model` | `str` | yes | Model name (e.g. `claude-opus-4`, `qwen3.5:9b`) | `ledger_writer.py:475`; consolidator sets it to the Ollama model (`consolidator.py:350`) |
 | `type` | `str` | yes | A canonical `LedgerEntryType` value (see below) | `ledger_writer.py:491-495` |
 | `scope` | `str` | yes | A canonical `LedgerScope` value (see below) | `ledger_writer.py:498-502` |

@@ -463,7 +463,7 @@ def _validate_entry_schema(entry: "LedgerEntry") -> None:
         )
 
     # Vendor enum
-    valid_vendors = {"anthropic", "google", "human", "local", "moonshot", "openai"}
+    valid_vendors = {"anthropic", "google", "human", "local", "moonshot", "openai", "zai"}
     if d["vendor"] not in valid_vendors:
         raise ValueError(
             f"ledger entry vendor {d['vendor']!r} not in {sorted(valid_vendors)}"

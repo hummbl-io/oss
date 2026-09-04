@@ -57,7 +57,7 @@ hummbl-cognition post --agent <id> --vendor <v> --model <m> \
 | Flag | Required | Description |
 |---|---|---|
 | `--agent` | yes | Agent identifier (e.g. `claude-code`). |
-| `--vendor` | yes | One of `anthropic`, `google`, `human`, `local`, `moonshot`, `openai` (`ledger_writer.py:485`). |
+| `--vendor` | yes | One of `anthropic`, `google`, `human`, `local`, `moonshot`, `openai`, `zai` (`ledger_writer.py:485`). |
 | `--model` | yes | Model name. |
 | `--type` | yes | A canonical `LedgerEntryType` (`decision`, `correction`, `lesson`, `convention`, `discovery`). |
 | `--scope` | yes | A canonical `LedgerScope` (`project`, `global`, `session`). |
