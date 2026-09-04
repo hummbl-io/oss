@@ -39,9 +39,7 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import dataclass, field
-from importlib.resources import (
-    files,  # nosemgrep: python.lang.compatibility.python37.python37-compatibility-importlib2
-)
+from importlib.resources import files  # nosemgrep: python.lang.compatibility.python37.python37-compatibility-importlib2
 from pathlib import Path
 from typing import Any
 
@@ -66,7 +64,7 @@ def build_contract_registry() -> RefRegistry:
 
     The shared-refs schema declares an ``$id`` so contract schemas can
     reference definitions such as
-    ``https://hummbl.io/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref``.
+    ``https://hummbl.dev/schemas/cross-repo-shared-refs-v0.1.schema.json#/$defs/repo_ref``.
     """
     registry = RefRegistry()
     shared = _load_packaged_schema(_SHARED_REFS_SCHEMA)
@@ -105,7 +103,10 @@ def enforce_contract(
     if registry is None:
         registry = build_contract_registry()
     schema = _load_packaged_schema(_CONTRACT_SCHEMA)
-    schema_errors = [f"schema: {error}" for error in SchemaValidator.validate(contract, schema, registry=registry)]
+    schema_errors = [
+        f"schema: {error}"
+        for error in SchemaValidator.validate(contract, schema, registry=registry)
+    ]
     if schema_errors:
         return EnforcementResult(is_valid=False, schema_errors=schema_errors)
     semantic_errors = validate_contract_document(contract)
@@ -131,7 +132,10 @@ def enforce_compatibility_manifest(
     if registry is None:
         registry = build_contract_registry()
     schema = _load_packaged_schema(_COMPATIBILITY_SCHEMA)
-    schema_errors = [f"schema: {error}" for error in SchemaValidator.validate(manifest, schema, registry=registry)]
+    schema_errors = [
+        f"schema: {error}"
+        for error in SchemaValidator.validate(manifest, schema, registry=registry)
+    ]
     if schema_errors:
         return EnforcementResult(is_valid=False, schema_errors=schema_errors)
     semantic_errors = validate_compatibility_manifest(manifest, contract)

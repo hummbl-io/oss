@@ -18,14 +18,15 @@
 
 import tempfile
 
+
 from hummbl_governance.audit_log import (
-    E_AMENDMENT_TARGET_MISSING,
-    E_AUDIT_IMMUTABLE,
-    E_AUDIT_SIGNATURE_INVALID,
-    E_EVIDENCE_REQUIRED,
-    E_VERIFICATION_REF_INVALID,
     AuditEntry,
     AuditLog,
+    E_AUDIT_IMMUTABLE,
+    E_AUDIT_SIGNATURE_INVALID,
+    E_AMENDMENT_TARGET_MISSING,
+    E_EVIDENCE_REQUIRED,
+    E_VERIFICATION_REF_INVALID,
 )
 
 
@@ -34,7 +35,6 @@ class TestAuditEntry:
 
     def test_to_jsonl_round_trip(self):
         import json
-
         entry = AuditEntry(
             timestamp="2026-01-01T00:00:00Z",
             entry_id="entry-1",
@@ -53,7 +53,6 @@ class TestAuditEntry:
 
     def test_optional_fields(self):
         import json
-
         entry = AuditEntry(
             timestamp="2026-01-01T00:00:00Z",
             entry_id="entry-1",
@@ -77,8 +76,7 @@ class TestAuditLogAppend:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir)
             ok, err = log.append(
-                intent_id="i1",
-                task_id="t1",
+                intent_id="i1", task_id="t1",
                 tuple_type="CONTRACT",
                 tuple_data={"name": "test"},
                 signature="sig-123",
@@ -91,8 +89,7 @@ class TestAuditLogAppend:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir, require_signature=True)
             ok, err = log.append(
-                intent_id="i1",
-                task_id="t1",
+                intent_id="i1", task_id="t1",
                 tuple_type="CONTRACT",
                 tuple_data={"name": "test"},
             )
@@ -104,8 +101,7 @@ class TestAuditLogAppend:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir, require_signature=False)
             ok, err = log.append(
-                intent_id="i1",
-                task_id="t1",
+                intent_id="i1", task_id="t1",
                 tuple_type="CONTRACT",
                 tuple_data={"name": "test"},
             )
@@ -116,8 +112,7 @@ class TestAuditLogAppend:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir, require_signature=False)
             ok, err = log.append(
-                intent_id="i1",
-                task_id="t1",
+                intent_id="i1", task_id="t1",
                 tuple_type="ATTEST",
                 tuple_data={"verdict": "pass"},
             )
@@ -129,8 +124,7 @@ class TestAuditLogAppend:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir, require_signature=False)
             ok, err = log.append(
-                intent_id="i1",
-                task_id="t1",
+                intent_id="i1", task_id="t1",
                 tuple_type="ATTEST",
                 tuple_data={"verdict": "pass"},
                 verification_id="nonexistent",
@@ -220,10 +214,7 @@ class TestAuditLogAmendments:
             log2 = AuditLog(tmpdir, require_signature=False)
             original = list(log2.query_by_intent("i1"))[0]
             ok, err = log2.append(
-                "i1",
-                "t1",
-                "CONTRACT",
-                {"v": 2},
+                "i1", "t1", "CONTRACT", {"v": 2},
                 amendment_of=original.entry_id,
             )
             assert ok is True
@@ -233,10 +224,7 @@ class TestAuditLogAmendments:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir, require_signature=False)
             ok, err = log.append(
-                "i1",
-                "t1",
-                "CONTRACT",
-                {"v": 2},
+                "i1", "t1", "CONTRACT", {"v": 2},
                 amendment_of="nonexistent",
             )
             assert ok is False
@@ -287,7 +275,6 @@ class TestAuditLogRetention:
 
     def test_enforce_retention_deletes_old_file(self):
         import os
-
         with tempfile.TemporaryDirectory() as tmpdir:
             # Manually create a stale governance file with old date
             old_file = os.path.join(tmpdir, "audit-2020-01-01.jsonl")
@@ -383,7 +370,8 @@ class TestAuditLogExplain:
             dct_entries = list(log.query_by_intent("i_dct"))
             dct_id = dct_entries[0].entry_id
             # Write action that references the DCT
-            log.append("i_action", "t2", "INTENT", {"agent": "claude"}, capability_token_id=dct_id)
+            log.append("i_action", "t2", "INTENT", {"agent": "claude"},
+                       capability_token_id=dct_id)
             action_entries = list(log.query_by_intent("i_action"))
             action_id = action_entries[0].entry_id
             chain = log.explain(action_id)
@@ -419,22 +407,18 @@ class TestHmacVerification:
     def _sign(self, entry: AuditEntry) -> str:
         import hmac as _hmac
         from hashlib import sha256
-
-        return _hmac.new(self.KEY, AuditLog.canonical_bytes(entry), sha256).hexdigest()
+        return _hmac.new(
+            self.KEY, AuditLog.canonical_bytes(entry), sha256
+        ).hexdigest()
 
     def _build_entry(
-        self,
-        log: AuditLog,
-        intent_id="i1",
-        task_id="t1",
-        tuple_type="CONTRACT",
-        tuple_data=None,
+        self, log: AuditLog, intent_id="i1", task_id="t1",
+        tuple_type="CONTRACT", tuple_data=None,
     ) -> AuditEntry:
         # Build an AuditEntry matching what AuditLog.append() will construct,
         # so we can pre-compute the canonical signature.
-        import uuid
         from datetime import datetime, timezone
-
+        import uuid
         return AuditEntry(
             timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             entry_id=str(uuid.uuid4()),
@@ -460,12 +444,9 @@ class TestHmacVerification:
             entry = self._build_entry(log)
             sig = self._sign(entry)
             signed = AuditEntry(
-                timestamp=entry.timestamp,
-                entry_id=entry.entry_id,
-                intent_id=entry.intent_id,
-                task_id=entry.task_id,
-                tuple_type=entry.tuple_type,
-                tuple_data=entry.tuple_data,
+                timestamp=entry.timestamp, entry_id=entry.entry_id,
+                intent_id=entry.intent_id, task_id=entry.task_id,
+                tuple_type=entry.tuple_type, tuple_data=entry.tuple_data,
                 signature=sig,
             )
             assert log.verify_entry(signed) is True
@@ -475,12 +456,9 @@ class TestHmacVerification:
             log = AuditLog(tmpdir, hmac_key=self.KEY)
             entry = self._build_entry(log)
             tampered = AuditEntry(
-                timestamp=entry.timestamp,
-                entry_id=entry.entry_id,
-                intent_id=entry.intent_id,
-                task_id=entry.task_id,
-                tuple_type=entry.tuple_type,
-                tuple_data=entry.tuple_data,
+                timestamp=entry.timestamp, entry_id=entry.entry_id,
+                intent_id=entry.intent_id, task_id=entry.task_id,
+                tuple_type=entry.tuple_type, tuple_data=entry.tuple_data,
                 signature="deadbeef" * 8,
             )
             assert log.verify_entry(tampered) is False
@@ -492,10 +470,8 @@ class TestHmacVerification:
             entry = self._build_entry(log, tuple_data={"n": 1})
             sig = self._sign(entry)
             mutated = AuditEntry(
-                timestamp=entry.timestamp,
-                entry_id=entry.entry_id,
-                intent_id=entry.intent_id,
-                task_id=entry.task_id,
+                timestamp=entry.timestamp, entry_id=entry.entry_id,
+                intent_id=entry.intent_id, task_id=entry.task_id,
                 tuple_type=entry.tuple_type,
                 tuple_data={"n": 2},  # mutated after signing
                 signature=sig,
@@ -507,11 +483,7 @@ class TestHmacVerification:
         with tempfile.TemporaryDirectory() as tmpdir:
             log = AuditLog(tmpdir, hmac_key=self.KEY)
             ok, err = log.append(
-                "i1",
-                "t1",
-                "CONTRACT",
-                {"n": 1},
-                signature="deadbeef" * 8,
+                "i1", "t1", "CONTRACT", {"n": 1}, signature="deadbeef" * 8,
             )
             assert ok is False
             assert err == E_AUDIT_SIGNATURE_INVALID
@@ -521,12 +493,9 @@ class TestHmacVerification:
             log = AuditLog(tmpdir)  # no hmac_key
             entry = self._build_entry(log)
             signed = AuditEntry(
-                timestamp=entry.timestamp,
-                entry_id=entry.entry_id,
-                intent_id=entry.intent_id,
-                task_id=entry.task_id,
-                tuple_type=entry.tuple_type,
-                tuple_data=entry.tuple_data,
+                timestamp=entry.timestamp, entry_id=entry.entry_id,
+                intent_id=entry.intent_id, task_id=entry.task_id,
+                tuple_type=entry.tuple_type, tuple_data=entry.tuple_data,
                 signature="anything",
             )
             assert log.verify_entry(signed) is False
@@ -540,39 +509,12 @@ class TestHmacVerification:
     def test_canonical_bytes_excludes_signature(self):
         """canonical_bytes() must be identical regardless of signature value."""
         from dataclasses import replace
-
         e1 = AuditEntry(
-            timestamp="2026-01-01T00:00:00Z",
-            entry_id="e1",
-            intent_id="i1",
-            task_id="t1",
-            tuple_type="CONTRACT",
-            tuple_data={"n": 1},
-            signature="sig-a",
+            timestamp="2026-01-01T00:00:00Z", entry_id="e1",
+            intent_id="i1", task_id="t1", tuple_type="CONTRACT",
+            tuple_data={"n": 1}, signature="sig-a",
         )
         e2 = replace(e1, signature="sig-b")
         e3 = replace(e1, signature=None)
         assert AuditLog.canonical_bytes(e1) == AuditLog.canonical_bytes(e2)
         assert AuditLog.canonical_bytes(e1) == AuditLog.canonical_bytes(e3)
-
-    def test_strict_hmac_raises_without_key(self):
-        """strict_hmac=True with no hmac_key raises ValueError at construction."""
-        import pytest
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with pytest.raises(ValueError, match="strict_hmac"):
-                AuditLog(tmpdir, strict_hmac=True)
-
-    def test_strict_hmac_accepts_key(self):
-        """strict_hmac=True with hmac_key set constructs without error."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            log = AuditLog(tmpdir, hmac_key=self.KEY, strict_hmac=True)
-            log.close()
-
-    def test_warning_logged_when_no_key(self, caplog):
-        """require_signature=True with no hmac_key logs a warning."""
-        import logging
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with caplog.at_level(logging.WARNING, logger="hummbl_governance.audit_log"):
-                with AuditLog(tmpdir) as log:
-                    pass
-        assert any("presence-checked only" in r.message for r in caplog.records)

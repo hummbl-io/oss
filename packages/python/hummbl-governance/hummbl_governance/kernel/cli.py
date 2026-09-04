@@ -15,7 +15,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Kernel CLI — boot, status, inspect, health.
+"""Kernel CLI — boot, status, inspect, health, model-registry.
 
 Usage:
     python -m hummbl_governance.kernel boot
@@ -24,6 +24,11 @@ Usage:
     python -m hummbl_governance.kernel inspect <agent_id>
     python -m hummbl_governance.kernel laws
     python -m hummbl_governance.kernel roles
+    python -m hummbl_governance.kernel model-registry list
+    python -m hummbl_governance.kernel model-registry find --task char_lm
+    python -m hummbl_governance.kernel model-registry best --metric val_ppl
+    python -m hummbl_governance.kernel model-registry get <model_id>
+    python -m hummbl_governance.kernel model-registry stats
 
 __dissect__
 -----------
@@ -49,6 +54,7 @@ import sys
 from pathlib import Path
 
 from .kernel import DEFAULT_STATE_DIR, Kernel
+from .model_registry import ModelRegistry
 
 
 def cmd_boot(args: argparse.Namespace) -> int:
@@ -84,11 +90,10 @@ def cmd_health(args: argparse.Namespace) -> int:
         identities = kernel.identity.list_identities()
 
         # Add engine-specific details
-        health["receipts_total"] = (
-            sum(1 for f in kernel.receipt.receipts_dir.glob("*.jsonl") for _ in f.read_text().strip().split("\n") if _)
-            if kernel.receipt.receipts_dir.exists()
-            else 0
-        )
+        health["receipts_total"] = sum(
+            1 for f in kernel.receipt.receipts_dir.glob("*.jsonl")
+            for _ in f.read_text().strip().split("\n") if _
+        ) if kernel.receipt.receipts_dir.exists() else 0
 
         health["laws"] = [law.law_id for law in kernel.law.list_laws()]
         health["identities"] = list(identities.keys())
@@ -177,6 +182,57 @@ def cmd_roles(args: argparse.Namespace) -> int:
         return 1
 
 
+def cmd_model_registry(args: argparse.Namespace) -> int:
+    """Model registry subcommands."""
+    sub = args.mr_subcommand
+    reg = ModelRegistry()
+    if sub == "list":
+        entries = reg.list_models()
+        print(f"Models: {len(entries)}")
+        for e in entries:
+            metrics = ", ".join(f"{k}={v:.4f}" if isinstance(v, float) else f"{k}={v}" for k, v in e.metrics.items())
+            print(f"  {e.model_id:30} {e.task:15} {e.params_m:6.1f}M  {metrics}")
+        return 0
+    elif sub == "find":
+        results = reg.find(
+            task=args.task,
+            tags=args.tags.split(",") if args.tags else None,
+            min_params_m=args.min_params,
+            max_params_m=args.max_params,
+            hardware=args.hardware,
+            framework=args.framework,
+        )
+        print(f"Found: {len(results)}")
+        for e in results:
+            print(f"  {e.model_id} ({e.task}, {e.params_m}M, {e.hardware})")
+        return 0
+    elif sub == "best":
+        entry = reg.best(args.metric, higher_is_better=args.higher)
+        if entry is None:
+            print("No models found.")
+            return 1
+        print(f"Best by {args.metric}:")
+        print(f"  ID: {entry.model_id}")
+        print(f"  Value: {entry.metrics[args.metric]}")
+        print(f"  Task: {entry.task}")
+        print(f"  Params: {entry.params_m}M")
+        return 0
+    elif sub == "get":
+        entry = reg.get(args.model_id)
+        if entry is None:
+            print(f"Model '{args.model_id}' not found.")
+            return 1
+        print(json.dumps(entry.to_dict(), indent=2))
+        return 0
+    elif sub == "stats":
+        s = reg.stats()
+        print(json.dumps(s, indent=2))
+        return 0
+    else:
+        print(f"Unknown model-registry subcommand: {sub}", file=sys.stderr)
+        return 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="HUMMBL Governance Kernel CLI")
     parser.add_argument("--state-dir", default=str(DEFAULT_STATE_DIR), help="Kernel state directory")
@@ -192,6 +248,28 @@ def main() -> int:
     subparsers.add_parser("laws", help="List scaling laws")
     subparsers.add_parser("roles", help="List registered roles")
 
+    # model-registry subcommand group
+    mr_parser = subparsers.add_parser("model-registry", help="Model registry operations")
+    mr_sub = mr_parser.add_subparsers(dest="mr_subcommand", help="Model registry subcommands")
+    mr_sub.add_parser("list", help="List all models")
+
+    mr_find = mr_sub.add_parser("find", help="Find models by criteria")
+    mr_find.add_argument("--task", type=str)
+    mr_find.add_argument("--tags", type=str)
+    mr_find.add_argument("--min-params", type=float)
+    mr_find.add_argument("--max-params", type=float)
+    mr_find.add_argument("--hardware", type=str)
+    mr_find.add_argument("--framework", type=str)
+
+    mr_best = mr_sub.add_parser("best", help="Best model by metric")
+    mr_best.add_argument("--metric", type=str, required=True)
+    mr_best.add_argument("--higher", action="store_true", default=False)
+
+    mr_get = mr_sub.add_parser("get", help="Get model by ID")
+    mr_get.add_argument("model_id", type=str)
+
+    mr_sub.add_parser("stats", help="Registry statistics")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -205,6 +283,7 @@ def main() -> int:
         "inspect": cmd_inspect,
         "laws": cmd_laws,
         "roles": cmd_roles,
+        "model-registry": cmd_model_registry,
     }
 
     return commands[args.command](args)

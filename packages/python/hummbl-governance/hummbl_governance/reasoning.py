@@ -126,7 +126,8 @@ class ReasoningEngine:
             )
         elif model.code == "P1":
             prompt.append(
-                "For P1, reduce the problem to its most fundamental truths. List 'axioms' and 'derived_conclusions'."
+                "For P1, reduce the problem to its most fundamental"
+                " truths. List 'axioms' and 'derived_conclusions'."
             )
         elif model.code == "S1":
             prompt.append(
@@ -135,7 +136,8 @@ class ReasoningEngine:
             )
         elif model.code == "RE1":
             prompt.append(
-                "For RE1, identify patterns that repeat across scales. Analyze 'base_case' and 'recursive_step'."
+                "For RE1, identify patterns that repeat across scales."
+                " Analyze 'base_case' and 'recursive_step'."
             )
 
         return "\n".join(prompt)
@@ -162,7 +164,7 @@ class ReasoningEngine:
                 analysis=data.get("analysis", {}),
                 recommendation=data.get("recommendation", "No recommendation provided."),
                 confidence=float(data.get("confidence", 0.5)),
-                metadata={"raw_length": len(output)},
+                metadata={"raw_length": len(output)}
             )
         except Exception:
             return ApplyResult(
@@ -170,5 +172,5 @@ class ReasoningEngine:
                 name=model.name,
                 analysis={"error": "Failed to parse LLM output", "raw": output},
                 recommendation="Error: See analysis for details.",
-                confidence=0.0,
+                confidence=0.0
             )

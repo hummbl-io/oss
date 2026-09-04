@@ -38,6 +38,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from hummbl_governance._file_lock import acquire_file_lock, release_file_lock
+
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -482,40 +484,13 @@ def get_signing_secret() -> bytes | None:
 _DEFAULT_TUPLE_LOG = "hummbl_governance/_state/governance/tuples.jsonl"
 
 
-def _acquire_file_lock(f, exclusive: bool = True) -> None:
-    """Acquire a file lock (cross-platform: portalocker on Windows, fcntl on Unix)."""
-    try:
-        import portalocker
-
-        flags = portalocker.LOCK_EX if exclusive else portalocker.LOCK_SH
-        portalocker.lock(f, flags)
-    except ImportError:
-        # Fallback to fcntl on Unix
-        import fcntl
-
-        flags = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
-        fcntl.flock(f, flags)
-
-
-def _release_file_lock(f) -> None:
-    """Release a file lock (cross-platform)."""
-    try:
-        import portalocker
-
-        portalocker.unlock(f)
-    except ImportError:
-        import fcntl
-
-        fcntl.flock(f, fcntl.LOCK_UN)
-
-
 def append_tuple(
     t: BaseNTuple,
     path: str | None = None,
 ) -> None:
     """Append a tuple to the JSONL log. Append-only — never deletes.
 
-    Uses portalocker (cross-platform) with fcntl fallback for file locking.
+    Uses platform-native standard-library file locking.
     """
     from pathlib import Path
 
@@ -524,14 +499,10 @@ def append_tuple(
         try:
             import subprocess
 
-            root = (
-                subprocess.check_output(
-                    ["git", "rev-parse", "--show-toplevel"],
-                    stderr=subprocess.DEVNULL,
-                )
-                .decode()
-                .strip()
-            )
+            root = subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                stderr=subprocess.DEVNULL,
+            ).decode().strip()
             log_path = Path(root) / _DEFAULT_TUPLE_LOG
         except Exception:
             log_path = Path(_DEFAULT_TUPLE_LOG)
@@ -542,10 +513,10 @@ def append_tuple(
     line = t.to_json() + "\n"
 
     with open(log_path, "a", encoding="utf-8") as f:
-        _acquire_file_lock(f, exclusive=True)
+        acquire_file_lock(f, exclusive=True)
         try:
             f.write(line)
             f.flush()
             os.fsync(f.fileno())
         finally:
-            _release_file_lock(f)
+            release_file_lock(f)

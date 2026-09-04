@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.agent_registry.v1.json",
+  "title": "Agent Registry Primitive v1 (P44)",
+  "description": "Schema for AgentEntry records in the append-only agent registry. Two-axis taxonomy: status (lifecycle) orthogonal to sender_class (autonomy classification). Enforces D5 (NO_AUTO_PROMOTION) on promotions via the lifecycle validation layer. Closes the roster-drift gap surfaced by WS-6: ROSTER.md and agent-roster.md are generated from this registry (WS-2/WS-3), and drift is detected by comparing registry state against the markdown rosters.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "agent_id",
+    "timestamp",
+    "display_name",
+    "status",
+    "sender_class",
+    "trust_class",
+    "role"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Canonical bus identity. Lowercase, hyphen-separated, no parentheticals. Must match the bare canonical name enforced by identity.md."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when this record was registered."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable display name."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "candidate_pending",
+        "active_bootstrap",
+        "active",
+        "active_aip",
+        "dormant",
+        "retired",
+        "superseded"
+      ],
+      "description": "Lifecycle status axis. Transitions: candidate_pending -> active_bootstrap -> active; active -> active_aip (research lane); active -> dormant (outage); dormant -> active (recovery, K10); any -> retired; any -> superseded (requires superseded_by). retired and superseded are terminal."
+    },
+    "sender_class": {
+      "type": "string",
+      "enum": [
+        "autonomous_llm",
+        "simulation_gated_service",
+        "non_sender"
+      ],
+      "description": "Autonomy classification axis, orthogonal to status. autonomous_llm: agents like devin, codex, hermes, pi. simulation_gated_service: code modules like purple/red/blue-team whose sender identity is valid only inside an enabled simulation. non_sender: candidate agents (agy, deepseek) and retired/superseded identities."
+    },
+    "trust_class": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "trusted",
+        "medium_high",
+        "medium",
+        "low",
+        "probationary",
+        "none"
+      ],
+      "description": "Trust tier. owner: human operator only. trusted: full fleet member. medium_high: elevated but not full. medium: standard. low: limited. probationary: candidate/trial. none: retired/superseded/non-sender."
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short description of the agent's function."
+    },
+    "default_model": {
+      "type": "string",
+      "description": "Default model identifier per model-tier-policy.md. Empty for code modules and non-LLM agents."
+    },
+    "guardrail_path": {
+      "type": "string",
+      "description": "Relative path to the agent's guardrail file (e.g. rules/pi-guardrails.md). Empty if no guardrail file exists."
+    },
+    "profile_path": {
+      "type": "string",
+      "description": "Relative path to the agent's profile file (e.g. agents/pi.md). Empty if no profile file exists."
+    },
+    "hosts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Hostnames where this agent may operate (e.g. anvil, hummbl_vps)."
+    },
+    "mesh_scope": {
+      "type": "string",
+      "description": "Description of mesh reach (e.g. 'Anvil + Pixel 10 llama-server API')."
+    },
+    "promoted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the agent was promoted to its current status."
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "agent_id that supersedes this one. Required when status is 'superseded'."
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "agent_id of the predecessor for lineage tracking (e.g. agy supersedes gemini-cli)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-text notes."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional tags for filtering."
+    }
+  }
+}

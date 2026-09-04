@@ -29,7 +29,6 @@ COMPATIBILITY_MODES = frozenset({"BACKWARD", "FORWARD", "FULL", "NONE"})
 @dataclass(frozen=True)
 class SchemaVersion:
     """Schema version with metadata."""
-
     version: str
     release_date: str  # ISO8601
     description: str
@@ -45,20 +44,10 @@ SCHEMA_VERSIONS: dict[str, SchemaVersion] = {
         release_date="2026-02-01",
         description="Original BaseNTuple with KRINEIA 4-node + governance fields",
         added_fields=[
-            "id",
-            "time",
-            "state",
-            "drift",
-            "agent",
-            "tool",
-            "args_hash",
-            "evidence",
-            "tier",
-            "contract_id",
-            "dct_id",
-            "dct_chain_depth",
-            "previous_hash",
-            "signature",
+            "id", "time", "state", "drift",
+            "agent", "tool", "args_hash", "evidence", "tier",
+            "contract_id", "dct_id", "dct_chain_depth",
+            "previous_hash", "signature"
         ],
     ),
     "1.1.0": SchemaVersion(
@@ -84,12 +73,9 @@ SCHEMA_VERSIONS: dict[str, SchemaVersion] = {
         release_date="2026-08-16",
         description="Added REVOCATION tuple type, Ed25519 signing, verify_tuple Ed25519 support",
         added_fields=[
-            "revocation_event in evidence",
-            "revoked_dct_id in evidence",
-            "reason in evidence",
-            "revoked_by in evidence",
-            "effective_immediately in evidence",
-            "propagation_proof in evidence",
+            "revocation_event in evidence", "revoked_dct_id in evidence",
+            "reason in evidence", "revoked_by in evidence",
+            "effective_immediately in evidence", "propagation_proof in evidence",
         ],
     ),
 }

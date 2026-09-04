@@ -35,10 +35,10 @@ from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Any, Literal
 
+
 # ---------------------------------------------------------------------------
 # Kill switch
 # ---------------------------------------------------------------------------
-
 
 class KillSwitchMode(Enum):
     """Kill switch engagement modes."""
@@ -82,7 +82,6 @@ class KillSwitchReason(Enum):
 # Circuit breaker
 # ---------------------------------------------------------------------------
 
-
 class CircuitBreakerState(Enum):
     """Circuit breaker states."""
 
@@ -94,7 +93,6 @@ class CircuitBreakerState(Enum):
 # ---------------------------------------------------------------------------
 # Coordination bus
 # ---------------------------------------------------------------------------
-
 
 class PolicyLevel(Enum):
     """Security policy levels for bus message validation.
@@ -130,7 +128,6 @@ class PolicyLevel(Enum):
 # ---------------------------------------------------------------------------
 # HITL approvals (human-in-the-loop)
 # ---------------------------------------------------------------------------
-
 
 class ApprovalStatus(Enum):
     """Approval request lifecycle states."""
@@ -246,7 +243,6 @@ class ApprovalRequest:
 # Audit log
 # ---------------------------------------------------------------------------
 
-
 @dataclass(frozen=True)
 class AuditEntry:
     """Single entry in the governance audit log."""
@@ -306,7 +302,6 @@ class AuditEntry:
 # Delegation tokens
 # ---------------------------------------------------------------------------
 
-
 @dataclass(frozen=True)
 class ResourceSelector:
     """Resource selector specifying accessible resources."""
@@ -335,9 +330,11 @@ class TokenBinding:
 
 @dataclass(frozen=True)
 class DelegationToken:
-    """HMAC-SHA256 signed delegation capability token.
+    """HMAC-SHA256 or Ed25519 signed delegation capability token.
 
-    Immutable after creation (frozen dataclass).
+    Immutable after creation (frozen dataclass). The signing_method field
+    indicates which signature scheme was used ("hmac_sha256" or "ed25519")
+    and is NOT part of the signed payload (to_dict()).
     """
 
     token_id: str
@@ -349,6 +346,7 @@ class DelegationToken:
     expiry: str | None = None
     binding: TokenBinding | None = None
     signature: str = ""
+    signing_method: str = "hmac_sha256"
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize token to dictionary (excluding signature for signing)."""
@@ -365,10 +363,15 @@ class DelegationToken:
                 for r in self.resource_selectors
             ],
             "ops_allowed": list(self.ops_allowed),
-            "caveats": [{"caveat_id": c.caveat_id, "type": c.type, "parameters": c.parameters} for c in self.caveats],
+            "caveats": [
+                {"caveat_id": c.caveat_id, "type": c.type, "parameters": c.parameters}
+                for c in self.caveats
+            ],
             "expiry": self.expiry,
             "binding": (
-                {"task_id": self.binding.task_id, "contract_id": self.binding.contract_id} if self.binding else None
+                {"task_id": self.binding.task_id, "contract_id": self.binding.contract_id}
+                if self.binding
+                else None
             ),
         }
 
@@ -378,6 +381,38 @@ class DelegationToken:
         mac = hmac.new(secret, canonical.encode("utf-8"), hashlib.sha256)
         expected = mac.hexdigest()
         return hmac.compare_digest(self.signature, expected)
+
+    def verify_ed25519_signature(self, public_key: bytes) -> bool:
+        """Verify Ed25519 signature against a public key.
+
+        Args:
+            public_key: Ed25519 public key bytes (32 bytes).
+
+        Returns:
+            True if signature is valid.
+
+        Raises:
+            ImportError: If the cryptography package is not installed.
+        """
+        try:
+            from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+                Ed25519PublicKey,
+            )
+        except ImportError as exc:
+            raise ImportError(
+                "Ed25519 verification requires the 'cryptography' package. "
+                "Install with: pip install hummbl-governance[primitives]"
+            ) from exc
+        canonical = json.dumps(self.to_dict(), separators=(",", ":"), sort_keys=True)
+        try:
+            pub = Ed25519PublicKey.from_public_bytes(public_key)
+            pub.verify(
+                bytes.fromhex(self.signature),
+                canonical.encode("utf-8"),
+            )
+            return True
+        except Exception:
+            return False
 
     def is_expired(self) -> bool:
         """Check if token has expired."""
@@ -393,13 +428,16 @@ class DelegationToken:
         """Validate token is bound to expected task/contract/subject."""
         if self.binding is None:
             return False
-        return self.binding.task_id == task_id and self.binding.contract_id == contract_id and self.subject == subject
+        return (
+            self.binding.task_id == task_id
+            and self.binding.contract_id == contract_id
+            and self.subject == subject
+        )
 
 
 # ---------------------------------------------------------------------------
 # Cost governor
 # ---------------------------------------------------------------------------
-
 
 @dataclass(frozen=True, slots=True)
 class UsageRecord:

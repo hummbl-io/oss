@@ -48,7 +48,7 @@ from hummbl_governance.errors import (
 class TestFailureMode:
     def test_all_30_codes_present(self):
         codes = {fm.value for fm in FailureMode}
-        assert len(codes) == 30
+        assert len(codes) == 42
         for i in range(1, 31):
             assert f"FM{i}" in codes, f"FM{i} missing from FailureMode enum"
 

@@ -23,7 +23,11 @@ checkable, and every check is against empirical law.
 Eleven invariants (K1-K11) and their engines provide the foundation for AI officer
 roles, compliance enforcement, and scaling-law governance. K1-K8 are enforced on
 every receipt path; K9-K11 are enum-defined, schema-backed, and exposed through
-Kernel validation methods (mandatory at call sites that invoke them).
+Kernel validation methods (mandatory at call sites that invoke them). K12-K14
+extend the invariant set to cover safety (K12), convergence detection (K13), and
+physical-AI safety (K14) — closing the primitive-invariant pairing gap identified
+in the 2026-09-02 assessment. Each invariant has a default severity tier
+(CRITICAL → HIGH → MEDIUM → LOW) via the Severity enum.
 
 All engines are stdlib-only. No vendor-specific APIs, models, or runtimes.
 
@@ -54,21 +58,30 @@ from __future__ import annotations
 __version__ = "1.2.2"
 __spec_version__ = "1.2.2"
 
-from .authority_engine import AuthorityEngine
-from .doctrine_engine import DoctrineEngine, Stage
-from .evidence_engine import EvidenceEngine
-from .identity_engine import IdentityEngine
-from .invariants import KernelInvariant, KernelPanic
 from .kernel import Kernel
-from .law_engine import LawEngine
+from .invariants import KernelInvariant, KernelPanic, Severity, default_severity
 from .receipt_engine import Receipt, ReceiptEngine
-from .schedule_engine import ScheduleEngine
+from .law_engine import LawEngine
+from .identity_engine import IdentityEngine
 from .sequence_engine import SequenceEngine
+from .evidence_engine import EvidenceEngine
+from .authority_engine import AuthorityEngine
+from .schedule_engine import ScheduleEngine
+from .doctrine_engine import DoctrineEngine, Stage
+from .mutation_gate import MutationGate, MutationRequest, GateResult, MutationLevel
+from .agent_registry import (
+    AgentEntry,
+    AgentRegistry,
+    AgentStatus,
+    SenderClass,
+)
 
 __all__ = [
     "Kernel",
     "KernelInvariant",
     "KernelPanic",
+    "Severity",
+    "default_severity",
     "Receipt",
     "ReceiptEngine",
     "LawEngine",
@@ -79,4 +92,12 @@ __all__ = [
     "ScheduleEngine",
     "DoctrineEngine",
     "Stage",
+    "MutationGate",
+    "MutationRequest",
+    "GateResult",
+    "MutationLevel",
+    "AgentEntry",
+    "AgentRegistry",
+    "AgentStatus",
+    "SenderClass",
 ]

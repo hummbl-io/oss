@@ -49,7 +49,7 @@ class TestK9EnumRecognition:
         assert "K9" in values
 
     def test_kernel_invariant_count_is_11(self):
-        assert len(list(KernelInvariant)) == 11
+        assert len(list(KernelInvariant)) == 14
 
 
 class TestK9ScopedRollbackEnforcement:

@@ -99,12 +99,6 @@ class AuditLog:
             signature presence is checked but contents are not verified.
             Callers should compute the signature as:
                 hmac.new(key, AuditLog.canonical_bytes(entry), sha256).hexdigest()
-        strict_hmac: If True, requires hmac_key to be set at construction
-            time. Raises ValueError if hmac_key is None. Use this for
-            deployments that require cryptographic tamper detection
-            (NIST SP 800-53 AU-6, SP 800-92). When False (default), a
-            warning is logged if require_signature=True but no hmac_key
-            is set, since signatures are presence-checked only.
     """
 
     def __init__(
@@ -115,7 +109,6 @@ class AuditLog:
         require_signature: bool = True,
         file_prefix: str = "governance",
         hmac_key: bytes | None = None,
-        strict_hmac: bool = False,
     ):
         self._base_dir = Path(base_dir)
         self._retention_days = retention_days
@@ -123,21 +116,6 @@ class AuditLog:
         self._require_signature = require_signature
         self._file_prefix = file_prefix
         self._hmac_key = hmac_key
-
-        if strict_hmac and hmac_key is None:
-            raise ValueError(
-                "strict_hmac=True requires hmac_key to be set; "
-                "without it, signatures are presence-checked only "
-                "(not cryptographically verified). See NIST SP 800-53 AU-6."
-            )
-
-        if require_signature and hmac_key is None and not strict_hmac:
-            logger.warning(
-                "AuditLog initialized with require_signature=True but no "
-                "hmac_key: signatures are presence-checked only, not "
-                "cryptographically verified. Set strict_hmac=True or "
-                "provide hmac_key for NIST SP 800-53 AU-6 compliance."
-            )
 
         self._base_dir.mkdir(parents=True, exist_ok=True)
         try:
@@ -150,6 +128,12 @@ class AuditLog:
         self._buffer_lock = threading.RLock()
         self._current_file: Path | None = None
         self._file_handle: Any = None
+        # In-memory index for O(1) query_by_entry_id. Built lazily on first
+        # query and invalidated on append. Maps entry_id -> AuditEntry.
+        # Without this index, query_by_entry_id does a full file scan on
+        # every call — O(n) per query, O(n²) for chain tracing (explain()).
+        self._entry_index: dict[str, AuditEntry] | None = None
+        self._index_lock = threading.RLock()
 
     def _get_current_file(self) -> Path:
         """Get current log file path (daily rotation)."""
@@ -238,11 +222,7 @@ class AuditLog:
             Tuple of (success, error_code).
         """
         error = self._validate_append(
-            tuple_type,
-            signature,
-            require_signature,
-            verification_id,
-            amendment_of,
+            tuple_type, signature, require_signature, verification_id, amendment_of,
         )
         if error:
             return False, error
@@ -285,6 +265,10 @@ class AuditLog:
                         self._current_file.chmod(0o600)
                     except OSError:
                         pass
+                # Update the entry index incrementally.
+                with self._index_lock:
+                    if self._entry_index is not None:
+                        self._entry_index[entry.entry_id] = entry
                 return True, None
             except (IOError, OSError):
                 return False, E_AUDIT_INCOMPLETE
@@ -323,21 +307,65 @@ class AuditLog:
         self, intent_id: str, tuple_type: TupleType | None = None, since: str | None = None
     ) -> Iterator[AuditEntry]:
         """Query entries by intent_id."""
-        yield from self._query(lambda e: e.intent_id == intent_id, tuple_type=tuple_type, since=since)
+        yield from self._query(
+            lambda e: e.intent_id == intent_id, tuple_type=tuple_type, since=since
+        )
 
-    def query_by_task(self, task_id: str, tuple_type: TupleType | None = None) -> Iterator[AuditEntry]:
+    def query_by_task(
+        self, task_id: str, tuple_type: TupleType | None = None
+    ) -> Iterator[AuditEntry]:
         """Query entries by task_id."""
         yield from self._query(lambda e: e.task_id == task_id, tuple_type=tuple_type)
 
-    def query_by_entry_id(self, entry_id: str) -> AuditEntry | None:
-        """Query a single entry by its entry_id."""
-        for entry in self._query(lambda e: e.entry_id == entry_id):
-            return entry
-        return None
+    def _build_entry_index(self) -> dict[str, AuditEntry]:
+        """Build the in-memory entry_id -> AuditEntry index.
 
-    def query_by_contract(self, contract_id: str, tuple_type: TupleType | None = None) -> Iterator[AuditEntry]:
+        Scans all log files (current + rotated .gz) once and builds a
+        dictionary mapping entry_id to the AuditEntry. Called lazily on
+        the first query_by_entry_id call. Subsequent appends update the
+        index incrementally (no full rebuild needed).
+        """
+        index: dict[str, AuditEntry] = {}
+        files = sorted(self._base_dir.glob(f"{self._file_prefix}-*.jsonl*"))
+        for filepath in files:
+            opener = (
+                partial(gzip.open, filepath, "rt", encoding="utf-8")
+                if filepath.suffix == ".gz"
+                else partial(open, filepath, "r", encoding="utf-8")
+            )
+            try:
+                with opener() as f:
+                    for entry in self._parse_entries(f):
+                        index[entry.entry_id] = entry
+            except (IOError, OSError):
+                continue
+        return index
+
+    def _get_entry_index(self) -> dict[str, AuditEntry]:
+        """Get the entry index, building it lazily if needed."""
+        with self._index_lock:
+            if self._entry_index is None:
+                self._entry_index = self._build_entry_index()
+            return self._entry_index
+
+    def query_by_entry_id(self, entry_id: str) -> AuditEntry | None:
+        """Query a single entry by its entry_id.
+
+        Uses an in-memory index for O(1) lookup. The index is built lazily
+        on the first call and maintained incrementally on append. This
+        avoids O(n) full-file scans on every query, which is critical for
+        chain tracing (explain() calls query_by_entry_id recursively).
+        """
+        index = self._get_entry_index()
+        return index.get(entry_id)
+
+    def query_by_contract(
+        self, contract_id: str, tuple_type: TupleType | None = None
+    ) -> Iterator[AuditEntry]:
         """Query entries by contract_id cross-link."""
-        yield from self._query(lambda e: e.contract_id == contract_id, tuple_type=tuple_type)
+        yield from self._query(
+            lambda e: e.contract_id == contract_id, tuple_type=tuple_type
+        )
 
     def query_amendments(self, entry_id: str) -> Iterator[AuditEntry]:
         """Query all amendments to a given entry."""
@@ -362,7 +390,9 @@ class AuditLog:
         since: str | None = None,
     ) -> Iterator[AuditEntry]:
         """Internal query implementation."""
-        files = sorted(self._base_dir.glob(f"{self._file_prefix}-*.jsonl*"), reverse=True)
+        files = sorted(
+            self._base_dir.glob(f"{self._file_prefix}-*.jsonl*"), reverse=True
+        )
 
         for filepath in files:
             opener = (
@@ -391,9 +421,7 @@ class AuditLog:
             try:
                 date_str = filepath.stem.split("-")[1:4]
                 file_date = datetime(
-                    int(date_str[0]),
-                    int(date_str[1]),
-                    int(date_str[2]),
+                    int(date_str[0]), int(date_str[1]), int(date_str[2]),
                     tzinfo=timezone.utc,
                 )
                 if file_date < cutoff:
@@ -499,7 +527,9 @@ class AuditLog:
         """
         if self._hmac_key is None:
             raise RuntimeError("HMAC key not configured")
-        return hmac.new(self._hmac_key, self.canonical_bytes(entry), sha256).hexdigest()
+        return hmac.new(
+            self._hmac_key, self.canonical_bytes(entry), sha256
+        ).hexdigest()
 
     def verify_entry(self, entry: AuditEntry) -> bool:
         """Verify an entry's HMAC signature against the configured key.

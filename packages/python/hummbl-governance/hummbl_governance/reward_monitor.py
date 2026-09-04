@@ -166,7 +166,7 @@ class BehaviorMonitor:
             history.append(action_type)
             if len(history) > self._window_size * 2:
                 # Keep extra for baseline comparison but don't grow unbounded
-                self._actions[agent_id] = history[-(self._window_size * 2) :]
+                self._actions[agent_id] = history[-(self._window_size * 2):]
 
     def snapshot_baseline(self, agent_id: str) -> dict[str, float]:
         """Snapshot the current action distribution as the baseline.

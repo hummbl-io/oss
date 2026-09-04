@@ -90,7 +90,9 @@ class RefRegistry:
         """
         key = schema.get("$id") or alias
         if not key:
-            raise RefResolutionError("schema has no $id and no alias was supplied; cannot register")
+            raise RefResolutionError(
+                "schema has no $id and no alias was supplied; cannot register"
+            )
         self._schemas[key] = schema
         if alias and alias != key:
             self._schemas[alias] = schema
@@ -148,10 +150,14 @@ class _Resolver:
             return self._resolve_fragment(self.root, fragment)
 
         if self.registry is None:
-            raise RefResolutionError(f"$ref {ref!r} targets another document but no registry was provided")
+            raise RefResolutionError(
+                f"$ref {ref!r} targets another document but no registry was provided"
+            )
         document = self.registry.get(document_part)
         if document is None:
-            raise RefResolutionError(f"$ref {ref!r} targets unregistered document {document_part!r}")
+            raise RefResolutionError(
+                f"$ref {ref!r} targets unregistered document {document_part!r}"
+            )
         return self._resolve_fragment(document, fragment)
 
     @staticmethod
@@ -167,13 +173,17 @@ class _Resolver:
                 try:
                     node = node[int(token)]
                 except (ValueError, IndexError) as exc:
-                    raise RefResolutionError(f"fragment token {token!r} is not a valid array index") from exc
+                    raise RefResolutionError(
+                        f"fragment token {token!r} is not a valid array index"
+                    ) from exc
             elif isinstance(node, dict):
                 if token not in node:
                     raise RefResolutionError(f"fragment token {token!r} not found in document")
                 node = node[token]
             else:
-                raise RefResolutionError(f"fragment token {token!r} cannot descend into {type(node).__name__}")
+                raise RefResolutionError(
+                    f"fragment token {token!r} cannot descend into {type(node).__name__}"
+                )
         if not isinstance(node, dict):
             raise RefResolutionError("$ref target must be a schema object")
         return node
@@ -250,9 +260,37 @@ def _check_type(instance: Any, schema: dict[str, Any], path: str) -> str | None:
         expected = tuple(t for name in type_name for t in _TYPE_MAP.get(name, ()))
     else:
         expected = _TYPE_MAP.get(type_name, ())
+    # ``bool`` subclasses ``int`` in Python, but JSON Schema treats booleans
+    # and numbers as disjoint instance types.
+    if isinstance(instance, bool):
+        accepts_boolean = type_name == "boolean" or (
+            isinstance(type_name, list) and "boolean" in type_name
+        )
+        includes_numeric = type_name in ("integer", "number") or (
+            isinstance(type_name, list)
+            and any(name in {"integer", "number"} for name in type_name)
+        )
+        if includes_numeric and not accepts_boolean:
+            return f"{path}: expected type {type_name!r}, got bool"
     if expected and not isinstance(instance, expected):
         return f"{path}: expected type {type_name!r}, got {type(instance).__name__}"
     return None
+
+
+def _json_equal(left: Any, right: Any) -> bool:
+    """Compare JSON values without Python's bool/integer equivalence."""
+    if isinstance(left, bool) or isinstance(right, bool):
+        return type(left) is type(right) and left == right
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(
+            _json_equal(left[key], right[key]) for key in left
+        )
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(
+            _json_equal(left_item, right_item)
+            for left_item, right_item in zip(left, right, strict=True)
+        )
+    return left == right
 
 
 def _validate(
@@ -284,7 +322,7 @@ def _validate(
             return [f"{path}: {exc}"]
         # Validate against the resolved target, then apply sibling keywords
         # present on the referring schema (Draft 2020-12 behavior).
-        errors = _validate(
+        ref_errors = _validate(
             instance,
             target,
             path,
@@ -295,7 +333,7 @@ def _validate(
         )
         sibling = {k: v for k, v in schema.items() if k != "$ref"}
         if sibling:
-            errors.extend(
+            ref_errors.extend(
                 _validate(
                     instance,
                     sibling,
@@ -306,10 +344,10 @@ def _validate(
                     ref_stack=ref_stack,
                 )
             )
-        return errors
+        return ref_errors
 
     # const (early return)
-    if "const" in schema and instance != schema["const"]:
+    if "const" in schema and not _json_equal(instance, schema["const"]):
         return [f"{path}: expected const {schema['const']!r}, got {instance!r}"]
 
     # type check (early return on mismatch)
@@ -320,7 +358,9 @@ def _validate(
     errors: list[str] = []
 
     # enum
-    if "enum" in schema and instance not in schema["enum"]:
+    if "enum" in schema and not any(
+        _json_equal(instance, candidate) for candidate in schema["enum"]
+    ):
         errors.append(f"{path}: {instance!r} not in enum {schema['enum']}")
 
     # type-specific validation

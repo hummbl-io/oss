@@ -231,7 +231,10 @@ class ContractNetManager:
         strat_name = strategy or self._default_strategy
         strat_fn = _STRATEGIES.get(strat_name)
         if strat_fn is None:
-            raise ValueError(f"Unknown strategy {strat_name!r}. Available: {', '.join(_STRATEGIES)}")
+            raise ValueError(
+                f"Unknown strategy {strat_name!r}. "
+                f"Available: {', '.join(_STRATEGIES)}"
+            )
 
         with self._lock:
             ann = self._announcements.get(announcement_id)
@@ -278,7 +281,10 @@ class ContractNetManager:
     def list_active(self) -> list[TaskAnnouncement]:
         """List all announcements in BIDDING phase."""
         with self._lock:
-            return [a for a in self._announcements.values() if a.phase == ContractPhase.BIDDING and not a.is_expired]
+            return [
+                a for a in self._announcements.values()
+                if a.phase == ContractPhase.BIDDING and not a.is_expired
+            ]
 
     def summary(self) -> dict[str, int]:
         """Count announcements by phase."""

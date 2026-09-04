@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/kernel.regulator_export.v1.json",
+  "title": "Regulator Export Primitive v1",
+  "description": "Schema for P35 RegulatorExport — produces compliance evidence in regulator-accepted formats. Closes GAP-E1 (EU AI Act Art. 11/Annex IV technical documentation, Art. 47/Annex V EU declaration of conformity) and partially GAP-E4 (GPAI Art. 51-56). Translates internal ComplianceReport output into regulator-accepted export envelopes. Status: IMPLEMENTED — module + tests shipped.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "export_id",
+    "framework",
+    "format",
+    "system_identity",
+    "evidence_bundle",
+    "generated_at",
+    "authority",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer version of this schema."
+    },
+    "export_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this export envelope (UUID or deterministic hash)."
+    },
+    "framework": {
+      "type": "string",
+      "enum": [
+        "eu-ai-act",
+        "soc2",
+        "iso-42001",
+        "nist-rmf",
+        "iso-27001",
+        "gdpr",
+        "hipaa",
+        "pci-dss"
+      ],
+      "description": "Target regulatory framework. Determines the format and required fields."
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "eu_ai_act_technical_file_annex_iv",
+        "eu_ai_act_declaration_of_conformity_annex_v",
+        "eu_ai_act_gpai_documentation_annex_xi",
+        "soc2_audit_packet",
+        "iso_42001_aims_evidence",
+        "nist_rmf_evidence_package",
+        "generic_json"
+      ],
+      "description": "Regulator-accepted format for the export. Maps to the specific annex/section of the framework."
+    },
+    "system_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_name", "system_version", "provider_name"],
+      "properties": {
+        "system_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the AI system being documented."
+        },
+        "system_version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version of the AI system."
+        },
+        "provider_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Legal entity providing the AI system (EU AI Act Art. 3(28) provider)."
+        },
+        "intended_purpose": {
+          "type": "string",
+          "description": "Intended purpose per EU AI Act Art. 9(2)(a) / Art. 13."
+        },
+        "risk_classification": {
+          "type": "string",
+          "enum": ["prohibited", "high-risk", "limited-transparency", "minimal-risk", "gpai", "gpai-systemic-risk"],
+          "description": "EU AI Act risk tier per Art. 6 / Art. 51."
+        }
+      },
+      "description": "Identity of the AI system and provider. Required for all regulator-facing exports."
+    },
+    "evidence_bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["controls"],
+      "properties": {
+        "controls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["control_id", "control_reference", "evidence", "coverage_state"],
+            "properties": {
+              "control_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Control or article identifier (e.g. 'Art.9', 'CC6.1', 'A.6.2.4')."
+              },
+              "control_reference": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Human-readable citation of the control requirement."
+              },
+              "coverage_state": {
+                "type": "string",
+                "enum": ["fulfilled", "partial", "boundary", "not_covered"],
+                "description": "Coverage state per the coverage matrix taxonomy."
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["source", "artifact_ref"],
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Primitive or module that produced the evidence."
+                    },
+                    "artifact_ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to the evidence artifact (receipt hash, log path, test name)."
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the evidence was generated."
+                    },
+                    "signed": {
+                      "type": "boolean",
+                      "description": "Whether the evidence is cryptographically signed."
+                    }
+                  }
+                },
+                "description": "Evidence artifacts supporting this control."
+              },
+              "boundary_note": {
+                "type": "string",
+                "description": "For partial/boundary coverage: what the customer-org must complete."
+              }
+            }
+          },
+          "description": "Per-control evidence entries."
+        },
+        "summary_stats": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "total_controls": { "type": "integer", "minimum": 0 },
+            "fulfilled": { "type": "integer", "minimum": 0 },
+            "partial": { "type": "integer", "minimum": 0 },
+            "boundary": { "type": "integer", "minimum": 0 },
+            "not_covered": { "type": "integer", "minimum": 0 }
+          },
+          "description": "Aggregate coverage statistics."
+        }
+      },
+      "description": "The evidence bundle — per-control evidence with coverage state."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when the export was generated."
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator_approval", "approver_id"],
+      "properties": {
+        "operator_approval": {
+          "type": "boolean",
+          "description": "Must be true. Enforces D5 (NO_AUTO_PROMOTION) — regulator exports cannot be auto-generated for submission without operator approval."
+        },
+        "approver_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identity of the operator approving the export."
+        },
+        "approval_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When approval was granted."
+        }
+      },
+      "description": "Authority gate: operator must approve before a regulator-facing export is finalized."
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["export_hash"],
+      "properties": {
+        "export_hash": {
+          "type": "string",
+          "minLength": 1,
+          "description": "SHA-256 hash of the canonical JSON export body. Tamper-evident seal."
+        },
+        "previous_export_hash": {
+          "type": "string",
+          "description": "Hash of the prior export for the same framework, enabling hash-chain verification across export iterations."
+        },
+        "receipt_ref": {
+          "type": "string",
+          "description": "Reference to the governance receipt recording this export (K1 RECEIPT)."
+        }
+      },
+      "description": "Integrity seal: hash-chained proof of export contents."
+    },
+    "boundary_disclaimer": {
+      "type": "string",
+      "description": "Statutory boundary disclaimer. HUMMBL is not a Notified Body / certification body / CPA firm. This export is technical evidence, not a legal conformity declaration."
+    }
+  }
+}

@@ -78,7 +78,6 @@ class ScheduleEngine:
         Returns schedule_id.
         """
         import uuid
-
         schedule_id = f"sched-{uuid.uuid4().hex[:8]}"
         schedule = LoopSchedule(
             schedule_id=schedule_id,

@@ -24,7 +24,8 @@ from __future__ import annotations
 
 import time
 import uuid
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
+from collections.abc import Mapping
 from typing import Any
 
 from hummbl_governance.audit_log import AuditLog
@@ -82,7 +83,9 @@ class ToolCallAuditor:
             action_hash, action_hash_error = self._hash_payload(
                 {"tool_name": tool_name, "args": args, "kwargs": kwargs},
             )
-            context_payload = call_context if call_context is not None else {"__context_absent__": True}
+            context_payload = (
+                call_context if call_context is not None else {"__context_absent__": True}
+            )
             context_hash, context_hash_error = self._hash_payload(context_payload)
 
             decision = "UNKNOWN"

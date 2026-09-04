@@ -464,11 +464,9 @@ def evaluate_validation(
         reason_codes.append("E_EVIDENCE_MISSING")
 
     # v0.4.0 Code Quality Check
-    if (
-        n_receipt.min_arbiter_score is not None
-        and n_receipt.actual_arbiter_score is not None
-        and n_receipt.actual_arbiter_score < n_receipt.min_arbiter_score
-    ):
+    if (n_receipt.min_arbiter_score is not None and
+        n_receipt.actual_arbiter_score is not None and
+        n_receipt.actual_arbiter_score < n_receipt.min_arbiter_score):
         reason_codes.append("E_CODE_QUALITY_FAIL")
 
     if n_receipt.epoch_explicit and n_receipt.epoch_number is None:
@@ -687,7 +685,11 @@ def evaluate_compat(
 
     if actions_removed or b.semantics_changed:
         classification = "INCOMPATIBLE"
-        reasons = [reason for reason in reasons if reason in {"COMPAT_ACTION_REMOVED", "COMPAT_SEMANTICS_CHANGED"}]
+        reasons = [
+            reason
+            for reason in reasons
+            if reason in {"COMPAT_ACTION_REMOVED", "COMPAT_SEMANTICS_CHANGED"}
+        ]
     elif constraints_added or constraints_tightened or risk_increased:
         classification = "CONDITIONAL"
         reasons = [
