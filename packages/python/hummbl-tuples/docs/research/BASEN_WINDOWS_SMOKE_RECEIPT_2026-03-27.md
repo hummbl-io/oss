@@ -1,7 +1,7 @@
 # BaseN Windows Smoke Receipt 2026-03-27
 
 Status: first end-to-end Windows training smoke after Codex takeover patch  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Patch Surface
 

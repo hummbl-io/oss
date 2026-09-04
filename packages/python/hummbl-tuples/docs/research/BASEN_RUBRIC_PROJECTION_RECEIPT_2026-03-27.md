@@ -1,7 +1,7 @@
 # BaseN Rubric Projection Receipt 2026-03-27
 
 Status: first nonzero rubric field-level score via decode-time schema projection  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>/autoresearch-yolo`
 
 ## Goal
 

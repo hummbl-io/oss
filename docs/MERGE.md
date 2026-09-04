@@ -17,7 +17,7 @@ live merge-pipe description.
 | All open PRs BLOCKED; nothing can land | False. Open PR count was 0 after #106. Squash-merge from a maintainer token works. |
 | Only one reviewing identity | Incomplete. Collaborators with admin on this repo: `hummbl-dev`, `hummbl-agent`. |
 | `publish-pypi.yml` and `RELEASE.md` disagree on tag shape | Fixed on main. Canonical tag is `python/<package>/v*`. |
-| Boundary scan is filename-only | Partial. `check_boundary_patterns.py` now also flags non-placeholder CGNAT IPs. Hostname and `C:/Users` path classes from #91 are still out of that scanner. |
+| Boundary scan is filename-only | Partial. Scanner flags CGNAT IPs and home-directory paths. Fleet hostnames in product/research vocabulary are not a global denylist. |
 | Required checks are only `gitleaks` and `pattern-denylist` | Still the likely settings gap. This file exists so that gap can be closed without guessing job names. |
 
 ## Required status-check contexts
@@ -61,6 +61,6 @@ red `ci-ok` can still merge. The YAML only makes the context exist.
 
 ## Out of scope here
 
-- Hostname / local-path redaction listed in #91 (follow-up class, not merge hygiene).
 - Changing review-count or `enforce_admins`.
 - New primitives, new PyPI names, ledger unification.
+- A global denylist of fleet host words used as research-actor or heraldry IDs.

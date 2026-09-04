@@ -12,11 +12,11 @@ This note records the Windows-side autoresearch surface split as observed on 202
 
 | Surface | Path | Role | Authority level |
 | --- | --- | --- | --- |
-| ~~Canonical benchmark repo~~ | `C:\Users\Owner\autoresearch-win-rtx` | ~~Tracked fork of `karpathy/autoresearch`; benchmark canon, results ledger, long-budget scaling, dataset expansions~~ **ARCHIVED — historical only** | ~~Highest~~ Historical |
-| Active benchmark authority | `C:\Users\Owner\autoresearch-pipeline` | Orchestration, supervisor/worker surface, and active benchmark canon | Highest (active) |
-| Scratch forge | `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo` | Derivative experimental workspace with additional logs, overnight scripts, and HUMMBL-specific exploratory changes | Secondary |
-| Pipeline repo | `C:\Users\Owner\autoresearch-pipeline` | Orchestration and supervisor/worker surface | Active authority |
-| Reports repo | `C:\Users\Owner\autoresearch-reports` | Distillation, proposals, and downstream reporting depot | Supporting |
+| ~~Canonical benchmark repo~~ | `<local-path>/autoresearch-win-rtx` | ~~Tracked fork of `karpathy/autoresearch`; benchmark canon, results ledger, long-budget scaling, dataset expansions~~ **ARCHIVED — historical only** | ~~Highest~~ Historical |
+| Active benchmark authority | `<local-path>/autoresearch-pipeline` | Orchestration, supervisor/worker surface, and active benchmark canon | Highest (active) |
+| Scratch forge | `<local-path>/autoresearch-yolo` | Derivative experimental workspace with additional logs, overnight scripts, and HUMMBL-specific exploratory changes | Secondary |
+| Pipeline repo | `<local-path>/autoresearch-pipeline` | Orchestration and supervisor/worker surface | Active authority |
+| Reports repo | `<local-path>/autoresearch-reports` | Distillation, proposals, and downstream reporting depot | Supporting |
 | Upstream trace factory | `nodezero:~/autoresearch-worker` | Local Ollama-driven trace generation, rubric-trace generation, and upstream corpus production for Windows alignment | Supporting |
 
 ## Key Distinctions

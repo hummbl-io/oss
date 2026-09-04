@@ -1,7 +1,7 @@
 # BaseN Readiness Probe Receipt 2026-03-27
 
 Status: constrained key-by-key `READINESS` probing establishes the first strong win on strict holdout v2  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Goal
 

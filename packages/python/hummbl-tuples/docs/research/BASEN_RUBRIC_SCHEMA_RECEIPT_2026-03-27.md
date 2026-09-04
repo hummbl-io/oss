@@ -1,7 +1,7 @@
 # BaseN Rubric Schema Receipt 2026-03-27
 
 Status: first schema-normalized rubric target pass  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>/autoresearch-yolo`
 
 ## Goal
 

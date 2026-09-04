@@ -14,9 +14,9 @@ This file now distinguishes between:
 - `raw-log-verified best`: best result backed by a preserved raw log footer
 - `scratch-workspace best`: best result found in the derivative YOLO workspace
 
-The historical benchmark surface is `C:\Users\Owner\autoresearch-win-rtx` (archived).
-The active benchmark authority is `C:\Users\Owner\autoresearch-pipeline`.
-The derivative scratch workspace is `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`.
+The historical benchmark surface is `<local-path>/autoresearch-win-rtx` (archived).
+The active benchmark authority is `<local-path>/autoresearch-pipeline`.
+The derivative scratch workspace is `<local-path>/autoresearch-yolo`.
 
 ## Scoring Rules
 
