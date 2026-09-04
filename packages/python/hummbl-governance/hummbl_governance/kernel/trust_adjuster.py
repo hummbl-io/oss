@@ -75,7 +75,9 @@ def validate_trust_adjuster(adjustment: dict[str, Any]) -> None:
     schema = _load_schema()
     errors = SchemaValidator.validate(adjustment, schema)
     if errors:
-        raise ValidationError(f"Trust adjuster schema validation failed: {'; '.join(errors)}")
+        raise ValidationError(
+            f"Trust adjuster schema validation failed: {'; '.join(errors)}"
+        )
 
 
 def validate_operator_approval(adjustment: dict[str, Any]) -> None:
@@ -93,7 +95,9 @@ def validate_operator_approval(adjustment: dict[str, Any]) -> None:
     """
     authority = adjustment.get("authority", {})
     if not isinstance(authority, dict):
-        raise ValueError("Trust adjustment rejected: authority gate missing or invalid")
+        raise ValueError(
+            "Trust adjustment rejected: authority gate missing or invalid"
+        )
 
     if not authority.get("operator_approval", False):
         raise ValueError(
@@ -103,7 +107,9 @@ def validate_operator_approval(adjustment: dict[str, Any]) -> None:
 
     adjusted_by = authority.get("adjusted_by", "")
     if not adjusted_by or not isinstance(adjusted_by, str):
-        raise ValueError("Trust adjustment rejected: adjusted_by must be a non-empty string")
+        raise ValueError(
+            "Trust adjustment rejected: adjusted_by must be a non-empty string"
+        )
 
 
 def validate_tier_transition(adjustment: dict[str, Any]) -> None:
@@ -124,9 +130,15 @@ def validate_tier_transition(adjustment: dict[str, Any]) -> None:
     proposed = adjustment.get("proposed_trust_tier", "")
 
     if current not in TRUST_TIER_ORDER:
-        raise ValueError(f"Trust adjustment rejected: current_trust_tier '{current}' is not a valid tier")
+        raise ValueError(
+            f"Trust adjustment rejected: current_trust_tier '{current}' "
+            f"is not a valid tier"
+        )
     if proposed not in TRUST_TIER_ORDER:
-        raise ValueError(f"Trust adjustment rejected: proposed_trust_tier '{proposed}' is not a valid tier")
+        raise ValueError(
+            f"Trust adjustment rejected: proposed_trust_tier '{proposed}' "
+            f"is not a valid tier"
+        )
 
     current_idx = TRUST_TIER_ORDER.index(current)
     proposed_idx = TRUST_TIER_ORDER.index(proposed)
@@ -139,7 +151,10 @@ def validate_tier_transition(adjustment: dict[str, Any]) -> None:
         )
 
     if proposed_idx == current_idx:
-        raise ValueError(f"Trust adjustment rejected: current and proposed tiers are both '{current}' — no change")
+        raise ValueError(
+            f"Trust adjustment rejected: current and proposed tiers are both "
+            f"'{current}' — no change"
+        )
 
 
 def validate_severity_consistency(adjustment: dict[str, Any]) -> None:

@@ -393,6 +393,16 @@ def send_error(msg_id: object, code: int, message: str) -> None:
 
 
 def main() -> None:
+    # Force UTF-8 on stdio. On Windows, sys.stdin/sys.stdout default to the
+    # system codepage (CP1252), which corrupts non-ASCII JSON-RPC payloads
+    # (em-dashes, smart quotes, accented characters) via mojibake before
+    # json.loads ever sees them. On POSIX this is a no-op (stdin/stdout are
+    # already UTF-8). Python 3.7+ supports TextIOWrapper.reconfigure().
+    if hasattr(sys.stdin, "reconfigure"):
+        sys.stdin.reconfigure(encoding="utf-8")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     for line in sys.stdin:
         line = line.strip()
         if not line:

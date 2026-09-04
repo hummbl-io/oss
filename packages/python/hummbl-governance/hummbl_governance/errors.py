@@ -31,7 +31,13 @@ from enum import Enum
 
 
 class FailureMode(str, Enum):
-    """Contract and artifact-level governance failure modes (FM1–FM30).
+    """Contract and artifact-level governance failure modes (FM1–FM42).
+
+    FM1–FM30: contract/artifact-level governance failures.
+    FM31–FM42: interaction-level systemic risk failures (ESRH taxonomy,
+    arXiv:2512.02682). These describe emergent risks in multi-agent
+    interaction — semantic drift, covert channels, alignment faking,
+    collusion, polarization, and feedback degradation.
 
     These describe categories of structural failure in governance contracts,
     schemas, and execution artifacts — not runtime violations.
@@ -67,6 +73,19 @@ class FailureMode(str, Enum):
     AUDIT_TRAIL_LOSS = "FM28"
     RECOVERY_FAILURE = "FM29"
     UNRECOVERABLE_SYSTEM_STATE = "FM30"
+    # ESRH interaction-level systemic risks (arXiv:2512.02682)
+    SEMANTIC_DRIFT_PROPAGATION = "FM31"
+    COVERT_CHANNEL_FORMATION = "FM32"
+    ALIGNMENT_FAKING = "FM33"
+    SYCOPHANTIC_CONVERGENCE = "FM34"
+    FALSE_CONSENSUS_COLLAPSE = "FM35"
+    AGENT_COLLUSION = "FM36"
+    NETWORK_POLARIZATION = "FM37"
+    MODEL_DATA_FEEDBACK_DEGRADATION = "FM38"
+    CASCADING_ERROR_PROPAGATION = "FM39"
+    PROMPT_INFECTION_VECTOR = "FM40"
+    CROSS_AGENT_DATA_LEAKAGE = "FM41"
+    EMERGENT_CONFLICT_ESCALATION = "FM42"
 
 
 class HummblError(str, Enum):

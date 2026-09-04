@@ -20,9 +20,7 @@ import json
 import re
 import sys
 from datetime import datetime, timezone
-from importlib.resources import (
-    files,  # nosemgrep: python.lang.compatibility.python37.python37-compatibility-importlib2
-)
+from importlib.resources import files  # nosemgrep: python.lang.compatibility.python37.python37-compatibility-importlib2
 from pathlib import Path
 from typing import Any
 
@@ -85,18 +83,26 @@ def _iter_contract_refs(contract: dict[str, Any]) -> list[tuple[str, str]]:
         ("interface.payload_schema_uri", contract["interface"]["payload_schema_uri"]),
     ]
     for key in ("valid_fixtures", "invalid_fixtures", "adversarial_fixtures"):
-        refs.extend((f"validation.{key}[{index}]", value) for index, value in enumerate(contract["validation"][key]))
+        refs.extend(
+            (f"validation.{key}[{index}]", value)
+            for index, value in enumerate(contract["validation"][key])
+        )
     for key in ("on_publish", "on_accept", "on_reject", "receipt_schema_refs"):
-        refs.extend((f"receipts.{key}[{index}]", value) for index, value in enumerate(contract["receipts"][key]))
+        refs.extend(
+            (f"receipts.{key}[{index}]", value)
+            for index, value in enumerate(contract["receipts"][key])
+        )
     refs.extend(
-        (f"assurance.refs[{index}].ref", item["ref"]) for index, item in enumerate(contract["assurance"]["refs"])
+        (f"assurance.refs[{index}].ref", item["ref"])
+        for index, item in enumerate(contract["assurance"]["refs"])
     )
     refs.extend(
         (f"compatibility.migration_refs[{index}]", value)
         for index, value in enumerate(contract["compatibility"]["migration_refs"])
     )
     refs.extend(
-        (f"lifecycle.supersedes[{index}]", value) for index, value in enumerate(contract["lifecycle"]["supersedes"])
+        (f"lifecycle.supersedes[{index}]", value)
+        for index, value in enumerate(contract["lifecycle"]["supersedes"])
     )
     replacement = contract["lifecycle"]["replacement_contract_ref"]
     if replacement is not None:
@@ -124,7 +130,9 @@ def validate_contract_document(contract: dict[str, Any]) -> list[str]:
         contract["contract_version"],
         contract["compatibility"]["supported_contract_versions"],
     ):
-        errors.append("semantic: contract_version is not included in supported_contract_versions")
+        errors.append(
+            "semantic: contract_version is not included in supported_contract_versions"
+        )
     if "*" in contract["compatibility"]["supported_payload_versions"]:
         errors.append(
             "semantic: bare payload wildcard '*' is not allowed; use an exact value "
@@ -145,16 +153,22 @@ def validate_contract_document(contract: dict[str, Any]) -> list[str]:
     if status == "active" and lifecycle["effective_at"] is None:
         errors.append("semantic: active contracts require lifecycle.effective_at")
     if status in {"deprecated", "retired"} and lifecycle["deprecated_at"] is None:
-        errors.append("semantic: deprecated or retired contracts require lifecycle.deprecated_at")
+        errors.append(
+            "semantic: deprecated or retired contracts require lifecycle.deprecated_at"
+        )
     if status == "deprecated" and lifecycle["replacement_contract_ref"] is None:
-        errors.append("semantic: deprecated contracts require lifecycle.replacement_contract_ref")
+        errors.append(
+            "semantic: deprecated contracts require lifecycle.replacement_contract_ref"
+        )
     if effective_at is not None and review_by is not None and review_by < effective_at:
         errors.append("semantic: lifecycle.review_by must not precede effective_at")
 
     postures = contract["postures"]
     if postures["visibility"] == "public":
         if postures["privacy"] not in {"public_safe", "metadata_only"}:
-            errors.append("semantic: public visibility requires public_safe or metadata_only privacy")
+            errors.append(
+                "semantic: public visibility requires public_safe or metadata_only privacy"
+            )
         for path, value in _iter_contract_refs(contract):
             if _is_private_ref(value):
                 errors.append(f"semantic: public contract leaks private reference at {path}")
@@ -165,22 +179,29 @@ def validate_contract_document(contract: dict[str, Any]) -> list[str]:
         ref_kinds.setdefault(item["ref"], set()).add(item["kind"])
     for ref, kinds in ref_kinds.items():
         if len(kinds) > 1:
-            errors.append(f"semantic: assurance reference {ref!r} is presented as multiple kinds: {sorted(kinds)}")
+            errors.append(
+                "semantic: assurance reference "
+                f"{ref!r} is presented as multiple kinds: {sorted(kinds)}"
+            )
 
     assurance_kinds = {item["kind"] for item in assurance_refs}
     if postures["claim_posture"] in {"evidence_linked", "externally_corroborated"}:
         if "evidence" not in assurance_kinds:
             errors.append(
-                "semantic: evidence_linked or externally_corroborated claim posture requires an evidence reference"
+                "semantic: evidence_linked or externally_corroborated claim posture "
+                "requires an evidence reference"
             )
     if postures["claim_posture"] == "externally_corroborated":
         if not assurance_kinds.intersection({"verification", "attestation"}):
             errors.append(
-                "semantic: externally_corroborated claim posture requires a verification or attestation reference"
+                "semantic: externally_corroborated claim posture requires a "
+                "verification or attestation reference"
             )
 
     if not contract["validation"]["offline_core_required"]:
-        errors.append("semantic: candidate v0.1 requires validation.offline_core_required=true")
+        errors.append(
+            "semantic: candidate v0.1 requires validation.offline_core_required=true"
+        )
 
     return errors
 
@@ -211,15 +232,23 @@ def validate_compatibility_manifest(
     for index, decision in enumerate(decisions):
         path = f"consumer_decisions[{index}]"
         if decision["decision"] in {"accepted", "conditional"}:
-            if not _contract_version_supported(contract_version, decision["supported_contract_versions"]):
-                errors.append(f"semantic: {path} does not support the declared contract_version")
+            if not _contract_version_supported(
+                contract_version, decision["supported_contract_versions"]
+            ):
+                errors.append(
+                    f"semantic: {path} does not support the declared contract_version"
+                )
             if "*" in decision["supported_payload_versions"]:
                 errors.append(
                     f"semantic: {path} contains bare payload wildcard '*'; use an exact "
                     "value or a non-empty trailing-prefix wildcard"
                 )
-            elif not _payload_version_supported(payload_version, decision["supported_payload_versions"]):
-                errors.append(f"semantic: {path} does not support the declared payload_version")
+            elif not _payload_version_supported(
+                payload_version, decision["supported_payload_versions"]
+            ):
+                errors.append(
+                    f"semantic: {path} does not support the declared payload_version"
+                )
         if decision["decision"] == "conditional" and not decision["conditions"]:
             errors.append(f"semantic: {path} conditional decision requires conditions")
         if decision["decision"] == "rejected" and not decision["reason"]:
@@ -250,17 +279,24 @@ def validate_compatibility_manifest(
     for index, decision in enumerate(decisions):
         repo = decision["repo"]
         if repo not in contract_consumers:
-            errors.append(f"semantic: consumer_decisions[{index}].repo is not declared by contract")
+            errors.append(
+                f"semantic: consumer_decisions[{index}].repo is not declared by contract"
+            )
 
     if manifest["manifest_scope"] == "full":
         missing = sorted(set(contract_consumers) - set(decision_repos))
         if missing:
-            errors.append(f"semantic: full manifest is missing consumer decisions for {missing}")
+            errors.append(
+                f"semantic: full manifest is missing consumer decisions for {missing}"
+            )
 
     if contract["postures"]["visibility"] == "public":
-        refs = [("producer.publish_receipt_ref", manifest["producer"]["publish_receipt_ref"])]
+        refs = [
+            ("producer.publish_receipt_ref", manifest["producer"]["publish_receipt_ref"])
+        ]
         refs.extend(
-            (f"consumer_decisions[{index}].receipt_ref", item["receipt_ref"]) for index, item in enumerate(decisions)
+            (f"consumer_decisions[{index}].receipt_ref", item["receipt_ref"])
+            for index, item in enumerate(decisions)
         )
         for path, value in refs:
             if _is_private_ref(value):

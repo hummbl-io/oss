@@ -24,7 +24,6 @@ from typing import NamedTuple
 
 class LamportTimestamp(NamedTuple):
     """Timestamp + Agent ID for total ordering."""
-
     time: int
     agent_id: str
 

@@ -184,7 +184,7 @@ class ConvergenceDetector:
             history.append((action_type, goal))
             # Trim to window
             if len(history) > self._window_size:
-                self._actions[agent_id] = history[-self._window_size :]
+                self._actions[agent_id] = history[-self._window_size:]
         return goal
 
     def scores(self, agent_id: str) -> dict[ConvergentGoal, float]:

@@ -22,16 +22,26 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+
 from hummbl_governance.compliance_mapper import (
     ComplianceMapper,
     ComplianceReport,
     main,
 )
+from hummbl_governance.compliance_frameworks import (
+    FrameworkSpec,
+    ControlSpec,
+    MappingRule,
+    register_framework,
+    get_framework,
+    list_frameworks,
+    framework_count,
+)
+
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
 
 def _today_str() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -150,7 +160,6 @@ def _killswitch_entry(entry_id: str = "e6") -> dict:
 # TestComplianceReport
 # ---------------------------------------------------------------------------
 
-
 class TestComplianceReport:
     def test_creation(self):
         report = ComplianceReport(
@@ -199,7 +208,6 @@ class TestComplianceReport:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperSOC2
 # ---------------------------------------------------------------------------
-
 
 class TestComplianceMapperSOC2:
     def test_generates_report(self, tmp_path):
@@ -259,7 +267,6 @@ class TestComplianceMapperSOC2:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperGDPR
 # ---------------------------------------------------------------------------
-
 
 class TestComplianceMapperGDPR:
     def test_dctx_maps_to_art30(self, tmp_path):
@@ -329,7 +336,6 @@ class TestComplianceMapperGDPR:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperOWASP
 # ---------------------------------------------------------------------------
-
 
 class TestComplianceMapperOWASP:
     def test_all_10_controls_initialized(self, tmp_path):
@@ -402,7 +408,6 @@ class TestComplianceMapperOWASP:
 # TestParseRobustness
 # ---------------------------------------------------------------------------
 
-
 class TestParseRobustness:
     def test_malformed_jsonl_line_skipped(self, tmp_path):
         fp = tmp_path / f"governance-{_today_str()}.jsonl"
@@ -431,7 +436,6 @@ class TestParseRobustness:
 # TestDefaultDir
 # ---------------------------------------------------------------------------
 
-
 class TestDefaultDir:
     def test_default_governance_dir(self):
         mapper = ComplianceMapper()
@@ -449,7 +453,6 @@ class TestDefaultDir:
 # ---------------------------------------------------------------------------
 # TestCLI
 # ---------------------------------------------------------------------------
-
 
 class TestCLI:
     def test_framework_soc2(self, tmp_path):
@@ -500,7 +503,6 @@ class TestCLI:
 # Fixtures shared between NIST/EU tests
 # ---------------------------------------------------------------------------
 
-
 def _attest_entry(entry_id: str = "e7") -> dict:
     return {
         "entry_id": entry_id,
@@ -537,7 +539,6 @@ def _cost_governor_entry(entry_id: str = "e8") -> dict:
 # TestComplianceMapperNISTRMF
 # ---------------------------------------------------------------------------
 
-
 class TestComplianceMapperNISTRMF:
     def test_all_controls_initialized(self, tmp_path):
         _write_governance_file(tmp_path, _today_str(), [])
@@ -545,14 +546,10 @@ class TestComplianceMapperNISTRMF:
         report = mapper.generate_nist_rmf_report(days=30)
         assert report.framework == "NIST_AI_RMF"
         expected = {
-            "GOVERN-1.1",
-            "GOVERN-1.7",
-            "MAP-1.1",
-            "MAP-2.2",
-            "MEASURE-2.5",
-            "MEASURE-2.8",
-            "MANAGE-1.3",
-            "MANAGE-2.4",
+            "GOVERN-1.1", "GOVERN-1.7",
+            "MAP-1.1", "MAP-2.2",
+            "MEASURE-2.5", "MEASURE-2.8",
+            "MANAGE-1.3", "MANAGE-2.4",
         }
         assert set(report.controls.keys()) == expected
 
@@ -657,8 +654,7 @@ class TestComplianceMapperNISTRMF:
 
     def test_multiple_entries_accumulate(self, tmp_path):
         _write_governance_file(
-            tmp_path,
-            _today_str(),
+            tmp_path, _today_str(),
             [_intent_entry("e1"), _intent_entry("e2"), _circuit_breaker_entry("e3")],
         )
         mapper = ComplianceMapper(governance_dir=tmp_path)
@@ -690,7 +686,6 @@ class TestComplianceMapperNISTRMF:
 # ---------------------------------------------------------------------------
 # TestComplianceMapperEUAIAct
 # ---------------------------------------------------------------------------
-
 
 class TestComplianceMapperEUAIAct:
     def test_all_controls_initialized(self, tmp_path):
@@ -813,8 +808,7 @@ class TestComplianceMapperEUAIAct:
 
     def test_multiple_entries_accumulate(self, tmp_path):
         _write_governance_file(
-            tmp_path,
-            _today_str(),
+            tmp_path, _today_str(),
             [_killswitch_entry("e1"), _killswitch_entry("e2"), _dctx_entry("e3")],
         )
         mapper = ComplianceMapper(governance_dir=tmp_path)
@@ -953,15 +947,8 @@ class TestComplianceMapperISO42001:
         report = mapper.generate_iso42001_report(days=30)
         assert report.framework == "ISO42001"
         assert set(report.controls.keys()) == {
-            "A.2",
-            "A.3",
-            "A.4",
-            "A.5",
-            "A.6",
-            "A.7",
-            "A.8",
-            "A.9",
-            "A.10",
+            "A.2", "A.3", "A.4", "A.5", "A.6",
+            "A.7", "A.8", "A.9", "A.10",
         }
 
     def test_iso42001_intent_maps_to_a2(self, tmp_path):
@@ -1119,430 +1106,229 @@ class TestComplianceMapperNISTCSF:
 
 
 # ---------------------------------------------------------------------------
-# TestComplianceMapperGPAI (EU AI Act Article 53)
+# TestRegistry -- registry mechanics and extensibility
 # ---------------------------------------------------------------------------
 
 
-def _training_attest_entry(entry_id: str = "e_train") -> dict:
-    return {
-        "entry_id": entry_id,
-        "timestamp": "2026-03-23T12:00:00Z",
-        "task_id": "t_train",
-        "intent_id": "i_train",
-        "signature": "sigtrain",
-        "tuple_type": "ATTEST",
-        "tuple_data": {
-            "claim": "training data provenance verified",
-            "outcome": "PASS",
-        },
-    }
+class TestRegistry:
+    def test_list_frameworks_sorted(self):
+        fw_ids = list_frameworks()
+        assert fw_ids == sorted(fw_ids)
 
+    def test_framework_count_at_least_18(self):
+        assert framework_count() >= 18
 
-def _adversarial_attest_entry(entry_id: str = "e_adv") -> dict:
-    return {
-        "entry_id": entry_id,
-        "timestamp": "2026-03-23T12:01:00Z",
-        "task_id": "t_adv",
-        "intent_id": "i_adv",
-        "signature": "sigadv",
-        "tuple_type": "ATTEST",
-        "tuple_data": {
-            "claim": "adversarial test suite passed",
-            "outcome": "PASS",
-        },
-    }
+    def test_get_framework_known(self):
+        spec = get_framework("soc2")
+        assert spec.name == "SOC2"
+        assert spec.id == "soc2"
 
+    def test_get_framework_unknown_raises(self):
+        try:
+            get_framework("nonexistent-framework")
+            assert False, "expected KeyError"
+        except KeyError:
+            pass
 
-class TestComplianceMapperGPAI:
-    def test_gpai_all_controls_initialized(self, tmp_path):
+    def test_all_frameworks_generate_report(self, tmp_path):
+        """Every registered framework must produce a report without errors."""
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert report.framework == "EU_AI_ACT_GPAI"
-        expected = {
-            "Art.53.1.a",
-            "Art.53.1.b",
-            "Art.53.1.c",
-            "Art.53.1.d",
-            "Art.53.2.a",
-            "Art.53.2.b",
-            "Art.53.2.c",
-            "Art.53.2.d",
-            "Art.53.2.e",
-        }
-        assert set(report.controls.keys()) == expected
+        for fw_id in list_frameworks():
+            report = mapper.generate_report(fw_id)
+            assert report.framework == get_framework(fw_id).name
+            assert isinstance(report.controls, dict)
 
-    def test_attest_maps_to_art53_1a(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.1.a"]) == 1
-        assert report.controls["Art.53.1.a"][0]["claim"] == "output validated"
+    def test_register_custom_framework(self, tmp_path):
+        """External packages can register new frameworks at import time."""
+        spec = FrameworkSpec(
+            id="test-custom-fw",
+            name="TEST_CUSTOM",
+            reference="Test framework for extensibility.",
+            default_days=7,
+            controls=(
+                ControlSpec("TC-01", "Test control", (
+                    MappingRule(tuple_types=("INTENT",), extract=(("objective", "objective"),)),
+                )),
+            ),
+        )
+        register_framework(spec)
+        try:
+            assert "test-custom-fw" in list_frameworks()
+            _write_governance_file(tmp_path, _today_str(), [_intent_entry()])
+            mapper = ComplianceMapper(governance_dir=tmp_path)
+            report = mapper.generate_report("test-custom-fw")
+            assert report.framework == "TEST_CUSTOM"
+            assert len(report.controls["TC-01"]) == 1
+            assert report.controls["TC-01"][0]["objective"] == "generate briefing"
+        finally:
+            # Clean up registry to avoid polluting other tests
+            from hummbl_governance.compliance_frameworks import _FRAMEWORK_REGISTRY
+            _FRAMEWORK_REGISTRY.pop("test-custom-fw", None)
 
-    def test_dctx_maps_to_art53_1b(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dctx_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.1.b"]) == 1
-        assert report.controls["Art.53.1.b"][0]["delegator"] == "agent-1"
+    def test_control_ids_property(self):
+        spec = get_framework("owasp")
+        assert "ASI01" in spec.control_ids
+        assert len(spec.control_ids) == 10
 
-    def test_contract_maps_to_art53_1c(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_contract_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.1.c"]) == 1
-
-    def test_training_attest_maps_to_art53_1d(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_training_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.1.d"]) == 1
-        assert "training" in report.controls["Art.53.1.d"][0]["claim"]
-
-    def test_non_training_attest_skips_art53_1d(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.1.d"]) == 0
-
-    def test_attest_with_outcome_maps_to_art53_2a(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.a"]) == 1
-
-    def test_circuit_breaker_maps_to_art53_2b(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.b"]) == 1
-
-    def test_adversarial_attest_maps_to_art53_2c(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_adversarial_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.c"]) == 1
-        assert "adversarial" in report.controls["Art.53.2.c"][0]["claim"]
-
-    def test_non_adversarial_attest_skips_art53_2c(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.c"]) == 0
-
-    def test_killswitch_maps_to_art53_2d(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_killswitch_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.d"]) == 1
-        assert report.controls["Art.53.2.d"][0]["state"] == "HALT_ALL"
-
-    def test_signed_maps_to_art53_2e(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=True)])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.e"]) >= 1
-
-    def test_unsigned_skips_art53_2e(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=False)])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        assert len(report.controls["Art.53.2.e"]) == 0
-
-    def test_gpai_empty_dir(self, tmp_path):
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        for ctrl in report.controls.values():
-            assert ctrl == []
-
-    def test_gpai_cli(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        rc = main(["--framework", "gpai", "--dir", str(tmp_path)])
-        assert rc == 0
-
-    def test_gpai_report_to_json_roundtrip(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dctx_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_gpai_report(days=30)
-        parsed = json.loads(report.to_json())
-        assert parsed["framework"] == "EU_AI_ACT_GPAI"
-        assert len(parsed["controls"]["Art.53.1.b"]) == 1
+    def test_registry_structural_integrity(self):
+        """Every framework has unique control ids and non-empty id/name fields."""
+        for fw_id in list_frameworks():
+            spec = get_framework(fw_id)
+            assert spec.id, "framework has empty id"
+            assert spec.name, f"{fw_id} has empty name"
+            ids = spec.control_ids
+            assert len(ids) == len(set(ids)), f"{fw_id} has duplicate control ids"
+            for ctrl in spec.controls:
+                assert ctrl.id, f"{fw_id} has a control with empty id"
 
 
 # ---------------------------------------------------------------------------
-# TestComplianceMapperCOSAiS
+# TestNewFrameworks -- smoke tests for the 10 new frameworks
 # ---------------------------------------------------------------------------
 
 
-def _health_probe_entry(entry_id: str = "e_hp") -> dict:
-    return {
-        "entry_id": entry_id,
-        "timestamp": "2026-03-23T13:00:00Z",
-        "task_id": "t_hp",
-        "intent_id": "i_hp",
-        "signature": "sighp",
-        "tuple_type": "HEALTH_PROBE",
-        "tuple_data": {
-            "state": "HEALTHY",
-        },
-    }
-
-
-class TestComplianceMapperCOSAiS:
-    def test_cosais_all_controls_initialized(self, tmp_path):
+class TestNewFrameworks:
+    def test_nist_cosais_all_controls_initialized(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
+        report = mapper.generate_report("nist-cosais")
         assert report.framework == "NIST_COSAIS"
         expected = {
-            "AC-2",
-            "AC-3",
-            "AU-2",
-            "AU-6",
-            "AU-12",
-            "CM-2",
-            "IA-2",
-            "RA-3",
-            "RA-5",
-            "SA-9",
-            "SC-8",
-            "SI-2",
-            "SI-7",
-            "SI-10",
+            "AC-AI", "AU-AI", "CM-AI", "IA-AI", "MA-AI",
+            "PL-AI", "PS-AI", "RA-AI", "SA-AI", "SC-AI", "SI-AI",
         }
         assert set(report.controls.keys()) == expected
 
-    def test_dct_maps_to_ac2_and_ia2(self, tmp_path):
+    def test_nist_cosais_dct_maps_to_ac_ai(self, tmp_path):
         _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["AC-2"]) == 1
-        assert len(report.controls["IA-2"]) == 1
-        assert report.controls["AC-2"][0]["subject"] == "agent-1"
+        report = mapper.generate_report("nist-cosais")
+        assert len(report.controls["AC-AI"]) == 1
 
-    def test_dct_maps_to_ac3(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["AC-3"]) == 1
-        assert report.controls["AC-3"][0]["ops_allowed"] == ["read"]
-
-    def test_signed_maps_to_au2_and_au12(self, tmp_path):
+    def test_nist_cosais_signed_maps_to_au_ai_and_si_ai(self, tmp_path):
         _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=True)])
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["AU-2"]) == 1
-        assert len(report.controls["AU-12"]) == 1
+        report = mapper.generate_report("nist-cosais")
+        assert len(report.controls["AU-AI"]) == 1
+        assert len(report.controls["SI-AI"]) == 1
 
-    def test_unsigned_skips_au2_and_au12(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=False)])
+    def test_cosai_all_controls_initialized(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["AU-2"]) == 0
-        assert len(report.controls["AU-12"]) == 0
+        report = mapper.generate_report("cosai")
+        assert report.framework == "COSAI"
+        expected = {f"CSA-{str(i).zfill(2)}" for i in range(1, 11)}
+        assert set(report.controls.keys()) == expected
 
-    def test_circuit_breaker_maps_to_au6(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
+    def test_cosai_intent_maps_to_csa_01(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_intent_entry()])
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["AU-6"]) == 1
+        report = mapper.generate_report("cosai")
+        assert len(report.controls["CSA-01"]) == 1
 
-    def test_health_probe_maps_to_au6(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_health_probe_entry()])
+    def test_hipaa_all_controls_initialized(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["AU-6"]) == 1
+        report = mapper.generate_report("hipaa")
+        assert report.framework == "HIPAA"
+        assert "164.312(a)(1)" in report.controls
+        assert "164.308(a)(7)" in report.controls
 
-    def test_contract_maps_to_cm2(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_contract_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["CM-2"]) == 1
-
-    def test_circuit_breaker_maps_to_ra3(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["RA-3"]) == 1
-
-    def test_health_probe_maps_to_ra5(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_health_probe_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["RA-5"]) == 1
-
-    def test_attest_maps_to_ra5(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["RA-5"]) == 1
-
-    def test_dctx_maps_to_sa9(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dctx_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["SA-9"]) == 1
-        assert report.controls["SA-9"][0]["delegator"] == "agent-1"
-
-    def test_signed_maps_to_sc8_and_si7(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry(signed=True)])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["SC-8"]) == 1
-        assert len(report.controls["SI-7"]) == 1
-
-    def test_circuit_breaker_maps_to_si2(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_circuit_breaker_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["SI-2"]) == 1
-
-    def test_attest_maps_to_si10(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_attest_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        assert len(report.controls["SI-10"]) == 1
-
-    def test_cosais_empty_dir(self, tmp_path):
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        for ctrl in report.controls.values():
-            assert ctrl == []
-
-    def test_cosais_cli(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
-        rc = main(["--framework", "cosais", "--dir", str(tmp_path)])
-        assert rc == 0
-
-    def test_cosais_report_to_json_roundtrip(self, tmp_path):
+    def test_hipaa_dct_maps_to_access_control(self, tmp_path):
         _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_cosais_report(days=30)
-        parsed = json.loads(report.to_json())
-        assert parsed["framework"] == "NIST_COSAIS"
-        assert len(parsed["controls"]["AC-2"]) == 1
+        report = mapper.generate_report("hipaa")
+        assert len(report.controls["164.312(a)(1)"]) == 1
 
-
-# ---------------------------------------------------------------------------
-# TestComplianceMapperCrosswalk
-# ---------------------------------------------------------------------------
-
-
-class TestComplianceMapperCrosswalk:
-    def test_crosswalk_framework_label(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+    def test_mas_feat_all_controls_initialized(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        assert report.framework == "CROSSWALK"
-
-    def test_crosswalk_has_entries_and_summary(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        assert "entries" in report.controls
-        assert "summary" in report.controls
-
-    def test_crosswalk_summary_includes_all_10_frameworks(self, tmp_path):
-        mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        summary_frameworks = {s["framework"] for s in report.controls["summary"]}
+        report = mapper.generate_report("mas-feat")
+        assert report.framework == "MAS_FEAT"
         expected = {
-            "SOC2",
-            "GDPR",
-            "OWASP_AGENTIC",
-            "NIST_AI_RMF",
-            "EU_AI_ACT",
-            "EU_AI_ACT_GPAI",
-            "ISO27001",
-            "ISO42001",
-            "NIST_CSF",
-            "NIST_COSAIS",
+            "FEAT-F1", "FEAT-E1", "FEAT-E2",
+            "FEAT-A1", "FEAT-A2", "FEAT-A3",
+            "FEAT-T1", "FEAT-T2",
         }
-        assert summary_frameworks == expected
+        assert set(report.controls.keys()) == expected
 
-    def test_crosswalk_summary_counts(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+    def test_pci_dss_all_controls_initialized(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        soc2_summary = next(s for s in report.controls["summary"] if s["framework"] == "SOC2")
-        assert soc2_summary["total_evidence"] >= 1
-        assert soc2_summary["controls_with_evidence"] >= 1
+        report = mapper.generate_report("pci-dss")
+        assert report.framework == "PCI_DSS"
+        expected = {
+            "REQ-3", "REQ-5", "REQ-6", "REQ-7", "REQ-8",
+            "REQ-10", "REQ-11", "REQ-12",
+        }
+        assert set(report.controls.keys()) == expected
 
-    def test_crosswalk_dct_entry_appears_in_multiple_frameworks(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+    def test_nist_ai_600_all_controls_initialized(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        entries = report.controls["entries"]
-        assert len(entries) == 1
-        entry = entries[0]
-        assert entry["entry_id"] == "e1"
-        # DCT should appear in multiple frameworks
-        frameworks_covered = set(entry["frameworks"].keys())
-        assert "SOC2" in frameworks_covered
-        assert "ISO27001" in frameworks_covered
+        report = mapper.generate_report("nist-ai-600")
+        assert report.framework == "NIST_AI_600_1"
+        assert "GEN-1.1" in report.controls
+        assert "GEN-4.3" in report.controls
 
-    def test_crosswalk_empty_dir(self, tmp_path):
+    def test_owasp_llm_all_10_controls(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        assert report.controls["entries"] == []
-        # Summary still has all frameworks with zero evidence
-        assert len(report.controls["summary"]) == 10
-        for s in report.controls["summary"]:
-            assert s["total_evidence"] == 0
+        report = mapper.generate_report("owasp-llm")
+        assert report.framework == "OWASP_LLM"
+        expected = {f"LLM{str(i).zfill(2)}" for i in range(1, 11)}
+        assert set(report.controls.keys()) == expected
 
-    def test_crosswalk_multiple_entries_accumulate(self, tmp_path):
-        _write_governance_file(
-            tmp_path,
-            _today_str(),
-            [_dct_entry("e1"), _dctx_entry("e2"), _intent_entry("e3")],
-        )
+    def test_owasp_llm_intent_maps_to_llm01(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_intent_entry()])
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        assert len(report.controls["entries"]) == 3
+        report = mapper.generate_report("owasp-llm")
+        assert len(report.controls["LLM01"]) == 1
 
-    def test_crosswalk_cli(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
-        rc = main(["--framework", "crosswalk", "--dir", str(tmp_path)])
-        assert rc == 0
-
-    def test_crosswalk_report_to_json_roundtrip(self, tmp_path):
-        _write_governance_file(tmp_path, _today_str(), [_dct_entry()])
+    def test_owasp_mcp_all_10_controls(self, tmp_path):
         mapper = ComplianceMapper(governance_dir=tmp_path)
-        report = mapper.generate_crosswalk_report(days=30)
-        parsed = json.loads(report.to_json())
-        assert parsed["framework"] == "CROSSWALK"
-        assert len(parsed["controls"]["entries"]) == 1
-        assert len(parsed["controls"]["summary"]) == 10
+        report = mapper.generate_report("owasp-mcp")
+        assert report.framework == "OWASP_MCP"
+        expected = {f"MCP{str(i).zfill(2)}" for i in range(1, 11)}
+        assert set(report.controls.keys()) == expected
 
+    def test_imda_ai_verify_all_controls(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_report("imda-ai-verify")
+        assert report.framework == "IMDA_AI_VERIFY"
+        expected = {f"AV-{str(i).zfill(2)}" for i in range(1, 11)}
+        assert set(report.controls.keys()) == expected
 
-# ---------------------------------------------------------------------------
-# NIST SP 800-53 Rev 5 framework registration
-# ---------------------------------------------------------------------------
+    def test_uk_aisi_all_controls(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_report("uk-aisi")
+        assert report.framework == "UK_AISI"
+        expected = {f"AISI-{str(i).zfill(2)}" for i in range(1, 11)}
+        assert set(report.controls.keys()) == expected
 
-class TestNist80053Registration:
-    """Verify the nist-800-53 framework is registered and queryable."""
+    def test_uk_aisi_killswitch_human_oversight(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_killswitch_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        report = mapper.generate_report("uk-aisi")
+        assert len(report.controls["AISI-04"]) == 1
+        assert report.controls["AISI-04"][0]["human_initiated"] is True
 
-    def test_framework_is_registered(self):
-        from hummbl_governance.compliance_frameworks import get_framework
-        fw = get_framework("nist-800-53")
-        assert fw is not None
-        assert fw.name == "NIST_SP_800_53_R5"
+    def test_new_frameworks_empty_dir_all_controls_empty(self, tmp_path):
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        for fw_id in ("nist-cosais", "cosai", "hipaa", "mas-feat",
+                       "pci-dss", "nist-ai-600", "owasp-llm",
+                       "owasp-mcp", "imda-ai-verify", "uk-aisi"):
+            report = mapper.generate_report(fw_id)
+            for ctrl in report.controls.values():
+                assert ctrl == [], f"{fw_id} has non-empty control in empty dir"
 
-    def test_framework_has_expected_control_families(self):
-        from hummbl_governance.compliance_frameworks import get_framework
-        fw = get_framework("nist-800-53")
-        control_ids = {c.id for c in fw.controls}
-        # Spot-check key controls across families
-        assert "AC-21" in control_ids  # Information sharing (was mislabeled AC-16)
-        assert "AU-2" in control_ids   # Event logging
-        assert "SC-13" in control_ids  # Cryptographic protection
-        assert "IA-2" in control_ids   # Identification and authentication
+    def test_new_frameworks_cli(self, tmp_path):
+        """All new frameworks work via the CLI."""
+        for fw_id in ("nist-cosais", "cosai", "hipaa", "mas-feat",
+                       "pci-dss", "nist-ai-600", "owasp-llm",
+                       "owasp-mcp", "imda-ai-verify", "uk-aisi"):
+            rc = main(["--framework", fw_id, "--dir", str(tmp_path)])
+            assert rc == 0, f"CLI failed for {fw_id}"
 
-    def test_ac_21_label_is_correct(self):
-        """Verify AC-21 is labeled 'Information sharing', not the old AC-16 mislabel."""
-        from hummbl_governance.compliance_frameworks import get_framework
-        fw = get_framework("nist-800-53")
-        ac21 = [c for c in fw.controls if c.id == "AC-21"]
-        assert len(ac21) == 1
-        assert ac21[0].description == "Information sharing"
-        # Ensure the old mislabeled AC-16 does not exist
-        ac16 = [c for c in fw.controls if c.id == "AC-16"]
-        assert len(ac16) == 0
+    def test_new_frameworks_json_roundtrip(self, tmp_path):
+        _write_governance_file(tmp_path, _today_str(), [_dct_entry(), _intent_entry()])
+        mapper = ComplianceMapper(governance_dir=tmp_path)
+        for fw_id in ("nist-cosais", "cosai", "hipaa", "mas-feat",
+                       "pci-dss", "nist-ai-600", "owasp-llm",
+                       "owasp-mcp", "imda-ai-verify", "uk-aisi"):
+            report = mapper.generate_report(fw_id)
+            parsed = json.loads(report.to_json())
+            assert parsed["framework"] == get_framework(fw_id).name

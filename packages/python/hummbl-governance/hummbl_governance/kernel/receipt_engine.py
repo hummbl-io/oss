@@ -27,7 +27,7 @@ import hmac
 import json
 import logging
 import os
-import subprocess  # nosec B404
+import subprocess  # nosec B404 — subprocess module required for icacls ACL management; all calls use validated arguments
 import threading
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -74,7 +74,9 @@ class Receipt:
 
     def verify_signature(self, secret: bytes) -> bool:
         """Verify HMAC-SHA256 signature."""
-        expected = hmac.new(secret, self.canonical_json().encode("utf-8"), hashlib.sha256).hexdigest()
+        expected = hmac.new(
+            secret, self.canonical_json().encode("utf-8"), hashlib.sha256
+        ).hexdigest()
         return hmac.compare_digest(self.signature, expected)
 
 
@@ -86,13 +88,20 @@ class ReceiptEngine:
         state_dir: Path,
         signing_secret: bytes | None = None,
         corpus_adapter: Any = None,
+        identity_engine: Any = None,
     ) -> None:
         self.state_dir = state_dir
         self.receipts_dir = state_dir / "receipts"
         self.receipts_dir.mkdir(parents=True, exist_ok=True)
         self.signing_secret = signing_secret or self._resolve_signing_secret()
         self.corpus_adapter = corpus_adapter
+        self._identity_engine = identity_engine
         self._io_lock = threading.RLock()
+        # In-memory cache of the last receipt hash per agent_id, keyed by
+        # agent_id. Avoids O(n²) full-file reads in last_for_agent() when
+        # creating chained receipts. Updated on store() and invalidated on
+        # any write that could change the last receipt.
+        self._last_hash_cache: dict[str, str] = {}
 
     def _resolve_signing_secret(self) -> bytes:
         """Resolve the HMAC signing secret with platform-appropriate protection.
@@ -147,12 +156,13 @@ class ReceiptEngine:
             username = os.environ.get("USERNAME") or os.environ.get("USER", "")
             if not username:
                 logger.warning(
-                    "Could not determine username for Windows ACL on %s; file may be accessible to other users",
+                    "Could not determine username for Windows ACL on %s; "
+                    "file may be accessible to other users",
                     path,
                 )
                 return
             try:
-                subprocess.run(  # nosec
+                subprocess.run(  # nosec B603 — icacls is a trusted Windows system utility for ACL management; arguments are constructed from validated username, not user input
                     [
                         "icacls",
                         str(path),
@@ -166,7 +176,8 @@ class ReceiptEngine:
                 )
             except Exception:
                 logger.warning(
-                    "Could not set Windows ACL on %s; file may be accessible to other users",
+                    "Could not set Windows ACL on %s; file may be accessible "
+                    "to other users",
                     path,
                     exc_info=True,
                 )
@@ -186,6 +197,8 @@ class ReceiptEngine:
         """Create a new receipt.
 
         Raises KernelPanic if K1 would be violated (e.g., empty agent_id).
+        Raises KernelPanic if K3 would be violated (agent_id not registered
+        in the identity engine, when identity enforcement is wired).
         """
         if not agent_id:
             raise KernelPanic(
@@ -197,6 +210,19 @@ class ReceiptEngine:
                 KernelInvariant.RECEIPT,
                 "Receipt requires action_type (K1)",
             )
+
+        # K3 identity enforcement: reject ghost agents not in the registry.
+        # Only enforced when an identity_engine is wired (opt-in for backward
+        # compatibility; the Kernel wires it automatically during boot).
+        if self._identity_engine is not None:
+            identity = self._identity_engine.resolve(agent_id)
+            if identity is None:
+                raise KernelPanic(
+                    KernelInvariant.IDENTITY,
+                    f"Agent '{agent_id}' is not registered in the identity "
+                    f"engine — ghost-agent receipt rejected (K3)",
+                    agent_id=agent_id,
+                )
 
         receipt = Receipt(
             receipt_id=f"r-{uuid.uuid4().hex[:12]}",
@@ -232,6 +258,9 @@ class ReceiptEngine:
         with self._io_lock:
             with open(receipt_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(asdict(receipt), sort_keys=True) + "\n")
+            # Update the in-memory last-hash cache so the next
+            # last_for_agent() call is O(1) instead of O(n).
+            self._last_hash_cache[receipt.agent_id] = receipt.compute_hash()
 
         # Best-effort corpus ingestion — never block local storage
         if self.corpus_adapter is not None:
@@ -306,8 +335,7 @@ class ReceiptEngine:
             except (json.JSONDecodeError, TypeError) as exc:
                 logger.error(
                     "Corrupted receipt line in %s: %s",
-                    receipt_file,
-                    line[:100],
+                    receipt_file, line[:100],
                 )
                 raise KernelPanic(
                     KernelInvariant.RECEIPT,
@@ -317,9 +345,44 @@ class ReceiptEngine:
         return receipts
 
     def last_for_agent(self, agent_id: str) -> Receipt | None:
-        """Get the most recent receipt for an agent."""
+        """Get the most recent receipt for an agent.
+
+        Uses an in-memory cache for the last receipt hash when available,
+        falling back to a full file read only on cache miss (first call
+        for this agent_id in this process, or after cache invalidation).
+        """
+        with self._io_lock:
+            cached = self._last_hash_cache.get(agent_id)
+        if cached is not None:
+            receipt_file = self.receipts_dir / f"{agent_id}.jsonl"
+            if not receipt_file.exists():
+                return None
+            with self._io_lock:
+                try:
+                    text = receipt_file.read_text(encoding="utf-8")
+                except UnicodeDecodeError:
+                    text = receipt_file.read_text(encoding="utf-8", errors="replace")
+            lines = text.strip().split("\n")
+            if not lines or not lines[-1]:
+                return None
+            try:
+                return Receipt(**json.loads(lines[-1]))
+            except (json.JSONDecodeError, TypeError) as exc:
+                logger.error(
+                    "Corrupted last receipt line in %s: %s",
+                    receipt_file, lines[-1][:100],
+                )
+                raise KernelPanic(
+                    KernelInvariant.RECEIPT,
+                    f"Corrupted receipt line in {receipt_file}: "
+                    f"{lines[-1][:100]!r} — refusing to silently drop receipt record",
+                ) from exc
         receipts = self.list_for_agent(agent_id)
-        return receipts[-1] if receipts else None
+        if receipts:
+            with self._io_lock:
+                self._last_hash_cache[agent_id] = receipts[-1].compute_hash()
+            return receipts[-1]
+        return None
 
     def verify_chain(self, agent_id: str) -> tuple[bool, str]:
         """Verify the hash chain for an agent's receipts.

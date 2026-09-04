@@ -62,7 +62,8 @@ class TrustTier(Enum):
             return cls(value.lower().strip())
         except ValueError as exc:
             raise ValueError(
-                f"Invalid trust tier {value!r}. Expected one of: {', '.join(t.value for t in cls)}"
+                f"Invalid trust tier {value!r}. "
+                f"Expected one of: {', '.join(t.value for t in cls)}"
             ) from exc
 
 
@@ -115,7 +116,9 @@ class AgentRegistry:
         if isinstance(trust, str):
             trust = TrustTier.from_str(trust)
         elif not isinstance(trust, TrustTier):
-            raise TypeError(f"trust must be a string or TrustTier, got {type(trust).__name__}")
+            raise TypeError(
+                f"trust must be a string or TrustTier, got {type(trust).__name__}"
+            )
         with self._lock:
             self._agents[name] = {
                 "display": display or name.title(),
@@ -144,7 +147,10 @@ class AgentRegistry:
             while current in self._aliases:
                 current = self._aliases[current]
                 if current in visited:
-                    raise ValueError(f"Alias cycle detected: adding {alias!r} -> {canonical!r} would create a loop")
+                    raise ValueError(
+                        f"Alias cycle detected: adding {alias!r} -> {canonical!r} "
+                        f"would create a loop"
+                    )
                 visited.add(current)
             self._aliases[alias] = canonical
 
@@ -263,7 +269,11 @@ class AgentRegistry:
         """Check if a sender is a known identity."""
         sender = sender.strip()
         with self._lock:
-            if sender in self._agents or sender in self._aliases or sender in self._services:
+            if (
+                sender in self._agents
+                or sender in self._aliases
+                or sender in self._services
+            ):
                 return True
         canonical = self.canonicalize(sender)
         # canonicalize returns None for unknown senders — guard against
@@ -271,6 +281,7 @@ class AgentRegistry:
         if canonical is None:
             return False
         return canonical != sender
+
 
     def is_deprecated(self, sender: str) -> bool:
         """Check if a sender is a known deprecated/junk identity."""

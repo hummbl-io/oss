@@ -14,12 +14,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Delegation Token -- HMAC-SHA256 signed capability tokens for agent delegation.
+"""Delegation Token -- HMAC-SHA256 or Ed25519 signed capability tokens for agent delegation.
 
 Implements delegation capability tokens with cryptographic integrity,
 expiry, binding to tasks/contracts, and least-privilege enforcement.
 
-Usage:
+Supports two signing methods:
+- HMAC-SHA256 (default, stdlib-only, shared-secret trust domain)
+- Ed25519 (optional, requires cryptography>=42.0, public-key trust domain)
+
+Usage (HMAC-SHA256):
     from hummbl_governance import DelegationToken, DelegationTokenManager
     from hummbl_governance.delegation import TokenBinding
 
@@ -33,7 +37,15 @@ Usage:
 
     valid, error = mgr.validate_token(token)
 
-Stdlib-only. Zero third-party dependencies.
+Usage (Ed25519):
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    priv = Ed25519PrivateKey.generate()
+    mgr = DelegationTokenManager(signing_method="ed25519", private_key=priv)
+    token = mgr.create_token(...)
+    # Verify with public key:
+    valid = token.verify_ed25519_signature(priv.public_key().public_bytes_raw())
+
+Stdlib-only by default. Ed25519 requires the [primitives] extra.
 """
 
 from __future__ import annotations
@@ -72,21 +84,77 @@ class DelegationTokenManager:
     Args:
         secret: HMAC secret bytes. If None, reads from HUMMBL_SIGNING_SECRET
             or DCT_SECRET env vars, or generates an ephemeral key.
+            Used when signing_method="hmac_sha256" (default).
+        signing_method: Signature scheme — "hmac_sha256" (default) or "ed25519".
+        private_key: Ed25519 private key object (required when signing_method="ed25519").
+            Must be an Ed25519PrivateKey from the cryptography package.
+        public_key: Ed25519 public key bytes (32 bytes). Required for ed25519
+            token validation. If None and signing_method="ed25519", validation
+            will fail. Can be derived from private_key if the cryptography
+            package is available.
     """
 
-    def __init__(self, secret: bytes | None = None):
-        if secret is None:
-            for var in ("HUMMBL_SIGNING_SECRET", "DCT_SECRET"):
-                secret_str = os.environ.get(var)
-                if secret_str:
-                    secret = secret_str.encode("utf-8")
-                    break
-            if secret is None:
-                logger.warning(
-                    "No signing secret configured, using ephemeral key. Tokens will be invalid after process restart."
+    def __init__(
+        self,
+        secret: bytes | None = None,
+        signing_method: str = "hmac_sha256",
+        private_key: Any = None,
+        public_key: bytes | None = None,
+    ):
+        self._signing_method = signing_method
+
+        if signing_method == "ed25519":
+            if private_key is None:
+                raise ValueError(
+                    "Ed25519 signing requires a private_key. "
+                    "Generate one with Ed25519PrivateKey.generate()."
                 )
-                secret = os.urandom(32)
-        self._secret = secret
+            self._ed25519_private_key = private_key
+            # Derive public key if not provided
+            if public_key is None:
+                try:
+                    from cryptography.hazmat.primitives.serialization import (
+                        Encoding,
+                        PublicFormat,
+                    )
+                    public_key = private_key.public_key().public_bytes(
+                        encoding=Encoding.Raw,
+                        format=PublicFormat.Raw,
+                    )
+                except ImportError as exc:
+                    raise ValueError(
+                        "Ed25519 public key derivation requires the "
+                        "'cryptography' package. Install with: "
+                        "pip install 'hummbl-governance[primitives]'"
+                    ) from exc
+                except Exception as exc:
+                    raise ValueError(
+                        f"Failed to derive Ed25519 public key: {exc}. "
+                        f"Provide public_key explicitly."
+                    ) from exc
+            self._ed25519_public_key = public_key
+            self._secret = b""  # Not used for ed25519
+        elif signing_method == "hmac_sha256":
+            if secret is None:
+                for var in ("HUMMBL_SIGNING_SECRET", "DCT_SECRET"):
+                    secret_str = os.environ.get(var)
+                    if secret_str:
+                        secret = secret_str.encode("utf-8")
+                        break
+                if secret is None:
+                    logger.warning(
+                        "No signing secret configured, using ephemeral key. "
+                        "Tokens will be invalid after process restart."
+                    )
+                    secret = os.urandom(32)
+            self._secret = secret
+            self._ed25519_private_key = None
+            self._ed25519_public_key = None
+        else:
+            raise ValueError(
+                f"Unsupported signing_method: {signing_method}. "
+                f"Use 'hmac_sha256' or 'ed25519'."
+            )
 
     def create_token(
         self,
@@ -116,7 +184,9 @@ class DelegationTokenManager:
             raise TypeError("issuer must be a non-empty exact string")
         if type(subject) is not str or not subject:
             raise TypeError("subject must be a non-empty exact string")
-        if type(ops_allowed) is not list or not all(type(operation) is str and operation for operation in ops_allowed):
+        if type(ops_allowed) is not list or not all(
+            type(operation) is str and operation for operation in ops_allowed
+        ):
             raise TypeError("ops_allowed must be a list of non-empty exact strings")
         if type(binding) is not TokenBinding:
             raise TypeError("binding must be an exact TokenBinding")
@@ -129,21 +199,23 @@ class DelegationTokenManager:
             expiry_dt = datetime.now(timezone.utc) + timedelta(minutes=expiry_minutes)
             expiry = expiry_dt.isoformat().replace("+00:00", "Z")
 
-        token = _normalized_token_snapshot(
-            DelegationToken(
-                token_id=str(uuid.uuid4()),
-                issuer=issuer,
-                subject=subject,
-                resource_selectors=tuple(resource_selectors or []),
-                ops_allowed=tuple(ops_allowed),
-                caveats=tuple(caveats or []),
-                expiry=expiry,
-                binding=binding,
-                signature="",
-            )
-        )
+        token = _normalized_token_snapshot(DelegationToken(
+            token_id=str(uuid.uuid4()),
+            issuer=issuer,
+            subject=subject,
+            resource_selectors=tuple(resource_selectors or []),
+            ops_allowed=tuple(ops_allowed),
+            caveats=tuple(caveats or []),
+            expiry=expiry,
+            binding=binding,
+            signature="",
+            signing_method=self._signing_method,
+        ))
 
-        sig = _compute_signature(token.to_dict(), self._secret)
+        if self._signing_method == "ed25519":
+            sig = _compute_ed25519_signature(token.to_dict(), self._ed25519_private_key)
+        else:
+            sig = _compute_signature(token.to_dict(), self._secret)
 
         return DelegationToken(
             token_id=token.token_id,
@@ -155,6 +227,7 @@ class DelegationTokenManager:
             expiry=token.expiry,
             binding=token.binding,
             signature=sig,
+            signing_method=self._signing_method,
         )
 
     def issue(
@@ -187,7 +260,9 @@ class DelegationTokenManager:
             Signed DelegationToken.
         """
         binding = TokenBinding(task_id=task_id, contract_id=contract_id)
-        selectors = [ResourceSelector(resource_type="*", resource_id=r) for r in resources]
+        selectors = [
+            ResourceSelector(resource_type="*", resource_id=r) for r in resources
+        ]
         return self.create_token(
             issuer=issuer,
             subject=subject,
@@ -239,17 +314,28 @@ class DelegationTokenManager:
             expected_subject,
             expected_issuer,
         )
-        if any(value is not None and (type(value) is not str or not value) for value in expected_values):
+        if any(
+            value is not None and (type(value) is not str or not value)
+            for value in expected_values
+        ):
             return None, E_BINDING_MISMATCH
         try:
             snapshot = _normalized_token_snapshot(token)
-            if not snapshot.verify_signature(self._secret):
-                return None, E_TOKEN_INVALID
+            if self._signing_method == "ed25519":
+                if not snapshot.verify_ed25519_signature(self._ed25519_public_key):
+                    return None, E_TOKEN_INVALID
+            else:
+                if not snapshot.verify_signature(self._secret):
+                    return None, E_TOKEN_INVALID
             if snapshot.is_expired():
                 return None, E_TOKEN_EXPIRED
             if expected_issuer is not None and snapshot.issuer != expected_issuer:
                 return None, E_BINDING_MISMATCH
-            if expected_task_id is not None or expected_contract_id is not None or expected_subject is not None:
+            if (
+                expected_task_id is not None
+                or expected_contract_id is not None
+                or expected_subject is not None
+            ):
                 valid, error = self._validate_binding(
                     snapshot,
                     expected_task_id,
@@ -271,7 +357,11 @@ class DelegationTokenManager:
         expected_subject: str | None,
     ) -> tuple[bool, str | None]:
         """Validate token binding against expected values."""
-        task_id = expected_task_id if expected_task_id is not None else (token.binding.task_id if token.binding else "")
+        task_id = (
+            expected_task_id
+            if expected_task_id is not None
+            else (token.binding.task_id if token.binding else "")
+        )
         contract_id = (
             expected_contract_id
             if expected_contract_id is not None
@@ -297,7 +387,10 @@ class DelegationTokenManager:
         if type(requested_op) is not str or not requested_op:
             return False, E_DCT_VIOLATION
         for tools in (allowed_tools, denied_tools):
-            if tools is not None and (type(tools) is not list or not all(type(tool) is str and tool for tool in tools)):
+            if tools is not None and (
+                type(tools) is not list
+                or not all(type(tool) is str and tool for tool in tools)
+            ):
                 return False, E_DCT_VIOLATION
         snapshot, error = self.authenticate_token(token)
         if snapshot is None:
@@ -317,6 +410,25 @@ def _compute_signature(data: dict[str, Any], secret: bytes) -> str:
     return hmac.new(secret, canonical.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
+def _compute_ed25519_signature(data: dict[str, Any], private_key: Any) -> str:
+    """Compute Ed25519 signature for token data.
+
+    Requires the cryptography package (install with hummbl-governance[primitives]).
+    """
+    try:
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+            Ed25519PrivateKey,
+        )
+    except ImportError as exc:
+        raise ImportError(
+            "Ed25519 signing requires the 'cryptography' package. "
+            "Install with: pip install hummbl-governance[primitives]"
+        ) from exc
+    canonical = json.dumps(data, sort_keys=True, separators=(",", ":"))
+    sig = private_key.sign(canonical.encode("utf-8"))
+    return sig.hex()
+
+
 def _normalized_token_snapshot(token: DelegationToken) -> DelegationToken:
     """Copy a token into exact built-in types before it crosses the trust boundary."""
     if type(token) is not DelegationToken:
@@ -326,7 +438,9 @@ def _normalized_token_snapshot(token: DelegationToken) -> DelegationToken:
             raise TypeError(f"{name} must be a string")
     if token.expiry is not None and type(token.expiry) is not str:
         raise TypeError("expiry must be a string or None")
-    if type(token.ops_allowed) is not tuple or not all(type(operation) is str for operation in token.ops_allowed):
+    if type(token.ops_allowed) is not tuple or not all(
+        type(operation) is str for operation in token.ops_allowed
+    ):
         raise TypeError("ops_allowed must be a tuple of strings")
     if type(token.resource_selectors) is not tuple:
         raise TypeError("resource_selectors must be a tuple")
@@ -379,6 +493,7 @@ def _normalized_token_snapshot(token: DelegationToken) -> DelegationToken:
         expiry=token.expiry,
         binding=binding,
         signature=token.signature,
+        signing_method=token.signing_method,
     )
 
 

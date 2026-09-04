@@ -9,6 +9,7 @@ users and can look like name-squatting). This document covers both.
 For the full monorepo architecture, directory structure, and per-language
 publishing workflows, see [`docs/MONOREPO-DESIGN.md`](./docs/MONOREPO-DESIGN.md).
 For the package inventory, see [`docs/PACKAGES.md`](./docs/PACKAGES.md).
+For merge gates and required-check names, see [`docs/MERGE.md`](./docs/MERGE.md).
 
 ---
 
@@ -167,7 +168,7 @@ consider whether the package should be renamed to `hummbl-*` (PyPI) or
 This is a **public** repo. Before pushing anything, scan for:
 
 - Internal host paths: `PROJECTS/`, `hosts/<fleet-node>`,
-  `C:\Users`, `/opt/<org>`
+  `C:\\Users`, `/opt/<org>`
 - Machine names in path context: `<fleet-node-1>`, `<fleet-node-2>`,
   `<fleet-vps>`, `<fleet-gateway>` (machine names as **public** GitHub
   repo names are fine -- they're already public; **private** repo names
@@ -252,4 +253,6 @@ pushed (delete the tag in git, but the proxy caches the version forever).
 
 ## 6. License
 
-All packages in this monorepo are Apache-2.0. See [`LICENSE`](./LICENSE).
+Repo license: MIT OR Apache-2.0. Individual packages ship under Apache-2.0
+or `MIT OR Apache-2.0`; see each package `pyproject.toml` and `LICENSE`.
+See [`LICENSE`](./LICENSE).

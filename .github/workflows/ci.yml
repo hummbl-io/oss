@@ -3,14 +3,11 @@ name: Tests
 "on":
   push:
     branches: [main]
-    paths:
-      - "packages/**"
-      - ".github/workflows/ci.yml"
   pull_request:
-    paths:
-      - "packages/**"
-      - ".github/workflows/ci.yml"
 
+# Always run. Path filters made the Tests workflow vanish on docs-only PRs,
+# so it could not be a required status check without starving those PRs.
+# See docs/MERGE.md and #91.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [base120, governed-compression, hummbl, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-free-models, hummbl-governance, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-taxonomy, hummbl-tuples, hummbl-validation, idp-spec]
+        package: [base120, governed-compression, hummbl, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -102,3 +99,20 @@ jobs:
             cd - > /dev/null
             echo "::endgroup::"
           done
+
+  # Single required-check context for branch protection.
+  # Do not require the 25 per-package names -- they churn when packages are added.
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [test, test-hummbl-governance, pip-audit]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require upstream jobs to succeed
+        run: |
+          echo "test=${{ needs.test.result }}"
+          echo "test-hummbl-governance=${{ needs.test-hummbl-governance.result }}"
+          echo "pip-audit=${{ needs.pip-audit.result }}"
+          test "${{ needs.test.result }}" = success
+          test "${{ needs.test-hummbl-governance.result }}" = success
+          test "${{ needs.pip-audit.result }}" = success

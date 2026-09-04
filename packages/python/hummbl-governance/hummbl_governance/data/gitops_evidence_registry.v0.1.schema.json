@@ -1,0 +1,704 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.io/schemas/gitops-evidence-registry.v0.1.schema.json",
+  "title": "Bounded GitOps Evidence Registry v0.1",
+  "description": "Advisory-only contract for bounded observation manifests and append-only evidence envelopes. This schema does not claim global completeness or grant enforcement authority.",
+  "oneOf": [
+    {"$ref": "#/$defs/ObservationManifest"},
+    {"$ref": "#/$defs/EvidenceEnvelope"}
+  ],
+  "$defs": {
+    "UtcTimestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?Z$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "Uuid": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+    },
+    "Observer": {
+      "type": "object",
+      "required": ["observer_id", "role"],
+      "additionalProperties": false,
+      "properties": {
+        "observer_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"},
+        "role": {
+          "type": "string",
+          "enum": ["operator", "collector", "reviewer", "auditor", "consumer"]
+        }
+      }
+    },
+    "ScopeUnit": {
+      "type": "object",
+      "required": [
+        "scope_id",
+        "target_kind",
+        "target_alias",
+        "enumeration",
+        "termination",
+        "capabilities",
+        "inclusions",
+        "exclusions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "scope_id": {"type": "string", "pattern": "^scope-[a-z0-9][a-z0-9-]{0,95}$"},
+        "target_kind": {
+          "type": "string",
+          "enum": ["host", "forge_account", "repository", "policy_store"]
+        },
+        "target_alias": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "enumeration": {
+          "type": "string",
+          "enum": ["explicit", "authoritative_api", "filesystem_walk"]
+        },
+        "termination": {
+          "type": "string",
+          "enum": ["explicit_list_consumed", "cursor_exhausted", "walk_completed"]
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"}
+        },
+        "inclusions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {"type": "string", "minLength": 1, "maxLength": 512}
+        },
+        "exclusions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "required": ["selector", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "selector": {"type": "string", "minLength": 1, "maxLength": 512},
+              "reason": {"type": "string", "minLength": 1, "maxLength": 1024}
+            }
+          }
+        }
+      }
+    },
+    "BlindSpot": {
+      "type": "object",
+      "required": ["description", "disposition"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "disposition": {
+          "type": "string",
+          "enum": ["accept", "probe_later", "operator_decision", "out_of_scope"]
+        }
+      }
+    },
+    "SurpriseProbe": {
+      "type": "object",
+      "required": ["probe", "trigger", "stop_condition"],
+      "additionalProperties": false,
+      "properties": {
+        "probe": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "trigger": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "stop_condition": {"type": "string", "minLength": 1, "maxLength": 2048}
+      }
+    },
+    "Source": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "scope_id",
+        "kind",
+        "authority_role",
+        "endpoint_alias",
+        "independence_domain",
+        "read_only_required"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {"type": "string", "pattern": "^source-[a-z0-9][a-z0-9-]{0,95}$"},
+        "scope_id": {"type": "string", "pattern": "^scope-[a-z0-9][a-z0-9-]{0,95}$"},
+        "kind": {
+          "type": "string",
+          "enum": [
+            "local_git",
+            "filesystem",
+            "ssh",
+            "github_api",
+            "gitea_api",
+            "gitlab_api",
+            "scheduler",
+            "policy_document",
+            "bus",
+            "manual"
+          ]
+        },
+        "authority_role": {
+          "type": "string",
+          "enum": ["primary_observation", "declaration", "historical", "derived"]
+        },
+        "endpoint_alias": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "independence_domain": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "credential_ref": {
+          "type": "string",
+          "pattern": "^credential:[a-z0-9][a-z0-9._/-]{0,255}$"
+        },
+        "read_only_required": {"const": true}
+      }
+    },
+    "PlannedAttempt": {
+      "type": "object",
+      "required": ["attempt_id", "scope_id", "source_id", "capability"],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {"type": "string", "pattern": "^attempt-[a-z0-9][a-z0-9-]{0,95}$"},
+        "scope_id": {"type": "string", "pattern": "^scope-[a-z0-9][a-z0-9-]{0,95}$"},
+        "source_id": {"type": "string", "pattern": "^source-[a-z0-9][a-z0-9-]{0,95}$"},
+        "capability": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"}
+      }
+    },
+    "ObservationManifest": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "record_type",
+        "manifest_id",
+        "decision_question",
+        "created_at",
+        "collection_window",
+        "observers",
+        "boundary",
+        "sources",
+        "predicate_profile",
+        "freshness_policy",
+        "sanitization_policy",
+        "corroboration_policy",
+        "run_policy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {"const": "0.1.0"},
+        "record_type": {"const": "observation_manifest"},
+        "manifest_id": {"type": "string", "pattern": "^manifest-[a-z0-9][a-z0-9-]{0,127}$"},
+        "decision_question": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "created_at": {"$ref": "#/$defs/UtcTimestamp"},
+        "collection_window": {
+          "type": "object",
+          "required": ["not_before", "not_after"],
+          "additionalProperties": false,
+          "properties": {
+            "not_before": {"$ref": "#/$defs/UtcTimestamp"},
+            "not_after": {"$ref": "#/$defs/UtcTimestamp"}
+          }
+        },
+        "observers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {"$ref": "#/$defs/Observer"}
+        },
+        "boundary": {
+          "type": "object",
+          "required": [
+            "completeness_claim",
+            "scope_units",
+            "known_blind_spots",
+            "surprise_probes"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "completeness_claim": {"const": "bounded_only"},
+            "scope_units": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 512,
+              "items": {"$ref": "#/$defs/ScopeUnit"}
+            },
+            "known_blind_spots": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {"$ref": "#/$defs/BlindSpot"}
+            },
+            "surprise_probes": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {"$ref": "#/$defs/SurpriseProbe"}
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "items": {"$ref": "#/$defs/Source"}
+        },
+        "predicate_profile": {"const": "gitops-observation-v0"},
+        "freshness_policy": {
+          "type": "object",
+          "required": ["max_age_seconds", "required_for_known_known"],
+          "additionalProperties": false,
+          "properties": {
+            "max_age_seconds": {"type": "integer", "minimum": 1, "maximum": 604800},
+            "required_for_known_known": {"const": true}
+          }
+        },
+        "sanitization_policy": {
+          "type": "object",
+          "required": [
+            "profile",
+            "allowlist_only",
+            "forbidden_data_classes",
+            "absolute_paths",
+            "hostile_display_text"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "profile": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+            "allowlist_only": {"const": true},
+            "forbidden_data_classes": {
+              "type": "array",
+              "minItems": 7,
+              "maxItems": 7,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "authorization_header",
+                  "cookie",
+                  "credential_value",
+                  "environment_value",
+                  "private_key",
+                  "secret_derived_hash",
+                  "url_userinfo"
+                ]
+              }
+            },
+            "absolute_paths": {"const": "alias"},
+            "hostile_display_text": {"const": true}
+          }
+        },
+        "corroboration_policy": {
+          "type": "object",
+          "required": [
+            "minimum_independent_sources",
+            "minimum_independent_collectors",
+            "required_for_known_known"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "minimum_independent_sources": {"type": "integer", "minimum": 1, "maximum": 16},
+            "minimum_independent_collectors": {"type": "integer", "minimum": 1, "maximum": 16},
+            "required_for_known_known": {"const": true}
+          }
+        },
+        "run_policy": {
+          "type": "object",
+          "required": [
+            "enforcement_mode",
+            "collector_write_access",
+            "dashboard_authority",
+            "planned_attempts"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "enforcement_mode": {"const": "advisory_only"},
+            "collector_write_access": {"const": "forbidden"},
+            "dashboard_authority": {"const": "none"},
+            "planned_attempts": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4096,
+              "items": {"$ref": "#/$defs/PlannedAttempt"}
+            }
+          }
+        }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "required": [
+        "agent",
+        "host",
+        "surface",
+        "product",
+        "executable",
+        "collector_name",
+        "collector_version",
+        "collector_code_digest",
+        "collector_config_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {"type": "string", "minLength": 1, "maxLength": 128},
+        "host": {"type": "string", "minLength": 1, "maxLength": 128},
+        "surface": {"type": "string", "minLength": 1, "maxLength": 128},
+        "product": {"type": "string", "minLength": 1, "maxLength": 128},
+        "executable": {"type": "string", "minLength": 1, "maxLength": 256},
+        "collector_name": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "collector_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "collector_code_digest": {"$ref": "#/$defs/Sha256"},
+        "collector_config_digest": {"$ref": "#/$defs/Sha256"},
+        "session_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "lane": {"type": "string", "minLength": 1, "maxLength": 256},
+        "transport": {"type": "string", "minLength": 1, "maxLength": 128},
+        "relayer": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    },
+    "NativeEvidence": {
+      "type": "object",
+      "required": [
+        "representation",
+        "storage_ref",
+        "sha256",
+        "byte_length",
+        "media_type",
+        "captured_at",
+        "sanitizer_profile",
+        "sanitizer_version",
+        "sanitizer_code_digest",
+        "transformations",
+        "pre_sanitize_digest_retained",
+        "sensitivity",
+        "export_policy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "representation": {"const": "sanitized_source_native"},
+        "storage_ref": {
+          "type": "string",
+          "pattern": "^sha256/[a-f0-9]{2}/[a-f0-9]{64}\\.(?:json|jsonl|txt|bin)$"
+        },
+        "sha256": {"$ref": "#/$defs/Sha256"},
+        "byte_length": {"type": "integer", "minimum": 0, "maximum": 1073741824},
+        "media_type": {
+          "type": "string",
+          "enum": ["application/json", "application/jsonl", "text/plain", "application/octet-stream"]
+        },
+        "captured_at": {"$ref": "#/$defs/UtcTimestamp"},
+        "sanitizer_profile": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+        "sanitizer_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "sanitizer_code_digest": {"$ref": "#/$defs/Sha256"},
+        "transformations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"}
+        },
+        "pre_sanitize_digest_retained": {"const": false},
+        "sensitivity": {"type": "string", "enum": ["public", "internal", "confidential"]},
+        "export_policy": {
+          "type": "string",
+          "enum": ["internal_only", "redacted_static", "never_export"]
+        }
+      }
+    },
+    "EpistemicAssessment": {
+      "type": "object",
+      "required": [
+        "observer_id",
+        "classified_at",
+        "quadrant",
+        "evidence_state",
+        "basis_refs",
+        "rationale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "observer_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"},
+        "classified_at": {"$ref": "#/$defs/UtcTimestamp"},
+        "quadrant": {
+          "type": "string",
+          "enum": ["known_known", "known_unknown", "unknown_known", "unknown_unknown"]
+        },
+        "evidence_state": {
+          "type": "string",
+          "enum": [
+            "verified_current",
+            "verified_stale",
+            "declared",
+            "memory_derived",
+            "inferred",
+            "unverified"
+          ]
+        },
+        "basis_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {"type": "string", "pattern": "^envelope:[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"}
+        },
+        "rationale": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "next_action": {"type": "string", "minLength": 1, "maxLength": 2048}
+      }
+    },
+    "AttemptObservation": {
+      "type": "object",
+      "required": ["subject", "predicate", "object", "normalization_profile"],
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "type": "object",
+          "required": ["scope_id", "target_alias"],
+          "additionalProperties": false,
+          "properties": {
+            "scope_id": {"type": "string", "pattern": "^scope-[a-z0-9][a-z0-9-]{0,95}$"},
+            "target_alias": {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "selector": {"type": "string", "minLength": 1, "maxLength": 512}
+          }
+        },
+        "predicate": {
+          "type": "string",
+          "enum": [
+            "git.repository.exists",
+            "git.ref.exists",
+            "git.refs.count",
+            "git.remote.exists",
+            "git.remotes.count",
+            "git.worktree.exists",
+            "git.worktrees.count",
+            "git.stash.exists",
+            "git.stashes.count",
+            "git.workflow.exists",
+            "git.protection.enabled",
+            "git.runner.online",
+            "git.mirror.current"
+          ]
+        },
+        "object": {"type": ["string", "integer", "boolean", "null"]},
+        "normalization_profile": {"const": "gitops-observation-v0"}
+      }
+    },
+    "AttemptPayload": {
+      "type": "object",
+      "required": [
+        "kind",
+        "attempt_id",
+        "capability",
+        "status",
+        "reason",
+        "result_count",
+        "enumeration_exhausted",
+        "unobserved_portions",
+        "observations"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "attempt"},
+        "attempt_id": {"type": "string", "pattern": "^attempt-[a-z0-9][a-z0-9-]{0,95}$"},
+        "capability": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+        "status": {
+          "type": "string",
+          "enum": ["complete", "partial", "failed", "not_attempted"]
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "none",
+            "denied",
+            "unreachable",
+            "timeout",
+            "rate_limited",
+            "unsupported",
+            "malformed",
+            "source_error",
+            "collector_error",
+            "cancelled",
+            "explicitly_excluded"
+          ]
+        },
+        "result_count": {"type": "integer", "minimum": 0, "maximum": 100000000},
+        "enumeration_exhausted": {"type": "boolean"},
+        "unobserved_portions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"type": "string", "minLength": 1, "maxLength": 1024}
+        },
+        "observations": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {"$ref": "#/$defs/AttemptObservation"}
+        }
+      }
+    },
+    "ClaimPayload": {
+      "type": "object",
+      "required": [
+        "kind",
+        "claim_id",
+        "attempt_envelope_id",
+        "subject",
+        "predicate",
+        "object",
+        "semantic_claim_key",
+        "claim_fingerprint",
+        "normalization_profile"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "claim"},
+        "claim_id": {"type": "string", "pattern": "^claim-[a-z0-9][a-z0-9-]{0,127}$"},
+        "attempt_envelope_id": {"$ref": "#/$defs/Uuid"},
+        "subject": {
+          "type": "object",
+          "required": ["scope_id", "target_alias"],
+          "additionalProperties": false,
+          "properties": {
+            "scope_id": {"type": "string", "pattern": "^scope-[a-z0-9][a-z0-9-]{0,95}$"},
+            "target_alias": {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "selector": {"type": "string", "minLength": 1, "maxLength": 512}
+          }
+        },
+        "predicate": {
+          "type": "string",
+          "enum": [
+            "git.repository.exists",
+            "git.ref.exists",
+            "git.refs.count",
+            "git.remote.exists",
+            "git.remotes.count",
+            "git.worktree.exists",
+            "git.worktrees.count",
+            "git.stash.exists",
+            "git.stashes.count",
+            "git.workflow.exists",
+            "git.protection.enabled",
+            "git.runner.online",
+            "git.mirror.current"
+          ]
+        },
+        "object": {"type": ["string", "integer", "boolean", "null"]},
+        "semantic_claim_key": {"$ref": "#/$defs/Sha256"},
+        "claim_fingerprint": {"$ref": "#/$defs/Sha256"},
+        "normalization_profile": {"const": "gitops-observation-v0"}
+      }
+    },
+    "StatusTotals": {
+      "type": "object",
+      "required": ["complete", "partial", "failed", "not_attempted"],
+      "additionalProperties": false,
+      "properties": {
+        "complete": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "partial": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "failed": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "not_attempted": {"type": "integer", "minimum": 0, "maximum": 4096}
+      }
+    },
+    "RunSummaryPayload": {
+      "type": "object",
+      "required": [
+        "kind",
+        "planned_attempts",
+        "emitted_attempts",
+        "status_totals",
+        "prior_chain_digest",
+        "boundary_result"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "run_summary"},
+        "planned_attempts": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "emitted_attempts": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "status_totals": {"$ref": "#/$defs/StatusTotals"},
+        "prior_chain_digest": {"$ref": "#/$defs/Sha256"},
+        "boundary_result": {"type": "string", "enum": ["complete", "partial", "failed"]}
+      }
+    },
+    "EvidenceEnvelope": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "record_type",
+        "envelope_id",
+        "manifest_digest",
+        "run_id",
+        "ingestion_nonce",
+        "sequence",
+        "previous_digest",
+        "started_at",
+        "observed_at",
+        "recorded_at",
+        "provenance",
+        "source_context",
+        "native_evidence",
+        "payload",
+        "epistemic_assessments",
+        "integrity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {"const": "0.1.0"},
+        "record_type": {"const": "evidence_envelope"},
+        "envelope_id": {"$ref": "#/$defs/Uuid"},
+        "manifest_digest": {"$ref": "#/$defs/Sha256"},
+        "run_id": {"$ref": "#/$defs/Uuid"},
+        "ingestion_nonce": {"$ref": "#/$defs/Uuid"},
+        "sequence": {"type": "integer", "minimum": 0, "maximum": 100000000},
+        "previous_digest": {"$ref": "#/$defs/Sha256"},
+        "started_at": {"$ref": "#/$defs/UtcTimestamp"},
+        "observed_at": {"$ref": "#/$defs/UtcTimestamp"},
+        "recorded_at": {"$ref": "#/$defs/UtcTimestamp"},
+        "provenance": {"$ref": "#/$defs/Provenance"},
+        "source_context": {
+          "type": "object",
+          "required": ["scope_id", "source_id"],
+          "additionalProperties": false,
+          "properties": {
+            "scope_id": {"type": "string", "pattern": "^scope-[a-z0-9][a-z0-9-]{0,95}$"},
+            "source_id": {"type": "string", "pattern": "^source-[a-z0-9][a-z0-9-]{0,95}$"}
+          }
+        },
+        "native_evidence": {"$ref": "#/$defs/NativeEvidence"},
+        "payload": {
+          "oneOf": [
+            {"$ref": "#/$defs/AttemptPayload"},
+            {"$ref": "#/$defs/ClaimPayload"},
+            {"$ref": "#/$defs/RunSummaryPayload"}
+          ]
+        },
+        "epistemic_assessments": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {"$ref": "#/$defs/EpistemicAssessment"}
+        },
+        "integrity": {
+          "type": "object",
+          "required": ["envelope_sha256"],
+          "additionalProperties": false,
+          "properties": {
+            "envelope_sha256": {"$ref": "#/$defs/Sha256"},
+            "attestation_ref": {"type": "string", "minLength": 1, "maxLength": 512}
+          }
+        }
+      }
+    }
+  }
+}

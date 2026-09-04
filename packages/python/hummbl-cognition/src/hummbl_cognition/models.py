@@ -160,6 +160,7 @@ VALID_VENDORS = frozenset(
         "moonshot",
         "local",
         "human",
+        "zai",
     }
 )
 

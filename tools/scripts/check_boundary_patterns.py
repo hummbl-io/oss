@@ -66,7 +66,7 @@ SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", "node_modules",
 def check_filenames(root: Path) -> list[tuple[str, str]]:
     """Check file and directory names against denylist.
 
-    Skips packages/ directory — package code legitimately implements
+    Skips packages/ directory -- package code legitimately implements
     'receipt' and 'handoff' as governance domain concepts (receipt_engine.py,
     handoff_event.schema.json, etc.). The concern is internal artifact files
     at the repo root or in docs/, not package source code.
@@ -77,20 +77,15 @@ def check_filenames(root: Path) -> list[tuple[str, str]]:
             continue
         if not path.is_file():
             continue
-        # Skip package source code — governance packages legitimately
-        # implement receipt/handoff primitives as domain concepts.
         if "packages" in path.parts:
             continue
         name = path.name
-        # Skip this script
         if name == "check_boundary_patterns.py":
             continue
-        # Check file name against patterns
         for pattern, desc in DENYFILE_PATTERNS:
             if pattern.search(name):
                 hits.append((str(path), desc))
                 break
-        # Check if any parent dir is a denied directory name
         for part in path.parts[:-1]:
             if part.lower() in DENYDIR_NAMES:
                 hits.append((str(path), f"file in denied directory '{part}'"))
@@ -112,22 +107,58 @@ def check_fleet_topology(root: Path) -> list[tuple[str, str]]:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        # Fleet topology files list many repos with git_host or private infra.
-        # Flag any file with >20 repo-like entries containing git_host.
         if "git_host" in text and text.count('"name"') > 20:
             hits.append((str(path), "fleet topology file with >20 repo entries and git_host field"))
     return hits
 
 
-def check_internal_ips(root: Path) -> list[tuple[str, str]]:
-    """Check for hardcoded Tailscale/CGNAT IPs (real fleet machine addresses).
+HOME_PATH_SCAN_EXTENSIONS = IP_SCAN_EXTENSIONS
 
-    Skips the .git directory and standard build/venv dirs. Unlike
-    check_filenames, this DOES scan packages/ -- a real machine IP baked
-    into a package default (e.g. a client's fallback URL) is exactly the
-    kind of internal-infra leak the boundary policy prohibits, regardless
-    of whether it's "source code" or "docs".
+# Windows / POSIX home-directory paths that disclose a local user tree.
+# Require a username after Users so a mention of the class name is not a hit.
+WINDOWS_HOME_PATH = re.compile(r"(?i)C:[/\\]Users[/\\][A-Za-z0-9._-]+")
+POSIX_HOME_PATH = re.compile(
+    r"(?i)(?:~/projects[/\\]PROJECTS|/(?:Users|home)/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+)"
+)
+
+HOME_PATH_SKIP_NAMES = {
+    "check_boundary_patterns.py",
+    "scan-sensitive-pre-commit.py",
+    "test_scan_sensitive.py",
+}
+
+
+def check_home_paths(root: Path) -> list[tuple[str, str]]:
+    """Flag committed home-directory paths (the #91 path class).
+
+    Skips lines that contain http:// or https:// so academic and vendor
+    URLs with /users/ in them are not treated as local trees.
     """
+    hits = []
+    for path in sorted(root.rglob("*")):
+        if any(part in SKIP_DIRS for part in path.parts):
+            continue
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in HOME_PATH_SCAN_EXTENSIONS:
+            continue
+        if path.name in HOME_PATH_SKIP_NAMES:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for i, line in enumerate(text.splitlines(), 1):
+            if "http://" in line or "https://" in line:
+                continue
+            if WINDOWS_HOME_PATH.search(line) or POSIX_HOME_PATH.search(line):
+                hits.append((str(path), f"home-directory path on line {i}"))
+                break
+    return hits
+
+
+def check_internal_ips(root: Path) -> list[tuple[str, str]]:
+    """Check for hardcoded Tailscale/CGNAT IPs (real fleet machine addresses)."""
     hits = []
     for path in sorted(root.rglob("*")):
         if any(part in SKIP_DIRS for part in path.parts):
@@ -147,7 +178,7 @@ def check_internal_ips(root: Path) -> list[tuple[str, str]]:
             if ip in ALLOWED_EXAMPLE_IPS:
                 continue
             hits.append((str(path), f"hardcoded Tailscale/CGNAT IP '{ip}' (internal infra)"))
-            break  # one hit per file is enough to flag it
+            break
     return hits
 
 
@@ -164,6 +195,10 @@ def main() -> int:
         total_hits += 1
 
     for path_str, desc in check_internal_ips(root):
+        print(f"[DENY] {path_str}: {desc}")
+        total_hits += 1
+
+    for path_str, desc in check_home_paths(root):
         print(f"[DENY] {path_str}: {desc}")
         total_hits += 1
 

@@ -42,7 +42,7 @@ required fields and their constraints (from `_validate_entry_schema`,
 | `id` | Auto-generated as `clp-<12 hex>` by `LedgerEntry.create()` | `ledger_writer.py:481-482` |
 | `timestamp` | ISO 8601; from the source record's time, or the import time if unavailable | `ledger_writer.py:475` |
 | `agent` | The source's author/actor (e.g. a bus participant, a git author, or `human`) | `ledger_writer.py:567` |
-| `vendor` | One of `anthropic`, `google`, `human`, `local`, `moonshot`, `openai` | `ledger_writer.py:485-487` |
+| `vendor` | One of `anthropic`, `google`, `human`, `local`, `moonshot`, `openai`, `zai` | `ledger_writer.py:485-487` |
 | `model` | The source's model, or `"unknown"` / `"n/a"` for non-AI sources | `ledger_writer.py:475` |
 | `type` | A canonical `LedgerEntryType` (`decision`, `correction`, `lesson`, `convention`, `discovery`) | `ledger_writer.py:491-495` |
 | `scope` | A canonical `LedgerScope` (`project`, `global`, `session`) | `ledger_writer.py:498-502` |

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/retrieval_receipt.v0.1.json",
+  "title": "Read-only Retrieval Receipt v0.1",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "schema_version",
+    "source_id",
+    "retrieved_at",
+    "content_sha256",
+    "transform_version",
+    "result",
+    "error",
+    "mutation_authority"
+  ],
+  "properties": {
+    "receipt_id": {"type": "string", "pattern": "^retrieval-[a-f0-9]{24}$"},
+    "schema_version": {"const": "retrieval_receipt.v0.1"},
+    "source_id": {
+      "enum": ["coordination-bus", "github", "fleet-health"]
+    },
+    "retrieved_at": {"type": "string", "minLength": 20},
+    "content_sha256": {
+      "oneOf": [
+        {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        {"type": "null"}
+      ]
+    },
+    "transform_version": {"const": "internal-operating-picture.v0.1"},
+    "result": {"enum": ["SUCCESS", "MISSING", "ERROR"]},
+    "error": {
+      "oneOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    },
+    "mutation_authority": {"const": "NONE"}
+  },
+  "additionalProperties": false
+}

@@ -1,7 +1,7 @@
 # BaseN Concise Sweep Receipt 2026-03-27
 
 Status: first small parameterized concise-lane sweep on Windows  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Setup
 

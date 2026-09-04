@@ -36,12 +36,15 @@ class DelegationContext:
     operations: tuple[str, ...] = field(default_factory=tuple)
     resources: tuple[str, ...] = field(default_factory=tuple)
     authority_token_id: str | None = field(default=None, init=False)
-    created_at: str = field(default_factory=lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    created_at: str = field(
+        default_factory=lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    )
 
     def __post_init__(self) -> None:
         if isinstance(self.parent, DelegationToken):
             raise TypeError(
-                "Token-backed roots must be created with DelegationContextManager.create_context_from_token()"
+                "Token-backed roots must be created with "
+                "DelegationContextManager.create_context_from_token()"
             )
         if type(self.max_depth) is not int or self.max_depth < 0:
             raise ValueError("max_depth must be a non-negative integer")
@@ -67,7 +70,10 @@ class DelegationContext:
     ) -> DelegationContext:
         """Create a child whose scope is no broader than this context."""
         if self.authority_token_id is not None or self.operations or self.resources:
-            raise PermissionError("Scoped contexts must delegate through DelegationContextManager.delegate()")
+            raise PermissionError(
+                "Scoped contexts must delegate through "
+                "DelegationContextManager.delegate()"
+            )
         return _delegate_context(self, operations, resources)
 
     def depth_exceeded(self, context: DelegationContext) -> bool:
@@ -180,12 +186,22 @@ class DelegationContextManager:
         if snapshot is None:
             raise PermissionError(f"Delegation token rejected: {error}")
         if snapshot.caveats:
-            raise PermissionError("DelegationContext cannot enforce token caveats; use CapabilityFence")
+            raise PermissionError(
+                "DelegationContext cannot enforce token caveats; use CapabilityFence"
+            )
 
         parent_operations = tuple(snapshot.ops_allowed)
         parent_resources = _token_resource_patterns(snapshot)
-        child_operations = parent_operations if operations is None else _normalized_scope(operations, "operations")
-        child_resources = parent_resources if resources is None else _normalized_scope(resources, "resources")
+        child_operations = (
+            parent_operations
+            if operations is None
+            else _normalized_scope(operations, "operations")
+        )
+        child_resources = (
+            parent_resources
+            if resources is None
+            else _normalized_scope(resources, "resources")
+        )
         _require_operation_subset(parent_operations, child_operations)
         _require_resource_subset(parent_resources, child_resources)
         ctx = DelegationContext(
@@ -232,7 +248,9 @@ class DelegationContextManager:
             trusted_scope = self._trusted_scopes.get(token_id)
             if ctx.authority_token_id is not None:
                 if authority is None:
-                    raise PermissionError("Token-backed context authority is unavailable")
+                    raise PermissionError(
+                        "Token-backed context authority is unavailable"
+                    )
                 snapshot = _authenticate_context_authority(ctx, *authority)
             elif authority is not None:
                 raise PermissionError("Context authority registry is inconsistent")
@@ -262,16 +280,22 @@ def _require_operation_subset(parent: Sequence[str], child: Sequence[str]) -> No
     extra = sorted(set(child) - set(parent))
     if extra:
         raise PermissionError(
-            f"{HummblError.CAPABILITY_ESCALATION.value}: child operations exceed parent scope: {extra}"
+            f"{HummblError.CAPABILITY_ESCALATION.value}: "
+            f"child operations exceed parent scope: {extra}"
         )
 
 
 def _require_resource_subset(parent: Sequence[str], child: Sequence[str]) -> None:
     """Reject child resource selectors not contained by a parent selector."""
-    extra = [resource for resource in child if not any(_resource_pattern_contains(scope, resource) for scope in parent)]
+    extra = [
+        resource
+        for resource in child
+        if not any(_resource_pattern_contains(scope, resource) for scope in parent)
+    ]
     if extra:
         raise PermissionError(
-            f"{HummblError.CAPABILITY_ESCALATION.value}: child resources exceed parent scope: {sorted(extra)}"
+            f"{HummblError.CAPABILITY_ESCALATION.value}: "
+            f"child resources exceed parent scope: {sorted(extra)}"
         )
 
 
@@ -322,9 +346,19 @@ def _delegate_context(
     """Create an attenuated child without assigning authority provenance."""
     new_depth = context.depth + 1
     if new_depth > context.max_depth:
-        raise PermissionError(f"Delegation chain depth {new_depth} exceeds max_depth {context.max_depth}")
-    child_operations = context.operations if operations is None else _normalized_scope(operations, "operations")
-    child_resources = context.resources if resources is None else _normalized_scope(resources, "resources")
+        raise PermissionError(
+            f"Delegation chain depth {new_depth} exceeds max_depth {context.max_depth}"
+        )
+    child_operations = (
+        context.operations
+        if operations is None
+        else _normalized_scope(operations, "operations")
+    )
+    child_resources = (
+        context.resources
+        if resources is None
+        else _normalized_scope(resources, "resources")
+    )
     _require_operation_subset(context.operations, child_operations)
     _require_resource_subset(context.resources, child_resources)
     child = DelegationContext(

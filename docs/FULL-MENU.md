@@ -1,24 +1,38 @@
 # The Full Menu
 
 **Origin:** "Full Menu" notates the comprehensive spread — not minimal, not
-a la carte, but the complete offering. This document applies that principle
-to HUMMBL's open-source publishing: not the minimum viable package, but the
-complete spread of everything the world deserves to install.
+a la carte, but the complete offering. This document is the *gate*, not the
+inventory.
 
-**Status:** Active
-**Date:** 2026-08-22
-**Authors:** Operator, HUMMBL fleet
+**Status:** Active as a release-discipline note.
+**As of:** 2026-09-02.
+**Canonical inventory:** [`PACKAGES.md`](./PACKAGES.md) and the root
+[`README.md`](../README.md). Do not keep a second live-package table here.
+
+---
+
+## Public sentence
+
+Same sentence as [hummbl.io](https://hummbl.io) and the root README:
+
+> HUMMBL is open-source governance infrastructure for agentic AI: scoped
+> delegation, kill switches, circuit breakers, and verifiable receipts that
+> run inside your Python environment.
+
+The Full Menu is how those packages reach a registry. It is not a second
+definition of the product.
 
 ---
 
 ## What is the Full Menu?
 
-The Full Menu is the comprehensive public OSS offering from `hummbl-io/oss`.
-Every HUMMBL package that can be `pip install`ed, `npm install`ed,
-`cargo add`ed, or `go get`ted by anyone in the world lives here or links
-here. The oss monorepo is the restaurant; the packages are the menu.
+The Full Menu is the public publishing gate for `hummbl-io/oss`.
+A package appears as installable to the world only when it is **both CAN
+and SHOULD** and has a trusted-publishing tag under `RELEASE.md`.
 
-The menu has three sections:
+There is no `packages/node/`, `packages/rust/`, or `packages/go/` tree in
+this repository. Do not tell readers they can `npm install`, `cargo add`,
+or `go get` HUMMBL packages from this monorepo today.
 
 | Section | Meaning | Decision gate |
 |---------|---------|---------------|
@@ -29,83 +43,58 @@ The menu has three sections:
 CAN is about capability. SHOULD is about judgment. A package can be CAN
 without being SHOULD (technically publishable but strategically premature),
 and SHOULD without being CAN (strategically ready but technically blocked).
-The Full Menu lists only packages that are **both CAN and SHOULD**.
 
-Candidates that are not yet both CAN and SHOULD are tracked privately, not
-staged into this public document ahead of release. This keeps the public
-menu limited to what a consumer can actually act on today.
+What is actually Live vs in-tree is listed in `PACKAGES.md`. Candidates that
+are not yet both CAN and SHOULD stay private and are not staged into this
+public document ahead of release.
 
----
+Canonical landing-page install names:
 
-## The Full Menu — PyPI (Python)
+```text
+pip install base120
+pip install hummbl-governance
+```
 
-### Already served (7 live)
-
-| Package | Version | What it is | Install |
-|---------|---------|-----------|---------|
-| `hummbl-governance` | 1.4.1 | Governance primitives — kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation | `pip install hummbl-governance` |
-| `hummbl-bus` | 0.1.0 | Secure append-only TSV coordination bus for multi-agent systems | `pip install hummbl-bus` |
-| `hummbl-cognition` | 0.1.0 | Cognitive Ledger Protocol and Open Brain server | `pip install hummbl-cognition` |
-| `hummbl-tuples` | 0.2.0 | HUMMBL Typed Tuples governance model (polyglot: also Go, Rust, TS) | `pip install hummbl-tuples` |
-| `hummbl-bif` | 1.0.1 | Batch Ingestion Framework | `pip install hummbl-bif` |
-| `base120` | 3.0.0 | 120 reasoning operators for structured thinking — stdlib-only, tuple-native | `pip install base120` |
-| `governed-compression` | 0.1.0 | Governed vector + KV-cache compression (ML) — CPU reference for quantization methods | `pip install governed-compression` |
-
-### Next to be served (2 ready for first release)
-
-| Package | Version | What it is | Install | Status |
-|---------|---------|-----------|---------|--------|
-| `hummbl` | 0.1.0 | Structured reasoning framework for AI agents — plans, hypotheses, observations, evaluations, decisions, reflections as durable artifacts | `pip install hummbl` | **Release-ready after metadata fix** |
-| `hummbl-kernel` | 0.1.0 | HUMMBL orchestration kernel — workflow execution, capability admission, fleet health, audit trail | `pip install hummbl-kernel` | **Release-ready after license + CHANGELOG fix** |
-
-These two are the focus of the current release cycle. `hummbl` is the
-reasoning library (the "thinking" layer). `hummbl-kernel` is the runtime
-kernel (the "doing" layer). Together they form the core of the HUMMBL
-stack: **reason about it, then execute it.**
-
-Everything beyond these — packages still pending migration or review — is
-tracked in an internal runbook and enters this document only as each is
-actually prepared, audited, and tagged for release.
+Do not document `pip install arbiter`, `agent-governance`, or `base120-mcp`.
 
 ---
 
-## The Full Menu — Other registries
+## Other registries
 
 ### npm (JavaScript/TypeScript)
 
 All previously-published HUMMBL npm packages were deprecated 2026-08-21.
-The `@hummbl` scope is clean. Future npm packages publish fresh under
-`@hummbl/*` from this monorepo as each is prepared for release.
+The `@hummbl` scope exists. Future npm packages publish under `@hummbl/*`
+from this monorepo **after** a `packages/node/` tree exists.
 
-### crates.io (Rust), Go module proxy, arXiv / Zenodo (papers)
+### crates.io, Go module proxy, arXiv / Zenodo
 
-No packages published yet in these registries. Candidates are tracked
-privately and will be added here as each clears the CAN + SHOULD gate and
-is actually prepared for release.
+No packages published from this monorepo in those registries. Candidates
+stay private until they clear CAN + SHOULD and have a tree here.
 
 ---
 
 ## Release readiness criteria
 
-Every package on the Full Menu must pass this checklist before its first
-release:
+Every package must pass this checklist before its first trusted-publishing
+tag from this repo:
 
 - [ ] `pyproject.toml` with: name, version, description, authors, license, keywords, classifiers, project.urls
-- [ ] `LICENSE` file (Apache-2.0 for all HUMMBL packages)
-- [ ] `NOTICE` file (attribution chain)
-- [ ] `README.md` with install instructions (`pip install <name>`, not `git clone`)
+- [ ] `LICENSE` file matching the package SPDX in `pyproject.toml`
+- [ ] `README.md` with install instructions (`pip install <name>` only if the name is HUMMBL-owned)
 - [ ] `CHANGELOG.md` with at least one released version section
 - [ ] Tests pass (`pytest -q`)
 - [ ] No secrets, internal fleet URLs, or personal data in the source
-- [ ] Source migrated into `oss/packages/<name>/` (the public surface)
+- [ ] Source under `packages/python/<name>/`
 - [ ] Trusted publisher configured on pypi.org (owner: hummbl-io, repo: oss, workflow: publish-pypi.yml, environment: pypi)
-- [ ] Tag pattern added to `.github/workflows/publish-pypi.yml`
-- [ ] README packages table in oss root updated
+- [ ] Tag pattern `python/<package>/v*` in `.github/workflows/publish-pypi.yml`
+- [ ] Root README, `AGENTS.md`, and `docs/PACKAGES.md` updated in the same PR
 
 ---
 
 ## See also
 
-- [PACKAGES.md](./PACKAGES.md) — published-package detail and registry collision warnings
-- [MONOREPO-DESIGN.md](./MONOREPO-DESIGN.md) — the directory structure and migration plan
-- [RELEASE.md](../RELEASE.md) — the release discipline (trusted publishing, no manual uploads)
+- [PACKAGES.md](./PACKAGES.md) — live vs in-tree inventory and registry collisions
+- [MONOREPO-DESIGN.md](./MONOREPO-DESIGN.md) — directory structure and migration plan
+- [RELEASE.md](../RELEASE.md) — trusted publishing, tag contract, no manual uploads
+- Issue `#79` — remaining identity work outside this repo (PyPI org blurb, `arbiter-dev`)

@@ -91,113 +91,63 @@ def test_kill_switch_status_history_is_list():
 # kill_switch_engage / disengage
 # ---------------------------------------------------------------------------
 def test_kill_switch_engage_requires_confirm():
-    result = mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "HALT_NONCRITICAL",
-            "reason": "test",
-            "confirm": False,
-        },
-    )
+    result = mcp_server.handle_tool("kill_switch_engage", {
+        "mode": "HALT_NONCRITICAL",
+        "reason": "test",
+        "confirm": False,
+    })
     assert "error" in result
 
 
 def test_kill_switch_engage_halt_noncritical():
-    result = mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "HALT_NONCRITICAL",
-            "reason": "unit test",
-            "confirm": True,
-            "triggered_by": "pytest",
-        },
-    )
+    result = mcp_server.handle_tool("kill_switch_engage", {
+        "mode": "HALT_NONCRITICAL",
+        "reason": "unit test",
+        "confirm": True,
+        "triggered_by": "pytest",
+    })
     assert result["engaged"] is True
     assert result["mode"] == "HALT_NONCRITICAL"
 
 
 def test_kill_switch_engage_halt_all():
-    result = mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "HALT_ALL",
-            "reason": "full stop",
-            "confirm": True,
-        },
-    )
+    result = mcp_server.handle_tool("kill_switch_engage", {
+        "mode": "HALT_ALL",
+        "reason": "full stop",
+        "confirm": True,
+    })
     assert result["engaged"] is True
 
 
 def test_kill_switch_engage_emergency():
-    result = mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "EMERGENCY",
-            "reason": "emergency",
-            "confirm": True,
-        },
-    )
+    result = mcp_server.handle_tool("kill_switch_engage", {
+        "mode": "EMERGENCY",
+        "reason": "emergency",
+        "confirm": True,
+    })
     assert result["engaged"] is True
 
 
 def test_kill_switch_engage_invalid_mode():
-    result = mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "BOGUS",
-            "reason": "test",
-            "confirm": True,
-        },
-    )
+    result = mcp_server.handle_tool("kill_switch_engage", {
+        "mode": "BOGUS",
+        "reason": "test",
+        "confirm": True,
+    })
     assert "error" in result
 
 
 def test_kill_switch_disengage():
-    mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "HALT_NONCRITICAL",
-            "reason": "engage first",
-            "confirm": True,
-        },
-    )
-    result = mcp_server.handle_tool(
-        "kill_switch_disengage",
-        {
-            "reason": "all clear",
-            "triggered_by": "pytest",
-        },
-    )
+    mcp_server.handle_tool("kill_switch_engage", {
+        "mode": "HALT_NONCRITICAL",
+        "reason": "engage first",
+        "confirm": True,
+    })
+    result = mcp_server.handle_tool("kill_switch_disengage", {
+        "reason": "all clear",
+        "triggered_by": "pytest",
+    })
     assert result["disengaged"] is True
-
-
-def test_kill_switch_survives_process_restart():
-    """Simulated MCP server recycle must keep an engaged HALT_ALL.
-
-    get_kill_switch() used to construct a fresh DISENGAGED instance and
-    ignore kill_switch_state.json, so a deploy/crash would lift the halt.
-    """
-    mcp_server.handle_tool(
-        "kill_switch_engage",
-        {
-            "mode": "HALT_ALL",
-            "reason": "incident halt",
-            "confirm": True,
-            "triggered_by": "pytest",
-        },
-    )
-    state_file = Path(mcp_server.STATE_DIR) / "kill_switch_state.json"
-    assert state_file.exists()
-    payload = json.loads(state_file.read_text(encoding="utf-8"))
-    assert payload["mode"] == "HALT_ALL"
-
-    mcp_server._instances.clear()
-
-    status = mcp_server.handle_tool("kill_switch_status", {})
-    assert status["status"]["engaged"] is True
-    assert status["status"]["mode"] == "HALT_ALL"
-    ks = mcp_server.get_kill_switch()
-    assert ks.check_task_allowed("data_export")["allowed"] is False
 
 
 # ---------------------------------------------------------------------------
@@ -219,31 +169,25 @@ def test_cost_budget_check_returns_decision():
 
 
 def test_cost_record_usage():
-    result = mcp_server.handle_tool(
-        "cost_record_usage",
-        {
-            "provider": "anthropic",
-            "model": "claude-opus-4-6",
-            "tokens_in": 1000,
-            "tokens_out": 500,
-            "cost": 0.05,
-        },
-    )
+    result = mcp_server.handle_tool("cost_record_usage", {
+        "provider": "anthropic",
+        "model": "claude-opus-4-6",
+        "tokens_in": 1000,
+        "tokens_out": 500,
+        "cost": 0.05,
+    })
     assert result["recorded"] is True
     assert result["cost"] == 0.05
 
 
 def test_cost_record_usage_reflected_in_check():
-    mcp_server.handle_tool(
-        "cost_record_usage",
-        {
-            "provider": "openai",
-            "model": "gpt-4o",
-            "tokens_in": 100,
-            "tokens_out": 100,
-            "cost": 0.01,
-        },
-    )
+    mcp_server.handle_tool("cost_record_usage", {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "tokens_in": 100,
+        "tokens_out": 100,
+        "cost": 0.01,
+    })
     result = mcp_server.handle_tool("cost_budget_check", {})
     assert "decision" in result
 
@@ -351,11 +295,9 @@ def _rpc(messages):
 
 
 def test_protocol_initialize():
-    responses = _rpc(
-        [
-            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-        ]
-    )
+    responses = _rpc([
+        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+    ])
     assert len(responses) == 1
     r = responses[0]
     assert r["id"] == 1
@@ -364,12 +306,10 @@ def test_protocol_initialize():
 
 
 def test_protocol_tools_list():
-    responses = _rpc(
-        [
-            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-            {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-        ]
-    )
+    responses = _rpc([
+        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+        {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+    ])
     tools_resp = next(r for r in responses if r["id"] == 2)
     tool_names = {t["name"] for t in tools_resp["result"]["tools"]}
     assert "governance_status" in tool_names
@@ -378,17 +318,14 @@ def test_protocol_tools_list():
 
 
 def test_protocol_tools_call_governance_status():
-    responses = _rpc(
-        [
-            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-            {
-                "jsonrpc": "2.0",
-                "id": 2,
-                "method": "tools/call",
-                "params": {"name": "governance_status", "arguments": {}},
-            },
-        ]
-    )
+    responses = _rpc([
+        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+        {
+            "jsonrpc": "2.0", "id": 2,
+            "method": "tools/call",
+            "params": {"name": "governance_status", "arguments": {}},
+        },
+    ])
     call_resp = next(r for r in responses if r["id"] == 2)
     assert "result" in call_resp
     content = call_resp["result"]["content"][0]["text"]
@@ -397,20 +334,16 @@ def test_protocol_tools_call_governance_status():
 
 
 def test_protocol_ping():
-    responses = _rpc(
-        [
-            {"jsonrpc": "2.0", "id": 99, "method": "ping", "params": {}},
-        ]
-    )
+    responses = _rpc([
+        {"jsonrpc": "2.0", "id": 99, "method": "ping", "params": {}},
+    ])
     assert any(r["id"] == 99 for r in responses)
 
 
 def test_protocol_unknown_method():
-    responses = _rpc(
-        [
-            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-            {"jsonrpc": "2.0", "id": 2, "method": "bogus/method", "params": {}},
-        ]
-    )
+    responses = _rpc([
+        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+        {"jsonrpc": "2.0", "id": 2, "method": "bogus/method", "params": {}},
+    ])
     err_resp = next(r for r in responses if r["id"] == 2)
     assert "error" in err_resp

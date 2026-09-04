@@ -16,8 +16,8 @@ Use this checklist before promoting any new benchmark or frontier result.
   - `alignment`
   - `exploratory`
 - Confirm the authoritative repo for this run:
-  - `C:\Users\Owner\autoresearch-pipeline` (active authority — see [issue #75](https://github.com/hummbl-dev/hummbl-tuples/issues/75))
-  - `C:\Users\Owner\autoresearch-win-rtx` is archived/historical — do not use for new runs
+  - `<local-path>` (active authority — see [issue #75](https://github.com/hummbl-dev/hummbl-tuples/issues/75))
+  - `<local-path>` is archived/historical — do not use for new runs
   - use `autoresearch-yolo` only when intentionally running an exploratory derivative lane
 - Record git state:
   - branch

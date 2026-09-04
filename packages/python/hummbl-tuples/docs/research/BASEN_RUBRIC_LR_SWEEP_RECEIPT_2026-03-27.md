@@ -1,7 +1,7 @@
 # BaseN Rubric LR Sweep Receipt 2026-03-27
 
 Status: first small LR bracket on the disciplined rubric/BaseN lane  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Fixed Setup
 

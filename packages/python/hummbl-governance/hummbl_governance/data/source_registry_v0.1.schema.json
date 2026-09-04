@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/source_registry.v0.1.json",
+  "title": "Internal Operating Picture Source Registry v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "registry_id",
+    "generated_at",
+    "mutation_authority",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {"const": "source_registry.v0.1"},
+    "registry_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "minLength": 20},
+    "mutation_authority": {"const": "NONE"},
+    "sources": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/source"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "owner",
+        "authority",
+        "license",
+        "purpose",
+        "privacy_class",
+        "cadence_seconds",
+        "freshness_threshold_seconds",
+        "failure_policy",
+        "upstream_group"
+      ],
+      "properties": {
+        "source_id": {
+          "enum": ["coordination-bus", "github", "fleet-health"]
+        },
+        "owner": {"type": "string", "minLength": 1},
+        "authority": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1},
+        "privacy_class": {
+          "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL"]
+        },
+        "cadence_seconds": {"type": "integer", "minimum": 1},
+        "freshness_threshold_seconds": {"type": "integer", "minimum": 1},
+        "failure_policy": {"const": "MARK_GAP"},
+        "upstream_group": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  }
+}

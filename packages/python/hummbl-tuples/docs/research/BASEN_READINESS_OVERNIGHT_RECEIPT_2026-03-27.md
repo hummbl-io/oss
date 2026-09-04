@@ -22,7 +22,7 @@ under one comparable overnight harness.
 
 Windows script:
 
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\basen_readiness_overnight.py`
+- `<local-path>/autoresearch-yolo\basen_readiness_overnight.py`
 
 Matrix:
 

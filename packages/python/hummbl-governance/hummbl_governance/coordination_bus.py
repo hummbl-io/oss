@@ -31,7 +31,8 @@ Usage::
     msgs = bus.read_all()
     recent = bus.read_since("2026-03-20T00:00:00Z")
 
-Stdlib-only. Unix-only (uses fcntl.flock).
+Stdlib-only. Cross-platform file locking uses ``fcntl`` on POSIX and
+``msvcrt`` on Windows.
 """
 
 from __future__ import annotations
@@ -46,14 +47,8 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
+from hummbl_governance._file_lock import acquire_file_lock, release_file_lock
 from hummbl_governance._types import PolicyLevel
-
-try:
-    import fcntl
-
-    _HAS_FCNTL = True
-except ImportError:
-    _HAS_FCNTL = False
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +192,9 @@ def _check_payload(message: str) -> None:
             logger.debug("Structured payload parse failed, treating as plain string: %s", exc)
 
 
-def _validate_fields(from_id: str, to_id: str, msg_type: str, message: str) -> None:
+def _validate_fields(
+    from_id: str, to_id: str, msg_type: str, message: str
+) -> None:
     """Validate that required bus message fields are non-empty strings.
 
     Raises:
@@ -218,7 +215,7 @@ class BusWriter:
     """Append-only TSV message bus with file-level locking.
 
     Thread-safe: uses a threading.Lock for in-process safety and
-    fcntl.flock(LOCK_EX) for cross-process safety.
+    a platform-native stdlib lock for cross-process safety.
 
     Args:
         bus_path: Path to the TSV file. Parent directories are created
@@ -258,8 +255,9 @@ class BusWriter:
     ) -> None:
         """Append a message to the bus file.
 
-        Uses ``fcntl.flock(LOCK_EX)`` for safe concurrent writes from
-        multiple processes, plus a ``threading.Lock`` for in-process safety.
+        Uses a platform-native stdlib file lock for safe concurrent writes
+        from multiple processes, plus a ``threading.Lock`` for in-process
+        safety.
 
         Args:
             from_id: Sender identifier (e.g., ``"agent-1"``).
@@ -292,12 +290,12 @@ class BusWriter:
             self._bus_path.parent.mkdir(parents=True, exist_ok=True)
             fd = os.open(str(self._bus_path), os.O_WRONLY | os.O_CREAT | os.O_APPEND)
             try:
-                if _HAS_FCNTL:
-                    fcntl.flock(fd, fcntl.LOCK_EX)
-                os.write(fd, line.encode("utf-8"))
+                acquire_file_lock(fd)
+                try:
+                    os.write(fd, line.encode("utf-8"))
+                finally:
+                    release_file_lock(fd)
             finally:
-                if _HAS_FCNTL:
-                    fcntl.flock(fd, fcntl.LOCK_UN)
                 os.close(fd)
 
     def append(

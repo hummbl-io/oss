@@ -46,7 +46,7 @@ _LEDGER_SCHEMA = {
         "agent": {"type": "string", "minLength": 1},
         "vendor": {
             "type": "string",
-            "enum": ["anthropic", "google", "human", "local", "moonshot", "openai"],
+            "enum": ["anthropic", "google", "human", "local", "moonshot", "openai", "zai"],
         },
         "model": {"type": "string", "minLength": 1},
         "type": {

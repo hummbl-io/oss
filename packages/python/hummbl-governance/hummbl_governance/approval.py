@@ -103,7 +103,9 @@ class ApprovalAlreadyDecidedError(ApprovalError):
     """Raised when a decision is attempted on an already-terminal request."""
 
     def __init__(self, request_id: str, current_status: str):
-        super().__init__(f"Request {request_id} already decided ({current_status})", request_id)
+        super().__init__(
+            f"Request {request_id} already decided ({current_status})", request_id
+        )
 
 
 # Risk-level ordering for policy comparisons.
@@ -221,7 +223,11 @@ class ApprovalManager:
 
         now = datetime.now(timezone.utc)
         effective_timeout = timeout_seconds if timeout_seconds is not None else self._default_timeout
-        expires_at = (now + timedelta(seconds=effective_timeout)).isoformat() if effective_timeout is not None else None
+        expires_at = (
+            (now + timedelta(seconds=effective_timeout)).isoformat()
+            if effective_timeout is not None
+            else None
+        )
 
         request = ApprovalRequest(
             request_id=str(uuid.uuid4()),
@@ -276,7 +282,9 @@ class ApprovalManager:
             ApprovalExpiredError: If the request has expired.
             ApprovalAlreadyDecidedError: If the request is already terminal.
         """
-        return self._decide(request_id, ApprovalStatus.APPROVED, decided_by, reason)
+        return self._decide(
+            request_id, ApprovalStatus.APPROVED, decided_by, reason
+        )
 
     def deny(
         self,
@@ -299,7 +307,9 @@ class ApprovalManager:
             ApprovalExpiredError: If the request has expired.
             ApprovalAlreadyDecidedError: If the request is already terminal.
         """
-        return self._decide(request_id, ApprovalStatus.DENIED, decided_by, reason)
+        return self._decide(
+            request_id, ApprovalStatus.DENIED, decided_by, reason
+        )
 
     def cancel(
         self,
@@ -321,7 +331,9 @@ class ApprovalManager:
             ApprovalNotFoundError: If request_id is unknown.
             ApprovalAlreadyDecidedError: If the request is already terminal.
         """
-        return self._decide(request_id, ApprovalStatus.CANCELLED, decided_by, reason)
+        return self._decide(
+            request_id, ApprovalStatus.CANCELLED, decided_by, reason
+        )
 
     def check_status(self, request_id: str) -> dict[str, Any]:
         """Get the current status of a request.
@@ -395,7 +407,11 @@ class ApprovalManager:
         """List all pending approval requests (auto-expires stale first)."""
         with self._lock:
             self.expire_stale()
-            return [req.to_dict() for req in self._requests.values() if req.is_pending]
+            return [
+                req.to_dict()
+                for req in self._requests.values()
+                if req.is_pending
+            ]
 
     def list_all(self, limit: int | None = None) -> list[dict[str, Any]]:
         """List all requests (newest first)."""
@@ -581,12 +597,10 @@ class ApprovalManager:
     @staticmethod
     def _send_webhook(url: str, request: ApprovalRequest) -> bool:
         """POST approval request as JSON to a generic webhook."""
-        payload = json.dumps(
-            {
-                "event": "approval_requested",
-                "request": request.to_dict(),
-            }
-        ).encode("utf-8")
+        payload = json.dumps({
+            "event": "approval_requested",
+            "request": request.to_dict(),
+        }).encode("utf-8")
         req = urlrequest.Request(
             url,
             data=payload,
@@ -659,7 +673,13 @@ class ApprovalManager:
         if request.expires_at:
             body += f"Expires: {request.expires_at}\n"
 
-        msg = f"From: {sender}\r\nTo: {recipient}\r\nSubject: {subject}\r\n\r\n{body}"
+        msg = (
+            f"From: {sender}\r\n"
+            f"To: {recipient}\r\n"
+            f"Subject: {subject}\r\n"
+            f"\r\n"
+            f"{body}"
+        )
 
         try:
             use_tls = config.get("use_tls", True)

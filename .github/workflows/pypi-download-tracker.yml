@@ -33,7 +33,7 @@ jobs:
         run: |
           if git fetch origin data/pypi-downloads:data/pypi-downloads; then
             git switch data/pypi-downloads
-            git merge --no-edit origin/main
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" merge --no-edit origin/main
           else
             git switch -c data/pypi-downloads
           fi

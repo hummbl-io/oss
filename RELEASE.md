@@ -2,20 +2,50 @@
 
 All packages in this monorepo must follow this release process. No exceptions.
 
+## Tag contract (one string)
+
+Canonical tag shape, parsed by `.github/workflows/publish-pypi.yml`:
+
+```
+python/<package>/v<version>
+```
+
+Example:
+
+```
+git tag python/hummbl-governance/v1.4.2
+git push origin python/hummbl-governance/v1.4.2
+```
+
+The workflow extracts `package` and `version` by stripping the `python/`
+prefix and splitting on `/v`. A tag that does not match
+`python/<package>/v*` **will not start the workflow**.
+
+### Legacy tags (do not reuse this shape)
+
+These existing tags are **not** in the workflow filter:
+
+- `hummbl-governance/v1.4.2`
+- `hummbl/v0.1.0`
+- `hummbl-kernel/v0.1.0`
+
+They remain as historical refs. New publishes use `python/<package>/v*`
+only.
+
+`hummbl-bus==0.2.0` is on PyPI (2026-08-27) without a matching
+`python/hummbl-bus/v0.2.0` tag in this repo. Do not publish another bus
+version until that provenance gap is documented in the package changelog
+or backfilled from the matching commit.
+
 ## Rules
 
 1. **No manual uploads.** Never use `twine upload` locally. All PyPI publishes go through the GitHub Actions trusted-publishing workflow (`.github/workflows/publish-pypi.yml`) using `pypa/gh-action-pypi-publish` with OIDC. No API tokens. The workflow is split into a `build` job (no `id-token`) and a `publish` job (`id-token: write`, `environment: pypi`) so build-time code never has access to the OIDC token.
 
 2. **No releases from unmerged branches.** The source being released must be on `main`. The workflow enforces this with a `git merge-base --is-ancestor` check — a tag not on main will fail the build. Merge the feature branch to `main` before tagging.
 
-3. **Tag the merge commit, not the feature branch commit.** After merging, tag the resulting merge commit on `main`:
-   ```
-   git tag hummbl-governance/v1.4.2
-   git push origin hummbl-governance/v1.4.2
-   ```
-   The tag push triggers the publish workflow.
+3. **Tag the merge commit, not the feature branch commit.** After merging, tag the resulting merge commit on `main` with the canonical shape above.
 
-4. **Version must match.** The version in `pyproject.toml` on the tagged commit must match the version in the tag name. The workflow enforces this with a comparison step — a mismatch will fail the build. All version sources must be kept in sync: `pyproject.toml`, `hummbl_governance/__init__.py`, `hummbl_governance/governance.yml`.
+4. **Version must match.** The version in `pyproject.toml` on the tagged commit must match the version in the tag name. The workflow enforces this with a comparison step — a mismatch will fail the build. Keep `pyproject.toml` and any `__init__.py` / `governance.yml` versions in sync.
 
 5. **One tag per release.** Never reuse a tag. Never move a tag. If a release is bad, yank it on PyPI and cut a new version. The workflow does NOT use `skip-existing` — a duplicate upload will fail loudly, signaling a possible tag reuse or manual upload that needs investigation.
 
@@ -32,8 +62,8 @@ All packages in this monorepo must follow this release process. No exceptions.
 2. `CHANGELOG.md` updated with a `## [<version>]` section
 3. Feature branch merged to `main`
 4. `main` is green (CI passing)
-5. Tag created on the merge commit: `git tag <package>/v<version>`
-6. Tag pushed: `git push origin <package>/v<version>`
+5. Tag created on the merge commit: `git tag python/<package>/v<version>`
+6. Tag pushed: `git push origin python/<package>/v<version>`
 7. Workflow triggered and completed — both `build` and `publish` jobs pass
 8. Verify on PyPI: artifact exists, version matches, "Uploaded using Trusted Publishing? Yes"
 
@@ -48,6 +78,11 @@ The publish workflow (`publish-pypi.yml`) enforces these checks automatically:
 | Build/publish separation | Two jobs; only publish has `id-token: write` | Build-time code cannot access OIDC token |
 | No silent skips | `skip-existing` is not set (defaults to false) | Duplicate upload fails loudly |
 | OIDC only | `pypa/gh-action-pypi-publish` with no `password` input | No API token in workflow |
+
+The workflow also runs package tests, builds an SBOM, signs artifacts
+with Sigstore, attests provenance, and opens a GitHub Release for the
+tag. Those steps exist in YAML; they only run when the tag matches the
+filter.
 
 ## Repository configuration requirements
 
@@ -69,11 +104,17 @@ If a release is bad:
 
 ## Pre-releases (alpha/beta/rc)
 
-Pre-release tags follow the same convention: `hummbl-governance/v1.5.0a1`, `hummbl-governance/v1.5.0b1`, `hummbl-governance/v1.5.0rc1`. The workflow triggers on any `hummbl-governance/v*` tag. Use PyPI's pre-release handling — consumers must opt in with `--pre`.
+Pre-release tags follow the same contract:
+`python/hummbl-governance/v1.5.0a1`,
+`python/hummbl-governance/v1.5.0b1`,
+`python/hummbl-governance/v1.5.0rc1`.
+Use PyPI's pre-release handling — consumers must opt in with `--pre`.
 
 ## Adding a new package
 
-1. Create `packages/<name>/` with source and `pyproject.toml`
-2. Add the tag pattern to `.github/workflows/publish-pypi.yml` under `tags:`
-3. Configure the trusted publisher on pypi.org (owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`)
-4. Document the package in `packages/<name>/README.md`
+1. Create `packages/python/<name>/` with source and `pyproject.toml`
+2. Add the tag pattern `python/<name>/v*` to `.github/workflows/publish-pypi.yml`
+3. Add `<name>` to the CI package matrix in `.github/workflows/ci.yml`
+4. Add a row to README, `AGENTS.md`, and `docs/PACKAGES.md`
+5. Configure the trusted publisher on pypi.org (owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`)
+6. Document the package in `packages/python/<name>/README.md`

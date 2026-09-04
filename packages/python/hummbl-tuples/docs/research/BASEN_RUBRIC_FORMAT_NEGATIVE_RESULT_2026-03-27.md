@@ -1,7 +1,7 @@
 # BaseN Rubric Format Negative Result 2026-03-27
 
 Status: negative result  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Hypothesis
 

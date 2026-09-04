@@ -45,7 +45,7 @@ _DATA_DIR = Path(__file__).parent / "data"
 class FailureModeRecord:
     """A single entry from the FM registry."""
 
-    id: str  # e.g. "FM1"
+    id: str    # e.g. "FM1"
     name: str  # e.g. "Specification Ambiguity"
 
 
@@ -53,21 +53,23 @@ class FailureModeRecord:
 class ErrorRecord:
     """A structured error code mapping to one or more failure modes."""
 
-    id: str  # e.g. "ERR-SCHEMA-001"
+    id: str             # e.g. "ERR-SCHEMA-001"
     fm: tuple[str, ...]  # e.g. ("FM15",)
-    severity: str  # "fatal" | "escalation" | "warning"
+    severity: str       # "fatal" | "escalation" | "warning"
 
 
 # ---------------------------------------------------------------------------
 # Internal loaders — called once, results cached
 # ---------------------------------------------------------------------------
 
-
 @lru_cache(maxsize=1)
 def _load_fm_registry() -> dict[str, FailureModeRecord]:
     with open(_DATA_DIR / "fm.json", encoding="utf-8") as fh:
         data = json.load(fh)
-    return {rec["id"]: FailureModeRecord(id=rec["id"], name=rec["name"]) for rec in data["registry"]}
+    return {
+        rec["id"]: FailureModeRecord(id=rec["id"], name=rec["name"])
+        for rec in data["registry"]
+    }
 
 
 @lru_cache(maxsize=1)
@@ -94,7 +96,6 @@ def _load_mappings() -> dict[str, list[str]]:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
-
 
 def all_failure_modes() -> list[FailureModeRecord]:
     """Return all 30 failure mode records, ordered by FM number."""
