@@ -1,10 +1,11 @@
 # HUMMBL OSS
 
-**Govern what AI agents can do. Prove what they did.**
+**Structured thinking at fleet scale. One operator, governed agents, any domain.**
 
-HUMMBL is open-source governance infrastructure for agentic AI: scoped
-delegation, kill switches, circuit breakers, and verifiable receipts that
-run inside your Python environment.
+HUMMBL is open-source infrastructure for governed agent fleets: a coordination
+bus, governance primitives (kill switches, circuit breakers, delegation tokens,
+verifiable receipts), executable mental models (Base120), and a cognition layer
+that runs inside your Python environment.
 
 That sentence is the public definition. It is the same sentence as
 [hummbl.io](https://hummbl.io). Do not invent a second one in this README,
