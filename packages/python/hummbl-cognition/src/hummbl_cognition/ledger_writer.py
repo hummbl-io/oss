@@ -24,6 +24,7 @@ from hummbl_cognition._filelock import unlock_file as _unlock_file
 from hummbl_cognition.models import (
     CANONICAL_LEDGER_SCOPES,
     CANONICAL_LEDGER_TYPES,
+    VALID_VENDORS,
     LedgerEntry,
     LedgerEntryType,
     LedgerScope,
@@ -462,11 +463,10 @@ def _validate_entry_schema(entry: "LedgerEntry") -> None:
             f"ledger entry id format invalid: {d['id']!r} (expected clp-<12hex>)"
         )
 
-    # Vendor enum
-    valid_vendors = {"anthropic", "google", "human", "local", "moonshot", "openai", "zai"}
-    if d["vendor"] not in valid_vendors:
+    # Vendor enum — canonical source is models.VALID_VENDORS
+    if d["vendor"] not in VALID_VENDORS:
         raise ValueError(
-            f"ledger entry vendor {d['vendor']!r} not in {sorted(valid_vendors)}"
+            f"ledger entry vendor {d['vendor']!r} not in {sorted(VALID_VENDORS)}"
         )
 
     # Type enum — canonical values only; historical aliases parse for read
