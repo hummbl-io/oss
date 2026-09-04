@@ -5,17 +5,9 @@
 
 ## Local HUMMBL Sources
 
-- `C:/Users/Owner/PROJECTS/hummbl-ani/README.md`
-- `C:/Users/Owner/PROJECTS/hummbl-ani/docs/taxonomy.md`
-- `C:/Users/Owner/PROJECTS/hummbl-ani/docs/ani-to-aspi-boundary.md`
-- `C:/Users/Owner/PROJECTS/hummbl-aspi/README.md`
-- `C:/Users/Owner/PROJECTS/hummbl-aspi/docs/taxonomy.md`
-- `C:/Users/Owner/PROJECTS/hummbl-aspi/docs/evaluation-framework.md`
-- `C:/Users/Owner/PROJECTS/hummbl-aspi/docs/governance-implications.md`
-- `C:/Users/Owner/PROJECTS/hummbl-agi/README.md`
-- `C:/Users/Owner/PROJECTS/hummbl-agi/docs/governed-agi-charter.md`
-- `C:/Users/Owner/PROJECTS/hummbl-agi/docs/promotion-policy.md`
-- `C:/Users/Owner/PROJECTS/hummbl-agi/docs/rung-contracts.md`
+Working-tree paths were removed from this public file (#91).
+The taxonomy package documents ANI / ASPI / AGI rungs in-tree.
+Sibling research notes live in private repos, not on this surface.
 
 ## External References
 

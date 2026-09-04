@@ -12,7 +12,7 @@ After the earlier overnight-style matrix established that coarse task/history pr
 
 The harness used was:
 
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\basen_readiness_marathon.py`
+- `<local-path>/autoresearch-yolo\basen_readiness_marathon.py`
 
 ## Important Honesty Note
 

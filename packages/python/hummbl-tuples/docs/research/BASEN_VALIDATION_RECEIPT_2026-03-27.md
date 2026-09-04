@@ -13,7 +13,7 @@ Validator:
 
 Source snapshot:
 
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\nodezero_hummbl_traces_v2_rubric.jsonl`
+- `<local-path>`
 
 Observed result:
 
@@ -39,7 +39,7 @@ Interpretation:
 
 Source snapshot:
 
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\nodezero_hummbl_traces_concise.jsonl`
+- `<local-path>`
 
 Observed result:
 

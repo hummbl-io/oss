@@ -5,11 +5,11 @@ Scope: Windows-side BaseN trace generation, SFT dataset construction, and alignm
 
 Primary review targets:
 
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\hummbl_basen_sft.py`
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\hummbl_sft.py`
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\hummbl_sft_dataset.py`
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\nodezero_hummbl_traces_v2_rubric.jsonl`
-- `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\nodezero_hummbl_traces_concise.jsonl`
+- `<local-path>`
+- `<local-path>`
+- `<local-path>`
+- `<local-path>`
+- `<local-path>`
 
 ## Findings
 

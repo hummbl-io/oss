@@ -6,8 +6,8 @@
 
 This file tracks the historical progression of HUMMBL's TinyStories BPB candidates across both:
 
-- the historical benchmark repo (archived): `C:\Users\Owner\autoresearch-win-rtx`
-- the derivative scratch workspace: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+- the historical benchmark repo (archived): `<local-path>/autoresearch-win-rtx`
+- the derivative scratch workspace: `<local-path>/autoresearch-yolo`
 
 ## Benchmark Scope
 

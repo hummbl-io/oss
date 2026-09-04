@@ -256,7 +256,7 @@ Tier notes:
 
 ## 5. Telemetry
 
-All timestamps UTC unless a git `%ci` offset is shown. Commands were run on host `delta` from `/home/reuben/PROJECTS/oss` unless noted.
+All timestamps UTC unless a git `%ci` offset is shown. Commands were run on host `delta` from `~/PROJECTS/oss` unless noted.
 
 ### 5.1 Repository identity (GitHub)
 

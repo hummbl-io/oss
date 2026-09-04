@@ -1,7 +1,7 @@
 # BaseN Rubric Decoding Receipt 2026-03-27
 
 Status: first decoding-only improvement pass on the rubric/BaseN lane  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Context
 

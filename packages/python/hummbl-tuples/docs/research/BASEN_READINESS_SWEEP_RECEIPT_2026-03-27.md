@@ -1,7 +1,7 @@
 # BaseN Readiness Sweep Receipt 2026-03-27
 
 Status: initialization and epoch sweep for the readiness-only clean lane  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Goal
 

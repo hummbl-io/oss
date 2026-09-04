@@ -3,7 +3,7 @@
 ## Active Windows Harnesses
 
 ### READINESS key-prior overnight harness
-- script: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo\basen_readiness_overnight.py`
+- script: `<local-path>`
 - purpose: sweep strict-v2 `READINESS` key-prior settings across frontier checkpoints and emit one summary JSON/TSV
 - current default matrix:
   - checkpoints:

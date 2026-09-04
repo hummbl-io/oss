@@ -1,7 +1,7 @@
 # BaseN Rubric Split Receipt 2026-03-27
 
 Status: first disciplined rubric/BaseN split run on Windows  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>/autoresearch-yolo`
 
 ## Setup
 

@@ -1,7 +1,7 @@
 # BaseN Readiness Clean Training Receipt 2026-03-27
 
 Status: first readiness-only clean training loop on strict holdout v2  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Goal
 

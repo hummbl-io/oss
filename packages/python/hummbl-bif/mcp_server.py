@@ -14,7 +14,7 @@ Configure in Claude Code settings.json:
       "mcpServers": {
         "bif": {
           "command": "python3",
-          "args": ["/Users/others/PROJECTS/bif/mcp_server.py"]
+          "args": ["<local-path>"]
         }
       }
     }

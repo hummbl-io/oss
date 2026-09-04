@@ -1,7 +1,7 @@
 # BaseN Readiness Key Discovery Receipt 2026-03-27
 
 Status: key-discovery and pruning loop for strict holdout v2  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>`
 
 ## Goal
 

@@ -1,7 +1,7 @@
 # BaseN Rubric Holdout V2 Receipt 2026-03-27
 
 Status: stricter rebuilt rubric holdout surfaced a regression in the projected-field win  
-Scope: `C:\Users\Owner\PROJECTS\yolo-playground\autoresearch-yolo`
+Scope: `<local-path>/autoresearch-yolo`
 
 ## Why This Exists
 
