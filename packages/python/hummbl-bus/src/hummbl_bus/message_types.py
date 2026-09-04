@@ -13,6 +13,7 @@ CANONICAL_MESSAGE_TYPES = frozenset(
         "ACK",
         "ALERT",
         "APPROVE",
+        "BELIEF_AUDIT",
         "BLOCKED",
         "COMPLETE",
         "DECISION",
