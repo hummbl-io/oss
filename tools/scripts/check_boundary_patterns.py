@@ -54,9 +54,11 @@ CGNAT_IP_PATTERN = re.compile(
     r"\b100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.\d{1,3}\.\d{1,3}\b"
 )
 
-# Documentation placeholder IP already adopted as convention across this
-# repo's docs/tests (first address of the CGNAT block). Not a leak.
-ALLOWED_EXAMPLE_IPS = {"100.64.0.1"}
+# Documentation placeholder IPs already adopted as convention across this
+# repo's docs/tests. Not leaks: the network address (100.64.0.0) and first
+# host address (100.64.0.1) of the CGNAT block are well-known RFC 6598
+# identifiers, not real fleet machine addresses.
+ALLOWED_EXAMPLE_IPS = {"100.64.0.0", "100.64.0.1"}
 
 # Dirs to skip entirely.
 SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", "node_modules",
