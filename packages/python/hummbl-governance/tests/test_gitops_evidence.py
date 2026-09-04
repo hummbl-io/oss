@@ -1500,7 +1500,7 @@ def test_security_raw_dict_validation_rejects_lone_surrogates(
 
 @pytest.mark.parametrize(
     "absolute_path",
-    [r"C:\Users\Owner\private-repo", r"\\server\share\private-repo", "/srv/repos/private"],
+    [r"C:\Private\private-repo", r"\\server\share\private-repo", "/srv/repos/private"],
 )
 @pytest.mark.parametrize("field", ["target_alias", "endpoint_alias"])
 def test_security_absolute_target_and_endpoint_aliases_are_rejected(
@@ -1952,7 +1952,7 @@ def test_security_manifest_must_exist_before_collection_starts() -> None:
 
 @pytest.mark.parametrize(
     "alias",
-    [r"  C:\Users\Owner\private-repo", r"  \\server\share\private-repo", "  /srv/repos/private"],
+    [r"  C:\Private\private-repo", r"  \\server\share\private-repo", "  /srv/repos/private"],
 )
 @pytest.mark.parametrize("field", ["target_alias", "endpoint_alias"])
 def test_security_whitespace_cannot_hide_absolute_alias(field: str, alias: str) -> None:
