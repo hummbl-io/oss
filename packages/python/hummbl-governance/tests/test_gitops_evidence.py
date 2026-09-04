@@ -2256,7 +2256,7 @@ def test_security_collector_name_requires_canonical_form(collector_name: str) ->
         "https:example.invalid/private",
         "ssh:git.example.invalid/repo",
         "repo:/srv/repos/private",
-        "repo:c:/users/owner/private",
+        "repo:c:/private/private",
         "repo:../private",
         r"C:private-repo",
         "repo:oss\x00hidden",
