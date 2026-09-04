@@ -26,7 +26,8 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, TypeVar
+
 
 from .authority_engine import AuthorityCheck, AuthorityEngine
 from .doctrine_engine import DoctrineEngine
@@ -34,12 +35,15 @@ from .evidence_engine import EvidenceEngine
 from .identity_engine import IdentityEngine
 from .invariants import KernelInvariant, KernelPanic
 from .law_engine import LawEngine
+from .mutation_gate import MutationGate, MutationRequest, GateResult
 from .receipt_engine import Receipt, ReceiptEngine
 from .receipt_integrity_monitor import raise_on_integrity_violation
 from .recovery_verifier import raise_on_recovery_violation
 from .rollback import raise_on_rollback_violation
 from .schedule_engine import ScheduleEngine
 from .sequence_engine import SequenceEngine
+
+T = TypeVar("T")
 
 # Best-effort corpus adapter import
 try:
@@ -48,7 +52,6 @@ except ImportError:
     CorpusAdapter = None  # type: ignore[misc,assignment]
 
 logger = logging.getLogger(__name__)
-
 
 def _default_state_dir() -> Path:
     """Return the default Kernel state directory.
@@ -79,7 +82,18 @@ class Kernel:
         kernel.receipt.store(receipt)
     """
 
-    def __init__(self, state_dir: Path | None = None) -> None:
+    def __init__(
+        self, state_dir: Path | None = None, enforce_identity: bool = True
+    ) -> None:
+        """Initialize the Kernel.
+
+        Args:
+            state_dir: Directory for kernel state files.
+            enforce_identity: When True (default), wire the identity engine
+                into the receipt engine to enforce K3 (ghost-agent rejection).
+                Set to False explicitly to opt out for backward compatibility
+                with callers that cannot yet wire identity enforcement.
+        """
         self.state_dir = state_dir or DEFAULT_STATE_DIR
         self.state_dir.mkdir(parents=True, exist_ok=True)
 
@@ -100,14 +114,21 @@ class Kernel:
                 )
 
         # Initialize all seven engines + doctrine
-        self.receipt = ReceiptEngine(self.state_dir, corpus_adapter=corpus_adapter)
-        self.law = LawEngine()
+        # Identity engine is created first so it can be wired into the
+        # receipt engine for K3 ghost-agent enforcement (issue K3-01).
         self.identity = IdentityEngine(self.state_dir)
+        self.receipt = ReceiptEngine(
+            self.state_dir,
+            corpus_adapter=corpus_adapter,
+            identity_engine=self.identity if enforce_identity else None,
+        )
+        self.law = LawEngine()
         self.sequence = SequenceEngine(self.state_dir)
         self.evidence = EvidenceEngine()
         self.authority = AuthorityEngine(self.state_dir)
         self.schedule = ScheduleEngine(self.state_dir)
         self.doctrine = DoctrineEngine(self.state_dir)
+        self.mutation_gate = MutationGate(self)
 
         self.booted = False
         self.boot_receipt_id: str = ""
@@ -138,6 +159,15 @@ class Kernel:
         if not self.identity.registry_file.exists():
             logger.warning("Identity registry not found; creating empty registry")
             self.identity.registry_file.touch()
+
+        # Register the kernel itself as a built-in identity so it can
+        # create boot receipts when K3 identity enforcement is active.
+        if "kernel" not in self.identity._identities:
+            self.identity.register(
+                agent_id="kernel",
+                trust_tier="TRUSTED",
+                capabilities=["boot", "receipt"],
+            )
 
         logger.info("KERNEL BOOT: Phase 2 — Law bootstrap")
         # Phase 2: Verify scaling law atlas
@@ -238,6 +268,20 @@ class Kernel:
                 "Kernel not booted; cannot create receipts",
             )
 
+        # K3: Auto-register unknown agents at PROBATIONARY tier when
+        # identity enforcement is active. This allows the Kernel's
+        # create_receipt syscall to accept new agents without requiring
+        # pre-registration, while still blocking direct receipt_engine
+        # calls with unregistered agents (the raw API enforces K3
+        # strictly; the Kernel syscall handles registration as part
+        # of the action).
+        if self.receipt._identity_engine is not None:
+            if self.identity.resolve(agent_id) is None:
+                self.identity.register(
+                    agent_id=agent_id,
+                    trust_tier="PROBATIONARY",
+                )
+
         # K4: Assign sequence_id
         seq_id = self.sequence.next(agent_id)
 
@@ -262,12 +306,34 @@ class Kernel:
         )
         return receipt
 
-    def store_receipt(self, receipt: Receipt) -> str:
-        """Store a receipt and evaluate against laws."""
+    def store_receipt(self, receipt: Receipt, strict_law: bool = False) -> str:
+        """Store a receipt and evaluate against laws.
+
+        Args:
+            receipt: The receipt to store.
+            strict_law: If True, law violations raise KernelPanic (K2 strict
+                mode). If False (default), violations are logged as warnings
+                but the receipt is still stored (advisory mode).
+
+        Returns:
+            The stored receipt ID.
+
+        Raises:
+            KernelPanic: If strict_law=True and any law violations are found.
+        """
         # K2: Evaluate against laws
         violations = self.law.evaluate(receipt.__dict__)
         if violations:
-            logger.warning(f"Receipt {receipt.receipt_id} has {len(violations)} law violations")
+            if strict_law:
+                from .invariants import KernelPanic
+
+                raise KernelPanic(
+                    f"Receipt {receipt.receipt_id} has {len(violations)} law violations "
+                    f"(strict_law mode): {violations}"
+                )
+            logger.warning(
+                f"Receipt {receipt.receipt_id} has {len(violations)} law violations"
+            )
 
         receipt_id = self.receipt.store(receipt)
 
@@ -329,6 +395,87 @@ class Kernel:
         )
 
         return check
+
+    # ── Pre-Mutation Gate (K6 enforcement) ──────────────────────
+
+    def check_mutation(
+        self,
+        mutation_type: str,
+        agent_id: str,
+        role_id: str,
+        target: str,
+        context: dict[str, Any] | None = None,
+        operator_decision_receipt: str | None = None,
+        second_approver_receipt: str | None = None,
+    ) -> GateResult:
+        """Check if a mutation is permitted through the pre-mutation gate.
+
+        This is the primary entry point for all production mutations.
+        Every mutation (commit, push, archive, delete, etc.) must pass
+        through this method before executing.
+
+        Args:
+            mutation_type: Type of mutation (e.g. "commit", "archive_repo").
+            agent_id: Agent performing the mutation.
+            role_id: Role under which the agent is acting.
+            target: Target resource (repo name, file path, etc.).
+            context: Additional context for authority check.
+            operator_decision_receipt: Bus receipt ID for HIGH/CRITICAL mutations.
+            second_approver_receipt: Second approver receipt for CRITICAL mutations.
+
+        Returns:
+            GateResult with permitted flag and reason.
+        """
+        request = MutationRequest(
+            mutation_type=mutation_type,
+            agent_id=agent_id,
+            role_id=role_id,
+            target=target,
+            context=context or {},
+            operator_decision_receipt=operator_decision_receipt,
+            second_approver_receipt=second_approver_receipt,
+        )
+        return self.mutation_gate.check(request)
+
+    def guard_mutation(
+        self,
+        mutation_type: str,
+        agent_id: str,
+        role_id: str,
+        target: str,
+        action: Callable[[], T],
+        context: dict[str, Any] | None = None,
+        operator_decision_receipt: str | None = None,
+        second_approver_receipt: str | None = None,
+    ) -> T:
+        """Execute a mutation only if the gate permits it.
+
+        Args:
+            mutation_type: Type of mutation.
+            agent_id: Agent performing the mutation.
+            role_id: Role under which the agent is acting.
+            target: Target resource.
+            action: Callable that performs the mutation.
+            context: Additional context.
+            operator_decision_receipt: Bus receipt for HIGH/CRITICAL.
+            second_approver_receipt: Second approver for CRITICAL.
+
+        Returns:
+            The result of the action.
+
+        Raises:
+            PermissionError: If the gate blocks the mutation.
+        """
+        request = MutationRequest(
+            mutation_type=mutation_type,
+            agent_id=agent_id,
+            role_id=role_id,
+            target=target,
+            context=context or {},
+            operator_decision_receipt=operator_decision_receipt,
+            second_approver_receipt=second_approver_receipt,
+        )
+        return self.mutation_gate.guard(request, action)
 
     # ── K9-K11 Enforcement ─────────────────────────────────────
 
@@ -417,7 +564,9 @@ class Kernel:
                     canonical = dict(receipt_dict)
                     canonical.pop("signature", None)
                     canonical_str = json.dumps(canonical, sort_keys=True, separators=(",", ":"))
-                    receipt_dict["receipt_hash"] = hashlib.sha256(canonical_str.encode("utf-8")).hexdigest()
+                    receipt_dict["receipt_hash"] = hashlib.sha256(
+                        canonical_str.encode("utf-8")
+                    ).hexdigest()
                     receipts.append(receipt_dict)
 
         # Adjust for 1-based sequence IDs: SequenceEngine starts at 1,

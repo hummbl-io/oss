@@ -1,0 +1,46 @@
+{
+  "expectation": {
+    "comparison_profile": "gitops-bounded-required-refs-v0",
+    "contract_version": "0.1.0",
+    "expectation_id": "expectation:synthetic-canary",
+    "mirror_alias": "repo:synthetic-postflight",
+    "mirror_repository_identity": "https://mirror.example.invalid/acme/canary.git",
+    "object_format": "sha1",
+    "required_refs": {
+      "refs/heads/main": "1111111111111111111111111111111111111111",
+      "refs/tags/canary-v1": "2222222222222222222222222222222222222222"
+    },
+    "source_alias": "repo:synthetic-canonical",
+    "source_repository_identity": "https://source.example.invalid/acme/canary.git"
+  },
+  "observed": {
+    "mirror": {
+      "alias": "repo:synthetic-postflight",
+      "object_format": "sha1",
+      "observation_complete": true,
+      "private": true,
+      "push_mirror": false,
+      "refs": {
+        "refs/heads/extra-mirror": "4444444444444444444444444444444444444444",
+        "refs/heads/main": "1111111111111111111111111111111111111111",
+        "refs/tags/canary-v1": "2222222222222222222222222222222222222222"
+      },
+      "repository_identity": "https://mirror.example.invalid/acme/canary.git",
+      "role": "pull_mirror",
+      "upstream_repository_identity": "https://source.example.invalid/acme/canary.git"
+    },
+    "source": {
+      "alias": "repo:synthetic-canonical",
+      "object_format": "sha1",
+      "observation_complete": true,
+      "private": true,
+      "refs": {
+        "refs/heads/extra-source": "3333333333333333333333333333333333333333",
+        "refs/heads/main": "1111111111111111111111111111111111111111",
+        "refs/tags/canary-v1": "2222222222222222222222222222222222222222"
+      },
+      "repository_identity": "https://source.example.invalid/acme/canary.git",
+      "role": "source"
+    }
+  }
+}

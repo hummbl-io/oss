@@ -30,7 +30,6 @@ Usage:
         tags=["base", "v1"],
     )
 """
-
 from __future__ import annotations
 
 import sys

@@ -163,11 +163,8 @@ class GovernanceLifecycle:
         if mode == KillSwitchMode.HALT_ALL:
             return AuthorizationDecision(False, "kill_switch:HALT_ALL", checks)
         _CRITICAL_ACTIONS = (
-            "safety_monitoring",
-            "data_persistence",
-            "audit_logging",
-            "cost_tracking",
-            "kill_switch_itself",
+            "safety_monitoring", "data_persistence", "audit_logging",
+            "cost_tracking", "kill_switch_itself",
         )
         if mode == KillSwitchMode.HALT_NONCRITICAL and action not in _CRITICAL_ACTIONS:
             return AuthorizationDecision(False, "kill_switch:HALT_NONCRITICAL", checks)

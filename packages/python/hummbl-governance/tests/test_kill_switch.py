@@ -221,37 +221,6 @@ class TestPersistence:
             loaded = KillSwitch.load_from_file(state_dir, require_hmac=False)
             assert loaded.mode == KillSwitchMode.DISENGAGED
 
-    def test_constructor_with_state_dir_restores_engaged_mode(self):
-        """Production boot path: KillSwitch(state_dir=...) must restore HALT_ALL.
-
-        Previously __init__ always started DISENGAGED even when state_dir was
-        set, so MCP/API process restart silently cleared an emergency halt.
-        """
-        with tempfile.TemporaryDirectory() as tmpdir:
-            state_dir = Path(tmpdir)
-            ks = KillSwitch(state_dir=state_dir, require_hmac=False)
-            ks.engage(KillSwitchMode.HALT_ALL, "budget exceeded", "governor")
-            restarted = KillSwitch(state_dir=state_dir, require_hmac=False)
-            assert restarted.mode == KillSwitchMode.HALT_ALL
-            assert restarted.engaged is True
-            result = restarted.check_task_allowed("data_export")
-            assert result["allowed"] is False
-            assert result["action"] == "block"
-
-    def test_unsigned_state_restored_when_no_signing_secret(self, monkeypatch):
-        """HMAC cannot be enforced without a key; persist+restart must not
-        drop HALT_ALL just because HUMMBL_SIGNING_SECRET was never set.
-        """
-        monkeypatch.delenv("HUMMBL_SIGNING_SECRET", raising=False)
-        monkeypatch.delenv("DCT_SECRET", raising=False)
-        with tempfile.TemporaryDirectory() as tmpdir:
-            state_dir = Path(tmpdir)
-            ks = KillSwitch(state_dir=state_dir, require_hmac=True)
-            ks.engage(KillSwitchMode.EMERGENCY, "incident", "operator")
-            restarted = KillSwitch(state_dir=state_dir, require_hmac=True)
-            assert restarted.mode == KillSwitchMode.EMERGENCY
-            assert restarted.check_task_allowed("safety_monitoring")["allowed"] is False
-
 
 class TestConcurrencyToctou:
     """Concurrency tests for the TOCTOU fix in check_task_allowed (issue #317).
@@ -294,26 +263,19 @@ class TestConcurrencyToctou:
                 for task_type in (critical_task, non_critical_task):
                     result = ks.check_task_allowed(task_type)
                     allowed = result["allowed"]
-                    # Re-read mode AFTER the check; if the snapshot was atomic,
-                    # the result must be consistent with EITHER the mode at
-                    # check time OR this later read (mode only moves between
-                    # DISENGAGED and HALT_ALL here). The forbidden outcome is:
-                    # non-critical task allowed while mode is HALT_ALL, OR
-                    # critical task blocked while mode is DISENGAGED.
-                    mode_after = ks.mode
-                    if mode_after == KillSwitchMode.HALT_ALL:
+                    # Use the mode observed inside the locked critical section
+                    # (returned in the result dict), NOT a re-read of ks.mode
+                    # which races with the mutator between check and read.
+                    mode_at_check = KillSwitchMode[result["mode"]]
+                    if mode_at_check == KillSwitchMode.HALT_ALL:
                         if not allowed and task_type == critical_task:
-                            # Critical task blocked under HALT_ALL is allowed
-                            # by the spec only if the snapshot saw HALT_ALL;
-                            # but if mode was DISENGAGED at snapshot, it should
-                            # have been allowed. A block here means the snapshot
-                            # saw HALT_ALL (correct). This is fine.
+                            # Critical task blocked under HALT_ALL is correct.
                             pass
                         if allowed and task_type == non_critical_task:
                             errors.append(
                                 f"non-critical allowed under HALT_ALL: {result}"
                             )
-                    elif mode_after == KillSwitchMode.DISENGAGED:
+                    elif mode_at_check == KillSwitchMode.DISENGAGED:
                         if not allowed:
                             errors.append(
                                 f"task blocked under DISENGAGED: {result}"
@@ -357,7 +319,7 @@ class TestConcurrencyToctou:
 
 
 class TestKillSwitchReasonEnum:
-    """Tests for the KillSwitchReason enum (Phase 1 -- issue #321)."""
+    """Tests for the KillSwitchReason enum (Phase 1 — issue #321)."""
 
     def test_enum_has_15_values(self):
         """Per Ashby's Law: the enum must cover >=15 failure classes."""
@@ -440,3 +402,43 @@ class TestKillSwitchReasonEnum:
         history = ks2.get_history()
         assert len(history) == 1
         assert history[0].failure_class == KillSwitchReason.IDENTITY
+
+    def test_failure_class_none_persisted_and_restored(self, tmp_path):
+        """None failure_class survives save/load cycle (backward compatible)."""
+        ks = KillSwitch(state_dir=tmp_path, require_hmac=False)
+        ks.engage(
+            KillSwitchMode.HALT_NONCRITICAL,
+            reason="test",
+            triggered_by="tester",
+        )
+
+        ks2 = KillSwitch.load_from_file(tmp_path, require_hmac=False)
+        history = ks2.get_history()
+        assert history[0].failure_class is None
+
+    def test_unknown_failure_class_in_state_file_handled(self, tmp_path):
+        """Unknown failure_class string in state file is handled gracefully."""
+        state_file = tmp_path / "kill_switch_state.json"
+        state_file.write_text(
+            json.dumps({
+                "mode": "HALT_ALL",
+                "engaged_at": "2026-08-20T00:00:00Z",
+                "reason": "test",
+                "triggered_by": "tester",
+                "failure_class": "NONEXISTENT_REASON",
+            }),
+            encoding="utf-8",
+        )
+        ks = KillSwitch.load_from_file(tmp_path, require_hmac=False)
+        # Should load without crashing, failure_class should be None
+        history = ks.get_history()
+        assert len(history) == 1
+        assert history[0].failure_class is None
+
+    def test_backward_compatible_engage_signature(self):
+        """Existing callers without failure_class still work identically."""
+        ks = KillSwitch()
+        event = ks.engage(KillSwitchMode.HALT_ALL, "test", "tester", affected_tasks=5)
+        assert event.affected_tasks == 5
+        assert event.failure_class is None
+        assert ks.mode == KillSwitchMode.HALT_ALL

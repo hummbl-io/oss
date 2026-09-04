@@ -1,169 +1,303 @@
 {
-  "schema_version": "1.0.0",
-  "generated_at": "2026-08-27T10:57:00Z",
-  "description": "Structured authority policy for HUMMBL agent fleet. Replaces heuristic markdown charter parsing in AuthorityEngine. Gap-9 (issue #414), NIST 800-53 AC-2, AC-5, CM-3.",
+  "schema_version": "1.1.0",
+  "description": "Structured authority policy for the HUMMBL agent fleet. Read by AuthorityEngine and MutationGate.",
+  "mutation_classes": {
+    "LOW": {
+      "description": "Read-only, bus post, receipt creation. No authority check required.",
+      "requires_authority_check": false,
+      "requires_operator_decision": false,
+      "requires_two_person": false,
+      "examples": [
+        "bus_post",
+        "receipt_create",
+        "file_read",
+        "status_update"
+      ]
+    },
+    "MEDIUM": {
+      "description": "Commit, PR creation, file write within scope. Authority check required.",
+      "requires_authority_check": true,
+      "requires_operator_decision": false,
+      "requires_two_person": false,
+      "examples": [
+        "commit",
+        "pr_create",
+        "pr_review",
+        "file_write",
+        "branch_create",
+        "issue_create",
+        "issue_comment"
+      ]
+    },
+    "HIGH": {
+      "description": "Archive, delete, force-push, secret rotation. Authority check + operator DECISION receipt required.",
+      "requires_authority_check": true,
+      "requires_operator_decision": true,
+      "requires_two_person": false,
+      "examples": [
+        "pr_merge",
+        "archive_repo",
+        "delete_file",
+        "delete_branch",
+        "force_push",
+        "branch_protection_change",
+        "secret_rotation",
+        "kill_switch_activate"
+      ]
+    },
+    "CRITICAL": {
+      "description": "Org-level change, key rotation, production deploy. Authority check + operator DECISION + two-person rule.",
+      "requires_authority_check": true,
+      "requires_operator_decision": true,
+      "requires_two_person": true,
+      "examples": [
+        "org_change",
+        "key_rotation",
+        "production_deploy",
+        "doctrine_amendment"
+      ]
+    }
+  },
   "roles": {
     "operator": {
-      "trust_tier": 5,
-      "identity_class": "human_reviewer",
-      "authorities": {
-        "github_mutation": {
-          "scope": "All repos, all operations",
-          "limit": "None (full authority)",
-          "max_severity": "CRITICAL",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "key_management": {
-          "scope": "Signing identity registry, GPG key generation",
-          "limit": "None (operator-only authority)",
-          "max_severity": "CRITICAL",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "authority_revocation": {
-          "scope": "Revoke agent authorities, suspend agents",
-          "limit": "Must post REVOCATION or SUSPENSION notice to bus",
-          "max_severity": "CRITICAL",
-          "requires_receipt": false,
-          "revoked": false
-        }
-      }
-    },
-    "devin": {
-      "trust_tier": 2,
-      "identity_class": "agent_author",
-      "authorities": {
-        "github_mutation": {
-          "scope": "Assigned repos, operations within authority charter",
-          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
-          "max_severity": "HIGH",
-          "requires_receipt": true,
-          "revoked": false
-        },
-        "receipt_authoring": {
-          "scope": "Bus receipts, SITREP, STATUS messages",
-          "limit": "Cannot post DECISION type (requires operator principal proof)",
-          "max_severity": "LOW",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "review_attestation": {
-          "scope": "Code review, evidence review",
-          "limit": "Attestation is advisory; does not satisfy human final review",
-          "max_severity": "MEDIUM",
-          "requires_receipt": false,
-          "revoked": false
-        }
-      }
+      "trust_tier": "OWNER",
+      "description": "Human operator. Final binding authority. No non-human has this tier.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "scope": "unlimited",
+      "limits": [],
+      "revocation": "Self-revoking. Operator authority cannot be revoked by any agent.",
+      "regulatory_profile": "high-risk"
     },
     "codex": {
-      "trust_tier": 2,
-      "identity_class": "agent_author",
-      "authorities": {
-        "github_mutation": {
-          "scope": "Assigned repos, operations within authority charter",
-          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
-          "max_severity": "HIGH",
-          "requires_receipt": true,
-          "revoked": false
-        },
-        "receipt_authoring": {
-          "scope": "Bus receipts, SITREP, STATUS messages",
-          "limit": "Cannot post DECISION type (requires operator principal proof)",
-          "max_severity": "LOW",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "review_attestation": {
-          "scope": "Code review, evidence review",
-          "limit": "Attestation is advisory; does not satisfy human final review",
-          "max_severity": "MEDIUM",
-          "requires_receipt": false,
-          "revoked": false
-        }
-      }
+      "trust_tier": "TRUSTED",
+      "description": "Primary Principal AI Agent. Top AI routing authority for engineering, governance, coordination.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ],
+      "scope": "all_repos",
+      "limits": [
+        "cannot authorize CRITICAL without operator DECISION receipt",
+        "cannot authorize own trust tier promotion",
+        "cannot bypass two-person rule for CRITICAL"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED. Authority engine rejects all exercises.",
+      "regulatory_profile": "high-risk"
     },
     "claude-code": {
-      "trust_tier": 2,
-      "identity_class": "agent_author",
-      "authorities": {
-        "github_mutation": {
-          "scope": "Assigned repos, operations within authority charter",
-          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
-          "max_severity": "HIGH",
-          "requires_receipt": true,
-          "revoked": false
-        },
-        "receipt_authoring": {
-          "scope": "Bus receipts, SITREP, STATUS messages",
-          "limit": "Cannot post DECISION type (requires operator principal proof)",
-          "max_severity": "LOW",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "review_attestation": {
-          "scope": "Code review, evidence review",
-          "limit": "Attestation is advisory; does not satisfy human final review",
-          "max_severity": "MEDIUM",
-          "requires_receipt": false,
-          "revoked": false
-        }
-      }
+      "trust_tier": "TRUSTED",
+      "description": "Quota-constrained specialist. Interactive only, no autonomous use.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM"
+      ],
+      "scope": "assigned_repos",
+      "limits": [
+        "cannot authorize HIGH without operator DECISION receipt",
+        "cannot authorize CRITICAL",
+        "no autonomous or scheduled use"
+      ],
+      "revocation": "Operator directive or quota exhaustion. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
+    },
+    "hermes": {
+      "trust_tier": "TRUSTED",
+      "description": "Engineering, execution, continuity specialist.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM"
+      ],
+      "scope": "assigned_repos",
+      "limits": [
+        "cannot authorize HIGH without operator DECISION receipt",
+        "cannot authorize CRITICAL"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
+    },
+    "devin": {
+      "trust_tier": "MEDIUM-HIGH",
+      "description": "Supervised delegated execution and coordination under Codex.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM"
+      ],
+      "scope": "assigned_repos",
+      "limits": [
+        "cannot authorize HIGH without operator DECISION receipt",
+        "cannot authorize CRITICAL",
+        "no autonomous DECISION proxy while on AIP",
+        "reports upward to Codex by default"
+      ],
+      "revocation": "Operator directive, AIP failure, or Codex escalation. Roster entry set to RETIRED or PROBATIONARY.",
+      "regulatory_profile": "high-risk"
     },
     "opencode": {
-      "trust_tier": 2,
-      "identity_class": "agent_author",
-      "authorities": {
-        "github_mutation": {
-          "scope": "Assigned repos, operations within authority charter",
-          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
-          "max_severity": "HIGH",
-          "requires_receipt": true,
-          "revoked": false
-        },
-        "receipt_authoring": {
-          "scope": "Bus receipts, SITREP, STATUS messages",
-          "limit": "Cannot post DECISION type (requires operator principal proof)",
-          "max_severity": "LOW",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "review_attestation": {
-          "scope": "Code review, evidence review",
-          "limit": "Attestation is advisory; does not satisfy human final review",
-          "max_severity": "MEDIUM",
-          "requires_receipt": false,
-          "revoked": false
-        }
-      }
+      "trust_tier": "MEDIUM-HIGH",
+      "description": "Interactive multi-model engineering and research.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM"
+      ],
+      "scope": "assigned_repos",
+      "limits": [
+        "cannot authorize HIGH without operator DECISION receipt",
+        "cannot authorize CRITICAL",
+        "model-tier constrained"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
+    },
+    "apex": {
+      "trust_tier": "MEDIUM-HIGH",
+      "description": "Pre-action assessor. Read-mostly.",
+      "can_authorize": [
+        "LOW"
+      ],
+      "scope": "read_only_assessment",
+      "limits": [
+        "cannot authorize MEDIUM, HIGH, or CRITICAL",
+        "no write authority"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
+    },
+    "nexus": {
+      "trust_tier": "MEDIUM-HIGH",
+      "description": "Canonical-surface scanner. Read-only.",
+      "can_authorize": [
+        "LOW"
+      ],
+      "scope": "read_only_scanning",
+      "limits": [
+        "cannot authorize MEDIUM, HIGH, or CRITICAL",
+        "no write authority"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
+    },
+    "pi": {
+      "trust_tier": "MEDIUM-HIGH",
+      "description": "Ops/remediation executor.",
+      "can_authorize": [
+        "LOW",
+        "MEDIUM"
+      ],
+      "scope": "assigned_repos",
+      "limits": [
+        "cannot authorize HIGH without operator DECISION receipt",
+        "cannot authorize CRITICAL"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
+    },
+    "kai": {
+      "trust_tier": "MEDIUM",
+      "description": "Scheduled Kai service. Briefs, summaries, triage.",
+      "can_authorize": [
+        "LOW"
+      ],
+      "scope": "briefs_summaries_triage",
+      "limits": [
+        "cannot authorize MEDIUM, HIGH, or CRITICAL",
+        "no write authority outside assigned briefs"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "high-risk"
     },
     "gemini": {
-      "trust_tier": 2,
-      "identity_class": "agent_author",
-      "authorities": {
-        "github_mutation": {
-          "scope": "Assigned repos, operations within authority charter",
-          "limit": "Cannot exercise HIGH/CRITICAL without operator DECISION receipt; cannot rotate keys; cannot change org-level settings; cannot remove branch protection",
-          "max_severity": "HIGH",
-          "requires_receipt": true,
-          "revoked": false
-        },
-        "receipt_authoring": {
-          "scope": "Bus receipts, SITREP, STATUS messages",
-          "limit": "Cannot post DECISION type (requires operator principal proof)",
-          "max_severity": "LOW",
-          "requires_receipt": false,
-          "revoked": false
-        },
-        "review_attestation": {
-          "scope": "Code review, evidence review",
-          "limit": "Attestation is advisory; does not satisfy human final review",
-          "max_severity": "MEDIUM",
-          "requires_receipt": false,
-          "revoked": false
-        }
-      }
+      "trust_tier": "PROBATIONARY",
+      "description": "Research and docs under data-tier limits.",
+      "can_authorize": [
+        "LOW"
+      ],
+      "scope": "research_docs_only",
+      "limits": [
+        "cannot authorize MEDIUM, HIGH, or CRITICAL",
+        "no write authority outside research docs",
+        "data-tier constrained"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "limited-risk"
+    },
+    "agy": {
+      "trust_tier": "MEDIUM",
+      "description": "Antigravity CLI candidate. Read-mostly GitOps scope.",
+      "can_authorize": [
+        "LOW"
+      ],
+      "scope": "read_mostly_gitops",
+      "limits": [
+        "cannot authorize MEDIUM, HIGH, or CRITICAL",
+        "no write authority"
+      ],
+      "revocation": "Operator directive. Roster entry set to RETIRED.",
+      "regulatory_profile": "limited-risk"
+    },
+    "arcana-advisory": {
+      "trust_tier": "MEDIUM",
+      "description": "Generic role for all ARCANA advisory lens personas. Advisory only \u2014 no consequential actions.",
+      "can_authorize": [
+        "LOW"
+      ],
+      "scope": "advisory_only",
+      "limits": [
+        "cannot authorize MEDIUM or higher",
+        "cannot execute consequential actions without delegation token",
+        "regulatory_profile: high-risk \u2014 must flag unanticipated risks",
+        "must disclose AI nature in all outputs (EU AI Act Art. 13)"
+      ],
+      "regulatory_profile": "high-risk",
+      "revocation": "Operator directive. Roster entry set to RETIRED."
     }
+  },
+  "revocation_procedures": {
+    "operator_initiated": {
+      "description": "Operator issues directive to revoke agent authority.",
+      "steps": [
+        "Operator posts DECISION message to bus with revocation directive",
+        "Roster entry set to RETIRED or PROBATIONARY",
+        "Authority engine rejects all future exercises for revoked identity",
+        "Active delegation tokens for revoked identity are invalidated",
+        "Bus bridge rejects messages from revoked identity",
+        "Revocation logged to authority_exercises.jsonl"
+      ]
+    },
+    "auto_revocation": {
+      "description": "Automatic revocation triggered by trust adjuster.",
+      "triggers": [
+        "CRITICAL severity violation \u2192 immediate revocation",
+        "HIGH severity violation \u2192 3 trust tier steps down",
+        "Repeated MEDIUM violations \u2192 progressive tier reduction"
+      ],
+      "steps": [
+        "Trust adjuster computes new tier",
+        "If tier reaches REVOKED, authority engine rejects all exercises",
+        "Revocation logged to authority_exercises.jsonl",
+        "Operator notified via bus"
+      ]
+    },
+    "expiry_based": {
+      "description": "Authority grants expire after their defined expiry time.",
+      "steps": [
+        "Authority sweeper scans authority_exercises.jsonl for expired grants",
+        "Expired grants are revoked",
+        "Affected agent notified via bus",
+        "Revocation logged to authority_exercises.jsonl"
+      ]
+    }
+  },
+  "two_person_rule": {
+    "description": "CRITICAL mutations require two independent approvals.",
+    "first_approver": "Operator (OWNER) \u2014 issues DECISION receipt on bus",
+    "second_approver": "Operator or TRUSTED agent \u2014 issues separate approval receipt",
+    "enforcement": "Pre-mutation gate checks both receipts before permitting CRITICAL mutations",
+    "rationale": "Prevents single-actor compromise from executing destructive operations"
   }
 }

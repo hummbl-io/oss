@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-08-30T13:40:00Z",
+  "mutation_authority": "NONE",
+  "registry_id": "internal-operating-picture-pilot",
+  "schema_version": "source_registry.v0.1",
+  "sources": [
+    {
+      "authority": "canonical-coordination-bus-snapshot",
+      "cadence_seconds": 60,
+      "failure_policy": "MARK_GAP",
+      "freshness_threshold_seconds": 300,
+      "license": "INTERNAL",
+      "owner": "HUMMBL fleet operations",
+      "privacy_class": "INTERNAL",
+      "purpose": "Coordination status, decisions, blockers, and milestones",
+      "source_id": "coordination-bus",
+      "upstream_group": "coordination-bus"
+    },
+    {
+      "authority": "operator-provided-github-snapshot",
+      "cadence_seconds": 900,
+      "failure_policy": "MARK_GAP",
+      "freshness_threshold_seconds": 3600,
+      "license": "INTERNAL",
+      "owner": "HUMMBL repository maintainers",
+      "privacy_class": "INTERNAL",
+      "purpose": "Issue, pull-request, and CI state",
+      "source_id": "github",
+      "upstream_group": "github-api"
+    },
+    {
+      "authority": "operator-provided-fleet-health-snapshot",
+      "cadence_seconds": 300,
+      "failure_policy": "MARK_GAP",
+      "freshness_threshold_seconds": 900,
+      "license": "INTERNAL",
+      "owner": "HUMMBL fleet operations",
+      "privacy_class": "INTERNAL",
+      "purpose": "Host and agent health state",
+      "source_id": "fleet-health",
+      "upstream_group": "fleet-health"
+    }
+  ]
+}

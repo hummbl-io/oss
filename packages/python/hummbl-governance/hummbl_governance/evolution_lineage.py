@@ -48,17 +48,16 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-DEFAULT_ALLOWED_MODIFICATION_TYPES: frozenset[str] = frozenset(
-    {
-        "code",
-        "prompt",
-        "weight",
-        "memory",
-        "config",
-        "architecture",
-        "fitness",
-    }
-)
+
+DEFAULT_ALLOWED_MODIFICATION_TYPES: frozenset[str] = frozenset({
+    "code",
+    "prompt",
+    "weight",
+    "memory",
+    "config",
+    "architecture",
+    "fitness",
+})
 
 
 @dataclass(frozen=True)
@@ -188,7 +187,10 @@ class EvolutionLineage:
                     raise ValueError(f"unknown parent variant: {variant.parent_id}")
                 expected_generation = parent.generation + 1
                 if variant.generation != expected_generation:
-                    raise ValueError(f"variant generation must be parent generation + 1 ({expected_generation})")
+                    raise ValueError(
+                        f"variant generation must be parent generation + 1 "
+                        f"({expected_generation})"
+                    )
 
             stored = _copy_variant(variant)
             self._variants[stored.id] = stored
@@ -248,14 +250,20 @@ class EvolutionLineage:
         with self._lock:
             if variant_id not in self._variants:
                 raise KeyError(variant_id)
-            return [_copy_variant(self._variants[child_id]) for child_id in self._children.get(variant_id, [])]
+            return [
+                _copy_variant(self._variants[child_id])
+                for child_id in self._children.get(variant_id, [])
+            ]
 
     def get_modifications(self, variant_id: str) -> list[ModificationRecord]:
         """Return recorded modifications for a variant."""
         with self._lock:
             if variant_id not in self._variants:
                 raise KeyError(variant_id)
-            return [_copy_modification(modification) for modification in self._modifications.get(variant_id, [])]
+            return [
+                _copy_modification(modification)
+                for modification in self._modifications.get(variant_id, [])
+            ]
 
     def detect_drift(
         self,
@@ -293,7 +301,10 @@ class EvolutionLineage:
     def variant_ids(self) -> list[str]:
         """List variant IDs ordered by generation, then ID."""
         with self._lock:
-            return [variant.id for variant in sorted(self._variants.values(), key=lambda v: (v.generation, v.id))]
+            return [
+                variant.id
+                for variant in sorted(self._variants.values(), key=lambda v: (v.generation, v.id))
+            ]
 
     def clear(self) -> None:
         """Clear all variants and modifications."""
@@ -363,7 +374,10 @@ def _build_drift_report(
     parent_keys = set(parent.fitness)
     variant_keys = set(variant.fitness)
     shared_keys = parent_keys & variant_keys
-    deltas = {key: variant.fitness[key] - parent.fitness[key] for key in sorted(shared_keys)}
+    deltas = {
+        key: variant.fitness[key] - parent.fitness[key]
+        for key in sorted(shared_keys)
+    }
     max_delta = max((abs(delta) for delta in deltas.values()), default=0.0)
     added_metrics = sorted(variant_keys - parent_keys)
     removed_metrics = sorted(parent_keys - variant_keys)

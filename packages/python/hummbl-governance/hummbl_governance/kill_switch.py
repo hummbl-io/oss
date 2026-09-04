@@ -100,10 +100,7 @@ class KillSwitch:
 
     Args:
         state_dir: Directory for persistent state. None disables persistence.
-            When set, persisted ``kill_switch_state.json`` is restored on
-            construction so an engaged halt survives process restart.
-        require_hmac: If True, HMAC verification is mandatory for loading state
-            when a signing secret is available.
+        require_hmac: If True, HMAC verification is mandatory for loading state.
         signing_secret: HMAC secret bytes. If None, reads from HUMMBL_SIGNING_SECRET
             or DCT_SECRET env vars.
         critical_tasks: Set of task types that are always allowed in HALT_NONCRITICAL
@@ -116,25 +113,21 @@ class KillSwitch:
         >>> ks.engaged
         False
 
-        With persistent state and a custom critical-tasks set (empty dir):
+        With persistent state and a custom critical-tasks set:
 
         >>> from pathlib import Path
-        >>> import tempfile
-        >>> with tempfile.TemporaryDirectory() as d:
-        ...     ks = KillSwitch(state_dir=Path(d), require_hmac=False)
-        ...     ks.mode
+        >>> ks = KillSwitch(state_dir=Path("/tmp/ks"), require_hmac=False)
+        >>> ks.mode
         <KillSwitchMode.DISENGAGED: 1>
     """
 
-    DEFAULT_CRITICAL_TASKS: frozenset[str] = frozenset(
-        [
-            "safety_monitoring",
-            "data_persistence",
-            "audit_logging",
-            "kill_switch_itself",
-            "cost_tracking",
-        ]
-    )
+    DEFAULT_CRITICAL_TASKS: frozenset[str] = frozenset([
+        "safety_monitoring",
+        "data_persistence",
+        "audit_logging",
+        "kill_switch_itself",
+        "cost_tracking",
+    ])
 
     def __init__(
         self,
@@ -151,13 +144,12 @@ class KillSwitch:
         self._signing_secret = signing_secret
         self._critical_tasks = critical_tasks or self.DEFAULT_CRITICAL_TASKS
         self._lock = threading.RLock()
-        if self._state_dir is not None:
-            self._restore_from_disk()
 
     @property
     def mode(self) -> KillSwitchMode:
-        """Current kill switch mode."""
-        return self._mode
+        """Current kill switch mode (thread-safe read)."""
+        with self._lock:
+            return self._mode
 
     @property
     def engaged(self) -> bool:
@@ -192,90 +184,6 @@ class KillSwitch:
         expected = KillSwitch._compute_signature(data, secret)
         return hmac.compare_digest(expected, signature)
 
-    def _restore_from_disk(self) -> None:
-        """Restore mode from ``kill_switch_state.json`` if present.
-
-        Missing file leaves the instance DISENGAGED. Invalid HMAC (when a
-        signing secret is configured) raises ``KillSwitchTamperError`` if
-        ``require_hmac`` is True, otherwise leaves the instance DISENGAGED.
-        Unsigned state is restored when no signing secret is available —
-        HMAC cannot be enforced without a key, and refusing to load would
-        silently drop an emergency halt across process restart.
-        """
-        if self._state_dir is None:
-            return
-
-        state_file = self._state_dir / "kill_switch_state.json"
-        if not state_file.exists():
-            return
-
-        try:
-            with open(state_file, encoding="utf-8") as f:
-                data = json.load(f)
-
-            secret = self._get_signing_secret()
-            signature = data.pop("signature", None)
-
-            if secret and signature:
-                if not self._verify_signature(data, signature, secret):
-                    logger.error("Kill switch state has INVALID HMAC signature")
-                    if self._require_hmac:
-                        raise KillSwitchTamperError("Kill switch state verification failed")
-                    return
-            elif secret:
-                logger.error("Kill switch state lacks required HMAC signature")
-                if self._require_hmac:
-                    raise KillSwitchTamperError(
-                        "Kill switch state missing mandatory HMAC signature"
-                    )
-                logger.warning("Kill switch state has no signature (legacy mode)")
-            elif signature:
-                logger.error(
-                    "Kill switch state has an HMAC signature but no signing secret "
-                    "is configured; cannot verify integrity"
-                )
-                if self._require_hmac:
-                    raise KillSwitchTamperError(
-                        "Kill switch state missing mandatory HMAC signature"
-                    )
-                logger.warning("Kill switch state has no signature (legacy mode)")
-            else:
-                if self._require_hmac:
-                    logger.error(
-                        "Kill switch state is unsigned and no signing secret is "
-                        "configured; restoring persisted mode without HMAC"
-                    )
-                else:
-                    logger.warning("Kill switch state has no signature (legacy mode)")
-
-            mode_str = data.get("mode", "DISENGAGED")
-            self._mode = KillSwitchMode[mode_str]
-
-            failure_class = None
-            fc_str = data.get("failure_class")
-            if fc_str:
-                try:
-                    failure_class = KillSwitchReason[fc_str]
-                except KeyError:
-                    logger.warning("Unknown failure_class in state file: %s", fc_str)
-
-            if self._mode != KillSwitchMode.DISENGAGED:
-                event = KillSwitchEvent(
-                    timestamp=data.get("engaged_at", datetime.now(timezone.utc).isoformat()),
-                    mode=self._mode,
-                    reason=data.get("reason", "Restored from file"),
-                    triggered_by=data.get("triggered_by", "system"),
-                    affected_tasks=0,
-                    failure_class=failure_class,
-                )
-                self._history.append(event)
-        except KillSwitchTamperError:
-            raise
-        except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
-            logger.error("Kill switch state file corrupt: %s", e)
-            if self._require_hmac:
-                raise KillSwitchTamperError(f"Kill switch state file corrupt: {e}") from e
-
     @classmethod
     def load_from_file(
         cls,
@@ -286,21 +194,73 @@ class KillSwitch:
     ) -> KillSwitch:
         """Load kill switch state from persistent storage.
 
-        Returns a fresh DISENGAGED instance if file is missing or corrupt
-        (when ``require_hmac`` is False). Construction with ``state_dir``
-        also restores persisted state; this classmethod remains the explicit
-        production boot API.
+        Returns a fresh DISENGAGED instance if file is missing or corrupt.
 
         Raises:
-            KillSwitchTamperError: If require_hmac=True and signature is invalid,
-                or a signing secret is configured but the file is unsigned/corrupt.
+            KillSwitchTamperError: If require_hmac=True and signature is invalid/missing.
         """
-        return cls(
+        state_file = state_dir / "kill_switch_state.json"
+        ks = cls(
             state_dir=state_dir,
             require_hmac=require_hmac,
             signing_secret=signing_secret,
             critical_tasks=critical_tasks,
         )
+
+        if not state_file.exists():
+            return ks
+
+        try:
+            with open(state_file, encoding="utf-8") as f:
+                data = json.load(f)
+
+            secret = ks._get_signing_secret()
+            signature = data.pop("signature", None)
+
+            if secret and signature:
+                if not cls._verify_signature(data, signature, secret):
+                    logger.error("Kill switch state has INVALID HMAC signature")
+                    if require_hmac:
+                        raise KillSwitchTamperError(
+                            "Kill switch state verification failed"
+                        )
+                    return ks
+            elif require_hmac:
+                logger.error("Kill switch state lacks required HMAC signature")
+                raise KillSwitchTamperError(
+                    "Kill switch state missing mandatory HMAC signature"
+                )
+            else:
+                logger.warning("Kill switch state has no signature (legacy mode)")
+
+            mode_str = data.get("mode", "DISENGAGED")
+            ks._mode = KillSwitchMode[mode_str]
+
+            # Restore failure_class if present (Phase 1 — backward compatible)
+            failure_class = None
+            fc_str = data.get("failure_class")
+            if fc_str:
+                try:
+                    failure_class = KillSwitchReason[fc_str]
+                except KeyError:
+                    logger.warning("Unknown failure_class in state file: %s", fc_str)
+
+            if ks._mode != KillSwitchMode.DISENGAGED:
+                event = KillSwitchEvent(
+                    timestamp=data.get("engaged_at", datetime.now(timezone.utc).isoformat()),
+                    mode=ks._mode,
+                    reason=data.get("reason", "Restored from file"),
+                    triggered_by=data.get("triggered_by", "system"),
+                    affected_tasks=0,
+                    failure_class=failure_class,
+                )
+                ks._history.append(event)
+        except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
+            logger.error("Kill switch state file corrupt: %s", e)
+            if require_hmac:
+                raise KillSwitchTamperError(f"Kill switch state file corrupt: {e}")
+
+        return ks
 
     def subscribe(self, callback: Callable[[KillSwitchEvent], None]) -> None:
         """Subscribe to kill switch state changes."""
@@ -319,7 +279,9 @@ class KillSwitch:
             data["failure_class"] = last_event.failure_class.name
         secret = self._get_signing_secret()
         if secret:
-            data["signature"] = self._compute_signature({k: v for k, v in data.items() if k != "signature"}, secret)
+            data["signature"] = self._compute_signature(
+                {k: v for k, v in data.items() if k != "signature"}, secret
+            )
         elif self._require_hmac:
             logger.error("Signing secret not available but require_hmac=True")
         return data
@@ -450,24 +412,31 @@ class KillSwitch:
             current_mode = self._mode
 
             if current_mode == KillSwitchMode.DISENGAGED:
-                return {"allowed": True, "action": "allow"}
+                return {"allowed": True, "action": "allow", "mode": current_mode.name}
 
             if current_mode == KillSwitchMode.HALT_NONCRITICAL:
                 if is_critical:
-                    return {"allowed": True, "action": "allow", "note": "critical task exempted"}
+                    return {
+                        "allowed": True,
+                        "action": "allow",
+                        "note": "critical task exempted",
+                        "mode": current_mode.name,
+                    }
                 return {
                     "allowed": False,
                     "action": "queue",
                     "reason": f"Kill switch engaged ({current_mode.name}): {task_type} queued",
+                    "mode": current_mode.name,
                 }
 
             if current_mode in (KillSwitchMode.HALT_ALL, KillSwitchMode.EMERGENCY):
                 if is_critical and current_mode == KillSwitchMode.HALT_ALL:
-                    return {"allowed": True, "action": "allow", "note": "critical only"}
+                    return {"allowed": True, "action": "allow", "note": "critical only", "mode": current_mode.name}
                 return {
                     "allowed": False,
                     "action": "block",
                     "reason": f"Kill switch engaged ({current_mode.name}): {task_type} blocked",
+                    "mode": current_mode.name,
                 }
 
             return {"allowed": False, "action": "block", "reason": "Unknown kill switch state"}

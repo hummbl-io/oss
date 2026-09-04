@@ -10,8 +10,12 @@ Standalone, stdlib-only Python package providing:
 - AuditLog: Append-only JSONL governance audit log with rotation and retention
 - AgentRegistry: Configurable agent identity, aliases, and trust tiers
 - SchemaValidator: Stdlib-only JSON Schema validator (Draft 2020-12 subset)
-- BusWriter: Append-only TSV coordination bus with flock locking and HMAC signing
-- ComplianceMapper: Map governance traces to SOC2, GDPR, OWASP, NIST AI RMF, and EU AI Act controls
+- BusWriter: Append-only TSV coordination bus with cross-platform locking and HMAC signing
+- ComplianceMapper: Map governance traces to 18 compliance frameworks via
+  declarative registry (SOC2, GDPR, OWASP Agentic, NIST AI RMF, EU AI Act,
+  ISO 27001, ISO 42001, NIST CSF, NIST COSAiS, CoSAI, HIPAA, MAS FEAT,
+  PCI DSS, NIST AI 600-1, OWASP LLM Top 10, OWASP MCP Top 10,
+  IMDA AI Verify, UK AISI)
 - HealthCollector: Composable health probe framework with latency tracking
 - OutputValidator: Rule-based content validation for agent outputs (ASI-06)
 - CapabilityFence: Soft sandbox enforcing capability boundaries (ASI-07)
@@ -27,13 +31,15 @@ Copyright 2026 HUMMBL, LLC. Licensed under Apache 2.0.
 
 import threading
 
-__version__ = "1.4.2"
+__version__ = "1.5.0"
 
 # Kernel — Governance operating system (v1.2.2)
 from hummbl_governance.kernel import (
     Kernel,
     KernelInvariant,
     KernelPanic,
+    Severity,
+    default_severity,
     Receipt,
     ReceiptEngine,
     LawEngine,
@@ -77,11 +83,7 @@ from hummbl_governance.contract_enforcement import (
     enforce_contract,
     enforce_files,
 )
-try:
-    from hummbl_governance.coordination_bus import BusWriter, PolicyLevel
-except ImportError:
-    BusWriter = None  # fcntl not available on Windows
-    PolicyLevel = None
+from hummbl_governance.coordination_bus import BusWriter, PolicyLevel
 from hummbl_governance.compliance_mapper import ComplianceMapper, ComplianceReport
 from hummbl_governance.compliance_frameworks import (
     FrameworkSpec,
@@ -103,6 +105,15 @@ from hummbl_governance.output_validator import (
     OutputValidator, PIIDetector, InjectionDetector, LengthBounds, BlocklistFilter,
     JailbreakPatternDetector, SteganographyDetector, EncodingBypassDetector,
 )
+from hummbl_governance.operating_picture import (
+    build_operating_picture,
+    load_source_registry,
+    read_bus_snapshot,
+    read_fleet_health_snapshot,
+    read_github_snapshot,
+    render_markdown,
+    write_draft_outputs,
+)
 from hummbl_governance.capability_fence import CapabilityFence, CapabilityDenied
 from hummbl_governance.reasoning import ReasoningEngine, ApplyResult
 from hummbl_governance.eal import (
@@ -122,6 +133,17 @@ from hummbl_governance.failure_modes import (
     all_error_records,
 )
 from hummbl_governance.corpus_adapter import CorpusAdapter
+
+# Regulator Export (P35) — produces compliance evidence in regulator-accepted formats
+from hummbl_governance.regulator_export import (
+    RegulatorExport,
+    ExportEnvelope,
+    ExportFormat,
+    Framework as ExportFramework,
+    CoverageState,
+    REGULATOR_FORMATS,
+    BOUNDARY_DISCLAIMERS,
+)
 from hummbl_governance.evolution_lineage import (
     EvolutionLineage,
     VariantRecord,
@@ -191,6 +213,33 @@ from hummbl_governance.kernel.doctrine_amendment import (
 DCT = DelegationTokenManager  # Short alias for DelegationTokenManager
 DCTX = DelegationContext  # Short alias for DelegationContext
 
+# Primitive Registry (O7 — runtime-queryable inventory)
+from hummbl_governance.primitive_registry import (
+    PrimitiveRegistry,
+    PrimitiveEntry,
+    PrimitiveStatus,
+    PrimitiveLayer,
+)
+
+# External Monitor (E3 — runtime verification stub)
+from hummbl_governance.external_monitor import (
+    ExternalMonitor,
+    TraceEvent,
+    Verdict,
+)
+
+# Regulatory Context (v1.5.0 — proactive regulatory awareness)
+from hummbl_governance.regulatory_context import (
+    RegulatoryContext,
+    RegulatoryProfile,
+    RegulatoryCheckResult,
+    ControlSet,
+    ProfileConfig,
+)
+
+# SOUL Injector (v1.5.0 — SOUL.md system-prompt injection)
+from hummbl_governance.soul_injector import SoulInjector
+
 
 class _B120Shortcut:
     """Lazy shortcut for Base120 ReasoningEngine access."""
@@ -233,6 +282,8 @@ __all__ = [
     "Kernel",
     "KernelInvariant",
     "KernelPanic",
+    "Severity",
+    "default_severity",
     "Receipt",
     "ReceiptEngine",
     "LawEngine",
@@ -319,6 +370,13 @@ __all__ = [
     "JailbreakPatternDetector",
     "SteganographyDetector",
     "EncodingBypassDetector",
+    "build_operating_picture",
+    "load_source_registry",
+    "read_bus_snapshot",
+    "read_fleet_health_snapshot",
+    "read_github_snapshot",
+    "render_markdown",
+    "write_draft_outputs",
     "CapabilityFence",
     "CapabilityDenied",
     "ReasoningEngine",
@@ -347,6 +405,14 @@ __all__ = [
     "ModificationRecord",
     "EvolutionDriftReport",
     "CorpusAdapter",
+    # Regulator Export (P35)
+    "RegulatorExport",
+    "ExportEnvelope",
+    "ExportFormat",
+    "ExportFramework",
+    "CoverageState",
+    "REGULATOR_FORMATS",
+    "BOUNDARY_DISCLAIMERS",
     # Canon Registry (P27)
     "CanonLevel",
     "validate_canon_registry",
@@ -400,4 +466,21 @@ __all__ = [
     "DCT",
     "DCTX",
     "b120",
+    # Primitive Registry (O7 — runtime-queryable inventory)
+    "PrimitiveRegistry",
+    "PrimitiveEntry",
+    "PrimitiveStatus",
+    "PrimitiveLayer",
+    # External Monitor (E3 — runtime verification stub)
+    "ExternalMonitor",
+    "TraceEvent",
+    "Verdict",
+    # Regulatory Context (v1.5.0)
+    "RegulatoryContext",
+    "RegulatoryProfile",
+    "RegulatoryCheckResult",
+    "ControlSet",
+    "ProfileConfig",
+    # SOUL Injector (v1.5.0)
+    "SoulInjector",
 ]

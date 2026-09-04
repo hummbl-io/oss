@@ -77,7 +77,7 @@ class CostGovernor:
         self.currency = currency
         self.retention_days = retention_days
         self._on_budget_alert = on_budget_alert
-        self._is_memory = raw == ":memory:"
+        self._is_memory = (raw == ":memory:")
         self._shared_conn: sqlite3.Connection | None = None
         self._init_db()
 
@@ -148,9 +148,13 @@ class CostGovernor:
         if cost < 0 or math.isnan(cost) or math.isinf(cost):
             raise ValueError(f"cost must be a finite non-negative number, got {cost}")
         if tokens_in < 0 or math.isnan(tokens_in) or math.isinf(tokens_in):
-            raise ValueError(f"tokens_in must be a finite non-negative number, got {tokens_in}")
+            raise ValueError(
+                f"tokens_in must be a finite non-negative number, got {tokens_in}"
+            )
         if tokens_out < 0 or math.isnan(tokens_out) or math.isinf(tokens_out):
-            raise ValueError(f"tokens_out must be a finite non-negative number, got {tokens_out}")
+            raise ValueError(
+                f"tokens_out must be a finite non-negative number, got {tokens_out}"
+            )
         record = UsageRecord.create(
             provider=provider,
             model=model,
@@ -170,14 +174,9 @@ class CostGovernor:
                 (record_id, timestamp, date, provider, model, tokens_in, tokens_out, cost, meta)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    record.record_id,
-                    record.timestamp,
-                    date_str,
-                    record.provider,
-                    record.model,
-                    record.tokens_in,
-                    record.tokens_out,
-                    record.cost,
+                    record.record_id, record.timestamp, date_str,
+                    record.provider, record.model,
+                    record.tokens_in, record.tokens_out, record.cost,
                     json.dumps(record.meta),
                 ),
             )
@@ -198,7 +197,9 @@ class CostGovernor:
             ).fetchone()
         return float(result["total"])
 
-    def get_spend_by_provider(self, provider: str, start: datetime, end: datetime) -> dict[str, Any]:
+    def get_spend_by_provider(
+        self, provider: str, start: datetime, end: datetime
+    ) -> dict[str, Any]:
         """Get spend breakdown for a specific provider."""
         start_iso = start.isoformat().replace("+00:00", "Z")
         end_iso = end.isoformat().replace("+00:00", "Z")
@@ -287,9 +288,9 @@ class CostGovernor:
     def cleanup(self, before: datetime | None = None) -> int:
         """Remove old usage records. Returns count deleted."""
         if before is None:
-            before = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(
-                days=self.retention_days
-            )
+            before = datetime.now(timezone.utc).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            ) - timedelta(days=self.retention_days)
         before_iso = before.isoformat().replace("+00:00", "Z")
         with self._conn() as conn:
             cursor = conn.execute("DELETE FROM usage WHERE timestamp < ?", (before_iso,))

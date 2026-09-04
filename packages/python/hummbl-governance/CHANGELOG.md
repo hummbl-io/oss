@@ -9,6 +9,65 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-09-04
+
+### Added
+
+Consolidation of standalone `hummbl-governance` repo into the oss monorepo.
+All primitives, tests, and data files from the standalone repo are now in
+`packages/python/hummbl-governance/`. The standalone repo is archived.
+
+**New modules ported from standalone:**
+
+- `cognition/` — governance cognition subsystem (scanner, indexer, ledger writer, query, boot context)
+- `evaluations/` — evaluation framework (api_tests, framework, lab_monitor, model_registry, rubrics, scorecard, scorecard_data)
+- `external_monitor.py` — runtime trace observation (ExternalMonitor, TraceEvent, Verdict)
+- `gitops_deployment_probe.py` — GitOps deployment evidence probe
+- `gitops_evidence.py` — GitOps evidence collection and verification
+- `kernel/agent_registry.py` — fleet agent registry (P44)
+- `kernel/github_auth.py` — GitHub authentication helper
+- `operating_picture.py` — multi-source governance snapshot
+- `primitive_registry.py` — runtime-queryable primitive inventory
+- `primitives/adversarial_tuples.py` — AdversarialTupleGenerator for testing verify_tuple
+- `regulator_export.py` — structured export for regulatory review (RegulatorExport, ExportEnvelope)
+- `regulatory_context.py` — jurisdictional compliance context (RegulatoryContext, RegulatoryProfile)
+- `services/skill_scorer.py` — skill usage health scoring
+- `soul_injector.py` — agent identity injection
+- `soul_cli.py` — soul CLI
+- `_file_lock.py` — cross-platform file locking
+
+**New exports in `__init__.py`:**
+
+- `PrimitiveRegistry`, `PrimitiveEntry`, `PrimitiveStatus`, `PrimitiveLayer`
+- `ExternalMonitor`, `TraceEvent`, `Verdict`
+- `RegulatorExport`, `ExportEnvelope`, `ExportFormat`, `ExportFramework`, `CoverageState`
+- `RegulatoryContext`, `RegulatoryProfile`, `RegulatoryCheckResult`, `ControlSet`, `ProfileConfig`
+- `build_operating_picture`, `load_source_registry`, `read_bus_snapshot`, `read_fleet_health_snapshot`, `read_github_snapshot`, `render_markdown`, `write_draft_outputs`
+- `SoulInjector`
+
+**Updated modules (newer versions from standalone):**
+
+- All kernel modules (kernel.py, receipt_engine.py, authority_engine.py, doctrine_engine.py, invariants.py, etc.)
+- kill_switch.py (HMAC-signed persistence state)
+- audit_log.py (strict_hmac parameter)
+- compliance_mapper.py, compliance_frameworks.py
+- All primitives (basen_tuple.py, merkle_anchor.py, tuple_schema_registry.py)
+- And 30+ other modules synced to standalone versions
+
+**Other changes:**
+
+- `PRIMITIVES.md` replaced with standalone version (45 primitives, K1-K14 invariants, D1-D7 doctrine invariants)
+- `authority_policy.json` updated with mutation_classes and arcana-advisory role
+- Test fixtures ported (41 fixture files)
+- Internal hostnames sanitized (`anvil`/`hummbl_vps` → `host-a`/`host-b`)
+- 3,325 tests passing (up from ~2,640)
+
+### Removed
+
+- `tests/test_mutation_gate.py` (oss) — referenced non-existent `MutationSeverity` class; replaced by `tests/kernel/test_mutation_gate.py` from standalone
+- `tests/test_authority_policy.py` (oss) — expected old oss policy format; replaced by `tests/kernel/test_authority_policy.py`
+- 6 infrastructure-dependent tests (scripts/, experimental/ dependencies) that don't apply to the package context
+
 ### Added
 
 - **HUMMBL Repo Standard v0.1** (`docs/standards/HUMMBL_REPO_STANDARD.md`) — global baseline for all `hummbl-io` repositories: 15-item artifact stack, five repo classes with required/prescribed/optional weightings, conflict-precedence ladder, provider-neutrality constraint, and routing doctrine (deterministic spine, stochastic muscle).

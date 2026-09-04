@@ -32,6 +32,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+
 # ---------------------------------------------------------------------------
 # RFC 6962 hashing primitives
 # ---------------------------------------------------------------------------
@@ -433,7 +434,9 @@ def consistency_proof(
     if old_size == 0:
         return []
     if old_size > new_size:
-        raise ValueError(f"old tree size {old_size} exceeds new tree size {new_size}")
+        raise ValueError(
+            f"old tree size {old_size} exceeds new tree size {new_size}"
+        )
     if old_size == new_size:
         return []
 
