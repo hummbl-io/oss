@@ -60,13 +60,15 @@ All primitives, tests, and data files from the standalone repo are now in
 - `authority_policy.json` updated with mutation_classes and arcana-advisory role
 - Test fixtures ported (41 fixture files)
 - Internal hostnames sanitized (`anvil`/`hummbl_vps` → `host-a`/`host-b`)
-- 3,325 tests passing (up from ~2,640)
+- 3,284 tests passing (up from ~2,640)
 
 ### Removed
 
 - `tests/test_mutation_gate.py` (oss) — referenced non-existent `MutationSeverity` class; replaced by `tests/kernel/test_mutation_gate.py` from standalone
 - `tests/test_authority_policy.py` (oss) — expected old oss policy format; replaced by `tests/kernel/test_authority_policy.py`
 - 6 infrastructure-dependent tests (scripts/, experimental/ dependencies) that don't apply to the package context
+- 3 MCP server subprocess tests (test_mcp_evaluation, test_mcp_lab_monitor, test_mcp_audit_crypto_health, test_mcp_new_servers) — these run MCP server scripts that exist in the standalone repo root but not in the oss package
+- `tests/test_mcp_server.py` (oss) — replaced by standalone version compatible with HMAC-signed kill_switch persistence
 
 ### Added
 

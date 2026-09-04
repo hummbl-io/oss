@@ -13,7 +13,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 
 | Package | Path | Tree | PyPI | Description |
 |---------|------|------|------|-------------|
-| hummbl-governance | `packages/python/hummbl-governance/` | 1.4.2 | Live 1.4.2 | Governance primitives for AI agent orchestration |
+| hummbl-governance | `packages/python/hummbl-governance/` | 1.5.0 | Live 1.4.2 | Governance primitives for AI agent orchestration |
 | base120 | `packages/python/base120/` | 3.0.0 | Live 3.0.0 | 120 reasoning operators for structured thinking |
 | hummbl-kernel | `packages/python/hummbl-kernel/` | 0.1.0 | Live 0.1.0 | Orchestration kernel with security and compliance enforcement |
 | hummbl | `packages/python/hummbl/` | 0.1.0 | Live 0.1.0 | Structured reasoning framework for AI agents |
