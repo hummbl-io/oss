@@ -14,6 +14,12 @@ def test_canonical_types_include_core_protocol() -> None:
     assert expected <= CANONICAL_MESSAGE_TYPES
 
 
+def test_canonical_types_include_belief_audit() -> None:
+    """BELIEF_AUDIT (added 2026-09-02 from incident governance research) is canonical."""
+    assert "BELIEF_AUDIT" in CANONICAL_MESSAGE_TYPES
+    assert "BELIEF_AUDIT" not in LEGACY_MESSAGE_TYPES
+
+
 def test_readable_is_canonical_plus_legacy() -> None:
     assert READABLE_MESSAGE_TYPES == CANONICAL_MESSAGE_TYPES | LEGACY_MESSAGE_TYPES
 

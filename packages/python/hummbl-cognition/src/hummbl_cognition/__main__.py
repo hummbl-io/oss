@@ -609,10 +609,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m hummbl_cognition",
         description="Cognitive Ledger Protocol -- vendor-agnostic shared agent memory",
+        epilog=(
+            "Note: --ledger is a GLOBAL argument that must precede the subcommand. "
+            "Placing it after the subcommand silently uses the default path.\n\n"
+            "  CORRECT: python -m hummbl_cognition --ledger /path/to/ledger.jsonl post ...\n"
+            "  WRONG:   python -m hummbl_cognition post --ledger /path/to/ledger.jsonl ...\n"
+            "(Origin: 2026-09-02 — misplaced --ledger silently used default path, "
+            "causing confusion during ledger cleanup.)"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "--ledger",
-        help="Override ledger file path",
+        help="Override ledger file path (MUST precede the subcommand — see note below)",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
