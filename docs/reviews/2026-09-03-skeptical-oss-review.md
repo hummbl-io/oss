@@ -519,7 +519,7 @@ Open PRs at review time: #112, #111, #110, #108.
 
 ### 5.12 Boundary-check control (excerpt)
 
-`tools/scripts/check_boundary_patterns.py` denies file names matching `HANDOFF-`, `AAR-`, `RECEIPT-`, `SESSION-TRANSCRIPT`, `FLEET-INVENTORY`, `AUDIT-<digit>`, `BACKCHANNEL`, `RETIRED-`, `INTERNAL-`, plus directory names `{handoffs, receipts, backchannel, session-transcripts, fleet-inventory, audit-matrices, internal-infra}`, plus CGNAT IPs `100.64.0.0/10` except `100.64.0.1`. Filename checks skip `packages/`. **`docs/artifacts` is not denied.**
+`tools/scripts/check_boundary_patterns.py` denies file names matching `HANDOFF-`, `AAR-`, `RECEIPT-`, `SESSION-TRANSCRIPT`, `FLEET-INVENTORY`, `AUDIT-<digit>`, `BACKCHANNEL`, `RETIRED-`, `INTERNAL-`, plus directory names `{handoffs, receipts, backchannel, session-transcripts, fleet-inventory, audit-matrices, internal-infra}`, plus the RFC 6598 CGNAT range used by Tailscale (one documentation placeholder IP is allowlisted). Filename checks skip `packages/`. **`docs/artifacts` is not denied.**
 
 ---
 
