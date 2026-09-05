@@ -393,5 +393,17 @@ class TestSafeExtraction:
         assert (tmp_path / "normal.txt").read_bytes() == b"safe content"
 
 
+class TestDownloadSchemeValidation:
+    """Tests for URL scheme validation in download path."""
+
+    def test_file_scheme_rejected(self) -> None:
+        """_ALLOWED_DOWNLOAD_SCHEMES should not include file: scheme."""
+        from hummbl_governance.lsp_registry.install import _ALLOWED_DOWNLOAD_SCHEMES
+
+        assert "file" not in _ALLOWED_DOWNLOAD_SCHEMES
+        assert "http" in _ALLOWED_DOWNLOAD_SCHEMES
+        assert "https" in _ALLOWED_DOWNLOAD_SCHEMES
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
