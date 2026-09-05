@@ -49,11 +49,14 @@ from __future__ import annotations
 import json
 import os
 import time
-import urllib.request
 import urllib.error
+import urllib.parse
+import urllib.request
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+_ALLOWED_API_SCHEMES = frozenset({"http", "https"})
 
 
 class TestStatus(str, Enum):
@@ -810,6 +813,9 @@ def _make_api_request(
     Uses urllib — no third-party dependencies.
     """
     url = f"{base_url.rstrip('/')}/v1/chat/completions"
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in _ALLOWED_API_SCHEMES:
+        raise ValueError(f"Refusing URL with disallowed scheme: {parsed.scheme}")
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],

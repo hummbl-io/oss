@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.parse
 import urllib.request
 import zipfile
 from dataclasses import dataclass
@@ -21,6 +22,8 @@ from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger("hummbl_governance.lsp_registry.install")
+
+_ALLOWED_DOWNLOAD_SCHEMES = frozenset({"http", "https"})
 
 
 def _safe_extract_tar(tf: tarfile.TarFile, dest: str) -> None:
@@ -228,6 +231,10 @@ def _install_binary(recipe: InstallRecipe) -> bool:
     platform_key = _get_platform_key()
 
     url = recipe.download_url.format(version=version, platform=platform_key)
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in _ALLOWED_DOWNLOAD_SCHEMES:
+        logger.error("Refusing URL with disallowed scheme: %s", parsed.scheme)
+        return False
     logger.info("Downloading %s from %s", recipe.package, url)
 
     try:
