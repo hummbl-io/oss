@@ -1,6 +1,6 @@
 """Open Brain Consolidator -- groups related ledger entries and synthesizes summaries.
 
-Runs periodically on nodezero (via launchd) to compress the cognitive ledger
+Runs periodically on the inference host (via launchd) to compress the cognitive ledger
 without losing information. Groups semantically related entries using BM25
 similarity, then synthesizes consolidated summaries via qwen3.5:9b on Ollama.
 

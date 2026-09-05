@@ -15,7 +15,7 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 
 | Framework | Surface | Rows | ✅ | 🟡 | ⚪ | Unmarked | File |
 |---|---:|---:|---:|---:|---:|---:|---|
-| EU AI Act | 113 articles + 13 annexes | 126 | 25 | 27 | 74 | 0 | [`eu-ai-act.md`](./eu-ai-act.md) |
+| EU AI Act | 113 articles + 13 annexes | 126 | 24 | 28 | 74 | 0 | [`eu-ai-act.md`](./eu-ai-act.md) |
 | GDPR | 99 articles | 99 | 21 | 20 | 58 | 0 | [`gdpr.md`](./gdpr.md) |
 | ISO/IEC 27001:2022 | 93 Annex A controls + ISMS Clauses 4–10 | 100 | 35 | 32 | 33 | 0 | [`iso-27001.md`](./iso-27001.md) |
 | ISO/IEC 42001:2023 | 38 Annex A controls + Clauses 4–10 | 45 | 25 | 18 | 2 | 0 | [`iso-42001.md`](./iso-42001.md) |
@@ -118,7 +118,7 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 | MCP Authorization (2026-07-28) | RS/client/AS + PRM/CIMD/DCR + token/errors + STDIO-vs-HTTP | 13 | 0 | 1 | 12 | 0 | [`mcp-authorization.md`](./mcp-authorization.md) |
 | ETSI EN 304 223 V2.1.1 | 13 principles + 5 phases; TS 104 158-1/2 document-level | 19 | 0 | 10 | 9 | 0 | [`etsi-en-304-223.md`](./etsi-en-304-223.md) |
 | NISTIR 8605 COSAiS | watch only (8605 / A / B / C / 8605D); no overlay IDs | 10 | 0 | 0 | 10 | 0 | [`nistir-8605.md`](./nistir-8605.md) |
-| **FLEET (102 frameworks)** | **~2980 controls in source standards** | **2980 data rows** | **1520** | **686** | **770** | **1** | — |
+| **FLEET (102 frameworks)** | **~2980 controls in source standards** | **2980 data rows** | **1519** | **687** | **770** | **1** | — |
 
 > **These counts are enumeration evidence, not a score.** "Rows" is the count of data rows in each matrix file (some matrices include both Clause-level and Annex/control-level rows, so row count may exceed the source-standard surface count). ✅ + 🟡 + ⚪ + ⛔ + Unmarked = Rows for each matrix. The **Unmarked** column counts data rows in the matrix file that do NOT yet have a state glyph assigned — these are drafting gaps per ADR-001 row invariant (every row must be ✅/🟡/⚪/⛔). Surfacing them is intentional: PR #28 review identified silent unmarked-row dropping as a Goodhart channel (`feedback_no_self_grades_on_public_surface.md`). There is no implied coverage rate. Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md), HUMMBL does not publish self-issued grades against external frameworks; the matrices are row-by-row receipts.
 
@@ -128,9 +128,9 @@ Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness,
 
 These matrices are internal coverage scaffolds, not public claim support yet. Do not use the aggregate counts or headline language externally until row counts, evidence cells, command examples, and boundary classifications pass validation plus operator/legal review.
 
-The **1520 ✅ Fulfilled** rows concentrate in the technical / measurement / access-control / audit-trail / lifecycle / data-governance surfaces where software primitives do the work. The **686 🟡 Partial** rows are where HUMMBL provides the technical primitive and the customer organization provides the policy, contract, or program completion. The **770 ⚪ Boundary** rows are organizational structures, regulatory institutions, civil/criminal liability mechanisms, member-state legislative regimes, and physical-security controls that no software product can implement. (Counts mechanically generated; see [`scripts/count_coverage_rows.py`](../../scripts/count_coverage_rows.py). Existing-matrix ✅ counts were not upgraded in the 2026-08-31 pass.)
+The **1519 ✅ Fulfilled** rows concentrate in the technical / measurement / access-control / audit-trail / lifecycle / data-governance surfaces where software primitives do the work. The **687 🟡 Partial** rows are where HUMMBL provides the technical primitive and the customer organization provides the policy, contract, or program completion. The **770 ⚪ Boundary** rows are organizational structures, regulatory institutions, civil/criminal liability mechanisms, member-state legislative regimes, and physical-security controls that no software product can implement. (Counts mechanically generated; see [`scripts/count_coverage_rows.py`](../../scripts/count_coverage_rows.py). Existing-matrix ✅ counts were not upgraded in the 2026-08-31 pass.)
 
-> **Note on count discrepancy:** The fleet total of 1520 ✅ Fulfilled rows (from `count_coverage_rows.py`) counts all rows marked with the ✅ glyph. The [`EVIDENCE_VALIDATION.md`](./EVIDENCE_VALIDATION.md) report shows 1496 validated fulfilled rows — a stricter count that includes only ✅ rows whose evidence references actually resolve to existing artifacts. The delta is partly in `eu-ai-act.md` (Annex rows III, IV, V, VI, VIII, IX that carry the ✅ glyph but have no backtick-quoted evidence references) and partly in `ophthalmic-ai.md` (draft skeleton, evidence cells not yet validated). These are hardening gaps — the rows are marked fulfilled but lack resolvable evidence artifacts. Both numbers are correct for their respective purposes.
+> **Note on count discrepancy:** The fleet total of 1519 ✅ Fulfilled rows (from `count_coverage_rows.py`) counts all rows marked with the ✅ glyph. The [`EVIDENCE_VALIDATION.md`](./EVIDENCE_VALIDATION.md) report shows 1496 validated fulfilled rows — a stricter count that includes only ✅ rows whose evidence references actually resolve to existing artifacts. The delta is partly in `eu-ai-act.md` (Annex rows III, IV, V, VI, VIII, IX that carry the ✅ glyph but have no backtick-quoted evidence references) and partly in `ophthalmic-ai.md` (draft skeleton, evidence cells not yet validated). These are hardening gaps — the rows are marked fulfilled but lack resolvable evidence artifacts. Both numbers are correct for their respective purposes.
 
 ## What this does NOT claim
 

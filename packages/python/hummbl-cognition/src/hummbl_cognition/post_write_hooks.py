@@ -6,7 +6,7 @@ into push (happens automatically when a discovery or decision lands).
 
 Hooks enqueue research queries to the research_processor's queue file
 (_state/cognition/research_queue.json). The existing research_processor
-cron (every 2 hours on nodezero) picks them up, runs them through Ollama,
+cron (every 2 hours on the inference host) picks them up, runs them through Ollama,
 and posts results back to the ledger as discovery entries linked to the
 trigger entry via the links field.
 
