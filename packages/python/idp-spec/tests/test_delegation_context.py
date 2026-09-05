@@ -623,10 +623,28 @@ class TestSubtreeBudgetContainment(unittest.TestCase):
         self.assertEqual(child1.budget.max_tokens, 1000)
         self.assertEqual(parent.budget.remaining_tokens, 0)
 
-        # Second child now finds 0 remaining tokens and receives 0 (or cannot exceed)
+        # Second child finds 0 remaining tokens in bounded parent and is rejected
+        from idp_spec.delegation_context import IDP_E_BUDGET_ESCALATION
         child2, error2 = parent.create_child("agent-c", "c-3")
-        self.assertIsNone(error2)
-        self.assertEqual(child2.budget.max_tokens, 0)
+        self.assertIsNone(child2)
+        self.assertEqual(error2, IDP_E_BUDGET_ESCALATION)
+
+    def test_unlimited_parent_delegates_unlimited_by_default(self):
+        """Child of unlimited parent inherits unlimited without accumulating fake allocation."""
+        parent = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="root",
+            delegatee_id="agent-a",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=0, max_cost_usd=0.0),
+        )
+        child, error = parent.create_child("agent-b", "c-2")
+        self.assertIsNone(error)
+        self.assertIsNotNone(child)
+        self.assertEqual(child.budget.max_tokens, 0)
+        self.assertEqual(parent.budget.allocated_tokens, 0)
 
     def test_budget_allocation_serialization_roundtrip(self):
         """allocated_* fields roundtrip through to_dict/from_dict."""

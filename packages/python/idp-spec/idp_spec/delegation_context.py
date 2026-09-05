@@ -11,6 +11,7 @@ IDP References:
 
 from __future__ import annotations
 
+import math
 import os
 import uuid
 from dataclasses import dataclass, field
@@ -382,7 +383,11 @@ class DelegationContext:
                 if budget.max_tokens <= 0 or budget.max_tokens > self.budget.remaining_tokens:
                     return None, IDP_E_BUDGET_ESCALATION
             if self.budget.max_cost_usd > 0.0:
-                if budget.max_cost_usd <= 0.0 or budget.max_cost_usd > self.budget.remaining_cost_usd:
+                # W2: Account for IEEE 754 precision drift
+                if budget.max_cost_usd <= 0.0 or (
+                    budget.max_cost_usd > self.budget.remaining_cost_usd
+                    and not math.isclose(budget.max_cost_usd, self.budget.remaining_cost_usd, rel_tol=1e-9, abs_tol=1e-9)
+                ):
                     return None, IDP_E_BUDGET_ESCALATION
             if self.budget.max_wall_time_seconds > 0:
                 if budget.max_wall_time_seconds <= 0 or budget.max_wall_time_seconds > self.budget.remaining_wall_time_seconds:
@@ -393,7 +398,16 @@ class DelegationContext:
                 max_wall_time_seconds=budget.max_wall_time_seconds,
             )
         else:
-            # Child inherits remaining budget from parent
+            # Child inherits remaining budget from parent.
+            # C1: If parent is bounded but remaining budget is exhausted (<= 0),
+            # reject delegation to prevent semantic inversion to unlimited (0).
+            if self.budget.max_tokens > 0 and self.budget.remaining_tokens <= 0:
+                return None, IDP_E_BUDGET_ESCALATION
+            if self.budget.max_cost_usd > 0.0 and self.budget.remaining_cost_usd <= 0.0:
+                return None, IDP_E_BUDGET_ESCALATION
+            if self.budget.max_wall_time_seconds > 0 and self.budget.remaining_wall_time_seconds <= 0:
+                return None, IDP_E_BUDGET_ESCALATION
+
             child_budget = DelegationBudget(
                 max_tokens=self.budget.remaining_tokens if self.budget.max_tokens > 0 else 0,
                 max_cost_usd=self.budget.remaining_cost_usd if self.budget.max_cost_usd > 0.0 else 0.0,
@@ -401,11 +415,12 @@ class DelegationContext:
             )
 
         # Decrement parent's remaining capacity by recording allocation
-        if child_budget.max_tokens > 0:
+        # A4: Guard allocation increments so unbounded parents don't accumulate tracking
+        if child_budget.max_tokens > 0 and self.budget.max_tokens > 0:
             self.budget.allocated_tokens += child_budget.max_tokens
-        if child_budget.max_cost_usd > 0.0:
+        if child_budget.max_cost_usd > 0.0 and self.budget.max_cost_usd > 0.0:
             self.budget.allocated_cost_usd += child_budget.max_cost_usd
-        if child_budget.max_wall_time_seconds > 0:
+        if child_budget.max_wall_time_seconds > 0 and self.budget.max_wall_time_seconds > 0:
             self.budget.allocated_wall_time_seconds += child_budget.max_wall_time_seconds
 
         return (
