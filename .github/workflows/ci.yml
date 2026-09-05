@@ -67,6 +67,40 @@ jobs:
         working-directory: packages/python/hummbl-governance
         run: python -m pytest tests/ -q --cov=hummbl_governance --cov-report=term
 
+  test-node:
+    name: test (node, ${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [mcp-base120]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22.x"
+          cache: npm
+          cache-dependency-path: packages/node/${{ matrix.package }}/package-lock.json
+
+      - name: Install package
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm ci
+
+      - name: Verify generated artifacts
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm run check:generated
+
+      - name: Run tests
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm test
+
+      - name: Verify package contents
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm run check:boundary
+
   pip-audit:
     name: pip-audit
     runs-on: ubuntu-latest
@@ -105,14 +139,16 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-hummbl-governance, pip-audit]
+    needs: [test, test-hummbl-governance, test-node, pip-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
         run: |
           echo "test=${{ needs.test.result }}"
           echo "test-hummbl-governance=${{ needs.test-hummbl-governance.result }}"
+          echo "test-node=${{ needs.test-node.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           test "${{ needs.test.result }}" = success
           test "${{ needs.test-hummbl-governance.result }}" = success
+          test "${{ needs.test-node.result }}" = success
           test "${{ needs.pip-audit.result }}" = success

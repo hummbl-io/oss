@@ -15,9 +15,9 @@ package blurbs, or agent briefs.
 Base120 (120 mental models across 6 transformation families) is the substrate
 those governance primitives sit on. It is not a competing product story.
 
-Public monorepo for HUMMBL open-source **Python** packages, plus a Lean
-sketch under `packages/lean/`. Consolidation in progress. There is no
-`packages/node/` or `packages/rust/` tree in this repository yet.
+Public monorepo for HUMMBL open-source **Python** packages, a private Node
+technical canary, and a Lean sketch under `packages/lean/`. Consolidation is
+in progress. There is no `packages/rust/` tree in this repository yet.
 
 Inventory below is the tree at HEAD. PyPI "Live" means a wheel exists on
 the registry; it does not mean production-supported. Identity leftovers
@@ -56,6 +56,12 @@ remain on `#79`.
 | `hummbl-garage` | 0.1.0 | — | In-tree — performance index, livery, failure aesthetics |
 | `hummbl-identity` | 0.1.0 | — | In-tree — identity facade over tokens + heraldry + garage |
 | `hummbl-validation-framework` | 0.1.0 | — | In-tree — external validation tests for the design system |
+
+Node packages:
+
+| Package | Tree | npm | Status |
+|---------|------|-----|--------|
+| `@hummbl/mcp-base120` | 0.1.0-canary.0 | — | Private technical canary — read-only Base120 MCP catalog; not publishable while admission blockers remain |
 
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.

@@ -18,6 +18,19 @@ updates:
           - "actions/*"
           - "github/*"
 
+  # Node technical canaries
+  - package-ecosystem: npm
+    directory: /packages/node/mcp-base120
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - node
+    commit-message:
+      prefix: "chore(deps)"
+
   # Python pip dependencies (governed-compression uses numpy, hummbl-rubric-templates uses pyyaml)
   - package-ecosystem: pip
     directory: /packages/python/governed-compression

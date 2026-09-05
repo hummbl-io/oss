@@ -1,0 +1,54 @@
+{
+  "schema_version": "hummbl.product.v1",
+  "product_id": "mcp-base120",
+  "display_name": "HUMMBL Base120 MCP",
+  "distribution": "@hummbl/mcp-base120",
+  "lifecycle": "technical-canary",
+  "public_launch": false,
+  "admission": {
+    "decision": "hold",
+    "blockers": [
+      "corpus-license",
+      "public-release-provenance",
+      "hosted-contract-parity",
+      "privacy-review"
+    ]
+  },
+  "canonical_source": {
+    "repository": "hummbl-io/oss",
+    "path": "packages/node/mcp-base120"
+  },
+  "corpus_authority": {
+    "repository": "hummbl-io/oss",
+    "path": "packages/python/base120/Base120_Canonical_Model_Registry.yaml"
+  },
+  "contract": {
+    "version": "hummbl.base120.catalog.v1",
+    "protocol_versions": [
+      "2026-07-28",
+      "2025-11-25",
+      "2025-06-18"
+    ],
+    "tools": [
+      "base120_get",
+      "base120_list",
+      "base120_search",
+      "base120_prompt"
+    ],
+    "mutations": false
+  },
+  "local_mode": {
+    "network_egress": false,
+    "telemetry": false,
+    "durable_writes": false
+  },
+  "excluded": [
+    "external model calls",
+    "recommendations",
+    "relationship writes",
+    "governance controls",
+    "billing",
+    "customer data",
+    "fleet configuration"
+  ]
+}
