@@ -220,6 +220,21 @@ class TestFormatResolution:
         )
         assert envelope.framework == "eu-ai-act"
 
+    def test_generic_json_raises_on_unknown_framework(
+        self, fake_report, system_identity, exporter
+    ):
+        """generic_json must not silently default to EU_AI_ACT for unknown frameworks."""
+        from dataclasses import replace
+
+        unknown_report = replace(fake_report, framework="UNKNOWN_FRAMEWORK")
+        with pytest.raises(ValueError, match="could not resolve framework"):
+            exporter.export(
+                report=unknown_report,
+                format=ExportFormat.GENERIC_JSON,
+                system_identity=system_identity,
+                approver_id="op-1",
+            )
+
 
 # ---------------------------------------------------------------------------
 # Integrity / hash chain
@@ -285,6 +300,42 @@ class TestIntegrity:
         # Different frameworks have independent chains
         assert soc2_env.integrity["previous_export_hash"] is None
         assert eu_env.integrity["previous_export_hash"] is None
+
+    def test_hash_chain_survives_new_instance(
+        self, fake_report, system_identity, tmp_path
+    ):
+        """P1 fix: hash chain must persist across RegulatorExport instances."""
+        exporter_a = RegulatorExport(state_dir=tmp_path)
+        env1 = exporter_a.export(
+            report=fake_report,
+            format=ExportFormat.EU_AI_ACT_TECHNICAL_FILE_ANNEX_IV,
+            system_identity=system_identity,
+            approver_id="op-1",
+        )
+        exporter_b = RegulatorExport(state_dir=tmp_path)
+        env2 = exporter_b.export(
+            report=fake_report,
+            format=ExportFormat.EU_AI_ACT_TECHNICAL_FILE_ANNEX_IV,
+            system_identity=system_identity,
+            approver_id="op-1",
+        )
+        assert env2.integrity["previous_export_hash"] == env1.integrity["export_hash"]
+
+    def test_hash_chain_corrupt_file_fails_safe(
+        self, fake_report, system_identity, tmp_path
+    ):
+        """A corrupt chain file should not crash — it produces a None previous hash."""
+        (tmp_path / RegulatorExport._CHAIN_FILENAME).write_text(
+            "not valid json", encoding="utf-8"
+        )
+        exporter = RegulatorExport(state_dir=tmp_path)
+        env = exporter.export(
+            report=fake_report,
+            format=ExportFormat.EU_AI_ACT_TECHNICAL_FILE_ANNEX_IV,
+            system_identity=system_identity,
+            approver_id="op-1",
+        )
+        assert env.integrity["previous_export_hash"] is None
 
 
 # ---------------------------------------------------------------------------
