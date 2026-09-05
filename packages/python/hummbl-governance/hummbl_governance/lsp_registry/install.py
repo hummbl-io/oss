@@ -12,13 +12,45 @@ import platform
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import urllib.request
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger("hummbl_governance.lsp_registry.install")
+
+
+def _safe_extract_tar(tf: tarfile.TarFile, dest: str) -> None:
+    """Extract tar archive with path-traversal protection (tar slip / CVE-2007-4559).
+
+    Rejects members whose resolved path escapes the destination directory.
+    On Python 3.12+ delegates to the stdlib ``filter="data"`` parameter.
+    """
+    if sys.version_info >= (3, 12):
+        tf.extractall(dest, filter="data")
+        return
+    dest_path = os.path.realpath(dest)
+    for member in tf.getmembers():
+        member_path = os.path.realpath(os.path.join(dest, member.name))
+        if not member_path.startswith(dest_path + os.sep) and member_path != dest_path:
+            raise ValueError(f"Refusing to extract path outside destination: {member.name}")
+    tf.extractall(dest)
+
+
+def _safe_extract_zip(zf: zipfile.ZipFile, dest: str) -> None:
+    """Extract zip archive with path-traversal protection (zip slip).
+
+    Rejects entries whose resolved path escapes the destination directory.
+    """
+    dest_path = os.path.realpath(dest)
+    for name in zf.namelist():
+        member_path = os.path.realpath(os.path.join(dest, name))
+        if not member_path.startswith(dest_path + os.sep) and member_path != dest_path:
+            raise ValueError(f"Refusing to extract path outside destination: {name}")
+    zf.extractall(dest)
 
 # ---------------------------------------------------------------------------
 # Installation recipes
@@ -208,20 +240,14 @@ def _install_binary(recipe: InstallRecipe) -> bool:
 
             # Extract
             if recipe.archive_type == "zip":
-                import zipfile
-
                 with zipfile.ZipFile(archive_path, "r") as zf:
-                    zf.extractall(tmpdir)
+                    _safe_extract_zip(zf, str(tmpdir))
             elif recipe.archive_type in ("tar.gz", "tgz"):
-                import tarfile
-
                 with tarfile.open(archive_path, "r:gz") as tf:
-                    tf.extractall(tmpdir)
+                    _safe_extract_tar(tf, str(tmpdir))
             elif recipe.archive_type == "tar.xz":
-                import tarfile
-
                 with tarfile.open(archive_path, "r:xz") as tf:
-                    tf.extractall(tmpdir)
+                    _safe_extract_tar(tf, str(tmpdir))
             elif recipe.archive_type == "gz":
                 import gzip
                 import shutil
