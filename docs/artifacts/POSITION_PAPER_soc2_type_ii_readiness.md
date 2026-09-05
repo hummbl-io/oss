@@ -49,13 +49,13 @@ SOC 2 has 5 Trust Service Criteria (TSC): Common, Security, Availability, Proces
 | ----------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | CC1: Control Environment                  | Doctrine (10 principles), Charter (HRI authority), Board (5 Directors)               | docs/artifacts/DOCTRINE_ai_governance.md, CHARTER_hri.md, governance/board/registry.yaml                                 |
 | CC2: Communication and Information        | Coordination bus (TSV), KRINEIA receipts, claims manifest                            | the coordination bus log, _receipts/krineia/primary.jsonl, web/manifest/claims-provenance.json |
-| CC3: Risk Assessment                      | Risk register (10 risks), SWOT (6 threats), Board risk reviews                       | docs/artifacts/RISK_REGISTER.md, SWOT_hummbl_current_state.md, BRIEFING_BOOK_board_q3_2026.md                            |
-| CC4: Monitoring Activities                | Health endpoint (8 probes), CI checks (P7 claims, P11 manifest), wave retrospectives | hummbl_governance/services/health.py, .github/workflows/claims-validation.yml, RETROSPECTIVE_wave_*.md                   |
+| CC3: Risk Assessment | Risk assessment and review process described in the original paper | Private supporting records omitted; operation and counts are not publicly verified here. |
+| CC4: Monitoring Activities                | Health endpoint (8 probes), CI checks (P7 claims, P11 manifest), wave retrospectives | hummbl_governance/services/health.py, .github/workflows/claims-validation.yml (private retrospective support omitted)                   |
 | CC5: Control Activities                   | KillSwitch, CircuitBreaker, DelegationToken, CapabilityFence                         | hummbl-governance library (8 primitives)                                                                                 |
 | CC6: Logical and Physical Access Controls | Agent identity registry, model tier policy, GPG signing                              | hummbl_governance/services/agent_identity.py, .agents/rules/model-tier-policy.md, GPG key [REDACTED-GPG-KEY]               |
 | CC7: System Operations                    | Deployment checklist, runbook, fleet rollout playbook                                | docs/artifacts/PLAYBOOK_fleet_rollout.md, deploy-checklist skill                                                         |
 | CC8: Change Management                    | Claims change playbook, ADR process, single-branch workflow (ADR-004)                | docs/artifacts/PLAYBOOK_claims_change.md, docs/adr/, ADR-004                                                             |
-| CC9: Risk Mitigation                      | Risk register, mitigation plans, Board risk reviews                                  | docs/artifacts/RISK_REGISTER.md, BRIEFING_BOOK_board_q3_2026.md                                                          |
+| CC9: Risk Mitigation | Mitigation planning and review described in the original paper | Private supporting records omitted; operating effectiveness is not publicly verified here. |
 
 ### 2.2 Security (SC1-SC7)
 
@@ -209,10 +209,10 @@ HUMMBL should NOT:
 
 ## 8. How to verify this paper
 
-A reader can re-verify this paper's claims by:
+The following are historical checks of selected supporting artifacts, not proof of SOC 2 readiness or operating effectiveness. Private and external-repository evidence may be unavailable to a public reader; file presence alone does not validate a control:
 
 1. **The artifact stack exists:** `ls docs/artifacts/ARTIFACT_MANIFEST.md`
-2. **The risk register exists:** `ls docs/artifacts/RISK_REGISTER.md`
+2. **Risk-assessment support:** Private records are omitted; this public tree does not provide verification of their contents or operating effectiveness.
 3. **The doctrine exists:** `ls docs/artifacts/DOCTRINE_ai_governance.md`
 4. **The charter exists:** `ls docs/artifacts/CHARTER_hri.md`
 5. **The evidence pack exists:** `ls docs/artifacts/EVIDENCE_PACK_fleet_rollout.md`
@@ -229,8 +229,7 @@ If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`
 ## References
 
 - White paper: `docs/artifacts/WHITE_PAPER_governance_infrastructure.md` (item 1)
-- Strategic plan: `docs/artifacts/STRATEGIC_PLAN_12mo.md` (item 2)
-- Risk register: `docs/artifacts/RISK_REGISTER.md` (item 3)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - Competitive analysis: `docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md` (item 4)
 - Doctrine: `docs/artifacts/DOCTRINE_ai_governance.md` (item 11)
 - Charter: `docs/artifacts/CHARTER_hri.md` (item 12)
@@ -239,8 +238,6 @@ If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`
 - Fleet rollout playbook: `docs/artifacts/PLAYBOOK_fleet_rollout.md` (item 15)
 - Agent onboarding playbook: `docs/artifacts/PLAYBOOK_agent_onboarding.md` (item 23)
 - ADR-004: `docs/adr/ADR-004-single-branch-workflow.md` (item 22)
-- Briefing book: `docs/artifacts/BRIEFING_BOOK_board_q3_2026.md` (item 18)
-- SWOT: `docs/artifacts/SWOT_hummbl_current_state.md` (item 19)
 - Claims manifest: `web/manifest/claims-provenance.json`
 - KRINEIA receipt chain: `_receipts/krineia/primary.jsonl`
 - hummbl-governance: https://github.com/hummbl-io/hummbl-governance (Apache 2.0)

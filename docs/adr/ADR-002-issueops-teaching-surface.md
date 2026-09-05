@@ -7,7 +7,7 @@
 - **Supersedes:** none
 - **Superseded by:** none
 - **Tracking issue:** hummbl-production#410
-- **Business case:** `docs/artifacts/BUSINESS_CASE_issueops.md` (item 5)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 
 ## Context
 
@@ -127,23 +127,18 @@ This ADR does not make HUMMBL a certification body, a Notified Body, or a NIST-r
 
 ## How to verify this ADR
 
-A reader can re-verify this ADR's claims by:
+These checks locate selected supporting artifacts; file presence does not validate the decision rationale. Private business-case and planning evidence is omitted. External repository checks require access and are not guaranteed public verification:
 
-1. **The business case exists** — `ls docs/artifacts/BUSINESS_CASE_issueops.md`
-2. **The business case recommends Option A** — `grep "Option A: Build Phase 1 (recommended)" docs/artifacts/BUSINESS_CASE_issueops.md`
-3. **The strategic plan exists** — `ls docs/artifacts/STRATEGIC_PLAN_12mo.md`
-4. **The competitive analysis exists** — `ls docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md`
-5. **The white paper exists** — `ls docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
-6. **The tracking issue exists** — `gh issue view 410 --repo hummbl-io/hummbl-production`
-7. **This ADR is in the manifest** — `grep "ADR-002" docs/artifacts/ARTIFACT_MANIFEST.md`
+1. **The competitive analysis exists** — `ls docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md`
+2. **The white paper exists** — `ls docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
+3. **The tracking issue exists** — `gh issue view 410 --repo hummbl-io/hummbl-production`
+4. **This ADR is in the manifest** — `grep "ADR-002" docs/artifacts/ARTIFACT_MANIFEST.md`
 
 If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`.
 
 ## References
 
-- Business case: `docs/artifacts/BUSINESS_CASE_issueops.md` (item 5)
 - White paper: `docs/artifacts/WHITE_PAPER_governance_infrastructure.md` (item 1)
-- Strategic plan: `docs/artifacts/STRATEGIC_PLAN_12mo.md` (item 2)
 - Competitive analysis: `docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md` (item 4)
 - Doctrine: `docs/artifacts/DOCTRINE_ai_governance.md` (item 11)
 - Charter: `docs/artifacts/CHARTER_hri.md` (item 12)

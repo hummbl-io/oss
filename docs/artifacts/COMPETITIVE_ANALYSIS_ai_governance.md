@@ -311,8 +311,7 @@ HUMMBL's strategic plan (Day 2) bets on category definition over feature competi
 ## References
 
 - White paper: `docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
-- Strategic plan: `docs/artifacts/STRATEGIC_PLAN_12mo.md`
-- Risk register: `docs/artifacts/RISK_REGISTER.md`
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - Gartner Magic Quadrant for AI Governance Platforms (June 2026)
 - Forrester Wave: AI Governance Solutions (Q3 2025)
 - EU AI Act (Regulation 2024/1689) — high-risk obligations enforceable Dec 2, 2027

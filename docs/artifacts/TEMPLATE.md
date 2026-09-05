@@ -53,7 +53,7 @@
 
 ## 7. How to verify this artifact
 
-A reader can re-verify every claim in this artifact independently:
+<List public verification methods for supported claims. Identify any unavailable support explicitly; do not present private evidence as independently verifiable.>
 
 1. **<Claim 1>** — <how to verify (URL, file path, command)>
 2. **<Claim 2>** — <how to verify>
@@ -123,5 +123,3 @@ Before promoting to live:
 - [ ] Commit on working branch
 - [ ] Cherry-pick to wave branch (use `bash scripts/promote_to_wave_branch.sh`)
 - [ ] Bus STATUS posted to hummbl-governance coordination bus
-
-Origin: P4 from RETROSPECTIVE_wave_1.md. Extracted from wave 1 artifact patterns (Days 6-10).
