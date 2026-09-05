@@ -1,9 +1,9 @@
 """Research Queue Processor -- uses local LLM to process research questions.
 
-Reads a research queue (JSON array of questions), uses qwen3.5:9b on nodezero
+Reads a research queue (JSON array of questions), uses qwen3.5:9b on the inference host
 to generate findings for each, and ingests results into the Open Brain ledger.
 
-Designed to run on nodezero as a launchd cron (every 2 hours) where Ollama and
+Designed to run on the inference host as a launchd cron (every 2 hours) where Ollama and
 the Open Brain server are both local.
 
 Idempotent: tracks processed question hashes in a state file so re-runs skip

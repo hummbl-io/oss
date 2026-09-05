@@ -12,7 +12,7 @@ Usage:
     python -m hummbl_cognition.autoresearch_bridge run --dry-run
     python -m hummbl_cognition.autoresearch_bridge status
 
-Designed to run on nodezero as a cron job (every 30 minutes or hourly).
+Designed to run on the inference host as a cron job (every 30 minutes or hourly).
 """
 
 from __future__ import annotations

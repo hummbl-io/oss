@@ -10,7 +10,7 @@ Usage:
     results = brain.search("OAuth token refresh")
 
     # Or with explicit URL
-    brain = OpenBrainClient("http://100.64.0.1:11435")
+    brain = OpenBrainClient("http://localhost:11435")
 
 CLI:
     python -m hummbl_cognition.client search "OAuth refresh"
@@ -142,7 +142,7 @@ class OpenBrainClient:
         """Send entries from a local brain to the remote brain (federation).
 
         Used by secondary brains (e.g., Windows Desktop) to sync findings
-        to the primary brain on nodezero.
+        to the primary brain on the inference host.
         """
         return self._request("POST", "/ingest", {"entries": entries})
 
