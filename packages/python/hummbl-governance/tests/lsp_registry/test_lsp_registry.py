@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import os
 
 import pytest
@@ -312,6 +313,84 @@ class TestRegistryExtensibility:
 
         reg.unregister("custom-test-2")
         assert ".cust2" not in reg._by_extension or reg._by_extension[".cust2"] == []
+
+
+class TestSafeExtraction:
+    """Tests for path-traversal protection in archive extraction."""
+
+    def test_safe_extract_zip_rejects_path_traversal(self, tmp_path: str) -> None:
+        """_safe_extract_zip should reject entries that escape the destination."""
+        import io
+        import zipfile
+
+        from hummbl_governance.lsp_registry.install import _safe_extract_zip
+
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr("../../evil.txt", "malicious")
+
+        buf.seek(0)
+        with zipfile.ZipFile(buf, "r") as zf:
+            with pytest.raises(ValueError, match="outside destination"):
+                _safe_extract_zip(zf, str(tmp_path))
+
+    def test_safe_extract_tar_rejects_path_traversal(self, tmp_path: str) -> None:
+        """_safe_extract_tar should reject members that escape the destination."""
+        import tarfile
+
+        from hummbl_governance.lsp_registry.install import _safe_extract_tar
+
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+            info = tarfile.TarInfo(name="../../evil.txt")
+            info.size = 9
+            tf.addfile(info, io.BytesIO(b"malicious"))
+
+        buf.seek(0)
+        with tarfile.open(fileobj=buf, mode="r:gz") as tf:
+            # Python 3.12+ stdlib filter="data" raises OutsideDestinationError;
+            # our manual fallback raises ValueError. Both indicate the path
+            # traversal was blocked.
+            try:
+                _safe_extract_tar(tf, str(tmp_path))
+                raise AssertionError("Expected extraction to be blocked")
+            except (ValueError, tarfile.OutsideDestinationError) as exc:
+                assert "outside" in str(exc).lower()
+
+    def test_safe_extract_zip_allows_normal_files(self, tmp_path: str) -> None:
+        """_safe_extract_zip should extract normal files without error."""
+        import zipfile
+
+        from hummbl_governance.lsp_registry.install import _safe_extract_zip
+
+        archive = tmp_path / "test.zip"
+        with zipfile.ZipFile(archive, "w") as zf:
+            zf.writestr("normal.txt", "safe content")
+            zf.writestr("subdir/nested.txt", "nested content")
+
+        with zipfile.ZipFile(archive, "r") as zf:
+            _safe_extract_zip(zf, str(tmp_path))
+
+        assert (tmp_path / "normal.txt").read_text() == "safe content"
+        assert (tmp_path / "subdir" / "nested.txt").read_text() == "nested content"
+
+    def test_safe_extract_tar_allows_normal_files(self, tmp_path: str) -> None:
+        """_safe_extract_tar should extract normal files without error."""
+        import tarfile
+
+        from hummbl_governance.lsp_registry.install import _safe_extract_tar
+
+        archive = tmp_path / "test.tar.gz"
+        with tarfile.open(archive, "w:gz") as tf:
+            data = b"safe content"
+            info = tarfile.TarInfo(name="normal.txt")
+            info.size = len(data)
+            tf.addfile(info, io.BytesIO(data))
+
+        with tarfile.open(archive, "r:gz") as tf:
+            _safe_extract_tar(tf, str(tmp_path))
+
+        assert (tmp_path / "normal.txt").read_bytes() == b"safe content"
 
 
 if __name__ == "__main__":
