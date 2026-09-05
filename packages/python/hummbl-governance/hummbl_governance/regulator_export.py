@@ -66,6 +66,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -313,11 +314,13 @@ class RegulatorExport:
 
     SCHEMA_VERSION = "1.0.0"
 
+    _CHAIN_FILENAME = ".hash_chain.json"
+
     def __init__(self, state_dir: Path | str | None = None) -> None:
         self.state_dir = Path(state_dir) if state_dir else Path(
             ".regulator_exports"
         )
-        self._previous_hashes: dict[str, str] = {}
+        self._previous_hashes: dict[str, str] = self._load_chain()
 
     def export(
         self,
@@ -417,8 +420,9 @@ class RegulatorExport:
             boundary_disclaimer=BOUNDARY_DISCLAIMERS.get(framework, ""),
         )
 
-        # Update hash chain for this framework
+        # Update and persist hash chain for this framework
         self._previous_hashes[framework.value] = export_hash
+        self._persist_chain()
         return envelope
 
     def export_to_file(
@@ -449,6 +453,38 @@ class RegulatorExport:
     # Internal helpers
     # ------------------------------------------------------------------
 
+    def _load_chain(self) -> dict[str, str]:
+        """Load the persisted hash chain from ``state_dir``.
+
+        The chain file maps ``framework.value`` -> last ``export_hash``.
+        Returns an empty dict if the file is absent or corrupt (fail-safe:
+        a broken chain file produces ``previous_export_hash=None`` rather
+        than raising, which the regulator can detect as a chain break).
+        """
+        chain_path = self.state_dir / self._CHAIN_FILENAME
+        try:
+            raw = json.loads(chain_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+        if not isinstance(raw, dict):
+            return {}
+        return {
+            str(k): str(v)
+            for k, v in raw.items()
+            if isinstance(k, str) and isinstance(v, str)
+        }
+
+    def _persist_chain(self) -> None:
+        """Atomically persist the hash chain to ``state_dir``."""
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        chain_path = self.state_dir / self._CHAIN_FILENAME
+        tmp = chain_path.with_suffix(".json.tmp")
+        tmp.write_text(
+            json.dumps(self._previous_hashes, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+        os.replace(tmp, chain_path)
+
     def _resolve_framework(self, fmt: ExportFormat, report: Any) -> Framework:
         """Resolve the target framework from format or report."""
         if fmt == ExportFormat.GENERIC_JSON:
@@ -457,7 +493,12 @@ class RegulatorExport:
             for fw in Framework:
                 if fw.value.upper().replace("-", "_") == report_fw:
                     return fw
-            return Framework.EU_AI_ACT  # safe default
+            raise ValueError(
+                f"generic_json format could not resolve framework from "
+                f"report.framework={getattr(report, 'framework', None)!r}; "
+                "either set a recognized framework on the report or use a "
+                "format-specific export."
+            )
         return REGULATOR_FORMATS[fmt]
 
     def _validate_system_identity(self, identity: dict[str, Any]) -> None:
