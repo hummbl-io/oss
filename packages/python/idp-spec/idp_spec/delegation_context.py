@@ -29,6 +29,7 @@ IDP_E_DEPTH_EXCEEDED = "IDP_E_DEPTH_EXCEEDED"
 IDP_E_INVALID_STATE_TRANSITION = "IDP_E_INVALID_STATE_TRANSITION"
 IDP_E_REPLAN_LIMIT = "IDP_E_REPLAN_LIMIT"
 IDP_E_CAPABILITY_ESCALATION = "IDP_E_CAPABILITY_ESCALATION"
+IDP_E_BUDGET_ESCALATION = "IDP_E_BUDGET_ESCALATION"
 # G3: Dynamic trust-decay depth exceeded
 IDP_E_TRUST_DEPTH_EXCEEDED = "IDP_E_TRUST_DEPTH_EXCEEDED"
 
@@ -91,11 +92,36 @@ class DelegationBudget:
     """Budget constraints for delegation.
 
     Matches IDP_SPEC.md DCTX.budget schema.
+    Tracks allocated resources to prevent subtree budget explosion.
     """
 
     max_tokens: int = 0  # 0 = unlimited
     max_cost_usd: float = 0.0  # 0.0 = unlimited
     max_wall_time_seconds: int = 0  # 0 = unlimited
+    allocated_tokens: int = 0
+    allocated_cost_usd: float = 0.0
+    allocated_wall_time_seconds: int = 0
+
+    @property
+    def remaining_tokens(self) -> int:
+        """Remaining tokens available for subdelegation (0 if unlimited)."""
+        if self.max_tokens <= 0:
+            return 0
+        return max(0, self.max_tokens - self.allocated_tokens)
+
+    @property
+    def remaining_cost_usd(self) -> float:
+        """Remaining cost available for subdelegation (0.0 if unlimited)."""
+        if self.max_cost_usd <= 0.0:
+            return 0.0
+        return max(0.0, self.max_cost_usd - self.allocated_cost_usd)
+
+    @property
+    def remaining_wall_time_seconds(self) -> int:
+        """Remaining wall time available for subdelegation (0 if unlimited)."""
+        if self.max_wall_time_seconds <= 0:
+            return 0
+        return max(0, self.max_wall_time_seconds - self.allocated_wall_time_seconds)
 
     def is_exceeded(self, tokens: int = 0, cost: float = 0.0, seconds: int = 0) -> bool:
         """Check if current usage exceeds budget."""
@@ -184,6 +210,9 @@ class DelegationContext:
                 "max_tokens": self.budget.max_tokens,
                 "max_cost_usd": self.budget.max_cost_usd,
                 "max_wall_time_seconds": self.budget.max_wall_time_seconds,
+                "allocated_tokens": self.budget.allocated_tokens,
+                "allocated_cost_usd": self.budget.allocated_cost_usd,
+                "allocated_wall_time_seconds": self.budget.allocated_wall_time_seconds,
             },
             "status": self.status,
             "created_at": self.created_at,
@@ -200,6 +229,9 @@ class DelegationContext:
             max_tokens=budget_data.get("max_tokens", 0),
             max_cost_usd=budget_data.get("max_cost_usd", 0.0),
             max_wall_time_seconds=budget_data.get("max_wall_time_seconds", 0),
+            allocated_tokens=budget_data.get("allocated_tokens", 0),
+            allocated_cost_usd=budget_data.get("allocated_cost_usd", 0.0),
+            allocated_wall_time_seconds=budget_data.get("allocated_wall_time_seconds", 0),
         )
         return cls(
             intent_id=data["intent_id"],
@@ -341,6 +373,41 @@ class DelegationContext:
             if not child_set.issubset(parent_set):
                 return None, IDP_E_CAPABILITY_ESCALATION
 
+        # Subtree budget attenuation & allocation
+        child_budget: DelegationBudget
+        if budget is not None:
+            # Escalation check: Child cannot ask for unlimited when parent is bounded,
+            # nor exceed parent's remaining pool.
+            if self.budget.max_tokens > 0:
+                if budget.max_tokens <= 0 or budget.max_tokens > self.budget.remaining_tokens:
+                    return None, IDP_E_BUDGET_ESCALATION
+            if self.budget.max_cost_usd > 0.0:
+                if budget.max_cost_usd <= 0.0 or budget.max_cost_usd > self.budget.remaining_cost_usd:
+                    return None, IDP_E_BUDGET_ESCALATION
+            if self.budget.max_wall_time_seconds > 0:
+                if budget.max_wall_time_seconds <= 0 or budget.max_wall_time_seconds > self.budget.remaining_wall_time_seconds:
+                    return None, IDP_E_BUDGET_ESCALATION
+            child_budget = DelegationBudget(
+                max_tokens=budget.max_tokens,
+                max_cost_usd=budget.max_cost_usd,
+                max_wall_time_seconds=budget.max_wall_time_seconds,
+            )
+        else:
+            # Child inherits remaining budget from parent
+            child_budget = DelegationBudget(
+                max_tokens=self.budget.remaining_tokens if self.budget.max_tokens > 0 else 0,
+                max_cost_usd=self.budget.remaining_cost_usd if self.budget.max_cost_usd > 0.0 else 0.0,
+                max_wall_time_seconds=self.budget.remaining_wall_time_seconds if self.budget.max_wall_time_seconds > 0 else 0,
+            )
+
+        # Decrement parent's remaining capacity by recording allocation
+        if child_budget.max_tokens > 0:
+            self.budget.allocated_tokens += child_budget.max_tokens
+        if child_budget.max_cost_usd > 0.0:
+            self.budget.allocated_cost_usd += child_budget.max_cost_usd
+        if child_budget.max_wall_time_seconds > 0:
+            self.budget.allocated_wall_time_seconds += child_budget.max_wall_time_seconds
+
         return (
             DelegationContext(
                 intent_id=self.intent_id,  # Same intent (shared tree)
@@ -351,12 +418,7 @@ class DelegationContext:
                 contract_id=contract_id,
                 risk_tier=risk_tier or self.risk_tier,
                 chain_depth=self.chain_depth + 1,
-                budget=budget
-                or DelegationBudget(
-                    max_tokens=self.budget.max_tokens,
-                    max_cost_usd=self.budget.max_cost_usd,
-                    max_wall_time_seconds=self.budget.max_wall_time_seconds,
-                ),
+                budget=child_budget,
                 ops_allowed=child_ops,
                 status="PROPOSED",
             ),
