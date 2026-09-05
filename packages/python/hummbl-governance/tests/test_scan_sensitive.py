@@ -36,6 +36,14 @@ scan_sensitive = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(scan_sensitive)
 
 
+@pytest.fixture(autouse=True)
+def isolated_scanner_environment(monkeypatch):
+    monkeypatch.delenv("SKIP_SENSITIVE_SCAN", raising=False)
+    def forbidden_subprocess(*args, **kwargs):
+        raise AssertionError("Focused scanner tests must not invoke external processes")
+    monkeypatch.setattr(scan_sensitive.subprocess, "run", forbidden_subprocess)
+
+
 # --- Pattern detection tests ------------------------------------------------
 
 
@@ -87,9 +95,15 @@ class TestCriticalPatterns:
         assert scan_sensitive.CRITICAL in severities
 
     def test_ssh_key_filename(self):
-        findings = scan_sensitive.scan_line("cp ~/.ssh/id_ed25519_fleet /tmp/")
+        findings = scan_sensitive.scan_line("cp ~/.ssh/id_ed25519_synthetic /tmp/")
         severities = [f[0] for f in findings]
         assert scan_sensitive.CRITICAL in severities
+
+    @pytest.mark.parametrize("name", ["id_ed25519.pub", "id_rsa_synthetic.pub",
+                                      "id_ed25519_synthetic-name.pub"])
+    def test_public_key_filename_is_not_private_key(self, name):
+        assert not any(f[2] == "SSH private-key filename"
+                       for f in scan_sensitive.scan_line(name))
 
     def test_ssn(self):
         findings = scan_sensitive.scan_line("SSN: 123-45-6789")
@@ -98,195 +112,76 @@ class TestCriticalPatterns:
 
 
 class TestHighPatterns:
-    """HIGH severity patterns — infrastructure details."""
+    @pytest.mark.parametrize("text", [
+        "node.example.ts.net", "Patient MRN:123456",
+        "C:" + "/Users/" + "synthetic/.config",
+        "c:" + "\\users\\" + "synthetic/data",
+        "D:" + "\\\\Users\\\\" + "synthetic/data",
+        "/" + "home/synthetic/projects",
+        "/" + "Users/synthetic/projects",
+        "node at 100." + "64.0.1", "node at 100." + "127.255.255",
+    ])
+    def test_generic_high_shapes(self, text):
+        assert scan_sensitive.HIGH in [f[0] for f in scan_sensitive.scan_line(text)]
 
-    def test_hummbl_vps_hostname(self):
-        findings = scan_sensitive.scan_line("ssh to hummbl-vps for deployment")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
+    @pytest.mark.parametrize("address", [
+        "100.63.255.255", "100.128.0.0", "100.255.0.1", "100." + "64.256.1",
+        "192.0.2.10", "203.0.113.7",
+    ])
+    def test_non_cgnat_or_invalid_not_classified_as_cgnat(self, address):
+        assert not any(f[2] == "CGNAT IPv4 address"
+                       for f in scan_sensitive.scan_line(address))
 
-    def test_ts_net_domain(self):
-        findings = scan_sensitive.scan_line("anvil.tail093e19.ts.net")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_public_vps_ip(self):
-        findings = scan_sensitive.scan_line("server at 5.161.114.121")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_delta_public_ip(self):
-        findings = scan_sensitive.scan_line("delta is at 32.140.210.42")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_windows_user_path(self):
-        findings = scan_sensitive.scan_line("Config at C:\\Users\\reuben\\.config")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_windows_user_path_case_insensitive(self):
-        findings = scan_sensitive.scan_line("config at c:\\users\\reuben\\data")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_unix_home_path(self):
-        findings = scan_sensitive.scan_line("cd /home/reuben/projects")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_opt_hummbl_path(self):
-        findings = scan_sensitive.scan_line("bus at /opt/hummbl-governance/_state/")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_bus_cache_path(self):
-        findings = scan_sensitive.scan_line("mirror at .cache/bus/messages.tsv")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_coordination_path(self):
-        findings = scan_sensitive.scan_line("_state/coordination/messages.tsv")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_tailscale_ip(self):
-        findings = scan_sensitive.scan_line("node at 100.64.0.1")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_mrn_phi(self):
-        findings = scan_sensitive.scan_line("Patient MRN:123456")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_internal_port_in_context(self):
-        findings = scan_sensitive.scan_line("bus port 18790 is open")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.HIGH in severities
-
-    def test_internal_port_without_context_not_flagged(self):
-        findings = scan_sensitive.scan_line("The number 18790 appeared")
-        labels = [f[2] for f in findings]
-        assert not any("port" in l.lower() for l in labels)
+    def test_public_address_and_port_need_private_custom_config(self):
+        text = "server at 192.0.2.10 port 45678"
+        assert scan_sensitive.scan_line(text) == []
+        patterns = scan_sensitive._build_active_patterns({"custom_patterns": [
+            {"severity": "HIGH", "category": "ip", "label": "site address",
+             "pattern": r"\b192\.0\.2\.10\b"},
+            {"severity": "HIGH", "category": "port", "label": "site service port",
+             "pattern": r"\bport\s+45678\b"},
+        ]})
+        findings = scan_sensitive.scan_line(text, patterns)
+        assert {f[2] for f in findings} == {"site address", "site service port"}
 
 
 class TestMediumPatterns:
-    """MEDIUM severity patterns — fleet hostnames, personal domains, emails."""
+    @pytest.mark.parametrize("text", ["host=fixture-node", "machine = fixture-node.example"])
+    def test_explicit_host_assignment(self, text):
+        assert scan_sensitive.MEDIUM in [f[0] for f in scan_sensitive.scan_line(text)]
 
-    def test_anvil_hostname_in_context(self):
-        findings = scan_sensitive.scan_line("running on anvil today")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_anvil_hostname_host_equals(self):
-        findings = scan_sensitive.scan_line("host=anvil status=OK")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_anvil_hostname_possessive(self):
-        findings = scan_sensitive.scan_line("anvil's SQLite database")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_anvil_word_not_flagged(self):
-        """The word 'anvil' as a tool/object should not be flagged."""
-        findings = scan_sensitive.scan_line("The blacksmith struck the anvil with a hammer")
-        labels = [f[2] for f in findings]
-        assert not any("anvil" in l for l in labels)
-
-    def test_delta_hostname_in_context(self):
-        findings = scan_sensitive.scan_line("host=delta session started")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_delta_hostname_devin_delta(self):
-        findings = scan_sensitive.scan_line("prior session (devin-delta) closed")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_delta_word_not_flagged(self):
-        """The word 'delta' meaning 'difference' should not be flagged."""
-        findings = scan_sensitive.scan_line("- **Delta**: No content delta.")
-        labels = [f[2] for f in findings]
-        assert not any("delta" in l.lower() for l in labels)
-
-    def test_huxley_hostname_in_context(self):
-        findings = scan_sensitive.scan_line("huxley is offline")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_huxley_hostname_author_tag(self):
-        findings = scan_sensitive.scan_line("**Author:** Devin (Huxley)")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_slate_hostname_in_context(self):
-        findings = scan_sensitive.scan_line("host=slate mesh watch")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_nodezero_hostname(self):
-        findings = scan_sensitive.scan_line("nodezero dormant since July")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_rpbx_domain(self):
-        findings = scan_sensitive.scan_line("previously owned rpbx.net")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
+    def test_bare_hostname_not_inferred(self):
+        assert scan_sensitive.scan_line("fixture-node is offline") == []
+        patterns = scan_sensitive._build_active_patterns({"custom_patterns": [
+            {"severity": "MEDIUM", "category": "hostname", "label": "site host",
+             "pattern": r"\bfixture-node\b"},
+        ]})
+        assert any(f[2] == "site host" for f in
+                   scan_sensitive.scan_line("fixture-node is offline", patterns))
 
     def test_email_address(self):
-        findings = scan_sensitive.scan_line("contact: user@notexample.org")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
+        assert scan_sensitive.MEDIUM in [f[0] for f in
+               scan_sensitive.scan_line("contact: person@fixture.invalid")]
 
-    def test_email_address_example_com_excluded(self):
-        """RFC 2606 reserved example domains should not be flagged."""
-        findings = scan_sensitive.scan_line("contact: user@example.com")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM not in severities
+    @pytest.mark.parametrize("text", ["contact: user@example.com", "git@github.com:",
+                                      "timestamp 1719600901"])
+    def test_public_examples_and_numeric_ids(self, text):
+        assert scan_sensitive.scan_line(text) == []
 
-    def test_email_address_git_github_excluded(self):
-        """git@github.com is an SSH protocol string, not an email address."""
-        findings = scan_sensitive.scan_line("if raw.startswith(\"git@github.com:\"):")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM not in severities
-
-    def test_phone_number(self):
-        findings = scan_sensitive.scan_line("call 555-123-4567")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_phone_number_dots(self):
-        findings = scan_sensitive.scan_line("call 555.123.4567")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.MEDIUM in severities
-
-    def test_phone_number_no_separators_not_flagged(self):
-        """10-digit numbers without separators are likely timestamps/IDs, not phone numbers."""
-        findings = scan_sensitive.scan_line("timestamp 1719600901")
-        labels = [f[2] for f in findings]
-        assert not any("phone" in l.lower() for l in labels)
+    @pytest.mark.parametrize("text", ["call 202-555-0100", "call 202.555.0100"])
+    def test_phone_shape(self, text):
+        assert scan_sensitive.MEDIUM in [f[0] for f in scan_sensitive.scan_line(text)]
 
 
 class TestLowPatterns:
-    """LOW severity patterns — personal names."""
-
-    def test_full_name_reuben_paul_bowlby(self):
-        findings = scan_sensitive.scan_line("Authored by Reuben Paul Bowlby")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.LOW in severities
-
-    def test_full_name_reuben_bowlby(self):
-        findings = scan_sensitive.scan_line("Reuben Bowlby committed this")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.LOW in severities
-
-    def test_paul_verderber(self):
-        findings = scan_sensitive.scan_line("Paul Verderber was his grandfather")
-        severities = [f[0] for f in findings]
-        assert scan_sensitive.LOW in severities
+    def test_personal_names_only_when_configured(self):
+        text = "Authored by Synthetic Example"
+        assert scan_sensitive.scan_line(text) == []
+        patterns = scan_sensitive._build_active_patterns({"custom_patterns": [
+            {"severity": "LOW", "category": "pii", "label": "site person",
+             "pattern": "Synthetic Example"},
+        ]})
+        assert [f[0] for f in scan_sensitive.scan_line(text, patterns)] == [scan_sensitive.LOW]
 
 
 # --- Config system tests ----------------------------------------------------
@@ -297,24 +192,24 @@ class TestConfigSystem:
 
     def test_disable_pattern_by_label(self):
         config = {
-            "disable_patterns": ["full name 'Reuben Paul Bowlby'"],
+            "disable_patterns": ["email address"],
             "severity_overrides": {},
             "custom_patterns": [],
         }
         active = scan_sensitive._build_active_patterns(config)
         labels = [p[2] for p in active]
-        assert "full name 'Reuben Paul Bowlby'" not in labels
+        assert "email address" not in labels
 
     def test_severity_override(self):
         config = {
             "disable_patterns": [],
-            "severity_overrides": {"fleet hostname 'anvil'": "LOW"},
+            "severity_overrides": {"explicit host assignment": "LOW"},
             "custom_patterns": [],
         }
         active = scan_sensitive._build_active_patterns(config)
-        anvil = [p for p in active if p[2] == "fleet hostname 'anvil'"]
-        assert len(anvil) == 1
-        assert anvil[0][0] == "LOW"
+        host_rules = [p for p in active if p[2] == "explicit host assignment"]
+        assert len(host_rules) == 1
+        assert host_rules[0][0] == "LOW"
 
     def test_custom_pattern_added(self):
         config = {
@@ -336,14 +231,14 @@ class TestConfigSystem:
 
     def test_disabled_pattern_not_detected(self):
         config = {
-            "disable_patterns": ["full name 'Reuben Paul Bowlby'"],
+            "disable_patterns": ["email address"],
             "severity_overrides": {},
             "custom_patterns": [],
         }
         active = scan_sensitive._build_active_patterns(config)
-        findings = scan_sensitive.scan_line("Authored by Reuben Paul Bowlby", active)
+        findings = scan_sensitive.scan_line("contact: person@fixture.invalid", active)
         labels = [f[2] for f in findings]
-        assert "full name 'Reuben Paul Bowlby'" not in labels
+        assert "email address" not in labels
 
     def test_load_config_no_file(self, tmp_path):
         config = scan_sensitive._load_config(tmp_path)
@@ -371,12 +266,12 @@ class TestConfigSystem:
     def test_config_in_main_integration(self, tmp_path, monkeypatch):
         """End-to-end: config file disables a pattern, main() respects it."""
         f = tmp_path / "bio.md"
-        f.write_text("Authored by Reuben Paul Bowlby\n")
+        f.write_text("contact: person@fixture.invalid\n")
         config_file = tmp_path / ".vet-config.json"
         config_file.write_text(json.dumps({
             "disable_patterns": [
-                "full name 'Reuben Paul Bowlby'",
-                "full name 'Reuben Bowlby'",
+                "email address",
+                "email address",
             ],
         }))
         monkeypatch.chdir(tmp_path)
@@ -387,10 +282,10 @@ class TestConfigSystem:
         """End-to-end: severity override downgrades MEDIUM to LOW,
         --allow-warnings lets it through."""
         f = tmp_path / "fleet.md"
-        f.write_text("host=anvil status=OK\n")
+        f.write_text("host=fixture-node status=OK\n")
         config_file = tmp_path / ".vet-config.json"
         config_file.write_text(json.dumps({
-            "severity_overrides": {"fleet hostname 'anvil'": "LOW"},
+            "severity_overrides": {"explicit host assignment": "LOW"},
         }))
         monkeypatch.chdir(tmp_path)
         # Without --allow-warnings, LOW still blocks by default
@@ -415,7 +310,7 @@ class TestScanFile:
 
     def test_file_with_findings(self, tmp_path):
         f = tmp_path / "secret.md"
-        f.write_text("# Config\n\nTOKEN=gho_abc123\nhost=hummbl-vps\n")
+        f.write_text("# Config\n\nTOKEN=gho_abc123\nnode.example.ts.net\n")
         findings = scan_sensitive.scan_file(f)
         assert len(findings) >= 2
         severities = [f[1] for f in findings]
@@ -437,11 +332,11 @@ class TestScanText:
         assert findings == []
 
     def test_multiple_findings_one_line(self):
-        findings = scan_sensitive.scan_text("ssh to hummbl-vps with gho_abc123")
+        findings = scan_sensitive.scan_text("ssh to node.example.ts.net with gho_abc123")
         assert len(findings) >= 2
 
     def test_multiline_text(self):
-        text = "line 1 clean\nline 2 has gho_token\nline 3 clean\nline 4 has 5.161.114.121"
+        text = "line 1 clean\nline 2 has gho_token\nline 3 clean\nline 4 has node.example.ts.net"
         findings = scan_sensitive.scan_text(text)
         assert len(findings) == 2
         assert findings[0][0] == 2  # line 2
@@ -538,28 +433,28 @@ class TestMainIntegration:
 
     def test_high_finding_blocks(self, tmp_path, monkeypatch):
         f = tmp_path / "infra.md"
-        f.write_text("server at 5.161.114.121\n")
+        f.write_text("server at node.example.ts.net\n")
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f)])
         assert result == scan_sensitive.EXIT_BLOCKED
 
     def test_medium_only_blocks_without_allow_warnings(self, tmp_path, monkeypatch):
         f = tmp_path / "fleet.md"
-        f.write_text("host=anvil status=OK\n")
+        f.write_text("host=fixture-node status=OK\n")
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f)])
         assert result == scan_sensitive.EXIT_BLOCKED
 
     def test_medium_only_passes_with_allow_warnings(self, tmp_path, monkeypatch):
         f = tmp_path / "fleet.md"
-        f.write_text("host=anvil status=OK\n")
+        f.write_text("host=fixture-node status=OK\n")
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f), "--allow-warnings"])
         assert result == scan_sensitive.EXIT_CLEAN
 
     def test_allow_sensitive_bypasses_everything(self, tmp_path, monkeypatch):
         f = tmp_path / "secret.md"
-        f.write_text("gho_abc123 and 5.161.114.121\n")
+        f.write_text("gho_abc123 and node.example.ts.net\n")
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f), "--allow-sensitive"])
         assert result == scan_sensitive.EXIT_CLEAN
@@ -575,7 +470,7 @@ class TestMainIntegration:
     def test_allowlist_exempts_file(self, tmp_path, monkeypatch):
         f = tmp_path / "docs" / "REPO_STATUS.md"
         f.parent.mkdir()
-        f.write_text("host=hummbl-vps with gho_token123\n")
+        f.write_text("node.example.ts.net with gho_token123\n")
         allowlist = tmp_path / ".vet-allowlist"
         allowlist.write_text("docs/REPO_STATUS*.md\n")
         monkeypatch.chdir(tmp_path)
@@ -584,21 +479,27 @@ class TestMainIntegration:
 
     def test_mixed_critical_and_medium_blocks(self, tmp_path, monkeypatch):
         f = tmp_path / "mixed.md"
-        f.write_text("host=anvil status=OK\ntoken=gho_abc123\n")
+        f.write_text("host=fixture-node status=OK\ntoken=gho_abc123\n")
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f), "--allow-warnings"])
         assert result == scan_sensitive.EXIT_BLOCKED
 
     def test_low_only_blocks_without_allow_warnings(self, tmp_path, monkeypatch):
         f = tmp_path / "bio.md"
-        f.write_text("Authored by Reuben Paul Bowlby\n")
+        f.write_text("contact: person@fixture.invalid\n")
+        (tmp_path / ".vet-config.json").write_text(json.dumps({
+            "severity_overrides": {"email address": "LOW"},
+        }))
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f)])
         assert result == scan_sensitive.EXIT_BLOCKED
 
     def test_low_only_passes_with_allow_warnings(self, tmp_path, monkeypatch):
         f = tmp_path / "bio.md"
-        f.write_text("Authored by Reuben Paul Bowlby\n")
+        f.write_text("contact: person@fixture.invalid\n")
+        (tmp_path / ".vet-config.json").write_text(json.dumps({
+            "severity_overrides": {"email address": "LOW"},
+        }))
         monkeypatch.chdir(tmp_path)
         result = scan_sensitive.main(["--file", str(f), "--allow-warnings"])
         assert result == scan_sensitive.EXIT_CLEAN

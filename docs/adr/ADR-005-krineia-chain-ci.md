@@ -7,7 +7,7 @@
 - **Supersedes:** none
 - **Superseded by:** none
 - **Tracking issue:** none (process ADR)
-- **Retrospective:** `docs/artifacts/RETROSPECTIVE_wave_4.md` (P17)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 
 ## Context
 
@@ -127,7 +127,6 @@ A reader can verify this ADR is in effect by:
 
 ## References
 
-- Wave 4 retrospective: `docs/artifacts/RETROSPECTIVE_wave_4.md` (P17)
 - KRINEIA chain: `_receipts/krineia/primary.jsonl`
 - Receipt emission script: `scripts/emit_receipt.py`
 - Validator: `scripts/validate_krineia_chain.py`

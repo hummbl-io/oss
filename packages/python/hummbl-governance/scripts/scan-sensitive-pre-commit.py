@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
 """Pre-commit hook + standalone vetting tool: scan for sensitive data.
 
-Scans .md/.json/.yaml/.yml/.txt/.py/.ts/.js files for internal hostnames,
-Tailscale IPs, public IPs, token patterns, passwords, SSH keys, PII, PHI,
-internal paths, and personal references.
+Scans selected text files for generic secret, network, path and PII patterns.
+Deployment-specific hostnames, public addresses, ports and personal names must
+be supplied through custom_patterns in a privately maintained .vet-config.json.
+Do not publish that deployment registry with an extracted public package.
+
+Limitations: heuristic matches are review leads, not proof of a secret or
+publication clearance. Generic host assignments may flag public examples.
+Bare names, arbitrary public IPs and application paths are not classified by
+default. Config labels changed from deployment identities to generic categories;
+existing disable_patterns/severity_overrides need review against current labels.
+This legacy CLI scans working files selected by Git, not index blob contents.
+It skips unsupported/missing files and can treat Git/read/config errors as empty
+results; use the separate boundary gate for fail-closed extraction coverage.
+Allowlist and explicit bypass options retain their existing behavior.
 
 Modes:
     python scripts/scan-sensitive-pre-commit.py              # Pre-commit: scan staged files
@@ -16,8 +27,8 @@ Modes:
 Severity levels:
     CRITICAL - Tokens, passwords, private keys, SSN (always blocks)
     HIGH     - Internal IPs, paths, Tailscale domains, PHI (blocks by default)
-    MEDIUM   - Fleet hostnames, personal domains, email addresses (warns)
-    LOW      - Full names, personal references (info only)
+    MEDIUM   - Explicit host assignments, email addresses and phones (warns)
+    LOW      - Optional custom patterns (info only)
 
 Exit codes:
     0 - No findings, or only LOW/MEDIUM with --allow-warnings
@@ -38,8 +49,8 @@ Allowlist:
 Config:
     A .vet-config.json file in the repo root can customize pattern behavior:
     {
-      "disable_patterns": ["full name 'Reuben Paul Bowlby'"],
-      "severity_overrides": {"fleet hostname 'anvil'": "LOW"},
+      "disable_patterns": ["email address"],
+      "severity_overrides": {"explicit host assignment": "LOW"},
       "custom_patterns": [
         {"severity": "HIGH", "category": "custom", "label": "project codename",
          "pattern": "\\bPROJECT_X\\b"}
@@ -83,8 +94,8 @@ CONFIG_FILE = ".vet-config.json"
 
 # Default config structure:
 # {
-#   "disable_patterns": ["full name 'Reuben Paul Bowlby'", "personal domain 'rpbx.net'"],
-#   "severity_overrides": {"fleet hostname 'anvil'": "LOW"},
+#   "disable_patterns": ["email address", "explicit host assignment"],
+#   "severity_overrides": {"explicit host assignment": "LOW"},
 #   "custom_patterns": [
 #     {"severity": "HIGH", "category": "custom", "label": "internal project codename",
 #      "pattern": "\\bPROJECT_X\\b"}
@@ -100,8 +111,8 @@ DEFAULT_CONFIG: dict = {
 # Each entry: (severity, category, label, compiled_regex)
 # CRITICAL: Always block — real secrets that must never be committed.
 # HIGH: Block by default — infrastructure details that aid attackers.
-# MEDIUM: Warn — fleet hostnames, personal domains, emails. May be intentional.
-# LOW: Info only — full names, personal references. Usually fine in docs.
+# MEDIUM: Warn — host assignments and contact details may be intentional.
+# LOW: Info only — available for privately configured review rules.
 
 PatternDef = tuple[str, str, str, re.Pattern[str]]
 
@@ -117,93 +128,44 @@ PATTERNS: list[PatternDef] = [
      re.compile(r"\bsk-proj-[A-Za-z0-9_-]+")),
     (CRITICAL, "token", "DASHBOARD_TOKEN reference",
      re.compile(r"\bDASHBOARD_TOKEN\b")),
-    (CRITICAL, "token", "BUS_TOKEN reference",
-     re.compile(r"\bBUS_TOKEN\b")),
     (CRITICAL, "token", "CLOUDFLARE_API_TOKEN= assignment",
      re.compile(r"\bCLOUDFLARE_API_TOKEN\s*=\s*\S")),
-    (CRITICAL, "token", "bus-bridge-token reference",
-     re.compile(r"\bbus-bridge-token\b")),
-    (CRITICAL, "token", "bus-sender-tokens reference",
-     re.compile(r"\bbus-sender-tokens\b")),
     (CRITICAL, "password", "SITE_PASSWORD= assignment",
      re.compile(r"\bSITE_PASSWORD=")),
     (CRITICAL, "password", "PASSWORD= assignment",
      re.compile(r"\bPASSWORD=")),
     (CRITICAL, "key", "SSH private key block",
      re.compile(r"-----BEGIN (RSA |EC |OPENSSH |ED25519 )?PRIVATE KEY-----")),
-    (CRITICAL, "key", "SSH key id_ed25519_fleet",
-     re.compile(r"\bid_ed25519_fleet\b")),
+    (CRITICAL, "key", "SSH private-key filename",
+     re.compile(r"\bid_(?:rsa|dsa|ecdsa|ed25519)(?:_[A-Za-z0-9_-]+)?(?![A-Za-z0-9_.-])")),
     (CRITICAL, "pii", "Social Security Number",
      re.compile(r"\b\d{3}-\d{2}-\d{4}\b")),
 
-    # --- HIGH: Infrastructure details ---
-    (HIGH, "hostname", "internal hostname 'hummbl-vps'",
-     re.compile(r"\bhummbl-vps\b")),
-    (HIGH, "hostname", "internal hostname 'hummbl-runner'",
-     re.compile(r"\bhummbl-runner\b")),
-    (HIGH, "hostname", "internal hostname 'tail093e19'",
-     re.compile(r"\btail093e19\b")),
-    (HIGH, "domain", "internal Tailscale domain 'ts.net'",
-     re.compile(r"\bts\.net\b")),
-    (HIGH, "ip", "public VPS IP 5.161.114.121",
-     re.compile(r"\b5\.161\.114\.121\b")),
-    (HIGH, "ip", "delta public IP 32.140.210.x",
-     re.compile(r"\b32\.140\.210\.\d{1,3}\b")),
-    (HIGH, "path", "internal Windows user path 'C:\\Users\\reuben'",
-     re.compile(r"C:\\Users\\reuben", re.IGNORECASE)),
-    (HIGH, "path", "internal Unix path '/home/reuben'",
-     re.compile(r"/home/reuben")),
-    (HIGH, "path", "internal path '/opt/hummbl'",
-     re.compile(r"/opt/hummbl")),
-    (HIGH, "path", "internal bus cache path '.cache/bus'",
-     re.compile(r"\.cache/bus")),
-    (HIGH, "path", "internal coordination path '_state/coordination'",
-     re.compile(r"_state/coordination")),
-    (HIGH, "path", "internal loop-ledger path 'loop-ledger/'",
-     re.compile(r"loop-ledger/")),
+    # Generic infrastructure shapes; site-specific identities belong in config.
+    (HIGH, "domain", "Tailscale domain",
+     re.compile(r"\b(?:[A-Za-z0-9-]+\.)+ts\.net\b", re.IGNORECASE)),
+    (HIGH, "path", "Windows user home path",
+     re.compile(r"\b[A-Za-z]:[/\\]+Users[/\\]+[A-Za-z0-9._-]+", re.IGNORECASE)),
+    (HIGH, "path", "Unix user home path",
+     re.compile(r"(?<![A-Za-z0-9/])/(?:home|Users)/[A-Za-z0-9._-]+")),
     (HIGH, "phi", "medical record number 'MRN:'",
      re.compile(r"\bMRN[:\s]?\d{4,}\b", re.IGNORECASE)),
-
-    # --- MEDIUM: Fleet hostnames, personal domains, emails ---
-    # Ambiguous hostnames (common English words) are only flagged in
-    # hostname-like contexts: host=, machine=, on <name>, <name> session,
-    # <name>'s, <name> is/has/was, from <name>, to <name>, @<name>
-    # Distinctive hostnames are always flagged.
-    (MEDIUM, "hostname", "fleet hostname 'anvil'",
-     re.compile(r"(?:host=anvil|machine=anvil|\bon\s+anvil\b|anvil\'s\b|anvil\s+(?:is|has|was|session|started|resumed|completed|froze)|from\s+anvil|to\s+anvil|@anvil|devin-anvil|codex-anvil)", re.IGNORECASE)),
-    (MEDIUM, "hostname", "fleet hostname 'delta'",
-     re.compile(r"(?:host=delta|machine=delta|\bon\s+delta\b|delta\'s\b|delta\s+(?:has|was|session|started|resumed|completed|froze)|from\s+delta|to\s+delta|@delta|devin-delta|codex-delta)", re.IGNORECASE)),
-    (MEDIUM, "hostname", "fleet hostname 'huxley'",
-     re.compile(r"(?:host=huxley|machine=huxley|\bon\s+huxley\b|huxley\'s\b|huxley\s+(?:is|has|was|session|started|resumed|completed|froze)|from\s+huxley|to\s+huxley|@huxley|devin-huxley|codex-huxley|\(Huxley\))", re.IGNORECASE)),
-    (MEDIUM, "hostname", "fleet hostname 'slate'",
-     re.compile(r"(?:host=slate|machine=slate|\bon\s+slate\b|slate\'s\b|slate\s+(?:is|has|was|session|started|resumed|completed|froze)|from\s+slate|to\s+slate|@slate|devin-slate|codex-slate)", re.IGNORECASE)),
-    (MEDIUM, "hostname", "fleet hostname 'nodezero'",
-     re.compile(r"\bnodezero\b")),
-    (MEDIUM, "hostname", "fleet hostname 'beachhead'",
-     re.compile(r"\bbeachhead\b")),
-    (MEDIUM, "domain", "personal domain 'rpbx.net'",
-     re.compile(r"\brpbx\.net\b")),
+    (MEDIUM, "hostname", "explicit host assignment",
+     re.compile(r"\b(?:host|machine)\s*=\s*[A-Za-z0-9][A-Za-z0-9.-]*", re.IGNORECASE)),
     (MEDIUM, "pii", "email address",
      re.compile(r"\b(?!git@github\.com\b)[A-Za-z0-9._%+-]+@(?!example\.(com|net|org|edu)\b)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")),
     (MEDIUM, "pii", "US phone number",
      re.compile(r"\b\d{3}[-.]\d{3}[-.]\d{4}\b")),
 
-    # --- LOW: Personal references ---
-    (LOW, "pii", "full name 'Reuben Paul Bowlby'",
-     re.compile(r"Reuben\s+Paul\s+Bowlby")),
-    (LOW, "pii", "full name 'Reuben Bowlby'",
-     re.compile(r"Reuben\s+Bowlby")),
-    (LOW, "pii", "full name 'Paul Verderber'",
-     re.compile(r"Paul\s+Verderber")),
 ]
 
-# Tailscale IPs: 100.x.y.z (CGNAT range used by Tailscale)
-TAILSCALE_IP_RE = re.compile(r"\b100\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
-
-# Internal port numbers -- only flagged when "port" or "bind" appears nearby.
-INTERNAL_PORTS = {"18790", "8080", "3030", "2222"}
-PORT_CONTEXT_RE = re.compile(r"(?i)(port|bind)")
-PORT_CONTEXT_WINDOW = 40
+# RFC 6598 CGNAT addresses are review leads, not proof of Tailscale usage.
+# Kept as an always-on check for compatibility with scan_line(patterns=[]).
+TAILSCALE_IP_RE = re.compile(
+    r"\b100\.(?:6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])"
+    r"\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])"
+    r"\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\b"
+)
 
 # Severity order for display
 _SEVERITY_ORDER = {CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3}
@@ -349,22 +311,6 @@ def _is_allowlisted(rel_path: str, allowlist: list[str]) -> bool:
     return False
 
 
-def _check_port_in_context(line: str, port: str) -> bool:
-    """Return True if `port` appears in `line` with 'port' or 'bind' nearby."""
-    idx = 0
-    while True:
-        found = line.find(port, idx)
-        if found == -1:
-            return False
-        start = max(0, found - PORT_CONTEXT_WINDOW)
-        end = min(len(line), found + len(port) + PORT_CONTEXT_WINDOW)
-        window = line[start:end]
-        if PORT_CONTEXT_RE.search(window):
-            return True
-        idx = found + len(port)
-    return False
-
-
 # --- Scanning --------------------------------------------------------------
 
 
@@ -372,8 +318,8 @@ def scan_line(line: str, patterns: list[PatternDef] | None = None) -> list[tuple
     """Scan a single line; return list of (severity, category, label, matched_text).
 
     If patterns is provided, use those instead of the global PATTERNS list
-    (for config-driven pattern selection). Tailscale IPs and internal ports
-    are always checked.
+    (for config-driven pattern selection). CGNAT addresses are always checked.
+    Site-specific ports and identifiers require custom patterns.
     """
     findings: list[tuple[str, str, str, str]] = []
     active = patterns if patterns is not None else PATTERNS
@@ -382,22 +328,10 @@ def scan_line(line: str, patterns: list[PatternDef] | None = None) -> list[tuple
         for m in regex.finditer(line):
             findings.append((severity, category, label, m.group(0)))
 
-    # Tailscale IPs (always checked — not part of the configurable pattern list)
+    # CGNAT addresses (always checked; not necessarily a private deployment)
     for m in TAILSCALE_IP_RE.finditer(line):
         ip = m.group(0)
-        if ip == "5.161.114.121":
-            continue  # already flagged by the specific VPS IP pattern
-        findings.append((HIGH, "ip", "Tailscale CGNAT IP 100.x.x.x", ip))
-
-    # Internal ports in context (always checked)
-    for port in INTERNAL_PORTS:
-        for m in re.finditer(rf"\b{port}\b", line):
-            if _check_port_in_context(line, port):
-                findings.append((
-                    HIGH, "port",
-                    f"internal port {port} (with port/bind context)",
-                    m.group(0),
-                ))
+        findings.append((HIGH, "ip", "CGNAT IPv4 address", ip))
 
     return findings
 
