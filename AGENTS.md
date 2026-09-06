@@ -120,6 +120,24 @@ runtime dependencies, regenerate its lock file.
 5. Verify no internal docs (handoffs, AARs, receipts, trackers) are in the public repo
 6. If the package set changed: README, this file, `docs/PACKAGES.md`, CI matrix, publish tag filter
 
+## PR review protocol
+
+Before posting a "looks good" verdict on any PR that cites a regulation,
+standard, statute, white-paper, vendor claim, or other external source,
+verify the cited primary source in-session using `web_search`/`webfetch`
+(or equivalent toolchain) against the authoritative original (publisher,
+government register, standards body, canonical vendor docs).
+
+- **Verifiable in-session** — attach a brief primary-source receipt to the
+  review (URL + accessed date + relevant excerpt or section). The "looks good"
+  verdict is then evidence-backed.
+- **Unverifiable in-session** — soften the verdict to **"looks good pending
+  citation spot-check"** and quote the specific claim that needs independent
+  verification. Do not block the review, but do not give an unqualified
+  "looks good" either.
+- **No external sources cited** — this checkpoint does not apply; proceed
+  with the normal review rubric.
+
 ## Public/private boundary
 
 This is a **public** repository. Do not commit:
