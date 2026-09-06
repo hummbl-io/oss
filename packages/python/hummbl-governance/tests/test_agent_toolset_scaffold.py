@@ -86,6 +86,7 @@ def test_resolve_template_source_falls_back_to_script_repo_root(tmp_path: Path) 
 
 
 def test_resolve_template_source_checks_script_root_docs_casing(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
     repo = tmp_path / "repo"
     script_root = tmp_path / "external_scripts"
     template = script_root / "DOCS" / "operations" / "AGENT_TOOLSET_STARTER.md"
@@ -99,6 +100,7 @@ def test_resolve_template_source_checks_script_root_docs_casing(tmp_path: Path) 
 
 
 def test_resolve_template_source_exits_when_template_missing(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
     repo = tmp_path / "repo"
     script_root = tmp_path / "scripts"
     repo.mkdir()
