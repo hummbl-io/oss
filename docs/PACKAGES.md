@@ -94,7 +94,7 @@ Tree versions checked 2026-09-02.
 
 | Package | Tree | Status |
 |---------|------|--------|
-| `@hummbl/mcp-base120` | 0.1.0-canary.0 | Private, no-egress Base120 catalog canary. Corpus licensing, release provenance, hosted parity, and privacy gates remain open. |
+| `@hummbl/mcp-base120` | 0.1.0-canary.0 | Private, no-egress Base120 catalog canary. New public corpus redistribution is on hold; rights reconciliation, distributable-package architecture, release provenance, hosted parity, and privacy gates remain open. |
 
 Previously published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
@@ -105,6 +105,8 @@ operator on 2026-08-21**:
 The `@hummbl` scope still exists. Future npm packages publish under
 `@hummbl/*` from this monorepo only after their manifests become non-private
 and every product-admission blocker is cleared.
+The reusable v1 schema and repository validator fail closed on incompatible
+public-launch, package-license, content-rights, and admission states.
 
 **Name collisions (NOT HUMMBL's):** `mcp-server`, `hermes-agent`,
 `arbiter`, `arcana`, `crab`, `randy` on npm.

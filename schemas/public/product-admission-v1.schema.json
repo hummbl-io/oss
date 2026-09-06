@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/hummbl-io/oss/main/schemas/public/product-admission-v1.schema.json",
+  "title": "HUMMBL Product Admission Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "product_id",
+    "display_name",
+    "distribution",
+    "lifecycle",
+    "public_launch",
+    "admission",
+    "canonical_source",
+    "content_authorities",
+    "rights",
+    "contract",
+    "local_mode",
+    "excluded"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://raw.githubusercontent.com/hummbl-io/oss/main/schemas/public/product-admission-v1.schema.json"
+    },
+    "schema_version": { "const": "hummbl.product.v1" },
+    "product_id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "display_name": { "type": "string", "minLength": 1 },
+    "distribution": { "type": "string", "minLength": 1 },
+    "lifecycle": {
+      "enum": [
+        "technical-canary",
+        "private-preview",
+        "public-preview",
+        "general-availability",
+        "retired"
+      ]
+    },
+    "public_launch": { "type": "boolean" },
+    "admission": { "$ref": "#/$defs/admission" },
+    "canonical_source": { "$ref": "#/$defs/canonicalSource" },
+    "content_authorities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/contentAuthority" }
+    },
+    "rights": { "$ref": "#/$defs/rights" },
+    "contract": { "$ref": "#/$defs/contract" },
+    "local_mode": { "$ref": "#/$defs/localMode" },
+    "excluded": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "blockers"],
+      "properties": {
+        "decision": { "enum": ["hold", "admit", "retire"] },
+        "blockers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
+        }
+      }
+    },
+    "canonicalSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "path": { "$ref": "#/$defs/repositoryPath" }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package_license", "software_license", "embedded_content"],
+      "properties": {
+        "package_license": { "type": "string", "minLength": 1 },
+        "software_license": { "type": "string", "minLength": 1 },
+        "embedded_content": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/contentBoundary" }
+        }
+      }
+    },
+    "contentAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content_id", "repository", "path"],
+      "properties": {
+        "content_id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "path": { "$ref": "#/$defs/repositoryPath" }
+      }
+    },
+    "contentBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "content_id",
+        "license",
+        "distribution_policy",
+        "decision_record"
+      ],
+      "properties": {
+        "content_id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "license": { "type": "string", "minLength": 1 },
+        "distribution_policy": {
+          "enum": [
+            "private-only",
+            "no-new-public-redistribution",
+            "public-redistribution-approved"
+          ]
+        },
+        "decision_record": { "$ref": "#/$defs/repositoryPath" }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "protocol_versions", "tools", "mutations"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "protocol_versions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "tools": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+        },
+        "mutations": { "type": "boolean" }
+      }
+    },
+    "localMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["network_egress", "telemetry", "durable_writes"],
+      "properties": {
+        "network_egress": { "type": "boolean" },
+        "telemetry": { "type": "boolean" },
+        "durable_writes": { "type": "boolean" }
+      }
+    },
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    }
+  }
+}

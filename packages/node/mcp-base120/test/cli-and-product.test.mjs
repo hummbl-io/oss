@@ -20,7 +20,13 @@ test("product manifest keeps the technical canary non-public and no-egress", asy
   assert.equal(product.local_mode.telemetry, false);
   assert.equal(packageManifest.private, true);
   assert.equal(packageManifest.license, "UNLICENSED");
-  assert.ok(product.admission.blockers.includes("corpus-license"));
+  assert.ok(product.admission.blockers.includes("corpus-rights-reconciliation"));
+  assert.equal(product.rights.package_license, "UNLICENSED");
+  assert.equal(product.rights.software_license, "Apache-2.0");
+  assert.equal(
+    product.rights.embedded_content[0].distribution_policy,
+    "no-new-public-redistribution",
+  );
   assert.deepEqual(product.contract.tools.sort(), [
     "base120_get",
     "base120_list",

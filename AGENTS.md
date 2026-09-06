@@ -103,8 +103,10 @@ cd packages/node/mcp-base120 && npm ci && npm test
 - Extra job `test-hummbl-governance` runs Python **3.11 / 3.12 / 3.13** with
   pytest-cov. Other packages are not on that matrix.
 - Lean is **not** built in CI.
-- Node technical canaries run on Node 22 and must pass generated-artifact,
-  test, and package-content checks.
+- Node technical canaries run on Node 22 and must pass product-admission,
+  generated-artifact, test, and package-content checks. Product manifests use
+  `schemas/public/product-admission-v1.schema.json` and the repository
+  validator in `tools/scripts/validate_product_manifests.mjs`.
 - **Workflow validator**: `.github/workflows/validate-workflows.yml` — enforces SHA-pinning.
 - SHA-pinning is required (`sha_pinning_required: true`). Tag refs (`@v4`, `@main`) cause `startup_failure`.
 

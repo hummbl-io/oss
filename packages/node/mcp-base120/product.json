@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/hummbl-io/oss/main/schemas/public/product-admission-v1.schema.json",
   "schema_version": "hummbl.product.v1",
   "product_id": "mcp-base120",
   "display_name": "HUMMBL Base120 MCP",
@@ -8,7 +9,8 @@
   "admission": {
     "decision": "hold",
     "blockers": [
-      "corpus-license",
+      "corpus-rights-reconciliation",
+      "redistributable-package-architecture",
       "public-release-provenance",
       "hosted-contract-parity",
       "privacy-review"
@@ -18,10 +20,25 @@
     "repository": "hummbl-io/oss",
     "path": "packages/node/mcp-base120"
   },
-  "corpus_authority": {
-    "repository": "hummbl-io/oss",
-    "path": "packages/python/base120/Base120_Canonical_Model_Registry.yaml"
+  "rights": {
+    "package_license": "UNLICENSED",
+    "software_license": "Apache-2.0",
+    "embedded_content": [
+      {
+        "content_id": "base120-corpus",
+        "license": "Proprietary",
+        "distribution_policy": "no-new-public-redistribution",
+        "decision_record": "docs/product/base120-corpus-distribution-decision.md"
+      }
+    ]
   },
+  "content_authorities": [
+    {
+      "content_id": "base120-corpus",
+      "repository": "hummbl-io/oss",
+      "path": "packages/python/base120/Base120_Canonical_Model_Registry.yaml"
+    }
+  ],
   "contract": {
     "version": "hummbl.base120.catalog.v1",
     "protocol_versions": [

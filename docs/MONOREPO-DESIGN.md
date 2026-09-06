@@ -967,7 +967,7 @@ operator on 2026-08-21. The `@hummbl` scope is retained (operator owns
 it under the `hummbl-io` npm account). Phase 2 is a clean greenfield:
 publish fresh under `@hummbl/*` from this monorepo.
 
-- [ ] `@hummbl/mcp-base120` → `packages/node/mcp-base120/` (private technical canary; clear corpus-license, provenance, hosted-parity, and privacy blockers before publishing)
+- [x] `@hummbl/mcp-base120` → `packages/node/mcp-base120/` (private technical canary; new public corpus redistribution remains on hold pending rights reconciliation and a distributable-package boundary; provenance, hosted-parity, and privacy blockers also remain)
 - [ ] `@hummbl/mcp-server` → `packages/node/mcp-server/` (re-publish fresh under scope; old `@hummbl/mcp-server` v1.2.0 is deprecated)
 - [ ] `@hummbl/bibliography` → `packages/node/hummbl-bibliography/` (re-publish scoped; old unscoped `hummbl-bibliography` v1.0.0 is deprecated)
 - [ ] Other npm candidates from PACKAGES.md "Publishable but not yet on npm" section

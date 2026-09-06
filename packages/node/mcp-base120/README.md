@@ -4,7 +4,8 @@ Read-only, deterministic access to the frozen Base120 catalog through the
 Model Context Protocol (MCP).
 
 > **Technical canary:** this package is private and unpublished. Its source,
-> corpus licensing, release provenance, hosted parity, and privacy gates must
+> corpus-rights reconciliation, distributable-package architecture, release
+> provenance, hosted parity, and privacy gates must
 > be resolved before any public release.
 
 ## Contract
@@ -71,9 +72,11 @@ SHA-256 hashes.
 
 ## Product boundary
 
-The machine-readable boundary is [`product.json`](product.json). This canary
-must not be published or deployed until every blocking admission item is
-cleared. In particular, the existing Base120 software/corpus license language
-requires reconciliation before redistribution from npm.
+The machine-readable boundary is [`product.json`](product.json), validated
+against the repository's versioned product-admission schema. This canary must
+not be published or deployed until every blocking admission item is cleared.
+The current [corpus distribution decision](../../../docs/product/base120-corpus-distribution-decision.md)
+prohibits new public redistribution while the software/corpus boundary is
+reconciled.
 
 See [`SECURITY.md`](SECURITY.md) for reporting and current limitations.

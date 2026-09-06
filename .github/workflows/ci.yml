@@ -89,6 +89,12 @@ jobs:
         working-directory: packages/node/${{ matrix.package }}
         run: npm ci
 
+      - name: Test product admission validator
+        run: node --test tools/scripts/test_validate_product_manifests.mjs
+
+      - name: Validate product manifests
+        run: node tools/scripts/validate_product_manifests.mjs
+
       - name: Verify generated artifacts
         working-directory: packages/node/${{ matrix.package }}
         run: npm run check:generated
