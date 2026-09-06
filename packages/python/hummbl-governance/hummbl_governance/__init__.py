@@ -76,6 +76,15 @@ from hummbl_governance.attest import Attest, AttestResult, ALLOWLIST, BLOCKLIST,
 from hummbl_governance.delegation_context import DelegationContext, DelegationContextManager
 from hummbl_governance.identity import AgentRegistry, TrustTier
 from hummbl_governance.schema_validator import RefRegistry, RefResolutionError, SchemaValidator, ValidationError
+from hummbl_governance.sandbox_contracts import (
+    SandboxContractError,
+    SandboxContractKind,
+    load_sandbox_schema,
+    sandbox_contract_digest,
+    sandbox_receipt_digest,
+    validate_sandbox_bundle,
+    validate_sandbox_contract,
+)
 from hummbl_governance.contract_enforcement import (
     EnforcementResult,
     build_contract_registry,
@@ -324,6 +333,13 @@ __all__ = [
     "ValidationError",
     "RefRegistry",
     "RefResolutionError",
+    "SandboxContractError",
+    "SandboxContractKind",
+    "load_sandbox_schema",
+    "sandbox_contract_digest",
+    "sandbox_receipt_digest",
+    "validate_sandbox_bundle",
+    "validate_sandbox_contract",
     "EnforcementResult",
     "build_contract_registry",
     "enforce_compatibility_manifest",

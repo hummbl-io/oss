@@ -121,6 +121,7 @@ graph TD
 - **Zero third-party Core runtime dependencies** -- Python stdlib only, no pip conflicts
 - **Thread-safe** -- all modules use appropriate locking primitives
 - **Independently importable** -- use only the modules you need
+- **Experimental sandbox lifecycle contracts** -- closed schemas and fail-closed bundle validation for profiles, leases, checkpoints, receipts, and host-controlled kill switches; [validation is not runtime isolation](docs/standards/SANDBOX_LIFECYCLE_CONTRACT_V0.1.md)
 - **Python 3.13** is the public oss CI version. Package classifiers declare 3.11–3.13; a public 3.11/3.12/3.13 CI matrix is not verified (GAP-003).
 
 ## governance.yml
