@@ -7,7 +7,7 @@
 - **Supersedes:** none
 - **Superseded by:** none
 - **Tracking issue:** hummbl-production#408
-- **Business case:** `docs/artifacts/BUSINESS_CASE_game_engine.md` (item 6)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - **Status ledger:** `docs/reports/game-engine-roadmap-status-ledger.md`
 
 ## Context
@@ -136,24 +136,20 @@ This ADR does not make HUMMBL a game studio. The game engine roadmap is a produc
 
 ## How to verify this ADR
 
-A reader can re-verify this ADR's claims by:
+These checks locate selected supporting artifacts; file presence does not validate the decision rationale. Private business-case and planning evidence is omitted. External repository checks require access and are not guaranteed public verification:
 
-1. **The business case exists** — `ls docs/artifacts/BUSINESS_CASE_game_engine.md`
-2. **The business case asks for Stage 0 funding** — `grep "Stage 0 funding" docs/artifacts/BUSINESS_CASE_game_engine.md`
-3. **The roadmap exists** — `ls docs/product/GAME_ENGINE_ROADMAP.md` (commit 7fdf172)
-4. **The tracking issue exists** — `gh issue view 408 --repo hummbl-io/hummbl-production`
-5. **The white paper exists** — `ls docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
-6. **This ADR is in the manifest** — `grep "ADR-003" docs/artifacts/ARTIFACT_MANIFEST.md`
-7. **The hummbl-governance library exists** — `pip install hummbl-governance && python -c "import hummbl_governance; print(hummbl_governance.__version__)"`
+1. **The roadmap exists** — `ls docs/product/GAME_ENGINE_ROADMAP.md` (commit 7fdf172)
+2. **The tracking issue exists** — `gh issue view 408 --repo hummbl-io/hummbl-production`
+3. **The white paper exists** — `ls docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
+4. **This ADR is in the manifest** — `grep "ADR-003" docs/artifacts/ARTIFACT_MANIFEST.md`
+5. **The hummbl-governance library exists** — `pip install hummbl-governance && python -c "import hummbl_governance; print(hummbl_governance.__version__)"`
 
 If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`.
 
 ## References
 
-- Business case: `docs/artifacts/BUSINESS_CASE_game_engine.md` (item 6)
 - Roadmap: `docs/product/GAME_ENGINE_ROADMAP.md` (commit 7fdf172)
 - White paper: `docs/artifacts/WHITE_PAPER_governance_infrastructure.md` (item 1)
-- Strategic plan: `docs/artifacts/STRATEGIC_PLAN_12mo.md` (item 2)
 - Competitive analysis: `docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md` (item 4)
 - Doctrine: `docs/artifacts/DOCTRINE_ai_governance.md` (item 11)
 - Charter: `docs/artifacts/CHARTER_hri.md` (item 12)

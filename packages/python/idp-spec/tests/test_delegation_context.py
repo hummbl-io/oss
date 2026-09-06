@@ -530,5 +530,148 @@ class TestI2CapabilityAttenuation(unittest.TestCase):
         self.assertEqual(ctx.ops_allowed, ())
 
 
+class TestSubtreeBudgetContainment(unittest.TestCase):
+    """Test subtree budget attenuation, decrementation, and escalation prevention."""
+
+    def test_child_budget_decrements_parent_remaining(self):
+        """Child budget allocation decrements parent remaining capacity."""
+        parent = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="root",
+            delegatee_id="agent-a",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=1000, max_cost_usd=10.0),
+        )
+        self.assertEqual(parent.budget.remaining_tokens, 1000)
+        self.assertEqual(parent.budget.remaining_cost_usd, 10.0)
+
+        # Allocate child with 400 tokens and $4.0
+        child1, error = parent.create_child(
+            delegatee_id="agent-b",
+            contract_id="c-2",
+            budget=DelegationBudget(max_tokens=400, max_cost_usd=4.0),
+        )
+        self.assertIsNone(error)
+        self.assertIsNotNone(child1)
+        self.assertEqual(child1.budget.max_tokens, 400)
+        self.assertEqual(child1.budget.max_cost_usd, 4.0)
+        self.assertEqual(parent.budget.allocated_tokens, 400)
+        self.assertEqual(parent.budget.allocated_cost_usd, 4.0)
+        self.assertEqual(parent.budget.remaining_tokens, 600)
+        self.assertEqual(parent.budget.remaining_cost_usd, 6.0)
+
+    def test_child_budget_escalation_rejected(self):
+        """Child requesting more than parent's remaining budget is rejected."""
+        from idp_spec.delegation_context import IDP_E_BUDGET_ESCALATION
+
+        parent = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="root",
+            delegatee_id="agent-a",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=500, max_cost_usd=5.0),
+        )
+        # Attempt child with 600 tokens (> 500 remaining)
+        child, error = parent.create_child(
+            delegatee_id="agent-b",
+            contract_id="c-2",
+            budget=DelegationBudget(max_tokens=600, max_cost_usd=2.0),
+        )
+        self.assertIsNone(child)
+        self.assertEqual(error, IDP_E_BUDGET_ESCALATION)
+
+    def test_child_unlimited_budget_escalation_rejected(self):
+        """Child requesting unlimited (0) budget when parent is bounded is rejected."""
+        from idp_spec.delegation_context import IDP_E_BUDGET_ESCALATION
+
+        parent = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="root",
+            delegatee_id="agent-a",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=500, max_cost_usd=5.0),
+        )
+        # Attempt child with max_tokens=0 (unlimited)
+        child, error = parent.create_child(
+            delegatee_id="agent-b",
+            contract_id="c-2",
+            budget=DelegationBudget(max_tokens=0, max_cost_usd=2.0),
+        )
+        self.assertIsNone(child)
+        self.assertEqual(error, IDP_E_BUDGET_ESCALATION)
+
+    def test_child_inherits_remaining_budget_by_default(self):
+        """Child inherits remaining budget when budget is omitted."""
+        parent = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="root",
+            delegatee_id="agent-a",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=1000, max_cost_usd=10.0),
+        )
+        # First child inherits remaining 1000
+        child1, error1 = parent.create_child("agent-b", "c-2")
+        self.assertIsNone(error1)
+        self.assertEqual(child1.budget.max_tokens, 1000)
+        self.assertEqual(parent.budget.remaining_tokens, 0)
+
+        # Second child finds 0 remaining tokens in bounded parent and is rejected
+        from idp_spec.delegation_context import IDP_E_BUDGET_ESCALATION
+        child2, error2 = parent.create_child("agent-c", "c-3")
+        self.assertIsNone(child2)
+        self.assertEqual(error2, IDP_E_BUDGET_ESCALATION)
+
+    def test_unlimited_parent_delegates_unlimited_by_default(self):
+        """Child of unlimited parent inherits unlimited without accumulating fake allocation."""
+        parent = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="root",
+            delegatee_id="agent-a",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=0, max_cost_usd=0.0),
+        )
+        child, error = parent.create_child("agent-b", "c-2")
+        self.assertIsNone(error)
+        self.assertIsNotNone(child)
+        self.assertEqual(child.budget.max_tokens, 0)
+        self.assertEqual(parent.budget.allocated_tokens, 0)
+
+    def test_budget_allocation_serialization_roundtrip(self):
+        """allocated_* fields roundtrip through to_dict/from_dict."""
+        ctx = DelegationContext(
+            intent_id="i-1",
+            task_id="t-1",
+            delegator_id="a",
+            delegatee_id="b",
+            contract_id="c-1",
+            chain_depth=0,
+            budget=DelegationBudget(
+                max_tokens=1000,
+                max_cost_usd=10.0,
+                allocated_tokens=400,
+                allocated_cost_usd=4.0,
+            ),
+        )
+        d = ctx.to_dict()
+        self.assertEqual(d["budget"]["allocated_tokens"], 400)
+        self.assertEqual(d["budget"]["allocated_cost_usd"], 4.0)
+
+        restored = DelegationContext.from_dict(d)
+        self.assertEqual(restored.budget.allocated_tokens, 400)
+        self.assertEqual(restored.budget.allocated_cost_usd, 4.0)
+        self.assertEqual(restored.budget.remaining_tokens, 600)
+        self.assertEqual(restored.budget.remaining_cost_usd, 6.0)
+
+
 if __name__ == "__main__":
     unittest.main()

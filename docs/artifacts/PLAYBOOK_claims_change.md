@@ -303,7 +303,7 @@ If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`
 - KRINEIA receipt chain: `_receipts/krineia/primary.jsonl`
 - Doctrine: `docs/artifacts/DOCTRINE_ai_governance.md` (Principle 1 honesty, Principle 6 receipts)
 - Evidence pack: `docs/artifacts/EVIDENCE_PACK_fleet_rollout.md` (E1 receipt chain verification, E2 claims manifest verification)
-- Wave 1 retrospective: `docs/artifacts/RETROSPECTIVE_wave_1.md` (F1 encoding bug, P1 helper scripts, P3 utf-8 convention)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 
 ---
 

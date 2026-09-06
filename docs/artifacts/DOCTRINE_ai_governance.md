@@ -110,7 +110,7 @@ HUMMBL uses its own governance primitives to govern its own operations. The clai
 
 **Decision rule:** When HUMMBL builds a governance primitive, HUMMBL uses it on itself first. If the primitive is not good enough for HUMMBL's own operations, it is not good enough for customers. The case study (claims remediation 2026-06-23) is the proof: HUMMBL used its own claims manifest to catch its own claim errors.
 
-**Source:** Case study `CASE_STUDY_claims_remediation.md`; RETROSPECTIVE_wave_1.md (RSI loop).
+**Source:** Case study `CASE_STUDY_claims_remediation.md`. Private retrospective support is omitted and is not publicly verifiable here.
 
 ---
 
@@ -229,7 +229,7 @@ If any principle's source cannot be re-verified, open an issue at `hummbl-io/hum
 - EU AI Act position paper: `docs/artifacts/POSITION_PAPER_eu_ai_act.md`
 - NIST AI RMF position paper: `docs/artifacts/POSITION_PAPER_nist_ai_rmf.md`
 - Case study: `docs/artifacts/CASE_STUDY_claims_remediation.md`
-- Wave 1 retrospective: `docs/artifacts/RETROSPECTIVE_wave_1.md`
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - KRINEIA receipt chain: `_receipts/krineia/primary.jsonl`
 - Claims manifest: `web/manifest/claims-provenance.json`
 - EU AI Act coverage matrix: `hummbl-io/hummbl-governance/docs/coverage/eu-ai-act.md`

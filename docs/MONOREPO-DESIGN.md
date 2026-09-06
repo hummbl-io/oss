@@ -77,7 +77,7 @@ oss/
 │       ├── publish-crates.yml
 │       └── publish-jvm.yml
 ├── README.md
-├── LICENSE                  # Apache-2.0
+├── LICENSE                  # MIT OR Apache-2.0; check package-specific terms
 └── docs/                    # design docs (this file + PACKAGES.md)
     ├── MONOREPO-DESIGN.md   # this file
     └── PACKAGES.md          # full inventory
@@ -1033,10 +1033,13 @@ independently, it goes in the monorepo.
 
 ## 10. License
 
-All packages in this monorepo are **Apache-2.0**, matching the existing
-HUMMBL OSS license. The root `LICENSE` file applies to all packages
-unless a package directory contains its own `LICENSE` override (none
-currently do).
+The repository license is **MIT OR Apache-2.0**. Packages declare
+**Apache-2.0** or **MIT OR Apache-2.0** in their own manifests; consult
+each package's manifest and license files together before reuse or extraction.
+The repository default does not override package-specific or third-party terms.
+Missing or inconsistent package license evidence must be resolved before
+extracting that package. A passing consistency check that excludes known
+issues does not resolve those issues or establish redistribution rights.
 
 TeX papers under `papers/` may use **CC BY 4.0** for the document text
 while keeping code under Apache-2.0 — this is specified per-paper in
@@ -1053,7 +1056,7 @@ the paper's `LICENSE` file.
 | 2026-08-21 | Independent per-package versioning | Packages are independently useful libraries, not a unified platform |
 | 2026-08-21 | PyPI Trusted Publishing (OIDC) | No API tokens to rotate; GitHub-native auth |
 | 2026-08-21 | Per-language CI workflows | Fast CI -- Python change doesn't run Rust tests |
-| 2026-08-21 | Apache-2.0 for all packages | Consistent with existing HUMMBL OSS license |
+| 2026-08-21 | Apache-2.0 for all packages (superseded) | Historical design assumption; current package-specific policy is in section 10 |
 | 2026-08-21 | SHA-pin all workflow actions | Repo has `sha_pinning_required: true`; tag refs cause `startup_failure`. Learned from 4 failed runs during 1.4.1 publish |
 | 2026-08-21 | ASCII-only + LF for workflow YAML | Em-dash + CRLF caused `startup_failure` on this repo |
 | 2026-08-21 | Clean snapshot (no history) for private-repo migrations | Private repo history may contain PII (hostnames, paths, credentials); `git mv` would carry it into the public monorepo |

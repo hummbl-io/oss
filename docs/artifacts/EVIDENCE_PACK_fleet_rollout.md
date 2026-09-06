@@ -267,26 +267,9 @@ curl -s https://api.github.com/repos/hummbl-io/hummbl-governance | python3 -c "i
 pip install hummbl-governance  # should install from PyPI
 ```
 
-### E10: Wave 1 retrospective (RSI)
+### E10: Retrospective support omitted
 
-**What it is:** The retrospective that documents wave 1 friction and wave 2 process improvements.
-
-**Where to find it:** `docs/artifacts/RETROSPECTIVE_wave_1.md`
-
-**Evidence:**
-
-- 6 friction points identified (F1-F6)
-- 6 process improvements proposed (P1-P6)
-- P1 (helper scripts) and P4 (template) implemented
-- P3 (utf-8 convention) documented in AGENTS.md
-- Recursive self-improvement loop made structural
-
-**How to verify:**
-
-```bash
-cat docs/artifacts/RETROSPECTIVE_wave_1.md | grep "^### [FP][0-9]"
-# Should show F1-F6 and P1-P6
-```
+The original evidence pack relied on a private retrospective for its account of process improvements. That record is excluded from this public tree. Its friction counts, improvement counts, and implementation assertions cannot be independently re-verified here and are not offered as public evidence.
 
 ---
 
@@ -314,7 +297,7 @@ This evidence pack does NOT prove:
 
 1. **That HUMMBL's customers are satisfied** — HUMMBL has not yet disclosed customer references. The case study (`CASE_STUDY_claims_remediation.md`) is HUMMBL's own claims remediation, not a customer engagement.
 2. **That HUMMBL's governance is legally sufficient** — HUMMBL is not a Notified Body or a NIST-recognized assessor. Legal sufficiency depends on the customer's jurisdiction, use case, and counsel.
-3. **That HUMMBL's market position is dominant** — the market analysis (`MARKET_ANALYSIS_ai_governance.md`) shows the market is fragmented; HUMMBL is a new entrant.
+3. **Market position:** The original market-position argument relied on a private market analysis that is omitted from this public tree. This pack does not independently substantiate that market-position claim.
 4. **That HUMMBL's revenue is significant** — HUMMBL's 12-month SOM target is $0.5-1M ARR (tier C internal estimate).
 5. **That HUMMBL's governance is complete** — the coverage matrices show 19 boundary subcategories (NIST AI RMF) and 71 boundary articles (EU AI Act) that are the customer organization's responsibility.
 
@@ -359,7 +342,7 @@ If any of these conditions fail, the evidence pack's credibility is reduced. A r
 
 ## 7. How to verify this evidence pack
 
-A reader can re-verify every item in this pack independently by running the "How to verify" commands in §2. If any command does not produce the cited result, open an issue at `hummbl-io/hummbl-production/issues` and the claim will be corrected or removed per CONSTITUTION §3.1.
+Private retrospective support (E10) is omitted and cannot be re-verified here. The remaining historical checks may require external-repository access and do not establish current readiness. A reader can inspect the retained items using the "How to verify" commands in §2. If any command does not produce the cited result, open an issue at `hummbl-io/hummbl-production/issues` and the claim will be corrected or removed per CONSTITUTION §3.1.
 
 ---
 
@@ -372,11 +355,10 @@ A reader can re-verify every item in this pack independently by running the "How
 - NIST AI RMF coverage matrix: `hummbl-io/hummbl-governance/docs/coverage/nist-ai-rmf.md`
 - White paper: `docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
 - Competitive analysis: `docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md`
-- Market analysis: `docs/artifacts/MARKET_ANALYSIS_ai_governance.md`
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - Case study: `docs/artifacts/CASE_STUDY_claims_remediation.md`
 - Doctrine: `docs/artifacts/DOCTRINE_ai_governance.md`
 - Charter: `docs/artifacts/CHARTER_hri.md`
-- Wave 1 retrospective: `docs/artifacts/RETROSPECTIVE_wave_1.md`
 - CONSTITUTION: `CONSTITUTION.md` (§3.1 public claim honesty invariant)
 - Artifact manifest: `docs/artifacts/ARTIFACT_MANIFEST.md`
 

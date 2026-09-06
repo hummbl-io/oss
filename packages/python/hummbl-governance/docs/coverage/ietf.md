@@ -70,7 +70,7 @@ Investigated on this tree (hummbl-governance v1.4.2):
 
 This matrix is the **first SCITT / RFC 9943 mapping in this corpus** (none existed in `docs/coverage/` before 2026-08-31). HMAC receipts remain Partial, not Fulfilled.
 
-This matrix does not enumerate EU AI Act / Regulation (EU) 2026/1744, NIST AI 600-1 Action IDs, or NISTIR 8605D. Those are foreign overlays on [`docs/STANDARDS-CROSSWALK.md`](../../../../../docs/STANDARDS-CROSSWALK.md). COSAiS 8605D has no overlay control IDs yet (targeted 2027); no numbers are invented here. Annex III / Art. 6(2) Chapter III §§1–3 high-risk application is **2 December 2027** per Recital 40; this file does not treat 2 August 2026 as the current high-risk date.
+This matrix covers only the IETF rows presented here. Other standards overlays and jurisdiction-specific application dates are outside its scope. Private supporting crosswalks are not distributed with this package and cannot serve as publicly inspectable evidence.
 
 ## Draft coverage summary (not public claim)
 
@@ -79,6 +79,5 @@ This matrix is internal starter material. It must not be used as public evidence
 ## Cross-references
 
 - ADR: [`docs/adr/ADR-001-coverage-matrix-not-self-grade.md`](../adr/ADR-001-coverage-matrix-not-self-grade.md)
-- Fleet index (primitive↔family, coarser than this file): [`docs/STANDARDS-CROSSWALK.md`](../../../../../docs/STANDARDS-CROSSWALK.md)
 - HMAC vs HDP/AAT/AIMS narrative: [`docs/DELEGATION-IETF-GAP-ANALYSIS.md`](../../../../../docs/DELEGATION-IETF-GAP-ANALYSIS.md) (use the copy on this tree; do not fork PR 89)
 - Canonical primitives: [`PRIMITIVES.md`](../../PRIMITIVES.md)

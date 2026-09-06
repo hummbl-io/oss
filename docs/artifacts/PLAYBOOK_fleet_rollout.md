@@ -368,8 +368,7 @@ If any verification fails, open an issue at `hummbl-io/hummbl-production/issues`
 - Charter: `docs/artifacts/CHARTER_hri.md` (HRI authority)
 - Evidence pack: `docs/artifacts/EVIDENCE_PACK_fleet_rollout.md` (credibility pack)
 - Claims change playbook: `docs/artifacts/PLAYBOOK_claims_change.md` (item 14)
-- Wave 1 retrospective: `docs/artifacts/RETROSPECTIVE_wave_1.md`
-- Wave 2 retrospective: `docs/artifacts/RETROSPECTIVE_wave_2.md`
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - hummbl-governance: https://github.com/hummbl-io/hummbl-governance (Apache 2.0)
 - mesh-sync skill: `~/.claude/skills/mesh-sync/SKILL.md`
 - hummbl-governance: https://github.com/hummbl-io/hummbl-governance

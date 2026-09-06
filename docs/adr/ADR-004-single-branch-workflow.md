@@ -7,7 +7,7 @@
 - **Supersedes:** none
 - **Superseded by:** none
 - **Tracking issue:** none (process ADR)
-- **Retrospective:** `docs/artifacts/RETROSPECTIVE_wave_3.md` (F10, P12)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 
 ## Context
 
@@ -136,8 +136,6 @@ A reader can verify this ADR is in effect by:
 
 ## References
 
-- Wave 3 retrospective: `docs/artifacts/RETROSPECTIVE_wave_3.md` (F10, P12)
-- Wave 2 retrospective: `docs/artifacts/RETROSPECTIVE_wave_2.md` (F7, promote script fix)
 - Promote script: `scripts/promote_to_wave_branch.sh`
 - Claims validation CI: `.github/workflows/claims-validation.yml` (P7)
 - Manifest validation CI: `.github/workflows/manifest-validation.yml` (P11)

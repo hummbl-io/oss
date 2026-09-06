@@ -14,10 +14,54 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Minimal conftest for coverage-matrix tests."""
+"""Shared fixtures for hummbl-governance tests."""
 
+import os
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+_GIT_ENV_VARS = (
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_CONFIG",
+    "GIT_CONFIG_PARAMETERS",
+    "GIT_CONFIG_COUNT",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_IMPLICIT_WORK_TREE",
+    "GIT_GRAFT_FILE",
+    "GIT_INDEX_FILE",
+    "GIT_NO_REPLACE_OBJECTS",
+    "GIT_REPLACE_REF_BASE",
+    "GIT_PREFIX",
+    "GIT_SHALLOW_FILE",
+    "GIT_COMMON_DIR",
+    "GIT_QUARANTINE_PATH",
+)
+
+
+def _remove_git_env(environ):
+    """Remove repository-local Git variables and return their prior values."""
+    return {var: environ.pop(var) for var in _GIT_ENV_VARS if var in environ}
+
+
+def _restore_git_env(environ, saved):
+    """Restore the exact pre-session state for repository-local Git variables."""
+    for var in _GIT_ENV_VARS:
+        environ.pop(var, None)
+    environ.update(saved)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _strip_git_env():
+    """Keep subprocess Git commands isolated from the invoking worktree."""
+    saved = _remove_git_env(os.environ)
+    try:
+        yield
+    finally:
+        _restore_git_env(os.environ, saved)

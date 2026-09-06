@@ -265,14 +265,12 @@ The 5 commits are currently on `fix/claude/gitops-cleanup-from-april-audit`. Thi
 
 ### 7.2 PR scope
 
-The PR should include:
+This historical scope is retained only for the public artifacts below. Private decision-support documents are omitted and must not be added to a public PR; their recommendations and approval claims are not independently substantiated by this tree. The list is not a current promotion authorization:
 - `docs/proposals/PROPOSAL_artifact_stack_buildout.md` (commit `dc4e64f`)
-- `docs/artifacts/ARTIFACT_MANIFEST.md` (with all 5 items marked per this packet's decisions)
+- `docs/artifacts/ARTIFACT_MANIFEST.md` (public entries only; historical item numbers retained)
 - `docs/artifacts/WHITE_PAPER_governance_infrastructure.md` (with revisions)
-- `docs/artifacts/STRATEGIC_PLAN_12mo.md` (with revisions)
-- `docs/artifacts/RISK_REGISTER.md` (with revisions)
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - `docs/artifacts/COMPETITIVE_ANALYSIS_ai_governance.md` (with revisions)
-- `docs/artifacts/BUSINESS_CASE_issueops.md` (with revisions)
 - `docs/artifacts/ARTIFACT_STACK_PROMOTION_PACKET.md` (this file)
 - `web/manifest/claims-provenance.json` (with ~42 new claims)
 - KRINEIA receipt for the promotion

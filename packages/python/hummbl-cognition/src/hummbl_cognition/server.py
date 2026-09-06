@@ -16,7 +16,7 @@ Endpoints:
 
 Usage:
     python -m hummbl_cognition.server --port 11435 --host 0.0.0.0
-    python -m hummbl_cognition.server --bind 100.64.0.1:11435
+    python -m hummbl_cognition.server --bind 127.0.0.1:11435
 
 Default port 11435 (Ollama is 11434 — adjacent by convention).
 """

@@ -215,8 +215,7 @@ If any claim in this charter cannot be re-verified, open an issue at `hummbl-io/
 - CONSTITUTION: `CONSTITUTION.md` (§5 authority, §7 amendment)
 - Doctrine: `docs/artifacts/DOCTRINE_ai_governance.md`
 - White paper: `docs/artifacts/WHITE_PAPER_governance_infrastructure.md`
-- Strategic plan: `docs/artifacts/STRATEGIC_PLAN_12mo.md`
-- Wave 1 retrospective: `docs/artifacts/RETROSPECTIVE_wave_1.md`
+- Supporting private records are omitted from this public tree; claims depending on them cannot be independently re-verified here.
 - Board Constitution Registry: `hummbl-io/hummbl-governance/.agents/board/BOARD_CONSTITUTION_REGISTRY.md`
 - Board meeting orchestrator: `board-meeting-orchestrator` skill
 - Claims manifest: `web/manifest/claims-provenance.json`
