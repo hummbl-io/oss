@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -86,13 +87,28 @@ def _ollama_generate(
 
 
 def _is_kill_switch_engaged() -> bool:
-    """Check if the kill switch is engaged (safety gate)."""
+    """Check if the kill switch is engaged (safety gate).
+
+    Fail-closed: unavailable module, missing persisted state, or any
+    check error blocks consolidation. Persisted engage is loaded from
+    HUMMBL_STATE_DIR or KILL_SWITCH_STATE_DIR when set.
+    """
     try:
-        from hummbl_governance.kill_switch_core import get_kill_switch_core
+        from hummbl_governance.kill_switch import KillSwitch
     except ImportError:
-        return False
+        logger.warning(
+            "Kill switch module unavailable; blocking consolidation as fail-closed"
+        )
+        return True
     try:
-        return bool(get_kill_switch_core().engaged)
+        raw = os.environ.get("HUMMBL_STATE_DIR") or os.environ.get(
+            "KILL_SWITCH_STATE_DIR"
+        )
+        if raw:
+            ks = KillSwitch.load_from_file(Path(raw), require_hmac=False)
+        else:
+            ks = KillSwitch()
+        return bool(ks.engaged)
     except Exception as exc:
         logger.warning(
             "Kill switch check failed; blocking consolidation as fail-closed: %s",

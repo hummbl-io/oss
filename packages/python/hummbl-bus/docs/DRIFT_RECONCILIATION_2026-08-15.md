@@ -114,7 +114,7 @@ an older, smaller core.
 
 ### Features hummbl-governance has that hummbl-bus lacks
 
-- **Windows cross-process locking** (`_msvcrt_path_lock`, `_cross_process_lock`) — hummbl-bus is flock-only, will not run correctly on Windows. This is a platform-critical gap for the Anvil runner.
+- **Windows cross-process locking** (`_msvcrt_path_lock`, `_cross_process_lock`) — hummbl-bus is flock-only, will not run correctly on Windows. This is a platform-critical gap for the Windows runner.
 - **Secret redaction** (`_redact_secrets`, `_redact_url_credentials`, `_redact_metadata`) — hummbl-bus has no redaction layer.
 - **Bus path hygiene** (`resolve_canonical_bus_path`, `find_shadow_bus_paths`, `assert_local_bus_hygiene`, `_allowed_bus_roots`, `_validate_bus_path`) — hummbl-bus has no shadow-bus detection or path validation.
 - **Authority validation** (`_record_privileged_type_event`, `_extract_authority_field`, `_validate_privileged_message_type`, `_validate_authority_field`) — ties to `authority.py`. hummbl-bus has no privileged-write proofs.
@@ -148,7 +148,7 @@ genuinely absent, they are a protocol feature the cutover must preserve.
    events) and the hummbl-governance-only features (Windows locking, redaction,
    authority, host-tag, path hygiene).
 3. **Add Windows cross-process locking** to hummbl-bus. Without this, hummbl-bus
-   cannot be the canonical writer on Anvil (Windows). This is a platform
+   cannot be the canonical writer on the Windows workstation. This is a platform
    blocker, not a nice-to-have.
 4. **Add process-level concurrency tests** for the merged `bus_writer.py`,
    including Windows `msvcrt` locking and Unix `fcntl` locking.
@@ -216,7 +216,7 @@ Keep `hummbl-bus` at `0.1.0` extraction status. The drift has widened, not
 narrowed, since the last reconciliation. The cutover is a multi-PR program,
 not a single promotion. The single highest-risk gap is the missing Windows
 cross-process locking — without it, hummbl-bus cannot replace the hummbl-governance
-writer on Anvil regardless of how much other code is promoted.
+writer on the Windows workstation regardless of how much other code is promoted.
 
 **This gap is now closed** (PR #14, 2026-08-15).
 

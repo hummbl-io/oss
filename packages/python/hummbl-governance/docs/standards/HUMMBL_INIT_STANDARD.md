@@ -2,7 +2,7 @@
 
 **Status:** v0.1
 **Steward:** HUMMBL, LLC
-**Approving human:** Reuben Bowlby
+**Approving human:** HUMMBL Principal Agent
 **Source of record:** git
 **Depends on:** HUMMBL Repo Standard v0.1
 
@@ -461,4 +461,4 @@ Every initialization must be validated:
 ## 8. Amendment
 
 Changes to this standard require: a PR, an ADR, a KRINEIA receipt, and
-human approval (Reuben Bowlby).
+human approval (HUMMBL Principal Agent).
