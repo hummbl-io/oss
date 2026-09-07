@@ -99,11 +99,11 @@
   ],
 
   "host_patches": [
-    {"id": "delta", "name": "Delta", "description": "Arch Linux workstation, primary host"},
-    {"id": "anvil", "name": "Anvil", "description": "Windows 11, Gitea and fleet services"},
-    {"id": "hummbl-vps", "name": "VPS", "description": "Ubuntu 24.04 VPS, bus host"},
-    {"id": "beachhead", "name": "Beachhead", "description": "Ubuntu VPS, CI runners"},
-    {"id": "slate", "name": "Slate", "description": "Ubuntu 24.04 Surface Pro, mobile"}
+    {"id": "host-a", "name": "Host A", "description": "Primary workstation"},
+    {"id": "host-b", "name": "Host B", "description": "Secondary workstation"},
+    {"id": "host-c", "name": "Host C", "description": "Remote services host"},
+    {"id": "host-d", "name": "Host D", "description": "CI runner host"},
+    {"id": "host-e", "name": "Host E", "description": "Mobile workstation"}
   ],
 
   "ics_flags": [

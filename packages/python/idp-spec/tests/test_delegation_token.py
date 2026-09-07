@@ -339,10 +339,9 @@ class TestTokenValidation(unittest.TestCase):
         self.assertEqual(error, IDP_E_BINDING_MISMATCH)
 
     def test_feature_flag_disabled_validation(self):
-        """When ENABLE_IDP=false, all tokens valid (backward compat)."""
+        """When ENABLE_IDP=false, tokens are rejected (fail-closed)."""
         os.environ["ENABLE_IDP"] = "false"
         try:
-            # Even invalid signature passes when disabled
             invalid_token = DelegationCapabilityToken(
                 token_id="bad",
                 issuer="bad",
@@ -350,8 +349,8 @@ class TestTokenValidation(unittest.TestCase):
                 signature="invalid"
             )
             is_valid, error = self.manager.validate_token(invalid_token)
-            self.assertTrue(is_valid)  # Bypassed when disabled
-            self.assertIsNone(error)
+            self.assertFalse(is_valid)
+            self.assertEqual(error, IDP_E_TOKEN_INVALID)
         finally:
             os.environ["ENABLE_IDP"] = "true"
 

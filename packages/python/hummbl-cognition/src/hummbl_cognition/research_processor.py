@@ -301,13 +301,28 @@ def _save_state(state_file: Path, state: dict[str, Any]) -> None:
 
 
 def _is_kill_switch_engaged() -> bool:
-    """Check if the kill switch is engaged."""
+    """Check if the kill switch is engaged.
+
+    Fail-closed: unavailable module, missing persisted state, or any
+    check error blocks research. Persisted engage is loaded from
+    HUMMBL_STATE_DIR or KILL_SWITCH_STATE_DIR when set.
+    """
     try:
-        from hummbl_governance.kill_switch_core import get_kill_switch_core
+        from hummbl_governance.kill_switch import KillSwitch
     except ImportError:
-        return False
+        logger.warning(
+            "Kill switch module unavailable; blocking research as fail-closed"
+        )
+        return True
     try:
-        return bool(get_kill_switch_core().engaged)
+        raw = os.environ.get("HUMMBL_STATE_DIR") or os.environ.get(
+            "KILL_SWITCH_STATE_DIR"
+        )
+        if raw:
+            ks = KillSwitch.load_from_file(Path(raw), require_hmac=False)
+        else:
+            ks = KillSwitch()
+        return bool(ks.engaged)
     except Exception as exc:
         logger.warning(
             "Kill switch check failed; blocking research as fail-closed: %s", exc

@@ -2,7 +2,7 @@
 
 **Status:** v0.1 (draft)
 **Steward:** HUMMBL, LLC
-**Approving human:** Reuben Bowlby
+**Approving human:** HUMMBL Principal Agent
 **Source of record:** this file in `hummbl-io/hummbl-governance` (canonical)
 **Depends on:** HUMMBL Repo Standard v0.1
 **Reference implementation:** `scripts/hummbl_release.py` in this repo
@@ -318,7 +318,7 @@ The tool:
 ## 11. Amendment
 
 Changes to this standard require: a PR to `hummbl-io/hummbl-governance`, an
-ADR under `docs/adr/`, a KRINEIA receipt, and human approval (Reuben Bowlby).
+ADR under `docs/adr/`, a KRINEIA receipt, and human approval (HUMMBL Principal Agent).
 Breaking changes bump the standard version (SemVer) and trigger a fleet
 re-audit of all repos using CalVer.
 

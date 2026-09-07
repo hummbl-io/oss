@@ -77,10 +77,10 @@
     │    └─────────────┬───────────────────┘                    │
     │                  │                                        │
     │    ═══════════════╪═══════════════════ BOUNDARY 5         │
-    │                  │   (Agent -> Credential Manager)        │
+    │                  │   (Agent -> OS credential store)       │
     │                  │                                        │
     │    ┌─────────────▼───────────────────┐                    │
-    │    │   WINDOWS CREDENTIAL MANAGER    │                    │
+    │    │   OS CREDENTIAL STORE           │                    │
     │    │   (OS-managed token storage)    │                    │
     │    └─────────────────────────────────┘                    │
     │                                                           │
@@ -95,13 +95,13 @@
     └───────────────────────────────────────────────────────────┘
                │
         ═══════╪══════════════════════════════════════ BOUNDARY 6
-               │   (Tailscale WireGuard + ACLs)
+               │   (mesh VPN encryption + ACLs)
                │
     ┌──────────▼───────────────────────────────────────────────┐
-    │                  TAILSCALE MESH                           │
+    │                  MESH VPN                                 │
     │                                                          │
     │   ┌─────────┐     ┌─────────┐     ┌─────────┐           │
-    │   │  Anvil  │─────│  Delta  │─────│   VPS   │           │
+    │   │ host-a  │─────│ host-b  │─────│ host-c  │           │
     │   │ (agent  │     │ (agent  │     │ (bus    │           │
     │   │  host)  │     │  host)  │     │  bridge)│           │
     │   └─────────┘     └─────────┘     └─────────┘           │
@@ -131,8 +131,8 @@
 | 2 | Public -> Cloudflare -> internal | Cloudflare Access policy, TLS | Existing |
 | 3 | Gate -> GitHub API | Gate authorization, two-person rule | Built (gap-1) |
 | 4 | Credential -> API call | Auth provider abstraction (gap-3) | Built |
-| 5 | Agent -> Credential Manager | OS-managed token storage | Existing |
-| 6 | Host <-> Host (Tailscale) | WireGuard encryption, ACLs | Existing |
+| 5 | Agent -> OS credential store | OS-managed token storage | Existing |
+| 6 | Host <-> Host (mesh VPN) | Overlay encryption, ACLs | Existing |
 | 7 | Operator -> machine | OS login, physical access | Existing |
 
 ## Data flow descriptions
@@ -155,7 +155,7 @@ Agent CLI -> AuthProvider.resolve(agent_id) -> AgentCredential
 ```
 Agent CLI -> bus-global.py post <sender> <recipient> <type> <message>
           -> HTTP bridge (authenticated)
-          -> append to bus TSV file (local on VPS)
+          -> append to bus TSV file (local on the bus host)
           -> [FUTURE: gap-6 Merkle hash-chaining + STH publication]
 ```
 
@@ -163,7 +163,7 @@ Agent CLI -> bus-global.py post <sender> <recipient> <type> <message>
 
 ```
 GitHub PR/Push -> GitHub Actions webhook
-              -> Self-hosted runner on Anvil
+              -> Self-hosted runner on the operator workstation
               -> Checkout repo
               -> Run tests, lint, validators
               -> Report status to GitHub
