@@ -31,7 +31,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from hummbl_governance.cognition.ledger_writer import resolve_root
+from hummbl_governance.cognition.ledger_writer import ledger_path, resolve_root
 
 __all__ = ["build_index", "index_path", "load_index", "search_index"]
 
@@ -41,7 +41,17 @@ _TOKEN_RE = re.compile(r"[a-z0-9_]{2,}")
 
 
 def index_path(root: Path | None = None) -> Path:
-    """Return the index JSON path under *root* (default: :func:`resolve_root`)."""
+    """Return the index JSON path.
+
+    When ``$COGNITION_LEDGER`` is set (and *root* is not), the index is
+    placed alongside the ledger file.  Otherwise the index lives under
+    *root* (default: :func:`resolve_root`) at ``_state/cognition/index.json``.
+    """
+    import os
+
+    env = os.environ.get("COGNITION_LEDGER")
+    if env and root is None:
+        return Path(env).parent / "index.json"
     return (root or resolve_root()) / "_state" / "cognition" / "index.json"
 
 

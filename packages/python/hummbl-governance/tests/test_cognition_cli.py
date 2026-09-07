@@ -34,6 +34,7 @@ def ledger_root(tmp_path, monkeypatch):
     root = tmp_path / "gov"
     (root / "hummbl_governance").mkdir(parents=True)
     monkeypatch.setenv("HUMMBL_GOVERNANCE_ROOT", str(root))
+    monkeypatch.delenv("COGNITION_LEDGER", raising=False)
     return root
 
 
@@ -215,6 +216,22 @@ class TestSearchAndBoot:
 
     def test_resolve_root_env_wins(self, ledger_root):
         assert resolve_root() == ledger_root
+
+    def test_cognition_ledger_env_overrides_root(self, tmp_path, monkeypatch):
+        """$COGNITION_LEDGER takes priority over $HUMMBL_GOVERNANCE_ROOT."""
+        ledger_file = tmp_path / "fleet" / "ledger.jsonl"
+        ledger_file.parent.mkdir(parents=True)
+        ledger_file.write_text(
+            json.dumps({"id": "x1", "content": "fleet entry"}) + "\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("COGNITION_LEDGER", str(ledger_file))
+        monkeypatch.setenv("HUMMBL_GOVERNANCE_ROOT", str(tmp_path / "gov"))
+        from hummbl_governance.cognition.ledger_writer import ledger_path
+        assert ledger_path() == ledger_file
+        entries = load_entries()
+        assert len(entries) == 1
+        assert entries[0]["id"] == "x1"
 
     def test_load_entries_tolerates_legacy_non_utf8_bytes(self, ledger_root):
         from hummbl_governance.cognition.ledger_writer import ledger_path
