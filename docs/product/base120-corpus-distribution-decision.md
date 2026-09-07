@@ -47,18 +47,16 @@ commercial license, contradicted those facts. That paragraph is removed.
 
 ## What this does not do
 
-- Yank or unpublish `base120==3.0.0`.
+- Yank or unpublish `base120==3.0.0`. The 3.0.0 wheel keeps its original
+  NOTICE. The aligned NOTICE ships in `base120==3.0.1`.
 - Delete `operators.json` or the YAML registry from git.
 - Auto-admit PR #138. Corpus-rights contradiction is resolved in text;
   that PR stays **draft + `requires-review`** until a human reviews
   (operator 2026-09-07). No agent merge.
-- Change PyPI 3.0.0 wheel contents. The published wheel still contains
-  the prior NOTICE until the next `base120` release ships the aligned
-  file. Git/source is the live rights text now.
 
-## Follow-up (not this disposition)
+## Follow-up
 
-- Next `base120` release includes the aligned NOTICE in the wheel.
+- `base120==3.0.1` is the NOTICE-aligned wheel (tag `python/base120/v3.0.1`).
 - Rights-boundary CI: fail if NOTICE again claims trade secret for the
   published corpus files (package test covers NOTICE text).
 - PR #138 remains a human review item, not an agent sweep item.
