@@ -21,7 +21,7 @@ Pulling is the expensive fiction: `base120==3.0.0` is live, and
 | --- | --- |
 | Public git `main` | `packages/python/base120/base120/data/operators.json` — 120 operators, six families, each with `code`, `name`, `transformation`, `definition` |
 | Same tree | `packages/python/base120/Base120_Canonical_Model_Registry.yaml` |
-| PyPI | [`base120==3.0.0`](https://pypi.org/project/base120/) live; wheel includes `operators.json` via package-data |
+| PyPI | [`base120==3.0.2`](https://pypi.org/project/base120/3.0.2/) live (NOTICE-aligned); [`3.0.0`](https://pypi.org/project/base120/3.0.0/) remains published and is not yanked |
 | Copies | `hummbl-cognition` `base120_registry.json` (generated from the canonical registry) |
 
 Those files are the **published corpus**.
@@ -48,7 +48,7 @@ commercial license, contradicted those facts. That paragraph is removed.
 ## What this does not do
 
 - Yank or unpublish `base120==3.0.0`. The 3.0.0 wheel keeps its original
-  NOTICE. The aligned NOTICE ships in `base120==3.0.1`.
+  NOTICE. The aligned NOTICE ships in `base120==3.0.2`.
 - Delete `operators.json` or the YAML registry from git.
 - Auto-admit PR #138. Corpus-rights contradiction is resolved in text;
   that PR stays **draft + `requires-review`** until a human reviews
@@ -56,7 +56,8 @@ commercial license, contradicted those facts. That paragraph is removed.
 
 ## Follow-up
 
-- `base120==3.0.1` is the NOTICE-aligned wheel (tag `python/base120/v3.0.1`).
+- `base120==3.0.2` is the NOTICE-aligned wheel (tag `python/base120/v3.0.2`).
+  `3.0.1` was tagged but never published.
 - Rights-boundary CI: fail if NOTICE again claims trade secret for the
   published corpus files (package test covers NOTICE text).
 - PR #138 remains a human review item, not an agent sweep item.
