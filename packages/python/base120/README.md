@@ -723,7 +723,13 @@ Base120 is part of the [HUMMBL](https://hummbl.io) architecture:
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+Apache 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+The published Base120 corpus files in this package (`base120/data/operators.json`
+and the in-tree YAML registry) are part of that Apache-2.0 Work. They are not a
+trade secret. Trademarks listed in NOTICE are not licensed. See
+[docs/product/base120-corpus-distribution-decision.md](../../../docs/product/base120-corpus-distribution-decision.md)
+(issue #141).
 
 ---
 
@@ -748,3 +754,4 @@ Built by [HUMMBL LLC](https://hummbl.io). Base120 powers the cognitive layer beh
 - X/Twitter: [@ReubenBowlby](https://x.com/ReubenBowlby)
 - LinkedIn: [reuben-bowlby](https://www.linkedin.com/in/reuben-bowlby/)
 - Website: [hummbl.io](https://www.hummbl.io)
+

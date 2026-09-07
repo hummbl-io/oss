@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- (placeholder for upcoming changes)
+### Changed
+- NOTICE and corpus-distribution decision aligned with already-public state
+  (issue #141, architecture 3): published corpus files are Apache-2.0 Work,
+  not a trade secret. PyPI `base120==3.0.0` is not yanked; wheel NOTICE
+  updates on the next release.
 
 ## [v3.0.0] - 2026-08-20
 
