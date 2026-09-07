@@ -32,7 +32,7 @@ remain on `#79`.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
 | `hummbl-governance` | 1.4.2 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live — governance primitives for AI agent orchestration |
-| `base120` | 3.0.1 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
+| `base120` | 3.0.2 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
 | `hummbl-tuples` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
