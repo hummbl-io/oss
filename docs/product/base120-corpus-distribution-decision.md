@@ -1,46 +1,69 @@
-# Base120 Corpus Distribution Decision
+# Base120 corpus distribution decision
 
-Status: **HOLD for new public redistribution**; effective: 2026-09-05
-Applies to: `@hummbl/mcp-base120` and later artifacts that embed the Base120 corpus
+**Status:** Operator operational disposition, 2026-09-07
+**Issue:** [#141](https://github.com/hummbl-io/oss/issues/141)
+**Architecture chosen:** 3 — explicit public corpus
+**This is not legal advice and is not counsel-reviewed.** It records
+the operator's instruction to match already-public facts.
 
 ## Decision
 
-Do not publish a new downloadable package that embeds the Base120 names,
-codes, definitions, or transformation structure under the current rights
-record. Keep `@hummbl/mcp-base120` private and `UNLICENSED` while the software
-and corpus boundaries are reconciled.
+Treat the published Base120 corpus as published. Align rights text with
+the surfaces that already carry it. Do not pull the wheel. Do not keep
+trade-secret language for material that is on public GitHub and PyPI.
 
-The preferred product architecture separates the Apache-2.0 implementation
-from the proprietary corpus. A future public client may contain interfaces and
-transport code, while corpus access is supplied by a governed service under
-approved terms. That hosted route is also a HOLD until its contract, privacy,
-provenance, and rights reviews pass.
+Pulling is the expensive fiction: `base120==3.0.0` is live, and
+`operators.json` is on `main`.
 
-## Basis
+## What is public (inventory)
 
-- The repository's Base120 `NOTICE` distinguishes Apache-2.0 software from a
-  proprietary structured corpus.
-- [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) grants broad rights
-  for the work to which it is applied. It does not by itself establish which
-  separate content assets HUMMBL intended to include in that licensed work.
-- [npm's package manifest documentation](https://docs.npmjs.com/files/package.json/)
-  defines `"license": "UNLICENSED"` and `"private": true` as the controls for
-  an unpublished package that grants no package-use license and must not be
-  published.
+| Surface | What is there |
+| --- | --- |
+| Public git `main` | `packages/python/base120/base120/data/operators.json` — 120 operators, six families, each with `code`, `name`, `transformation`, `definition` |
+| Same tree | `packages/python/base120/Base120_Canonical_Model_Registry.yaml` |
+| PyPI | [`base120==3.0.2`](https://pypi.org/project/base120/3.0.2/) live (NOTICE-aligned); [`3.0.0`](https://pypi.org/project/base120/3.0.0/) remains published and is not yanked |
+| Copies | `hummbl-cognition` `base120_registry.json` (generated from the canonical registry) |
 
-This record is an operational release decision, not a new license or legal
-opinion. It does not retroactively characterize existing website or package
-exposures. Those exposures require a separate inventory and counsel-reviewed
-rights reconciliation.
+Those files are the **published corpus**.
 
-## Exit criteria
+## What the license already is
 
-Before any manifest changes to `public_launch: true`:
+`packages/python/base120/pyproject.toml` declares `license = "Apache-2.0"`
+and `license-files = ["LICENSE", "NOTICE"]`. The bundled corpus files are
+part of that Work. Apache-2.0 already permits use of the Work, including
+commercial use, subject to the License.
 
-1. Counsel-approved terms define the software, corpus, trademarks, permitted
-   use, and redistribution rights without contradiction.
-2. The distributable artifact contains only content approved for that channel,
-   or the corpus is removed behind the governed service boundary.
-3. Release provenance, hosted-contract parity, and privacy review are complete.
-4. The product manifest is changed to `admit` with no remaining blockers and
-   passes the repository admission validator.
+The prior NOTICE paragraph that called the definitions, names, codes, and
+transformation framework a trade secret, and that required a separate
+commercial license, contradicted those facts. That paragraph is removed.
+
+## What this does not license
+
+- Trademarks: HUMMBL™, BASE120™, and other marks in NOTICE. Apache-2.0
+  does not grant trademark rights.
+- Unpublished HUMMBL material that is not in this public tree.
+- A new grant beyond Apache-2.0. This disposition does not relicense; it
+  stops claiming secrecy for files that are already Apache-2.0 published.
+
+## What this does not do
+
+- Yank or unpublish `base120==3.0.0`. The 3.0.0 wheel keeps its original
+  NOTICE. The aligned NOTICE ships in `base120==3.0.2`.
+- Delete `operators.json` or the YAML registry from git.
+- Auto-admit PR #138. Corpus-rights contradiction is resolved in text;
+  that PR stays **draft + `requires-review`** until a human reviews
+  (operator 2026-09-07). No agent merge.
+
+## Follow-up
+
+- `base120==3.0.2` is the NOTICE-aligned wheel (tag `python/base120/v3.0.2`).
+  `3.0.1` was tagged but never published.
+- Rights-boundary CI: fail if NOTICE again claims trade secret for the
+  published corpus files (package test covers NOTICE text).
+- PR #138 remains a human review item, not an agent sweep item.
+
+## Related
+
+- `packages/python/base120/NOTICE`
+- `packages/python/base120/LICENSE`
+- Issue #141, PR #138

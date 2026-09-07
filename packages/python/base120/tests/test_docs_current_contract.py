@@ -93,6 +93,22 @@ def test_documented_sdk_version_matches_package_metadata() -> None:
     assert version in _read("README.md")
 
 
+def test_notice_matches_published_corpus() -> None:
+    """NOTICE must not claim trade secret for files already on GitHub and PyPI."""
+    notice = _read("NOTICE")
+    forbidden = [
+        "protected by copyright and trade secret",
+        "requires a separate commercial license",
+        "Proprietary Content Notice",
+    ]
+    for phrase in forbidden:
+        assert phrase not in notice, f"NOTICE still claims unpublished rights: {phrase!r}"
+    assert "Apache License" in notice
+    assert "operators.json" in notice
+    assert "not a trade secret" in notice
+    assert "docs/product/base120-corpus-distribution-decision.md" in notice
+
+
 def test_no_hummbl_dev_refs_in_public_files() -> None:
     """Public files must not reference the old hummbl-dev org."""
     public_files = [

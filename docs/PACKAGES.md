@@ -46,7 +46,7 @@ Tree versions checked 2026-09-02.
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
 | `hummbl-governance` | 1.4.2 | 1.4.2 | Governance primitives. |
-| `base120` | 3.0.0 | 3.0.0 | 120 reasoning operators. PyPI project URL may still point at the legacy standalone repo. |
+| `base120` | 3.0.2 | 3.0.2 | 120 reasoning operators. NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
 | `hummbl-tuples` | 0.2.0 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. |
 | `hummbl-bus` | 0.2.0 | 0.2.0 | TSV coordination bus. 0.2.0 was uploaded 2026-08-27 with **no** `python/hummbl-bus/v0.2.0` tag in this repo. Further bus publishes wait on the tag contract in `RELEASE.md`. |
