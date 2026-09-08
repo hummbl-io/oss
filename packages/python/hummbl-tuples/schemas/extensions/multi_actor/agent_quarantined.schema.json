@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "agent_id",
-        "quarantine_reason"
+        "quarantine_reason",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

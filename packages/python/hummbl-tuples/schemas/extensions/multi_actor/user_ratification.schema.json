@@ -53,7 +53,8 @@
         "actor_regime",
         "receipt_link",
         "visibility_class",
-        "ratified_claim"
+        "ratified_claim",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "merge_proposal_ref",
-        "merged_model"
+        "merged_model",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

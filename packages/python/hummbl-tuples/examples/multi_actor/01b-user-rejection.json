@@ -24,6 +24,7 @@
     "revocation_state": "active",
     "rejected_claim": "User appears to prefer morning meetings",
     "rejected_fragment_ref": "umf-001",
-    "rejection_reason": "I don't prefer morning meetings; the data was from a week with early deadlines"
+    "rejection_reason": "I don't prefer morning meetings; the data was from a week with early deadlines",
+    "independence_class": "single_lineage"
   }
 }

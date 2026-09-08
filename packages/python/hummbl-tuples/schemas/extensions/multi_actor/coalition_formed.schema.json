@@ -57,7 +57,8 @@
         "coalition_purpose",
         "coalition_members",
         "coalition_authority",
-        "coalition_expiry"
+        "coalition_expiry",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {
