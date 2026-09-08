@@ -23,6 +23,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from hummbl_bus.bridge_client import _auth_headers
 from hummbl_bus.bridge_server import BusBridgeHandler
 
 
@@ -253,6 +254,104 @@ class TestRemoteAgentNotInLocalRegistry:
             assert handler._response_code == 200
             _, kwargs = mock_post.call_args
             assert kwargs.get("validate_sender_identity") is True
+
+
+def _make_get_handler(*, path: str, headers: dict | None = None):
+    """Construct a BusBridgeHandler with a fake GET request."""
+    handler = object.__new__(BusBridgeHandler)
+    handler.path = path
+    handler.headers = headers or {}
+    handler.rfile = io.BytesIO()
+    handler.wfile = io.BytesIO()
+    handler._response_code = None
+    handler._error = None
+
+    def _send_response(code, *args, **kwargs):
+        handler._response_code = code
+
+    def _send_header(*args, **kwargs):
+        pass
+
+    def _end_headers(*args, **kwargs):
+        pass
+
+    def _send_error(code, message=None, *args, **kwargs):
+        handler._response_code = code
+        handler._error = message
+
+    def _json_response(data, status=200):
+        handler._response_code = status
+
+    def _serve_bus_lines(**kwargs):
+        handler._response_code = 200
+
+    handler.send_response = _send_response
+    handler.send_header = _send_header
+    handler.end_headers = _end_headers
+    handler.send_error = _send_error
+    handler._json_response = _json_response
+    handler._serve_bus_lines = _serve_bus_lines
+    return handler
+
+
+class TestBridgeClientAuth:
+    """bridge_client must send Authorization: Bearer when BUS_BRIDGE_TOKEN is set."""
+
+    def test_auth_headers_include_bearer(self, monkeypatch):
+        monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token-abc123")
+        headers = _auth_headers()
+        assert headers["Authorization"] == "Bearer test-token-abc123"
+
+    def test_auth_headers_omit_bearer_when_unset(self, monkeypatch):
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN", raising=False)
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN_FILE", raising=False)
+        headers = _auth_headers()
+        assert "Authorization" not in headers
+
+
+class TestGetAuth:
+    """GET /bus/tail and /bus/search require Bearer auth; /health stays open."""
+
+    def test_health_unauthenticated(self, monkeypatch):
+        monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token-abc123")
+        monkeypatch.delenv("BUS_BRIDGE_ALLOW_NO_AUTH", raising=False)
+        handler = _make_get_handler(path="/health")
+        BusBridgeHandler.do_GET(handler)
+        assert handler._response_code == 200
+
+    def test_tail_rejected_without_token(self, monkeypatch):
+        monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token-abc123")
+        monkeypatch.delenv("BUS_BRIDGE_ALLOW_NO_AUTH", raising=False)
+        handler = _make_get_handler(path="/bus/tail?n=10")
+        BusBridgeHandler.do_GET(handler)
+        assert handler._response_code == 401
+
+    def test_search_rejected_without_token(self, monkeypatch):
+        monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token-abc123")
+        monkeypatch.delenv("BUS_BRIDGE_ALLOW_NO_AUTH", raising=False)
+        handler = _make_get_handler(path="/bus/search?q=status")
+        BusBridgeHandler.do_GET(handler)
+        assert handler._response_code == 401
+
+    def test_tail_accepted_with_bearer(self, monkeypatch):
+        monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token-abc123")
+        monkeypatch.delenv("BUS_BRIDGE_ALLOW_NO_AUTH", raising=False)
+        handler = _make_get_handler(
+            path="/bus/tail?n=10",
+            headers={"Authorization": "Bearer test-token-abc123"},
+        )
+        BusBridgeHandler.do_GET(handler)
+        assert handler._response_code == 200
+
+    def test_search_accepted_with_bearer(self, monkeypatch):
+        monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token-abc123")
+        monkeypatch.delenv("BUS_BRIDGE_ALLOW_NO_AUTH", raising=False)
+        handler = _make_get_handler(
+            path="/bus/search?q=status",
+            headers={"Authorization": "Bearer test-token-abc123"},
+        )
+        BusBridgeHandler.do_GET(handler)
+        assert handler._response_code == 200
 
 
 class TestReservedAgentIdsRegistry:

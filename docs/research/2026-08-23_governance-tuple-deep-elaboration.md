@@ -49,7 +49,7 @@ Let $H_0 = \text{SHA-256}(\text{Genesis Seed} \parallel \text{Node Identity})$. 
 $$H_n = \text{SHA-256}\Big( n \parallel t_n \parallel \text{SHA-256}(\Delta S_n) \parallel H_{n-1} \Big)$$
 
 ### 2.2 Proof of Tamper-Evidence
-If an adversary attempts to retroactively alter a single bit in the historical state self-hosted-runner-5 $\Delta S_k$ (where $k < n$):
+If an adversary attempts to retroactively alter a single bit in the historical state delta $\Delta S_k$ (where $k < n$):
 1. $\text{SHA-256}(\Delta S_k') \neq \text{SHA-256}(\Delta S_k)$.
 2. Therefore, $H_k' \neq H_k$.
 3. By induction, every subsequent hash $H_{k+1}, \dots, H_n$ becomes invalid.
@@ -94,7 +94,7 @@ The Governance Tuple solves this through **Merkleized Evidence Fields**:
                        H_id    H_seq H_delta  H_salt
 ```
 
-- When sharing the receipt with an external auditor, the organization redacts the raw state self-hosted-runner-5 $\Delta S$, providing only the **Blind Hash $\text{SHA-256}(\Delta S \parallel \text{Salt})$** and the Merkle inclusion proof.
+- When sharing the receipt with an external auditor, the organization redacts the raw state delta $\Delta S$, providing only the **Blind Hash $\text{SHA-256}(\Delta S \parallel \text{Salt})$** and the Merkle inclusion proof.
 - **Result:** The auditor mathematically verifies that the execution conformed to the Contract ($C$) and Delegation Token ($D$) and occupied the exact monotonic sequence slot ($n_{\text{seq}}$), **without ever viewing the sensitive underlying data.**
 
 ---

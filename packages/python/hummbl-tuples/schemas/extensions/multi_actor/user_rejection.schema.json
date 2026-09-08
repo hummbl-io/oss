@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "rejected_claim",
-        "rejection_reason"
+        "rejection_reason",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

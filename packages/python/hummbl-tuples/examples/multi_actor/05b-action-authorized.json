@@ -26,6 +26,7 @@
     "authorized_by": "user-005",
     "authorization_reason": "Bounded action accepted despite dissent",
     "authorization_scope": "rollout-phase-1",
-    "authorization_expiry": "2026-09-01"
+    "authorization_expiry": "2026-09-01",
+    "independence_class": "single_lineage"
   }
 }

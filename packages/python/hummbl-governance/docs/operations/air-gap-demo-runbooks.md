@@ -95,7 +95,7 @@ local Gitea mirror.
 
 ### Prerequisites
 
-- Air-gapped host (Anvil or dedicated air-gap machine)
+- Air-gapped host (operator workstation or dedicated air-gap machine)
 - Gitea v1.26+ running locally (port 3030) with governance repos mirrored
 - Local Docker registry (port 5000) with base images
 - Local PyPI index (port 8080) with cached wheels

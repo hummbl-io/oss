@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "agent_id",
-        "rebound_reason"
+        "rebound_reason",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

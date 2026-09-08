@@ -159,9 +159,9 @@ class TestGenerator:
 
     def test_with_host(self):
         gen = ArmsGenerator()
-        arms = gen.generate("devin", host="delta")
+        arms = gen.generate("devin", host="host-a")
         assert arms.host_patch is not None
-        assert arms.host_patch.id == "delta"
+        assert arms.host_patch.id == "host-a"
 
     def test_with_skill_tabs(self):
         gen = ArmsGenerator()
@@ -170,7 +170,7 @@ class TestGenerator:
 
     def test_to_dict(self):
         gen = ArmsGenerator()
-        arms = gen.generate("devin", trust_tier="MEDIUM-HIGH", role="coordinator", host="delta")
+        arms = gen.generate("devin", trust_tier="MEDIUM-HIGH", role="coordinator", host="host-a")
         d = arms.to_dict()
         assert d["agent_name"] == "devin"
         assert d["hash"]
@@ -178,7 +178,7 @@ class TestGenerator:
         assert d["field_tincture"]
         assert d["cadency"] == "crescent"
         assert d["role_badge"] == "star"
-        assert d["host_patch"] == "delta"
+        assert d["host_patch"] == "host-a"
 
     def test_rule_of_tincture_field_vs_charge(self):
         """Charge tincture should obey the rule of tincture vs field."""
