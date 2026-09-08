@@ -337,6 +337,16 @@ class TestValidateEnvTokenErrorPaths(unittest.TestCase):
         self.assertEqual(error, IDP_E_TOKEN_INVALID)
         self.assertIsNone(token)
 
+    def test_idp_disabled_env_token_fails_closed(self):
+        os.environ["ENABLE_IDP"] = "false"
+        try:
+            is_valid, error, token = self.manager.validate_env_token("!!!notbase64!!!")
+            self.assertFalse(is_valid)
+            self.assertEqual(error, IDP_E_TOKEN_INVALID)
+            self.assertIsNone(token)
+        finally:
+            os.environ["ENABLE_IDP"] = "true"
+
     def test_empty_env_string_returns_invalid(self):
         is_valid, error, token = self.manager.validate_env_token("")
         self.assertFalse(is_valid)

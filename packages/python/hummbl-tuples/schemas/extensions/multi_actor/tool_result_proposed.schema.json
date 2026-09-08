@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "tool_id",
-        "tool_result"
+        "tool_result",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

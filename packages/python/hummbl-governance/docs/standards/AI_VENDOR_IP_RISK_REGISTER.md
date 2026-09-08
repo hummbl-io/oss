@@ -1,7 +1,7 @@
 # AI Vendor IP Risk Register
 
 **Status:** initial governed register
-**Owner:** Reuben Bowlby
+**Owner:** HUMMBL Principal Agent
 **Steward:** HUMMBL, LLC
 **Last reviewed:** 2026-06-30
 

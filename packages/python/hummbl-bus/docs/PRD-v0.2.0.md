@@ -3,7 +3,7 @@
 **Version**: 0.2.0  
 **Date**: 2026-05-04  
 **Status**: APPROVED — execute Q2 2026  
-**Author**: Reuben Bowlby
+**Author**: HUMMBL Principal Agent
 
 ---
 
@@ -43,7 +43,7 @@ Business logic is complete. Gap: test coverage before public release.
 - `hummbl-governance` (PyPI, v0.8.0) references bus concepts in its governance audit log.
 - `hummbl-crucible` trust scorer reads the TSV bus directly; a stable `hummbl-bus` API removes that coupling.
 - The Chief-of-Staff always-on agent (Phase 1) requires a reliable cross-machine write path.
-- `bus-global.py` on Anvil is an ad-hoc workaround; `hummbl-bus` bridge replaces it permanently.
+- `bus-global.py` on the operator workstation is an ad-hoc workaround; `hummbl-bus` bridge replaces it permanently.
 
 ---
 
@@ -53,7 +53,7 @@ Business logic is complete. Gap: test coverage before public release.
 |------|------|
 | **hummbl-crucible** | Parse and iterate over TSV bus messages via `BusReader` |
 | **hummbl-clp** | Write ledger receipts to bus optionally |
-| **Chief-of-Staff agent** | Post messages from Anvil to nodezero bus via bridge |
+| **Chief-of-Staff agent** | Post messages from the operator workstation to a remote bus via bridge |
 | **agentic developers** | Import `BusWriter`, `BusVerifier` to wire their own coordination |
 | **MCP-enabled agents** | Call `bus_write`, `bus_read` MCP tools |
 

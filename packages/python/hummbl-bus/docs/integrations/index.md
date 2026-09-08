@@ -337,11 +337,11 @@ export OPEN_BRAIN_TOKEN="relay-token"
 
 ### Dashboard Integration
 
-When `BUS_REMOTE_URL` is set, `post_message()` POSTs to a dashboard's `/bus` endpoint with an `X-Dashboard-Token` header:
+When `BUS_REMOTE_URL` is set, `post_message()` POSTs to the remote bus endpoint with `Authorization: Bearer` (and `X-Dashboard-Token` for dashboard compatibility):
 
 ```bash
 export BUS_REMOTE_URL="http://dashboard.example.com"
-export DASHBOARD_WRITE_TOKEN="dashboard-token"
+export BUS_BRIDGE_TOKEN="bridge-token"
 ```
 
 ### CI/CD Integration

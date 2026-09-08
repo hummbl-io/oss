@@ -56,7 +56,8 @@
         "source_model_a",
         "source_model_b",
         "proposed_merged_model",
-        "unresolved_dissent_acknowledged"
+        "unresolved_dissent_acknowledged",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

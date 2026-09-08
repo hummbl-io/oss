@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "executed_action",
-        "authorization_ref"
+        "authorization_ref",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

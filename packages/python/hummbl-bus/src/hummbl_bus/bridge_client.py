@@ -9,11 +9,29 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 DEFAULT_PORT = 18790
+
+
+def _auth_headers() -> dict[str, str]:
+    """Return HTTP headers including Bearer auth when a bridge token is set."""
+    headers = {"Content-Type": "application/json"}
+    token = os.environ.get("BUS_BRIDGE_TOKEN", "").strip()
+    if not token:
+        token_file = os.environ.get("BUS_BRIDGE_TOKEN_FILE", "").strip()
+        if token_file:
+            try:
+                token = Path(token_file).read_text(encoding="utf-8").strip()
+            except (OSError, UnicodeDecodeError):
+                token = ""
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
 
 
 def post_to_remote_bus(
@@ -32,7 +50,7 @@ def post_to_remote_bus(
     ).encode("utf-8")
 
     req = urllib.request.Request(
-        url, data=data, headers={"Content-Type": "application/json"}, method="POST"
+        url, data=data, headers=_auth_headers(), method="POST"
     )
 
     try:
@@ -97,7 +115,7 @@ def post_to_remote_bus_result(
         payload["origin_machine"] = origin_machine
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
-        url, data=data, headers={"Content-Type": "application/json"}, method="POST"
+        url, data=data, headers=_auth_headers(), method="POST"
     )
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
