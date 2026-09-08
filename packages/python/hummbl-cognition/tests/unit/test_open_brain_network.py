@@ -11,6 +11,8 @@ from unittest.mock import patch
 import pytest
 from hummbl_cognition.models import LedgerEntry
 
+OPEN_BRAIN_TEST_TOKEN = "test-open-brain-token"
+
 
 def _make_entry(content: str, **kwargs) -> LedgerEntry:
     defaults = dict(
@@ -35,22 +37,25 @@ def _write_ledger(path: Path, entries: list[LedgerEntry]) -> Path:
 class TestOpenBrainServer:
     """Test the HTTP server + client integration."""
 
-    def _post(self, port: int, path: str, body: dict | None = None) -> tuple[int, dict]:
+    def _post(self, port: int, path: str, body: dict | None = None, token: str | None = OPEN_BRAIN_TEST_TOKEN) -> tuple[int, dict]:
         """Helper to post JSON payloads and parse response JSON."""
         conn = HTTPConnection("127.0.0.1", port)
         data = json.dumps(body or {}).encode("utf-8")
-        conn.request(
-            "POST", path, body=data, headers={"Content-Type": "application/json"}
-        )
+        headers = {"Content-Type": "application/json"}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        conn.request("POST", path, body=data, headers=headers)
         resp = conn.getresponse()
         return resp.status, json.loads(resp.read().decode("utf-8"))
 
     @pytest.fixture
-    def brain_server(self, tmp_path):
+    def brain_server(self, tmp_path, monkeypatch):
         """Start a test server on a random port."""
         from http.server import HTTPServer
 
         from hummbl_cognition.server import OpenBrainState, _make_handler
+
+        monkeypatch.setenv("OPEN_BRAIN_TOKEN", OPEN_BRAIN_TEST_TOKEN)
 
         # Create test data
         cog_dir = tmp_path / "cognition"
@@ -66,7 +71,7 @@ class TestOpenBrainServer:
             state_dir=tmp_path,
             ledger_path=cog_dir / "ledger.jsonl",
         )
-        handler = _make_handler(state)
+        handler = _make_handler(state, auth_token=OPEN_BRAIN_TEST_TOKEN)
         server = HTTPServer(("127.0.0.1", 0), handler)
         port = server.server_address[1]
 
@@ -83,6 +88,44 @@ class TestOpenBrainServer:
         url, _ = brain_server
         client = OpenBrainClient(url)
         assert client.health() is True
+
+    def test_missing_auth_token_fails_closed(self, tmp_path):
+        from http.client import HTTPConnection
+        from http.server import HTTPServer
+
+        from hummbl_cognition.server import OpenBrainState, _make_handler
+
+        cog_dir = tmp_path / "cognition"
+        cog_dir.mkdir()
+        _write_ledger(cog_dir / "ledger.jsonl", [_make_entry("token rotation")])
+        state = OpenBrainState(
+            state_dir=tmp_path,
+            ledger_path=cog_dir / "ledger.jsonl",
+        )
+        handler = _make_handler(state)
+        server = HTTPServer(("127.0.0.1", 0), handler)
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            health = HTTPConnection("127.0.0.1", port)
+            health.request("GET", "/health")
+            health_resp = health.getresponse()
+            assert health_resp.status == 200
+            health_resp.read()
+
+            status = HTTPConnection("127.0.0.1", port)
+            status.request("GET", "/status")
+            status_resp = status.getresponse()
+            assert status_resp.status == 401
+
+            post_status, post_body = self._post(
+                port, "/search", {"query": "token"}, token=None
+            )
+            assert post_status == 401
+            assert post_body["error"] == "unauthorized"
+        finally:
+            server.shutdown()
 
     def test_status(self, brain_server):
         from hummbl_cognition.client import OpenBrainClient
@@ -187,7 +230,7 @@ class TestOpenBrainServer:
             state_dir=tmp_path,
             ledger_path=cog_dir / "ledger.jsonl",
         )
-        handler = _make_handler(state)
+        handler = _make_handler(state, auth_token=OPEN_BRAIN_TEST_TOKEN)
         server = HTTPServer(("127.0.0.1", 0), handler)
         port = server.server_address[1]
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -228,7 +271,7 @@ class TestOpenBrainServer:
             state_dir=tmp_path,
             ledger_path=cog_dir / "ledger.jsonl",
         )
-        handler = _make_handler(state)
+        handler = _make_handler(state, auth_token=OPEN_BRAIN_TEST_TOKEN)
         server = HTTPServer(("127.0.0.1", 0), handler)
         port = server.server_address[1]
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -274,7 +317,7 @@ class TestOpenBrainServer:
             state_dir=tmp_path,
             ledger_path=cog_dir / "ledger.jsonl",
         )
-        handler = _make_handler(state)
+        handler = _make_handler(state, auth_token=OPEN_BRAIN_TEST_TOKEN)
         server = HTTPServer(("127.0.0.1", 0), handler)
         port = server.server_address[1]
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -282,7 +325,11 @@ class TestOpenBrainServer:
 
         try:
             conn = HTTPConnection("127.0.0.1", port)
-            conn.request("GET", f"/lineage/{target_id}")
+            conn.request(
+                "GET",
+                f"/lineage/{target_id}",
+                headers={"Authorization": f"Bearer {OPEN_BRAIN_TEST_TOKEN}"},
+            )
             resp = conn.getresponse()
             assert resp.status == 200
             body = json.loads(resp.read().decode("utf-8"))

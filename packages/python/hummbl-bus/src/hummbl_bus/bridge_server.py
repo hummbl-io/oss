@@ -148,7 +148,11 @@ class BusBridgeHandler(BaseHTTPRequestHandler):
             self.send_error(500, str(e))
 
     def do_GET(self):
-        """Handle GET requests: health, tail, search."""
+        """Handle GET requests: health, tail, search.
+
+        /health is unauthenticated (liveness). /bus/tail and /bus/search
+        require the same Bearer token as POST /bus.
+        """
         from urllib.parse import parse_qs, urlparse
 
         parsed = urlparse(self.path)
@@ -159,8 +163,13 @@ class BusBridgeHandler(BaseHTTPRequestHandler):
             self._json_response(
                 {"status": "up", "service": "bus-bridge", "version": "1.1"}
             )
+            return
 
-        elif path == "/bus/tail":
+        if path in ("/bus/tail", "/bus/search"):
+            if not self._check_post_auth():
+                return
+
+        if path == "/bus/tail":
             try:
                 n = min(int(params.get("n", ["50"])[0]), MAX_TAIL_LINES)
             except (ValueError, IndexError):

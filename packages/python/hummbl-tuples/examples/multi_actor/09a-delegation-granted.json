@@ -26,6 +26,7 @@
     "delegated_to": "agent-i1",
     "delegated_by": "user-009",
     "delegation_scope": "read-only-metrics",
-    "delegation_expiry": "2026-09-01"
+    "delegation_expiry": "2026-09-01",
+    "independence_class": "single_lineage"
   }
 }

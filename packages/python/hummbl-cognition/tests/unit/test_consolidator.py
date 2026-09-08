@@ -10,11 +10,11 @@ from hummbl_cognition.ledger_writer import post_entry
 from hummbl_cognition.models import LedgerEntry
 
 try:
-    from hummbl_governance.kill_switch_core import get_kill_switch_core  # noqa: F401
+    from hummbl_governance.kill_switch import KillSwitch  # noqa: F401
 
-    _HAS_KILL_SWITCH_CORE = True
+    _HAS_KILL_SWITCH = True
 except ImportError:
-    _HAS_KILL_SWITCH_CORE = False
+    _HAS_KILL_SWITCH = False
 
 # This module tests ledger writing directly — allow real writes.
 pytestmark = pytest.mark.allow_ledger_writes
@@ -124,15 +124,30 @@ class TestConsolidatedIdTracking:
 
 
 class TestKillSwitchHelper:
+    def test_import_error_fails_closed(self):
+        import builtins
+
+        from hummbl_cognition.consolidator import _is_kill_switch_engaged
+
+        real_import = builtins.__import__
+
+        def _boom(name, *args, **kwargs):
+            if name == "hummbl_governance.kill_switch":
+                raise ImportError("simulated")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=_boom):
+            assert _is_kill_switch_engaged() is True
+
     @pytest.mark.skipif(
-        not _HAS_KILL_SWITCH_CORE,
-        reason="hummbl_governance.kill_switch_core not available",
+        not _HAS_KILL_SWITCH,
+        reason="hummbl_governance.kill_switch not available",
     )
     def test_runtime_error_fails_closed(self):
         from hummbl_cognition.consolidator import _is_kill_switch_engaged
 
         with patch(
-            "hummbl_governance.kill_switch_core.get_kill_switch_core",
+            "hummbl_governance.kill_switch.KillSwitch",
             side_effect=RuntimeError("boom"),
         ):
             assert _is_kill_switch_engaged() is True
@@ -140,6 +155,14 @@ class TestKillSwitchHelper:
 
 class TestRunConsolidation:
     """Test the full consolidation run."""
+
+    @pytest.fixture(autouse=True)
+    def _kill_switch_disengaged(self):
+        with patch(
+            "hummbl_cognition.consolidator._is_kill_switch_engaged",
+            return_value=False,
+        ):
+            yield
 
     def test_dry_run_no_writes(self, tmp_path):
         from hummbl_cognition.consolidator import run_consolidation

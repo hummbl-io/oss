@@ -32,6 +32,20 @@ These existing tags are **not** in the workflow filter:
 They remain as historical refs. New publishes use `python/<package>/v*`
 only.
 
+### Known-bad tag — do not re-run (issue #143)
+
+Operator disposition 2026-09-07: **leave and ignore** origin tag
+`python/hummbl-governance/v1.5.0` (SHA `4d40da8`). Live PyPI is
+`hummbl-governance==1.4.2`. Re-running Publish on that tag is the known
+P0.
+
+- Do **not** re-run the Publish workflow on `python/hummbl-governance/v1.5.0`.
+- Do **not** delete or retarget that tag unless a later operator instruction
+  says so (tag move is irreversible for consumers who fetched the ref).
+- The workflow step `Refuse known-bad governance v1.5.0 tag (issue 143)`
+  must stay. If 1.5.0 is ever meant to ship, cut a **new** tag on the
+  intended release commit after registry/README/`docs/PACKAGES.md` match.
+
 `hummbl-bus==0.2.0` is on PyPI (2026-08-27) without a matching
 `python/hummbl-bus/v0.2.0` tag in this repo. Do not publish another bus
 version until that provenance gap is documented in the package changelog
@@ -118,3 +132,4 @@ Use PyPI's pre-release handling — consumers must opt in with `--pre`.
 4. Add a row to README, `AGENTS.md`, and `docs/PACKAGES.md`
 5. Configure the trusted publisher on pypi.org (owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`)
 6. Document the package in `packages/python/<name>/README.md`
+

@@ -54,7 +54,9 @@
         "receipt_link",
         "visibility_class",
         "inference_content",
-        "inference_basis"
+        "inference_basis",
+        "independence_class",
+        "epistemic_permission"
       ],
       "properties": {
         "authored_by": {
