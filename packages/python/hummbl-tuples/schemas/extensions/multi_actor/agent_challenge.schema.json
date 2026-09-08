@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "challenged_claim",
-        "challenge_reason"
+        "challenge_reason",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

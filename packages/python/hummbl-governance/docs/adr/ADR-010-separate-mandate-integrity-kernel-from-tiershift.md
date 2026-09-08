@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-08-14
-- **Decision owner:** Reuben Bowlby
+- **Decision owner:** HUMMBL Principal Agent
 - **Steward:** HUMMBL, LLC
 - **Supersedes:** none
 - **Superseded by:** none

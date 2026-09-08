@@ -13,7 +13,7 @@ the 7-layer identity system from the heraldry research synthesis:
 | 1 | Base arms (SHA-256(agent_name) → shield, tincture, division, ordinary, charge) | Immutable |
 | 2 | Trust tier cadency mark | Changes with tier |
 | 3 | Role badge (gear, scroll, lens, compass, wrench, star) | Changes with role |
-| 4 | Host patch (Delta, Anvil, VPS, etc.) | Changes with deployment |
+| 4 | Host patch (host-a, host-b, host-c, etc.) | Changes with deployment |
 | 5 | Skill tabs (earned competencies) | Append-only |
 | 6 | Runtime status (ephemeral: healthy/degraded/critical) | Real-time |
 
@@ -26,7 +26,7 @@ the 7-layer identity system from the heraldry research synthesis:
 - 30 charges (lion, eagle, mullet, crescent, fleur-de-lis, cogwheel, compass, etc.)
 - 5 cadency marks (label, crescent, mullet, bordure compony, none)
 - 6 role badges (star, gear, scroll, lens, compass, wrench)
-- 5 host patches (delta, anvil, hummbl-vps, beachhead, slate)
+- 5 host patches (host-a, host-b, host-c, host-d, host-e)
 - 9 ICS signal flags for bus message types
 
 **Combination space:** 7 × 9 × 10 × 8 × 30 = 15,120 base combinations (without
@@ -42,7 +42,7 @@ visual contrast at any scale.
 
 ```bash
 # Generate arms for a single agent
-hummbl-heraldry generate devin --trust MEDIUM-HIGH --role coordinator --host delta
+hummbl-heraldry generate devin --trust MEDIUM-HIGH --role coordinator --host host-a
 
 # Generate arms for all 11 fleet agents with SVGs
 hummbl-heraldry generate-all --outdir /tmp/heraldry
@@ -66,7 +66,7 @@ hummbl-heraldry info
 from hummbl_heraldry import ArmsGenerator
 
 gen = ArmsGenerator()
-arms = gen.generate("devin", trust_tier="MEDIUM-HIGH", role="coordinator", host="delta")
+arms = gen.generate("devin", trust_tier="MEDIUM-HIGH", role="coordinator", host="host-a")
 print(arms.blazon)
 
 from hummbl_heraldry.svg import render_arms_svg

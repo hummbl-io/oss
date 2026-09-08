@@ -24,6 +24,7 @@
     "revocation_state": "active",
     "executed_action": "Deploy to production",
     "authorization_ref": "auth-bad-001",
-    "execution_result": "deployed"
+    "execution_result": "deployed",
+    "independence_class": "single_lineage"
   }
 }

@@ -1,8 +1,8 @@
 # ADR-001: hummbl-bus Extraction and Bridge Protocol
 **Status**: ACCEPTED  
 **Date**: 2026-05-04  
-**Author**: Reuben Bowlby  
-**Deciders**: Reuben Bowlby
+**Author**: HUMMBL Principal Agent  
+**Deciders**: HUMMBL Principal Agent
 
 ---
 
@@ -164,7 +164,7 @@ is disabled even if `sign_messages=True` (with a warning). Never hardcode a defa
 Remove in v0.4.0.
 
 **Rationale**:
-- Legacy `bus-global.py` on Anvil uses the raw TCP path. Removing it immediately would break
+- Legacy `bus-global.py` on the operator workstation uses the raw TCP path. Removing it immediately would break
   the coordination bus before the HTTP bridge is deployed and tested.
 - Deprecation notice gives time to migrate.
 

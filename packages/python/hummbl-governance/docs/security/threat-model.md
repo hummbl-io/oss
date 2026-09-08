@@ -17,17 +17,17 @@ are identified.
 
 | Component | Description | Location |
 |-----------|-------------|----------|
-| Agent CLI runtimes | Devin, Codex, Claude Code, OpenCode, Gemini | Anvil (Windows) |
-| Coordination bus | Append-only TSV file, HTTP bridge | Anvil (local), VPS (bridge) |
-| GitHub org | 285+ repos, branch protection, CI | github.com/hummbl-io |
-| GPG keyring | Per-agent EdDSA keys for commit signing | Anvil (Gpg4win) |
+| Agent CLI runtimes | Devin, Codex, Claude Code, OpenCode, Gemini | Operator workstation |
+| Coordination bus | Append-only TSV file, HTTP bridge | Operator workstation (local), remote services host (bridge) |
+| GitHub org | Public and private repositories, branch protection, CI | github.com/hummbl-io |
+| GPG keyring | Per-agent EdDSA keys for commit signing | Operator workstation (local keyring) |
 | Signing identity registry | Public fingerprints, key status | hummbl-governance repo |
 | Authority policy | Structured JSON, per-role permissions | hummbl-governance repo |
 | Pre-mutation gate | Intercepts GitHub API mutations | hummbl-governance library |
-| CI runners | Self-hosted Windows runner on Anvil | Anvil (GitHub Actions) |
-| Cloudflare Tunnel | Routes traffic to internal services | Anvil -> Cloudflare -> VPS |
-| Tailscale network | Mesh VPN between Anvil, Delta, VPS | Tailnet |
-| Credential Manager | Windows Credential Manager for tokens | Anvil (OS-managed) |
+| CI runners | Self-hosted runner on the operator workstation | GitHub Actions |
+| TLS tunnel | Routes traffic to internal services | Operator workstation -> TLS edge -> remote services host |
+| Mesh VPN | Private network between fleet hosts | Operator-controlled overlay |
+| Credential store | OS credential store for tokens | Operator workstation (OS-managed) |
 
 ## 3. Trust boundaries
 
@@ -35,13 +35,13 @@ are identified.
 ┌─────────────────────────────────────────────────────────────────┐
 │                     EXTERNAL (UNTRUSTED)                         │
 │  ┌───────────┐  ┌───────────┐  ┌───────────┐                    │
-│  │  GitHub   │  │ Cloudflare│  │  Public   │                    │
+│  │  GitHub   │  │ TLS edge  │  │  Public   │                    │
 │  │   API     │  │  Network  │  │  Internet │                    │
 │  └─────┬─────┘  └─────┬─────┘  └───────────┘                    │
 │        │              │                                          │
 └────────┼──────────────┼──────────────────────────────────────────┘
          │ BOUNDARY 1   │ BOUNDARY 2
-         │ GitHub API   │ Cloudflare Tunnel
+         │ GitHub API   │ TLS tunnel
          │ auth + TLS   │ Access policy + TLS
 ┌────────┼──────────────┼──────────────────────────────────────────┐
 │        ▼              ▼              INTERNAL (SEMI-TRUSTED)       │
@@ -62,18 +62,19 @@ are identified.
 │              [GitHub API mutation]                                │
 │                                                                  │
 │  ┌──────────────────────────────────────────────┐               │
-│  │           TAILSCALE NETWORK (BOUNDARY 6)      │               │
-│  │  Anvil <-> Delta <-> VPS                      │               │
-│  │  WireGuard encryption, ACL-scoped             │               │
+│  │           MESH VPN (BOUNDARY 6)               │               │
+│  │  operator workstation <-> secondary host      │               │
+│  │  <-> remote services host                     │               │
+│  │  encrypted overlay, ACL-scoped                │               │
 │  └──────────────────────────────────────────────┘               │
 └──────────────────────────────────────────────────────────────────┘
          │ BOUNDARY 7
-         │ Credential Manager -> Agent
+         │ OS credential store -> Agent
 ┌────────▼─────────────────────────────────────────────────────────┐
 │                     TRUSTED (OPERATOR)                           │
 │  ┌───────────┐  ┌───────────┐  ┌───────────┐                    │
-│  │ Operator  │  │ Windows   │  │ GPG keys  │                    │
-│  │ (human)   │  │ Cred Mgr  │  │ (private) │                    │
+│  │ Operator  │  │ OS cred   │  │ GPG keys  │                    │
+│  │ (human)   │  │ store     │  │ (private) │                    │
 │  └───────────┘  └───────────┘  └───────────┘                    │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -83,12 +84,12 @@ are identified.
 | # | Boundary | Crossing | Protection |
 |---|----------|----------|------------|
 | 1 | GitHub API | Agent/org -> GitHub | Per-agent auth (gap-3), TLS, branch protection (gap-7) |
-| 2 | Cloudflare Tunnel | Public -> internal services | Cloudflare Access policy, TLS |
+| 2 | TLS tunnel | Public -> internal services | Access policy, TLS |
 | 3 | Bus file I/O | Bridge/agents -> bus TSV | File permissions, bridge auth (no crypto integrity — gap-6) |
 | 4 | Agent -> Gate | Agent -> PreMutationGate | Identity resolution (gap-1), authority policy (gap-9) |
 | 5 | Gate -> GitHub | Gate -> GitHub API | Per-agent credential (gap-3), two-person rule (gap-1) |
-| 6 | Tailscale | Anvil <-> Delta <-> VPS | WireGuard encryption, Tailscale ACLs |
-| 7 | Credential Manager | OS -> Agent process | Windows Credential Manager, env vars |
+| 6 | Mesh VPN | Fleet hosts | Overlay encryption, host ACLs |
+| 7 | Credential store | OS -> Agent process | OS credential store, env vars |
 
 ## 4. Threat catalog
 
@@ -122,8 +123,8 @@ cryptographic integrity protection. An attacker with file write access
 could modify or delete bus messages retroactively.
 
 **Attack vectors:**
-- Local file access on Anvil (bus file is on local disk)
-- Cloudflare Tunnel compromise (if bus bridge is exposed)
+- Local file access on the operator workstation (bus file is on local disk)
+- TLS tunnel compromise (if bus bridge is exposed)
 - Another service reads the bus file directly (dashboard incident
   2026-08-23)
 
@@ -192,37 +193,38 @@ is built (gap-3 phase 2).
 
 ### T5: Cross-host compromise (MEDIUM)
 
-**Threat:** Compromise of one host (Anvil, Delta, VPS) leads to
-compromise of others via Tailscale network.
+**Threat:** Compromise of one fleet host leads to compromise of others
+via the mesh VPN.
 
 **Attack vectors:**
-- Tailscale node compromise (lateral movement)
+- Mesh-VPN node compromise (lateral movement)
 - SSH key compromise
 - Shared credentials across hosts
 
 **Mitigations (implemented):**
-- Tailscale ACLs restrict which nodes can talk to which
-- Each host has its own Tailscale identity
+- Overlay ACLs restrict which nodes can talk to which
+- Each host has its own mesh identity
 - No shared SSH keys (per-host keys)
 
 **NIST controls:** SC-7, AC-3
 
-**Residual risk:** MEDIUM — Tailscale ACLs are not regularly audited.
+**Residual risk:** MEDIUM — overlay ACLs are not regularly audited.
 
 ### T6: CI runner compromise (MEDIUM)
 
-**Threat:** The self-hosted CI runner on Anvil is compromised, allowing
-an attacker to inject code into CI pipelines or steal secrets.
+**Threat:** The self-hosted CI runner on the operator workstation is
+compromised, allowing an attacker to inject code into CI pipelines or
+steal secrets.
 
 **Attack vectors:**
 - Malicious PR triggers CI with code that exfiltrates secrets
-- Runner has broad repo access (all hummbl-io repos)
+- Runner has broad repo access (organization repositories)
 - Runner runs as the operator user (broad filesystem access)
 
 **Mitigations (implemented):**
 - Branch protection requires CI to pass before merge
 - CI does not expose secrets to PRs from forks
-- Runner is on Anvil (not a shared cloud runner)
+- Runner is on the operator workstation (not a shared cloud runner)
 
 **Mitigations (planned):**
 - Runner isolation (separate user account for CI)
@@ -294,7 +296,7 @@ no pre-mutation gate in place.
 | IA-2 | Identification and Authentication | T1, T4 | Implemented (gap-2 keys, gap-3 auth) |
 | IA-5 | Authenticator Management | T3 | Implemented (per-agent tokens) |
 | RA-3 | Risk Assessment | All | This document |
-| SC-7 | Boundary Protection | T5, T6 | Partial (Tailscale ACLs, no runner isolation) |
+| SC-7 | Boundary Protection | T5, T6 | Partial (mesh ACLs, no runner isolation) |
 | SC-8 | Transmission Integrity | T2 | Planned (gap-6 Merkle anchoring) |
 | SC-12 | Cryptographic Key Establishment | T3, T4 | Implemented (gap-2 GPG keys) |
 | SC-13 | Cryptographic Protection | T3, T4 | Implemented (EdDSA signing) |
@@ -310,7 +312,7 @@ no pre-mutation gate in place.
 | R4 | CI runner not isolated | MEDIUM | Create separate user account for CI runner | Operator |
 | R5 | base120-internal branch protection blocked | LOW | Manual investigation of repo-level setting | Operator |
 | R6 | GitHub GPG key upload pending | LOW | Operator runs `gh auth refresh -s write:gpg_key` | Operator |
-| R7 | Tailscale ACLs not regularly audited | LOW | Schedule quarterly ACL audit | Operator |
+| R7 | Mesh-VPN ACLs not regularly audited | LOW | Schedule quarterly ACL audit | Operator |
 
 ## 8. Change history
 

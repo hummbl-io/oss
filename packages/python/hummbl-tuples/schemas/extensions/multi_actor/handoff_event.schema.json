@@ -54,7 +54,9 @@
         "receipt_link",
         "visibility_class",
         "handed_from",
-        "handed_to"
+        "handed_to",
+        "independence_class",
+        "preserved_dissent"
       ],
       "properties": {
         "authored_by": {

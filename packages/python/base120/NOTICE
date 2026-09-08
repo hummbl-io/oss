@@ -45,19 +45,31 @@ and mathematics. See hummbl-bibliography for provenance.
 MCP server implementation by HUMMBL Fleet.
 
 ------------------------------------------------------------------------------
-IMPORTANT: Base120 Proprietary Content Notice
+Base120 corpus (names, codes, definitions, transformation families)
 ------------------------------------------------------------------------------
 
-The Base120 mental model DEFINITIONS, NAMES, CODES, and TRANSFORMATION
-FRAMEWORK are proprietary intellectual property of HUMMBL, LLC.
+The Base120 corpus files shipped in this package and in the public
+hummbl-io/oss tree are part of the Apache-2.0 Work. That includes:
 
-While the SOFTWARE (Python package, MCP server, CLI) is Apache-2.0
-licensed, the structured mental model corpus itself
-(Base120_Canonical_Model_Registry.yaml, base120/ package definitions)
-is protected by copyright and trade secret.
+- base120/data/operators.json (bundled in the PyPI wheel)
+- Base120_Canonical_Model_Registry.yaml (in the public source tree)
+- the 120 model names, codes, short definitions, and six-family
+  transformation structure as published in those files
 
-Commercial use of the Base120 corpus beyond the Apache-2.0 software
-license requires a separate commercial license from HUMMBL, LLC.
+Those files are published. They are not a trade secret. They are on
+public GitHub (hummbl-io/oss) and on PyPI as base120==3.0.0.
+
+Copyright in those files remains with HUMMBL, LLC and is licensed under
+the Apache License 2.0, same as the rest of this package. Apache-2.0
+already permits use of the Work, including commercial use, subject to
+the License. No separate commercial license is required to use the
+published corpus files as distributed here.
+
+This NOTICE does not license trademarks (see below). It does not
+license unpublished HUMMBL material that is not in this tree.
+
+Canonical operational disposition (issue #141, architecture 3):
+  docs/product/base120-corpus-distribution-decision.md
 
 ------------------------------------------------------------------------------
 Trademarks

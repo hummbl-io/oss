@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-05-14
-- **Decision owner:** Reuben Bowlby (operator)
+- **Decision owner:** HUMMBL Principal Agent
 - **Steward:** HUMMBL, LLC
 - **Authors:** claude-code (host-C)
 - **Supersedes:** implicit pre-2026-05-14 framing of "governance score / A+ rubric"

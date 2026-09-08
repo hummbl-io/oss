@@ -38,6 +38,16 @@ class BoundaryTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(self.scan(name, '{}').exit_code, 1)
 
+    def test_dated_aar_session_forensics_and_production_audit_denied(self):
+        for name in [
+            'docs/research/2026-08-23_AAR_SESSION_KRINEIA.md',
+            'docs/research/2026-08-23_session_forensics_manifest.md',
+            'docs/research/2026-08-23_INLINE_SESSION_SELF_REVIEW.md',
+            'docs/research/hummbl-production-audit-20260820.md',
+        ]:
+            with self.subTest(name=name):
+                self.assertEqual(self.scan(name, '{}').exit_code, 1)
+
     def test_encoded_windows_home_paths(self):
         for separator in ('\\', '\\\\', '/', '//'):
             text = 'D:' + separator + 'Users' + separator + 'ExamplePerson' + separator + 'file.txt'

@@ -53,7 +53,8 @@
         "actor_regime",
         "receipt_link",
         "visibility_class",
-        "observation_content"
+        "observation_content",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {
