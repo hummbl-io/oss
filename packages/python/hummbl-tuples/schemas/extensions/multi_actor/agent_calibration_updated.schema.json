@@ -55,7 +55,8 @@
         "visibility_class",
         "agent_id",
         "calibration_domain",
-        "calibration_version"
+        "calibration_version",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

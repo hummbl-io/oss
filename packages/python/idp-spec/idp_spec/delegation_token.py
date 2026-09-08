@@ -38,8 +38,7 @@ def _is_idp_enabled() -> bool:
     enabled = os.environ.get("ENABLE_IDP", "true").lower() == "true"
     if not enabled:
         logger.warning(
-            "ENABLE_IDP=false: IDP validation BYPASSED. "
-            "This is an emergency-only setting and creates security risk."
+            "ENABLE_IDP=false: IDP token validation rejects all tokens (fail-closed)."
         )
     return enabled
 
@@ -564,8 +563,7 @@ class DelegationTokenManager:
             - IDP_E_BINDING_MISMATCH: Task/contract/subject binding mismatch
         """
         if not _is_idp_enabled():
-            # When IDP disabled, tokens are always valid (backward compat)
-            return True, None
+            return False, IDP_E_TOKEN_INVALID
 
         # Check signature
         if not token.verify_signature(self._secret):
@@ -619,12 +617,7 @@ class DelegationTokenManager:
             return (False, IDP_E_TOKEN_INVALID, None).
         """
         if not _is_idp_enabled():
-            # IDP disabled: parse for caller convenience but return valid.
-            try:
-                token = DelegationCapabilityToken.from_env_string(env_string)
-                return True, None, token
-            except ValueError:
-                return True, None, None
+            return False, IDP_E_TOKEN_INVALID, None
 
         # Parse first; malformed input is signature-invalid by definition.
         try:

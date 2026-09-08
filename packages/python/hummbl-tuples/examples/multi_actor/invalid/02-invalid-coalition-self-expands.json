@@ -33,6 +33,7 @@
     ],
     "coalition_expiry": "2026-12-31",
     "decision_rules": "agent-decides",
-    "dissent_policy": "ignored"
+    "dissent_policy": "ignored",
+    "independence_class": "single_lineage"
   }
 }

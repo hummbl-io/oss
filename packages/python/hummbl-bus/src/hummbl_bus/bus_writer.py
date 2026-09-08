@@ -1543,9 +1543,13 @@ def post_message(
                     "message": safe_message,
                 }
             ).encode("utf-8")
-            token = os.environ.get("DASHBOARD_WRITE_TOKEN", "")
+            token = (
+                os.environ.get("BUS_BRIDGE_TOKEN", "").strip()
+                or os.environ.get("DASHBOARD_WRITE_TOKEN", "").strip()
+            )
             headers = {"Content-Type": "application/json"}
             if token:
+                headers["Authorization"] = f"Bearer {token}"
                 headers["X-Dashboard-Token"] = token
             req = urllib.request.Request(
                 f"{remote_url.rstrip('/')}/api/bus/send",

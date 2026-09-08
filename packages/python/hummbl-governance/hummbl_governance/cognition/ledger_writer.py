@@ -74,7 +74,17 @@ def resolve_root() -> Path:
 
 
 def ledger_path(root: Path | None = None) -> Path:
-    """Return the ledger JSONL path under *root* (default: :func:`resolve_root`)."""
+    """Return the ledger JSONL path.
+
+    Resolution order:
+
+    1. ``$COGNITION_LEDGER`` — absolute path to the ledger file (highest priority).
+    2. *root* argument, if provided.
+    3. ``<resolve_root()>/_state/cognition/ledger.jsonl`` (default).
+    """
+    env = os.environ.get("COGNITION_LEDGER")
+    if env and root is None:
+        return Path(env)
     return (root or resolve_root()) / "_state" / "cognition" / "ledger.jsonl"
 
 

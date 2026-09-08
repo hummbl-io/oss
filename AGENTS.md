@@ -14,7 +14,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | Package | Path | Tree | PyPI | Description |
 |---------|------|------|------|-------------|
 | hummbl-governance | `packages/python/hummbl-governance/` | 1.5.0 | Live 1.4.2 | Governance primitives for AI agent orchestration |
-| base120 | `packages/python/base120/` | 3.0.0 | Live 3.0.0 | 120 reasoning operators for structured thinking |
+| base120 | `packages/python/base120/` | 3.0.2 | Live 3.0.2 | 120 reasoning operators for structured thinking |
 | hummbl-kernel | `packages/python/hummbl-kernel/` | 0.1.0 | Live 0.1.0 | Orchestration kernel with security and compliance enforcement |
 | hummbl | `packages/python/hummbl/` | 0.1.0 | Live 0.1.0 | Structured reasoning framework for AI agents |
 | hummbl-bif | `packages/python/hummbl-bif/` | 1.0.1 | Live 1.0.1 | Batch Ingestion Framework for technical knowledge acquisition |
@@ -119,6 +119,24 @@ runtime dependencies, regenerate its lock file.
 4. If runtime dependencies changed, regenerate `requirements.lock` for the affected package(s)
 5. Verify no internal docs (handoffs, AARs, receipts, trackers) are in the public repo
 6. If the package set changed: README, this file, `docs/PACKAGES.md`, CI matrix, publish tag filter
+
+## PR review protocol
+
+Before posting a "looks good" verdict on any PR that cites a regulation,
+standard, statute, white-paper, vendor claim, or other external source,
+verify the cited primary source in-session using `web_search`/`webfetch`
+(or equivalent toolchain) against the authoritative original (publisher,
+government register, standards body, canonical vendor docs).
+
+- **Verifiable in-session** — attach a brief primary-source receipt to the
+  review (URL + accessed date + relevant excerpt or section). The "looks good"
+  verdict is then evidence-backed.
+- **Unverifiable in-session** — soften the verdict to **"looks good pending
+  citation spot-check"** and quote the specific claim that needs independent
+  verification. Do not block the review, but do not give an unqualified
+  "looks good" either.
+- **No external sources cited** — this checkpoint does not apply; proceed
+  with the normal review rubric.
 
 ## Public/private boundary
 

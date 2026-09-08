@@ -10,6 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - (placeholder for upcoming changes)
 
+## [v3.0.2] - 2026-09-07
+
+### Fixed
+- Publish workflow SBOM step: cyclonedx-py 7 dropped `--outfile`; use `-o`.
+  `3.0.1` was tagged but never reached PyPI (SBOM step failed after the
+  wheel built).
+
+### Changed
+- Same NOTICE alignment as 3.0.1 (issue #141). `base120==3.0.0` is not yanked.
+
+## [v3.0.1] - 2026-09-07
+
+### Changed
+- NOTICE aligned with already-public corpus (issue #141, architecture 3):
+  published names, codes, definitions, and transformation families are
+  Apache-2.0 Work, not a trade secret. `base120==3.0.0` is not yanked.
+
 ## [v3.0.0] - 2026-08-20
 
 ### Note

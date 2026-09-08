@@ -21,6 +21,7 @@ Configure in Claude Code settings.json:
 """
 
 import json
+import re
 import sys
 import tempfile
 import traceback
@@ -260,7 +261,16 @@ def _ensure_sessions_dir():
     SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# session_id is either internally generated (str(uuid.uuid4())[:8]) or, in
+# tool_bif_session_status, taken directly from untrusted MCP tool arguments.
+# Reject anything but a plain alphanumeric/-/_ token before it reaches a path
+# join, so a value like "../../etc/passwd" can't escape SESSIONS_DIR.
+_SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
 def _session_path(session_id):
+    if not isinstance(session_id, str) or not _SESSION_ID_RE.match(session_id):
+        raise ValueError(f"Invalid session_id: {session_id!r}")
     return SESSIONS_DIR / f"{session_id}.json"
 
 
@@ -629,7 +639,10 @@ def tool_bif_session_status(arguments):
     if not session_id:
         return _list_all_sessions()
 
-    session = _load_session(session_id)
+    try:
+        session = _load_session(session_id)
+    except ValueError as e:
+        return {"error": str(e)}
     if not session:
         return {"error": f"Session not found: {session_id}"}
 

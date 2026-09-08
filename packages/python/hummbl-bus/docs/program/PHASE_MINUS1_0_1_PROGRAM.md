@@ -2,7 +2,7 @@
 
 Status: PROPOSED
 
-Sponsor and final decision authority: Reuben Bowlby
+Sponsor and final decision authority: HUMMBL Principal Agent
 
 Canonical planning repository: `hummbl-dev-org/hummbl-bus`
 
@@ -48,7 +48,7 @@ how to roll back. Activity, commits, and document count are not completion.
   shared bearer to assert arbitrary sender identity.
 - The founder security-focused sample produced 79 passes and 10 failures; the
   failures reflect stale provenance expectations after automatic host rewriting.
-- Delta still imports its signed writer from hummbl-governance. The old writer remains
+- One fleet host still imports its signed writer from hummbl-governance. The old writer remains
   available while the standalone candidate is developed and shadow-tested.
 
 ## Phase −1 — Evidence and version freeze
@@ -105,7 +105,7 @@ Deliverables:
 4. Cross-platform concurrency, crash, replay, freshness, authorization, and
    fault-injection test plan.
 5. Single-writer/dual-reader shadow architecture with attributable telemetry.
-6. Deployment manifest for Delta, Anvil, VPS, and applicable fleet consumers.
+6. Deployment manifest for fleet hosts and applicable consumers.
 7. Rollback procedure that restores the previous writer without rewriting TSV
    history or replaying old queue entries.
 8. Sized implementation backlog with dependencies, evidence, stop conditions,

@@ -25,6 +25,7 @@
     "agent_id": "agent-h1",
     "previous_version": "v1.2",
     "new_version": "v2.0",
-    "change_reason": "Model upgrade"
+    "change_reason": "Model upgrade",
+    "independence_class": "single_lineage"
   }
 }
