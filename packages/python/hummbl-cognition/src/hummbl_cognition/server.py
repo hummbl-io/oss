@@ -325,8 +325,9 @@ class OpenBrainState:
 def _make_handler(state: OpenBrainState, *, auth_token: str | None = None) -> type:
     """Create a request handler class with access to shared state.
 
-    If auth_token is set, all mutating endpoints (POST) require
-    ``Authorization: Bearer <token>``. GET /health is always open.
+    Auth is fail-closed: if auth_token is unset, every endpoint except
+    GET /health is denied. When auth_token is set, those endpoints
+    require ``Authorization: Bearer <token>``. GET /health is always open.
     """
 
     class OpenBrainHandler(BaseHTTPRequestHandler):
@@ -344,7 +345,8 @@ def _make_handler(state: OpenBrainState, *, auth_token: str | None = None) -> ty
         def _check_auth(self) -> bool:
             """Return True if request is authorized. Sends 401 and returns False otherwise."""
             if not auth_token:
-                return True  # No token configured — open access
+                self._send_json({"error": "unauthorized"}, 401)
+                return False
             header = self.headers.get("Authorization", "")
             expected = f"Bearer {auth_token}"
             if hmac.compare_digest(header, expected):
@@ -444,8 +446,8 @@ def run_server(
 ) -> None:
     """Start the Open Brain HTTP server.
 
-    If auth_token is provided (or OPEN_BRAIN_TOKEN env is set), all
-    mutating endpoints require ``Authorization: Bearer <token>``.
+    Auth is fail-closed. OPEN_BRAIN_TOKEN or auth_token must be set;
+    otherwise every endpoint except GET /health returns 401.
     """
     logging.basicConfig(
         level=logging.INFO,
@@ -456,7 +458,9 @@ def run_server(
     if token:
         logger.info("Bearer token auth enabled")
     else:
-        logger.warning("No auth token configured — server is open access")
+        logger.warning(
+            "No auth token configured — denying all non-health requests (fail-closed)"
+        )
 
     logger.info("Initializing Open Brain...")
     brain_state = OpenBrainState(state_dir=state_dir, ledger_path=ledger_path)

@@ -8,11 +8,11 @@ from unittest.mock import patch
 import pytest
 
 try:
-    from hummbl_governance.kill_switch_core import get_kill_switch_core  # noqa: F401
+    from hummbl_governance.kill_switch import KillSwitch  # noqa: F401
 
-    _HAS_KILL_SWITCH_CORE = True
+    _HAS_KILL_SWITCH = True
 except ImportError:
-    _HAS_KILL_SWITCH_CORE = False
+    _HAS_KILL_SWITCH = False
 
 SAMPLE_QUEUE = [
     {
@@ -185,21 +185,44 @@ class TestStateManagement:
 
 
 class TestKillSwitchHelper:
+    def test_import_error_fails_closed(self):
+        import builtins
+
+        from hummbl_cognition.research_processor import _is_kill_switch_engaged
+
+        real_import = builtins.__import__
+
+        def _boom(name, *args, **kwargs):
+            if name == "hummbl_governance.kill_switch":
+                raise ImportError("simulated")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=_boom):
+            assert _is_kill_switch_engaged() is True
+
     @pytest.mark.skipif(
-        not _HAS_KILL_SWITCH_CORE,
-        reason="hummbl_governance.kill_switch_core not available",
+        not _HAS_KILL_SWITCH,
+        reason="hummbl_governance.kill_switch not available",
     )
     def test_runtime_error_fails_closed(self):
         from hummbl_cognition.research_processor import _is_kill_switch_engaged
 
         with patch(
-            "hummbl_governance.kill_switch_core.get_kill_switch_core",
+            "hummbl_governance.kill_switch.KillSwitch",
             side_effect=RuntimeError("boom"),
         ):
             assert _is_kill_switch_engaged() is True
 
 
 class TestRunProcessor:
+    @pytest.fixture(autouse=True)
+    def _kill_switch_disengaged(self):
+        with patch(
+            "hummbl_cognition.research_processor._is_kill_switch_engaged",
+            return_value=False,
+        ):
+            yield
+
     @patch("hummbl_cognition.research_processor._ollama_research")
     @patch("hummbl_cognition.research_processor._ingest_finding")
     def test_dry_run(self, mock_ingest, mock_ollama, tmp_path):

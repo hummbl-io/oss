@@ -24,6 +24,7 @@
     "revocation_state": "active",
     "source_model": "umf-006",
     "forked_model": "umf-006-fork-a",
-    "fork_reason": "Exploring alternative hypothesis"
+    "fork_reason": "Exploring alternative hypothesis",
+    "independence_class": "single_lineage"
   }
 }

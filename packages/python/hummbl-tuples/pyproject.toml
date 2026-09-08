@@ -1,6 +1,6 @@
 [project]
 name = "hummbl-tuples"
-version = "0.2.0"
+version = "0.2.1"
 description = "HUMMBL Typed Tuples governance model"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -35,7 +35,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["hummbl_tuples"]
+packages = ["hummbl_tuples", "hummbl_tuples.simulation"]
 
 [tool.setuptools.package-data]
 hummbl_tuples = ["governance.yml"]

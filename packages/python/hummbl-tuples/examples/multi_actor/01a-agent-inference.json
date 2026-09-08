@@ -27,6 +27,7 @@
     "inference_basis": [
       "obs-001",
       "obs-002"
-    ]
+    ],
+    "independence_class": "single_lineage"
   }
 }

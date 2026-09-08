@@ -1,0 +1,31 @@
+{
+  "tuple_type": "AGENT_INFERENCE",
+  "id": "05-invalid-inference-without-epistemic-permission",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "agent-bad-5",
+  "principal": "user-bad-5",
+  "control_mode": "AI_PROPOSE_USER_CONFIRM",
+  "tuple_data": {
+    "authored_by": "agent-bad-5",
+    "represented_principal": "user-bad-5",
+    "owner": "user-bad-5",
+    "receipted_by": "receipt-bad-005",
+    "actor_regime": "user_plus_agent",
+    "evidence_links": [],
+    "receipt_link": "receipt-05-invalid-inference-without-epistemic-permission",
+    "visibility_class": "private",
+    "durable_write_permission": "none",
+    "action_permission": "none",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "independence_class": "single_lineage",
+    "inference_content": "User believes X is true",
+    "target_model": "umf-bad-5",
+    "inference_basis": [
+      "obs-bad-001"
+    ]
+  }
+}

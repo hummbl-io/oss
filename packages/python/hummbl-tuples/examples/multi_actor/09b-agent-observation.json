@@ -24,6 +24,7 @@
     "revocation_state": "active",
     "observation_content": "CPU usage at 80%",
     "target_model": "umf-009",
-    "delegation_id": "deleg-001"
+    "delegation_id": "deleg-001",
+    "independence_class": "single_lineage"
   }
 }

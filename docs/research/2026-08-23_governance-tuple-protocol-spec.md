@@ -75,7 +75,7 @@ The Evidence element is the tamper-evident, append-only cryptographic witness em
 $$E = \langle \text{ReceiptID}, n_{\text{seq}}, t_{\text{timestamp}}, \Delta S, H_{\text{prev}}, H_{\text{curr}}, \sigma_{\text{witness}} \rangle$$
 
 - $n_{\text{seq}} \in \mathbb{N}$: Strictly monotonic sequence number ($n_i = n_{i-1} + 1$).
-- $\Delta S$: The state self-hosted-runner-5 or output payload produced by the execution.
+- $\Delta S$: The state delta or output payload produced by the execution.
 - $H_{\text{prev}}$: SHA-256 hash of the immediate predecessor evidence object:
   $$H_{\text{curr}} = \text{SHA-256}(n_{\text{seq}} \parallel t_{\text{timestamp}} \parallel \text{SHA-256}(\Delta S) \parallel H_{\text{prev}})$$
 - $\sigma_{\text{witness}}$: Cryptographic signature binding $C$, $D$, and $H_{\text{curr}}$.
@@ -111,7 +111,7 @@ If any clause of $C$ is violated, or if the signature $\sigma_{\text{HMAC}}$ of 
   },
   "delegation": {
     "token_id": "dct-EXAMPLE-TOKEN-ID",
-    "issuer": "operator@self-hosted-runner-2.hummbl.local",
+    "issuer": "operator@host.example",
     "subject": "agent-scavenger-01",
     "permitted_tools": ["view_file", "list_dir", "grep_search"],
     "depth_remaining": 1,

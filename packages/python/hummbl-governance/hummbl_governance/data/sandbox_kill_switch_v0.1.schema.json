@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hummbl.dev/schemas/sandbox-kill-switch-v0.1.schema.json",
+  "title": "Sandbox Kill Switch v0.1",
+  "description": "Host-controlled kill-switch state for a worker, sandbox, or fleet scope.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kill_switch_id",
+    "controller",
+    "scope",
+    "target_id",
+    "status",
+    "mode",
+    "generation",
+    "changed_by",
+    "changed_at",
+    "reason",
+    "receipt_ref"
+  ],
+  "properties": {
+    "schema_version": {"const": "sandbox-kill-switch.v0.1"},
+    "kill_switch_id": {"type": "string", "pattern": "^ksw-[a-z0-9-]+$"},
+    "controller": {"const": "host_supervisor"},
+    "scope": {"type": "string", "enum": ["worker", "sandbox", "fleet"]},
+    "target_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 128},
+    "status": {"type": "string", "enum": ["armed", "engaged", "released"]},
+    "mode": {"type": "string", "enum": ["halt_new", "terminate_worker", "terminate_sandbox", "terminate_all"]},
+    "generation": {"type": "integer", "minimum": 0, "maximum": 1000000000},
+    "changed_by": {"type": "string", "minLength": 1, "maxLength": 128},
+    "changed_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "receipt_ref": {"type": "string", "pattern": "^rcpt-[a-z0-9-]+$"}
+  },
+  "additionalProperties": false
+}

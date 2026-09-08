@@ -24,6 +24,7 @@
     "revocation_state": "active",
     "ratified_claim": "Code review bottleneck is slowing merges",
     "ratified_fragment_ref": "umf-002",
-    "ratification_reason": "Confirmed by merge rate data"
+    "ratification_reason": "Confirmed by merge rate data",
+    "independence_class": "single_lineage"
   }
 }

@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "coalition_id",
-        "dissolution_reason"
+        "dissolution_reason",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

@@ -16,7 +16,7 @@
 Use this playbook whenever you need to:
 
 - **Pilot HUMMBL governance on a single machine** (the hummbl-governance proving ground pattern)
-- **Roll out HUMMBL governance across a multi-machine mesh** (the self-hosted-runner-2 fleet pattern)
+- **Roll out HUMMBL governance across a multi-machine mesh** (the fleet-host mesh pattern)
 - **Activate a new agent** in an existing HUMMBL-governed fleet (the agent onboarding pattern)
 - **Roll out HUMMBL governance to a customer organization** (the enterprise deployment pattern)
 
@@ -74,13 +74,13 @@ Do NOT use this playbook for:
 - `python -c "import hummbl_governance; print(hummbl_governance.__version__)"` returns the version
 - The KRINEIA receipt chain is intact (run the chain verification from the evidence pack E1)
 
-### 3.2 Multi-machine mesh (self-hosted-runner-2 fleet pattern)
+### 3.2 Multi-machine mesh (fleet-host mesh pattern)
 
-**When:** Rolling out HUMMBL governance across multiple machines (e.g., self-hosted-runner-2, self-hosted-runner-1, self-hosted-runner-3, self-hosted-runner-4).
+**When:** Rolling out HUMMBL governance across multiple machines (e.g., fleet-host-1, fleet-host-2, fleet-host-3, fleet-host-4).
 
 **Pre-flight:**
 
-1. Complete §3.1 on the first machine (the source of truth, e.g., self-hosted-runner-2)
+1. Complete §3.1 on the first machine (the source of truth, e.g., fleet-host-1)
 2. Confirm Tailscale (or equivalent) is running on all machines
 3. Confirm SSH (or equivalent) works between machines
 4. Confirm the source machine has the canonical `.agents/` directory
