@@ -18,7 +18,16 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a subprocess regression test that round-trips an em-dash through the MCP
   server and verifies no CP1252 mojibake in the bus file or read response.
 
+### Changed
+- `lane_classifier`: triadic LLL routing (`classify_triadic` returns -1 LOOP,
+  0 LATTICE, +1 LADDER). Binary `classify_message` stays as the wrapper
+  (LOOP and LADDER map to foreground, LATTICE to background). Harvested from
+  standalone hummbl-bus `ae18f50`. `ALERT` and `SITREP` now classify as
+  foreground; oss-only `BELIEF_AUDIT` routes LATTICE (background). Completeness
+  check now covers every canonical type, including `BELIEF_AUDIT`.
+
 ### Added
+- `classify_triadic()` public export on `hummbl_bus`.
 - Promoted 5 bus modules from founder-mode (archived):
   - `autonomy_ladder.py` — autonomy tier labels and action validation (7 functions)
   - `bus_writer_cli.py` — CLI interface for bus writer with path resolution and signing support

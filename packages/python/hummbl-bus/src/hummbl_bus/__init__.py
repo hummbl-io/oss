@@ -10,7 +10,7 @@ Security policy: ``get_bus_policy()`` (configurable via BUS_SECURITY_POLICY env)
 Integrity audit: ``audit_bus()`` (read-only bus scanner).
 Autonomy tiers: ``tier_label()``, ``can_execute()`` (from autonomy_ladder).
 Inference tiers: ``baseline_tier()``, ``recommended_tier()`` (from inference_tier).
-Lane classification: ``classify_message()``, ``is_foreground()`` (from lane_classifier).
+Lane classification: ``classify_triadic()``, ``classify_message()``, ``is_foreground()`` (from lane_classifier).
 Work queue: ``push_task()``, ``pull_tasks()``, ``claim_task()`` (from work_queue).
 """
 
@@ -55,6 +55,7 @@ _LAZY_INFERENCE_TIER_EXPORTS = {
 }
 
 _LAZY_LANE_CLASSIFIER_EXPORTS = {
+    "classify_triadic",
     "classify_message",
     "classify_lane",
     "is_foreground",
@@ -137,6 +138,7 @@ __all__ = [
     "estimate_cost",
     "validate_tier_escalation",
     # lane_classifier
+    "classify_triadic",
     "classify_message",
     "classify_lane",
     "is_foreground",
