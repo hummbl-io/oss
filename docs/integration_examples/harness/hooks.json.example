@@ -1,0 +1,12 @@
+{
+  "$comment": "Cursor hooks example for CONTRACT×DCT×EVIDENCE shell mediation. Alpha demo only — not production-certified. Copy/adapt into your project's hooks config; do not treat as fleet default policy.",
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python docs/integration_examples/harness/cursor_beforeShellExecution.py",
+        "timeout": 15
+      }
+    ]
+  }
+}
