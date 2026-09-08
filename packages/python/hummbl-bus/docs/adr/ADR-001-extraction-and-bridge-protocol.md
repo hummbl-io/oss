@@ -1,8 +1,8 @@
 # ADR-001: hummbl-bus Extraction and Bridge Protocol
 **Status**: ACCEPTED  
 **Date**: 2026-05-04  
-**Author**: HUMMBL Principal Agent  
-**Deciders**: HUMMBL Principal Agent
+**Author**: Human Principal Agent  
+**Deciders**: Human Principal Agent
 
 ---
 
