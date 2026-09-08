@@ -1,8 +1,9 @@
 """Foreground / background lane classifier for the coordination bus.
 
 Component 2 of PROPOSAL-012: Autonomous Agent Orchestration.
-Maps bus lanes and message types to foreground (operator-present, P0/P1)
-or background (autonomous, P2/P3) work classes.
+Maps bus lanes and message types to triadic LLL routing
+(-1 LOOP, 0 LATTICE, +1 LADDER). ``classify_message`` remains the
+binary wrapper (foreground / background).
 """
 
 from __future__ import annotations
@@ -14,43 +15,50 @@ from hummbl_bus.message_types import CANONICAL_MESSAGE_TYPES
 
 logger = logging.getLogger(__name__)
 
-# Message types that are inherently foreground (review-gate, binding decisions)
-_FOREGROUND_MESSAGE_TYPES = frozenset(
+# Message types for +1 LADDER (Foreground / Active / Priority)
+_LADDER_MESSAGE_TYPES = frozenset(
     {
         "PROPOSAL",
         "REVIEW",
         "ACK",
-        "VETO",
         "DECISION",
         "DIRECTIVE",
         "APPROVE",
         "REJECT",
-        "HANDOFF",
         "WIP_START",
         "WIP_END",
         "QUESTION",
-        "BLOCKED",
+        "SITREP",
     }
 )
 
-# Message types that are inherently background (reporting, monitoring, receipts)
-_BACKGROUND_MESSAGE_TYPES = frozenset(
+# Message types for 0 LATTICE (Background / Autonomous / Routine)
+_LATTICE_MESSAGE_TYPES = frozenset(
     {
         "STATUS",
         "TASK_COMPLETE",
         "HEARTBEAT",
-        "ALERT",
         "RECEIPT",
         "COMPLETE",
         "MILESTONE",
-        "SITREP",
         "VERIFY",
         "HRSI_CHECKIN",
         "SKILL_INVOKE",
+        "BELIEF_AUDIT",
     }
 )
 
-if _FOREGROUND_MESSAGE_TYPES | _BACKGROUND_MESSAGE_TYPES != CANONICAL_MESSAGE_TYPES:
+# Message types for -1 LOOP (Blocked / Quality Gate / Exception)
+_LOOP_MESSAGE_TYPES = frozenset(
+    {
+        "BLOCKED",
+        "VETO",
+        "ALERT",
+        "HANDOFF",
+    }
+)
+
+if _LADDER_MESSAGE_TYPES | _LATTICE_MESSAGE_TYPES | _LOOP_MESSAGE_TYPES != CANONICAL_MESSAGE_TYPES:
     raise RuntimeError("lane classifier must classify every canonical bus type")
 
 # Lane prefixes that default to background (unless overridden by priority)
@@ -84,45 +92,59 @@ _TIER_HIGH_STAKES = frozenset(
 )
 
 
-def classify_message(msg_type: str, priority: str | None = None) -> str:
-    """Classify a bus message as foreground or background.
-
-    Args:
-        msg_type: The bus message type (e.g. ``STATUS``, ``PROPOSAL``).
-        priority: Optional priority tag (``P0``, ``P1``, ``P2``, ``P3``).
-
-    Returns:
-        ``"foreground"`` or ``"background"``.
-    """
-    mtype = msg_type.strip().upper()
-
-    # Priority override takes precedence
+def classify_triadic(
+    msg_type: str,
+    priority: str | None = None,
+    lane: str = "",
+) -> int:
+    """Classify a bus message into triadic LLL routing: -1 (LOOP), 0 (LATTICE), +1 (LADDER)."""
     if priority is not None:
         p = priority.strip().upper()
         if p in _FOREGROUND_PRIORITIES:
-            return "foreground"
+            return 1
         if p in _BACKGROUND_PRIORITIES:
-            return "background"
+            return 0
 
-    # Message type classification
-    if mtype in _FOREGROUND_MESSAGE_TYPES:
-        return "foreground"
-    if mtype in _BACKGROUND_MESSAGE_TYPES:
-        return "background"
+    if lane:
+        lane_clean = lane.strip().lower()
+        if lane_clean.startswith(_BACKGROUND_LANE_PREFIXES):
+            return 0
+        if lane_clean.startswith(_FOREGROUND_LANE_PREFIXES):
+            return 1
 
-    # Default: unknown types treated as foreground (safe default)
+    mtype = msg_type.strip().upper()
+    if mtype in _LADDER_MESSAGE_TYPES:
+        return 1
+    if mtype in _LOOP_MESSAGE_TYPES:
+        return -1
+    if mtype in _LATTICE_MESSAGE_TYPES:
+        return 0
+
     logger.debug(
-        "Unknown message type %r for lane classification; defaulting to foreground",
+        "Unknown message type %r for lane classification; defaulting to LADDER (+1)",
         mtype,
     )
-    return "foreground"
+    return 1
+
+
+def classify_message(
+    msg_type: str,
+    priority: str | None = None,
+    lane: str = "",
+) -> str:
+    """Classify a bus message (optionally with a lane) as foreground or background.
+
+    Legacy wrapper around classify_triadic. Maps +1 and -1 to 'foreground', 0 to 'background'.
+    """
+    val = classify_triadic(msg_type, priority, lane)
+    return "foreground" if val != 0 else "background"
 
 
 def classify_lane(lane: str, msg_type: str, priority: str | None = None) -> str:
     """Classify a lane as foreground or background.
 
-    Lane prefixes can bias the classification when priority is ambiguous
-    (e.g. ``STATUS`` without explicit priority).
+    Thin wrapper around :func:`classify_message` that passes the lane name.
+    Kept for backward-compatibility with the public API.
 
     Args:
         lane: The lane name (e.g. ``ops/codex/steward-watcher``).
@@ -132,24 +154,7 @@ def classify_lane(lane: str, msg_type: str, priority: str | None = None) -> str:
     Returns:
         ``"foreground"`` or ``"background"``.
     """
-    lane_clean = lane.strip().lower()
-
-    # Priority is still the strongest signal
-    if priority is not None:
-        p = priority.strip().upper()
-        if p in _FOREGROUND_PRIORITIES:
-            return "foreground"
-        if p in _BACKGROUND_PRIORITIES:
-            return "background"
-
-    # Lane prefix bias
-    if lane_clean.startswith(_BACKGROUND_LANE_PREFIXES):
-        return "background"
-    if lane_clean.startswith(_FOREGROUND_LANE_PREFIXES):
-        return "foreground"
-
-    # Fall through to message-type classification
-    return classify_message(msg_type, priority=None)
+    return classify_message(msg_type, priority=priority, lane=lane)
 
 
 def is_foreground(msg_type: str, priority: str | None = None) -> bool:
@@ -175,7 +180,7 @@ def classify_message_from_body(msg_type: str, body: str) -> str:
     """Classify using the raw message body (extracts lane= and priority=)."""
     priority = _extract_tag(body, "priority")
     lane = _extract_tag(body, "lane") or ""
-    return classify_lane(lane, msg_type, priority)
+    return classify_message(msg_type, priority=priority, lane=lane)
 
 
 def expected_model_tier(
@@ -193,7 +198,7 @@ def expected_model_tier(
     Returns:
         ``"T0"``, ``"T1"``, or ``"T2"``.
     """
-    cls = classify_lane(lane or "", msg_type, priority)
+    cls = classify_message(msg_type, priority=priority, lane=lane or "")
     mtype = msg_type.strip().upper()
 
     if cls == "background":
