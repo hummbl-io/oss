@@ -55,7 +55,8 @@
         "visibility_class",
         "delegation_id",
         "delegated_to",
-        "delegated_by"
+        "delegated_by",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

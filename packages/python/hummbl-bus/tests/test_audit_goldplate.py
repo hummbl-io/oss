@@ -323,6 +323,10 @@ class TestBridgeServerInputValidation:
 
         from hummbl_bus.bridge_server import BusBridgeHandler
 
+        monkeypatch.setenv("BUS_BRIDGE_ALLOW_NO_AUTH", "1")
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN", raising=False)
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN_FILE", raising=False)
+
         handler = object.__new__(BusBridgeHandler)
         handler.path = "/bus/tail?n=-5"
         handler.headers = {}
@@ -363,6 +367,10 @@ class TestBridgeServerInputValidation:
         import io
 
         from hummbl_bus.bridge_server import BusBridgeHandler
+
+        monkeypatch.setenv("BUS_BRIDGE_ALLOW_NO_AUTH", "1")
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN", raising=False)
+        monkeypatch.delenv("BUS_BRIDGE_TOKEN_FILE", raising=False)
 
         handler = object.__new__(BusBridgeHandler)
         handler.path = "/bus/tail?n=abc"

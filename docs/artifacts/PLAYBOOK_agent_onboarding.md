@@ -52,7 +52,7 @@ Do NOT use this playbook for:
 
 - `name`: The canonical agent identity (e.g., `devin`, `codex`, `claude-code`)
 - `role`: The agent's function (e.g., "primary cloud engineering lane")
-- `runtime`: Where the agent runs (e.g., "Cognition cloud", "self-hosted-runner-2")
+- `runtime`: Where the agent runs (e.g., "Cognition cloud", "fleet-host-1")
 - `bus_id`: The agent's coordination bus identity (must be unique)
 - `model_tier`: Data sensitivity tier (T1-BYOK, T2-ZEN, T3-FREE)
 - `trust_level`: Operator confidence (TRUSTED, MEDIUM-HIGH, MEDIUM, PROBATIONARY)

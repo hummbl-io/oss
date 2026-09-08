@@ -96,7 +96,7 @@
     },
     "mesh_scope": {
       "type": "string",
-      "description": "Description of mesh reach (e.g. 'Anvil + Pixel 10 llama-server API')."
+      "description": "Description of mesh reach (e.g. 'operator workstation + on-device llama-server API')."
     },
     "promoted_at": {
       "type": "string",

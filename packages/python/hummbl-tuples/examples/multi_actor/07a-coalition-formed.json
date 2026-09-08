@@ -35,6 +35,7 @@
     ],
     "coalition_expiry": "2026-08-01",
     "decision_rules": "consensus-with-dissent",
-    "dissent_policy": "dissent-preserved"
+    "dissent_policy": "dissent-preserved",
+    "independence_class": "correlated"
   }
 }

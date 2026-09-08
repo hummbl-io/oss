@@ -55,7 +55,8 @@
         "visibility_class",
         "dissented_claim",
         "dissent_reason",
-        "resolution_posture"
+        "resolution_posture",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

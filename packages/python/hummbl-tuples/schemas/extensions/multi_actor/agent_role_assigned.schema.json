@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "agent_id",
-        "role"
+        "role",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

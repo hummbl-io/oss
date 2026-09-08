@@ -24,6 +24,7 @@
     "revocation_state": "active",
     "coalition_id": "coal-001",
     "dissolution_reason": "Investigation complete, expiry reached",
-    "dissolution_receipt": "receipt-012"
+    "dissolution_receipt": "receipt-012",
+    "independence_class": "correlated"
   }
 }

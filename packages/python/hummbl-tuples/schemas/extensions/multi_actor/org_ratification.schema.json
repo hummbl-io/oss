@@ -54,7 +54,8 @@
         "receipt_link",
         "visibility_class",
         "ratified_claim",
-        "org_authority"
+        "org_authority",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

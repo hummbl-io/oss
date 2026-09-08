@@ -42,7 +42,8 @@ hummbl-bus is configured entirely through environment variables. There are no co
 |---|---|---|---|---|
 | `OPEN_BRAIN_RELAY_URL` | string | (unset) | HTTP URL | When set, bus messages are also forwarded to this Open Brain server's `/bus/post` endpoint. Best-effort, never raises. **Source:** `bus_writer_core.py:1570` |
 | `OPEN_BRAIN_TOKEN` | string | (unset) | any string | Bearer token for Open Brain relay authentication. **Source:** `bus_writer_core.py:1583` |
-| `DASHBOARD_WRITE_TOKEN` | string | (unset) | any string | Token sent as `X-Dashboard-Token` header when posting to `BUS_REMOTE_URL`. **Source:** `bus_writer_core.py:1539` |
+| `DASHBOARD_WRITE_TOKEN` | string | (unset) | any string | Fallback token for remote writes when `BUS_BRIDGE_TOKEN` is unset. Sent as both `Authorization: Bearer` and `X-Dashboard-Token`. **Source:** `bus_writer.py` |
+| `BUS_BRIDGE_TOKEN` | string | (unset) | any string | Preferred Bearer token for bridge client and remote bus writes. **Source:** `bridge_client.py`, `bus_writer.py` |
 
 ### Machine Identity
 
