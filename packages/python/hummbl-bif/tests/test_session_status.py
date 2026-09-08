@@ -74,3 +74,53 @@ class TestSessionStatus:
         _save_session(session)
         result = tool_bif_session_status({"session_id": sid})
         assert result["next_batch"] is None
+
+
+class TestSessionIdPathTraversal:
+    """Regression tests for #155: session_id must not escape SESSIONS_DIR."""
+
+    def test_parent_dir_traversal_rejected(self):
+        result = tool_bif_session_status({"session_id": "../../etc/passwd"})
+        assert "error" in result
+        assert "Invalid session_id" in result["error"]
+
+    def test_forward_slash_rejected(self):
+        result = tool_bif_session_status({"session_id": "foo/bar"})
+        assert "error" in result
+
+    def test_backslash_rejected(self):
+        result = tool_bif_session_status({"session_id": "foo\\bar"})
+        assert "error" in result
+
+    def test_absolute_path_rejected(self):
+        result = tool_bif_session_status({"session_id": "/etc/passwd"})
+        assert "error" in result
+
+    def test_null_byte_rejected(self):
+        result = tool_bif_session_status({"session_id": "abc\x00def"})
+        assert "error" in result
+
+    def test_bare_dotdot_rejected(self):
+        result = tool_bif_session_status({"session_id": ".."})
+        assert "error" in result
+
+    def test_traversal_does_not_create_file_outside_sessions_dir(self, tmp_path):
+        """The rejected path join must never actually be attempted."""
+        import mcp_server
+
+        canary = tmp_path / "canary.json"
+        assert not canary.exists()
+        tool_bif_session_status({"session_id": "../canary"})
+        assert not canary.exists()
+        # also confirm nothing leaked into SESSIONS_DIR itself
+        assert list(mcp_server.SESSIONS_DIR.iterdir()) == []
+
+    def test_valid_uuid_style_session_id_still_works(self):
+        """Normal internally-generated session_ids (uuid4()[:8]) must still pass."""
+        from mcp_server import _SESSION_ID_RE
+
+        created = tool_bif_start_session({"domain": "TestDomain"})
+        sid = created["session_id"]
+        assert _SESSION_ID_RE.match(sid)
+        result = tool_bif_session_status({"session_id": sid})
+        assert "error" not in result
