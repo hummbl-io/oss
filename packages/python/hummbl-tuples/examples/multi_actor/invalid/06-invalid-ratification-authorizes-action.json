@@ -1,0 +1,28 @@
+{
+  "tuple_type": "USER_RATIFICATION",
+  "id": "06-invalid-ratification-authorizes-action",
+  "time": "2026-07-11T10:00:00Z",
+  "actor": "user-bad-6",
+  "principal": "user-bad-6",
+  "control_mode": "USER_DIRECT",
+  "tuple_data": {
+    "authored_by": "user-bad-6",
+    "represented_principal": "user-bad-6",
+    "owner": "user-bad-6",
+    "receipted_by": "receipt-bad-006",
+    "actor_regime": "user_only",
+    "evidence_links": [],
+    "receipt_link": "receipt-06-invalid-ratification-authorizes-action",
+    "visibility_class": "private",
+    "epistemic_permission": "claim",
+    "durable_write_permission": "none",
+    "action_permission": "authorize_action",
+    "approval_requirement": "required",
+    "authority_source": "user-001",
+    "scope": "bounded",
+    "expiry": "2026-12-31",
+    "revocation_state": "active",
+    "independence_class": "single_lineage",
+    "ratified_claim": "The deployment is safe"
+  }
+}

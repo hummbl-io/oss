@@ -26,6 +26,7 @@
     "source_model_b": "umf-bad-1-fork",
     "proposed_merged_model": "umf-bad-1-merged",
     "merge_rationale": "Merge without acknowledging dissent",
-    "unresolved_dissent_acknowledged": false
+    "unresolved_dissent_acknowledged": false,
+    "independence_class": "single_lineage"
   }
 }

@@ -55,7 +55,8 @@
         "visibility_class",
         "coalition_id",
         "change_type",
-        "affected_member"
+        "affected_member",
+        "independence_class"
       ],
       "properties": {
         "authored_by": {

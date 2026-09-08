@@ -26,6 +26,7 @@
     "source_model_b": "umf-006-fork-a",
     "proposed_merged_model": "umf-006-merged",
     "merge_rationale": "Both branches converged on same conclusion",
-    "unresolved_dissent_acknowledged": true
+    "unresolved_dissent_acknowledged": true,
+    "independence_class": "correlated"
   }
 }

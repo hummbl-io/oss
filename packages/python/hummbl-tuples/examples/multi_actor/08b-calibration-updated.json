@@ -31,6 +31,7 @@
       "pred-002"
     ],
     "abstention_behavior": "abstains on >3 file changes",
-    "correction_behavior": "self-corrects on outcome mismatch"
+    "correction_behavior": "self-corrects on outcome mismatch",
+    "independence_class": "single_lineage"
   }
 }

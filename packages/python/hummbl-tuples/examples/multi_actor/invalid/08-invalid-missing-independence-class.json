@@ -1,18 +1,18 @@
 {
-  "tuple_type": "AGENT_VERSION_CHANGED",
-  "id": "changed",
+  "tuple_type": "AGENT_OBSERVATION",
+  "id": "08-invalid-missing-independence-class",
   "time": "2026-07-11T10:00:00Z",
-  "actor": "agent-h1",
-  "principal": "user-008",
+  "actor": "agent-bad-8",
+  "principal": "user-bad-8",
   "control_mode": "AI_PROPOSE_USER_CONFIRM",
   "tuple_data": {
-    "authored_by": "agent-h1",
-    "represented_principal": "user-008",
-    "owner": "user-008",
-    "receipted_by": "receipt-013",
+    "authored_by": "agent-bad-8",
+    "represented_principal": "user-bad-8",
+    "owner": "user-bad-8",
+    "receipted_by": "receipt-bad-008",
     "actor_regime": "user_plus_agent",
     "evidence_links": [],
-    "receipt_link": "receipt-changed",
+    "receipt_link": "receipt-08-invalid-missing-independence-class",
     "visibility_class": "private",
     "epistemic_permission": "observe",
     "durable_write_permission": "none",
@@ -22,10 +22,9 @@
     "scope": "bounded",
     "expiry": "2026-12-31",
     "revocation_state": "active",
-    "agent_id": "agent-h1",
-    "previous_version": "v1.2",
-    "new_version": "v2.0",
-    "change_reason": "Model upgrade",
-    "independence_class": "single_lineage"
+    "observation_content": "System metric X exceeded threshold",
+    "observation_basis": [
+      "metric-001"
+    ]
   }
 }

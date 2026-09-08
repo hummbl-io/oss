@@ -24,6 +24,7 @@
     "revocation_state": "revoked",
     "observation_content": "observed data",
     "target_model": "umf-bad-4",
-    "delegation_id": "deleg-revoked-001"
+    "delegation_id": "deleg-revoked-001",
+    "independence_class": "single_lineage"
   }
 }
