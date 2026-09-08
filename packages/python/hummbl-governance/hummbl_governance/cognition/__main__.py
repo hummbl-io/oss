@@ -156,7 +156,8 @@ def _cmd_search(args: argparse.Namespace) -> int:
 
 def _cmd_reindex(args: argparse.Namespace) -> int:
     entries = load_entries()
-    path = reindex(entries, root=resolve_root())
+    # Don't pass root explicitly so $COGNITION_LEDGER can override the index path.
+    path = reindex(entries)
     print(json.dumps({"indexed": len(entries), "path": str(path)}))
     return 0
 
@@ -171,11 +172,13 @@ def _cmd_state(args: argparse.Namespace) -> int:
 
     root = resolve_root()
     entries = load_entries()
-    idx = index_path(root)
+    # Don't pass root explicitly so $COGNITION_LEDGER can override ledger/index paths.
+    lpath = ledger_path()
+    idx = index_path()
     last_ts = entries[-1]["timestamp"] if entries else "(empty)"
     print(json.dumps({
         "root": str(root),
-        "ledger": str(ledger_path(root)),
+        "ledger": str(lpath),
         "entries": len(entries),
         "last_write": last_ts,
         "index_present": idx.is_file(),
