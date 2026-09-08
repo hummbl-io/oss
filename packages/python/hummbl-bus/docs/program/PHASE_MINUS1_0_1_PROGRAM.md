@@ -2,7 +2,7 @@
 
 Status: PROPOSED
 
-Sponsor and final decision authority: HUMMBL Principal Agent
+Sponsor and final decision authority: Human Principal Agent
 
 Canonical planning repository: `hummbl-dev-org/hummbl-bus`
 
