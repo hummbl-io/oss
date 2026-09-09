@@ -90,9 +90,11 @@ cd packages/python/idp-spec && python -m pytest tests/ -v
 ## CI
 
 - **GitHub Actions** (primary): `.github/workflows/ci.yml` on `ubuntu-latest`.
-  Default job is **Python 3.13 only**, one matrix entry per Python package.
-- Extra job `test-hummbl-governance` runs Python **3.11 / 3.12 / 3.13** with
-  pytest-cov. Other packages are not on that matrix.
+  Main matrix tests every package on Python **3.11, 3.12, 3.13, 3.14**.
+  Two packages declaring `>=3.10` (`hummbl`, `hummbl-kernel`) get an extra
+  **3.10** entry. Coverage reporting is conditional on `hummbl-governance`.
+- Future-preview job `test-preview` runs all packages on **3.15-dev** with
+  `continue-on-error` -- failures are informational and do not block merges.
 - Lean is **not** built in CI.
 - **Workflow validator**: `.github/workflows/validate-workflows.yml` — enforces SHA-pinning.
 - SHA-pinning is required (`sha_pinning_required: true`). Tag refs (`@v4`, `@main`) cause `startup_failure`.

@@ -16,9 +16,62 @@ permissions:
   contents: read
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Main test matrix: every package x every supported Python version.
+  #
+  # Most packages declare requires-python = ">=3.11". Two packages (hummbl,
+  # hummbl-kernel) declare >=3.10 and get an extra 3.10 entry via `include`.
+  #
+  # Coverage reporting is conditional on the package name so only
+  # hummbl-governance gets --cov (preserving the GAP-003 intent).
+  # ---------------------------------------------------------------------------
   test:
-    name: test (${{ matrix.package }})
+    name: test (${{ matrix.package }}, ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
+        include:
+          # Extended floor: packages declaring >=3.10 also tested on 3.10
+          - package: hummbl
+            python-version: "3.10"
+          - package: hummbl-kernel
+            python-version: "3.10"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package and test dependencies
+        working-directory: packages/python/${{ matrix.package }}
+        run: pip install -e ".[test]"
+
+      - name: Run tests
+        working-directory: packages/python/${{ matrix.package }}
+        run: |
+          if [ "${{ matrix.package }}" = "hummbl-governance" ]; then
+            python -m pytest tests/ -q --cov=hummbl_governance --cov-report=term
+          else
+            python -m pytest tests/ -q
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Future-preview matrix: all packages on Python 3.15-dev.
+  #
+  # continue-on-error means failures here do NOT block the PR. The job is
+  # informational only -- it surfaces breakages early so they can be fixed
+  # before 3.15 ships stable (~Oct 2026).
+  # ---------------------------------------------------------------------------
+  test-preview:
+    name: test-preview (${{ matrix.package }}, 3.15-dev)
+    runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -30,7 +83,7 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: "3.13"
+          python-version: "3.15-dev"
 
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
@@ -39,33 +92,6 @@ jobs:
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
         run: python -m pytest tests/ -q
-
-  # Targeted extra matrix for hummbl-governance (GAP-003).
-  # Other packages stay on the 3.13-only job above.
-  # GAP-003 stays open until the first green public run of this job.
-  test-hummbl-governance:
-    name: test (hummbl-governance, ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install package and test dependencies
-        working-directory: packages/python/hummbl-governance
-        run: pip install -e ".[test]"
-
-      - name: Run tests with coverage
-        working-directory: packages/python/hummbl-governance
-        run: python -m pytest tests/ -q --cov=hummbl_governance --cov-report=term
 
   pip-audit:
     name: pip-audit
@@ -105,14 +131,15 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-hummbl-governance, pip-audit]
+    needs: [test, test-preview, pip-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
         run: |
           echo "test=${{ needs.test.result }}"
-          echo "test-hummbl-governance=${{ needs.test-hummbl-governance.result }}"
+          echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
+          # test-preview has continue-on-error so its result is always
+          # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
-          test "${{ needs.test-hummbl-governance.result }}" = success
           test "${{ needs.pip-audit.result }}" = success
