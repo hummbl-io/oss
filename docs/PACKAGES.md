@@ -4,7 +4,9 @@
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
 
-**As of:** 2026-09-02, tree `packages/python/` = 25 packages.
+**Tree inventory updated:** 2026-09-08, `packages/python/` = 27 packages.
+Release verification dates are recorded separately below. The two new
+imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
 
 ## Name-collision warning (PyPI + npm)
@@ -45,7 +47,7 @@ Tree versions checked 2026-09-02.
 
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
-| `hummbl-governance` | 1.4.2 | 1.4.2 | Governance primitives. |
+| `hummbl-governance` | 1.5.0 | 1.4.2 | Tree version checked 2026-09-08; 1.5.0 remains unreleased under the disposition in `RELEASE.md`. |
 | `base120` | 3.0.2 | 3.0.2 | 120 reasoning operators. NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
 | `hummbl-tuples` | 0.2.0 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. |
@@ -75,6 +77,8 @@ Tree versions checked 2026-09-02.
 | `hummbl-garage` | 0.1.0 | API / livery / failure aesthetics |
 | `hummbl-identity` | 0.1.0 | Identity facade |
 | `hummbl-validation-framework` | 0.1.0 | Design-system validation tests |
+| `hummbl-agent-eval-harness` | 0.1.0 | Regex evaluation; imports as `agent_eval_harness`, command `agent-eval` |
+| `hummbl-sast` | 0.1.0 | Experimental static analysis, secret patterns, and OSV lookups |
 
 ### Excluded (not HUMMBL's)
 
