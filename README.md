@@ -26,7 +26,7 @@ remain on `#79`.
 
 ## Packages
 
-28 Python packages under `packages/python/<name>/`. Versions are
+39 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 
 | Package | Tree | PyPI | Status |
@@ -59,6 +59,17 @@ remain on `#79`.
 | `hummbl-agent-eval-harness` | 0.1.0 | — | In-tree — required and forbidden regex constraints for agent output |
 | `hummbl-sast` | 0.1.0 | — | In-tree — static analysis, secret patterns, and OSV dependency lookups |
 | `hummbl-mcp` | 0.1.0 | — | In-tree — MCP server framework: gateway, protocol, tools, and adapters |
+| `hummbl-mcp-base120` | 0.1.0 | — | In-tree — MCP server exposing Base120 mental models engine |
+| `hummbl-mcp-basen` | 0.1.0 | — | In-tree — MCP server exposing BaseN governance surface |
+| `hummbl-mcp-bif` | 0.1.0 | — | In-tree — MCP server exposing BIF methodology tools |
+| `hummbl-mcp-cognitive-ledger` | 0.1.0 | — | In-tree — MCP server shim for Cognitive Ledger Protocol |
+| `hummbl-mcp-coordination-bus` | 0.1.0 | — | In-tree — MCP server shim for HUMMBL coordination bus |
+| `hummbl-mcp-discord` | 0.1.0 | — | In-tree — local stdio MCP server for Discord |
+| `hummbl-mcp-governance` | 0.1.0 | — | In-tree — MCP servers exposing HUMMBL governance primitives |
+| `hummbl-mcp-onepassword` | 0.1.0 | — | In-tree — MCP server exposing 1Password CLI as tools |
+| `hummbl-mcp-proton` | 0.1.0 | — | In-tree — local MCP server for Proton Mail, Drive, Calendar |
+| `hummbl-mcp-signal` | 0.1.0 | — | In-tree — local stdio MCP server for Signal Messenger |
+| `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
 
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
