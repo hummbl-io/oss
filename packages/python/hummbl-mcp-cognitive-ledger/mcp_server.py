@@ -47,7 +47,7 @@ Wire into MCP config::
           "args": ["C:\\path\\to\\mcp-server\\packages\\python\\cognitive-ledger\\mcp_server.py"],
           "transport": "stdio",
           "env": {
-            "CLP_STATE_DIR": "C:\\Users\\Owner\\PROJECTS\\hummbl-cognition\\_state\\cognition"
+            "CLP_STATE_DIR": "C:\\path\\to\\hummbl-cognition\\_state\\cognition"
           }
         }
       }
