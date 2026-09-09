@@ -4,7 +4,7 @@
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
 
-**Tree inventory updated:** 2026-09-08, `packages/python/` = 39 packages.
+**Tree inventory updated:** 2026-09-08, `packages/python/` = 41 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
@@ -91,6 +91,8 @@ Tree versions checked 2026-09-02.
 | `hummbl-mcp-proton` | 0.1.0 | Local MCP server for Proton Mail, Drive, Calendar |
 | `hummbl-mcp-signal` | 0.1.0 | Local stdio MCP server for Signal Messenger |
 | `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
+| `hummbl-mcp-omnichannel` | 0.1.0 | Omnichannel governance gate MCP server (refactored from FastAPI to stdlib http.server) |
+| `hummbl-mcp-voice` | 0.1.0 | MCP server for vendor-neutral voice interactions (Vapi adapter) |
 
 ### Excluded (not HUMMBL's)
 
