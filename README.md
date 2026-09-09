@@ -26,7 +26,7 @@ remain on `#79`.
 
 ## Packages
 
-27 Python packages under `packages/python/<name>/`. Versions are
+28 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 
 | Package | Tree | PyPI | Status |
@@ -58,6 +58,7 @@ remain on `#79`.
 | `hummbl-validation-framework` | 0.1.0 | — | In-tree — external validation tests for the design system |
 | `hummbl-agent-eval-harness` | 0.1.0 | — | In-tree — required and forbidden regex constraints for agent output |
 | `hummbl-sast` | 0.1.0 | — | In-tree — static analysis, secret patterns, and OSV dependency lookups |
+| `hummbl-mcp` | 0.1.0 | — | In-tree — MCP server framework: gateway, protocol, tools, and adapters |
 
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.

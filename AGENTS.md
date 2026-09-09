@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **27** Python packages under `packages/python/<name>/` and
+Currently hosts **28** Python packages under `packages/python/<name>/` and
 one Lean tree under `packages/lean/hummbl-formalization`.
 There is no JS or Rust package tree under `packages/` yet.
 
@@ -40,6 +40,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-validation-framework | `packages/python/hummbl-validation-framework/` | 0.1.0 | In-tree | External validation tests for the design system |
 | hummbl-agent-eval-harness | `packages/python/hummbl-agent-eval-harness/` | 0.1.0 | In-tree | Required and forbidden regex constraints for agent output |
 | hummbl-sast | `packages/python/hummbl-sast/` | 0.1.0 | In-tree | Static analysis, secret patterns, and OSV dependency lookups |
+| hummbl-mcp | `packages/python/hummbl-mcp/` | 0.1.0 | In-tree | MCP server framework -- gateway, protocol, tools, and adapters |
 
 If you add a directory under `packages/python/`, update this table, the
 README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
@@ -57,7 +58,7 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 27)
+# Per-package (all 28)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
 cd packages/python/hummbl-sast && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
@@ -85,6 +86,7 @@ cd packages/python/hummbl-tuples && python -m pytest tests/ -v
 cd packages/python/hummbl-validation && python -m pytest tests/ -v
 cd packages/python/hummbl-validation-framework && python -m pytest tests/ -v
 cd packages/python/idp-spec && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp && python -m pytest tests/ -v
 ```
 
 ## CI
