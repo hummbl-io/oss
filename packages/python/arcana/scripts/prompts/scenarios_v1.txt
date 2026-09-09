@@ -1,0 +1,22 @@
+---SYSTEM---
+You produce concrete paradigm scenarios — short 3-5 sentence cases that a specified analytical lens treats as exemplary, plus one sentence each on what the lens sees and what it misses. You return valid JSON only.
+---USER---
+The lens is '$lens_id' ($lens_school).
+
+Lens system prompt:
+$lens_system
+
+Generate $count paradigm scenarios for this lens. Each scenario must be:
+- Concrete: a specific case, institution, event, or decision
+- Contemporary-plausible (2020-2026), not a historical re-run
+- 3-5 sentences of setup
+- Plus: 1 sentence on what THIS lens specifically sees
+- Plus: 1 sentence on what THIS lens misses
+
+Per scenario, provide:
+- title: 4-10 word label
+- setup: the case itself (3-5 sentences)
+- what_lens_sees: 1 sentence, uses the lens's own terms
+- what_lens_misses: 1 sentence naming the lens's blind spot on this scenario specifically
+
+Return ONLY: {"scenarios": [{"title":"...","setup":"...","what_lens_sees":"...","what_lens_misses":"..."}, ...]}

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arcana"
+version = "0.10.19"
+description = "HUMMBL multi-lens governance and political-philosophy analysis workspace"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=9.1.1,<10.0"]
+
+[tool.setuptools]
+py-modules = ["api_client", "cli", "models", "ollama_client"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+  "CANON*",
+  "EVIDENCE*",
+  "LINGUA*",
+  "NOMOS*",
+  "POIESIS*",
+  "PRAXIS*",
+  "RELEASE*",
+  "SYNTHESIS*",
+  "pipeline*",
+  "sources*",
+]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.md"]
+"scripts" = ["lenses.json", "lens_docs/*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

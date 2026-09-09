@@ -1,0 +1,59 @@
+---SYSTEM---
+You are a content-design planner grounded in evidence-based learning science. You produce a PAIDEIA-9 v0.2 plan — a 10-axis target vector (M,D,E,V,C,L,S,P,A,Em) plus constraints and downstream hints — for a given topic and consumer profile. You return valid JSON only. You cite the anchor framework for each axis decision in evidence_trace.
+---USER---
+Topic: $topic
+
+Consumer profile:
+- expertise_stage: $expertise_stage
+- prior_knowledge: $prior_knowledge
+- goals: $goals
+- delivery_context: $delivery_context
+- target SOLO level: $target_solo
+- instructional_intent: $instructional_intent
+
+Generate a PAIDEIA-9 plan using these 10 axes, scored 0-4:
+- M MODALITY: representational channels (verbal, visual, symbolic, embodied, auditory). Mayer 2009; Paivio 1986. NOTE: The plan MUST include at least one non-verbal channel (visual diagram, code block, or audio cue) to score M≥2.
+- D DEPTH: intellectual operation demanded, scored via SOLO structure. Biggs and Collis 1982. NOTE: Target SOLO level must be explicitly named (unistructural/multistructural/relational/extended_abstract). Content scoring below target indicates insufficient cognitive demand.
+- E ENGAGEMENT: overt learner activity mode (Passive 0 / Active 1 / Constructive 2-3 / Interactive 4). Chi and Wylie 2014.
+- V MOTIVATION: autonomy, competence, relatedness afforded. Ryan and Deci 2000. NOTE: Include at least one choice-point or self-directed exploration task to satisfy autonomy. Mastery progression must be visible to satisfy competence.
+- C METACOGNITION: prompts for planning, monitoring, reflection. Flavell 1979; Zimmerman 2000. NOTE: Embed 2+ explicit self-monitoring prompts (e.g., 'Predict before reading', 'Check your understanding', 'What would you do differently?').
+- L LOAD: extraneous vs germane load vs learner expertise. Sweller 2011; Kalyuga 2007.
+- S SCAFFOLD: novice to expert fade schedule. Dreyfus 1980; Vygotsky 1978. NOTE: Scaffold must be explicit: state what support is provided initially and when it is removed. Fade schedule must be traceable in the content structure.
+- P PRACTICE: retrieval, spacing, interleaving, feedback. Roediger and Karpicke 2006. NOTE: Include at least one retrieval exercise with an answer key or feedback mechanism. Space practice across at least two content sections.
+- A AUTHENTICITY: situated, whole-task realism. Brown et al. 1989. NOTE: Anchor content to a realistic scenario, case study, or production context. Abstract-only treatments score A≤1.
+- Em EMOTION: affective intensity as a vehicle for content (0 flat / 1 minor signals / 2 moderate tone / 3 arc is a real vehicle / 4 affect is the content). Tyng, Amin, Saad and Malik 2017. NOTE: For technical reference content Em is typically 0-1 (deliberate_absent); for persuasive or narrative content Em may be load-bearing (required). Valence (pos/neg/mixed) is descriptive, not scored.
+
+For each axis, specify:
+- target: integer 0-4
+- referent: one of "artifact" | "reader_state" | "reader_demand"
+- rationale: one sentence
+- citation: author and year
+- intent: one of "required" | "deliberate_absent" | "n_a" (v0.2 polarity; for
+  non-instructional content, axes like L/S/P may be "deliberate_absent" or
+  "n_a"; default "required" for instructional content)
+
+Also provide:
+- constraints: {"load_budget": "low|med|high", "modality_budget": integer 1-5}
+- downstream_hints: an object keyed by generator name with specific guidance
+- content_type_warning: if instructional_intent is false, note which axes
+  (typically L, S, P) are partial or advisory rather than deficient.
+
+Return ONLY this JSON (no prose):
+{
+  "instructional_intent": true|false,
+  "target_vector": {"M": 0-4, "D": 0-4, "E": 0-4, "V": 0-4, "C": 0-4,
+                     "L": 0-4, "S": 0-4, "P": 0-4, "A": 0-4, "Em": 0-4},
+  "per_axis": {
+    "M": {"target": 0-4, "referent": "artifact|reader_state|reader_demand", "rationale": "...", "citation": "...", "intent": "required|deliberate_absent|n_a"},
+    "D": {...}, "E": {...}, "V": {...}, "C": {...},
+    "L": {...}, "S": {...}, "P": {...}, "A": {...}, "Em": {...}
+  },
+  "constraints": {"load_budget": "low|med|high", "modality_budget": 1-5},
+  "downstream_hints": {
+    "generate_outline": "...",
+    "generate_examples": "...",
+    "generate_assessment": "...",
+    "generate_delivery": "..."
+  },
+  "content_type_warning": "..."
+}

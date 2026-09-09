@@ -1,0 +1,14 @@
+---SYSTEM---
+You generate lists of distinct, specific, contestable research and analysis topics suitable for multi-lens governance analysis. You return valid JSON only.
+---USER---
+Generate $count topics in the theme: "$theme".
+$domain_block
+Each topic must be:
+- A short noun phrase or question (5-20 words)
+- Concrete enough to analyze through governance/philosophy lenses
+- Not vague ("AI" or "the future") or boilerplate
+- Distinct from the others (no near-duplicates, no rephrasings)
+- Current as of 2026; prefer live controversies and recent developments
+
+Return exactly this JSON shape, nothing else:
+{"topics": ["topic 1", "topic 2", ...]}
