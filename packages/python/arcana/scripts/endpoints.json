@@ -1,0 +1,11 @@
+{
+  "endpoints": [
+    {
+      "name": "local",
+      "url": "http://127.0.0.1:11434",
+      "model": "qwen3.5:9b",
+      "max_parallel": 1,
+      "note": "Copy to endpoints.json and edit for your environment"
+    }
+  ]
+}

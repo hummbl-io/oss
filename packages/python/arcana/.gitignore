@@ -1,0 +1,23 @@
+scripts/outputs/
+scripts/topics/*.txt
+scripts/topics/*.md
+scripts/agents/agents-*.json
+scripts/pairings/pairings-*.json
+scripts/synthesists/synthesists-*.json
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+scripts/paideia/plans/*.json
+scripts/paideia/scores/*.json
+scripts/paideia/.artifacts/
+scripts/*/*.bak
+arcana.egg-info/
+
+# Secrets and Keys
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
