@@ -18,11 +18,15 @@ import csv
 import json
 import logging
 import os
+import socket
 import sys
 import traceback
+import urllib.error
+import urllib.request
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +43,86 @@ BUS_FILE = Path(
         / "messages.tsv",
     )
 )
+
+# Canonical bridge URL (same default as bus-global.py).
+HUB_BRIDGE_URL = os.environ.get(
+    "BUS_CANONICAL_BRIDGE_URL",
+    "http://hummbl-vps.tail093e19.ts.net:18790",
+)
+
+# Token path mirrors bus-global.py for shared credential resolution.
+BUS_BRIDGE_TOKEN_PATH = Path(
+    os.environ.get(
+        "BUS_BRIDGE_TOKEN_PATH",
+        str(Path.home() / ".config" / "hummbl" / "bus_bridge_token"),
+    )
+)
+
+ORIGIN_MACHINE = os.environ.get("BUS_ORIGIN_MACHINE") or socket.gethostname() or "unknown"
+ORIGIN_SURFACE = os.environ.get("BUS_ORIGIN_SURFACE") or "unknown"
+HTTP_TIMEOUT_SECONDS = 10
+HTTP_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+HTTP_USER_AGENT = "hummbl-bus-mcp/0.1.0 (+fleet coordination bus MCP client)"
+
+
+# ---------------------------------------------------------------------------
+# Bridge write path
+# ---------------------------------------------------------------------------
+def _load_bridge_token() -> str | None:
+    """Resolve the bridge bearer token (env var or token file)."""
+    env_token = os.environ.get("BUS_BRIDGE_TOKEN", "").strip().lstrip("\ufeff")
+    if env_token:
+        return env_token
+    try:
+        token_path = Path(
+            os.environ.get("BUS_BRIDGE_TOKEN_PATH", str(BUS_BRIDGE_TOKEN_PATH))
+        )
+        token = token_path.read_text(encoding="utf-8-sig").strip().lstrip("\ufeff")
+    except OSError:
+        return None
+    return token or None
+
+
+def _bridge_post(
+    from_agent: str, to_agent: str, msg_type: str, message: str
+) -> tuple[bool, str]:
+    """Post to the canonical bus via the HTTP bridge (same path as bus-global.py)."""
+    token = _load_bridge_token()
+    if not token:
+        return False, f"missing BUS_BRIDGE_TOKEN and token file {BUS_BRIDGE_TOKEN_PATH}"
+
+    payload = {
+        "from": from_agent,
+        "to": to_agent,
+        "type": msg_type,
+        "message": message,
+        "origin_machine": ORIGIN_MACHINE,
+        "origin_surface": ORIGIN_SURFACE,
+        "request_id": uuid4().hex,
+    }
+    body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    request = urllib.request.Request(
+        f"{HUB_BRIDGE_URL}/bus",
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+            "User-Agent": HTTP_USER_AGENT,
+        },
+        method="POST",
+    )
+    try:
+        with HTTP_OPENER.open(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
+            response_body = response.read().decode("utf-8", errors="replace").strip()
+    except urllib.error.HTTPError as exc:
+        response_body = exc.read().decode("utf-8", errors="replace").strip()
+        return False, f"HTTP {exc.code}: {response_body or exc.reason}"
+    except urllib.error.URLError as exc:
+        return False, f"HTTP bridge unavailable: {exc.reason}"
+    except TimeoutError:
+        return False, "HTTP bridge timed out"
+
+    return True, response_body or "POSTED via HTTP bridge"
 
 
 # ---------------------------------------------------------------------------
@@ -299,25 +383,67 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
         return {"count": len(messages), "messages": messages}
 
     elif name == "bus_post":
+        mtype = arguments.get("type")
+        message = arguments.get("message")
+        if not mtype:
+            return {"error": "missing required argument: type"}
+        if not message:
+            return {"error": "missing required argument: message"}
+        from_agent = arguments.get("from_agent", "mcp-client")
+        to_agent = arguments.get("to", "all")
+
+        # Reject privileged types at the MCP layer — bridge enforces this
+        # server-side too, but failing early gives a clearer error.
+        from .authority import PRIVILEGED_TYPES
+        if str(mtype).strip().upper() in PRIVILEGED_TYPES:
+            return {
+                "posted": False,
+                "error": "privileged bus write requires authenticated principal proof",
+            }
+
+        # Primary path: HTTP bridge to canonical bus (same as bus-global.py).
+        ok, detail = _bridge_post(from_agent, to_agent, mtype, message)
+        if ok:
+            return {
+                "posted": True,
+                "type": mtype,
+                "message": message[:200],
+                "method": "bridge",
+                "bridge_response": detail[:200],
+            }
+
+        # Emergency fallback: local file append ONLY when BUS_FILE is explicitly
+        # set. Without an explicit BUS_FILE, the package-relative default is a
+        # non-canonical sink — returning posted:false surfaces the bridge
+        # failure rather than silently writing to a disconnected local store.
+        bus_file_env = os.environ.get("BUS_FILE")
+        if not bus_file_env:
+            return {
+                "posted": False,
+                "type": mtype,
+                "message": message[:200],
+                "error": f"bridge failed: {detail}; local fallback disabled (BUS_FILE not set)",
+            }
+
         try:
             from .bus_writer import post_message
 
             post_message(
-                bus_path=str(BUS_FILE),
-                from_id=arguments.get("from_agent", "mcp-client"),
-                to_id=arguments.get("to", "all"),
-                msg_type=arguments["type"],
-                message=arguments["message"],
+                bus_path=bus_file_env,
+                from_id=from_agent,
+                to_id=to_agent,
+                msg_type=mtype,
+                message=message,
             )
             return {
                 "posted": True,
-                "type": arguments["type"],
-                "message": arguments["message"][:200],
+                "type": mtype,
+                "message": message[:200],
+                "method": "local_fallback",
+                "warning": f"bridge failed: {detail}; wrote to local BUS_FILE only",
             }
-        except PermissionError as exc:
-            return {"posted": False, "error": str(exc)}
         except ImportError:
-            # Fallback: direct append with platform-appropriate locking
+            # Last-resort: raw append with platform-appropriate locking.
             try:
                 import fcntl
             except ImportError:
@@ -328,20 +454,11 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
                 msvcrt = None  # type: ignore[assignment]
 
             ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-            frm = arguments.get("from_agent", "mcp-client")
-            to = arguments.get("to", "all")
-            mtype = arguments["type"]
-            from .authority import PRIVILEGED_TYPES
-
-            if str(mtype).strip().upper() in PRIVILEGED_TYPES:
-                return {
-                    "posted": False,
-                    "error": "privileged bus write requires authenticated principal proof",
-                }
-            msg = arguments["message"].replace("\t", " ").replace("\n", " ")
-            line = f"{ts}\t{frm}\t{to}\t{mtype}\t{msg}\n"
-            BUS_FILE.parent.mkdir(parents=True, exist_ok=True)
-            with open(BUS_FILE, "a", encoding="utf-8") as f:
+            msg = message.replace("\t", " ").replace("\n", " ")
+            line = f"{ts}\t{from_agent}\t{to_agent}\t{mtype}\t{msg}\n"
+            fallback_path = Path(bus_file_env)
+            fallback_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(fallback_path, "a", encoding="utf-8") as f:
                 if fcntl is not None:
                     fcntl.flock(f, fcntl.LOCK_EX)
                 elif msvcrt is not None:
@@ -357,6 +474,7 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
                 "type": mtype,
                 "message": msg[:200],
                 "method": "direct_append",
+                "warning": f"bridge failed: {detail}; raw append to local BUS_FILE only",
             }
 
     elif name == "bus_search":
