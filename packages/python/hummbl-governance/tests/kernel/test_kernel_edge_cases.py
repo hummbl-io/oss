@@ -41,6 +41,7 @@ from hummbl_governance.kernel import (
     Kernel,
     ReceiptEngine,
 )
+from _helpers import make_receipt_engine
 
 
 def _tmp() -> Path:
@@ -61,14 +62,14 @@ class TestEdgeCaseReceipts:
 
     def test_very_long_agent_id(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
             long_id = "a" * 1000
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test", long_id))
             receipt = engine.create(agent_id=long_id, action_type="TEST")
             assert receipt.agent_id == long_id
 
     def test_unicode_payload(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             payload = {
                 "chinese": "\u4f60\u597d\u4e16\u754c",
                 "emoji": "\U0001f680\U0001f525\u2705",
@@ -83,19 +84,19 @@ class TestEdgeCaseReceipts:
 
     def test_empty_payload(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             receipt = engine.create(agent_id="test", action_type="EMPTY", payload={})
             assert receipt.payload == {}
 
     def test_none_payload(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             receipt = engine.create(agent_id="test", action_type="NONE", payload=None)  # type: ignore[arg-type]
             assert receipt.payload == {}
 
     def test_deeply_nested_payload(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             nested = {"level": 0}
             current = nested
             for i in range(1, 10):
@@ -108,7 +109,7 @@ class TestEdgeCaseReceipts:
 
     def test_special_chars_in_action_type(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             action = "TEST:ACTION/SUB|TYPE"
             receipt = engine.create(agent_id="test", action_type=action)
             assert receipt.action_type == action

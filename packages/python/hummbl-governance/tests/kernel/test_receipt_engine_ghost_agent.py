@@ -72,14 +72,17 @@ class TestGhostAgentReceiptVulnerability:
         receipt = engine.create(agent_id="devin", action_type="STATUS")
         assert receipt.agent_id == "devin"
 
-    def test_no_identity_engine_allows_any_agent_backward_compat(self, tmp_state: Path) -> None:
-        """Without identity_engine, behavior is unchanged (backward compat)."""
+    def test_no_identity_engine_fails_closed(self, tmp_state: Path) -> None:
+        """Without identity_engine, receipt creation fails closed (K3)."""
         engine = ReceiptEngine(tmp_state)
 
-        # This should NOT raise — backward compatibility for callers
-        # that haven't wired identity enforcement yet
-        receipt = engine.create(agent_id="any-agent", action_type="STATUS")
-        assert receipt.agent_id == "any-agent"
+        # Fail-closed: no identity_engine means K3 cannot be enforced,
+        # so receipt creation must be rejected rather than silently
+        # allowing ghost agents.
+        with pytest.raises(KernelPanic) as exc_info:
+            engine.create(agent_id="any-agent", action_type="STATUS")
+
+        assert exc_info.value.invariant == KernelInvariant.IDENTITY
 
     def test_create_and_store_rejects_ghost_agent(self, tmp_state: Path) -> None:
         """create_and_store must also reject ghost agents."""

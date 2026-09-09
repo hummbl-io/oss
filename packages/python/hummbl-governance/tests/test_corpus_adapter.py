@@ -19,15 +19,23 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import hummbl_governance
 from hummbl_governance.corpus_adapter import CorpusAdapter
 from hummbl_governance.kernel import ReceiptEngine
 
 
+def _mock_identity() -> MagicMock:
+    """Create a mock identity engine that resolves any agent as registered."""
+    identity = MagicMock()
+    identity.resolve.return_value = MagicMock()
+    return identity
+
+
 class TestCorpusAdapter:
     def test_receipt_to_kernel_output(self, tmp_path: Path) -> None:
-        engine = ReceiptEngine(tmp_path)
+        engine = ReceiptEngine(tmp_path, identity_engine=_mock_identity())
         receipt = engine.create(agent_id="devin", action_type="BUS_POST")
 
         adapter = CorpusAdapter(state_dir=tmp_path)
@@ -40,7 +48,7 @@ class TestCorpusAdapter:
         assert queue_file.exists()
 
     def test_local_queue_content(self, tmp_path: Path) -> None:
-        engine = ReceiptEngine(tmp_path)
+        engine = ReceiptEngine(tmp_path, identity_engine=_mock_identity())
         receipt = engine.create(agent_id="devin", action_type="BUS_POST")
 
         adapter = CorpusAdapter(state_dir=tmp_path)
