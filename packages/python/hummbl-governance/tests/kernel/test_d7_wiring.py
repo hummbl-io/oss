@@ -20,7 +20,9 @@ from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
 
 def _make_kernel() -> Kernel:
     tmpdir = tempfile.mkdtemp(prefix="kernel_d7_")
-    return Kernel.boot(state_dir=Path(tmpdir))
+    kernel = Kernel.boot(state_dir=Path(tmpdir))
+    kernel.identity.register("test-agent")
+    return kernel
 
 
 def _valid_amendment():

@@ -26,12 +26,12 @@ remain on `#79`.
 
 ## Packages
 
-25 Python packages under `packages/python/<name>/`. Versions are
+42 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
-| `hummbl-governance` | 1.4.2 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live — governance primitives for AI agent orchestration |
+| `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `RELEASE.md` |
 | `base120` | 3.0.2 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
@@ -56,6 +56,23 @@ remain on `#79`.
 | `hummbl-garage` | 0.1.0 | — | In-tree — performance index, livery, failure aesthetics |
 | `hummbl-identity` | 0.1.0 | — | In-tree — identity facade over tokens + heraldry + garage |
 | `hummbl-validation-framework` | 0.1.0 | — | In-tree — external validation tests for the design system |
+| `hummbl-agent-eval-harness` | 0.1.0 | — | In-tree — required and forbidden regex constraints for agent output |
+| `hummbl-sast` | 0.1.0 | — | In-tree — static analysis, secret patterns, and OSV dependency lookups |
+| `hummbl-evidence` | 0.1.0 | — | In-tree — evidence state and two-party approval primitives |
+| `hummbl-mcp` | 0.1.0 | — | In-tree — MCP server framework: gateway, protocol, tools, and adapters |
+| `hummbl-mcp-base120` | 0.1.0 | — | In-tree — MCP server exposing Base120 mental models engine |
+| `hummbl-mcp-basen` | 0.1.0 | — | In-tree — MCP server exposing BaseN governance surface |
+| `hummbl-mcp-bif` | 0.1.0 | — | In-tree — MCP server exposing BIF methodology tools |
+| `hummbl-mcp-cognitive-ledger` | 0.1.0 | — | In-tree — MCP server shim for Cognitive Ledger Protocol |
+| `hummbl-mcp-coordination-bus` | 0.1.0 | — | In-tree — MCP server shim for HUMMBL coordination bus |
+| `hummbl-mcp-discord` | 0.1.0 | — | In-tree — local stdio MCP server for Discord |
+| `hummbl-mcp-governance` | 0.1.0 | — | In-tree — MCP servers exposing HUMMBL governance primitives |
+| `hummbl-mcp-onepassword` | 0.1.0 | — | In-tree — MCP server exposing 1Password CLI as tools |
+| `hummbl-mcp-proton` | 0.1.0 | — | In-tree — local MCP server for Proton Mail, Drive, Calendar |
+| `hummbl-mcp-signal` | 0.1.0 | — | In-tree — local stdio MCP server for Signal Messenger |
+| `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
+| `hummbl-mcp-omnichannel` | 0.1.0 | — | In-tree — omnichannel governance gate MCP server (stdlib http.server) |
+| `hummbl-mcp-voice` | 0.1.0 | — | In-tree — MCP server for vendor-neutral voice interactions (Vapi adapter) |
 
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
