@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **39** Python packages under `packages/python/<name>/` and
+Currently hosts **41** Python packages under `packages/python/<name>/` and
 one Lean tree under `packages/lean/hummbl-formalization`.
 There is no JS or Rust package tree under `packages/` yet.
 
@@ -52,6 +52,8 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-mcp-proton | `packages/python/hummbl-mcp-proton/` | 0.1.0 | In-tree | Local MCP server for Proton Mail, Drive, Calendar |
 | hummbl-mcp-signal | `packages/python/hummbl-mcp-signal/` | 0.1.0 | In-tree | Local stdio MCP server for Signal Messenger |
 | hummbl-mcp-utf | `packages/python/hummbl-mcp-utf/` | 0.1.0 | In-tree | MCP server exposing HUMMBL Unified Tier Framework |
+| hummbl-mcp-omnichannel | `packages/python/hummbl-mcp-omnichannel/` | 0.1.0 | In-tree | Omnichannel governance gate MCP server (stdlib http.server) |
+| hummbl-mcp-voice | `packages/python/hummbl-mcp-voice/` | 0.1.0 | In-tree | MCP server for vendor-neutral voice interactions (Vapi adapter) |
 
 If you add a directory under `packages/python/`, update this table, the
 README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
@@ -69,7 +71,7 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 39)
+# Per-package (all 41)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
 cd packages/python/hummbl-sast && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
@@ -109,6 +111,8 @@ cd packages/python/hummbl-mcp-onepassword && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp-proton && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp-signal && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp-utf && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-omnichannel && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-voice && python -m pytest tests/ -v
 ```
 
 ## CI
