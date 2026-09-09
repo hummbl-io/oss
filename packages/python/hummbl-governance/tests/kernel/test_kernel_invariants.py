@@ -43,6 +43,7 @@ from hummbl_governance.kernel import (
     ReceiptEngine,
 )
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
+from _helpers import make_receipt_engine
 
 
 def _tmp() -> Path:
@@ -63,14 +64,14 @@ class TestInvariantEnforcement:
 
     def test_k1_empty_agent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             with pytest.raises(KernelPanic) as exc:
                 engine.create(agent_id="", action_type="TEST")
             assert exc.value.invariant == KernelInvariant.RECEIPT
 
     def test_k1_empty_action(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test",))
             with pytest.raises(KernelPanic) as exc:
                 engine.create(agent_id="test", action_type="")
             assert exc.value.invariant == KernelInvariant.RECEIPT

@@ -19,7 +19,9 @@ from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
 def _make_kernel() -> Kernel:
     """Create a booted Kernel with a temporary state directory."""
     tmpdir = tempfile.mkdtemp(prefix="kernel_k9k11_")
-    return Kernel.boot(state_dir=Path(tmpdir))
+    kernel = Kernel.boot(state_dir=Path(tmpdir))
+    kernel.identity.register("test-agent")
+    return kernel
 
 
 def _valid_rollback_declaration():

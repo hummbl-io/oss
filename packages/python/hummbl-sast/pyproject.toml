@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-sast"
+version = "0.1.0"
+description = "Python static analysis, secret-pattern scanning, and OSV dependency lookups"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "HUMMBL Research Institute" }]
+requires-python = ">=3.11"
+dependencies = []
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-sast/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+
+[project.scripts]
+hummbl-sast = "hummbl_sast.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hummbl_sast*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

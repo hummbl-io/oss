@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-agent-eval-harness"
+version = "0.1.0"
+description = "Deterministic regex constraint evaluation for agent output"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE", "LICENSE-APACHE", "LICENSE-MIT", "NOTICE"]
+authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+requires-python = ">=3.11"
+dependencies = []
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-agent-eval-harness/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+
+[project.scripts]
+agent-eval = "agent_eval_harness.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent_eval_harness*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

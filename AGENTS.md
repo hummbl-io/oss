@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **25** Python packages under `packages/python/<name>/`, one
+Currently hosts **42** Python packages under `packages/python/<name>/`, one
 private Node technical canary under `packages/node/mcp-base120`, and one Lean
 tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
 under `packages/` yet.
@@ -39,6 +39,23 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-garage | `packages/python/hummbl-garage/` | 0.1.0 | In-tree | Agent Performance Index, livery, watch faces, failure aesthetics |
 | hummbl-identity | `packages/python/hummbl-identity/` | 0.1.0 | In-tree | Unified agent identity facade |
 | hummbl-validation-framework | `packages/python/hummbl-validation-framework/` | 0.1.0 | In-tree | External validation tests for the design system |
+| hummbl-agent-eval-harness | `packages/python/hummbl-agent-eval-harness/` | 0.1.0 | In-tree | Required and forbidden regex constraints for agent output |
+| hummbl-sast | `packages/python/hummbl-sast/` | 0.1.0 | In-tree | Static analysis, secret patterns, and OSV dependency lookups |
+| hummbl-evidence | `packages/python/hummbl-evidence/` | 0.1.0 | In-tree | Evidence state and two-party approval primitives |
+| hummbl-mcp | `packages/python/hummbl-mcp/` | 0.1.0 | In-tree | MCP server framework -- gateway, protocol, tools, and adapters |
+| hummbl-mcp-base120 | `packages/python/hummbl-mcp-base120/` | 0.1.0 | In-tree | MCP server exposing Base120 mental models engine |
+| hummbl-mcp-basen | `packages/python/hummbl-mcp-basen/` | 0.1.0 | In-tree | MCP server exposing Base120 + BaseN governance surface |
+| hummbl-mcp-bif | `packages/python/hummbl-mcp-bif/` | 0.1.0 | In-tree | MCP server exposing BIF methodology tools |
+| hummbl-mcp-cognitive-ledger | `packages/python/hummbl-mcp-cognitive-ledger/` | 0.1.0 | In-tree | MCP server shim for Cognitive Ledger Protocol |
+| hummbl-mcp-coordination-bus | `packages/python/hummbl-mcp-coordination-bus/` | 0.1.0 | In-tree | MCP server shim for HUMMBL coordination bus |
+| hummbl-mcp-discord | `packages/python/hummbl-mcp-discord/` | 0.1.0 | In-tree | Local stdio MCP server for Discord |
+| hummbl-mcp-governance | `packages/python/hummbl-mcp-governance/` | 0.1.0 | In-tree | MCP servers exposing HUMMBL governance primitives |
+| hummbl-mcp-onepassword | `packages/python/hummbl-mcp-onepassword/` | 0.1.0 | In-tree | MCP server exposing 1Password CLI as tools for agents |
+| hummbl-mcp-proton | `packages/python/hummbl-mcp-proton/` | 0.1.0 | In-tree | Local MCP server for Proton Mail, Drive, Calendar |
+| hummbl-mcp-signal | `packages/python/hummbl-mcp-signal/` | 0.1.0 | In-tree | Local stdio MCP server for Signal Messenger |
+| hummbl-mcp-utf | `packages/python/hummbl-mcp-utf/` | 0.1.0 | In-tree | MCP server exposing HUMMBL Unified Tier Framework |
+| hummbl-mcp-omnichannel | `packages/python/hummbl-mcp-omnichannel/` | 0.1.0 | In-tree | Omnichannel governance gate MCP server (stdlib http.server) |
+| hummbl-mcp-voice | `packages/python/hummbl-mcp-voice/` | 0.1.0 | In-tree | MCP server for vendor-neutral voice interactions (Vapi adapter) |
 
 Node packages:
 
@@ -65,7 +82,10 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 25)
+# Per-package (all 42)
+cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
+cd packages/python/hummbl-sast && python -m pytest tests/ -v
+cd packages/python/hummbl-evidence && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
 cd packages/python/governed-compression && python -m pytest tests/ -v
 cd packages/python/hummbl && python -m pytest tests/ -v
@@ -91,6 +111,20 @@ cd packages/python/hummbl-tuples && python -m pytest tests/ -v
 cd packages/python/hummbl-validation && python -m pytest tests/ -v
 cd packages/python/hummbl-validation-framework && python -m pytest tests/ -v
 cd packages/python/idp-spec && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-base120 && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-basen && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-bif && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-cognitive-ledger && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-coordination-bus && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-discord && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-governance && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-onepassword && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-proton && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-signal && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-utf && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-omnichannel && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-voice && python -m pytest tests/ -v
 
 # Node technical canaries
 cd packages/node/mcp-base120 && npm ci && npm test
@@ -99,9 +133,11 @@ cd packages/node/mcp-base120 && npm ci && npm test
 ## CI
 
 - **GitHub Actions** (primary): `.github/workflows/ci.yml` on `ubuntu-latest`.
-  Default job is **Python 3.13 only**, one matrix entry per Python package.
-- Extra job `test-hummbl-governance` runs Python **3.11 / 3.12 / 3.13** with
-  pytest-cov. Other packages are not on that matrix.
+  Main matrix tests every package on Python **3.11, 3.12, 3.13, 3.14**.
+  Two packages declaring `>=3.10` (`hummbl`, `hummbl-kernel`) get an extra
+  **3.10** entry. Coverage reporting is conditional on `hummbl-governance`.
+- Future-preview job `test-preview` runs all packages on **3.15-dev** with
+  `continue-on-error` -- failures are informational and do not block merges.
 - Lean is **not** built in CI.
 - Node technical canaries run on Node 22 and must pass product-admission,
   generated-artifact, test, and package-content checks. Product manifests use

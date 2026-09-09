@@ -18,6 +18,8 @@ name: Publish to PyPI
 "on":
   push:
     tags:
+      # Also covers hummbl-agent-eval-harness and hummbl-sast when a release
+      # is separately prepared; adding source packages creates no tags.
       - "python/*/v*"
 
 
