@@ -84,20 +84,34 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install package and test dependencies
+      - name: Verify hash-locked build environment is current
+        # Stdlib-only check: the lock must exist and must have been generated
+        # from the current pyproject.toml inputs. Fails closed on a missing or
+        # stale lock so an unpinned build can never publish.
+        run: python .github/scripts/lock_build_env.py check-inputs "${{ steps.pkg.outputs.name }}"
+
+      - name: Install hash-locked build environment
         working-directory: ${{ steps.pkg.outputs.path }}
-        run: pip install -e ".[test]"
+        # Everything the build job needs (build backend, runtime deps, test
+        # extra, build front-end, SBOM generator) is pinned by SHA-256 in
+        # requirements-build.lock. pip refuses any file whose hash is not
+        # listed, so a poisoned upstream release cannot enter this job even
+        # with valid provenance of its own.
+        run: pip install --require-hashes -r requirements-build.lock
+
+      - name: Install package (no resolver, no build isolation)
+        working-directory: ${{ steps.pkg.outputs.path }}
+        run: pip install --no-deps --no-build-isolation -e .
 
       - name: Run tests
         working-directory: ${{ steps.pkg.outputs.path }}
         run: python -m pytest tests/ -q
 
-      - name: Install build tools
-        run: pip install "build>=1.0"
-
       - name: Build package
         working-directory: ${{ steps.pkg.outputs.path }}
-        run: python -m build
+        # --no-isolation: use the hash-locked setuptools/wheel already
+        # installed instead of letting `build` download a fresh backend.
+        run: python -m build --no-isolation
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.6.1
@@ -108,11 +122,13 @@ jobs:
       - name: Generate SBOM
         working-directory: ${{ steps.pkg.outputs.path }}
         run: |
-          pip install "cyclonedx-bom>=5.0" --quiet
           # Per-artifact SBOM: scan a clean venv containing only the built
           # wheel and its runtime deps (not test extras like pytest).
+          # The venv is filled offline from a wheelhouse that pip downloaded
+          # under --require-hashes, so the SBOM venv never touches the index.
+          pip download --require-hashes -r requirements-build.lock -d /tmp/wheelhouse --quiet
           python -m venv /tmp/sbom-venv
-          /tmp/sbom-venv/bin/pip install dist/*.whl "cyclonedx-bom>=5.0"
+          /tmp/sbom-venv/bin/pip install --no-index --find-links /tmp/wheelhouse dist/*.whl cyclonedx-bom
           /tmp/sbom-venv/bin/cyclonedx-py environment --output-reproducible -o sbom.json
 
       - name: Upload SBOM

@@ -108,6 +108,37 @@ python tools/scripts/pypi_download_tracker.py --report  # print trend table
 python tools/scripts/pypi_download_tracker.py --check   # flag anomalies
 ```
 
+## Verify a release
+
+Every Python package published from this repository is built by
+[`publish-pypi.yml`](.github/workflows/publish-pypi.yml) from a
+**hash-locked build environment**: the build backend, runtime dependencies,
+test extra, build front-end, and SBOM generator are pinned by SHA-256 in each
+package's `requirements-build.lock` and installed with `pip --require-hashes`.
+The build runs with `--no-isolation`, so nothing enters the build job that is
+not named and hashed in this repository. The release job then publishes via
+PyPI trusted publishing (OIDC, no long-lived tokens), signs the artifacts with
+Sigstore, records a GitHub build-provenance attestation, and attaches a
+CycloneDX SBOM and SHA-256 checksums to the GitHub release.
+
+To check a wheel you downloaded, verify its provenance attestation against this
+repository with the GitHub CLI:
+
+```bash
+pip download --no-deps hummbl-governance==1.5.0 -d ./dl
+gh attestation verify ./dl/hummbl_governance-1.5.0-py3-none-any.whl --repo hummbl-io/oss
+```
+
+A successful result means GitHub's Sigstore instance attests that this exact
+file was produced by the `publish-pypi.yml` workflow in `hummbl-io/oss`. Then
+compare its checksum with `checksums-sha256.txt` on the matching GitHub release
+(tag `python/<package>/v<version>`), and inspect `sbom.json` there for the
+runtime dependency set.
+
+Lock maintenance: `python .github/scripts/lock_build_env.py lock <package>`
+regenerates a lock after a `pyproject.toml` change; CI (`build-lock-check`)
+and the publish workflow both fail closed on a missing or stale lock.
+
 ## License
 
 Dual-licensed at the repo level: MIT OR Apache-2.0. See [LICENSE](LICENSE),

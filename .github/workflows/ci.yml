@@ -100,12 +100,29 @@ jobs:
             echo "::endgroup::"
           done
 
+  build-lock-check:
+    name: build-lock-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Every package has a current requirements-build.lock
+        # Stdlib only. The publish workflow refuses to build from a missing or
+        # stale lock; this job surfaces that on the PR instead of at release.
+        run: python .github/scripts/lock_build_env.py check-inputs --all
+
   # Single required-check context for branch protection.
   # Do not require the 25 per-package names -- they churn when packages are added.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-hummbl-governance, pip-audit]
+    needs: [test, test-hummbl-governance, pip-audit, build-lock-check]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
@@ -113,6 +130,8 @@ jobs:
           echo "test=${{ needs.test.result }}"
           echo "test-hummbl-governance=${{ needs.test-hummbl-governance.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
+          echo "build-lock-check=${{ needs.build-lock-check.result }}"
           test "${{ needs.test.result }}" = success
           test "${{ needs.test-hummbl-governance.result }}" = success
           test "${{ needs.pip-audit.result }}" = success
+          test "${{ needs.build-lock-check.result }}" = success
