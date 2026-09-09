@@ -4,7 +4,7 @@
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
 
-**Tree inventory updated:** 2026-09-08, `packages/python/` = 41 packages.
+**Tree inventory updated:** 2026-09-09, `packages/python/` = 42 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
@@ -79,6 +79,7 @@ Tree versions checked 2026-09-02.
 | `hummbl-validation-framework` | 0.1.0 | Design-system validation tests |
 | `hummbl-agent-eval-harness` | 0.1.0 | Regex evaluation; imports as `agent_eval_harness`, command `agent-eval` |
 | `hummbl-sast` | 0.1.0 | Experimental static analysis, secret patterns, and OSV lookups |
+| `hummbl-evidence` | 0.1.0 | Evidence state and two-party approval primitives |
 | `hummbl-mcp` | 0.1.0 | MCP server framework -- gateway, protocol, tools, and adapters |
 | `hummbl-mcp-base120` | 0.1.0 | MCP server exposing Base120 mental models engine |
 | `hummbl-mcp-basen` | 0.1.0 | MCP server exposing BaseN governance surface |
