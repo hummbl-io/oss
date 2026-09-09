@@ -8,6 +8,9 @@ build/
 *.egg
 *.db
 uv.lock
+node_modules/
+*.tgz
+.npm/
 
 # Generated graph reports
 reports/*.html

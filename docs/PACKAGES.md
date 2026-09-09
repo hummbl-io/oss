@@ -109,7 +109,11 @@ Tree versions checked 2026-09-02.
 
 ### Live: none
 
-There is no `packages/node/` tree in this monorepo.
+### In-tree technical canary — not publishable
+
+| Package | Tree | Status |
+|---------|------|--------|
+| `@hummbl/mcp-base120` | 0.1.0-canary.0 | Private, no-egress Base120 catalog canary. New public corpus redistribution is on hold; rights reconciliation, distributable-package architecture, release provenance, hosted parity, and privacy gates remain open. |
 
 Previously published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
@@ -118,7 +122,10 @@ operator on 2026-08-21**:
 - `hummbl-bibliography` v1.0.0 — deprecated ("Package no longer supported")
 
 The `@hummbl` scope still exists. Future npm packages publish under
-`@hummbl/*` from this monorepo **after** a `packages/node/` tree exists.
+`@hummbl/*` from this monorepo only after their manifests become non-private
+and every product-admission blocker is cleared.
+The reusable v1 schema and repository validator fail closed on incompatible
+public-launch, package-license, content-rights, and admission states.
 
 **Name collisions (NOT HUMMBL's):** `mcp-server`, `hermes-agent`,
 `arbiter`, `arcana`, `crab`, `randy` on npm.
@@ -130,7 +137,8 @@ The `@hummbl` scope still exists. Future npm packages publish under
 | Tree | Status |
 |------|--------|
 | `packages/lean/hummbl-formalization` | Present. Not in Python CI. Not a PyPI package. Do not call runtime packages "formally verified". |
-| `packages/node/`, `packages/rust/`, `packages/go/`, `packages/jvm/` | **Absent.** |
+| `packages/node/` | Present with one private technical canary. No live npm package. |
+| `packages/rust/`, `packages/go/`, `packages/jvm/` | **Absent.** |
 
 ---
 

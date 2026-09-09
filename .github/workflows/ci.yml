@@ -93,6 +93,46 @@ jobs:
         working-directory: packages/python/${{ matrix.package }}
         run: python -m pytest tests/ -q
 
+  test-node:
+    name: test (node, ${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [mcp-base120]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22.x"
+          cache: npm
+          cache-dependency-path: packages/node/${{ matrix.package }}/package-lock.json
+
+      - name: Install package
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm ci
+
+      - name: Test product admission validator
+        run: node --test tools/scripts/test_validate_product_manifests.mjs
+
+      - name: Validate product manifests
+        run: node tools/scripts/validate_product_manifests.mjs
+
+      - name: Verify generated artifacts
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm run check:generated
+
+      - name: Run tests
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm test
+
+      - name: Verify package contents
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm run check:boundary
+
   pip-audit:
     name: pip-audit
     runs-on: ubuntu-latest
@@ -131,15 +171,16 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit]
+needs: [test, test-preview, pip-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
         run: |
           echo "test=${{ needs.test.result }}"
-          echo "test-preview=${{ needs.test-preview.result }}"
+echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
+
           test "${{ needs.pip-audit.result }}" = success

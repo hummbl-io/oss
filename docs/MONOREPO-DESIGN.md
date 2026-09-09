@@ -36,7 +36,7 @@ oss/
 │   ├── node/                # npm
 │   │   ├── hummbl-agent/
 │   │   ├── hummbl-asi/
-│   │   ├── mcp-server/      # publishes as @hummbl/mcp-server
+│   │   ├── mcp-base120/     # bounded Base120 MCP; technical canary first
 │   │   ├── hummbl-tuples/   # TS reference impl
 │   │   └── …
 │   ├── rust/                # crates.io
@@ -967,13 +967,17 @@ operator on 2026-08-21. The `@hummbl` scope is retained (operator owns
 it under the `hummbl-io` npm account). Phase 2 is a clean greenfield:
 publish fresh under `@hummbl/*` from this monorepo.
 
+- [x] `@hummbl/mcp-base120` → `packages/node/mcp-base120/` (private technical canary; new public corpus redistribution remains on hold pending rights reconciliation and a distributable-package boundary; provenance, hosted-parity, and privacy blockers also remain)
 - [ ] `@hummbl/mcp-server` → `packages/node/mcp-server/` (re-publish fresh under scope; old `@hummbl/mcp-server` v1.2.0 is deprecated)
 - [ ] `@hummbl/bibliography` → `packages/node/hummbl-bibliography/` (re-publish scoped; old unscoped `hummbl-bibliography` v1.0.0 is deprecated)
 - [ ] Other npm candidates from PACKAGES.md "Publishable but not yet on npm" section
 
 **Excluded from Phase 2 (name collisions, never HUMMBL's):** `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, `mcp-server` (unscoped) are unrelated packages by other authors on npm (see PACKAGES.md).
 
-**For each:** configure Trusted Publishing on npmjs.com (or set `NPM_TOKEN` secret as fallback for packages not yet migrated), create `npm` environment, flip `private: true` → `false`, set `"name"` to `@hummbl/<name>`, verify build, tag release.
+**For each:** configure Trusted Publishing on npmjs.com, create the `npm`
+environment, clear package-specific admission blockers, flip `private: true` →
+`false`, set `"name"` to `@hummbl/<name>`, verify the packed artifact, and tag
+the release. New packages must not introduce a long-lived `NPM_TOKEN` fallback.
 
 ### Phase 3: Publish not-yet-live packages (~31 PyPI, ~10 npm)
 
