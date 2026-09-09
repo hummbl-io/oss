@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **28** Python packages under `packages/python/<name>/` and
+Currently hosts **39** Python packages under `packages/python/<name>/` and
 one Lean tree under `packages/lean/hummbl-formalization`.
 There is no JS or Rust package tree under `packages/` yet.
 
@@ -41,6 +41,17 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-agent-eval-harness | `packages/python/hummbl-agent-eval-harness/` | 0.1.0 | In-tree | Required and forbidden regex constraints for agent output |
 | hummbl-sast | `packages/python/hummbl-sast/` | 0.1.0 | In-tree | Static analysis, secret patterns, and OSV dependency lookups |
 | hummbl-mcp | `packages/python/hummbl-mcp/` | 0.1.0 | In-tree | MCP server framework -- gateway, protocol, tools, and adapters |
+| hummbl-mcp-base120 | `packages/python/hummbl-mcp-base120/` | 0.1.0 | In-tree | MCP server exposing Base120 mental models engine |
+| hummbl-mcp-basen | `packages/python/hummbl-mcp-basen/` | 0.1.0 | In-tree | MCP server exposing Base120 + BaseN governance surface |
+| hummbl-mcp-bif | `packages/python/hummbl-mcp-bif/` | 0.1.0 | In-tree | MCP server exposing BIF methodology tools |
+| hummbl-mcp-cognitive-ledger | `packages/python/hummbl-mcp-cognitive-ledger/` | 0.1.0 | In-tree | MCP server shim for Cognitive Ledger Protocol |
+| hummbl-mcp-coordination-bus | `packages/python/hummbl-mcp-coordination-bus/` | 0.1.0 | In-tree | MCP server shim for HUMMBL coordination bus |
+| hummbl-mcp-discord | `packages/python/hummbl-mcp-discord/` | 0.1.0 | In-tree | Local stdio MCP server for Discord |
+| hummbl-mcp-governance | `packages/python/hummbl-mcp-governance/` | 0.1.0 | In-tree | MCP servers exposing HUMMBL governance primitives |
+| hummbl-mcp-onepassword | `packages/python/hummbl-mcp-onepassword/` | 0.1.0 | In-tree | MCP server exposing 1Password CLI as tools for agents |
+| hummbl-mcp-proton | `packages/python/hummbl-mcp-proton/` | 0.1.0 | In-tree | Local MCP server for Proton Mail, Drive, Calendar |
+| hummbl-mcp-signal | `packages/python/hummbl-mcp-signal/` | 0.1.0 | In-tree | Local stdio MCP server for Signal Messenger |
+| hummbl-mcp-utf | `packages/python/hummbl-mcp-utf/` | 0.1.0 | In-tree | MCP server exposing HUMMBL Unified Tier Framework |
 
 If you add a directory under `packages/python/`, update this table, the
 README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
@@ -58,7 +69,7 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 28)
+# Per-package (all 39)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
 cd packages/python/hummbl-sast && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
@@ -87,6 +98,17 @@ cd packages/python/hummbl-validation && python -m pytest tests/ -v
 cd packages/python/hummbl-validation-framework && python -m pytest tests/ -v
 cd packages/python/idp-spec && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-base120 && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-basen && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-bif && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-cognitive-ledger && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-coordination-bus && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-discord && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-governance && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-onepassword && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-proton && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-signal && python -m pytest tests/ -v
+cd packages/python/hummbl-mcp-utf && python -m pytest tests/ -v
 ```
 
 ## CI
