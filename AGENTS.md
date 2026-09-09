@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **27** Python packages under `packages/python/<name>/` and
+Currently hosts **30** Python packages under `packages/python/<name>/` and
 one Lean tree under `packages/lean/hummbl-formalization`.
 There is no JS or Rust package tree under `packages/` yet.
 
@@ -40,6 +40,9 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-validation-framework | `packages/python/hummbl-validation-framework/` | 0.1.0 | In-tree | External validation tests for the design system |
 | hummbl-agent-eval-harness | `packages/python/hummbl-agent-eval-harness/` | 0.1.0 | In-tree | Required and forbidden regex constraints for agent output |
 | hummbl-sast | `packages/python/hummbl-sast/` | 0.1.0 | In-tree | Static analysis, secret patterns, and OSV dependency lookups |
+| hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | Evidence-governed evaluation contracts for compositional Human-AI systems |
+| hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | Bidirectional multi-agent peer-review GitOps loop |
+| hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.2.0 | In-tree | Deterministic runtime safety primitives for multi-agent AI fleets |
 
 If you add a directory under `packages/python/`, update this table, the
 README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
@@ -57,8 +60,11 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 27)
+# Per-package (all 30)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
+cd packages/python/hummbl-agent-governance && python -m pytest tests/ -v
+cd packages/python/hummbl-eval && python -m pytest tests/ -v
+cd packages/python/hummbl-gitops && python -m pytest tests/ -v
 cd packages/python/hummbl-sast && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
 cd packages/python/governed-compression && python -m pytest tests/ -v

@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hummbl-gitops"
+version = "0.1.0"
+description = "Bidirectional multi-agent peer-review GitOps loop"
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+requires-python = ">=3.11"
+keywords = ["gitops", "ci", "peer-review", "multi-agent", "governance", "hummbl"]
+dependencies = []
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git",
+]
+
+[project.optional-dependencies]
+governance = ["hummbl-governance>=1.4.2"]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+hummbl-gitops = "hummbl_gitops.cli:main"
+hummbl-gitops-mcp = "hummbl_gitops.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/hummbl-io/oss"
+Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-gitops/README.md"
+Repository = "https://github.com/hummbl-io/oss"
+Issues = "https://github.com/hummbl-io/oss/issues"
+PyPI = "https://pypi.org/project/hummbl-gitops/"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hummbl_gitops*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

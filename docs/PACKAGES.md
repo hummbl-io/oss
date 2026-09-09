@@ -4,7 +4,7 @@
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
 
-**Tree inventory updated:** 2026-09-08, `packages/python/` = 27 packages.
+**Tree inventory updated:** 2026-09-09, `packages/python/` = 30 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
@@ -79,6 +79,9 @@ Tree versions checked 2026-09-02.
 | `hummbl-validation-framework` | 0.1.0 | Design-system validation tests |
 | `hummbl-agent-eval-harness` | 0.1.0 | Regex evaluation; imports as `agent_eval_harness`, command `agent-eval` |
 | `hummbl-sast` | 0.1.0 | Experimental static analysis, secret patterns, and OSV lookups |
+| `hummbl-eval` | 0.1.0 | Evidence-governed evaluation contracts; imports as `hummbl_eval` |
+| `hummbl-gitops` | 0.1.0 | Bidirectional multi-agent peer-review GitOps loop |
+| `hummbl-agent-governance` | 0.2.0 | Runtime safety primitives; renamed from `agent-governance` to avoid PyPI collision |
 
 ### Excluded (not HUMMBL's)
 

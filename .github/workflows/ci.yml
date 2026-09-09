@@ -32,12 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
-        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
+        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-agent-governance, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-eval, hummbl-free-models, hummbl-garage, hummbl-gitops, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
         include:
           # Extended floor: packages declaring >=3.10 also tested on 3.10
           - package: hummbl
             python-version: "3.10"
           - package: hummbl-kernel
+            python-version: "3.10"
+          - package: hummbl-agent-governance
             python-version: "3.10"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -75,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
+        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-agent-governance, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-eval, hummbl-free-models, hummbl-garage, hummbl-gitops, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

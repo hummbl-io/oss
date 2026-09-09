@@ -58,6 +58,9 @@ remain on `#79`.
 | `hummbl-validation-framework` | 0.1.0 | — | In-tree — external validation tests for the design system |
 | `hummbl-agent-eval-harness` | 0.1.0 | — | In-tree — required and forbidden regex constraints for agent output |
 | `hummbl-sast` | 0.1.0 | — | In-tree — static analysis, secret patterns, and OSV dependency lookups |
+| `hummbl-eval` | 0.1.0 | — | In-tree — evidence-governed evaluation contracts for compositional Human-AI systems |
+| `hummbl-gitops` | 0.1.0 | — | In-tree — bidirectional multi-agent peer-review GitOps loop |
+| `hummbl-agent-governance` | 0.2.0 | — | In-tree — deterministic runtime safety primitives for multi-agent AI fleets |
 
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
