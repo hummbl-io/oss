@@ -14,7 +14,7 @@ signal-cli --config /path/to/isolated/config link -n "HummblMCP"
 
 Then set the configuration path in your environment so the MCP server knows where to read/write state:
 ```bash
-export SIGNAL_CONFIG_DIR="C:\\Users\\Owner\\.gemini\\config\\signal-cli-mcp"
+export SIGNAL_CONFIG_DIR="C:\\path\\to\\signal-cli-mcp"
 export SIGNAL_ACCOUNT="+1234567890" # Your registered number
 ```
 

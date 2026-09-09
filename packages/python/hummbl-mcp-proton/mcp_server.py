@@ -13,7 +13,7 @@ Configure in Antigravity or Gemini config (`mcp_config.json`):
       "mcpServers": {
         "proton": {
           "command": "python",
-          "args": ["C:\\\\Users\\\\Owner\\\\PROJECTS\\\\mcp-server\\\\packages\\\\python\\\\proton\\\\mcp_server.py"]
+          "args": ["C:\\\\path\\\\to\\\\mcp-server\\\\packages\\\\python\\\\proton\\\\mcp_server.py"]
         }
       }
     }
