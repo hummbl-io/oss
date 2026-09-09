@@ -35,12 +35,13 @@ from hummbl_governance.kernel import (
     SequenceEngine,
 )
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
+from _helpers import make_receipt_engine
 
 
 class TestReceiptEngine:
     def test_create_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test-agent",))
             receipt = engine.create(
                 agent_id="test-agent",
                 action_type="TEST",
@@ -53,7 +54,7 @@ class TestReceiptEngine:
 
     def test_store_and_retrieve(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test-agent",))
             receipt = engine.create(agent_id="test-agent", action_type="TEST")
             receipt_id = engine.store(receipt)
             assert receipt_id == receipt.receipt_id
@@ -64,7 +65,7 @@ class TestReceiptEngine:
 
     def test_hash_chain(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test-agent",))
             r1 = engine.create(agent_id="test-agent", action_type="FIRST")
             engine.store(r1)
 
@@ -81,13 +82,13 @@ class TestReceiptEngine:
 
     def test_validate_signature(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test-agent",))
             receipt = engine.create(agent_id="test-agent", action_type="TEST")
             assert engine.validate(receipt) is True
 
     def test_k1_panic_empty_agent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("test-agent",))
             try:
                 engine.create(agent_id="", action_type="TEST")
                 assert False, "Should have raised KernelPanic"
@@ -309,6 +310,7 @@ class TestKernel:
     def test_create_and_store_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
+            kernel.identity.register("test-agent")
             receipt = kernel.create_receipt(
                 agent_id="test-agent",
                 action_type="TEST",
@@ -323,6 +325,7 @@ class TestKernel:
     def test_receipt_chain(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
+            kernel.identity.register("test-agent")
             r1 = kernel.create_receipt("test-agent", "FIRST")
             kernel.store_receipt(r1)
 
