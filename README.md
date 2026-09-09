@@ -15,9 +15,9 @@ package blurbs, or agent briefs.
 Base120 (120 mental models across 6 transformation families) is the substrate
 those governance primitives sit on. It is not a competing product story.
 
-Public monorepo for HUMMBL open-source **Python** packages, plus a Lean
-sketch under `packages/lean/`. Consolidation in progress. There is no
-`packages/node/` or `packages/rust/` tree in this repository yet.
+Public monorepo for HUMMBL open-source **Python** packages, a private Node
+technical canary, and a Lean sketch under `packages/lean/`. Consolidation is
+in progress. There is no `packages/rust/` tree in this repository yet.
 
 Inventory below is the tree at HEAD. PyPI "Live" means a wheel exists on
 the registry; it does not mean production-supported. Identity leftovers
@@ -26,7 +26,7 @@ remain on `#79`.
 
 ## Packages
 
-41 Python packages under `packages/python/<name>/`. Versions are
+42 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 
 | Package | Tree | PyPI | Status |
@@ -58,6 +58,7 @@ remain on `#79`.
 | `hummbl-validation-framework` | 0.1.0 | — | In-tree — external validation tests for the design system |
 | `hummbl-agent-eval-harness` | 0.1.0 | — | In-tree — required and forbidden regex constraints for agent output |
 | `hummbl-sast` | 0.1.0 | — | In-tree — static analysis, secret patterns, and OSV dependency lookups |
+| `hummbl-evidence` | 0.1.0 | — | In-tree — evidence state and two-party approval primitives |
 | `hummbl-mcp` | 0.1.0 | — | In-tree — MCP server framework: gateway, protocol, tools, and adapters |
 | `hummbl-mcp-base120` | 0.1.0 | — | In-tree — MCP server exposing Base120 mental models engine |
 | `hummbl-mcp-basen` | 0.1.0 | — | In-tree — MCP server exposing BaseN governance surface |
@@ -72,6 +73,12 @@ remain on `#79`.
 | `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | — | In-tree — omnichannel governance gate MCP server (stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | — | In-tree — MCP server for vendor-neutral voice interactions (Vapi adapter) |
+
+Node packages:
+
+| Package | Tree | npm | Status |
+|---------|------|-----|--------|
+| `@hummbl/mcp-base120` | 0.1.0-canary.0 | — | Private technical canary — read-only Base120 MCP catalog; not publishable while admission blockers remain |
 
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
