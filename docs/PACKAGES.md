@@ -4,7 +4,7 @@
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
 
-**Tree inventory updated:** 2026-09-08, `packages/python/` = 28 packages.
+**Tree inventory updated:** 2026-09-08, `packages/python/` = 39 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
@@ -80,6 +80,17 @@ Tree versions checked 2026-09-02.
 | `hummbl-agent-eval-harness` | 0.1.0 | Regex evaluation; imports as `agent_eval_harness`, command `agent-eval` |
 | `hummbl-sast` | 0.1.0 | Experimental static analysis, secret patterns, and OSV lookups |
 | `hummbl-mcp` | 0.1.0 | MCP server framework -- gateway, protocol, tools, and adapters |
+| `hummbl-mcp-base120` | 0.1.0 | MCP server exposing Base120 mental models engine |
+| `hummbl-mcp-basen` | 0.1.0 | MCP server exposing BaseN governance surface |
+| `hummbl-mcp-bif` | 0.1.0 | MCP server exposing BIF methodology tools |
+| `hummbl-mcp-cognitive-ledger` | 0.1.0 | MCP server shim for Cognitive Ledger Protocol |
+| `hummbl-mcp-coordination-bus` | 0.1.0 | MCP server shim for HUMMBL coordination bus |
+| `hummbl-mcp-discord` | 0.1.0 | Local stdio MCP server for Discord |
+| `hummbl-mcp-governance` | 0.1.0 | MCP servers exposing HUMMBL governance primitives |
+| `hummbl-mcp-onepassword` | 0.1.0 | MCP server exposing 1Password CLI as tools for agents |
+| `hummbl-mcp-proton` | 0.1.0 | Local MCP server for Proton Mail, Drive, Calendar |
+| `hummbl-mcp-signal` | 0.1.0 | Local stdio MCP server for Signal Messenger |
+| `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
 
 ### Excluded (not HUMMBL's)
 
