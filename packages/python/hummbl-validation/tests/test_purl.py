@@ -7,7 +7,7 @@ false equivalence.' These tests enforce that.
 """
 
 import pytest
-from hummbl_validation.purl import PURL, parse, normalize
+from hummbl_validation.purl import normalize, parse
 
 
 class TestParse:
@@ -31,6 +31,31 @@ class TestParse:
         assert p.namespace == "@types"
         assert p.name == "node"
         assert p.version == "20.0.0"
+
+    def test_npm_scoped_no_version(self):
+        """P0 regression: pkg:npm/@babel/core must not crash.
+
+        The @ in @babel is the npm scope marker, not a version separator.
+        """
+        p = parse("pkg:npm/@babel/core")
+        assert p.type == "npm"
+        assert p.namespace == "@babel"
+        assert p.name == "core"
+        assert p.version is None
+
+    def test_npm_scoped_with_version(self):
+        p = parse("pkg:npm/@babel/core@7.0.0")
+        assert p.type == "npm"
+        assert p.namespace == "@babel"
+        assert p.name == "core"
+        assert p.version == "7.0.0"
+
+    def test_npm_scoped_with_qualifiers(self):
+        p = parse("pkg:npm/@babel/core@7.0.0?arch=x86_64")
+        assert p.namespace == "@babel"
+        assert p.name == "core"
+        assert p.version == "7.0.0"
+        assert p.qualifiers == {"arch": "x86_64"}
 
     def test_type_lowercased(self):
         p = parse("pkg:PyPI/Django@5.0")

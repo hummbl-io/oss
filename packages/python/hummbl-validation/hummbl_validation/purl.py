@@ -19,7 +19,7 @@ equates identities across ecosystems.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from urllib.parse import unquote, quote
+from urllib.parse import quote, unquote
 
 # Ecosystems where name and namespace are case-insensitive.
 _CASE_INSENSITIVE_TYPES = frozenset({"pypi", "github", "composer", "nuget"})
@@ -97,11 +97,16 @@ def parse(purl_str: str) -> PURL:
                 else:
                     qualifiers[pair.lower()] = ""
 
-    # Split off version
+    # Split off version — the @ must be after the last / (in the name
+    # portion), not in the namespace. npm scoped packages use @ in the
+    # namespace (e.g. pkg:npm/@babel/core) and that @ is NOT a version
+    # separator. Only an @ after the last / is the version separator.
     version = None
-    if "@" in body:
-        body, version = body.rsplit("@", 1)
-        version = unquote(version) if version else None
+    last_slash = body.rfind("/")
+    at_pos = body.find("@", last_slash + 1) if last_slash >= 0 else body.find("@")
+    if at_pos >= 0:
+        version = unquote(body[at_pos + 1:]) if body[at_pos + 1:] else None
+        body = body[:at_pos]
 
     # Now body is type/namespace/name
     if "/" not in body:
