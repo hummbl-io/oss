@@ -66,3 +66,24 @@ packages/hummbl-governance/docs/MAXIMALLY_PROMOTABLE_SURFACE_DOCTRINE.md
 packages/hummbl-governance/docs/aar-20260530-setup-python-ci-fix.md
 
 _internal/
+
+# Local audit artifacts -- internal findings, not for public repo
+.audit/
+AUDIT_FINDINGS.md
+
+# Wrangler local cache
+.wrangler/
+
+# Rust build artifacts (reference implementations)
+Cargo.lock
+**/target/
+
+# Lean build artifacts
+lake-manifest.json
+lean-toolchain
+
+# Local test output
+_test_out.txt
+_test_stdout.txt
+pytest_out.txt
+tmp_test/
