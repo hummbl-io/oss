@@ -22,8 +22,11 @@ The actual server implementation lives in the `hummbl-bus` package
 the `hummbl_bus.mcp_server` module.
 
 This shim delegates entirely to the installed package, so the monorepo has a
-consistent `packages/python/<name>/mcp_server.py` entry point for every MCP
-server in the fleet without duplicating the `hummbl_bus` source.
+consistent `packages/python/<name>/<name>_mcp_server.py` entry point for
+every MCP server in the fleet without duplicating the `hummbl_bus` source.
+Each shim's module name is namespaced per-package (rather than a bare
+`mcp_server`) so multiple HUMMBL MCP servers can be pip-installed into the
+same Python environment without colliding on the same top-level module name.
 
 Tools exposed (via delegation):
   bus_read    — read recent bus messages (optionally filtered)
@@ -42,9 +45,7 @@ Wire into MCP config::
     {
       "mcpServers": {
         "coordination-bus": {
-          "command": "python",
-          "args": ["C:\\path\\to\\mcp-server\\packages\\python\\coordination-bus\\mcp_server.py"],
-          "transport": "stdio",
+          "command": "hummbl-mcp-coordination-bus",
           "env": {
             "BUS_CANONICAL_BRIDGE_URL": "${BUS_CANONICAL_BRIDGE_URL}",
             "BUS_BRIDGE_TOKEN": "${BUS_BRIDGE_TOKEN}"

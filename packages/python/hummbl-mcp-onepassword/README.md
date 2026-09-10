@@ -28,7 +28,7 @@ hummbl-mcp-onepassword
 Or via stdio JSON-RPC:
 
 ```bash
-python mcp_server.py
+python onepassword_mcp_server.py
 ```
 
 ## Prerequisites

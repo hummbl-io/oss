@@ -35,10 +35,10 @@ PyPI = "https://pypi.org/project/hummbl-mcp-voice/"
 test = ["pytest>=7.0"]
 
 [project.scripts]
-hummbl-mcp-voice = "mcp_server:main"
+hummbl-mcp-voice = "voice_mcp_server:main"
 
 [tool.setuptools]
-py-modules = ["mcp_server"]
+py-modules = ["voice_mcp_server"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

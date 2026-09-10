@@ -7,5 +7,5 @@ Crucially, it enforces the **"Draft, don't Send"** state machine. Agents do not 
 
 ## Architecture (Zero Dependencies)
 - `state.py`: SQLite-backed state machine for message drafts.
-- `mcp_server.py`: Standard `stdio` MCP JSON-RPC interface.
+- `omnichannel_mcp_server.py`: Standard `stdio` MCP JSON-RPC interface.
 - `dispatcher.py`: Routing logic to downstream platform MCPs based on urgency and target.

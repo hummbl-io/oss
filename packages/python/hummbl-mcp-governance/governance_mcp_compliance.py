@@ -24,14 +24,13 @@ threat analysis.
 Zero third-party dependencies. Uses only Python stdlib + hummbl_governance.
 
 Usage:
-    python3 mcp_compliance.py
+    python3 governance_mcp_compliance.py
 
 Configure in Claude Code settings.json:
     {
       "mcpServers": {
         "hummbl-compliance": {
-          "command": "python3",
-          "args": ["path/to/mcp_compliance.py"],
+          "command": "hummbl-compliance-mcp",
           "env": {
             "GOVERNANCE_AUDIT_DIR": "/path/to/audit"
           }

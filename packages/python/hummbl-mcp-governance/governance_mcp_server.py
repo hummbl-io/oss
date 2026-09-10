@@ -23,14 +23,13 @@ audit log, compliance mapper, health probes) as MCP tools via stdio JSON-RPC.
 Zero third-party dependencies. Uses only Python stdlib + hummbl_governance.
 
 Usage:
-    python3 mcp_server.py
+    python3 governance_mcp_server.py
 
 Configure in Claude Code settings.json:
     {
       "mcpServers": {
         "hummbl-governance": {
-          "command": "python3",
-          "args": ["path/to/mcp_server.py"],
+          "command": "hummbl-governance-mcp",
           "env": {
             "GOVERNANCE_STATE_DIR": "/path/to/state"
           }

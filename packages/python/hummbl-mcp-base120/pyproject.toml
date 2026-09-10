@@ -36,8 +36,11 @@ PyPI = "https://pypi.org/project/hummbl-mcp-base120/"
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
 
+[project.scripts]
+hummbl-mcp-base120 = "base120_mcp_server:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.setuptools]
-py-modules = ["mcp_server"]
+py-modules = ["base120_mcp_server"]

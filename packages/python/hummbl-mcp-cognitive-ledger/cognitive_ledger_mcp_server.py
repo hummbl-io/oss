@@ -22,8 +22,11 @@ The actual server implementation lives in the `hummbl-cognition` package
 provides the `hummbl_cognition.mcp_server` module.
 
 This shim delegates entirely to the installed package, so the monorepo has a
-consistent `packages/python/<name>/mcp_server.py` entry point for every MCP
-server in the fleet without duplicating the 63-file `hummbl_cognition` source.
+consistent `packages/python/<name>/<name>_mcp_server.py` entry point for every
+MCP server in the fleet without duplicating the 63-file `hummbl_cognition`
+source. Each shim's module name is namespaced per-package (rather than a bare
+`mcp_server`) so multiple HUMMBL MCP servers can be pip-installed into the
+same Python environment without colliding on the same top-level module name.
 
 Tools exposed (via delegation):
   ledger_search   — BM25 search over the cognitive ledger
@@ -43,9 +46,7 @@ Wire into MCP config::
     {
       "mcpServers": {
         "cognitive-ledger": {
-          "command": "python",
-          "args": ["C:\\path\\to\\mcp-server\\packages\\python\\cognitive-ledger\\mcp_server.py"],
-          "transport": "stdio",
+          "command": "hummbl-mcp-cognitive-ledger",
           "env": {
             "CLP_STATE_DIR": "C:\\path\\to\\hummbl-cognition\\_state\\cognition"
           }
