@@ -66,3 +66,10 @@ packages/hummbl-governance/docs/MAXIMALLY_PROMOTABLE_SURFACE_DOCTRINE.md
 packages/hummbl-governance/docs/aar-20260530-setup-python-ci-fix.md
 
 _internal/
+
+# Local audit artifacts -- internal findings, not for public repo
+.audit/
+AUDIT_FINDINGS.md
+
+# Wrangler local cache
+.wrangler/
