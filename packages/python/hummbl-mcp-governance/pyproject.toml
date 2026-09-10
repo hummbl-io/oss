@@ -36,8 +36,25 @@ PyPI = "https://pypi.org/project/hummbl-mcp-governance/"
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
 
+[project.scripts]
+hummbl-governance-mcp = "governance_mcp_server:main"
+hummbl-compliance-mcp = "governance_mcp_compliance:main"
+hummbl-sandbox-mcp = "governance_mcp_sandbox:main"
+hummbl-identity-mcp = "governance_mcp_identity:main"
+hummbl-agent-monitor-mcp = "governance_mcp_agent_monitor:main"
+hummbl-reasoning-mcp = "governance_mcp_reasoning:main"
+hummbl-physical-mcp = "governance_mcp_physical:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.setuptools]
-py-modules = ["mcp_server", "mcp_compliance", "mcp_sandbox", "mcp_identity", "mcp_agent_monitor", "mcp_reasoning", "mcp_physical"]
+py-modules = [
+    "governance_mcp_server",
+    "governance_mcp_compliance",
+    "governance_mcp_sandbox",
+    "governance_mcp_identity",
+    "governance_mcp_agent_monitor",
+    "governance_mcp_reasoning",
+    "governance_mcp_physical",
+]

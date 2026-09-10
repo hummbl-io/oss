@@ -38,9 +38,7 @@ Wire into MCP config (settings.json / mcp_config.local.json)::
     {
       "mcpServers": {
         "onepassword": {
-          "command": "python",
-          "args": ["/path/to/mcp-server/packages/python/onepassword/mcp_server.py"],
-          "transport": "stdio"
+          "command": "hummbl-mcp-onepassword"
         }
       }
     }

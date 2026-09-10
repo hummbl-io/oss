@@ -7,14 +7,13 @@ status tracking) as MCP tools via stdio JSON-RPC.
 Zero third-party dependencies. Uses only Python stdlib.
 
 Usage:
-    python3 mcp_server.py
+    python3 bif_mcp_server.py
 
 Configure in Claude Code settings.json:
     {
       "mcpServers": {
         "bif": {
-          "command": "python3",
-          "args": ["/path/to/mcp_server.py"]
+          "command": "hummbl-mcp-bif"
         }
       }
     }
