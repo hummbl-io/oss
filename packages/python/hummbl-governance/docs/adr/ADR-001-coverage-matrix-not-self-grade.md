@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-05-14
-- **Decision owner:** HUMMBL Principal Agent
+- **Decision owner:** Human Principal Agent
 - **Steward:** HUMMBL, LLC
 - **Authors:** claude-code (host-C)
 - **Supersedes:** implicit pre-2026-05-14 framing of "governance score / A+ rubric"
