@@ -1,7 +1,1 @@
-# PROVENANCE � hummbl-sast
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 0.1.0
-- **Description:** Python static analysis, secret-pattern scanning, and OSV dependency lookups
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠栠浵扭⵬慳瑳ਊ‭⨪牏杩湩污爠灥㩯⨪䤠⵮牴敥⠠牯杩湩瑡摥椠⁮畨浭汢椭⽯獯⥳ⴊ⨠䴪楡瑮楡敮㩲⨪删略敢⁮潂汷祢ⴊ⨠嘪牥楳湯⨺‪⸰⸱ਰ‭⨪敄捳楲瑰潩㩮⨪倠瑹潨⁮瑳瑡捩愠慮祬楳ⱳ猠捥敲⵴慰瑴牥⁮捳湡楮杮‬湡⁤协⁖敤数摮湥祣氠潯畫獰ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

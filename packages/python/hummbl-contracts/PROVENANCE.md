@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-contracts
+# PROVENANCE â€” hummbl-contracts
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby

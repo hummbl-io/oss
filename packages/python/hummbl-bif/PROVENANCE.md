@@ -1,7 +1,1 @@
-# PROVENANCE � hummbl-bif
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 1.0.1
-- **Description:** Batch Ingestion Framework - systematic methodology for technical knowledge acquisition using AI assistants
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠栠浵扭⵬楢੦ⴊ⨠伪楲楧慮⁬敲潰⨺‪湉琭敲⁥漨楲楧慮整⁤湩栠浵扭⵬潩漯獳਩‭⨪慍湩慴湩牥⨺‪敒扵湥䈠睯扬੹‭⨪敖獲潩㩮⨪ㄠ〮ㄮⴊ⨠䐪獥牣灩楴湯⨺‪慂捴⁨湉敧瑳潩⁮牆浡睥牯⁫‭祳瑳浥瑡捩洠瑥潨潤潬祧映牯琠捥湨捩污欠潮汷摥敧愠煣極楳楴湯甠楳杮䄠⁉獡楳瑳湡獴ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-agent-eval-harness
+# PROVENANCE â€” hummbl-agent-eval-harness
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby

@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-lint-config
+# PROVENANCE â€” hummbl-lint-config
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby

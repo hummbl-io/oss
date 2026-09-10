@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-lattice
+# PROVENANCE â€” hummbl-lattice
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby

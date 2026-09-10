@@ -1,7 +1,1 @@
-# PROVENANCE � hummbl-free-models
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 0.1.0
-- **Description:** HUMMBL Open-Weights & Free-Tier Model Registry Generator
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠栠浵扭⵬牦敥洭摯汥ੳⴊ⨠伪楲楧慮⁬敲潰⨺‪湉琭敲⁥漨楲楧慮整⁤湩栠浵扭⵬潩漯獳਩‭⨪慍湩慴湩牥⨺‪敒扵湥䈠睯扬੹‭⨪敖獲潩㩮⨪〠ㄮ〮ⴊ⨠䐪獥牣灩楴湯⨺‪啈䵍䱂传数⵮敗杩瑨⁳…牆敥吭敩⁲潍敤⁬敒楧瑳祲䜠湥牥瑡牯ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

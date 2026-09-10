@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-tuples
+# PROVENANCE â€” hummbl-tuples
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby

@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-bus
+# PROVENANCE â€” hummbl-bus
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby

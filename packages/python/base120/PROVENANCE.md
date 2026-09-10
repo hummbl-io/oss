@@ -1,7 +1,1 @@
-# PROVENANCE � base120
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 3.0.2
-- **Description:** 120 reasoning operators for structured thinking � stdlib-only, tuple-native
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠戠獡ㅥ〲ਊ‭⨪牏杩湩污爠灥㩯⨪䤠⵮牴敥⠠牯杩湩瑡摥椠⁮畨浭汢椭⽯獯⥳ⴊ⨠䴪楡瑮楡敮㩲⨪删略敢⁮潂汷祢ⴊ⨠嘪牥楳湯⨺‪⸳⸰ਲ‭⨪敄捳楲瑰潩㩮⨪ㄠ〲爠慥潳楮杮漠数慲潴獲映牯猠牴捵畴敲⁤桴湩楫杮霠猠摴楬ⵢ湯祬‬畴汰ⵥ慮楴敶ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

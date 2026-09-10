@@ -1,7 +1,1 @@
-# PROVENANCE � hummbl-compass
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 0.1.0
-- **Description:** HUMMBL Directional Navigation & Multi-Agent Routing Algorithms
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠栠浵扭⵬潣灭獡ੳⴊ⨠伪楲楧慮⁬敲潰⨺‪湉琭敲⁥漨楲楧慮整⁤湩栠浵扭⵬潩漯獳਩‭⨪慍湩慴湩牥⨺‪敒扵湥䈠睯扬੹‭⨪敖獲潩㩮⨪〠ㄮ〮ⴊ⨠䐪獥牣灩楴湯⨺‪啈䵍䱂䐠物捥楴湯污丠癡杩瑡潩⁮…畍瑬⵩杁湥⁴潒瑵湩⁧汁潧楲桴獭ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

@@ -1,7 +1,1 @@
-# PROVENANCE � hummbl-cognition
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 0.1.0
-- **Description:** Cognitive Ledger Protocol (CLP) and Open Brain server for HUMMBL agent reasoning
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠栠浵扭⵬潣湧瑩潩੮ⴊ⨠伪楲楧慮⁬敲潰⨺‪湉琭敲⁥漨楲楧慮整⁤湩栠浵扭⵬潩漯獳਩‭⨪慍湩慴湩牥⨺‪敒扵湥䈠睯扬੹‭⨪敖獲潩㩮⨪〠ㄮ〮ⴊ⨠䐪獥牣灩楴湯⨺‪潃湧瑩癩⁥敌杤牥倠潲潴潣⁬䌨偌 湡⁤灏湥䈠慲湩猠牥敶⁲潦⁲啈䵍䱂愠敧瑮爠慥潳楮杮ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

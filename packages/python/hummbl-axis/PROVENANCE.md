@@ -1,7 +1,1 @@
-# PROVENANCE � hummbl-axis
-
-- **Original repo:** In-tree (originated in hummbl-io/oss)
-- **Maintainer:** Reuben Bowlby
-- **Version:** 0.1.0
-- **Description:** Ladder that selects which Atlas contradiction to act on
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+‣剐噏久乁䕃霠栠浵扭⵬硡獩ਊ‭⨪牏杩湩污爠灥㩯⨪䤠⵮牴敥⠠牯杩湩瑡摥椠⁮畨浭汢椭⽯獯⥳ⴊ⨠䴪楡瑮楡敮㩲⨪删略敢⁮潂汷祢ⴊ⨠嘪牥楳湯⨺‪⸰⸱ਰ‭⨪敄捳楲瑰潩㩮⨪䰠摡敤⁲桴瑡猠汥捥獴眠楨档䄠汴獡挠湯牴摡捩楴湯琠⁯捡⁴湯ⴊ⨠䰪捩湥敳⨺‪䥍⁔剏䄠慰档ⵥ⸲‰搨慵⵬楬散獮ⱥ猠敥䰠䍉久䕓映汩獥਩

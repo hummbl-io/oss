@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-rubric-templates
+# PROVENANCE â€” hummbl-rubric-templates
 
 - **Original repo:** In-tree (originated in hummbl-io/oss)
 - **Maintainer:** Reuben Bowlby
