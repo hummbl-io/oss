@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-basen
+# PROVENANCE â€” hummbl-mcp-basen
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

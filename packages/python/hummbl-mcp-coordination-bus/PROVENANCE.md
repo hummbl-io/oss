@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-coordination-bus
+# PROVENANCE â€” hummbl-mcp-coordination-bus
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-proton
+# PROVENANCE â€” hummbl-mcp-proton
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

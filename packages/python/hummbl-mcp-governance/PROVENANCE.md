@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-governance
+# PROVENANCE â€” hummbl-mcp-governance
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

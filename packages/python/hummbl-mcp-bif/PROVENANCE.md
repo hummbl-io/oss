@@ -1,9 +1,1 @@
-# PROVENANCE � hummbl-mcp-bif
-
-- **Original repo:** https://github.com/hummbl-io/mcp-server
-- **Original maintainer:** Reuben Bowlby
-- **Import date:** 2026-09-09
-- **Import mechanism:** File-copy only (no git history imported)
-- **Why this package exists:** MCP server exposing BIF methodology tools
-- **Release history:** Not yet published to PyPI
-- **PII sanitization:** Performed during import (operator-verified)
+‣剐噏久乁䕃霠栠浵扭⵬捭⵰楢੦ⴊ⨠伪楲楧慮⁬敲潰⨺‪瑨灴㩳⼯楧桴扵挮浯栯浵扭⵬潩洯灣猭牥敶ੲ‭⨪牏杩湩污洠楡瑮楡敮㩲⨪删略敢⁮潂汷祢ⴊ⨠䤪灭牯⁴慤整⨺‪〲㘲〭ⴹ㤰ⴊ⨠䤪灭牯⁴敭档湡獩㩭⨪䘠汩ⵥ潣祰漠汮⁹渨⁯楧⁴楨瑳牯⁹浩潰瑲摥਩‭⨪桗⁹桴獩瀠捡慫敧攠楸瑳㩳⨪䴠偃猠牥敶⁲硥潰楳杮䈠䙉洠瑥潨潤潬祧琠潯獬ⴊ⨠刪汥慥敳栠獩潴祲⨺‪潎⁴敹⁴異汢獩敨⁤潴倠偹੉‭⨪䥐⁉慳楮楴慺楴湯⨺‪敐晲牯敭⁤畤楲杮椠灭牯⁴漨数慲潴⵲敶楲楦摥਩

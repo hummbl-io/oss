@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-cognitive-ledger
+# PROVENANCE â€” hummbl-mcp-cognitive-ledger
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

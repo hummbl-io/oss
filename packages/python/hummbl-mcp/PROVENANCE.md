@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp
+# PROVENANCE â€” hummbl-mcp
 
 - **Original repo:** https://github.com/hummbl-io/hummbl-mcp
 - **Original maintainer:** Reuben Bowlby

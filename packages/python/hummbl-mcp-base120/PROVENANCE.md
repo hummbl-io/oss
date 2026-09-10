@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-base120
+# PROVENANCE â€” hummbl-mcp-base120
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

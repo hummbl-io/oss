@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-signal
+# PROVENANCE â€” hummbl-mcp-signal
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby

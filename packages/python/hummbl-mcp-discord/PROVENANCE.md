@@ -1,4 +1,4 @@
-# PROVENANCE — hummbl-mcp-discord
+# PROVENANCE â€” hummbl-mcp-discord
 
 - **Original repo:** https://github.com/hummbl-io/mcp-server
 - **Original maintainer:** Reuben Bowlby
