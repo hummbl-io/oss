@@ -1,0 +1,10 @@
+{
+  "case_id": "GB-P0-003",
+  "severity": "P0",
+  "claim": "The bounded result has independent evidence.",
+  "evidence_refs": ["evidence:independent-1"],
+  "receipt_refs": ["receipt:execution-1"],
+  "author_id": "actor:builder",
+  "evaluator_id": "actor:reviewer",
+  "expected_disposition": "accept"
+}

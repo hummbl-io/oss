@@ -1,0 +1,7 @@
+{
+  "case_id": "GB-B120-004",
+  "severity": "P0",
+  "skill_name": "plain-text",
+  "base120_output": "Just some plain text output without any structure.",
+  "expected_disposition": "reject"
+}
