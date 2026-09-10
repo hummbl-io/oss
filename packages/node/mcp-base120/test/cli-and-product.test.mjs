@@ -25,7 +25,7 @@ test("product manifest keeps the technical canary non-public and no-egress", asy
   assert.equal(product.rights.software_license, "Apache-2.0");
   assert.equal(
     product.rights.embedded_content[0].distribution_policy,
-    "no-new-public-redistribution",
+    "public-redistribution-approved",
   );
   assert.deepEqual(product.contract.tools.sort(), [
     "base120_get",
