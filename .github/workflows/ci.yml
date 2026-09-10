@@ -171,13 +171,13 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-needs: [test, test-preview, pip-audit]
+    needs: [test, test-preview, pip-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
         run: |
           echo "test=${{ needs.test.result }}"
-echo "test-preview=${{ needs.test-preview.result }}"
+          echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
