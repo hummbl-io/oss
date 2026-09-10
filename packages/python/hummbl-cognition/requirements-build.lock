@@ -91,7 +91,7 @@ boolean-py==5.0 \
 build==1.6.0 \
     --hash=sha256:bd2c8afc603e7a2e0ce70e2ea85f0a6d02043bafbd307f5bada0f98669eca5af \
     --hash=sha256:f7aaf1ebbb79178a02ba248bb524f2176b256017e17e8e4bd4289c7b38cc2bad
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 chardet==5.2.0 \
     --hash=sha256:1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7 \
     --hash=sha256:e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970
@@ -218,11 +218,11 @@ coverage==7.16.0 \
     --hash=sha256:fa4ff0b3dd52208d2b30903022d5087f82000507b504753dfeee83e4f32d6883 \
     --hash=sha256:fddd26ed9a2527a7e23f7e4c1fd0734c4a5b45f77b261da1c536b20a7d2e6f0c \
     --hash=sha256:fe5aa402d02318db2f41e471320b2ecca6085b8f595a034c037085732e49c04a
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 cyclonedx-bom==7.3.1 \
     --hash=sha256:8c5adccefd593e89c0500463649c232625cee8e38dae1a433e057dfa495eff08 \
     --hash=sha256:ebd99dc2cf62a7067e327bef2b2ffada99d57ed3fda2db6c4c8f3004e5bfd3cf
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 cyclonedx-python-lib==11.12.0 \
     --hash=sha256:0e807521a921a5c3cb8ce1153f8a61d29eedfe76a46aac2796b7c6b573391a54 \
     --hash=sha256:16767c4039de90c04e9f03348f8f0ed4b8ff842eaa7eefcad3a95685f970dacf
@@ -238,7 +238,7 @@ fqdn==1.5.1 \
 hummbl-bus==0.2.0 \
     --hash=sha256:86490c653b97936a6ab9ad541330a4048a16ea4cf2359df8697b8ca602d9cfcc \
     --hash=sha256:cc3474bd2273829f16039faa9de9ddcb3aa83fea668c0e7fbfe43066d3595619
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 hummbl-governance==1.4.2 \
     --hash=sha256:48fade5c1feb0fab7409c0fc811605f262f4eb7caf3000efc933c51ef82d1861 \
     --hash=sha256:6b360bef7ce01185ac2b057fe24c85294106c140081a62db74fdf32927aacc9e
@@ -647,7 +647,7 @@ mypy==2.3.1 \
     --hash=sha256:f12fdb70459d0060dea40b29e52163a961b156106d68d57882a6a9f648983a53 \
     --hash=sha256:f5d716048611e85ca9eefb2e1baa5d73ede389b5820ded260ea27c757d667af8 \
     --hash=sha256:ff715e45b2231a8e85de1d163d1b42791e4d7aab8f5145f85fee1b710b735aff
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 mypy-extensions==1.1.0 \
     --hash=sha256:1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505 \
     --hash=sha256:52e68efc3284861e772bbcd66823fde5ae21fd2fdb51c62a211403730b916558
@@ -704,7 +704,7 @@ pytest==9.1.1 \
 pytest-timeout==2.4.0 \
     --hash=sha256:7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a \
     --hash=sha256:c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
@@ -851,7 +851,7 @@ rpds-py==2026.6.3 \
 setuptools==84.0.0 \
     --hash=sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670 \
     --hash=sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
@@ -881,4 +881,4 @@ webcolors==25.10.0 \
 wheel==0.48.0 \
     --hash=sha256:3217dcc807155e45db462d7ef2431f5ddda0d7273b700d05a67b271ceb1287ab \
     --hash=sha256:94800765601e9171bf5d58d066e640662842bcedcbab982b2c90787a2c987322
-    # via -r C:/Users/Owner/AppData/Local/Temp/tmpv949r0z_/requirements-build.in
+   

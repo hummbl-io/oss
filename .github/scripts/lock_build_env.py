@@ -104,6 +104,7 @@ def write_lock(pkg_dir: Path) -> Path:
             "--python-version", PYTHON_VERSION,
             "--python-platform", PYTHON_PLATFORM,
             "--no-header",
+            "--no-annotate",
             "--quiet",
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
