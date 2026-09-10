@@ -1,0 +1,55 @@
+---SYSTEM---
+You are a content-design planner grounded in evidence-based learning science. You produce a PAIDEIA-9 plan — a 9-axis target vector plus constraints and downstream hints — for a given topic and consumer profile. You return valid JSON only. You cite the anchor framework for each axis decision in evidence_trace.
+---USER---
+Topic: $topic
+
+Consumer profile:
+- expertise_stage: $expertise_stage
+- prior_knowledge: $prior_knowledge
+- goals: $goals
+- delivery_context: $delivery_context
+- target SOLO level: $target_solo
+- instructional_intent: $instructional_intent
+
+Generate a PAIDEIA-9 plan using these 9 axes, scored 0-4:
+- M MODALITY: representational channels (verbal, visual, symbolic, embodied, auditory). Mayer 2009; Paivio 1986.
+- D DEPTH: intellectual operation demanded, scored via SOLO structure. Biggs and Collis 1982.
+- E ENGAGEMENT: overt learner activity mode (Passive 0 / Active 1 / Constructive 2-3 / Interactive 4). Chi and Wylie 2014.
+- V MOTIVATION: autonomy, competence, relatedness afforded. Ryan and Deci 2000.
+- C METACOGNITION: prompts for planning, monitoring, reflection. Flavell 1979; Zimmerman 2000.
+- L LOAD: extraneous vs germane load vs learner expertise. Sweller 2011; Kalyuga 2007.
+- S SCAFFOLD: novice to expert fade schedule. Dreyfus 1980; Vygotsky 1978.
+- P PRACTICE: retrieval, spacing, interleaving, feedback. Roediger and Karpicke 2006.
+- A AUTHENTICITY: situated, whole-task realism. Brown et al. 1989.
+
+For each axis, specify:
+- target: integer 0-4
+- referent: one of "artifact" | "reader_state" | "reader_demand"
+- rationale: one sentence
+- citation: author and year
+
+Also provide:
+- constraints: {"load_budget": "low|med|high", "modality_budget": integer 1-5}
+- downstream_hints: an object keyed by generator name with specific guidance
+- content_type_warning: if instructional_intent is false, note which axes
+  (typically L, S, P) are partial or advisory rather than deficient.
+
+Return ONLY this JSON (no prose):
+{
+  "instructional_intent": true|false,
+  "target_vector": {"M": 0-4, "D": 0-4, "E": 0-4, "V": 0-4, "C": 0-4,
+                     "L": 0-4, "S": 0-4, "P": 0-4, "A": 0-4},
+  "per_axis": {
+    "M": {"target": 0-4, "referent": "artifact|reader_state|reader_demand", "rationale": "...", "citation": "..."},
+    "D": {...}, "E": {...}, "V": {...}, "C": {...},
+    "L": {...}, "S": {...}, "P": {...}, "A": {...}
+  },
+  "constraints": {"load_budget": "low|med|high", "modality_budget": 1-5},
+  "downstream_hints": {
+    "generate_outline": "...",
+    "generate_examples": "...",
+    "generate_assessment": "...",
+    "generate_delivery": "..."
+  },
+  "content_type_warning": "..."
+}

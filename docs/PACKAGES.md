@@ -1,21 +1,16 @@
 # HUMMBL OSS — Published Packages
-
 **Scope:** Packages in this monorepo and their public release state.
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
-
 **Tree inventory updated:** 2026-09-09, `packages/python/` = 42 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
-
 ## Name-collision warning (PyPI + npm)
-
 The package names `hermes-agent`, `arbiter`, `arcana`, `crab`, `randy`, and
 `mcp-server` are **not HUMMBL's** — they are unrelated packages by other
 authors that happen to share common-word names. Verified 2026-08-21 against
 each registry's author/repository/maintainer fields.
-
 | Name | PyPI owner | npm owner |
 |------|-----------|-----------|
 | `hermes-agent` | Nous Research | wrtensi |
@@ -24,27 +19,19 @@ each registry's author/repository/maintainer fields.
 | `crab` | Graham Bell (`grahambell/crab`) | kossnocorp (`kossnocorp/crab`) |
 | `randy` | Francis Horsman (Bitbucket `sys-git/randy`) | deestan (`deestan/randy`) |
 | `mcp-server` | (not on PyPI) | Melvin Carvalho (`sandy-mount/mcp-server`) |
-
 HUMMBL PyPI packages use the `hummbl-*` prefix except `base120`,
 `governed-compression`, and `idp-spec`. On npm, future packages use
 `@hummbl/*`. Canonical install names from this repo:
-
 ```text
 pip install base120
 pip install hummbl-governance
 ```
-
 Do not document `pip install arbiter`, `agent-governance`, or `base120-mcp`.
-
 ---
-
 ## 1. PyPI (Python)
-
 ### Live — wheel on the registry, HUMMBL-owned
-
 Ownership last verified in fleet audits 2026-08-30 / 2026-08-31.
 Tree versions checked 2026-09-02.
-
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
 | `hummbl-governance` | 1.5.0 | 1.4.2 | Tree version checked 2026-09-08; 1.5.0 remains unreleased under the disposition in `RELEASE.md`. |
@@ -56,9 +43,7 @@ Tree versions checked 2026-09-02.
 | `governed-compression` | 0.1.0 | 0.1.0 | Compression experiments. Live summary may still say "Private research surface". |
 | `hummbl` | 0.1.0 | 0.1.0 | Shipped 2026-08-25. |
 | `hummbl-kernel` | 0.1.0 | 0.1.0 | Shipped 2026-08-25. |
-
 ### In-tree — not on PyPI (no trusted-publishing tag yet)
-
 | Package | Tree | Notes |
 |---------|------|-------|
 | `hummbl-lattice` | 0.1.0 | Domain120 lattices |
@@ -94,59 +79,41 @@ Tree versions checked 2026-09-02.
 | `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | Omnichannel governance gate MCP server (refactored from FastAPI to stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | MCP server for vendor-neutral voice interactions (Vapi adapter) |
-
 ### Excluded (not HUMMBL's)
-
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|
 | `OBLITERATUS` | 0.0.1 | Pliny (pliny-lab) | Reserved-name placeholder. Not HUMMBL's. |
 | `arbiter` | — | R.A. Stern | Collision. Do not `pip install arbiter` from HUMMBL docs. |
 | `agent-governance` | — | not HUMMBL org | Collision / foreign owner. |
-
 ---
-
 ## 2. npm (JavaScript/TypeScript)
-
 ### Live: none
-
 ### In-tree technical canary — not publishable
-
 | Package | Tree | Status |
 |---------|------|--------|
 | `@hummbl/mcp-base120` | 0.1.0-canary.0 | Private, no-egress Base120 catalog canary. New public corpus redistribution is on hold; rights reconciliation, distributable-package architecture, release provenance, hosted parity, and privacy gates remain open. |
-
 Previously published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
-
 - `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
 - `hummbl-bibliography` v1.0.0 — deprecated ("Package no longer supported")
-
 The `@hummbl` scope still exists. Future npm packages publish under
 `@hummbl/*` from this monorepo only after their manifests become non-private
 and every product-admission blocker is cleared.
 The reusable v1 schema and repository validator fail closed on incompatible
 public-launch, package-license, content-rights, and admission states.
-
 **Name collisions (NOT HUMMBL's):** `mcp-server`, `hermes-agent`,
 `arbiter`, `arcana`, `crab`, `randy` on npm.
-
 ---
-
 ## 3. Other languages in this repo
-
 | Tree | Status |
 |------|--------|
 | `packages/lean/hummbl-formalization` | Present. Not in Python CI. Not a PyPI package. Do not call runtime packages "formally verified". |
 | `packages/node/` | Present with one private technical canary. No live npm package. |
 | `packages/rust/`, `packages/go/`, `packages/jvm/` | **Absent.** |
-
 ---
-
 ## Monorepo consolidation status
-
 `hummbl-io/oss` is the target monorepo for public HUMMBL packages.
 Recommended future layout (not current tree):
-
 ```
 oss/
 ├── packages/
@@ -158,13 +125,10 @@ oss/
 ├── docs/
 └── .github/workflows/
 ```
-
 ### Per-language publishing (current)
-
 - **Python**: GitHub Actions trusted publishing from
   `.github/workflows/publish-pypi.yml`. Tag shape:
   `python/<package>/v<version>`. See `RELEASE.md`.
 - **npm / crates / Go / JVM / Nix**: no publish workflow in this repo yet.
-
 Do not use local `twine upload` for packages that should come from this
 repo.
