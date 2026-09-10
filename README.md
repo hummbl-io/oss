@@ -18,7 +18,7 @@ the registry; it does not mean production-supported. Identity leftovers
 (PyPI org blurb, `arbiter-dev` fate, foreign install names on other surfaces)
 remain on `#79`.
 ## Packages
-42 Python packages under `packages/python/<name>/`. Versions are
+46 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|

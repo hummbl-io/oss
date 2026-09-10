@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **42** Python packages under `packages/python/<name>/`, one
+Currently hosts **46** Python packages under `packages/python/<name>/`, one
 private Node technical canary under `packages/node/mcp-base120`, and one Lean
 tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
 under `packages/` yet.
@@ -82,7 +82,7 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 42)
+# Per-package (all 46)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
 cd packages/python/arcana && python -m pytest tests/ -v
 cd packages/python/hummbl-agent-governance && python -m pytest tests/ -v
