@@ -26,8 +26,8 @@
     "embedded_content": [
       {
         "content_id": "base120-corpus",
-        "license": "Proprietary",
-        "distribution_policy": "no-new-public-redistribution",
+        "license": "Apache-2.0",
+        "distribution_policy": "public-redistribution-approved",
         "decision_record": "docs/product/base120-corpus-distribution-decision.md"
       }
     ]
