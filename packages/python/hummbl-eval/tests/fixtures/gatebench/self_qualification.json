@@ -1,0 +1,10 @@
+{
+  "case_id": "GB-P0-002",
+  "severity": "P0",
+  "claim": "The evaluator is qualified for release promotion.",
+  "evidence_refs": ["evidence:result-1"],
+  "receipt_refs": [],
+  "author_id": "actor:builder",
+  "evaluator_id": "actor:builder",
+  "expected_disposition": "reject"
+}

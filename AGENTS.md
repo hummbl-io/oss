@@ -84,6 +84,9 @@ pip install -e ".[test]"
 ```bash
 # Per-package (all 42)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
+cd packages/python/hummbl-agent-governance && python -m pytest tests/ -v
+cd packages/python/hummbl-eval && python -m pytest tests/ -v
+cd packages/python/hummbl-gitops && python -m pytest tests/ -v
 cd packages/python/hummbl-sast && python -m pytest tests/ -v
 cd packages/python/hummbl-evidence && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
