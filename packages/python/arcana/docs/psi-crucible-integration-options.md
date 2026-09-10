@@ -12,7 +12,7 @@ the concrete build slices with honest tradeoffs.
 
 ## 1. What each surface actually is (grounded)
 
-### PSI — Signal Pipeline (`C:\Users\Owner\PROJECTS\PSI\`)
+### PSI — Signal Pipeline (`~/projects/psi`)
 
 PSI refines **noisy intent → fleet-ready signal** through staged trust
 boundaries with operator-approved gates.
@@ -54,7 +54,7 @@ Agent lifecycle metrics, guardrail violations, fleet health.
 - Skill chains: `agent-audit`, `rsi-dashboard`
 - **Domain: agent guardrail metrics** (not content)
 
-### arcana — content/artifact pipeline (`C:\Users\Owner\PROJECTS\arcana\`)
+### arcana — content/artifact pipeline (`~/projects/arcana`)
 
 arcana refines **topic → article family → scored → released**.
 
