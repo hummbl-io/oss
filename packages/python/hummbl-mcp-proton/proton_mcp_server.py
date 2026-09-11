@@ -6,14 +6,13 @@ This package integrates with Proton Bridge (for Mail) and other potential local/
 for Drive, Calendar, and Meet.
 
 Usage:
-    python3 mcp_server.py
+    python3 proton_mcp_server.py
 
 Configure in Antigravity or Gemini config (`mcp_config.json`):
     {
       "mcpServers": {
         "proton": {
-          "command": "python",
-          "args": ["C:\\\\path\\\\to\\\\mcp-server\\\\packages\\\\python\\\\proton\\\\mcp_server.py"]
+          "command": "hummbl-mcp-proton"
         }
       }
     }

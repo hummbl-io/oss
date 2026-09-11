@@ -35,12 +35,12 @@ PyPI = "https://pypi.org/project/hummbl-mcp-omnichannel/"
 test = ["pytest>=7.0"]
 
 [project.scripts]
-hummbl-mcp-omnichannel = "mcp_server:main"
-hummbl-omnichannel-http = "http_server:main"
-hummbl-omnichannel-sync = "d1_sync:main"
+hummbl-mcp-omnichannel = "omnichannel_mcp_server:main"
+hummbl-omnichannel-http = "omnichannel_http_server:main"
+hummbl-omnichannel-sync = "omnichannel_d1_sync:main"
 
 [tool.setuptools]
-py-modules = ["mcp_server", "http_server", "state", "dispatcher", "d1_sync"]
+py-modules = ["omnichannel_mcp_server", "omnichannel_http_server", "state", "dispatcher", "omnichannel_d1_sync"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

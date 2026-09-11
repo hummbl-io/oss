@@ -29,7 +29,7 @@ hummbl-mcp-coordination-bus
 Or via stdio JSON-RPC:
 
 ```bash
-python mcp_server.py
+python coordination_bus_mcp_server.py
 ```
 
 ## Environment
