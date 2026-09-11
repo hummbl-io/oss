@@ -10,7 +10,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/hummbl-governance)](https://pypi.org/project/hummbl-governance/)
 [![Python](https://img.shields.io/pypi/pyversions/hummbl-governance)](https://pypi.org/project/hummbl-governance/)
-[![Tests](https://img.shields.io/badge/public%20oss%20CI%20(3.13)-2463%20passed%20%2F%203%20skipped-blue)](docs/public-claims.md)
+[![Tests](https://img.shields.io/badge/public%20oss%20CI%20(3.11--3.14)-3479%20passed%20%2F%2016%20skipped-blue)](docs/public-claims.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)]()
 [![Last commit](https://img.shields.io/github/last-commit/hummbl-io/oss/main)](https://github.com/hummbl-io/oss/commits/main)
@@ -69,7 +69,7 @@ before selecting a governance layer.
 
 **Compliance-aware by design.** The `compliance_mapper` maps governance events to SOC2, GDPR, and OWASP controls. The `stride_mapper` produces STRIDE threat analysis for agent interactions. These modules generate audit evidence, not just runtime safety — evidence you can hand to an auditor or compliance team.
 
-**Evidence-first.** Package metrics, cross-repo extraction notes, production-use statements, and framework mappings are governed by [docs/public-claims.md](docs/public-claims.md). Public test counts follow the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json) (as of 2026-08-26): public oss CI reported 2,463 passed and 3 skipped on Python 3.13. That is repository CI evidence, not a production-use receipt.
+**Evidence-first.** Package metrics, cross-repo extraction notes, production-use statements, and framework mappings are governed by [docs/public-claims.md](docs/public-claims.md). Public test counts follow this package's own [docs/public-claims.md](docs/public-claims.md) (the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json) is a separate, not-yet-refreshed surface): public oss CI reported 3,479 passed and 16 skipped on Python 3.13, full 3.11-3.14 matrix ([run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121)). That is repository CI evidence, not a production-use receipt.
 
 **Sponsorship boundary.** The canonical draft sponsorship policy (in the HUMMBL OSS monorepo) does not sell support, priority, favorable findings, or roadmap control. Sponsorship is not active until its documented launch gates pass.
 
@@ -117,7 +117,7 @@ graph TD
 ## Features
 
 - **51 implemented governance primitives** (58 tracked total: 51 implemented, 4 proposed, 3 candidate — see [PRIMITIVES.md](PRIMITIVES.md)) covering safety, cost, identity, compliance, reasoning, coordination, physical-AI, execution assurance, and governance Kernel
-- **2,463 passed / 3 skipped** on public oss CI (Python 3.13 only); see [docs/public-claims.md](docs/public-claims.md) and the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json)
+- **3,479 passed / 16 skipped** on public oss CI (Python 3.11-3.14 matrix, coverage collected); see [docs/public-claims.md](docs/public-claims.md)
 - **Zero third-party Core runtime dependencies** -- Python stdlib only, no pip conflicts
 - **Thread-safe** -- all modules use appropriate locking primitives
 - **Independently importable** -- use only the modules you need
@@ -151,7 +151,7 @@ provenance:
   build_system: github-actions
   trusted_publishing: true
   dependencies: zero
-  tests: 2463  # public oss CI passed on Python 3.13; 3 skipped
+  tests: 3479  # public oss CI passed, 3.11-3.14 matrix; 16 skipped
 ```
 
 Read it at runtime (the file is human-readable YAML; parse with PyYAML if available, or read as text):
@@ -287,7 +287,7 @@ The table below maps hummbl-governance primitives to the [OWASP Top 10 for Agent
 | **ASI09** Human-Agent Trust Exploitation | [`ReasoningEngine`](hummbl_governance/reasoning.py), [`ComplianceMapper`](hummbl_governance/compliance_mapper.py) | [7](tests/test_explain.py) + [112](tests/test_compliance_mapper.py) | Structured decision traces explain *why* a governance decision was made. Compliance mapping to NIST/ISO provides external validation anchor. |
 | **ASI10** Rogue Agents | [`BehaviorMonitor`](hummbl_governance/reward_monitor.py), [`GovernanceLifecycle`](hummbl_governance/lifecycle.py) | [20](tests/test_reward_monitor.py) + [17](tests/test_lifecycle.py) | Jensen-Shannon divergence detects behavioral drift from baseline. Lifecycle FSM enforces PROVISIONED → ACTIVE → SUSPENDED → DECOMMISSIONED transitions. |
 
-**Current posture:** 51 implemented primitives, 7 MCP server entry points, and zero third-party Core runtime dependencies. Public oss CI on Python 3.13 last reported 2,463 passed and 3 skipped ([run 32904924444](https://github.com/hummbl-io/oss/actions/runs/32904924444)); that run predates the P44-P58 / K12-K14 additions, so a fresh CI receipt is due. That figure is repository CI evidence, not a production-use receipt. Public multi-version CI and coverage are not claimed (GAP-003). See [docs/public-claims.md](docs/public-claims.md).
+**Current posture:** 51 implemented primitives, 7 MCP server entry points, and zero third-party Core runtime dependencies. Public oss CI on the full 3.11-3.14 matrix last reported 3,479 passed and 16 skipped ([run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121), commit 77854dd), with coverage collected (no percentage published). That figure is repository CI evidence, not a production-use receipt. See [docs/public-claims.md](docs/public-claims.md).
 
 For the formal governance primitive underlying all 10 mitigations, see [The Governance Tuple](https://doi.org/10.5281/zenodo.19646940) (Bowlby, 2026).
 
