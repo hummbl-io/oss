@@ -17,7 +17,7 @@
 """Records of Processing (P57) -- GDPR Art. 30 record assembler.
 
 P-ID  : P57
-Family: AC-6
+Family: AC-9
 Layer : Infrastructure
 Legal : GDPR Art. 30(1)/(2), AI Act Art. 12
 

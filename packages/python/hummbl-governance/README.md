@@ -21,7 +21,7 @@ Your AI agent calls an API. The API starts returning errors. Your agent retries,
 
 Teams shipping AI agents can face runaway costs, cascading failures, unauthorized actions, and incomplete audit trails. General-purpose agent frameworks emphasize orchestration; their governance coverage varies by framework, version, and deployment, so teams still need to evaluate runtime controls explicitly.
 
-**hummbl-governance** is a safety and evidence layer. It provides 34 governance primitives — kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, compliance mapping, and more — as a single stdlib-only Python package. It has no third-party runtime dependencies and no required orchestration framework.
+**hummbl-governance** is a safety and evidence layer. It provides 51 implemented governance primitives — kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, compliance mapping, and more — as a single stdlib-only Python package. It has no third-party runtime dependencies and no required orchestration framework.
 
 The package is classified **Alpha** in `pyproject.toml`. Evaluate it against your own risk, security, and production-readiness requirements.
 
@@ -84,7 +84,7 @@ pip install hummbl-governance
 **Integrate with your framework** (CrewAI, LangChain, AutoGen, raw OpenAI):
 See [docs/integrations/README.md](docs/integrations/README.md) for copy-paste examples.
 
-Explore all 34 primitives:
+Explore all 51 implemented primitives:
 
 ```bash
 git clone https://github.com/hummbl-io/oss.git
@@ -116,7 +116,7 @@ graph TD
 
 ## Features
 
-- **34 governance primitives** covering safety, cost, identity, compliance, reasoning, coordination, physical-AI, execution assurance, and governance Kernel
+- **51 implemented governance primitives** (58 tracked total: 51 implemented, 4 proposed, 3 candidate — see [PRIMITIVES.md](PRIMITIVES.md)) covering safety, cost, identity, compliance, reasoning, coordination, physical-AI, execution assurance, and governance Kernel
 - **2,463 passed / 3 skipped** on public oss CI (Python 3.13 only); see [docs/public-claims.md](docs/public-claims.md) and the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json)
 - **Zero third-party Core runtime dependencies** -- Python stdlib only, no pip conflicts
 - **Thread-safe** -- all modules use appropriate locking primitives
@@ -167,7 +167,7 @@ text = governance_file.read_text()
 
 Every HUMMBL PyPI package includes `governance.yml` inside its wheel, giving consumers a machine- and human-readable statement of the package's declared governance posture.
 
-## All 34 Primitives
+## All 51 Implemented Primitives
 
 ### Core Primitives (26)
 
@@ -200,18 +200,37 @@ Every HUMMBL PyPI package includes `governance.yml` inside its wheel, giving con
 | `evolution_lineage` | In-memory lineage tracking for eAI variants with drift detection |
 | `ValidationError` | Top-level exception for schema validation failures (exported from `schema_validator`) |
 
-### Kernel Sub-Primitives (8)
+### Expansion & Post-v1.2 Primitives (25)
 
-| Module | Invariant | Description |
-|--------|-----------|-------------|
-| `canon_registry` | — | Canonical operator approval registry for governance transitions |
-| `rollback` | K9 | Rollback declaration validation with reversibility checks |
-| `recovery_verifier` | K10 | Recovery verification with root-cause and operator approval validation |
-| `receipt_integrity_monitor` | K11 | Sequence, hash-chain, and timestamp integrity checks for receipts |
-| `contestability` | D6 | Contest status tracking with review outcome validation |
-| `doctrine_amendment` | D7 | Doctrine amendment validation with operator approval and tier transitions |
-| `authority_sweeper` | P34 | Authority sweep validation with revocation consistency checks |
-| `trust_adjuster` | P36 | Trust tier adjustment validation with severity classification |
+Shipped after the original 26 (v1.3–v1.5); see [PRIMITIVES.md](PRIMITIVES.md) for the full canonical reference, including the 4 proposed and 3 candidate primitives not counted here.
+
+| ID | Module | Invariant | Description |
+|----|--------|-----------|-------------|
+| P27 | `kernel.canon_registry` | D5 | Governs promotion from draft to canonical status (6 levels) |
+| P28 | `kernel.rollback` | K9 | Enforces reversibility: every governed action declares a rollback path |
+| P29 | `kernel.recovery_verifier` | K10 | Gates re-engagement after halt with root-cause verification |
+| P30 | `kernel.receipt_integrity_monitor` | K11 | Detects receipt sequence gaps, hash-chain breaks, retroactive insertion |
+| P31 | `kernel.contestability` | D6 | Allows affected parties to flag AI-mediated decisions for human review |
+| P34 | `kernel.authority_sweeper` | K6 | Sweep validation for expired authority grants |
+| P35 | `regulator_export` | D5 | Produces compliance evidence in regulator-accepted formats (7 formats, 8 frameworks) |
+| P36 | `kernel.trust_adjuster` | K3 | Evidence-backed trust-tier reductions |
+| P37 | `approval` | D6 | Human-in-the-loop approval gate with risk tiers |
+| P38 | `kernel.doctrine_amendment` | D7 | Governs changes to invariants themselves |
+| P44 | `attest` | K3 | MCP server identity attestation and policy compliance verification |
+| P45 | `contract_enforcement` | K6 | Cross-repo contract enforcement layer |
+| P46 | `cross_repo_contract` | K6 | Cross-repository contract validation standard |
+| P47 | `corpus_adapter` | — | Bridges receipts to unified-framework corpus formats |
+| P48 | `delegation_context` | K6 | Immutable delegation context with depth and scope attenuation |
+| P49 | `sovereign_cryptosystem` | K3 | Hardened cryptographic sync router for sovereign key management |
+| P50 | `primitives/merkle_anchor` | K11 | CT-style Merkle anchoring with signed tree heads |
+| P51 | `transition_receipt` | K1 | Transition receipts for governed agent/tool execution |
+| P52 | `tool_audit` | K1 | Tool-call audit hook for AI agent integrations |
+| P53 | `human_review_gate` | K1 | GDPR Art. 22(3) pre-decision human review checkpoint for automated decisions |
+| P54 | `contestation_handler` | K1 | Data-subject-facing workflow to contest automated decisions (GDPR Art. 21/22) |
+| P55 | `dsar_handler` | K1 | End-to-end Data Subject Access Request workflow (GDPR Art. 15) |
+| P56 | `redaction_engine` | K1 | Deterministic pseudonymisation via hash-placeholder substitution (GDPR Art. 17) |
+| P57 | `records_of_processing` | — | Assembles an Article 30-formatted Record of Processing Activities |
+| P58 | `dpia_generator` | — | Assembles a GDPR Art. 35 Data Protection Impact Assessment document |
 
 ## Runnable Examples
 
@@ -268,7 +287,7 @@ The table below maps hummbl-governance primitives to the [OWASP Top 10 for Agent
 | **ASI09** Human-Agent Trust Exploitation | [`ReasoningEngine`](hummbl_governance/reasoning.py), [`ComplianceMapper`](hummbl_governance/compliance_mapper.py) | [7](tests/test_explain.py) + [112](tests/test_compliance_mapper.py) | Structured decision traces explain *why* a governance decision was made. Compliance mapping to NIST/ISO provides external validation anchor. |
 | **ASI10** Rogue Agents | [`BehaviorMonitor`](hummbl_governance/reward_monitor.py), [`GovernanceLifecycle`](hummbl_governance/lifecycle.py) | [20](tests/test_reward_monitor.py) + [17](tests/test_lifecycle.py) | Jensen-Shannon divergence detects behavioral drift from baseline. Lifecycle FSM enforces PROVISIONED → ACTIVE → SUSPENDED → DECOMMISSIONED transitions. |
 
-**Current posture:** 34 implemented primitives, 7 MCP server entry points, and zero third-party Core runtime dependencies. Public oss CI on Python 3.13 reported 2,463 passed and 3 skipped ([run 32904924444](https://github.com/hummbl-io/oss/actions/runs/32904924444)). That is repository CI evidence, not a production-use receipt. Public multi-version CI and coverage are not claimed (GAP-003). See [docs/public-claims.md](docs/public-claims.md).
+**Current posture:** 51 implemented primitives, 7 MCP server entry points, and zero third-party Core runtime dependencies. Public oss CI on Python 3.13 last reported 2,463 passed and 3 skipped ([run 32904924444](https://github.com/hummbl-io/oss/actions/runs/32904924444)); that run predates the P44-P58 / K12-K14 additions, so a fresh CI receipt is due. That figure is repository CI evidence, not a production-use receipt. Public multi-version CI and coverage are not claimed (GAP-003). See [docs/public-claims.md](docs/public-claims.md).
 
 For the formal governance primitive underlying all 10 mitigations, see [The Governance Tuple](https://doi.org/10.5281/zenodo.19646940) (Bowlby, 2026).
 
