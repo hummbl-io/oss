@@ -183,12 +183,30 @@ jobs:
         # stale lock; this job surfaces that on the PR instead of at release.
         run: python .github/scripts/lock_build_env.py check-inputs --all
 
+  claim-drift-check:
+    name: claim-drift-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Check hummbl-governance public count claims against PrimitiveRegistry
+        # Catches the class of drift from the 2026-09-11 "34 primitives" incident:
+        # a doc/README count silently diverging from the actual registry. See
+        # docs/artifacts/AUDIT_2026-09-11_public_claims_drift.md.
+        run: python packages/python/hummbl-governance/scripts/check_public_count_claims.py
+
   # Single required-check context for branch protection.
   # Do not require the per-package names -- they churn when packages are added.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit, build-lock-check]
+    needs: [test, test-preview, pip-audit, build-lock-check, claim-drift-check]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
@@ -197,9 +215,11 @@ jobs:
           echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           echo "build-lock-check=${{ needs.build-lock-check.result }}"
+          echo "claim-drift-check=${{ needs.claim-drift-check.result }}"
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
 
           test "${{ needs.pip-audit.result }}" = success
           test "${{ needs.build-lock-check.result }}" = success
+          test "${{ needs.claim-drift-check.result }}" = success

@@ -14,7 +14,10 @@ explicitly framed as planned, draft, pending, historical, or source-candidate.
 
 GAP-001 is **closed** on the live landing claims ledger: a scoped public-probe
 receipt is linked. `production_use_established` remains false, so a general
-production-tested claim is still not allowed. GAP-002 and GAP-003 remain **open**.
+production-tested claim is still not allowed. GAP-003 is **closed** as of
+2026-09-11 (public oss CI already runs the full 3.11-3.14 matrix with
+coverage collection; this file previously said otherwise and was itself
+stale — see the Closed evidence gaps table). GAP-002 remains **open**.
 
 ## Claim Status Table
 
@@ -22,10 +25,10 @@ production-tested claim is still not allowed. GAP-002 and GAP-003 remain **open*
 | ----- | ------ | ------- | -------------- |
 | Published package version is `1.4.2` and classified Alpha | verified-with-scope | PyPI-live `pyproject.toml` at tag `hummbl-governance/v1.4.2`, commit `b1b0581`, declares `version = "1.4.2"` and `Development Status :: 3 - Alpha`. Landing claim LANDING-002. The current tree has since moved to `1.5.0` (also Alpha, also verified in-tree 2026-09-11) but has not been released; see `RELEASE.md`. | May be stated as the current published package metadata. State tree work as unreleased when describing `1.5.0`-tree features. Alpha is maturity, not production suitability. |
 | Runtime Core dependencies are zero | verified-with-scope | `pyproject.toml` has `dependencies = []` at tag `hummbl-governance/v1.4.2` (PyPI-live) and confirmed still `dependencies = []` in the current `1.5.0` tree as of 2026-09-11. Landing claim LANDING-005. | May be stated as zero third-party Core runtime dependencies. Optional, test, build, and integration extras are out of scope. |
-| Public oss CI reported 2,463 passed and 3 skipped on Python 3.13 | verified-with-scope | GitHub Actions [run 32904924444](https://github.com/hummbl-io/oss/actions/runs/32904924444) at commit `7546c4e` on oss main. Landing claims LANDING-004 and LANDING-006. | May be stated as public oss repository CI on Python 3.13 only. This is not a production-use receipt. |
-| Public oss CI tests Python 3.11, 3.12, and 3.13 | not verified (GAP-003) | Public oss `.github/workflows/ci.yml` runs `python-version: "3.13"` only and does not collect coverage. | Do not claim public CI-tested on 3.11–3.13. Declared classifiers in `pyproject.toml` are not a public CI matrix. |
-| Public coverage percentage | not verified (GAP-003) | Public oss CI does not collect coverage. | Do not publish a coverage percentage. The earlier 3.11/3.12/3.13 matrix with 84.45% coverage was private-repo only and is not public evidence. |
-| Python 3.14 is supported | not verified | Classifiers and public oss CI do not include 3.14. | Do not claim support until public CI includes 3.14 and passes. |
+| Public oss CI reported 3,479 passed and 16 skipped on Python 3.13 | verified-with-scope | GitHub Actions [run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) at commit `77854dd` on oss main (the PR #222 merge commit). Supersedes the prior 2,463/3 receipt (run 32904924444, commit `7546c4e`), which predated P44-P58/K12-K14. | May be stated as public oss repository CI on Python 3.13. This is not a production-use receipt. |
+| Public oss CI tests Python 3.11, 3.12, 3.13, and 3.14 | verified (GAP-003 closed 2026-09-11) | Same run 34610754121: `test (hummbl-governance, 3.11)`, `3.12`, `3.13`, `3.14` all `success`. `.github/workflows/ci.yml` matrix is `["3.11","3.12","3.13","3.14"]`, not 3.13-only — this row and GAP-003 were themselves stale; corrected 2026-09-11. | May be stated as public CI-tested on 3.11 through 3.14. |
+| Public oss CI collects coverage for hummbl-governance | verified (GAP-003 closed 2026-09-11) | `ci.yml` runs `pytest tests/ -q --cov=hummbl_governance --cov-report=term` for this package specifically; confirmed in run 34610754121's logs. | May state that public CI collects coverage for this package. Do not publish a specific coverage percentage (not extracted/verified here) — that remains a separate, unverified claim. |
+| Python 3.14 is supported | verified | Public oss CI (run 34610754121) includes and passes `test (hummbl-governance, 3.14)`. | May be stated as CI-tested on 3.14. |
 | Local collection of 2314 tests (2026-08-17, commit `bc56261`) | historical / not for public promotion | Former local `pytest --collect-only` receipt. Not the current public CI receipt. | Do not state as the current public test count. Use the public oss CI receipt instead. |
 | Local full-suite / coverage-enforced 2027-test passes (2026-07-05) | historical / not for public promotion | Former local working-tree receipts. | Historical only. Do not state as current public suite or coverage status. |
 | 51 implemented governance primitives | verified | `PRIMITIVES.md` header ("Total implemented: 51") and `hummbl_governance.primitive_registry.PrimitiveRegistry().implemented_primitives()` agree as of 2026-09-11 (58 tracked total: 51 implemented, 4 proposed/not-started, 3 candidate). Supersedes the prior "34" figure (v1.4.2-era: 26 existing + 8 implemented expansion; missed P35, P37, and the 9 post-v1.2 primitives P44-P52) and the intermediate "45" figure recorded earlier the same day. Two registry gaps were fixed 2026-09-11: (1) P35 RegulatorExport was marked `not_started` despite the module, schema, and 40 tests existing and PRIMITIVES.md marking it implemented; (2) PR #220 (merged 2026-09-11, same day) added 6 real, tested GDPR primitives (P53 HumanReviewGate, P54 ContestationHandler, P55 DSARHandler, P56 RedactionEngine, P57 RecordsOfProcessing, P58 DPIAGenerator — 103 passing tests) and updated `PRIMITIVES.md`'s header/counts, but never added corresponding `PrimitiveRegistry` entries, so the registry still computed 45 immediately after that merge. Both gaps are now fixed; registry and `PRIMITIVES.md` agree at 51. | May be stated as implemented package primitive inventory. Proposed (4) and candidate (3) primitives are excluded. Regenerate this count from `PrimitiveRegistry` rather than hand-counting before any future promotion. |
@@ -45,20 +48,19 @@ production-tested claim is still not allowed. GAP-002 and GAP-003 remain **open*
 | ID | Resolution | Remaining boundary |
 | -- | ---------- | ------------------ |
 | GAP-001 | Live-closed on the landing claims ledger (`as_of` 2026-08-31T21:56:55Z). A scoped public-probe receipt is linked: `r-7e400da03299` at 2026-08-31T21:56:55Z on https://hummbl-receipt-probe.hummbl.workers.dev/. | `production_use_established` remains false. Do not claim general production-tested status. |
+| GAP-003 | Closed 2026-09-11. This file previously said public oss CI ran Python 3.13 only with no coverage collection; that was itself stale. Verified via run [34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121): the matrix covers 3.11/3.12/3.13/3.14 and `hummbl-governance` runs with `--cov`. | A coverage *percentage* is still not extracted or published — do not state one. The private-repo 84.45% figure remains private-repo-only evidence. |
 
 ## Open evidence gaps
 
-GAP-002 and GAP-003 stay open.
+GAP-002 stays open.
 
 | ID | Gap | Effect |
 | -- | --- | ------ |
 | GAP-002 | No cold-visitor comprehension results exist yet. | Do not invent or publish comprehension metrics. |
-| GAP-003 | Public oss CI runs Python 3.13 only and does not collect coverage. The earlier 3.11/3.12/3.13 matrix with 84.45% coverage was private-repo only. | Do not claim a public multi-version Python matrix or a public coverage percentage. |
 
 ## Required Receipts Before Promotion
 
-- Public oss CI matrix receipt covering every Python version claimed as CI-tested (GAP-003).
-- Public coverage receipt if a coverage percentage is claimed (GAP-003). Private-repo coverage is not a substitute.
+- Public coverage *percentage* receipt if a specific number is ever claimed (coverage collection itself is now verified, but no percentage has been extracted from public CI). Private-repo coverage is not a substitute.
 - A package-level production-use receipt with `production_use_established: true` before any general production-tested claim. The linked public-probe receipt does not satisfy that field.
 - Cold-visitor comprehension results if communication effectiveness is claimed (GAP-002).
 - Build and wheel install smoke receipt.
@@ -70,13 +72,15 @@ GAP-002 and GAP-003 stay open.
 
 ## Wording Rules
 
-- Use the public oss CI receipt for current test counts: 2,463 passed and 3
-  skipped on Python 3.13 ([run 32904924444](https://github.com/hummbl-io/oss/actions/runs/32904924444)).
+- Use the public oss CI receipt for current test counts: 3,479 passed and 16
+  skipped on Python 3.13 ([run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121)).
   Scope the sentence as public oss repository CI, not production use.
-- Do not say "CI-tested on Python 3.11 through 3.13" while public oss CI is
-  3.13 only. Classifiers may declare 3.11–3.13; that is not a public CI matrix.
-- Do not publish 84.45% coverage or any other private-repo coverage figure as
-  a public claim.
+- "CI-tested on Python 3.11 through 3.14" is now accurate (GAP-003 closed
+  2026-09-11) — public oss CI runs the full matrix, not 3.13 only.
+- Coverage is collected in public CI for this package, but do not publish a
+  specific coverage *percentage* — none has been extracted from a public
+  receipt. Do not publish 84.45% coverage or any other private-repo coverage
+  figure as a public claim.
 - Do not reuse historical local counts (2314 collected, 2027 passed) as the
   current public test count.
 - Use "engineering mapping" for framework tables unless a third-party
@@ -101,16 +105,16 @@ eligible for current promotion.
 | Surface | Version | Tests | Primitives | Scope |
 | ------- | ------- | ----- | ---------- | ----- |
 | `pyproject.toml` / tree (source) | 1.5.0 (tree); 1.4.2 (PyPI live) | 3,495 collected locally (2026-09-11, not a public CI receipt) | 51 | Package metadata and `PrimitiveRegistry` — source of truth for primitive count. Tree version has moved past the last PyPI release; see `RELEASE.md`. |
-| README.md (repo) | 1.4.2 | 2,463 passed / 3 skipped (stale — predates P44-P58/K12-K14) | 51 | Public docs — primitive count corrected 2026-09-11; test-count badge still needs a fresh public CI run. |
-| Public oss CI | — | 2,463 passed / 3 skipped | — | [Run 32904924444](https://github.com/hummbl-io/oss/actions/runs/32904924444) at commit `7546c4e` on oss main. Python 3.13 only. No coverage collected. Predates P44-P58/K12-K14; a fresh run is due. Repository CI evidence, not a production-use receipt. |
-| Landing claims ledger | 1.4.2 | 2,463 passed / 3 skipped | 34 (stale) | Canonical public promotion source (`as_of` 2026-08-31T21:56:55Z) — has not yet been refreshed to 51; landing-claims.json update is a follow-up outside this repo. |
+| README.md (repo) | 1.4.2 | 3,479 passed / 16 skipped (current — matches run 34610754121) | 51 | Public docs — primitive count and test-count badge both corrected 2026-09-11. |
+| Public oss CI | — | 3,479 passed / 16 skipped | — | [Run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) at commit `77854dd` (the PR #222 merge) on oss main. Full 3.11-3.14 matrix, coverage collected (no percentage published). Repository CI evidence, not a production-use receipt. |
+| Landing claims ledger | 1.4.2 | 2,463 passed / 3 skipped | 34 (stale) | Canonical public promotion source (`as_of` 2026-08-31T21:56:55Z) — has not yet been refreshed to 51 or to the fresh test-count receipt; landing-claims.json update is a follow-up outside this repo (needs a real hummbl-governance PyPI release + a new landing-release-receipt, not a hand-edit — see `scripts/emit_landing_release_receipt.py` in hummbl-production). |
 | Historical local collection | — | 2314 collected | — | Former local receipt (2026-08-17). Not current public evidence. |
-| Private-repo CI matrix + coverage | — | — | — | 3.11/3.12/3.13 and 84.45% coverage were private-repo only. Not public evidence (GAP-003). |
+| Private-repo CI matrix + coverage | — | — | — | The 84.45% coverage *percentage* remains private-repo-only evidence (public CI now collects coverage but doesn't publish a percentage). |
 
 **Key distinction:** The package has 51 implemented primitives (58 tracked:
 51 implemented, 4 proposed, 3 candidate), regenerable from `PrimitiveRegistry`.
-Public oss CI currently proves one Python version (3.13) and one job result
-(2,463 passed, 3 skipped) from before the P44-P58/K12-K14 additions — that
-count is stale and a fresh CI run is a follow-up, not something to hand-edit
-here. Declared language classifiers and private-repo history are not
-substitutes for a public matrix.
+Public oss CI now proves the full 3.11-3.14 matrix with coverage collection
+(run 34610754121, 2026-09-11) — GAP-003 is closed. Only a specific coverage
+*percentage* remains unpublished. The `hummbl.io` landing claims ledger is a
+separate, out-of-repo surface still showing the stale figures; fixing it
+needs a real PyPI release and receipt regeneration, not a text edit here.
