@@ -301,11 +301,20 @@ def run_consolidation(
     # Find already-consolidated entry IDs
     already_consolidated = _get_consolidated_ids(entries)
 
-    # Filter to unconsolidated entries only
+    # Filter to unconsolidated entries only.
+    # Also exclude entries with non-clp IDs (e.g. legacy UUID-format IDs).
+    # The consolidator uses entry IDs as link IDs in new consolidated entries,
+    # but LedgerEntry link validation only accepts clp-<12hex>. Entries with
+    # UUID or other legacy IDs are valid ledger records but cannot be linked
+    # to from consolidated entries, so they are skipped during consolidation.
+    # Origin: 2026-09-11 Cognition-Consolidator-Nightly failing on 4 UUID-ID entries.
     candidates = [
         e
         for e in entries
-        if e.id not in already_consolidated and "consolidated" not in e.tags
+        if e.id not in already_consolidated
+        and "consolidated" not in e.tags
+        and e.id.startswith("clp-")
+        and len(e.id) == 16
     ]
 
     if len(candidates) < MIN_GROUP_SIZE:
