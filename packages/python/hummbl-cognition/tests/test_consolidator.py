@@ -170,3 +170,67 @@ class TestConstants:
 
     def test_similarity_threshold(self) -> None:
         assert 0 < SIMILARITY_THRESHOLD < 1
+
+
+class TestRunConsolidationFiltersLegacyIds:
+    """run_consolidation must skip entries with non-clp IDs.
+
+    Legacy UUID-format IDs are valid ledger records but cannot be used as
+    link IDs in consolidated entries (LedgerEntry link validation only
+    accepts clp-<12hex>). The consolidator filters them from candidates
+    so grouping never produces a consolidated entry that links to a UUID.
+
+    Origin: 2026-09-11 Cognition-Consolidator-Nightly failing on 4 UUID-ID entries.
+    """
+
+    def test_uuid_id_entries_skipped(self, tmp_path) -> None:
+        from hummbl_cognition.consolidator import run_consolidation
+        from hummbl_cognition.ledger_writer import post_entry
+
+        ledger = tmp_path / "ledger.jsonl"
+
+        # Entry with standard clp- ID -- eligible for consolidation.
+        good = _make_entry(content="alpha beta gamma shared terms")
+        post_entry(good, ledger_path=ledger)
+
+        # Entry with legacy UUID ID -- must be skipped by consolidator.
+        # Construct the dict directly because LedgerEntry is a frozen
+        # dataclass and post_entry validates via LedgerEntry.create (which
+        # rejects UUID IDs). Legacy UUID entries were only ever produced
+        # by historical graphify events that bypassed schema validation
+        # -- see ledger_writer.read_entries skip-and-warn guard.
+        import json
+        legacy_line = {
+            "id": "0e8ef33e-9d3f-48d2-b674-9097f1bda00d",
+            "timestamp": "2026-09-11T10:52:44Z",
+            "agent": "test-agent",
+            "vendor": "anthropic",
+            "model": "claude-opus-4-6",
+            "type": "lesson",
+            "scope": "project",
+            "content": "alpha beta gamma shared terms",
+            "content_hash": "x" * 64,
+        }
+        with open(ledger, "a", encoding="utf-8") as f:
+            f.write(json.dumps(legacy_line) + "\n")
+
+        result = run_consolidation(ledger_path=ledger, dry_run=True)
+        # The UUID entry must not appear in any group; only the single clp
+        # entry remains, which is below MIN_GROUP_SIZE, so groups_found == 0.
+        assert result["errors"] == []
+        assert result["groups_found"] == 0
+
+    def test_clp_id_entries_consolidated(self, tmp_path) -> None:
+        from hummbl_cognition.consolidator import run_consolidation
+        from hummbl_cognition.ledger_writer import post_entry
+
+        ledger = tmp_path / "ledger.jsonl"
+
+        e1 = _make_entry(content="alpha beta gamma shared terms here")
+        e2 = _make_entry(content="alpha beta gamma shared terms there")
+        post_entry(e1, ledger_path=ledger)
+        post_entry(e2, ledger_path=ledger)
+
+        result = run_consolidation(ledger_path=ledger, dry_run=True)
+        assert result["errors"] == []
+        assert result["groups_found"] >= 1
