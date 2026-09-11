@@ -3,9 +3,9 @@
 **Version:** v1.4.1
 **Existing primitives:** 26 (P1-P26)
 **Implemented expansion primitives:** 10 (P27-P31, P34-P35, P36-P38) — schemas, modules, and tests
-**Implemented post-v1.2 primitives:** 9 (P44-P52) — modules and tests, shipped v1.3-v1.4
+**Implemented post-v1.2 primitives:** 15 (P44-P58) — modules and tests, shipped v1.3-v1.4
 **Proposed primitives:** 4 (P32-P33, P39-P40) — not yet started
-**Total implemented:** 45 (P1-P26, P27-P31, P34-P35, P36-P38, P44-P52)
+**Total implemented:** 51 (P1-P26, P27-P31, P34-P35, P36-P38, P44-P58)
 **Kernel invariants:** K1-K14 (K1-K8 enforced on every receipt path; K9-K11 enum-defined, schema-backed, tested, and exposed through Kernel validation methods; K12-K14 added 2026-09-02 for safety, convergence, and physical-AI safety — closing the primitive-invariant pairing gap)
 **Doctrine invariants:** D1-D7 (D1-D5 enforced on every promotion path; D6 enforced via contestability primitive; D7 enforced via `assert_invariant_change_gated()` using multi-signal detection — see D7 enforcement note below)
 **Severity tiers:** Each invariant has a default severity (CRITICAL → HIGH → MEDIUM → LOW) that determines the response on violation. See `Severity` enum in `kernel/invariants.py`.
@@ -190,29 +190,30 @@ These primitives shipped in v1.3-v1.4 but were not tracked in PRIMITIVES.md unti
 
 ---
 
-## Primitive categories (P1-P52)
+## Primitive categories (P1-P58)
 
 | Category | Existing | Implemented expansion | Post-v1.2 | Proposed | Total |
 |---|---|---|---|---|---|
 | Governance Kernel | 2 (P25, P26) | 4 (P27-P30) | 0 | 1 (P40) | 7 |
 | Safety | 4 (P1-P4) | 0 | 0 | 0 | 4 |
 | Cost & Budget | 1 (P5) | 0 | 0 | 0 | 1 |
+| Risk Management | 0 | 0 | 1 (P58) | 0 | 1 |
 | Identity & Auth | 2 (P6, P7) | 2 (P34, P36) | 1 (P48) | 0 | 5 |
-| Audit & Compliance | 3 (P8-P10) | 1 (P35) | 2 (P51, P52) | 0 | 6 |
+| Audit & Compliance | 3 (P8-P10) | 1 (P35) | 5 (P51-P52, P55-P57) | 0 | 9 |
 | Reasoning & Contract | 3 (P11-P13) | 0 | 2 (P45, P46) | 0 | 5 |
 | Coordination | 3 (P14-P16) | 0 | 0 | 1 (P32) | 4 |
 | Behavior & Health | 3 (P17-P19) | 0 | 0 | 1 (P39) | 4 |
 | Physical AI | 1 (P20) | 0 | 0 | 0 | 1 |
 | Execution Assurance | 1 (P21) | 0 | 1 (P50) | 0 | 2 |
 | Error Taxonomy | 3 (P22-P24) | 0 | 0 | 0 | 3 |
-| Governance Ecology | 0 | 3 (P31, P37, P38) | 0 | 1 (P33) | 4 |
+| Governance Ecology | 0 | 3 (P31, P37, P38) | 2 (P53-P54) | 1 (P33) | 6 |
 | Cryptography | 0 | 0 | 2 (P44, P49) | 0 | 2 |
 | Corpus Integration | 0 | 0 | 1 (P47) | 0 | 1 |
-| **Total (P1-P52)** | **26** | **10** | **9** | **4** | **49** |
+| **Total (P1-P58)** | **26** | **10** | **15** | **4** | **55** |
 
 > **Note:** P37 (ApprovalManager, repurposed from Treaty) appears in the Governance Ecology category. Some primitives span multiple categories (e.g., P38 DoctrineAmendment is both Governance Ecology and Governance Kernel), but each primitive is counted once in its primary category. P44-P52 are post-v1.2 additions not counted in the original P1-P40 roadmap numbering.
 
-### Candidates under consideration (P41-P43, not counted in P1-P52 total)
+### Candidates under consideration (P41-P43, not counted in P1-P58 total)
 
 | Category | Candidates |
 |---|---|
