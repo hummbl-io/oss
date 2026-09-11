@@ -1,6 +1,6 @@
 # HUMMBL Governance Primitives — Complete Reference
 
-**Version:** v1.4.1
+**Version:** v1.5.0 (tree) — latest published release is v1.4.2 on PyPI; see `RELEASE.md`
 **Existing primitives:** 26 (P1-P26)
 **Implemented expansion primitives:** 10 (P27-P31, P34-P35, P36-P38) — schemas, modules, and tests
 **Implemented post-v1.2 primitives:** 15 (P44-P58) — modules and tests, shipped v1.3-v1.4
@@ -172,7 +172,7 @@ This document is the canonical reference for all HUMMBL governance primitives. F
 | P42 | ConceptRegistry | Governs terminology: ensures terms in receipts/admissions have canonical definitions | Matrix Part 1: full-gap family 1 |
 | P43 | RiskRegister | Dedicated risk-register primitive (family 9 is weak, only stride_mapper/failure_modes adjacent) | Matrix Part 1: weak-coverage family 9 |
 
-### Implemented post-v1.2 (P44-P52)
+### Implemented post-v1.2 (P44-P58)
 
 These primitives shipped in v1.3-v1.4 but were not tracked in PRIMITIVES.md until this update. All have modules, tests, and are importable from the package root.
 
@@ -187,6 +187,12 @@ These primitives shipped in v1.3-v1.4 but were not tracked in PRIMITIVES.md unti
 | P50 | MerkleAnchor | CT-style Merkle anchoring for governance tuple logs — signed tree heads with witness cosignature | `primitives/merkle_anchor.py` | ✅ Implemented |
 | P51 | TransitionReceipt | Transition receipts for governed agent/tool execution — tracks tool handoff state | `transition_receipt.py` | ✅ Implemented |
 | P52 | ToolAudit | Tool-call audit hook for AI agent integrations — records and validates tool invocations | `tool_audit.py` | ✅ Implemented |
+| P53 | HumanReviewGate | GDPR Art. 22(3) mandatory pre-decision checkpoint for solely-automated decisions; wraps ApprovalManager (P37) with data-subject linkage and DSAR-searchable receipts | `human_review_gate.py` | ✅ Implemented (2026-09-11, PR #220) |
+| P54 | ContestationHandler | External data-subject-facing workflow to contest automated decisions (GDPR Art. 21/22(3)); links to HumanReviewGate (P53), suspends effects via CapabilityFence, enforces 30-day Art. 12 deadline | `contestation_handler.py` | ✅ Implemented (2026-09-11, PR #220) |
+| P55 | DSARHandler | End-to-end Data Subject Access Request workflow (GDPR Art. 15 / AI Act Art. 26(11)); compiles Art. 15-structured responses from AuditLog, HumanReviewGate, ContestationHandler | `dsar_handler.py` | ✅ Implemented (2026-09-11, PR #220) |
+| P56 | RedactionEngine | Deterministic pseudonymisation via hash-placeholder substitution (GDPR Art. 17 / Art. 5(1)(c)); resolves the tension between right to erasure and append-only audit log integrity | `redaction_engine.py` | ✅ Implemented (2026-09-11, PR #220) |
+| P57 | RecordsOfProcessing | Assembles an Article 30-formatted Record of Processing Activities (RoPA) from AuditLog and ComplianceMapper evidence; stateless assembler, owns no new data store | `records_of_processing.py` | ✅ Implemented (2026-09-11, PR #220) |
+| P58 | DPIAGenerator | Assembles a GDPR Art. 35 / AI Act Art. 27 (FRIA) Data Protection Impact Assessment document from existing primitive evidence | `dpia_generator.py` | ✅ Implemented (2026-09-11, PR #220) |
 
 ---
 
@@ -211,7 +217,7 @@ These primitives shipped in v1.3-v1.4 but were not tracked in PRIMITIVES.md unti
 | Corpus Integration | 0 | 0 | 1 (P47) | 0 | 1 |
 | **Total (P1-P58)** | **26** | **10** | **15** | **4** | **55** |
 
-> **Note:** P37 (ApprovalManager, repurposed from Treaty) appears in the Governance Ecology category. Some primitives span multiple categories (e.g., P38 DoctrineAmendment is both Governance Ecology and Governance Kernel), but each primitive is counted once in its primary category. P44-P52 are post-v1.2 additions not counted in the original P1-P40 roadmap numbering.
+> **Note:** P37 (ApprovalManager, repurposed from Treaty) appears in the Governance Ecology category. Some primitives span multiple categories (e.g., P38 DoctrineAmendment is both Governance Ecology and Governance Kernel), but each primitive is counted once in its primary category. P44-P58 are post-v1.2 additions not counted in the original P1-P40 roadmap numbering; P53-P58 (GDPR Art. 15/17/21/22/30/35 primitives) shipped 2026-09-11 via PR #220.
 
 ### Candidates under consideration (P41-P43, not counted in P1-P58 total)
 
@@ -306,7 +312,7 @@ Primitives are organized into five layers (organizational pattern O1, Layered Ar
 | Foundation | Shared base modules (errors, schema_validator, _types) — not governance primitives | `errors.py`, `schema_validator.py`, `_types.py` |
 | Authority | Primitives that scope what an agent can do | P6, P7, P25, P27, P31, P34, P36, P37, P38, P44, P45, P46, P48, P49 |
 | Containment | Primitives that bound what happens when things go wrong | P1, P2, P4, P5, P16, P17, P20, P28, P29 |
-| Evidence | Primitives that prove what actually happened | P8, P15, P21, P26, P30, P50, P51, P52 |
-| Infrastructure | Utility primitives that support the above | P3, P9, P10, P11, P12, P13, P14, P18, P19, P22, P23, P24, P47 |
+| Evidence | Primitives that prove what actually happened | P8, P15, P21, P26, P30, P50, P51, P52, P53, P54, P55, P56 |
+| Infrastructure | Utility primitives that support the above | P3, P9, P10, P11, P12, P13, P14, P18, P19, P22, P23, P24, P47, P57, P58 |
 
 Layer dependencies are enforced by `scripts/check_layer_dependencies.py`. The FOUNDATION layer was added 2026-09-02 to resolve 13 cross-layer import violations where authority/containment/evidence modules needed `schema_validator` and `errors` (previously misclassified as infrastructure).
