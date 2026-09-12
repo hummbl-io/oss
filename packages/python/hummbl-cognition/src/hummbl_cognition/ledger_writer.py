@@ -78,7 +78,9 @@ _CREDENTIAL_PATTERNS: list[re.Pattern[str]] = [
 # Used by scan_pii() to warn/block, and by scrub_pii() to hash-replace.
 _PII_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("email", re.compile(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b")),
-    ("phone_us", re.compile(r"\b(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b")),
+    # phone_us requires parens or a separator after the area code so bare
+    # 10-digit runs (HRESULT codes, numeric IDs) do not false-positive.
+    ("phone_us", re.compile(r"(?<![\d(])(?:\+1[-.\s]?)?(?:\(\d{3}\)[-.\s]?|\d{3}[-.\s])\d{3}[-.\s]?\d{4}\b")),
     ("ssn", re.compile(r"\b\d{3}-\d{2}-\d{4}\b")),
     (
         "ip_address",
