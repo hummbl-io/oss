@@ -201,12 +201,42 @@ jobs:
         # docs/artifacts/AUDIT_2026-09-11_public_claims_drift.md.
         run: python packages/python/hummbl-governance/scripts/check_public_count_claims.py
 
+  # ---------------------------------------------------------------------------
+  # Docker-based test job for hummbl-governance.
+  #
+  # Verifies the multi-stage Dockerfile (packages/python/hummbl-governance/)
+  # stays green and reproduces CI locally:
+  #   docker build -t hummbl-governance-ci packages/python/hummbl-governance/
+  #   docker run hummbl-governance-ci
+  #
+  # One test is deselected: test_resolve_workspace_for_file expects .git/ to
+  # exist (it walks up looking for a git workspace root). The .dockerignore
+  # intentionally excludes .git/ to keep the image lean. This test passes in
+  # the regular CI job (which uses actions/checkout) and locally.
+  # ---------------------------------------------------------------------------
+  docker-test:
+    name: docker-test (hummbl-governance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Build Docker image
+        run: docker build -t hummbl-governance-ci packages/python/hummbl-governance/
+
+      - name: Run tests in container
+        run: |
+          docker run --rm hummbl-governance-ci \
+            python -m pytest tests/ -q \
+            --deselect tests/lsp_registry/test_lsp_registry.py::TestWorkspaceUtils::test_resolve_workspace_for_file
+
   # Single required-check context for branch protection.
   # Do not require the per-package names -- they churn when packages are added.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit, build-lock-check, claim-drift-check]
+    needs: [test, test-preview, pip-audit, build-lock-check, claim-drift-check, docker-test]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
@@ -216,6 +246,7 @@ jobs:
           echo "pip-audit=${{ needs.pip-audit.result }}"
           echo "build-lock-check=${{ needs.build-lock-check.result }}"
           echo "claim-drift-check=${{ needs.claim-drift-check.result }}"
+          echo "docker-test=${{ needs.docker-test.result }}"
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
@@ -223,3 +254,4 @@ jobs:
           test "${{ needs.pip-audit.result }}" = success
           test "${{ needs.build-lock-check.result }}" = success
           test "${{ needs.claim-drift-check.result }}" = success
+          test "${{ needs.docker-test.result }}" = success
