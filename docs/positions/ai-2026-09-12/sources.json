@@ -1,0 +1,383 @@
+[
+  {
+    "id": "PA-01",
+    "title": "DGM technical evidence",
+    "urls": [
+      "https://arxiv.org/abs/2505.22954v3"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "DGM v3 reports agent-code improvement while foundation models and outer selection remain fixed.",
+    "limitation": "Coding-agent experiments, selection and resource budgets do not establish unrestricted successor-model improvement."
+  },
+  {
+    "id": "PA-02",
+    "title": "DGM author explanation and transfer",
+    "urls": [
+      "https://sakana.ai/dgm/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "The DGM authors describe agent-code evolution and transfer experiments.",
+    "limitation": "An author account complements the paper; it is not independent replication."
+  },
+  {
+    "id": "PA-03",
+    "title": "AlphaEvolve original result",
+    "urls": [
+      "https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "DeepMind reports algorithm discovery and infrastructure optimization with AlphaEvolve.",
+    "limitation": "Provider-reported bounded outcomes do not establish general intelligence or customer ROI."
+  },
+  {
+    "id": "PA-04",
+    "title": "AlphaEvolve follow-up",
+    "urls": [
+      "https://deepmind.google/blog/alphaevolve-impact/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "The AlphaEvolve follow-up reports additional optimization applications.",
+    "limitation": "Follow-up deployment reports retain workload and evaluation boundaries."
+  },
+  {
+    "id": "PA-05",
+    "title": "Current frontier-lab RSI account",
+    "urls": [
+      "https://www.anthropic.com/institute/recursive-self-improvement"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Anthropic distinguishes current AI research acceleration from fully autonomous successor development.",
+    "limitation": "Access-dated provider account; activity and proxy gains are not accepted value or general RSI."
+  },
+  {
+    "id": "PA-06",
+    "title": "AGI levels",
+    "urls": [
+      "https://arxiv.org/abs/2311.02462v5"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Levels of AGI separates performance, generality and autonomy.",
+    "limitation": "A proposed framework, not universal consensus or certification of a system."
+  },
+  {
+    "id": "PA-07",
+    "title": "New AGI measurement framework",
+    "urls": [
+      "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/measuring-agi-cognitive-framework/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "The cognitive framework proposes broader ability measurement and human baselines.",
+    "limitation": "A measurement proposal is not a result showing that a model passed it."
+  },
+  {
+    "id": "PA-08",
+    "title": "Initial productivity RCT",
+    "urls": [
+      "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "METR reports a slowdown for experienced developers in its early-2025 randomized study.",
+    "limitation": "The population, tasks and date bound the result; read the later update alongside it."
+  },
+  {
+    "id": "PA-09",
+    "title": "Productivity update and uncertainty",
+    "urls": [
+      "https://metr.org/blog/2026-02-24-uplift-update/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "METR reports changed conditions and selection uncertainty in its 2026 productivity update.",
+    "limitation": "Neither update nor original study supports a timeless universal productivity effect."
+  },
+  {
+    "id": "PA-10",
+    "title": "Task horizons",
+    "urls": [
+      "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "METR measures success probabilities against tasks characterized by human completion time.",
+    "limitation": "A 50% horizon is not reliable autonomous work for that many wall-clock hours; task-suite and measurement limits matter."
+  },
+  {
+    "id": "PA-11",
+    "title": "Influential ASI forecast",
+    "urls": [
+      "https://blog.samaltman.com/the-gentle-singularity",
+      "https://blog.samaltman.com/archive?date=1748736000"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Altman presents a superintelligence forecast and related scenarios.",
+    "limitation": "Attributed forecast, not a reproduced ASI observation or a company promise in this paper."
+  },
+  {
+    "id": "PA-12",
+    "title": "Explicit powerful-AI scenario",
+    "urls": [
+      "https://darioamodei.com/essay/machines-of-loving-grace"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Amodei defines a powerful-AI scenario and discusses physical and institutional constraints.",
+    "limitation": "The scenario is not silently relabeled ASI, an arrival observation, or a guaranteed date."
+  },
+  {
+    "id": "CV-01",
+    "title": "OSI definition",
+    "urls": [
+      "https://opensource.org/ai/open-source-ai-definition"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "OSAID 1.0 specifies freedoms and artifacts beyond downloadable weights.",
+    "limitation": "OSI definition, not a statute; data information does not mean every original training example."
+  },
+  {
+    "id": "CV-02",
+    "title": "Definition release date",
+    "urls": [
+      "https://opensource.org/blog/the-open-source-initiative-announces-the-release-of-the-industrys-first-open-source-ai-definition"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "OSI announced version 1.0 of its AI definition in October 2024.",
+    "limitation": "Release provenance does not demonstrate artifact conformance or universal agreement."
+  },
+  {
+    "id": "CV-03",
+    "title": "Llama restrictions",
+    "urls": [
+      "https://github.com/meta-llama/llama-models/blob/5fdf83110cc9daa7435dfba6eb304892cc0041b8/models/llama4/LICENSE",
+      "https://github.com/meta-llama/llama-models/blob/main/models/llama4/LICENSE"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "The pinned Llama 4 license contains a large-user threshold and incorporates an acceptable-use policy.",
+    "limitation": "Custom license; no full legal applicability, acceptable-use-policy or OSAID audit is asserted."
+  },
+  {
+    "id": "CV-04",
+    "title": "Frontier lab also releases open weights",
+    "urls": [
+      "https://openai.com/index/introducing-gpt-oss/",
+      "https://huggingface.co/openai/gpt-oss-20b"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "OpenAI describes gpt-oss weights released under Apache 2.0.",
+    "limitation": "This establishes overlap between frontier-lab origin and open weights, not full training reproducibility or universal performance."
+  },
+  {
+    "id": "CV-05",
+    "title": "Fuller openness example",
+    "urls": [
+      "https://allenai.org/blog/olmo3",
+      "https://docs.allenai.org/latest-releases",
+      "https://huggingface.co/allenai/Olmo-3-7B-Think"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Ai2 describes broader lifecycle artifacts for Olmo 3.",
+    "limitation": "Provider-described availability; no independent complete training reproduction or conformance audit is asserted."
+  },
+  {
+    "id": "CV-06",
+    "title": "Anthropic draft submission",
+    "urls": [
+      "https://www.anthropic.com/news/confidential-draft-s1-sec"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Anthropic announced confidential draft S-1 submission on June 1, 2026.",
+    "limitation": "The announcement does not establish later filing, effectiveness, pricing or listing; the confidential draft was not inspected."
+  },
+  {
+    "id": "CV-07",
+    "title": "OpenAI draft submission",
+    "urls": [
+      "https://openai.com/index/openai-submits-confidential-s-1/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "OpenAI announced June 8, 2026 that it had recently submitted a confidential S-1.",
+    "limitation": "The exact submission day and final timetable are not established by this announcement."
+  },
+  {
+    "id": "CV-08",
+    "title": "Submission versus filing",
+    "urls": [
+      "https://www.sec.gov/about/divisions-offices/division-corporation-finance/voluntary-submission-draft-registration-statements-faqs"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "The SEC FAQ distinguishes nonpublic draft submission from a filed registration statement.",
+    "limitation": "General procedural guidance does not establish any particular issuer\u2019s current stage."
+  },
+  {
+    "id": "CV-09",
+    "title": "Anthropic's actual open-weights stance",
+    "urls": [
+      "https://www.anthropic.com/news/position-open-weights-models"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Anthropic\u2019s July statement rejects a blanket open-weights ban while proposing other controls.",
+    "limitation": "What the company said is distinct from its motives, every historical action or proven policy effects."
+  },
+  {
+    "id": "CV-10",
+    "title": "Already-public Alphabet",
+    "urls": [
+      "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm",
+      "https://deepmind.google/about/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Alphabet\u2019s public-company record establishes parent-company equity status.",
+    "limitation": "It does not establish a separate AI-lab IPO or AI-segment profitability."
+  },
+  {
+    "id": "CV-11",
+    "title": "Already-public Microsoft",
+    "urls": [
+      "https://www.microsoft.com/en-us/investor/default",
+      "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Microsoft\u2019s investor materials establish public parent-company equity.",
+    "limitation": "It does not establish a separate AI-lab IPO or segment profitability; not every linked filing was retrieved."
+  },
+  {
+    "id": "CV-12",
+    "title": "Already-public Meta",
+    "urls": [
+      "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-to-Announce-Second-Quarter-2026-Results/default.aspx"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Meta\u2019s investor materials establish public parent-company equity.",
+    "limitation": "Parent status does not establish separate lab financing or AI-segment profitability."
+  },
+  {
+    "id": "CV-13",
+    "title": "xAI ownership",
+    "urls": [
+      "https://x.ai/news/xai-joins-spacex"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "xAI announced its acquisition by SpaceX on February 2, 2026.",
+    "limitation": "An acquisition announcement alone is not a listing event."
+  },
+  {
+    "id": "CV-14",
+    "title": "SpaceX listing, unlike a confidential draft",
+    "urls": [
+      "https://www.nasdaq.com/events/spacex-rings-closing-bell"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Nasdaq records SpaceX\u2019s June 12, 2026 IPO launch event.",
+    "limitation": "A diversified parent listing is not a standalone xAI IPO or evidence of AI profitability."
+  },
+  {
+    "id": "H-01",
+    "title": "HUMMBL homepage",
+    "urls": [
+      "https://hummbl.io/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "public-surface-observation",
+    "observation": "The HUMMBL homepage qualifies its browser demonstration, package maturity and shared-key receipt assurances.",
+    "limitation": "Observation of public wording, not independent certification of enforcement or production suitability."
+  },
+  {
+    "id": "H-02",
+    "title": "HUMMBL landing claims",
+    "urls": [
+      "https://hummbl.io/manifest/landing-claims.json"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "public-surface-observation",
+    "observation": "The public landing claim ledger binds individual statements to dated source scopes and assurance limits.",
+    "limitation": "Publisher classifications and hashes do not independently prove semantic truth or complete mediation."
+  },
+  {
+    "id": "H-03",
+    "title": "HUMMBL services",
+    "urls": [
+      "https://hummbl.io/services"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "public-surface-observation",
+    "observation": "The services page offers the $400, 30-minute Bridge Method Diagnostic with preparation and separately scoped engagements. Its process copy uses broad receipt-proof language.",
+    "limitation": "Prices do not prove sales. Later integration and identity qualifications remain relevant; the correction map addresses the broader wording."
+  },
+  {
+    "id": "H-04",
+    "title": "HUMMBL build guide",
+    "urls": [
+      "https://hummbl.io/build"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "public-surface-observation",
+    "observation": "The build page describes composable primitives and deployment responsibilities for route coverage, identity, storage and response.",
+    "limitation": "A library cannot guarantee that every action is routed through it."
+  },
+  {
+    "id": "H-05",
+    "title": "HUMMBL models catalog",
+    "urls": [
+      "https://hummbl.io/models/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "public-surface-observation",
+    "observation": "The public models page presents the Base120 operator catalog.",
+    "limitation": "Catalog availability does not establish framework superiority or outcome improvement."
+  },
+  {
+    "id": "R-01",
+    "title": "GPT-6 Astra release",
+    "urls": [
+      "https://openai.com/index/gpt-6-astra/"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "OpenAI\u2019s September Astra release reports results with benchmark-version and research-configuration distinctions.",
+    "limitation": "Provider report; harness, effort and safeguards matter. No independent rerun or zero-deployment-risk conclusion is asserted."
+  },
+  {
+    "id": "R-02",
+    "title": "Fable 5.1 and Mythos 5.1 release",
+    "urls": [
+      "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "Anthropic describes Fable 5.1 and Mythos 5.1 as the same underlying model with different safeguards and access.",
+    "limitation": "Provider description; delivered permissions and refusals differ from raw model capability."
+  },
+  {
+    "id": "R-03",
+    "title": "Open Weights and American AI Leadership",
+    "urls": [
+      "https://images.nvidia.com/pdf/Open-Weights-and-American-AI-Leadership.pdf"
+    ],
+    "accessed_on": "2026-09-12",
+    "kind": "primary-source-research-receipt",
+    "observation": "The July industry letter advocates open-weights benefits while acknowledging release risks.",
+    "limitation": "Policy advocacy is not causal proof of universal security or cost advantages."
+  }
+]
