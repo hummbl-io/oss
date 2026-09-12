@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from hummbl_bus.bus_ed25519_verifier import (
     Ed25519VerificationError,
     _compute_canonical_payload,

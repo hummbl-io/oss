@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from hummbl_bus.bus_utils import parse_bus_line, register_message_type
+from hummbl_bus.bus_utils import parse_bus_line
 from hummbl_bus.message_types import (
     CANONICAL_MESSAGE_TYPES,
-    LEGACY_MESSAGE_TYPES,
     READABLE_MESSAGE_TYPES,
 )
 
@@ -14,19 +13,9 @@ def test_canonical_types_include_core_protocol() -> None:
     assert expected <= CANONICAL_MESSAGE_TYPES
 
 
-def test_canonical_types_include_belief_audit() -> None:
-    """BELIEF_AUDIT (added 2026-09-02 from incident governance research) is canonical."""
-    assert "BELIEF_AUDIT" in CANONICAL_MESSAGE_TYPES
-    assert "BELIEF_AUDIT" not in LEGACY_MESSAGE_TYPES
-
-
-def test_readable_is_canonical_plus_legacy() -> None:
-    assert READABLE_MESSAGE_TYPES == CANONICAL_MESSAGE_TYPES | LEGACY_MESSAGE_TYPES
-
-
-def test_canonical_and_legacy_are_disjoint() -> None:
-    """Legacy types must not appear in canonical -- new writes reject them."""
-    assert not (CANONICAL_MESSAGE_TYPES & LEGACY_MESSAGE_TYPES)
+def test_readable_equals_canonical() -> None:
+    """READABLE_MESSAGE_TYPES is exactly CANONICAL_MESSAGE_TYPES (legacy removed)."""
+    assert READABLE_MESSAGE_TYPES == CANONICAL_MESSAGE_TYPES
 
 
 def test_parse_bus_line_valid() -> None:
@@ -70,19 +59,7 @@ def test_parse_bus_line_rejects_garbage_type() -> None:
     assert parse_bus_line(line) is None
 
 
-def test_parse_bus_line_accepts_legacy_type() -> None:
-    """Readers must accept historical rows with legacy types."""
+def test_parse_bus_line_rejects_retired_legacy_type() -> None:
+    """Retired legacy types (e.g. AAR) are no longer accepted by readers."""
     line = "2026-01-01T00:00:00Z\tclaude-code\tall\tAAR\thistorical review"
-    result = parse_bus_line(line)
-    assert result is not None
-    assert result["type"] == "AAR"
-
-
-def test_register_message_type_extends_allowed() -> None:
-    """Custom types can be registered at import time."""
-    line = "2026-08-15T12:00:00Z\tcodex\tall\tCUSTOM_TYPE\thello"
-    assert parse_bus_line(line) is None  # not registered yet
-    register_message_type("CUSTOM_TYPE")
-    result = parse_bus_line(line)
-    assert result is not None
-    assert result["type"] == "CUSTOM_TYPE"
+    assert parse_bus_line(line) is None

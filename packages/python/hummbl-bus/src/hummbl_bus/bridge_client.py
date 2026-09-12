@@ -4,7 +4,7 @@ Bus Bridge Client - Post messages to remote machine's coordination bus.
 
 Usage:
     python -m hummbl_bus.bridge_client <host> <from> <to> <type> <message>
-    python -m hummbl_bus.bridge_client 100.64.0.1 agent-a agent-b STATUS "Hello from agent A"
+    python -m hummbl_bus.bridge_client 100.120.13.37 kimi-mini kimi-mbp STATUS "Hello from Mac Mini"
 """
 
 import argparse
@@ -13,24 +13,47 @@ import os
 import sys
 import urllib.error
 import urllib.request
+
 from pathlib import Path
 
 DEFAULT_PORT = 18790
+DEFAULT_TOKEN_FILE = Path.home() / ".config" / "hummbl-bus" / "bus_bridge_token"
 
 
-def _auth_headers() -> dict[str, str]:
-    """Return HTTP headers including Bearer auth when a bridge token is set."""
+def _load_bridge_token(explicit_token: str | None = None) -> str:
+    """Load bridge token from explicit argument, env var, or config file."""
+    if explicit_token is not None:
+        return explicit_token.strip()
+    env_token = os.environ.get("BUS_BRIDGE_TOKEN", "").strip().lstrip("\ufeff")
+    if env_token:
+        return env_token
+    token_file_env = os.environ.get("BUS_BRIDGE_TOKEN_PATH")
+    token_path = Path(token_file_env) if token_file_env else DEFAULT_TOKEN_FILE
+    if token_path.exists():
+        try:
+            return token_path.read_text(encoding="utf-8-sig").strip().lstrip("\ufeff")
+        except OSError:
+            return ""
+    return ""
+
+
+def _request_headers(
+    *,
+    bearer_token: str | None = None,
+    client_id: str | None = None,
+) -> dict[str, str]:
+    """Build bridge headers without logging or serializing credentials."""
+    token = _load_bridge_token(bearer_token)
+    effective_client_id = (
+        client_id
+        if client_id is not None
+        else os.environ.get("BUS_BRIDGE_CLIENT_ID", "")
+    ).strip()
     headers = {"Content-Type": "application/json"}
-    token = os.environ.get("BUS_BRIDGE_TOKEN", "").strip()
-    if not token:
-        token_file = os.environ.get("BUS_BRIDGE_TOKEN_FILE", "").strip()
-        if token_file:
-            try:
-                token = Path(token_file).read_text(encoding="utf-8").strip()
-            except (OSError, UnicodeDecodeError):
-                token = ""
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    if effective_client_id:
+        headers["X-Bridge-Client-ID"] = effective_client_id
     return headers
 
 
@@ -41,6 +64,9 @@ def post_to_remote_bus(
     msg_type: str,
     message: str,
     port: int = DEFAULT_PORT,
+    *,
+    bearer_token: str | None = None,
+    client_id: str | None = None,
 ) -> bool:
     """Post a message to a remote machine's bus via HTTP."""
     url = f"http://{host}:{port}/bus"
@@ -50,7 +76,13 @@ def post_to_remote_bus(
     ).encode("utf-8")
 
     req = urllib.request.Request(
-        url, data=data, headers=_auth_headers(), method="POST"
+        url,
+        data=data,
+        headers=_request_headers(
+            bearer_token=bearer_token,
+            client_id=client_id,
+        ),
+        method="POST",
     )
 
     try:
@@ -84,6 +116,8 @@ def post_to_remote_bus_result(
     correlation_id: str | None = None,
     origin_machine: str | None = None,
     principal_proof: str | None = None,
+    bearer_token: str | None = None,
+    client_id: str | None = None,
     port: int = DEFAULT_PORT,
 ) -> dict[str, object]:
     """Post a message to a remote machine's bus and return a structured result dict.
@@ -92,11 +126,10 @@ def post_to_remote_bus_result(
     shape that ``replay_worker`` expects: ``{"ok": bool, "duplicate": bool,
     "permanent_error": bool, "status_code": int|None, "error": str}``.
 
-    Note: the underlying ``post_to_remote_bus`` does not currently forward
-    request_id/correlation_id/origin_machine/principal_proof. Those fields are
-    accepted for API compatibility with hummbl-governance's richer client but are
-    not yet sent over the wire. Promote the full HTTP result machinery when
-    the bridge server supports them.
+    Optional request metadata and principal proof are forwarded to the bridge.
+    A genuine idempotent replay is a successful HTTP 200 response with
+    ``duplicate=true``. HTTP 409 instead means that the idempotency key is
+    already bound to a different request and is therefore a permanent error.
     """
     url = f"http://{host}:{port}/bus"
     payload: dict[str, object] = {
@@ -113,15 +146,32 @@ def post_to_remote_bus_result(
         payload["correlation_id"] = correlation_id
     if origin_machine is not None:
         payload["origin_machine"] = origin_machine
+    if principal_proof is not None:
+        payload["principal_proof"] = principal_proof
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
-        url, data=data, headers=_auth_headers(), method="POST"
+        url,
+        data=data,
+        headers=_request_headers(
+            bearer_token=bearer_token,
+            client_id=client_id,
+        ),
+        method="POST",
     )
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
+            response_body = response.read().decode("utf-8", errors="replace")
+            try:
+                response_data = json.loads(response_body) if response_body else {}
+            except json.JSONDecodeError:
+                response_data = {}
+            duplicate = bool(
+                isinstance(response_data, dict)
+                and response_data.get("duplicate") is True
+            )
             return {
                 "ok": response.status == 200,
-                "duplicate": False,
+                "duplicate": duplicate,
                 "permanent_error": False,
                 "status_code": response.status,
                 "error": "",
@@ -132,12 +182,13 @@ def post_to_remote_bus_result(
             body = e.read().decode()
         except Exception:
             pass
-        # 409 Conflict is the conventional duplicate-rejection status
-        duplicate = e.code == 409
-        permanent = e.code in (400, 401, 403, 413, 422)
+        # Successful idempotent replays return HTTP 200 with duplicate=true.
+        # HTTP 409 means the key is bound to a different request, so retrying
+        # the same queued record cannot succeed.
+        permanent = e.code in (400, 401, 403, 409, 413, 422)
         return {
             "ok": False,
-            "duplicate": duplicate,
+            "duplicate": False,
             "permanent_error": permanent,
             "status_code": e.code,
             "error": body or str(e.reason),

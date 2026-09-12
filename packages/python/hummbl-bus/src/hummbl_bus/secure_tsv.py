@@ -4,10 +4,10 @@ CRIT-003: TSV Injection Prevention
 Implements base64 encoding for message payloads to prevent tab and newline
 injection attacks that could corrupt the TSV message bus format.
 
-The format maintains backward compatibility:
+The format maintains read compatibility:
     - Old plaintext messages can still be read
     - New messages are base64-encoded in the payload column
-    - A version flag indicates encoding type
+    - Version metadata is embedded in canonical column five
 """
 
 from __future__ import annotations
@@ -21,6 +21,11 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+_SECURE_TSV_SCHEMA = "hummbl_bus.secure_tsv/v1"
+_SECURE_TSV_ENVELOPE_FIELDS = frozenset(
+    {"$schema", "payload_b64", "version"}
+)
 
 
 class TSVInjectionError(Exception):
@@ -81,7 +86,7 @@ class SecureTSVEncoder:
     """
 
     # TSV column headers
-    COLUMNS = ["timestamp", "from", "to", "type", "version", "payload"]
+    COLUMNS = ["timestamp", "from", "to", "type", "message"]
 
     @classmethod
     def encode_message(cls, message: BusMessage) -> str:
@@ -109,18 +114,25 @@ class SecureTSVEncoder:
             payload_bytes = payload_json.encode("utf-8")
             encoded_payload = base64.b64encode(payload_bytes).decode("ascii")
 
-            # Build TSV line
+            envelope = json.dumps(
+                {
+                    "$schema": _SECURE_TSV_SCHEMA,
+                    "payload_b64": encoded_payload,
+                    "version": message.version,
+                },
+                separators=(",", ":"),
+                sort_keys=True,
+            )
             fields = [
                 message.timestamp,
                 message.from_id,
                 message.to_id,
                 message.message_type,
-                message.version,
-                encoded_payload,
+                envelope,
             ]
 
             # Verify no tabs or newlines in metadata fields
-            for i, field in enumerate(fields[:-1]):  # Skip payload (already encoded)
+            for i, field in enumerate(fields):
                 if "\t" in field or "\n" in field or "\r" in field:
                     raise TSVInjectionError(
                         f"Field at index {i} contains tab or newline: {field!r}"
@@ -130,36 +142,6 @@ class SecureTSVEncoder:
 
         except (json.JSONEncodeError, UnicodeEncodeError) as e:
             raise TSVInjectionError(f"Failed to encode message payload: {e}") from e
-
-    @classmethod
-    def encode_legacy_message(
-        cls,
-        timestamp: str,
-        from_id: str,
-        to_id: str,
-        message_type: str,
-        message: str,
-    ) -> str:
-        """Encode a message in legacy (plaintext) format.
-
-        Only use this for backward compatibility or when the message
-        content is guaranteed safe.
-
-        Args:
-            timestamp: ISO timestamp.
-            from_id: Sender ID.
-            to_id: Recipient ID.
-            message_type: Message type.
-            message: Plaintext message.
-
-        Returns:
-            TSV-formatted line string (legacy format).
-        """
-        # Sanitize the message to remove tabs and newlines
-        safe_message = message.replace("\t", " ").replace("\n", " ").replace("\r", " ")
-
-        fields = [timestamp, from_id, to_id, message_type, "legacy", safe_message]
-        return "\t".join(fields)
 
     @classmethod
     def create_and_encode(
@@ -183,7 +165,7 @@ class SecureTSVEncoder:
             Encoded TSV line.
         """
         if timestamp is None:
-            timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%Z")
+            timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         message = BusMessage(
             timestamp=timestamp,
@@ -223,11 +205,24 @@ class SecureTSVDecoder:
 
         fields = line.split("\t")
 
-        # Handle both old format (5 columns) and new format (6 columns)
+        # Canonical format is five columns. Historical six-column rows remain
+        # readable but are never emitted.
         if len(fields) == 5:
-            # Legacy format: timestamp, from, to, type, message
             timestamp, from_id, to_id, message_type, payload = fields
             version = "legacy"
+            try:
+                envelope = json.loads(payload)
+            except json.JSONDecodeError:
+                envelope = None
+            if (
+                isinstance(envelope, dict)
+                and set(envelope) == _SECURE_TSV_ENVELOPE_FIELDS
+                and envelope.get("$schema") == _SECURE_TSV_SCHEMA
+                and isinstance(envelope.get("payload_b64"), str)
+                and isinstance(envelope.get("version"), str)
+            ):
+                payload = envelope["payload_b64"]
+                version = envelope["version"]
         elif len(fields) == 6:
             # New format: timestamp, from, to, type, version, payload
             timestamp, from_id, to_id, message_type, version, payload = fields
@@ -343,10 +338,10 @@ def append_message_to_bus(
     """Append a message to the TSV bus file.
 
     .. deprecated::
-        Do not use for production bus writes. This function lacks fcntl
-        mutual exclusion and HMAC signing. Use
-        ``bus_writer.post_message()`` instead, which provides fcntl.LOCK_EX
-        locking and optional HMAC-SHA256 signing.
+        Compatibility wrapper that preserves the secure-TSV envelope through
+        the strict raw five-column validator. New code should call
+        ``bus_writer.post_message()`` directly when policy validation or HMAC
+        signing is required.
 
     Args:
         file_path: Path to the TSV bus file.
@@ -355,15 +350,19 @@ def append_message_to_bus(
         message_type: Type of message.
         payload: Message content.
         timestamp: Optional timestamp (default: now).
-        ensure_header: If True, write header if file is new.
+        ensure_header: Deprecated and ignored; canonical bus files are
+            headerless.
 
     Raises:
         TSVInjectionError: If appending fails.
     """
-    file_path = Path(file_path)
-    file_path.parent.mkdir(parents=True, exist_ok=True)
+    from .authority import PRIVILEGED_TYPES
 
-    # Create encoded line
+    if message_type.strip().upper() in PRIVILEGED_TYPES:
+        raise PermissionError(
+            "legacy TSV append cannot write privileged bus message types"
+        )
+    file_path = Path(file_path)
     encoded_line = SecureTSVEncoder.create_and_encode(
         from_id=from_id,
         to_id=to_id,
@@ -372,18 +371,15 @@ def append_message_to_bus(
         timestamp=timestamp,
     )
 
+    fields = encoded_line.split("\t")
+    if len(fields) != 5:
+        raise TSVInjectionError("encoder did not produce a canonical five-column row")
+
+    from .bus_writer import _append_tsv_line
+
     try:
-        # Check if file exists and needs header
-        write_header = ensure_header and (
-            not file_path.exists() or file_path.stat().st_size == 0
-        )
-
-        with open(file_path, "a", encoding="utf-8", newline="") as f:
-            if write_header:
-                f.write("\t".join(SecureTSVEncoder.COLUMNS) + "\n")
-            f.write(encoded_line + "\n")
-
-    except OSError as e:
+        _append_tsv_line(file_path, encoded_line)
+    except (OSError, ValueError) as e:
         raise TSVInjectionError(f"Failed to append to bus file: {e}") from e
 
 
