@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 import pytest
-from base120.engine import Engine
+from base120.engine import Engine, _tokenize
 from base120.models import Operator
 
 _engine = Engine()
@@ -125,3 +125,41 @@ class TestRelevance:
         families = {op.family for op, _ in result}
         # Governance operators are primarily in SY and DE families
         assert families & {"SY", "DE"}, f"No SY/DE in top 5: {families}"
+
+
+# ---------------------------------------------------------------------------
+# Tie-breaking — equal primary scores order by operator specificity
+# ---------------------------------------------------------------------------
+
+
+class TestTieBreaking:
+    def test_score_ties_broken_by_specificity(self):
+        # A single-token problem gives every containing operator the same
+        # primary score (overlap / 1). Order among them must follow
+        # specificity: shorter operator text ranks first.
+        token_ops: dict[str, list[int]] = {}
+        for op in _engine.list():
+            toks = _tokenize(op.name + " " + op.definition)
+            for tok in toks:
+                token_ops.setdefault(tok, []).append(len(toks))
+        shared = [
+            tok
+            for tok, sizes in token_ops.items()
+            if len(sizes) >= 2 and len(set(sizes)) >= 2
+        ]
+        if not shared:
+            pytest.skip("no token shared by operators of differing sizes")
+        token = shared[0]
+        k = len(token_ops[token])
+        result = _engine.select(token, n=k)
+        assert len({s for _, s in result}) == 1
+        sizes = [
+            len(_tokenize(op.name + " " + op.definition)) for op, _ in result
+        ]
+        assert sizes == sorted(sizes), (
+            f"equal scores not ordered by ascending operator size: {sizes}"
+        )
+
+    def test_select_still_returns_operator_score_tuples(self):
+        for item in _engine.select("decompose", n=3):
+            assert len(item) == 2
