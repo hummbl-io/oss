@@ -51,15 +51,39 @@ HUB_BRIDGE_URL = os.environ.get(
 )
 
 # Token path mirrors bus-global.py for shared credential resolution.
+# Uses ~/.config/hummbl-bus/ (with -bus suffix) to match the CLI's default.
 BUS_BRIDGE_TOKEN_PATH = Path(
     os.environ.get(
         "BUS_BRIDGE_TOKEN_PATH",
-        str(Path.home() / ".config" / "hummbl" / "bus_bridge_token"),
+        str(Path.home() / ".config" / "hummbl-bus" / "bus_bridge_token"),
     )
 )
 
 ORIGIN_MACHINE = os.environ.get("BUS_ORIGIN_MACHINE") or socket.gethostname() or "unknown"
 ORIGIN_SURFACE = os.environ.get("BUS_ORIGIN_SURFACE") or "unknown"
+
+# Canonical machine names accepted by the bridge's host= tag validation
+# (hummbl-bus AGENTS.md §"Validation hardening" #1). Non-canonical hostnames
+# fall back to "unknown" so the bridge accepts the post rather than 400-ing.
+_CANONICAL_HOSTS = frozenset({
+    "anvil", "delta", "huxley", "slate", "nodezero",
+    "beachhead", "hummbl-vps", "meshport", "unknown",
+})
+
+
+def _resolve_host_tag() -> str:
+    """Resolve the canonical host= tag for agent-originated posts.
+
+    Per bus-protocol.md §75, every agent-originated post must carry
+    ``host=<machine>`` in the message body — the ``from`` field names the
+    agent identity, not the executing machine. ``socket.gethostname()`` is
+    uppercased on Windows (e.g. ``ANVIL``), so lowercase before comparing
+    against the canonical set.
+    """
+    raw = (os.environ.get("BUS_ORIGIN_MACHINE") or socket.gethostname() or "unknown").strip().lower()
+    return raw if raw in _CANONICAL_HOSTS else "unknown"
+
+
 HTTP_TIMEOUT_SECONDS = 10
 HTTP_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 HTTP_USER_AGENT = "hummbl-bus-mcp/0.1.0 (+fleet coordination bus MCP client)"
@@ -68,26 +92,56 @@ HTTP_USER_AGENT = "hummbl-bus-mcp/0.1.0 (+fleet coordination bus MCP client)"
 # ---------------------------------------------------------------------------
 # Bridge write path
 # ---------------------------------------------------------------------------
-def _load_bridge_token() -> str | None:
-    """Resolve the bridge bearer token (env var or token file)."""
-    env_token = os.environ.get("BUS_BRIDGE_TOKEN", "").strip().lstrip("\ufeff")
-    if env_token:
-        return env_token
+def _load_bridge_token(sender: str | None = None) -> str | None:
+    """Resolve the bridge bearer token, matching bus-global.py priority.
+
+    Priority order (same as bus-global.py):
+    1. Per-sender token file (if sender is provided and the file exists).
+       This takes priority over the env var so restricted senders on shared
+       hosts always use their own credential, even when BUS_BRIDGE_TOKEN
+       is set in the shell environment.
+    2. Default token file on Unix (~/.config/hummbl-bus/bus_bridge_token).
+    3. BUS_BRIDGE_TOKEN env var for legacy clients without a stored token.
+       Storage precedes inherited environment so rotation reaches running shells.
+    """
+    # Per-sender token file: check first so a restricted sender on a shared
+    # host picks up its own credential even when BUS_BRIDGE_TOKEN is set.
+    if sender:
+        env_sender_path = os.environ.get(
+            f"BUS_SENDER_TOKEN_PATH_{sender.upper().replace('-', '_')}"
+        )
+        sender_token_path = (
+            Path(env_sender_path)
+            if env_sender_path
+            else BUS_BRIDGE_TOKEN_PATH.parent / f"{sender}_token"
+        )
+        try:
+            token = sender_token_path.read_text(encoding="utf-8-sig").strip().lstrip("\ufeff")
+            if token:
+                return token
+        except OSError:
+            pass  # no per-sender file — fall through to default file / env var
+
+    # Default token file (Unix)
     try:
         token_path = Path(
             os.environ.get("BUS_BRIDGE_TOKEN_PATH", str(BUS_BRIDGE_TOKEN_PATH))
         )
         token = token_path.read_text(encoding="utf-8-sig").strip().lstrip("\ufeff")
+        if token:
+            return token
     except OSError:
-        return None
-    return token or None
+        pass  # no default file — fall through to env var
+
+    # Env var (last resort)
+    return os.environ.get("BUS_BRIDGE_TOKEN", "").strip().lstrip("\ufeff") or None
 
 
 def _bridge_post(
     from_agent: str, to_agent: str, msg_type: str, message: str
 ) -> tuple[bool, str]:
     """Post to the canonical bus via the HTTP bridge (same path as bus-global.py)."""
-    token = _load_bridge_token()
+    token = _load_bridge_token(sender=from_agent)
     if not token:
         return False, f"missing BUS_BRIDGE_TOKEN and token file {BUS_BRIDGE_TOKEN_PATH}"
 
@@ -125,6 +179,40 @@ def _bridge_post(
     return True, response_body or "POSTED via HTTP bridge"
 
 
+def _bridge_get(path: str) -> tuple[bool, dict[str, object] | str]:
+    """GET from the canonical bus via the HTTP bridge.
+
+    Used by bus_read, bus_search, bus_stats, bus_agents to fetch from the
+    bridge instead of a local TSV file that may not exist on this host.
+    Returns (ok, data_or_error).
+    """
+    token = _load_bridge_token()
+    if not token:
+        return False, f"missing BUS_BRIDGE_TOKEN and token file {BUS_BRIDGE_TOKEN_PATH}"
+    request = urllib.request.Request(
+        f"{HUB_BRIDGE_URL}{path}",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "User-Agent": HTTP_USER_AGENT,
+        },
+        method="GET",
+    )
+    try:
+        with HTTP_OPENER.open(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
+            response_body = response.read().decode("utf-8", errors="replace").strip()
+    except urllib.error.HTTPError as exc:
+        response_body = exc.read().decode("utf-8", errors="replace").strip()
+        return False, f"HTTP {exc.code}: {response_body or exc.reason}"
+    except urllib.error.URLError as exc:
+        return False, f"HTTP bridge unavailable: {exc.reason}"
+    except TimeoutError:
+        return False, "HTTP bridge timed out"
+    try:
+        return True, json.loads(response_body)
+    except json.JSONDecodeError:
+        return False, f"invalid JSON from bridge: {response_body[:200]}"
+
+
 # ---------------------------------------------------------------------------
 # Bus operations
 # ---------------------------------------------------------------------------
@@ -134,8 +222,38 @@ def read_bus(
     msg_type: str | None = None,
     since: str | None = None,
 ) -> list[dict[str, str]]:
-    """Read messages from the TSV bus, newest first."""
-    limit = max(limit, 0)
+    """Read messages from the bus, newest first.
+
+    Primary path: HTTP bridge /bus/tail endpoint.
+    Fallback: local TSV file (if BUS_FILE is set and exists).
+    """
+    if limit < 0:
+        limit = 0
+
+    # Primary path: bridge
+    fetch_n = max(limit, 50)  # fetch more than needed to allow client-side filtering
+    ok, data = _bridge_get(f"/bus/tail?n={fetch_n}")
+    if ok and isinstance(data, dict):
+        rows = data.get("messages", [])
+        # Apply client-side filters
+        filtered = []
+        for row in rows:
+            if agent and agent.lower() not in row.get("from", "").lower():
+                continue
+            if msg_type and msg_type.upper() != row.get("type", "").upper():
+                continue
+            if since and row.get("timestamp", "") < since:
+                continue
+            filtered.append({
+                "timestamp": row.get("timestamp", ""),
+                "from": row.get("from", ""),
+                "to": row.get("to", ""),
+                "type": row.get("type", ""),
+                "message": row.get("message", "")[:500],
+            })
+        return filtered[-limit:] if limit > 0 else filtered
+
+    # Fallback: local TSV file
     if not BUS_FILE.exists():
         return []
     rows = []
@@ -174,9 +292,31 @@ def read_bus(
 
 
 def search_bus(query: str, limit: int = 20) -> list[dict[str, str]]:
-    """Search bus messages by content."""
-    limit = max(limit, 0)
+    """Search bus messages by content.
+
+    Primary path: HTTP bridge /bus/search endpoint.
+    Fallback: local TSV file (if BUS_FILE is set and exists).
+    """
+    if limit < 0:
+        limit = 0
     query_lower = query.lower()
+
+    # Primary path: bridge
+    from urllib.parse import quote
+    ok, data = _bridge_get(f"/bus/search?q={quote(query)}&n={max(limit, 50)}")
+    if ok and isinstance(data, dict):
+        results = []
+        for row in data.get("messages", []):
+            results.append({
+                "timestamp": row.get("timestamp", ""),
+                "from": row.get("from", ""),
+                "to": row.get("to", ""),
+                "type": row.get("type", ""),
+                "message": row.get("message", "")[:500],
+            })
+        return results[-limit:] if limit > 0 else results
+
+    # Fallback: local TSV file
     results = []
     if not BUS_FILE.exists():
         return results
@@ -204,14 +344,44 @@ def search_bus(query: str, limit: int = 20) -> list[dict[str, str]]:
 
 
 def bus_stats() -> dict[str, object]:
-    """Aggregate bus statistics."""
+    """Aggregate bus statistics.
+
+    Primary path: HTTP bridge /bus/status + /bus/tail for breakdown.
+    Fallback: local TSV file.
+    """
+    # Primary path: bridge
+    ok_status, status_data = _bridge_get("/bus/status")
+    ok_tail, tail_data = _bridge_get("/bus/tail?n=10000")
+    if ok_status and isinstance(status_data, dict) and ok_tail and isinstance(tail_data, dict):
+        messages = tail_data.get("messages", [])
+        agents: Counter[str] = Counter()
+        types: Counter[str] = Counter()
+        first_ts: str | None = None
+        last_ts: str | None = None
+        for row in messages:
+            agents[row.get("from", "")] += 1
+            types[row.get("type", "")] += 1
+            ts = row.get("timestamp", "")
+            if first_ts is None or ts < first_ts:
+                first_ts = ts
+            if last_ts is None or ts > last_ts:
+                last_ts = ts
+        return {
+            "total_messages": status_data.get("line_count", len(messages)),
+            "date_range": {"first": first_ts, "last": last_ts},
+            "agents": dict(agents.most_common(20)),
+            "types": dict(types.most_common()),
+            "source": "bridge",
+        }
+
+    # Fallback: local TSV file
     if not BUS_FILE.exists():
         return {"error": "Bus file not found"}
-    agents: Counter[str] = Counter()
-    types: Counter[str] = Counter()
+    agents = Counter()
+    types = Counter()
     total = 0
-    first_ts: str | None = None
-    last_ts: str | None = None
+    first_ts = None
+    last_ts = None
     try:
         with open(BUS_FILE, "r", encoding="utf-8") as f:
             reader = csv.reader(f, delimiter="\t")
@@ -232,14 +402,56 @@ def bus_stats() -> dict[str, object]:
         "date_range": {"first": first_ts, "last": last_ts},
         "agents": dict(agents.most_common(20)),
         "types": dict(types.most_common()),
+        "source": "local",
     }
 
 
 def bus_agents_list() -> dict[str, object]:
-    """List agents with activity stats."""
+    """List agents with activity stats.
+
+    Primary path: HTTP bridge /bus/tail endpoint.
+    Fallback: local TSV file.
+    """
+    # Primary path: bridge
+    ok, data = _bridge_get("/bus/tail?n=10000")
+    if ok and isinstance(data, dict):
+        agent_data: dict[str, dict[str, object]] = {}
+        for row in data.get("messages", []):
+            frm = row.get("from", "")
+            if not frm:
+                continue
+            ts = row.get("timestamp", "")
+            if frm not in agent_data:
+                agent_data[frm] = {
+                    "count": 0,
+                    "first_seen": ts,
+                    "last_seen": ts,
+                    "types": Counter(),
+                }
+            agent_data[frm]["count"] += 1
+            if ts < agent_data[frm]["first_seen"]:
+                agent_data[frm]["first_seen"] = ts
+            if ts > agent_data[frm]["last_seen"]:
+                agent_data[frm]["last_seen"] = ts
+            agent_data[frm]["types"][row.get("type", "")] += 1
+        return {
+            "agents": [
+                {
+                    "name": name,
+                    "messages": data["count"],
+                    "first_seen": data["first_seen"],
+                    "last_seen": data["last_seen"],
+                    "top_types": dict(data["types"].most_common(3)),
+                }
+                for name, data in sorted(agent_data.items(), key=lambda x: -x[1]["count"])
+            ],
+            "source": "bridge",
+        }
+
+    # Fallback: local TSV file
     if not BUS_FILE.exists():
         return {"error": "Bus file not found"}
-    agent_data: dict[str, dict[str, object]] = {}
+    agent_data = {}
     try:
         with open(BUS_FILE, "r", encoding="utf-8") as f:
             reader = csv.reader(f, delimiter="\t")
@@ -270,7 +482,8 @@ def bus_agents_list() -> dict[str, object]:
                 "top_types": dict(data["types"].most_common(3)),
             }
             for name, data in sorted(agent_data.items(), key=lambda x: -x[1]["count"])
-        ]
+        ],
+        "source": "local",
     }
 
 
@@ -389,17 +602,21 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
             return {"error": "missing required argument: type"}
         if not message:
             return {"error": "missing required argument: message"}
+        if str(mtype).strip().upper() in {"DECISION", "DIRECTIVE"}:
+            return {
+                "posted": False,
+                "type": mtype,
+                "error": "MCP bus_post cannot issue privileged message types",
+            }
         from_agent = arguments.get("from_agent", "mcp-client")
         to_agent = arguments.get("to", "all")
 
-        # Reject privileged types at the MCP layer — bridge enforces this
-        # server-side too, but failing early gives a clearer error.
-        from .authority import PRIVILEGED_TYPES
-        if str(mtype).strip().upper() in PRIVILEGED_TYPES:
-            return {
-                "posted": False,
-                "error": "privileged bus write requires authenticated principal proof",
-            }
+        # Per bus-protocol.md §75, agent-originated posts must carry
+        # host=<machine> in the message body. Auto-inject so callers don't
+        # have to (and the bridge doesn't reject with HTTP 400 missing host=).
+        # Skip injection if the caller already supplied a host= tag.
+        if not message.lstrip().startswith("host="):
+            message = f"host={_resolve_host_tag()} {message}"
 
         # Primary path: HTTP bridge to canonical bus (same as bus-global.py).
         ok, detail = _bridge_post(from_agent, to_agent, mtype, message)
@@ -443,43 +660,22 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
                 "warning": f"bridge failed: {detail}; wrote to local BUS_FILE only",
             }
         except ImportError:
-            # Last-resort: raw append with platform-appropriate locking.
-            try:
-                import fcntl
-            except ImportError:
-                fcntl = None  # type: ignore[assignment]
-            try:
-                import msvcrt  # type: ignore[attr-defined]
-            except ImportError:
-                msvcrt = None  # type: ignore[assignment]
-
-            ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-            msg = message.replace("\t", " ").replace("\n", " ")
-            line = f"{ts}\t{from_agent}\t{to_agent}\t{mtype}\t{msg}\n"
-            fallback_path = Path(bus_file_env)
-            fallback_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(fallback_path, "a", encoding="utf-8") as f:
-                if fcntl is not None:
-                    fcntl.flock(f, fcntl.LOCK_EX)
-                elif msvcrt is not None:
-                    msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-                f.write(line)
-                f.flush()
-                if fcntl is not None:
-                    fcntl.flock(f, fcntl.LOCK_UN)
-                elif msvcrt is not None:
-                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
             return {
-                "posted": True,
+                "posted": False,
                 "type": mtype,
-                "message": msg[:200],
-                "method": "direct_append",
-                "warning": f"bridge failed: {detail}; raw append to local BUS_FILE only",
+                "message": message[:200],
+                "error": (
+                    f"bridge failed: {detail}; canonical local writer unavailable; "
+                    "raw append is prohibited"
+                ),
             }
 
     elif name == "bus_search":
-        results = search_bus(arguments["query"], arguments.get("limit", 20))
-        return {"query": arguments["query"], "count": len(results), "results": results}
+        query = arguments.get("query")
+        if not query:
+            return {"error": "missing required argument: query"}
+        results = search_bus(query, arguments.get("limit", 20))
+        return {"query": query, "count": len(results), "results": results}
 
     elif name == "bus_stats":
         return bus_stats()
@@ -511,16 +707,6 @@ def send_error(msg_id: object, code: int, message: str) -> None:
 
 
 def main() -> None:
-    # Force UTF-8 on stdio. On Windows, sys.stdin/sys.stdout default to the
-    # system codepage (CP1252), which corrupts non-ASCII JSON-RPC payloads
-    # (em-dashes, smart quotes, accented characters) via mojibake before
-    # json.loads ever sees them. On POSIX this is a no-op (stdin/stdout are
-    # already UTF-8). Python 3.7+ supports TextIOWrapper.reconfigure().
-    if hasattr(sys.stdin, "reconfigure"):
-        sys.stdin.reconfigure(encoding="utf-8")
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
-
     for line in sys.stdin:
         line = line.strip()
         if not line:

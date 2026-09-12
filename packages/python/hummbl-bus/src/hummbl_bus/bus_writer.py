@@ -21,6 +21,7 @@ Sender identity validation now uses only the built-in registry.
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import logging
 import os
@@ -29,10 +30,15 @@ import subprocess
 import sys
 import threading
 import uuid
-from collections.abc import Mapping
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .authority import VerifiedPrincipal
 
 try:
     import fcntl  # type: ignore[attr-defined]
@@ -45,6 +51,21 @@ except ImportError:  # pragma: no cover - POSIX
     msvcrt = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, slots=True)
+class BusWriteResult:
+    """Exact non-secret linkage for one locally appended TSV row."""
+
+    bus_path: str
+    timestamp: str
+    sender: str
+    recipient: str
+    msg_type: str
+    authorized_content_sha256: str
+    persisted_message_sha256: str
+    row_sha256: str
+    verified_principal: object | None
 
 _MSVCRT_LOCKS_GUARD = threading.Lock()
 _MSVCRT_PATH_LOCKS: dict[Path, threading.Lock] = {}
@@ -184,37 +205,103 @@ def _validate_bus_path(path: str | Path, *, source: str = "env_override") -> Pat
     )
 
 
+def _fsync_parent_directory(path: str | Path) -> None:
+    """Durably flush the parent entry for a newly created file."""
+    parent = Path(path).resolve(strict=False).parent
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        create_file = kernel32.CreateFileW
+        create_file.argtypes = [
+            wintypes.LPCWSTR,
+            wintypes.DWORD,
+            wintypes.DWORD,
+            wintypes.LPVOID,
+            wintypes.DWORD,
+            wintypes.DWORD,
+            wintypes.HANDLE,
+        ]
+        create_file.restype = wintypes.HANDLE
+        flush_file_buffers = kernel32.FlushFileBuffers
+        flush_file_buffers.argtypes = [wintypes.HANDLE]
+        flush_file_buffers.restype = wintypes.BOOL
+        close_handle = kernel32.CloseHandle
+        close_handle.argtypes = [wintypes.HANDLE]
+        close_handle.restype = wintypes.BOOL
+
+        handle = create_file(
+            str(parent),
+            0x40000000,  # GENERIC_WRITE
+            0x00000001 | 0x00000002 | 0x00000004,
+            None,
+            3,  # OPEN_EXISTING
+            0x02000000,  # FILE_FLAG_BACKUP_SEMANTICS
+            None,
+        )
+        invalid_handle = ctypes.c_void_p(-1).value
+        if handle == invalid_handle:
+            raise ctypes.WinError(ctypes.get_last_error())
+        try:
+            if not flush_file_buffers(handle):
+                raise ctypes.WinError(ctypes.get_last_error())
+        finally:
+            close_handle(handle)
+        return
+
+    directory_fd = os.open(parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+
+
 def _append_tsv_line(bus_path: str | Path, tsv_line: str) -> None:
     """Append a preformatted TSV line to the coordination bus under lock.
 
-    Simplified version of hummbl-governance's _append_tsv_line. Privileged
-    types (DECISION/DIRECTIVE) are rejected here; they must go through
-    post_message() with a live principal proof. Malformed lines are
+    Simplified version of hummbl-governance's _append_tsv_line. Privileged-type
+    verification (DECISION/DIRECTIVE) is handled by callers that check
+    PRIVILEGED_TYPES before calling this function. Malformed lines are
     rejected to dead-letter.
     """
     resolved_bus_path = Path(bus_path)
     resolved_bus_path.parent.mkdir(parents=True, exist_ok=True)
     path_lock = _msvcrt_path_lock(resolved_bus_path)
 
-    stripped = tsv_line.rstrip("\n\r")
-    if stripped:
-        parts = stripped.split("\t")
-        if len(parts) != 5:
-            write_dead_letter(
-                dead_letter_path=resolved_bus_path.parent / "dead_letters.jsonl",
-                source="_append_tsv_line",
-                reason=f"Malformed TSV line rejected: expected 5 columns, got {len(parts)}",
-                payload={"line_preview": _redact_secrets(stripped[:200])},
-            )
-            return
-        from .authority import PRIVILEGED_TYPES
+    def reject(reason: str, preview: str) -> None:
+        write_dead_letter(
+            dead_letter_path=resolved_bus_path.parent / "dead_letters.jsonl",
+            source="_append_tsv_line",
+            reason=reason,
+            payload={"line_preview": _redact_secrets(preview[:200])},
+        )
+        raise ValueError(reason)
 
-        if parts[3].strip().upper() in PRIVILEGED_TYPES:
-            raise PermissionError(
-                "privileged bus types (DECISION/DIRECTIVE) cannot be appended "
-                "without a live principal proof; use post_message()"
-            )
+    if not isinstance(tsv_line, str) or not tsv_line:
+        reject("Malformed TSV line rejected: empty physical row", repr(tsv_line))
 
+    logical_row = tsv_line[:-1] if tsv_line.endswith("\n") else tsv_line
+    if "\r" in logical_row or "\n" in logical_row:
+        reject(
+            "Malformed TSV line rejected: expected exactly one physical row",
+            logical_row,
+        )
+    if not logical_row:
+        reject("Malformed TSV line rejected: empty physical row", logical_row)
+
+    parts = logical_row.split("\t")
+    if len(parts) != 5:
+        reject(
+            f"Malformed TSV line rejected: expected 5 columns, got {len(parts)}",
+            logical_row,
+        )
+    if parts[3].strip().upper() in _PRIVILEGED_TYPES:
+        raise PermissionError(
+            "raw TSV append cannot write privileged bus message types"
+        )
+
+    is_new_file = not resolved_bus_path.exists()
     with (
         _cross_process_lock(resolved_bus_path),
         path_lock,
@@ -222,10 +309,94 @@ def _append_tsv_line(bus_path: str | Path, tsv_line: str) -> None:
     ):
         if fcntl is not None:
             fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(tsv_line if tsv_line.endswith("\n") else tsv_line + "\n")
+        f.write(logical_row + "\n")
         f.flush()
+        os.fsync(f.fileno())
         if fcntl is not None:
             fcntl.flock(f, fcntl.LOCK_UN)
+    if is_new_file:
+        _fsync_parent_directory(resolved_bus_path)
+
+
+# ---------------------------------------------------------------------------
+# Bus rotation and retention
+# ---------------------------------------------------------------------------
+
+DEFAULT_BUS_RETENTION_LINES = 50_000
+DEFAULT_BUS_ROTATE_KEEP_LINES = 10_000
+
+
+def rotate_bus(
+    bus_path: str | Path,
+    keep_lines: int = DEFAULT_BUS_ROTATE_KEEP_LINES,
+) -> int:
+    """Rotate the bus file, keeping only the last ``keep_lines`` lines.
+
+    The rotated-out lines are moved to ``<bus_path>.1`` (overwriting any
+    existing rotation file). The main bus file is truncated to the last
+    ``keep_lines`` lines. Returns the number of lines rotated out.
+
+    This prevents unbounded growth of the canonical bus file. With the
+    Jarvis daemon posting ~200 messages/day and multi-agent swarms posting
+    bursts of 50+, the bus file grows ~100 KB/day. Without rotation, a
+    6-month-old bus file is ~18 MB and every ``/bus/tail`` or
+    ``/bus/search`` request scans the full file.
+
+    Call this from a weekly systemd timer or after large swarm bursts.
+    """
+    resolved = Path(bus_path)
+    if not resolved.exists():
+        return 0
+
+    path_lock = _msvcrt_path_lock(resolved)
+    with _cross_process_lock(resolved), path_lock:
+        with open(resolved, "r", encoding="utf-8") as f:
+            if fcntl is not None:
+                fcntl.flock(f, fcntl.LOCK_SH)
+            all_lines = f.readlines()
+
+        if len(all_lines) <= keep_lines:
+            return 0
+
+        rotated_lines = all_lines[:-keep_lines]
+        kept_lines = all_lines[-keep_lines:]
+
+        # Write rotated-out lines to .1 file
+        rotated_path = resolved.with_suffix(resolved.suffix + ".1")
+        with open(rotated_path, "w", encoding="utf-8") as f:
+            f.writelines(rotated_lines)
+
+        # Truncate main bus file to kept lines
+        with open(resolved, "w", encoding="utf-8") as f:
+            if fcntl is not None:
+                fcntl.flock(f, fcntl.LOCK_EX)
+            f.writelines(kept_lines)
+            f.flush()
+
+        return len(rotated_lines)
+
+
+def enforce_bus_retention(
+    bus_path: str | Path,
+    max_lines: int = DEFAULT_BUS_RETENTION_LINES,
+    keep_lines: int = DEFAULT_BUS_ROTATE_KEEP_LINES,
+) -> int:
+    """Enforce bus retention policy. Returns lines rotated out.
+
+    If the bus file exceeds ``max_lines``, rotate it down to ``keep_lines``.
+    No-op if the file is under the threshold.
+    """
+    resolved = Path(bus_path)
+    if not resolved.exists():
+        return 0
+
+    with open(resolved, "r", encoding="utf-8") as f:
+        line_count = sum(1 for _ in f)
+
+    if line_count <= max_lines:
+        return 0
+
+    return rotate_bus(resolved, keep_lines=keep_lines)
 
 
 def _redact_metadata(metadata: dict[str, object] | None) -> dict[str, object] | None:
@@ -482,6 +653,25 @@ _RESERVED_AGENT_IDS = {
     "habituation",
     "hummbl-loop",
 }
+
+# Canonical fleet machine names for host= tag validation.
+# These are NOT agent identities — agents identify by agent name (devin, codex, etc.).
+# The host= field in bus messages distinguishes machines.
+# Ported from founder-mode bus_writer_core.py 2026-08-18.
+_CANONICAL_HOST_NAMES = frozenset({
+    "anvil", "delta", "huxley", "slate", "nodezero", "beachhead",
+    "hummbl-vps", "meshport", "unknown",
+})
+
+# Senders exempt from host= tag requirement (human/system senders).
+_HOST_EXEMPT_SENDERS = frozenset({
+    "human", "system", "scheduler", "user",
+})
+
+# Privileged bus write types that require Ed25519 principal proof.
+# Mirrors authority.PRIVILEGED_TYPES — defined locally to avoid circular import.
+_PRIVILEGED_TYPES = frozenset({"DECISION", "DIRECTIVE"})
+
 _KIMI_APPROVED_IDENTITIES: set[str] = set()  # RETIRED 2026-04-05 — all kimi-* rejected
 _KIMI_APPROVED_MESSAGE_TYPES = {
     "STATUS",
@@ -512,7 +702,6 @@ _DEFAULT_MESSAGE_TYPES = {
     "TASK_REQUEST",
     "TASK_COMPLETE",
     "RECEIPT",
-    "BELIEF_AUDIT",
     "QUESTION",
     "REVIEW",
     "COMPLETE",
@@ -529,6 +718,24 @@ _DEFAULT_MESSAGE_TYPES = {
     "WARNO",
     "CORRECTION",
     "VERIFY",
+    # Canonical types from message_types.py (2026-08-18 sync)
+    "ALERT",
+    "APPROVE",
+    "DIRECTIVE",
+    "HANDOFF",
+    "HRSI_CHECKIN",
+    "REJECT",
+    "SKILL_INVOKE",
+    "VETO",
+    # High-usage types promoted from VPS bus survey (2026-08-18)
+    # See docs/NON_CANONICAL_TYPE_CLASSIFICATION.md for full survey
+    "REVIEW_RESPONSE",   # 43 uses — active review workflow
+    "REVIEW_REQUEST",    # 12 uses — review workflow companion
+    "HEALTH_TRANSITION", # 19 uses — health monitoring
+    "INTEL",             # 15 uses — intelligence ingestion
+    "CLAIM",             # 15 uses — claim verification
+    "DELEGATION",        # 13 uses — delegation tokens
+    "RESOLVED",          # 9 uses — status resolution
 }
 _CORRELATION_RE = re.compile(r"(?:^|[,\s])correlation_id=([A-Za-z0-9._:-]+)\b")
 
@@ -870,7 +1077,60 @@ def _validate_kimi_constraints(
         logger.warning(message)
 
 
-def _validate_fields(from_id: str, to_id: str, msg_type: str, message: str) -> None:
+def _is_host_exempt_sender(from_id: str) -> bool:
+    """Check if sender is exempt from host= tag requirement."""
+    base_id = from_id.split("(")[0].strip() if "(" in from_id else from_id.strip()
+    return base_id.lower() in _HOST_EXEMPT_SENDERS
+
+
+def _message_has_host(message: str) -> bool:
+    """Check if message body contains a canonical host= tag.
+
+    Searches for ``host=<value>`` anywhere in the message body and validates
+    the value against ``_CANONICAL_HOST_NAMES``.
+    """
+    match = re.search(r"(?:^|[\s,\[])host=([^\s,;\]]+)", message)
+    return bool(match and match.group(1).strip() in _CANONICAL_HOST_NAMES)
+
+
+def _validate_host_presence(
+    *,
+    from_id: str,
+    message: str,
+    enforce: bool = True,
+) -> None:
+    """Require ``host=`` tag in agent-originated posts.
+
+    Fails closed by default — agent posts without a canonical ``host=`` tag
+    are rejected with ValueError. Human and system senders are exempt.
+    Set ``BUS_ALLOW_MISSING_HOST`` to downgrade to a warning.
+    """
+    if _is_host_exempt_sender(from_id):
+        return
+    if _message_has_host(message):
+        return
+    msg = (
+        f"Agent-originated post from {from_id!r} missing required host= tag. "
+        f"Use canonical host= value from "
+        f"anvil|delta|huxley|slate|nodezero|beachhead|hummbl-vps|unknown. "
+        f"See bus-protocol.md §Machine tagging."
+    )
+    allow_missing_host = os.environ.get("BUS_ALLOW_MISSING_HOST", "").strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+    if enforce and not allow_missing_host:
+        raise ValueError(msg)
+    logger.warning(msg)
+
+
+def _validate_fields(
+    from_id: str,
+    to_id: str,
+    msg_type: str,
+    message: str,
+    *,
+    allow_empty_message: bool = False,
+) -> None:
     """Validate that required bus message fields are non-empty strings.
 
     Args:
@@ -880,7 +1140,8 @@ def _validate_fields(from_id: str, to_id: str, msg_type: str, message: str) -> N
         message: Message content
 
     Raises:
-        ValueError: If any required field is empty or not a string
+        ValueError: If any structural field is invalid, or if a required
+            message is empty
     """
     if not isinstance(from_id, str) or not from_id.strip():
         raise ValueError(f"from_id must be a non-empty string, got {from_id!r}")
@@ -888,7 +1149,9 @@ def _validate_fields(from_id: str, to_id: str, msg_type: str, message: str) -> N
         raise ValueError(f"to_id must be a non-empty string, got {to_id!r}")
     if not isinstance(msg_type, str) or not msg_type.strip():
         raise ValueError(f"msg_type must be a non-empty string, got {msg_type!r}")
-    if not isinstance(message, str) or not message.strip():
+    if not isinstance(message, str) or (
+        not allow_empty_message and not message.strip()
+    ):
         raise ValueError(f"message must be a non-empty string, got {message!r}")
     # ASI01: Enforce payload size limit
     message_bytes = len(message.encode("utf-8"))
@@ -936,15 +1199,17 @@ def _validate_content(message: str) -> None:
 
 
 def _sanitize_correlation_id(correlation_id: str) -> str:
-    """Sanitize correlation ID for safe transport in message payloads."""
+    """Validate a canonical correlation ID for safe payload injection."""
     if not isinstance(correlation_id, str) or not correlation_id.strip():
         raise ValueError(
             f"correlation_id must be a non-empty string, got {correlation_id!r}"
         )
-    value = (
-        correlation_id.strip().replace("\t", " ").replace("\n", "").replace("\r", "")
-    )
-    return value
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", correlation_id):
+        raise ValueError(
+            "correlation_id must match "
+            "[A-Za-z0-9][A-Za-z0-9._:-]{0,127} exactly"
+        )
+    return correlation_id
 
 
 def generate_correlation_id(prefix: str = "corr") -> str:
@@ -1063,9 +1328,6 @@ def post_structured_event(
     enforce_message_type: bool = False,
     known_message_types: set[str] | None = None,
     validate: bool = True,
-    principal_proof: str | Mapping[str, object] | None = None,
-    request_id: str | None = None,
-    nonce_dir: str | Path | None = None,
 ) -> None:
     """Post a structured bus event while preserving the 5-column TSV format."""
     if timestamp is not None:
@@ -1105,9 +1367,6 @@ def post_structured_event(
         enforce_message_type=enforce_message_type,
         known_message_types=known_message_types,
         validate=validate,
-        principal_proof=principal_proof,
-        request_id=request_id,
-        nonce_dir=nonce_dir,
     )
 
 
@@ -1344,54 +1603,6 @@ def read_verified_messages(
     return entries
 
 
-def _enforce_privileged_principal(
-    *,
-    from_id: str,
-    to_id: str,
-    msg_type: str,
-    message: str,
-    principal_proof: str | Mapping[str, object] | None,
-    request_id: str | None,
-    nonce_dir: str | Path | None,
-) -> None:
-    """Reject DECISION/DIRECTIVE writes unless a live principal proof verifies.
-
-    These types are operator-authority records. A caller-supplied ``from``
-    field, HMAC bus signature, or bridge bearer token is not proof that the
-    operator authored the write. Fail closed even when ``validate=False``.
-    """
-    from .authority import (
-        PRIVILEGED_TYPES,
-        principal_authorizes,
-        resolve_nonce_dir,
-        verify_principal_proof,
-    )
-
-    if msg_type.strip().upper() not in PRIVILEGED_TYPES:
-        return
-
-    verified = verify_principal_proof(
-        principal_proof,
-        sender=from_id,
-        recipient=to_id,
-        msg_type=msg_type,
-        message=message,
-        request_id=request_id,
-        nonce_dir=nonce_dir if nonce_dir is not None else resolve_nonce_dir(),
-    )
-    if not principal_authorizes(
-        verified,
-        sender=from_id,
-        recipient=to_id,
-        msg_type=msg_type,
-        message=message,
-        request_id=verified.request_id,
-    ):
-        raise PermissionError(
-            "principal proof does not authorize this privileged bus write"
-        )
-
-
 def post_message(
     bus_path: str | Path,
     from_id: str,
@@ -1410,11 +1621,13 @@ def post_message(
     validate_message_type: bool = False,
     enforce_message_type: bool = False,
     known_message_types: set[str] | None = None,
+    validate_host_presence: bool = False,
+    enforce_host_presence: bool | None = None,
     validate: bool = True,
-    principal_proof: str | Mapping[str, object] | None = None,
     request_id: str | None = None,
-    nonce_dir: str | Path | None = None,
-) -> None:
+    principal_proof: str | dict[str, object] | None = None,
+    before_privileged_append: Callable[[VerifiedPrincipal], None] | None = None,
+) -> BusWriteResult | None:
     r"""Post a message to the coordination bus with TSV-safe encoding.
 
     Args:
@@ -1426,18 +1639,44 @@ def post_message(
         timestamp: Optional UTC timestamp (defaults to now with Z suffix)
         correlation_id: Optional correlation ID for traceability.
         secret: Optional HMAC-SHA256 key (32+ bytes).
-        validate: If True (default), validate fields before writing.
-        principal_proof: Required for DECISION/DIRECTIVE. Operator principal
-            proof bound to this write request (JSON string or dict).
-        request_id: Proof-bound request id; required with principal_proof.
-        nonce_dir: Optional nonce receipt directory for principal proofs.
+        validate: If True (default), apply semantic identity, message-type,
+            and host policy checks. Structural field, content, timestamp, and
+            TSV framing checks are always enforced.
+        request_id: Optional request identifier for replay dedup.
+            Required for privileged writes (DECISION/DIRECTIVE) — the
+            principal proof is bound to this request_id.
+        principal_proof: Optional Ed25519-signed operator-principal proof.
+            Required for privileged writes (DECISION/DIRECTIVE). Verified
+            via authority.verify_principal_proof() when the message type
+            is in PRIVILEGED_TYPES.
+        before_privileged_append: Optional fail-closed write-ahead hook for a
+            privileged write. It receives the verifier-derived principal only
+            after all row construction succeeds and immediately before the
+            durable append. Non-privileged writes reject this hook.
 
     Raises:
-        ValueError: If validate=True and a required field is empty
-        PermissionError: If a privileged type is posted without a valid proof
+        ValueError: If a structural field, timestamp, content, or enabled
+            semantic policy check is invalid
+        PermissionError: If a privileged write lacks principal proof
         OSError: If file write fails
     """
     bus_path = Path(bus_path)
+
+    # Structural safety is never optional. ``validate=False`` is retained for
+    # compatibility fixtures that intentionally bypass registry/host semantics;
+    # it must not bypass TSV framing or content limits.
+    _validate_fields(
+        from_id,
+        to_id,
+        msg_type,
+        message,
+        allow_empty_message=not validate,
+    )
+    _validate_content(message)
+    from_id = _sanitize_field(from_id)
+    to_id = _sanitize_field(to_id)
+    msg_type = _sanitize_field(msg_type)
+
     bus_path.parent.mkdir(parents=True, exist_ok=True)
 
     # ASI07: Auto-resolve signing secret from environment if not provided
@@ -1449,15 +1688,8 @@ def post_message(
 
     get_bus_policy().check_signing(secret=secret, from_id=from_id, msg_type=msg_type)
 
-    # Validate required fields
+    # Apply optional semantic policy validation.
     if validate:
-        _validate_fields(from_id, to_id, msg_type, message)
-        # ASI06: Content validation (null bytes, structured field count)
-        _validate_content(message)
-        # Sanitize header fields (remove tabs/newlines that would break TSV)
-        from_id = _sanitize_field(from_id)
-        to_id = _sanitize_field(to_id)
-        msg_type = _sanitize_field(msg_type)
         # P0 fix (S-001): default enforce_sender_identity to True in production,
         # False under FM_TEST_MODE=1. Prior default was False (advisory-only),
         # which allowed any caller to post as any identity. None resolves to
@@ -1484,30 +1716,96 @@ def post_message(
             )
         # Kimi-specific constraints (identity + message type)
         _validate_kimi_constraints(from_id, msg_type)
+        # Host= tag validation (ported from bus_writer_core 2026-08-18)
+        if enforce_host_presence is None:
+            enforce_host_presence = os.environ.get("FM_TEST_MODE") != "1"
+        if validate_host_presence:
+            _validate_host_presence(
+                from_id=from_id,
+                message=message,
+                enforce=enforce_host_presence,
+            )
 
-    # Privileged types require a live operator principal proof. This is not
-    # optional and is not skipped when validate=False — a from-field or HMAC
-    # signature is not operator authorship.
-    _enforce_privileged_principal(
-        from_id=from_id,
-        to_id=to_id,
-        msg_type=msg_type,
-        message=message,
-        principal_proof=principal_proof,
-        request_id=request_id,
-        nonce_dir=nonce_dir,
-    )
+    normalized_type = msg_type.strip().upper()
+    remote_url = os.environ.get("BUS_REMOTE_URL")
+    if before_privileged_append is not None:
+        if normalized_type not in _PRIVILEGED_TYPES:
+            raise ValueError(
+                "before_privileged_append is only valid for privileged writes"
+            )
+        if not callable(before_privileged_append):
+            raise TypeError("before_privileged_append must be callable")
+    if normalized_type in _PRIVILEGED_TYPES:
+        if remote_url:
+            raise PermissionError(
+                "privileged bus writes cannot use legacy BUS_REMOTE_URL forwarding"
+            )
+        if timestamp is not None:
+            raise PermissionError(
+                "privileged bus writes require a writer-generated timestamp"
+            )
+        if correlation_id is not None:
+            raise PermissionError(
+                "privileged correlation_id must already be inside signed content"
+            )
+        # The persisted type must be exactly the type authorized by the proof.
+        msg_type = normalized_type
 
-    # Generate timestamp if not provided; normalize to UTC if caller-supplied
+    # Normalize writer-controlled row fields before proof verification.
     if timestamp is None:
         timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     else:
+        if not isinstance(timestamp, str):
+            raise ValueError("timestamp must be a string in ISO 8601 format")
         timestamp = _normalize_timestamp(timestamp)
-
-    # Inject traceability metadata when available
+        try:
+            parsed_timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
+        except ValueError as exc:
+            raise ValueError(
+                "timestamp must normalize to canonical UTC format "
+                "YYYY-MM-DDTHH:MM:SSZ"
+            ) from exc
+        if parsed_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ") != timestamp:
+            raise ValueError(
+                "timestamp must normalize to canonical UTC format "
+                "YYYY-MM-DDTHH:MM:SSZ"
+            )
     if correlation_id is not None:
         safe_correlation_id = _sanitize_correlation_id(correlation_id)
         message = _inject_correlation_id(message, safe_correlation_id)
+
+    # Privileged-type proof verification (DECISION/DIRECTIVE)
+    # Hard gate — no env var escape hatch. The bridge catches PermissionError
+    # and returns 403.
+    verified_principal = None
+    if normalized_type in _PRIVILEGED_TYPES:
+        if not principal_proof:
+            raise PermissionError(
+                f"privileged bus write ({normalized_type}) requires authenticated "
+                f"principal proof -- see authority.verify_principal_proof()"
+            )
+        from .authority import (
+            build_privileged_message,
+            resolve_nonce_dir,
+            verify_principal_proof,
+        )
+
+        verified_principal = verify_principal_proof(
+            principal_proof,
+            sender=from_id,
+            recipient=to_id,
+            msg_type=normalized_type,
+            message=message,
+            request_id=request_id,
+            nonce_dir=resolve_nonce_dir(),
+        )
+        message = build_privileged_message(message, verified_principal)
+
+    authorized_content_sha256 = (
+        verified_principal.message_sha256
+        if verified_principal is not None
+        else hashlib.sha256(message.encode("utf-8")).hexdigest()
+    )
 
     # HMAC-SHA256 signing (wraps message in JSON envelope, stays 5-col)
     if secret is not None:
@@ -1528,9 +1826,21 @@ def post_message(
 
     # Construct TSV line (5 columns: timestamp, from, to, type, message)
     tsv_line = f"{timestamp}\t{from_id}\t{to_id}\t{msg_type}\t{safe_message}\n"
+    logical_row = tsv_line[:-1]
+    if "\r" in logical_row or "\n" in logical_row or len(logical_row.split("\t")) != 5:
+        raise ValueError("refusing to append a structurally invalid TSV row")
+    persisted_message_sha256 = hashlib.sha256(
+        safe_message.encode("utf-8")
+    ).hexdigest()
+    row_sha256 = hashlib.sha256(logical_row.encode("utf-8")).hexdigest()
+
+    # Privileged bridge callers use this verifier-gated hook to durably claim
+    # the proof-bound request before the row can land. If the hook fails, the
+    # consumed proof remains burned and no append is attempted.
+    if verified_principal is not None and before_privileged_append is not None:
+        before_privileged_append(verified_principal)
 
     # Remote bus write: if BUS_REMOTE_URL is set, POST to the HTTP API
-    remote_url = os.environ.get("BUS_REMOTE_URL")
     if remote_url:
         try:
             import urllib.request
@@ -1543,13 +1853,9 @@ def post_message(
                     "message": safe_message,
                 }
             ).encode("utf-8")
-            token = (
-                os.environ.get("BUS_BRIDGE_TOKEN", "").strip()
-                or os.environ.get("DASHBOARD_WRITE_TOKEN", "").strip()
-            )
+            token = os.environ.get("DASHBOARD_WRITE_TOKEN", "")
             headers = {"Content-Type": "application/json"}
             if token:
-                headers["Authorization"] = f"Bearer {token}"
                 headers["X-Dashboard-Token"] = token
             req = urllib.request.Request(
                 f"{remote_url.rstrip('/')}/api/bus/send",
@@ -1587,38 +1893,15 @@ def post_message(
             fcntl.flock(f, fcntl.LOCK_EX)
         f.write(tsv_line)
         f.flush()
+        os.fsync(f.fileno())
         if fcntl is not None:
             fcntl.flock(f, fcntl.LOCK_UN)
+    if is_new_file:
+        _fsync_parent_directory(bus_path)
 
     # ASI07: Harden file permissions on newly created bus files
     if is_new_file:
         harden_bus_file_permissions(bus_path)
-
-    # K1: Create governance receipt for every bus post (hummbl-governance >=1.1.0)
-    try:
-        from hummbl_governance.kernel import ReceiptEngine
-
-        _kernel_state_dir = Path(
-            os.environ.get("HUMMBL_KERNEL_STATE_DIR", bus_path.parent / ".kernel")
-        )
-        _receipt_engine = ReceiptEngine(_kernel_state_dir)
-        receipt = _receipt_engine.create(
-            agent_id=from_id,
-            action_type="BUS_POST",
-            payload={
-                "bus_path": str(bus_path),
-                "to": to_id,
-                "msg_type": msg_type,
-                "message_length": len(message),
-                "timestamp": timestamp,
-                "correlation_id": correlation_id or "",
-            },
-        )
-        _receipt_engine.store(receipt)
-        logger.debug("K1 receipt created: %s", receipt.receipt_id)
-    except Exception:
-        # Receipt creation is best-effort; never block bus writes
-        logger.debug("K1 receipt creation skipped (hummbl-governance unavailable)")
 
     # Post-write verification (debug mode only)
     if os.environ.get("BUS_DEBUG"):
@@ -1639,6 +1922,18 @@ def post_message(
                     )
         except OSError:
             pass
+
+    return BusWriteResult(
+        bus_path=str(bus_path),
+        timestamp=timestamp,
+        sender=from_id,
+        recipient=to_id,
+        msg_type=msg_type,
+        authorized_content_sha256=authorized_content_sha256,
+        persisted_message_sha256=persisted_message_sha256,
+        row_sha256=row_sha256,
+        verified_principal=verified_principal,
+    )
 
 
 def validate_tsv_integrity(bus_path: str | Path) -> tuple[int, list[str]]:

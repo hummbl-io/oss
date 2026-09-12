@@ -78,15 +78,16 @@ def test_scan_format_drift_detects_unknown_types(tmp_path: Path) -> None:
     assert report.unknown_types == ("BOGUS_TYPE",)
 
 
-def test_scan_format_drift_detects_legacy_types(tmp_path: Path) -> None:
+def test_scan_format_drift_detects_retired_types_as_unknown(tmp_path: Path) -> None:
+    """Retired legacy types (e.g. AAR) are now classified as unknown drift."""
     bus = tmp_path / "bus.tsv"
     _write_bus(
         bus,
         ["2026-08-15T12:00:00Z\tcodex\tall\tAAR\thistorical review"],
     )
     report = scan_format_drift_details(bus)
-    assert report.legacy_types == ("AAR",)
-    assert report.unknown_types == ()
+    assert report.legacy_types == ()
+    assert report.unknown_types == ("AAR",)
 
 
 def test_scan_format_drift_compat_wrapper(tmp_path: Path) -> None:
