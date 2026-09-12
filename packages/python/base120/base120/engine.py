@@ -220,7 +220,9 @@ class Engine:
         Returns:
             List of (Operator, score) tuples, sorted by score descending.
             Score is in [0.0, 1.0] — fraction of problem tokens found in
-            the operator's name+definition.
+            the operator's name+definition. Ties on score are broken by
+            operator specificity (overlap as a fraction of the operator's
+            own tokens), so more distinctive operators rank first.
         """
         if n < 0:
             raise ValueError(f"n must be non-negative, got {n}")
@@ -228,18 +230,16 @@ class Engine:
             return []
         ops = self.list()
         problem_tokens = _tokenize(problem)
-        scored: list[tuple[Operator, float]] = []
+        scored: list[tuple[Operator, float, float]] = []
         for op in ops:
             op_text = op.name + " " + op.definition
             op_tokens = _tokenize(op_text)
-            if problem_tokens:
-                overlap = len(problem_tokens & op_tokens)
-                score = overlap / len(problem_tokens)
-            else:
-                score = 0.0
-            scored.append((op, round(min(score, 1.0), 6)))
-        scored.sort(key=lambda x: x[1], reverse=True)
-        return scored[:n]
+            overlap = len(problem_tokens & op_tokens) if problem_tokens else 0
+            score = overlap / len(problem_tokens) if problem_tokens else 0.0
+            specificity = overlap / len(op_tokens) if op_tokens else 0.0
+            scored.append((op, round(min(score, 1.0), 6), specificity))
+        scored.sort(key=lambda x: (x[1], x[2]), reverse=True)
+        return [(op, score) for op, score, _ in scored[:n]]
 
     def record(
         self,
