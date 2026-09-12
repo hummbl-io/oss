@@ -17,6 +17,12 @@ Inventory below is the tree at HEAD. PyPI "Live" means a wheel exists on
 the registry; it does not mean production-supported. Identity leftovers
 (PyPI org blurb, `arbiter-dev` fate, foreign install names on other surfaces)
 remain on `#79`.
+## AI positions
+
+[Proposed positions on AI progress, openness and frontier financing](docs/positions/ai-2026-09-12/README.md)
+provide dated primary sources, claim boundaries and a commercial measurement
+proposal. Company adoption and deployed public copy remain separate review steps.
+
 ## Packages
 46 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
