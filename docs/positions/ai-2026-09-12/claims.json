@@ -1,0 +1,579 @@
+{
+  "schema_version": "1.0",
+  "status": "proposed_canonical_baseline",
+  "claims": [
+    {
+      "id": "AI-001",
+      "topics": [
+        "RSI"
+      ],
+      "position_id": "POS-01",
+      "claim": "Bounded agent-code self-improvement is reported in DGM v3.",
+      "evidence_class": "study_result",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "PA-01",
+        "PA-02"
+      ],
+      "limitation": "Coding-agent experiments with frozen foundation models and outer selection; not unlimited or general successor improvement.",
+      "revision_trigger": "Replicated result changes or paper correction.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-002",
+      "topics": [
+        "RSI"
+      ],
+      "position_id": "POS-01",
+      "claim": "The reviewed evidence does not establish fully autonomous successor development or sustained accelerating general self-improvement.",
+      "evidence_class": "review_judgment",
+      "disposition": "bounded_conclusion",
+      "source_ids": [
+        "PA-01",
+        "PA-05"
+      ],
+      "limitation": "A conclusion about this reviewed evidence set, not a proof of global absence or impossibility.",
+      "revision_trigger": "Independent multi-generation successor experiments with full lineage and resource accounting.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-003",
+      "topics": [
+        "RSI"
+      ],
+      "position_id": "POS-01",
+      "claim": "DeepMind reports AlphaEvolve improvements in algorithms and AI infrastructure.",
+      "evidence_class": "company_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "PA-03",
+        "PA-04"
+      ],
+      "limitation": "Operator-reported scoped outcomes; no HUMMBL ROI or generalized intelligence inference.",
+      "revision_trigger": "External replication, corrections, or newer deployment report.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-004",
+      "topics": [
+        "RSI",
+        "profitability"
+      ],
+      "position_id": "POS-09",
+      "claim": "More code per engineer does not by itself measure accepted value or profit.",
+      "evidence_class": "methodological_judgment",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "PA-05",
+        "PA-08",
+        "PA-09"
+      ],
+      "limitation": "Code quantity, review burden, defects and business outcomes are different measures.",
+      "revision_trigger": "A validated relationship under a specific measured workflow.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-005",
+      "topics": [
+        "AGI"
+      ],
+      "position_id": "POS-02",
+      "claim": "AGI evaluation frameworks distinguish breadth, performance and autonomy.",
+      "evidence_class": "framework_description",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "PA-06",
+        "PA-07"
+      ],
+      "limitation": "Proposed frameworks, not universal consensus or proof that a system has passed.",
+      "revision_trigger": "Framework revision or new comparable broad evaluation.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-006",
+      "topics": [
+        "AGI"
+      ],
+      "position_id": "POS-02",
+      "claim": "A narrow benchmark score is insufficient for HUMMBL to certify general intelligence.",
+      "evidence_class": "methodological_judgment",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "PA-06",
+        "PA-07"
+      ],
+      "limitation": "HUMMBL's stated evidence requirement; this package is not an AGI certification scheme.",
+      "revision_trigger": "Declared broad evaluation standard and independent system evaluation.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-007",
+      "topics": [
+        "ASI"
+      ],
+      "position_id": "POS-03",
+      "claim": "Altman's near-superintelligence narrative is an attributed forecast.",
+      "evidence_class": "attributed_forecast",
+      "disposition": "attributed",
+      "source_ids": [
+        "PA-11"
+      ],
+      "limitation": "Not an ASI observation, promised date, or HUMMBL prediction.",
+      "revision_trigger": "Author revision or observed outcomes against a fixed forecast.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-008",
+      "topics": [
+        "ASI"
+      ],
+      "position_id": "POS-03",
+      "claim": "Amodei's powerful-AI scenario is conditional and acknowledges physical and institutional constraints.",
+      "evidence_class": "attributed_forecast",
+      "disposition": "attributed",
+      "source_ids": [
+        "PA-12"
+      ],
+      "limitation": "An early possible date is not a deadline or evidence of current arrival.",
+      "revision_trigger": "Scenario assumption changes or independently measured capabilities.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-009",
+      "topics": [
+        "AGI",
+        "RSI"
+      ],
+      "position_id": "POS-02",
+      "claim": "A 50% task horizon must not be described as reliable agent work for that many wall-clock hours.",
+      "evidence_class": "measurement_interpretation",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "PA-10"
+      ],
+      "limitation": "Human task-duration proxy, software task distribution, probability and measurement limits must be retained.",
+      "revision_trigger": "METR task-suite or methodology update.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-001",
+      "topics": [
+        "open_source",
+        "open_weights"
+      ],
+      "position_id": "POS-04",
+      "claim": "OSAID 1.0 requires freedoms and artifacts beyond downloadable weights.",
+      "evidence_class": "standard_description",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "CV-01",
+        "CV-02"
+      ],
+      "limitation": "OSI's definition, not a statute or proof of universal agreement; data information differs from all raw data.",
+      "revision_trigger": "New OSAID version or artifact conformance analysis.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-002",
+      "topics": [
+        "open_source",
+        "open_weights"
+      ],
+      "position_id": "POS-04",
+      "claim": "Llama 4 uses a custom license with conditions including a large-user threshold.",
+      "evidence_class": "license_description",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "CV-03"
+      ],
+      "limitation": "Pinned license is checked; no complete legal applicability opinion or full AUP audit.",
+      "revision_trigger": "Applicable model, license or AUP changes.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-003",
+      "topics": [
+        "open_weights",
+        "frontier_labs"
+      ],
+      "position_id": "POS-05",
+      "claim": "OpenAI released gpt-oss weights under Apache 2.0, so frontier origin and open weights can overlap.",
+      "evidence_class": "release_description",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "CV-04"
+      ],
+      "limitation": "Not full training reproducibility, universal quality, or full-system OSAID certification.",
+      "revision_trigger": "Model license or availability changes.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-004",
+      "topics": [
+        "open_source",
+        "open_weights"
+      ],
+      "position_id": "POS-04",
+      "claim": "Ai2 describes broader lifecycle artifact availability for Olmo 3.",
+      "evidence_class": "company_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "CV-05"
+      ],
+      "limitation": "No independent full training reproduction or OSAID conformance audit here.",
+      "revision_trigger": "Artifact audit or reproducibility result.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-005",
+      "topics": [
+        "open_source",
+        "open_weights",
+        "profitability"
+      ],
+      "position_id": "POS-05",
+      "claim": "No universal cost or task-quality winner follows from openness alone.",
+      "evidence_class": "engineering_judgment",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "CV-04",
+        "CV-05",
+        "PA-09"
+      ],
+      "limitation": "Requires same-workload, same-acceptance and full-cost comparison; no local benchmark was run.",
+      "revision_trigger": "Measured deployment comparison under changed constraints.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-006",
+      "topics": [
+        "open_weights",
+        "frontier_labs"
+      ],
+      "position_id": "POS-07",
+      "claim": "Anthropic publicly rejects a blanket open-weights ban while proposing other controls.",
+      "evidence_class": "attributed_policy",
+      "disposition": "attributed",
+      "source_ids": [
+        "CV-09"
+      ],
+      "limitation": "Statement of the company's position, not proof of its motives or every historical action.",
+      "revision_trigger": "New policy text or contradictory primary record.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-007",
+      "topics": [
+        "open_weights",
+        "frontier_labs"
+      ],
+      "position_id": "POS-07",
+      "claim": "HUMMBL will require threat-specific evidence rather than declare a licensing category universally safe or unsafe.",
+      "evidence_class": "normative_position",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "CV-09",
+        "CV-01"
+      ],
+      "limitation": "Safety depends on use, capability, distribution, controls and adversaries; sources do not prove this policy is optimal.",
+      "revision_trigger": "New threat evidence or deployment failure.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-001",
+      "topics": [
+        "IPO",
+        "frontier_labs"
+      ],
+      "position_id": "POS-06",
+      "claim": "Anthropic announced confidential draft S-1 submission on June 1, 2026.",
+      "evidence_class": "company_event_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "CV-06"
+      ],
+      "limitation": "The confidential draft was not inspected; no later IPO stage established by this announcement.",
+      "revision_trigger": "Issuer-specific public filing, effectiveness, pricing or exchange evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-002",
+      "topics": [
+        "IPO",
+        "frontier_labs"
+      ],
+      "position_id": "POS-06",
+      "claim": "OpenAI announced on June 8, 2026 that it had recently submitted a confidential S-1.",
+      "evidence_class": "company_event_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "CV-07"
+      ],
+      "limitation": "Exact submission date unspecified; no completed listing or final timetable established.",
+      "revision_trigger": "Issuer-specific later public record.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-003",
+      "topics": [
+        "IPO"
+      ],
+      "position_id": "POS-06",
+      "claim": "Nonpublic draft submission differs from filing a registration statement.",
+      "evidence_class": "regulator_guidance",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "CV-08"
+      ],
+      "limitation": "SEC staff FAQ, not a finding about a particular issuer's current procedural status.",
+      "revision_trigger": "Updated SEC guidance or issuer-specific records.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-004",
+      "topics": [
+        "IPO",
+        "frontier_labs"
+      ],
+      "position_id": "POS-06",
+      "claim": "Alphabet, Microsoft and Meta already have public parent-company equity.",
+      "evidence_class": "issuer_record",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "CV-10",
+        "CV-11",
+        "CV-12"
+      ],
+      "limitation": "Parent-company status does not establish separate AI-lab listings or segment profitability.",
+      "revision_trigger": "Corporate restructuring or listing change.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-005",
+      "topics": [
+        "IPO",
+        "frontier_labs"
+      ],
+      "position_id": "POS-06",
+      "claim": "xAI announced acquisition by SpaceX on February 2, 2026.",
+      "evidence_class": "company_event_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "CV-13"
+      ],
+      "limitation": "Acquisition announcement does not itself establish a listing.",
+      "revision_trigger": "Ownership changes or corrected transaction record.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-006",
+      "topics": [
+        "IPO",
+        "frontier_labs"
+      ],
+      "position_id": "POS-06",
+      "claim": "Nasdaq records SpaceX's June 12, 2026 IPO launch event.",
+      "evidence_class": "exchange_record",
+      "disposition": "supported_with_scope",
+      "source_ids": [
+        "CV-14"
+      ],
+      "limitation": "Diversified parent issuer, not standalone xAI IPO or AI profitability.",
+      "revision_trigger": "Exchange or issuer correction.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "IPO-007",
+      "topics": [
+        "IPO",
+        "AGI",
+        "ASI"
+      ],
+      "position_id": "POS-06",
+      "claim": "Financing milestones do not establish AGI, ASI, profitability or dishonesty.",
+      "evidence_class": "methodological_judgment",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "CV-06",
+        "CV-07",
+        "CV-08",
+        "PA-06"
+      ],
+      "limitation": "Separate claim types need separate evidence; incentive analysis is not evidence of hidden intent.",
+      "revision_trigger": "New directly relevant technical or financial evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "GOV-001",
+      "topics": [
+        "receipts",
+        "RSI"
+      ],
+      "position_id": "POS-08",
+      "claim": "Receipt integrity is not sufficient evidence of semantic truth, lawful authority or complete mediation.",
+      "evidence_class": "methodological_judgment",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "H-01",
+        "H-02"
+      ],
+      "limitation": "Hashes and MACs have bounded trust assumptions; actual observation and enforcement must be checked.",
+      "revision_trigger": "Changed trust model or observed verification failure.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "GOV-002",
+      "topics": [
+        "open_source",
+        "receipts"
+      ],
+      "position_id": "POS-08",
+      "claim": "HUMMBL's public site distinguishes the browser walkthrough from native package enforcement.",
+      "evidence_class": "public_surface_observation",
+      "disposition": "observed",
+      "source_ids": [
+        "H-01",
+        "H-02"
+      ],
+      "limitation": "Observation of published wording, not an independent implementation audit.",
+      "revision_trigger": "New deployment or changed public wording.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "BIZ-001",
+      "topics": [
+        "profitability"
+      ],
+      "position_id": "POS-09",
+      "claim": "HUMMBL publicly offers advisory, audits, implementation sprints and retainers.",
+      "evidence_class": "public_offer_observation",
+      "disposition": "observed",
+      "source_ids": [
+        "H-03"
+      ],
+      "limitation": "An offer is not evidence of customer purchases, revenue, demand or realized margin.",
+      "revision_trigger": "Offer page changes or paid transaction evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "BIZ-002",
+      "topics": [
+        "profitability"
+      ],
+      "position_id": "POS-09",
+      "claim": "Among eligible inbound inquiries, evidence-first positioning may improve downstream qualification/conversion and delivery margin.",
+      "evidence_class": "commercial_hypothesis",
+      "disposition": "untested",
+      "source_ids": [
+        "H-03",
+        "PA-08",
+        "PA-09"
+      ],
+      "limitation": "No customer experiment, revenue uplift or causal effect established by this paper; this inbound-enrollment design does not test increased traffic or acquisition.",
+      "revision_trigger": "Predeclared pilot outcomes or failure to meet cost/acceptance thresholds.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "METHOD-002",
+      "topics": [
+        "RSI",
+        "receipts"
+      ],
+      "position_id": "POS-10",
+      "claim": "Improvement claims must preserve baselines, evaluator integrity, costs, version lineage and termination criteria.",
+      "evidence_class": "normative_position",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "PA-01",
+        "PA-09"
+      ],
+      "limitation": "A methodological position; a checklist pass is not sufficient proof that all scientific requirements are met.",
+      "revision_trigger": "Evaluator drift, regression, resource overrun or failed replication.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-010",
+      "topics": [
+        "AGI",
+        "receipts"
+      ],
+      "position_id": "POS-02",
+      "claim": "OpenAI's September release reports benchmark results under specified research configurations.",
+      "evidence_class": "company_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "R-01"
+      ],
+      "limitation": "Provider report; benchmark version, effort, harness and safeguards matter; no independent rerun.",
+      "revision_trigger": "New version, evaluation, public correction or deployment-specific evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "AI-011",
+      "topics": [
+        "AGI",
+        "frontier_labs"
+      ],
+      "position_id": "POS-05",
+      "claim": "Anthropic describes Fable 5.1 and Mythos 5.1 as the same underlying model with different safeguards/access.",
+      "evidence_class": "company_report",
+      "disposition": "attributed",
+      "source_ids": [
+        "R-02"
+      ],
+      "limitation": "Provider description; delivered permissions and refusals differ from raw model capability.",
+      "revision_trigger": "New version, evaluation, public correction or deployment-specific evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "OPEN-008",
+      "topics": [
+        "open_weights",
+        "frontier_labs"
+      ],
+      "position_id": "POS-07",
+      "claim": "The July industry letter argues for open-weights benefits while acknowledging release risks.",
+      "evidence_class": "attributed_policy",
+      "disposition": "attributed",
+      "source_ids": [
+        "R-03"
+      ],
+      "limitation": "Advocacy, not causal proof of universal safety or cost advantage.",
+      "revision_trigger": "New version, evaluation, public correction or deployment-specific evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "GOV-003",
+      "topics": [
+        "AGI",
+        "receipts"
+      ],
+      "position_id": "POS-08",
+      "claim": "Zero observed failures in a finite evaluation do not establish zero risk in deployment.",
+      "evidence_class": "methodological_judgment",
+      "disposition": "proposed_policy",
+      "source_ids": [
+        "R-01"
+      ],
+      "limitation": "Methodological interpretation; trial count/distribution and deployment differences bound inference.",
+      "revision_trigger": "New version, evaluation, public correction or deployment-specific evidence.",
+      "as_of": "2026-09-12"
+    },
+    {
+      "id": "GOV-004",
+      "topics": [
+        "receipts"
+      ],
+      "position_id": "POS-08",
+      "claim": "The live services process description uses broader proof language than its later trust and integration qualifications.",
+      "evidence_class": "public_surface_observation_and_wording_assessment",
+      "disposition": "observed",
+      "source_ids": [
+        "H-03"
+      ],
+      "limitation": "A wording inconsistency, not a finding of fraudulent intent or a complete implementation audit; later qualifications are preserved.",
+      "revision_trigger": "Verified publication of qualified replacement wording or changed trust/evidence assumptions.",
+      "as_of": "2026-09-12"
+    }
+  ]
+}
