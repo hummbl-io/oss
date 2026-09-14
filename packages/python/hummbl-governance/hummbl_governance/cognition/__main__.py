@@ -60,7 +60,7 @@ def _add_post_parser(sub: argparse._SubParsersAction) -> None:  # noqa: SLF001
     p.add_argument("--scope", default="project", choices=SCOPES, help="entry scope")
     p.add_argument("--content", required=True, help="the knowledge to record")
     p.add_argument("--tags", default="", help="comma-separated tags (max %d)" % MAX_TAGS)
-    p.add_argument("--agent", default=None, help="agent identity (default $AGENT_AGENT)")
+    p.add_argument("--agent", default=None, help="agent identity (required, or set $AGENT_AGENT)")
     p.add_argument(
         "--confidence", type=float, default=0.8, help="confidence in [0.0, 1.0]"
     )
@@ -114,7 +114,12 @@ def _resolve_agent_vendor(args: argparse.Namespace) -> tuple[str, str]:
 
 def _cmd_post(args: argparse.Namespace) -> int:
     vendor, model = _resolve_agent_vendor(args)
-    agent = args.agent or os.environ.get("AGENT_AGENT") or "unknown"
+    agent = args.agent or os.environ.get("AGENT_AGENT")
+    if not agent:
+        raise SystemExit(
+            "error: --agent is required (or set $AGENT_AGENT); the ledger records "
+            "provenance and 'unknown' is not provenance"
+        )
     tags = [t.strip() for t in args.tags.split(",") if t.strip()]
     record = append_entry(
         args.content,
