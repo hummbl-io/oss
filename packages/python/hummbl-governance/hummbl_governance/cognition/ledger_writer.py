@@ -22,12 +22,13 @@ Entry schema mirrors the existing on-disk ledger (12 keys):
     id, type, assurance_level, evidence, content, tags, agent,
     timestamp, confidence, model, scope, vendor
 
-Provenance enforcement (opt-in via ``enforce_provenance=True`` or the
-``--require-skill-invoke`` CLI flag): before persisting, the writer reads the
-coordination bus TSV and rejects the entry unless a ``SKILL_INVOKE`` row from
-the same agent exists within ``SKILL_INVOKE_WINDOW_SECONDS`` (default 300s).
-This closes the gap between the documented protocol ("emit SKILL_INVOKE before
-any stateful action") and the write path, which previously did not check.
+Provenance enforcement (default-on; opt out via ``enforce_provenance=False``
+or the ``--no-skill-invoke-check`` CLI flag): before persisting, the writer
+reads the coordination bus TSV and rejects the entry unless a
+``SKILL_INVOKE`` row from the same agent exists within
+``SKILL_INVOKE_WINDOW_SECONDS`` (default 300s). This closes the gap between
+the documented protocol ("emit SKILL_INVOKE before any stateful action") and
+the write path, which previously did not check.
 
 stdlib-only.
 """
