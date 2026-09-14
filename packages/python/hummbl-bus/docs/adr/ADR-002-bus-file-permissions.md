@@ -1,8 +1,8 @@
 # ADR-002: Bus File Permissions Standard
 **Status**: ACCEPTED  
 **Date**: 2026-05-04  
-**Author**: HUMMBL Principal Agent  
-**Deciders**: HUMMBL Principal Agent
+**Author**: Human Principal Agent  
+**Deciders**: Human Principal Agent
 
 ---
 

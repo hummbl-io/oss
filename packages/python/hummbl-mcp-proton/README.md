@@ -6,14 +6,23 @@ Local MCP server (stdio) for Proton services (Mail, Drive, Calendar, Meet).
 
 This server communicates over standard input/output using the Model Context Protocol (MCP).
 
+## Install
+
+```bash
+pip install hummbl-mcp-proton
+```
+
+## Run
+
+```bash
+hummbl-mcp-proton
+```
+
 To use it with Antigravity or Gemini, add the following to your `mcp_config.json`:
 
 ```json
     "proton": {
-      "command": "python",
-      "args": [
-        "C:\\path\\to\\mcp-server\\packages\\python\\proton\\mcp_server.py"
-      ]
+      "command": "hummbl-mcp-proton"
     }
 ```
 

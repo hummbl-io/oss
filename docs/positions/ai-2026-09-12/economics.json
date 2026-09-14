@@ -1,0 +1,36 @@
+{
+  "currency": "USD",
+  "status": "illustrative_not_observed",
+  "source_price_receipt": "H-03",
+  "assumptions": {
+    "collection_fraction": 0.03,
+    "labor_rate_per_hour": 100,
+    "target_margin": 0.5
+  },
+  "scenarios": [
+    {
+      "name": "advisory",
+      "price": 400,
+      "variable_cost": 5,
+      "labor_hours": 2,
+      "expected_contribution": 183,
+      "expected_max_hours": 1.83
+    },
+    {
+      "name": "audit",
+      "price": 5000,
+      "variable_cost": 50,
+      "labor_hours": 25,
+      "expected_contribution": 2300,
+      "expected_max_hours": 23
+    },
+    {
+      "name": "sprint",
+      "price": 15000,
+      "variable_cost": 150,
+      "labor_hours": 80,
+      "expected_contribution": 6400,
+      "expected_max_hours": 69
+    }
+  ]
+}

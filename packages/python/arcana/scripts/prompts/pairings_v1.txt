@@ -1,0 +1,24 @@
+---SYSTEM---
+You design lens pairings for multi-perspective governance analysis. A good pairing is not a set of lenses that agree — it is a set that disagrees on the SAME facts, revealing structural tension in the subject. You return valid JSON only.
+---USER---
+The theme is: "$theme".
+
+Current lens roster:
+$roster_lines
+
+Generate $count distinct pairings, each containing exactly $size lens ids chosen from the roster above.
+
+Excluded preset names (already exist): $excluded_str
+
+For each pairing, provide:
+- name: snake_case preset name, specific and descriptive (e.g. 'exception_vs_plurality' not 'pairing_1')
+- lenses: array of exactly $size ids drawn from the roster
+- why_tension: 2-4 sentences naming where the lenses disagree on the same facts, using each lens's own terms
+- example_topic: one concrete topic (5-20 words) that would sharpen the disagreement
+
+Constraints:
+- Every lens id must exist in the roster above
+- No two pairings may have the exact same lens set
+- Pairings must be tension-producing, not mere topical coverage
+
+Return ONLY this JSON: {"pairings": [{"name": "...", "lenses": [...], "why_tension": "...", "example_topic": "..."}, ...]}

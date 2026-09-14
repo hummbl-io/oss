@@ -3,9 +3,10 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **42** Python packages under `packages/python/<name>/` and
-one Lean tree under `packages/lean/hummbl-formalization`.
-There is no JS or Rust package tree under `packages/` yet.
+Currently hosts **47** Python packages under `packages/python/<name>/`, one
+private Node technical canary under `packages/node/mcp-base120`, and one Lean
+tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
+under `packages/` yet.
 
 ## Packages
 
@@ -33,6 +34,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-rubric-templates | `packages/python/hummbl-rubric-templates/` | 0.1.0 | In-tree | Evaluation rubric templates and validators |
 | hummbl-taxonomy | `packages/python/hummbl-taxonomy/` | 0.1.0 | In-tree | Governed intelligence-tier taxonomy and classifier |
 | hummbl-validation | `packages/python/hummbl-validation/` | 0.1.0 | In-tree | Invariant and schema validation primitives |
+| hummbl-invariance | `packages/python/hummbl-invariance/` | 0.1.0 | In-tree | Invariance battery measuring agent stance consistency |
 | hummbl-design-tokens | `packages/python/hummbl-design-tokens/` | 0.1.0 | In-tree | Fleet visual identity source of truth |
 | hummbl-heraldry | `packages/python/hummbl-heraldry/` | 0.1.0 | In-tree | SHA-256 procedural heraldic agent identity |
 | hummbl-garage | `packages/python/hummbl-garage/` | 0.1.0 | In-tree | Agent Performance Index, livery, watch faces, failure aesthetics |
@@ -56,9 +58,18 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-mcp-omnichannel | `packages/python/hummbl-mcp-omnichannel/` | 0.1.0 | In-tree | Omnichannel governance gate MCP server (stdlib http.server) |
 | hummbl-mcp-voice | `packages/python/hummbl-mcp-voice/` | 0.1.0 | In-tree | MCP server for vendor-neutral voice interactions (Vapi adapter) |
 
+Node packages:
+
+| Package | Path | Tree | npm | Description |
+|---------|------|------|-----|-------------|
+| @hummbl/mcp-base120 | `packages/node/mcp-base120/` | 0.1.0-canary.0 | Private canary | Read-only, no-egress Base120 MCP catalog |
+
 If you add a directory under `packages/python/`, update this table, the
 README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
 and the tag filter in `.github/workflows/publish-pypi.yml` in the same PR.
+For `packages/node/`, update the same inventory surfaces and Node CI. Do not
+add an npm publish workflow or tag for a package whose manifest is private or
+whose admission blockers remain open.
 
 ## Setup
 
@@ -72,8 +83,12 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 42)
+# Per-package (all 47)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
+cd packages/python/arcana && python -m pytest tests/ -v
+cd packages/python/hummbl-agent-governance && python -m pytest tests/ -v
+cd packages/python/hummbl-eval && python -m pytest tests/ -v
+cd packages/python/hummbl-gitops && python -m pytest tests/ -v
 cd packages/python/hummbl-sast && python -m pytest tests/ -v
 cd packages/python/hummbl-evidence && python -m pytest tests/ -v
 cd packages/python/base120 && python -m pytest tests/ -v
@@ -92,6 +107,7 @@ cd packages/python/hummbl-governance && python -m pytest tests/ -v
 cd packages/python/hummbl-heraldry && python -m pytest tests/ -v
 cd packages/python/hummbl-identity && python -m pytest tests/ -v
 cd packages/python/hummbl-intel && python -m pytest tests/ -v
+cd packages/python/hummbl-invariance && python -m pytest tests/ -v
 cd packages/python/hummbl-kernel && python -m pytest tests/ -v
 cd packages/python/hummbl-lattice && python -m pytest tests/ -v
 cd packages/python/hummbl-lint-config && python -m pytest tests/ -v
@@ -115,6 +131,9 @@ cd packages/python/hummbl-mcp-signal && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp-utf && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp-omnichannel && python -m pytest tests/ -v
 cd packages/python/hummbl-mcp-voice && python -m pytest tests/ -v
+
+# Node technical canaries
+cd packages/node/mcp-base120 && npm ci && npm test
 ```
 
 ## CI
@@ -126,12 +145,17 @@ cd packages/python/hummbl-mcp-voice && python -m pytest tests/ -v
 - Future-preview job `test-preview` runs all packages on **3.15-dev** with
   `continue-on-error` -- failures are informational and do not block merges.
 - Lean is **not** built in CI.
+- Node technical canaries run on Node 22 and must pass product-admission,
+  generated-artifact, test, and package-content checks. Product manifests use
+  `schemas/public/product-admission-v1.schema.json` and the repository
+  validator in `tools/scripts/validate_product_manifests.mjs`.
 - **Workflow validator**: `.github/workflows/validate-workflows.yml` — enforces SHA-pinning.
 - SHA-pinning is required (`sha_pinning_required: true`). Tag refs (`@v4`, `@main`) cause `startup_failure`.
 
 ## Conventions
 
 - Python 3.11+ required (kernel `requires-python` is `>=3.10`; treat 3.11 as the fleet floor)
+- Node.js 22+ required for Node packages.
 - Zero third-party runtime dependencies (stdlib only in production code)
   - **Exception**: `governed-compression` requires `numpy>=1.26` for array operations (documented in its `pyproject.toml`)
 - Test dependencies in `[test]` extras only
@@ -146,6 +170,18 @@ Packages with runtime dependencies have a `requirements.lock` file generated by
 `uv pip compile pyproject.toml --output-file requirements.lock`. Stdlib-only
 packages (zero runtime deps) do not need a lock file. When updating a package's
 runtime dependencies, regenerate its lock file.
+Node packages commit `package-lock.json`; use `npm ci` in CI and package checks.
+
+Every package also has a `requirements-build.lock`: a SHA-256 hash-locked pin
+of its build backend, runtime dependencies, `[test]` extra, `build`, and
+`cyclonedx-bom`, targeting CPython 3.13 on Linux (the publish runner).
+`publish-pypi.yml` installs it with `pip install --require-hashes`, installs the
+package with `--no-deps --no-build-isolation`, and builds with `--no-isolation`,
+so the release build environment contains only what is hashed in the repo.
+Regenerate with `python .github/scripts/lock_build_env.py lock <package>`
+(needs `uv`) whenever `pyproject.toml` dependencies, extras, or
+`[build-system].requires` change. `check-inputs` (stdlib only) runs in CI and
+in the publish workflow and fails closed on a missing or stale lock.
 
 ## Pre-PR checklist
 
@@ -153,8 +189,9 @@ runtime dependencies, regenerate its lock file.
 2. `git rebase origin/main` — PR branch starts from latest
 3. Run tests for the affected package(s)
 4. If runtime dependencies changed, regenerate `requirements.lock` for the affected package(s)
-5. Verify no internal docs (handoffs, AARs, receipts, trackers) are in the public repo
-6. If the package set changed: README, this file, `docs/PACKAGES.md`, CI matrix, publish tag filter
+5. If any dependency, extra, or build-system requirement changed, regenerate `requirements-build.lock` (`python .github/scripts/lock_build_env.py lock <package>`)
+6. Verify no internal docs (handoffs, AARs, receipts, trackers) are in the public repo
+7. If the package set changed: README, this file, `docs/PACKAGES.md`, CI matrix, publish tag filter
 
 ## PR review protocol
 

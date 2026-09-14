@@ -30,7 +30,7 @@ hummbl-mcp-cognitive-ledger
 Or via stdio JSON-RPC:
 
 ```bash
-python mcp_server.py
+python cognitive_ledger_mcp_server.py
 ```
 
 ## Environment

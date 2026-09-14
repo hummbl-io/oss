@@ -249,6 +249,46 @@ from hummbl_governance.regulatory_context import (
 # SOUL Injector (v1.5.0 — SOUL.md system-prompt injection)
 from hummbl_governance.soul_injector import SoulInjector
 
+# Records of Processing (P57 — GDPR Art. 30 record assembler)
+from hummbl_governance.records_of_processing import RecordsOfProcessing
+from hummbl_governance._types import Art30Record
+
+# ---------------------------------------------------------------------------
+# GDPR Compliance Primitives (P53-P58) — v1.6.0
+# ---------------------------------------------------------------------------
+
+# Human Review Gate (P53, GE-3) — GDPR Art. 22(3) + AI Act Art. 14
+# Mandatory pre-decision checkpoint; breaks "solely automated" chain on APPROVED.
+from hummbl_governance.human_review_gate import (
+    Art22Mode,
+    Art22ModeError,
+    GateAlreadyDecidedError,
+    GateNotFoundError,
+    HumanReviewGate,
+    HumanReviewGateError,
+    HumanReviewGateReceipt,
+)
+
+# Contestation Handler (P54, GE-4) — GDPR Art. 22(3) / Art. 21 right to contest
+from hummbl_governance.contestation_handler import ContestationHandler
+from hummbl_governance._types import ContestationRecord
+
+# DSAR Handler (P55, AC-4) — GDPR Art. 15 / AI Act Art. 26(11) workflow
+from hummbl_governance.dsar_handler import DSARHandler
+from hummbl_governance._types import DSARRecord
+
+# Redaction Engine (P56, AC-5) — GDPR Art. 17 data minimisation workflow
+from hummbl_governance.redaction_engine import RedactionEngine, RedactionError, RedactionReceipt
+from hummbl_governance._types import RedactionReceipt
+
+# DPIA Generator (P58, RM-2) — GDPR Art. 35 / AI Act Art. 27 FRIA
+from hummbl_governance.dpia_generator import DPIAGenerator
+from hummbl_governance._types import DPIADocument, DPIASection
+
+
+
+
+
 
 class _B120Shortcut:
     """Lazy shortcut for Base120 ReasoningEngine access."""
@@ -499,4 +539,7 @@ __all__ = [
     "ProfileConfig",
     # SOUL Injector (v1.5.0)
     "SoulInjector",
+    # Records of Processing (P57 — GDPR Art. 30)
+    "RecordsOfProcessing",
+    "Art30Record",
 ]

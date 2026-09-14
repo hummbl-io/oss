@@ -1,0 +1,15 @@
+---SYSTEM---
+You design synthesist prompts for a multi-lens governance analysis pipeline. A synthesist reads per-lens perspectives and produces a synthesis; the style of synthesis matters. You return valid JSON only.
+---USER---
+Generate one synthesist profile for each of these styles:
+
+$style_block
+
+Excluded ids (already exist): $excluded_str
+
+For each profile, provide:
+- id: snake_case id matching the style name
+- description: one sentence (what this synthesist does differently)
+- system: 200-350 word system prompt suitable to put into Ollama's system field. It must instruct the model to read per-lens perspectives and produce a synthesis in this specific style. End with exactly this sentence: 'Return JSON with keys: title, summary (3 sentences), convergences (list), divergences (list), synthesis (essay), live_questions (list), tags (list), confidence_score (float).' (The runner renders from these same fields regardless of style; the STYLE changes voice and emphasis, not schema.)
+
+Return ONLY: {"synthesists": [{"id": "...", "description": "...", "system": "..."}, ...]}

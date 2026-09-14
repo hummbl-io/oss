@@ -32,7 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
-        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-evidence, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-mcp, hummbl-mcp-base120, hummbl-mcp-basen, hummbl-mcp-bif, hummbl-mcp-cognitive-ledger, hummbl-mcp-coordination-bus, hummbl-mcp-discord, hummbl-mcp-governance, hummbl-mcp-omnichannel, hummbl-mcp-onepassword, hummbl-mcp-proton, hummbl-mcp-signal, hummbl-mcp-utf, hummbl-mcp-voice, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
+        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-agent-governance, hummbl-eval, hummbl-gitops, arcana, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-evidence, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-invariance, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-mcp, hummbl-mcp-base120, hummbl-mcp-basen, hummbl-mcp-bif, hummbl-mcp-cognitive-ledger, hummbl-mcp-coordination-bus, hummbl-mcp-discord, hummbl-mcp-governance, hummbl-mcp-omnichannel, hummbl-mcp-onepassword, hummbl-mcp-proton, hummbl-mcp-signal, hummbl-mcp-utf, hummbl-mcp-voice, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
         include:
           # Extended floor: packages declaring >=3.10 also tested on 3.10
           - package: hummbl
@@ -75,7 +75,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-evidence, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-mcp, hummbl-mcp-base120, hummbl-mcp-basen, hummbl-mcp-bif, hummbl-mcp-cognitive-ledger, hummbl-mcp-coordination-bus, hummbl-mcp-discord, hummbl-mcp-governance, hummbl-mcp-omnichannel, hummbl-mcp-onepassword, hummbl-mcp-proton, hummbl-mcp-signal, hummbl-mcp-utf, hummbl-mcp-voice, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
+        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-agent-governance, hummbl-eval, hummbl-gitops, arcana, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-evidence, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-invariance, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-mcp, hummbl-mcp-base120, hummbl-mcp-basen, hummbl-mcp-bif, hummbl-mcp-cognitive-ledger, hummbl-mcp-coordination-bus, hummbl-mcp-discord, hummbl-mcp-governance, hummbl-mcp-omnichannel, hummbl-mcp-onepassword, hummbl-mcp-proton, hummbl-mcp-signal, hummbl-mcp-utf, hummbl-mcp-voice, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -92,6 +92,46 @@ jobs:
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
         run: python -m pytest tests/ -q
+
+  test-node:
+    name: test (node, ${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [mcp-base120]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22.x"
+          cache: npm
+          cache-dependency-path: packages/node/${{ matrix.package }}/package-lock.json
+
+      - name: Install package
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm ci
+
+      - name: Test product admission validator
+        run: node --test tools/scripts/test_validate_product_manifests.mjs
+
+      - name: Validate product manifests
+        run: node tools/scripts/validate_product_manifests.mjs
+
+      - name: Verify generated artifacts
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm run check:generated
+
+      - name: Run tests
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm test
+
+      - name: Verify package contents
+        working-directory: packages/node/${{ matrix.package }}
+        run: npm run check:boundary
 
   pip-audit:
     name: pip-audit
@@ -126,12 +166,77 @@ jobs:
             echo "::endgroup::"
           done
 
+  build-lock-check:
+    name: build-lock-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Every package has a current requirements-build.lock
+        # Stdlib only. The publish workflow refuses to build from a missing or
+        # stale lock; this job surfaces that on the PR instead of at release.
+        run: python .github/scripts/lock_build_env.py check-inputs --all
+
+  claim-drift-check:
+    name: claim-drift-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Check hummbl-governance public count claims against PrimitiveRegistry
+        # Catches the class of drift from the 2026-09-11 "34 primitives" incident:
+        # a doc/README count silently diverging from the actual registry. See
+        # docs/artifacts/AUDIT_2026-09-11_public_claims_drift.md.
+        run: python packages/python/hummbl-governance/scripts/check_public_count_claims.py
+
+  # ---------------------------------------------------------------------------
+  # Docker-based test job for hummbl-governance.
+  #
+  # Verifies the multi-stage Dockerfile (packages/python/hummbl-governance/)
+  # stays green and reproduces CI locally:
+  #   docker build -t hummbl-governance-ci packages/python/hummbl-governance/
+  #   docker run hummbl-governance-ci
+  #
+  # One test is deselected: test_resolve_workspace_for_file expects .git/ to
+  # exist (it walks up looking for a git workspace root). The .dockerignore
+  # intentionally excludes .git/ to keep the image lean. This test passes in
+  # the regular CI job (which uses actions/checkout) and locally.
+  # ---------------------------------------------------------------------------
+  docker-test:
+    name: docker-test (hummbl-governance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Build Docker image
+        run: docker build -t hummbl-governance-ci packages/python/hummbl-governance/
+
+      - name: Run tests in container
+        run: |
+          docker run --rm hummbl-governance-ci \
+            python -m pytest tests/ -q \
+            --deselect tests/lsp_registry/test_lsp_registry.py::TestWorkspaceUtils::test_resolve_workspace_for_file
+
   # Single required-check context for branch protection.
   # Do not require the per-package names -- they churn when packages are added.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit]
+    needs: [test, test-preview, pip-audit, build-lock-check, claim-drift-check, docker-test]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
@@ -139,7 +244,14 @@ jobs:
           echo "test=${{ needs.test.result }}"
           echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
+          echo "build-lock-check=${{ needs.build-lock-check.result }}"
+          echo "claim-drift-check=${{ needs.claim-drift-check.result }}"
+          echo "docker-test=${{ needs.docker-test.result }}"
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
+
           test "${{ needs.pip-audit.result }}" = success
+          test "${{ needs.build-lock-check.result }}" = success
+          test "${{ needs.claim-drift-check.result }}" = success
+          test "${{ needs.docker-test.result }}" = success

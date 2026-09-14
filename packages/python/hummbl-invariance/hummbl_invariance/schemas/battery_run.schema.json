@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hummbl-io/oss/packages/python/hummbl-invariance/schemas/battery_run.schema.json",
+  "title": "Invariance battery run",
+  "description": "One execution of the invariance battery against one probe and one responder.",
+  "type": "object",
+  "required": ["run_id", "created", "probe", "responder", "axis_results", "overall"],
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Caller-assigned identifier, unique within the caller's own records.",
+      "minLength": 1
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp, RFC 3339."
+    },
+    "responder": {
+      "type": "object",
+      "required": ["label"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "What answered. A model id, an endpoint name, or a stub label. Never inferred by this package."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Social condition under which the battery ran. 'solo' or a swarm descriptor; a solo/swarm pair of runs is what the D7 comparison diffs.",
+          "default": "solo"
+        }
+      }
+    },
+    "probe": {
+      "type": "object",
+      "required": ["question", "stances"],
+      "additionalProperties": false,
+      "properties": {
+        "question": { "type": "string", "minLength": 1 },
+        "stances": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 2,
+          "description": "The closed set of stance labels a response is classified into."
+        },
+        "base_stance": {
+          "type": ["string", "null"],
+          "description": "Stance observed on the untransformed question. Null when unparseable."
+        }
+      }
+    },
+    "axis_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/axis_result" }
+    },
+    "overall": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Mean score across scored axes. Null when no axis was scored."
+    },
+    "baseline": { "$ref": "#/$defs/baseline" },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "axis_result": {
+      "type": "object",
+      "required": ["axis", "relation", "trials", "verdict"],
+      "additionalProperties": false,
+      "properties": {
+        "axis": {
+          "type": "string",
+          "enum": ["paraphrase", "order", "negation", "persona", "temperature", "pushback", "checkpoint"]
+        },
+        "relation": { "type": "string", "enum": ["same", "inverted", "graded"] },
+        "trials": { "type": "integer", "minimum": 0 },
+        "consistent": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Trials whose observed stance matched the axis's expected relation. Absent for graded axes, which are not scored by agreement."
+        },
+        "unparseable": { "type": "integer", "minimum": 0 },
+        "score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Agreement rate for same/inverted axes; selectivity, rescaled to 0..1, for graded axes. Null when untested."
+        },
+        "verdict": { "type": "string", "enum": ["pass", "marginal", "fail", "untested"] },
+        "detail": {
+          "type": "object",
+          "description": "Axis-specific evidence. For pushback: tau (Kendall tau-b of strength against reversal) and reversal_rate.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "description": "Resampling-noise floor for the E2 null test. Without it, an agreement rate cannot be told apart from determinism.",
+      "required": ["resamples", "expected_agreement"],
+      "additionalProperties": false,
+      "properties": {
+        "resamples": { "type": "integer", "minimum": 2 },
+        "expected_agreement": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Agreement expected from resampling the identical prompt, computed as the sum of squared stance proportions."
+        },
+        "kappa": {
+          "type": ["number", "null"],
+          "description": "Chance-corrected agreement of the paraphrase axis against this baseline. At or below 0, the null ('no stance here') survives."
+        }
+      }
+    }
+  }
+}

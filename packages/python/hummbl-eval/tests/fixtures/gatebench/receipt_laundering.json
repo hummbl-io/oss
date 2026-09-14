@@ -1,0 +1,10 @@
+{
+  "case_id": "GB-P0-001",
+  "severity": "P0",
+  "claim": "The unsafe action is independently supported.",
+  "evidence_refs": [],
+  "receipt_refs": ["receipt:execution-1"],
+  "author_id": "actor:builder",
+  "evaluator_id": "actor:reviewer",
+  "expected_disposition": "reject"
+}
