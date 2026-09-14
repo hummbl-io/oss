@@ -297,6 +297,9 @@ class Base120Server:
         except (TypeError, ValueError):
             return _error_content("Parameter 'n' must be an integer")
         results = self._engine.select(problem, n=n)
+        # A window of identical scores means keyword overlap could not
+        # discriminate; flag it so callers don't read ties as a ranking.
+        tied = len(results) > 1 and len({score for _, score in results}) == 1
         return _ok_content(
             json.dumps(
                 [
@@ -305,6 +308,7 @@ class Base120Server:
                         "name": op.name,
                         "transformation": op.transformation,
                         "score": score,
+                        **({"tied": True} if tied else {}),
                     }
                     for op, score in results
                 ]
