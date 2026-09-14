@@ -121,6 +121,7 @@ class TestCrossEngineIntegration:
     def test_receipt_triggers_law_evaluation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = _make_kernel(Path(tmpdir))
+            kernel.identity.register("test")
             receipt = kernel.create_receipt(
                 agent_id="test",
                 action_type="STATUS",
@@ -152,6 +153,7 @@ class TestCrossEngineIntegration:
     def test_schedule_triggers_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = _make_kernel(Path(tmpdir))
+            kernel.identity.register("devin")
             sid = kernel.schedule.register("AI-CCO", "DAILY")
 
             loop_receipt = kernel.create_receipt(

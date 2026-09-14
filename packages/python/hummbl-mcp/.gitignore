@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.venv/
+.tox/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.so
+.env
+.env.local
+_state/
+state/
+
+# Secrets — never commit credentials
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials
+credentials.json
+*.keystore
+*.jks
+
+# Shared lint config (symlinked, not committed)
+hummbl_lint_config

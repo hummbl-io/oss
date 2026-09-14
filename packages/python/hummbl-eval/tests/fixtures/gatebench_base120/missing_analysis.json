@@ -1,0 +1,7 @@
+{
+  "case_id": "GB-B120-002",
+  "severity": "P0",
+  "skill_name": "missing-analysis",
+  "base120_output": "missing-analysis (Base120 Cognitive Structuring) | all | 2026-08-11\n======================================================================\n\n## Overview (P6: Point-of-View Anchoring)\n  Count: 5\n\nBase120 Applied: P6\n======================================================================",
+  "expected_disposition": "reject"
+}

@@ -212,17 +212,24 @@ class ReceiptEngine:
             )
 
         # K3 identity enforcement: reject ghost agents not in the registry.
-        # Only enforced when an identity_engine is wired (opt-in for backward
-        # compatibility; the Kernel wires it automatically during boot).
-        if self._identity_engine is not None:
-            identity = self._identity_engine.resolve(agent_id)
-            if identity is None:
-                raise KernelPanic(
-                    KernelInvariant.IDENTITY,
-                    f"Agent '{agent_id}' is not registered in the identity "
-                    f"engine — ghost-agent receipt rejected (K3)",
-                    agent_id=agent_id,
-                )
+        # Fail-closed: if no identity_engine is wired, reject all receipts
+        # rather than silently allowing ghost agents.
+        if self._identity_engine is None:
+            raise KernelPanic(
+                KernelInvariant.IDENTITY,
+                "Identity engine not wired — cannot enforce K3 "
+                "(ghost-agent rejection). Wire an IdentityEngine to "
+                "ReceiptEngine to create receipts.",
+                agent_id=agent_id,
+            )
+        identity = self._identity_engine.resolve(agent_id)
+        if identity is None:
+            raise KernelPanic(
+                KernelInvariant.IDENTITY,
+                f"Agent '{agent_id}' is not registered in the identity "
+                f"engine — ghost-agent receipt rejected (K3)",
+                agent_id=agent_id,
+            )
 
         receipt = Receipt(
             receipt_id=f"r-{uuid.uuid4().hex[:12]}",

@@ -41,6 +41,7 @@ from hummbl_governance.kernel import (
     SequenceEngine,
 )
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
+from _helpers import make_receipt_engine
 
 # ===========================================================================
 # Property-Based Receipt Engine Tests
@@ -53,8 +54,8 @@ class TestReceiptProperties:
     def test_random_receipts_roundtrip(self) -> None:
         """Generate 500 random receipts, store, retrieve, verify all invariants."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
             agents = ["a", "b", "c", "d", "e"]
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("sig-test", *agents))
             actions = ["CREATE", "UPDATE", "DELETE", "STATUS", "SCAN"]
             last_receipts: dict[str, Any] = {}
 
@@ -90,7 +91,7 @@ class TestReceiptProperties:
     def test_receipt_signature_invariant(self) -> None:
         """Every stored receipt must have a valid signature."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("sig-test",))
             for _ in range(200):
                 receipt = engine.create(
                     agent_id="sig-test",
@@ -104,6 +105,7 @@ class TestReceiptProperties:
         """For any sequence of receipts, sequence_id must be strictly increasing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
+            kernel.identity.register("mono")
             seq_ids: list[int] = []
             for _ in range(100):
                 receipt = kernel.create_receipt("mono", "TEST", payload=self._random_payload())
@@ -116,6 +118,7 @@ class TestReceiptProperties:
         """For any two consecutive receipts, receipt[N].prev_hash == hash(receipt[N-1])."""
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
+            kernel.identity.register("chain")
             prev_receipt = None
             for _ in range(50):
                 receipt = kernel.create_receipt("chain", "TEST")
@@ -128,7 +131,8 @@ class TestReceiptProperties:
     def test_receipt_id_uniqueness_property(self) -> None:
         """All receipt IDs must be unique across all agents."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            all_agents = tuple(f"agent-{i}" for i in range(10))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("sig-test", *all_agents))
             all_ids: set[str] = set()
             for _ in range(300):
                 agent = f"agent-{random.randint(0, 9)}"

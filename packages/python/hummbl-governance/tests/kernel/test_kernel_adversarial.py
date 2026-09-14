@@ -44,6 +44,7 @@ from hummbl_governance.kernel import (
     SequenceEngine,
 )
 from hummbl_governance.kernel.invariants import KernelInvariant, KernelPanic
+from _helpers import make_receipt_engine
 
 
 def _tmp() -> Path:
@@ -64,21 +65,21 @@ class TestAdversarialReceiptEngine:
 
     def test_forged_signature_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('attacker', 'rogue'))
             receipt = engine.create(agent_id="attacker", action_type="FORGE")
             receipt.signature = "a" * 64
             assert engine.validate(receipt) is False
 
     def test_tampered_payload_detected(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('attacker', 'rogue'))
             receipt = engine.create(agent_id="attacker", action_type="TAMPER", payload={"x": 1})
             receipt.payload["x"] = 2
             assert engine.validate(receipt) is False
 
     def test_replay_attack(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('attacker', 'rogue'))
             receipt = engine.create(agent_id="attacker", action_type="REPLAY")
             engine.store(receipt)
             engine.store(receipt)
@@ -86,7 +87,7 @@ class TestAdversarialReceiptEngine:
 
     def test_chain_break_on_missing_prev(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('attacker', 'rogue'))
             r1 = engine.create(agent_id="attacker", action_type="FIRST")
             engine.store(r1)
             r2 = engine.create(agent_id="attacker", action_type="SECOND", prev_receipt_hash="wrong_hash")
@@ -96,14 +97,14 @@ class TestAdversarialReceiptEngine:
 
     def test_empty_agent_id_panics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('attacker', 'rogue'))
             with pytest.raises(KernelPanic) as exc:
                 engine.create(agent_id="", action_type="TEST")
             assert exc.value.invariant == KernelInvariant.RECEIPT
 
     def test_null_bytes_in_payload(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('attacker', 'rogue'))
             receipt = engine.create(
                 agent_id="attacker",
                 action_type="INJECT",

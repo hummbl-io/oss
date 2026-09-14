@@ -43,6 +43,7 @@ from hummbl_governance.kernel import (
     ReceiptEngine,
     SequenceEngine,
 )
+from _helpers import make_receipt_engine
 
 
 def _tmp() -> Path:
@@ -64,6 +65,7 @@ class TestPerformance:
     def test_1000_receipts_latency(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = _make_kernel(Path(tmpdir))
+            kernel.identity.register("perf")
             start = time.time()
             for i in range(1000):
                 receipt = kernel.create_receipt("perf", "BULK", payload={"i": i})
@@ -84,7 +86,7 @@ class TestPerformance:
 
     def test_large_payload_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("big",))
             big_data = "x" * (1024 * 1024)
             start = time.time()
             receipt = engine.create(agent_id="big", action_type="BULK", payload={"data": big_data})

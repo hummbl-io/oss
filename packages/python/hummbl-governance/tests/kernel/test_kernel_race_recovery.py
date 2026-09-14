@@ -45,6 +45,7 @@ from hummbl_governance.kernel import (
     ReceiptEngine,
     SequenceEngine,
 )
+from _helpers import make_receipt_engine
 
 
 def _tmp() -> Path:
@@ -65,7 +66,7 @@ class TestRaceConditions:
 
     def test_concurrent_receipt_creation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('concurrent', 'gap', 'recover', 'trunc'))
             errors: list[Exception] = []
 
             def create_receipts(n: int) -> None:
@@ -137,7 +138,7 @@ class TestRecovery:
     def test_corrupted_receipt_file(self) -> None:
         """Corrupted receipt file must fail-closed with KernelPanic (K1)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('concurrent', 'gap', 'recover', 'trunc'))
             receipt = engine.create(agent_id="recover", action_type="VALID")
             engine.store(receipt)
             receipt_file = engine.receipts_dir / "recover.jsonl"
@@ -151,7 +152,7 @@ class TestRecovery:
     def test_truncated_receipt_file(self) -> None:
         """Truncated receipt file must fail-closed with KernelPanic (K1)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('concurrent', 'gap', 'recover', 'trunc'))
             receipt = engine.create(agent_id="trunc", action_type="TEST")
             engine.store(receipt)
             receipt_file = engine.receipts_dir / "trunc.jsonl"
@@ -186,7 +187,7 @@ class TestRecovery:
 
     def test_rebuild_chain_after_gap(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=('concurrent', 'gap', 'recover', 'trunc'))
             r1 = engine.create(agent_id="gap", action_type="ONE")
             engine.store(r1)
             r2 = engine.create(agent_id="gap", action_type="TWO", prev_receipt_hash="wrong")

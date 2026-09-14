@@ -10,6 +10,7 @@ from hummbl_validation.primitives import (
     read_jsonl,
     quarantine_corrupt_state,
 )
+from hummbl_validation.purl import PURL, parse, normalize
 
 __all__ = [
     "require_non_negative",
@@ -17,5 +18,8 @@ __all__ = [
     "require_type",
     "read_jsonl",
     "quarantine_corrupt_state",
+    "PURL",
+    "parse",
+    "normalize",
 ]
 __version__ = "0.1.0"

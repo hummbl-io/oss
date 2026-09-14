@@ -1,0 +1,11 @@
+This package includes the HUMMBL agent-eval-harness implementation from
+hummbl-io/agent-eval-harness at source commit
+570c0a1ce33950ad0c43b6871c6f3d2893990a9c.
+
+Original MIT and Apache-2.0 license texts are retained in this distribution.
+The Python import namespace remains agent_eval_harness.
+
+HUMMBL modifications, 2026-09-08: package metadata and documentation adapted
+for the oss monorepo; CLI failure and argument handling made explicit;
+regression tests added. This package has not been published to PyPI by
+this import.

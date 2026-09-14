@@ -268,19 +268,11 @@ class Kernel:
                 "Kernel not booted; cannot create receipts",
             )
 
-        # K3: Auto-register unknown agents at PROBATIONARY tier when
-        # identity enforcement is active. This allows the Kernel's
-        # create_receipt syscall to accept new agents without requiring
-        # pre-registration, while still blocking direct receipt_engine
-        # calls with unregistered agents (the raw API enforces K3
-        # strictly; the Kernel syscall handles registration as part
-        # of the action).
-        if self.receipt._identity_engine is not None:
-            if self.identity.resolve(agent_id) is None:
-                self.identity.register(
-                    agent_id=agent_id,
-                    trust_tier="PROBATIONARY",
-                )
+        # K3: Require explicit registration before receipt creation.
+        # Ghost agents (unregistered agent_id) are rejected by the
+        # ReceiptEngine. The Kernel does NOT auto-register — agents
+        # must be explicitly registered via identity.register() before
+        # they can create receipts.
 
         # K4: Assign sequence_id
         seq_id = self.sequence.next(agent_id)

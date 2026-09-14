@@ -38,6 +38,23 @@ class ValidationError(Exception):
         super().__init__(f"{path}: {message}" if path else message)
 
 
+def _json_equal(a: Any, b: Any) -> bool:
+    """Type-aware equality for JSON Schema semantics.
+
+    Python's bool is a subclass of int, so True == 1 and False == 0.
+    JSON Schema treats booleans and numbers as distinct types. This
+    function ensures bool != int/float in comparisons used by const
+    and enum validation.
+    """
+    if isinstance(a, bool) != isinstance(b, bool):
+        return False
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_json_equal(x, y) for x, y in zip(a, b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_json_equal(a[k], b[k]) for k in a)
+    return a == b
+
+
 def _check_str(inst: Any, sch: dict[str, Any], p: str) -> list[str]:
     """Validate string keywords: pattern, minLength, maxLength."""
     if not isinstance(inst, str):
@@ -58,7 +75,8 @@ def _check_str(inst: Any, sch: dict[str, Any], p: str) -> list[str]:
 
 def _check_num(inst: Any, sch: dict[str, Any], p: str) -> list[str]:
     """Validate number keywords: minimum, maximum."""
-    if not isinstance(inst, (int, float)):
+    # bool is a subclass of int in Python, but JSON Schema treats bool != number
+    if isinstance(inst, bool) or not isinstance(inst, (int, float)):
         return []
     errs: list[str] = []
     if "minimum" in sch and inst < sch["minimum"]:
@@ -126,22 +144,33 @@ def validate(instance: Any, schema: dict[str, Any], path: str = "") -> list[str]
 
     Returns a list of error strings (empty = valid).
     """
-    # const -- early return
-    if "const" in schema and instance != schema["const"]:
+    # Boolean schemas (Draft 2020-12): true = always valid, false = always invalid
+    if schema is True:
+        return []
+    if schema is False:
+        return [f"{path}: schema is false, no value is valid"]
+
+    # const -- early return (type-aware: bool != int/float in JSON Schema)
+    if "const" in schema and not _json_equal(instance, schema["const"]):
         return [f"{path}: expected const {schema['const']!r}, got {instance!r}"]
 
     # type -- early return
     if "type" in schema:
         type_name = schema["type"]
-        if isinstance(type_name, list):
-            expected = tuple(t for name in type_name for t in _TYPE_MAP.get(name, ()))
+        type_names = set(type_name) if isinstance(type_name, list) else {type_name}
+        # bool is a subclass of int in Python, but JSON Schema treats them as distinct
+        if isinstance(instance, bool):
+            if "boolean" not in type_names:
+                return [f"{path}: expected type {type_name!r}, got bool"]
+        elif isinstance(instance, float) and instance.is_integer() and "integer" in type_names:
+            pass  # float with zero fractional part is a valid integer in JSON Schema
         else:
-            expected = _TYPE_MAP.get(type_name, ())
-        if expected and not isinstance(instance, expected):
-            return [f"{path}: expected type {type_name!r}, got {type(instance).__name__}"]
+            expected = tuple(t for name in type_names for t in _TYPE_MAP.get(name, ()))
+            if expected and not isinstance(instance, expected):
+                return [f"{path}: expected type {type_name!r}, got {type(instance).__name__}"]
 
     errors: list[str] = []
-    if "enum" in schema and instance not in schema["enum"]:
+    if "enum" in schema and not any(_json_equal(instance, v) for v in schema["enum"]):
         errors.append(f"{path}: {instance!r} not in enum {schema['enum']}")
     errors.extend(_check_str(instance, schema, path))
     errors.extend(_check_num(instance, schema, path))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Crawl live provider /models endpoints to verify and extend the registry.
 
-For each provider that has a models_endpoint, this script:
+For each provider that has a models_endpoint or models_path, this script:
   1. Fetches the list of available models from the live API
   2. Matches each live model against the curated registry entries
   3. Marks matched entries as verified=True
@@ -283,9 +283,9 @@ def infer_variant_from_slug(slug):
 
 def crawl_provider(provider, registry_entries, dry_run=False):
     """Crawl one provider's /models endpoint."""
-    endpoint = provider.get("models_endpoint")
+    endpoint = provider.get("models_endpoint") or provider.get("models_path")
     if not endpoint:
-        return [], [], f"No models_endpoint for {provider['id']}"
+        return [], [], f"No models_endpoint or models_path for {provider['id']}"
 
     # Resolve account_id placeholder for Cloudflare
     if "{account_id}" in endpoint:

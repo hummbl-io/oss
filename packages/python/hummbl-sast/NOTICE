@@ -1,0 +1,9 @@
+This package includes the HUMMBL security scanner from hummbl-io/hummbl-sast
+at source commit 59f31c5506041086cf31377db5465fd521ca0a19.
+The source Apache-2.0 license is retained in this distribution.
+
+HUMMBL modifications, 2026-09-08: package metadata and documentation adapted
+for the oss monorepo; dependency lookup failures distinguished from empty
+vulnerability results; regression tests added. Source module descriptions
+were narrowed to the implemented heuristics. This import does not publish
+a PyPI release or replace the repository's existing security checks.

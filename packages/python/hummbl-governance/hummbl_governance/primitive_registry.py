@@ -293,10 +293,31 @@ _PRIMITIVES: list[PrimitiveEntry] = [
         layer=PrimitiveLayer.INFRASTRUCTURE,
         description="Bridges hummbl-governance receipts to unified-framework corpus formats"),
 
-    # ── Candidates (not in P1-P52 total) ─────────────────────────
-    PrimitiveEntry("P35", _fc("AC", 6), "RegulatorExport", "Audit & Compliance", "kernel.regulator_export",
-        status=PrimitiveStatus.NOT_STARTED, layer=PrimitiveLayer.EVIDENCE,
+    PrimitiveEntry("P35", _fc("AC", 6), "RegulatorExport", "Audit & Compliance", "regulator_export",
+        enforced_invariants=("D5",), status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.EVIDENCE,
         description="Produces compliance evidence in regulator-accepted formats"),
+
+    # ── GDPR primitives (P53-P58, PR #220) ───────────────────────
+    PrimitiveEntry("P53", _fc("GE", 4), "HumanReviewGate", "Governance Ecology", "human_review_gate",
+        enforced_invariants=("K1",), status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.EVIDENCE,
+        description="GDPR Art. 22(3) mandatory pre-decision human review checkpoint for solely-automated decisions"),
+    PrimitiveEntry("P54", _fc("GE", 5), "ContestationHandler", "Governance Ecology", "contestation_handler",
+        enforced_invariants=("K1",), status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.EVIDENCE,
+        description="Data-subject-facing workflow to contest automated decisions (GDPR Art. 21/22(3))"),
+    PrimitiveEntry("P55", _fc("AC", 7), "DSARHandler", "Audit & Compliance", "dsar_handler",
+        enforced_invariants=("K1",), status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.EVIDENCE,
+        description="End-to-end Data Subject Access Request workflow (GDPR Art. 15)"),
+    PrimitiveEntry("P56", _fc("AC", 8), "RedactionEngine", "Audit & Compliance", "redaction_engine",
+        enforced_invariants=("K1",), status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.EVIDENCE,
+        description="Deterministic pseudonymisation via hash-placeholder substitution (GDPR Art. 17)"),
+    PrimitiveEntry("P57", _fc("AC", 9), "RecordsOfProcessing", "Audit & Compliance", "records_of_processing",
+        status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.INFRASTRUCTURE,
+        description="Assembles an Article 30-formatted Record of Processing Activities (RoPA)"),
+    PrimitiveEntry("P58", _fc("RM", 2), "DPIAGenerator", "Risk Management", "dpia_generator",
+        status=PrimitiveStatus.IMPLEMENTED, layer=PrimitiveLayer.INFRASTRUCTURE,
+        description="Assembles a GDPR Art. 35 Data Protection Impact Assessment (DPIA) document"),
+
+    # ── Candidates (not in P1-P58 total) ─────────────────────────
     PrimitiveEntry("P39", _fc("BH", 4), "GovernanceFitness", "Behavior & Health", "kernel.governance_fitness",
         enforced_invariants=("K8",), status=PrimitiveStatus.NOT_STARTED, layer=PrimitiveLayer.EVIDENCE,
         description="Evaluates governance pattern effectiveness over time"),

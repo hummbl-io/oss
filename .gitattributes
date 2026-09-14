@@ -1,3 +1,8 @@
+# Auto-detect text vs binary, normalize text to LF in the repository.
+# Existing content is untouched until re-added; this only stops new/edited
+# files from drifting to CRLF depending on the committer's core.autocrlf.
+* text=auto eol=lf
+
 # Enforce LF line endings on workflow files (CRLF causes GitHub Actions startup_failure)
 .github/workflows/*.yml text eol=lf
 .github/workflows/*.yaml text eol=lf
@@ -11,3 +16,22 @@
 
 # Markdown (CRLF-tolerant, but normalize for consistency)
 *.md text eol=lf
+
+*.py text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.toml text eol=lf
+*.ts text eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Never touch line endings on binary/packaging artifacts
+*.whl binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

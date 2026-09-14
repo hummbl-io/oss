@@ -30,6 +30,7 @@ from unittest.mock import patch
 
 import pytest
 from hummbl_governance.kernel import ReceiptEngine
+from _helpers import make_receipt_engine
 
 ENV_VAR = "RECEIPTENGINE_HMAC_KEY"
 FALLBACK_ENV_VAR = "HUMMBL_SIGNING_SECRET"
@@ -48,13 +49,13 @@ class TestEnvVarKeyInjection:
     def test_env_var_used_when_set(self, clean_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(ENV_VAR, "my-secret-key-from-env")
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine.signing_secret == b"my-secret-key-from-env"
 
     def test_env_var_not_persisted_to_file(self, clean_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(ENV_VAR, "env-only-key")
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine.signing_secret == b"env-only-key"
             secret_path = Path(tmpdir) / ".kernel_secret"
             assert not secret_path.exists()
@@ -62,7 +63,7 @@ class TestEnvVarKeyInjection:
     def test_fallback_env_var_used(self, clean_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(FALLBACK_ENV_VAR, "fallback-key")
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine.signing_secret == b"fallback-key"
 
     def test_primary_env_var_takes_precedence_over_fallback(
@@ -71,7 +72,7 @@ class TestEnvVarKeyInjection:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(ENV_VAR, "primary")
             monkeypatch.setenv(FALLBACK_ENV_VAR, "fallback")
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine.signing_secret == b"primary"
 
     def test_explicit_secret_param_takes_precedence_over_env(
@@ -79,13 +80,13 @@ class TestEnvVarKeyInjection:
     ) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(ENV_VAR, "from-env")
-            engine = ReceiptEngine(Path(tmpdir), signing_secret=b"explicit-param")
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",), signing_secret=b"explicit-param")
             assert engine.signing_secret == b"explicit-param"
 
     def test_receipts_signed_with_env_var_key(self, clean_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(ENV_VAR, "signing-key")
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             receipt = engine.create(agent_id="agent", action_type="ACT")
             assert engine.validate(receipt) is True
 
@@ -99,7 +100,7 @@ class TestFileBasedMigration:
             pre_existing = b"\x00\x01\x02" * 10  # 30 bytes, non-random
             secret_path.write_bytes(pre_existing)
 
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine.signing_secret == pre_existing
 
     def test_existing_secret_file_not_overwritten(self, clean_env: None) -> None:
@@ -108,7 +109,7 @@ class TestFileBasedMigration:
             original = b"original-key-value"
             secret_path.write_bytes(original)
 
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine.signing_secret == original
             # File content unchanged
             assert secret_path.read_bytes() == original
@@ -118,17 +119,17 @@ class TestFileBasedMigration:
             secret_path = Path(tmpdir) / ".kernel_secret"
             assert not secret_path.exists()
 
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert secret_path.exists()
             assert secret_path.read_bytes() == engine.signing_secret
             assert len(engine.signing_secret) == 32
 
     def test_persisted_secret_survives_restart(self, clean_env: None) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine1 = ReceiptEngine(Path(tmpdir))
+            engine1 = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             key1 = engine1.signing_secret
 
-            engine2 = ReceiptEngine(Path(tmpdir))
+            engine2 = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine2.signing_secret == key1
 
 
@@ -139,13 +140,13 @@ class TestFailClosed:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("pathlib.Path.write_bytes", side_effect=OSError("permission denied")):
                 with pytest.raises(RuntimeError, match="RECEIPTENGINE_HMAC_KEY"):
-                    ReceiptEngine(Path(tmpdir))
+                    make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
 
     def test_fail_closed_message_mentions_env_var(self, clean_env: None) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("pathlib.Path.write_bytes", side_effect=OSError("permission denied")):
                 with pytest.raises(RuntimeError) as exc_info:
-                    ReceiptEngine(Path(tmpdir))
+                    make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
                 msg = str(exc_info.value)
                 assert "RECEIPTENGINE_HMAC_KEY" in msg
 
@@ -153,7 +154,7 @@ class TestFailClosed:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("pathlib.Path.write_bytes", side_effect=OSError("permission denied")):
                 monkeypatch.setenv(ENV_VAR, "env-key-bypass")
-                engine = ReceiptEngine(Path(tmpdir))
+                engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
                 assert engine.signing_secret == b"env-key-bypass"
 
     def test_existing_file_bypasses_fail_closed(self, clean_env: None) -> None:
@@ -162,7 +163,7 @@ class TestFailClosed:
             secret_path.write_bytes(b"pre-existing-key")
 
             with patch("pathlib.Path.write_bytes", side_effect=OSError("permission denied")):
-                engine = ReceiptEngine(Path(tmpdir))
+                engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
                 assert engine.signing_secret == b"pre-existing-key"
 
 
@@ -174,7 +175,7 @@ class TestCrossPlatformFileProtection:
             pytest.skip("POSIX-only test")
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            ReceiptEngine(Path(tmpdir))
+            make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             secret_path = Path(tmpdir) / ".kernel_secret"
             mode = stat.S_IMODE(secret_path.stat().st_mode)
             assert mode == 0o600
@@ -186,7 +187,7 @@ class TestCrossPlatformFileProtection:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("subprocess.run") as mock_run:
                 mock_run.return_value = None
-                ReceiptEngine(Path(tmpdir))
+                make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
                 assert mock_run.called
                 call_args = mock_run.call_args
                 assert "icacls" in call_args[0][0]
@@ -198,7 +199,7 @@ class TestCrossPlatformFileProtection:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("subprocess.run", side_effect=Exception("icacls not found")):
                 # Should not raise — degrades to warning
-                engine = ReceiptEngine(Path(tmpdir))
+                engine = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
                 assert len(engine.signing_secret) == 32
 
 
@@ -208,12 +209,12 @@ class TestKeyRotation:
     def test_env_var_change_rotates_key(self, clean_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             monkeypatch.setenv(ENV_VAR, "old-key")
-            engine1 = ReceiptEngine(Path(tmpdir))
+            engine1 = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             receipt1 = engine1.create(agent_id="agent", action_type="ACT")
             assert engine1.validate(receipt1) is True
 
             monkeypatch.setenv(ENV_VAR, "new-key")
-            engine2 = ReceiptEngine(Path(tmpdir))
+            engine2 = make_receipt_engine(Path(tmpdir), agent_ids=("agent",))
             assert engine2.signing_secret == b"new-key"
 
             # Old receipt fails validation with new key
@@ -221,10 +222,10 @@ class TestKeyRotation:
 
     def test_explicit_secret_rotation(self, clean_env: None) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine1 = ReceiptEngine(Path(tmpdir), signing_secret=b"old-key")
+            engine1 = make_receipt_engine(Path(tmpdir), agent_ids=("agent",), signing_secret=b"old-key")
             receipt1 = engine1.create(agent_id="agent", action_type="ACT")
 
-            engine2 = ReceiptEngine(Path(tmpdir), signing_secret=b"new-key")
+            engine2 = make_receipt_engine(Path(tmpdir), agent_ids=("agent",), signing_secret=b"new-key")
             assert engine2.validate(receipt1) is False
 
             # New receipt validates with new key

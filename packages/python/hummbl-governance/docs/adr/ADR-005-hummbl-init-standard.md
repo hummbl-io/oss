@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-06-22
-- **Decision owner:** HUMMBL Principal Agent
+- **Decision owner:** Human Principal Agent
 - **Steward:** HUMMBL, LLC
 - **Supersedes:** none
 

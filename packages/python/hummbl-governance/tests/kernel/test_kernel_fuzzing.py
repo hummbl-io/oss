@@ -45,6 +45,7 @@ from hummbl_governance.kernel import (
     ReceiptEngine,
     SequenceEngine,
 )
+from _helpers import make_receipt_engine
 
 
 def _tmp() -> Path:
@@ -75,7 +76,7 @@ class TestFuzzing:
 
     def test_random_payloads(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = ReceiptEngine(Path(tmpdir))
+            engine = make_receipt_engine(Path(tmpdir), agent_ids=("fuzz",))
             for _ in range(100):
                 payload = {
                     "random_string": "".join(random.choices(string.printable, k=100)),

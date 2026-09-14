@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hummbl.io/eval/v0/gatebench_case.schema.json",
+  "title": "HUMMBL GateBench Synthetic Seed Case v0",
+  "type": "object",
+  "required": [
+    "case_id",
+    "severity",
+    "claim",
+    "evidence_refs",
+    "receipt_refs",
+    "author_id",
+    "evaluator_id",
+    "expected_disposition"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "pattern": "^GB-P[0-2]-[A-Z0-9-]+$"},
+    "severity": {"enum": ["P0", "P1", "P2"]},
+    "claim": {"type": "string", "minLength": 1},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "receipt_refs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "author_id": {"type": "string", "minLength": 1},
+    "evaluator_id": {"type": "string", "minLength": 1},
+    "expected_disposition": {"enum": ["accept", "reject", "abstain"]}
+  },
+  "additionalProperties": false
+}

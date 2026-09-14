@@ -205,6 +205,7 @@ class TestLawEvaluationRealAtlas:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             kernel = Kernel.boot(state_dir=Path(tmpdir))
+            kernel.identity.register("test")
             assert len(kernel.law.laws) == 19
 
             receipt = kernel.create_receipt(

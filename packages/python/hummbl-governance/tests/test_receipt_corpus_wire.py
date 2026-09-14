@@ -26,9 +26,16 @@ from hummbl_governance.corpus_adapter import CorpusAdapter
 from hummbl_governance.kernel import Kernel, Receipt, ReceiptEngine
 
 
+def _mock_identity(agent_id: str = "devin") -> MagicMock:
+    """Create a mock identity engine that resolves agent_id as registered."""
+    identity = MagicMock()
+    identity.resolve.return_value = MagicMock()  # non-None = registered
+    return identity
+
+
 class TestReceiptCorpusWire:
     def test_store_with_corpus_adapter(self, tmp_path: Path) -> None:
-        engine = ReceiptEngine(tmp_path)
+        engine = ReceiptEngine(tmp_path, identity_engine=_mock_identity())
         receipt = engine.create(agent_id="devin", action_type="TEST")
 
         # Create a mock adapter
@@ -41,7 +48,7 @@ class TestReceiptCorpusWire:
         mock_adapter.ingest_receipt.assert_called_once_with(receipt)
 
     def test_store_with_failing_adapter(self, tmp_path: Path) -> None:
-        engine = ReceiptEngine(tmp_path)
+        engine = ReceiptEngine(tmp_path, identity_engine=_mock_identity())
         receipt = engine.create(agent_id="devin", action_type="TEST")
 
         # Create a mock adapter that raises
@@ -58,7 +65,7 @@ class TestReceiptCorpusWire:
         assert receipt_file.exists()
 
     def test_create_and_store(self, tmp_path: Path) -> None:
-        engine = ReceiptEngine(tmp_path)
+        engine = ReceiptEngine(tmp_path, identity_engine=_mock_identity())
 
         mock_adapter = MagicMock(spec=CorpusAdapter)
         engine.corpus_adapter = mock_adapter
@@ -81,7 +88,7 @@ class TestReceiptCorpusWire:
         mock_adapter.ingest_receipt.assert_called_once_with(receipt)
 
     def test_create_and_store_without_adapter(self, tmp_path: Path) -> None:
-        engine = ReceiptEngine(tmp_path)
+        engine = ReceiptEngine(tmp_path, identity_engine=_mock_identity())
         receipt = engine.create_and_store(
             agent_id="devin",
             action_type="BUS_POST",
