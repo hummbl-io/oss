@@ -57,6 +57,7 @@ Tree versions checked 2026-09-02.
 | `hummbl-rubric-templates` | 0.1.0 | Eval rubrics |
 | `hummbl-taxonomy` | 0.1.0 | Intelligence-tier taxonomy |
 | `hummbl-validation` | 0.1.0 | Invariant / schema primitives |
+| `hummbl-invariance` | 0.1.0 | Invariance battery for stance consistency |
 | `hummbl-design-tokens` | 0.1.0 | Visual identity tokens |
 | `hummbl-heraldry` | 0.1.0 | Procedural heraldry |
 | `hummbl-garage` | 0.1.0 | API / livery / failure aesthetics |

@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **46** Python packages under `packages/python/<name>/`, one
+Currently hosts **47** Python packages under `packages/python/<name>/`, one
 private Node technical canary under `packages/node/mcp-base120`, and one Lean
 tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
 under `packages/` yet.
@@ -34,6 +34,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-rubric-templates | `packages/python/hummbl-rubric-templates/` | 0.1.0 | In-tree | Evaluation rubric templates and validators |
 | hummbl-taxonomy | `packages/python/hummbl-taxonomy/` | 0.1.0 | In-tree | Governed intelligence-tier taxonomy and classifier |
 | hummbl-validation | `packages/python/hummbl-validation/` | 0.1.0 | In-tree | Invariant and schema validation primitives |
+| hummbl-invariance | `packages/python/hummbl-invariance/` | 0.1.0 | In-tree | Invariance battery measuring agent stance consistency |
 | hummbl-design-tokens | `packages/python/hummbl-design-tokens/` | 0.1.0 | In-tree | Fleet visual identity source of truth |
 | hummbl-heraldry | `packages/python/hummbl-heraldry/` | 0.1.0 | In-tree | SHA-256 procedural heraldic agent identity |
 | hummbl-garage | `packages/python/hummbl-garage/` | 0.1.0 | In-tree | Agent Performance Index, livery, watch faces, failure aesthetics |
@@ -82,7 +83,7 @@ pip install -e ".[test]"
 ## Testing
 
 ```bash
-# Per-package (all 46)
+# Per-package (all 47)
 cd packages/python/hummbl-agent-eval-harness && python -m pytest tests/ -v
 cd packages/python/arcana && python -m pytest tests/ -v
 cd packages/python/hummbl-agent-governance && python -m pytest tests/ -v
@@ -106,6 +107,7 @@ cd packages/python/hummbl-governance && python -m pytest tests/ -v
 cd packages/python/hummbl-heraldry && python -m pytest tests/ -v
 cd packages/python/hummbl-identity && python -m pytest tests/ -v
 cd packages/python/hummbl-intel && python -m pytest tests/ -v
+cd packages/python/hummbl-invariance && python -m pytest tests/ -v
 cd packages/python/hummbl-kernel && python -m pytest tests/ -v
 cd packages/python/hummbl-lattice && python -m pytest tests/ -v
 cd packages/python/hummbl-lint-config && python -m pytest tests/ -v

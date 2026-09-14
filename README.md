@@ -24,7 +24,7 @@ provide dated primary sources, claim boundaries and a commercial measurement
 proposal. Company adoption and deployed public copy remain separate review steps.
 
 ## Packages
-46 Python packages under `packages/python/<name>/`. Versions are
+47 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
@@ -48,6 +48,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | `hummbl-rubric-templates` | 0.1.0 | — | In-tree — evaluation rubric templates |
 | `hummbl-taxonomy` | 0.1.0 | — | In-tree — intelligence-tier taxonomy |
 | `hummbl-validation` | 0.1.0 | — | In-tree — invariant and schema validation primitives |
+| `hummbl-invariance` | 0.1.0 | — | In-tree — invariance battery for agent stance consistency |
 | `hummbl-design-tokens` | 0.1.0 | — | In-tree — fleet visual identity tokens |
 | `hummbl-heraldry` | 0.1.0 | — | In-tree — procedural heraldic agent identity |
 | `hummbl-garage` | 0.1.0 | — | In-tree — performance index, livery, failure aesthetics |
