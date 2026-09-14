@@ -48,7 +48,11 @@ POST_ARGS = [
     "--tags", "test,weather",
     "--confidence", "0.9",
     "--evidence", "observed 2026-09-02",
+    "--no-skill-invoke-check",
 ]
+
+# Same as POST_ARGS but with provenance enforcement left on (the default).
+POST_ARGS_ENFORCED = [a for a in POST_ARGS if a != "--no-skill-invoke-check"]
 
 SCANNER_KEYS = [
     # assembled from fragments so secret scanners do not flag this file
@@ -146,7 +150,7 @@ class TestProvenanceEnforcement:
         return "\t".join([ts, sender, "fleet", row_type, "invoke"]) + "\n"
 
     def test_post_rejected_without_skill_invoke(self, ledger_root, bus_file, capsys):
-        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        rc = main(POST_ARGS_ENFORCED)
         assert rc == 3
         err = capsys.readouterr().err
         assert "SKILL_INVOKE" in err
@@ -159,7 +163,7 @@ class TestProvenanceEnforcement:
         bus_file.write_text(
             self._bus_row(_timestamp(), "test-agent"), encoding="utf-8"
         )
-        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        rc = main(POST_ARGS_ENFORCED)
         assert rc == 0
         assert len(load_entries()) == 1
 
@@ -170,8 +174,8 @@ class TestProvenanceEnforcement:
         old_ts = (
             datetime.now(timezone.utc) - timedelta(hours=1)
         ).strftime("%Y-%m-%dT%H:%M:%SZ")
-        bus_file.write_text(self._bus_row(old_ts, "test-agent"), encoding="utf-8")
-        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        bus_file.write_text(self._bus_row(old_ts, "test-agent"))
+        rc = main(POST_ARGS_ENFORCED)
         assert rc == 3
 
     def test_post_rejected_when_skill_invoke_from_other_agent(
@@ -182,11 +186,11 @@ class TestProvenanceEnforcement:
         bus_file.write_text(
             self._bus_row(_timestamp(), "other-agent"), encoding="utf-8"
         )
-        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        rc = main(POST_ARGS_ENFORCED)
         assert rc == 3
 
-    def test_post_without_flag_ignores_missing_skill_invoke(self, ledger_root, bus_file):
-        # No bus rows at all — backward-compat path still works
+    def test_post_with_no_skill_invoke_check_bypasses_enforcement(self, ledger_root, bus_file):
+        # No bus rows at all — opt-out flag bypasses provenance enforcement
         rc = main(POST_ARGS)
         assert rc == 0
         assert len(load_entries()) == 1

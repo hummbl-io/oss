@@ -69,9 +69,9 @@ def _add_post_parser(sub: argparse._SubParsersAction) -> None:  # noqa: SLF001
         "--assurance-level", default="SELF", help="assurance level (default SELF)"
     )
     p.add_argument(
-        "--require-skill-invoke",
+        "--no-skill-invoke-check",
         action="store_true",
-        help="reject the post unless a recent SKILL_INVOKE bus row from --agent exists",
+        help="bypass provenance enforcement (default: enforce; use only for legacy callers)",
     )
 
 
@@ -127,7 +127,7 @@ def _cmd_post(args: argparse.Namespace) -> int:
         confidence=args.confidence,
         evidence=args.evidence,
         assurance_level=args.assurance_level,
-        enforce_provenance=args.require_skill_invoke,
+        enforce_provenance=not args.no_skill_invoke_check,
     )
     print(json.dumps({"posted": record["id"], "timestamp": record["timestamp"]}))
     return 0

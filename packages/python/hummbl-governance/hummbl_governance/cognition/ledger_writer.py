@@ -281,17 +281,19 @@ def append_entry(
     evidence: str = "",
     assurance_level: str = "SELF",
     root: Path | None = None,
-    enforce_provenance: bool = False,
+    enforce_provenance: bool = True,
     bus: Path | None = None,
 ) -> dict:
     """Scan, validate, and append one entry; return the persisted record.
 
-    When *enforce_provenance* is True, the writer reads the coordination bus
+    Provenance is enforced by default: the writer reads the coordination bus
     and raises :class:`ProvenanceError` unless a ``SKILL_INVOKE`` row from
     *agent* exists within :data:`SKILL_INVOKE_WINDOW_SECONDS`. This makes the
     documented protocol ("emit SKILL_INVOKE before any stateful action")
-    enforceable at the write path rather than a convention the caller must
-    remember. *bus* overrides the bus path for tests.
+    enforced at the write path rather than a convention the caller must
+    remember. Pass ``enforce_provenance=False`` to bypass (e.g., for legacy
+    callers that have not yet been migrated). *bus* overrides the bus path
+    for tests.
     """
     _validate(entry_type=entry_type, scope=scope, tags=tags, confidence=confidence)
     scan_entry(content, evidence=evidence, tags=tags)
@@ -299,7 +301,8 @@ def append_entry(
         raise ProvenanceError(
             f"no recent SKILL_INVOKE from agent {agent!r} in the coordination bus "
             f"(window={SKILL_INVOKE_WINDOW_SECONDS}s); emit SKILL_INVOKE before "
-            "posting to the ledger, or pass enforce_provenance=False to bypass"
+            "posting to the ledger, or pass enforce_provenance=False / "
+            "--no-skill-invoke-check to bypass"
         )
 
     record = {
