@@ -32,7 +32,7 @@ Issues = "https://github.com/hummbl-io/oss/issues"
 PyPI = "https://pypi.org/project/hummbl-mcp-signal/"
 
 [project.scripts]
-hummbl-mcp-signal = "mcp_server:main"
+hummbl-mcp-signal = "signal_mcp_server:main"
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
@@ -41,4 +41,4 @@ test = ["pytest>=7.0"]
 testpaths = ["tests"]
 
 [tool.setuptools]
-py-modules = ["mcp_server"]
+py-modules = ["signal_mcp_server"]

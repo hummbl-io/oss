@@ -30,9 +30,9 @@ The Full Menu is the public publishing gate for `hummbl-io/oss`.
 A package appears as installable to the world only when it is **both CAN
 and SHOULD** and has a trusted-publishing tag under `RELEASE.md`.
 
-There is no `packages/node/`, `packages/rust/`, or `packages/go/` tree in
-this repository. Do not tell readers they can `npm install`, `cargo add`,
-or `go get` HUMMBL packages from this monorepo today.
+There is one private Node technical canary under `packages/node/`; there is no
+Rust or Go package tree. Do not tell readers they can `npm install`,
+`cargo add`, or `go get` HUMMBL packages from this monorepo today.
 
 | Section | Meaning | Decision gate |
 |---------|---------|---------------|
@@ -64,8 +64,10 @@ Do not document `pip install arbiter`, `agent-governance`, or `base120-mcp`.
 ### npm (JavaScript/TypeScript)
 
 All previously-published HUMMBL npm packages were deprecated 2026-08-21.
-The `@hummbl` scope exists. Future npm packages publish under `@hummbl/*`
-from this monorepo **after** a `packages/node/` tree exists.
+The `@hummbl` scope exists. `@hummbl/mcp-base120` is an in-tree private
+technical canary, not a live package. Future npm packages publish under
+`@hummbl/*` only after clearing CAN, SHOULD, licensing, and product-admission
+gates.
 
 ### crates.io, Go module proxy, arXiv / Zenodo
 

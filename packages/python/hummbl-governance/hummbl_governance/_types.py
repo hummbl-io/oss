@@ -511,3 +511,320 @@ class BudgetStatus:
             "decision": self.decision,
             "rationale": self.rationale,
         }
+
+
+# ---------------------------------------------------------------------------
+# Contestation Handler (P54)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ContestationRecord:
+    """A data subject's contestation of an automated decision.
+    
+    Status can change, so this is a standard dataclass (not frozen).
+    """
+    contestation_id: str
+    original_gate_id: str
+    data_subject_id: str
+    grounds: str
+    status: str
+    outcome: "str | None"
+    resolution_notes: str
+    deadline_iso: str
+    timestamp_submitted: str
+    timestamp_resolved: "str | None"
+    resolver_id: "str | None"
+    receipt_hmac: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "contestation_id": self.contestation_id,
+            "original_gate_id": self.original_gate_id,
+            "data_subject_id": self.data_subject_id,
+            "grounds": self.grounds,
+            "status": self.status,
+            "outcome": self.outcome,
+            "resolution_notes": self.resolution_notes,
+            "deadline_iso": self.deadline_iso,
+            "timestamp_submitted": self.timestamp_submitted,
+            "timestamp_resolved": self.timestamp_resolved,
+            "resolver_id": self.resolver_id,
+            "receipt_hmac": self.receipt_hmac,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ContestationRecord":
+        return cls(
+            contestation_id=data["contestation_id"],
+            original_gate_id=data["original_gate_id"],
+            data_subject_id=data["data_subject_id"],
+            grounds=data["grounds"],
+            status=data["status"],
+            outcome=data.get("outcome"),
+            resolution_notes=data.get("resolution_notes", ""),
+            deadline_iso=data["deadline_iso"],
+            timestamp_submitted=data["timestamp_submitted"],
+            timestamp_resolved=data.get("timestamp_resolved"),
+            resolver_id=data.get("resolver_id"),
+            receipt_hmac=data["receipt_hmac"],
+        )
+
+
+# ---------------------------------------------------------------------------
+# DSAR Handler (P55)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class DSARRecord:
+    """A Data Subject Access Request (Art. 15).
+    
+    Status can change, so this is a standard dataclass (not frozen).
+    """
+    dsar_id: str
+    data_subject_id: str
+    requester_ref: str
+    status: str
+    deadline_iso: str
+    extended: bool
+    extension_reason: "str | None"
+    request_notes: str
+    timestamp_received: str
+    timestamp_completed: "str | None"
+    response_path: "str | None"
+    receipt_hmac: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "dsar_id": self.dsar_id,
+            "data_subject_id": self.data_subject_id,
+            "requester_ref": self.requester_ref,
+            "status": self.status,
+            "deadline_iso": self.deadline_iso,
+            "extended": self.extended,
+            "extension_reason": self.extension_reason,
+            "request_notes": self.request_notes,
+            "timestamp_received": self.timestamp_received,
+            "timestamp_completed": self.timestamp_completed,
+            "response_path": self.response_path,
+            "receipt_hmac": self.receipt_hmac,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DSARRecord":
+        return cls(
+            dsar_id=data["dsar_id"],
+            data_subject_id=data["data_subject_id"],
+            requester_ref=data["requester_ref"],
+            status=data["status"],
+            deadline_iso=data["deadline_iso"],
+            extended=data.get("extended", False),
+            extension_reason=data.get("extension_reason"),
+            request_notes=data.get("request_notes", ""),
+            timestamp_received=data["timestamp_received"],
+            timestamp_completed=data.get("timestamp_completed"),
+            response_path=data.get("response_path"),
+            receipt_hmac=data["receipt_hmac"],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Redaction Engine (P56)
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class RedactionReceipt:
+    redaction_id: str
+    data_subject_id: str
+    art17_ground: str
+    entries_affected: int
+    fields_redacted: list[str]
+    preserve_for_legal_claims: bool
+    operator_id: str
+    timestamp: str
+    receipt_hmac: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "redaction_id": self.redaction_id,
+            "data_subject_id": self.data_subject_id,
+            "art17_ground": self.art17_ground,
+            "entries_affected": self.entries_affected,
+            "fields_redacted": self.fields_redacted,
+            "preserve_for_legal_claims": self.preserve_for_legal_claims,
+            "operator_id": self.operator_id,
+            "timestamp": self.timestamp,
+            "receipt_hmac": self.receipt_hmac,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "RedactionReceipt":
+        return cls(
+            redaction_id=data["redaction_id"],
+            data_subject_id=data["data_subject_id"],
+            art17_ground=data["art17_ground"],
+            entries_affected=data["entries_affected"],
+            fields_redacted=data["fields_redacted"],
+            preserve_for_legal_claims=data["preserve_for_legal_claims"],
+            operator_id=data["operator_id"],
+            timestamp=data["timestamp"],
+            receipt_hmac=data["receipt_hmac"],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Records of Processing (P57) — GDPR Art. 30 record
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Art30Record:
+    """A GDPR Art. 30 Record of Processing Activities (RoPA).
+
+    Generated by :class:`hummbl_governance.records_of_processing.RecordsOfProcessing`.
+    Immutable after creation (frozen dataclass).
+
+    Attributes:
+        record_id:                UUID4 identifier for this record.
+        generated_at:             ISO 8601 timestamp of generation (UTC).
+        role:                     ``'controller'`` or ``'processor'``.
+        controller_name:          Legal name of the data controller.
+        controller_contact:       Controller representative contact.
+        dpo_contact:              Data Protection Officer contact (may be empty).
+        processing_purposes:      List of processing purpose descriptions.
+        data_subject_categories:  Categories of data subjects.
+        personal_data_categories: Categories of personal data processed.
+        recipient_categories:     Categories of recipients.
+        third_country_transfers:  Transfer records for third-country destinations.
+        retention_periods:        Mapping of data category to retention period string.
+        security_measures_summary: Summary of technical/organisational safeguards.
+        primitive_sources:        Governance primitives that contributed data.
+        boundary_disclaimer:      Mandatory legal disclaimer text.
+        receipt_hmac:             HMAC-SHA256 fingerprint over key record fields.
+        sme_exempt:               True if the Art. 30(5) SME exemption applies.
+    """
+
+    record_id: str
+    generated_at: str
+    role: str
+    controller_name: str
+    controller_contact: str
+    dpo_contact: str
+    processing_purposes: list
+    data_subject_categories: list
+    personal_data_categories: list
+    recipient_categories: list
+    third_country_transfers: list
+    retention_periods: dict
+    security_measures_summary: str
+    primitive_sources: list
+    boundary_disclaimer: str
+    receipt_hmac: str
+    sme_exempt: bool = False
+
+
+# ---------------------------------------------------------------------------
+# DPIA Generator (P58) — GDPR Art. 35 / AI Act Art. 27
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class DPIASection:
+    """A single Art. 35(7) statutory DPIA section."""
+
+    title: str
+    content: str
+    evidence_refs: list  # list[str] — primitive receipt IDs or source names
+
+
+@dataclass
+class DPIADocument:
+    """A structured GDPR Art. 35 DPIA document assembled from governance evidence.
+
+    Generated by DPIAGenerator.generate().  Fields are intentionally mutable
+    so that the controller's DPO can annotate prior to formal sign-off.
+    """
+
+    dpia_id: str              # uuid4
+    generated_at: str         # ISO 8601
+    system_name: str
+    art35_triggers: list      # list[str] — which Art.35(3) conditions triggered
+    sections: list            # list[DPIASection] — 4 statutory sections
+    fria_addendum: "str | None"   # AI Act Art. 27 FRIA text if requested
+    risk_summary: dict        # {critical: n, high: n, medium: n, low: n, info: n}
+    measures_summary: list    # list[str] — safeguards implemented
+    boundary_disclaimer: str
+    receipt_hmac: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-safe dictionary."""
+        return {
+            "dpia_id": self.dpia_id,
+            "generated_at": self.generated_at,
+            "system_name": self.system_name,
+            "art35_triggers": self.art35_triggers,
+            "sections": [
+                {
+                    "title": s.title,
+                    "content": s.content,
+                    "evidence_refs": s.evidence_refs,
+                }
+                for s in self.sections
+            ],
+            "fria_addendum": self.fria_addendum,
+            "risk_summary": self.risk_summary,
+            "measures_summary": self.measures_summary,
+            "boundary_disclaimer": self.boundary_disclaimer,
+            "receipt_hmac": self.receipt_hmac,
+        }
+
+    def to_markdown(self) -> str:
+        """Render the DPIA document as a Markdown string."""
+        lines: list[str] = []
+        lines.append(f"# GDPR Art. 35 DPIA — {self.system_name}")
+        lines.append("")
+        lines.append(f"**DPIA ID:** `{self.dpia_id}`  ")
+        lines.append(f"**Generated:** {self.generated_at}  ")
+        lines.append("")
+
+        if self.art35_triggers:
+            lines.append("## Art. 35(3) Triggers")
+            for trigger in self.art35_triggers:
+                lines.append(f"- {trigger}")
+            lines.append("")
+
+        for section in self.sections:
+            lines.append(f"## {section.title}")
+            lines.append("")
+            lines.append(section.content)
+            lines.append("")
+            if section.evidence_refs:
+                lines.append("**Evidence references:**")
+                for ref in section.evidence_refs:
+                    lines.append(f"- {ref}")
+                lines.append("")
+
+        lines.append("## Risk Summary")
+        lines.append("")
+        for level, count in self.risk_summary.items():
+            lines.append(f"- {level.capitalize()}: {count}")
+        lines.append("")
+
+        lines.append("## Measures Envisaged (Summary)")
+        lines.append("")
+        for measure in self.measures_summary:
+            lines.append(f"- {measure}")
+        lines.append("")
+
+        if self.fria_addendum:
+            lines.append("## FRIA Addendum (AI Act Art. 27)")
+            lines.append("")
+            lines.append(self.fria_addendum)
+            lines.append("")
+
+        lines.append("---")
+        lines.append("")
+        lines.append(f"> **Boundary Disclaimer:** {self.boundary_disclaimer}")
+        lines.append("")
+        lines.append(f"**Receipt HMAC:** `{self.receipt_hmac}`")
+        lines.append("")
+
+        return "\n".join(lines)

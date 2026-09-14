@@ -1,11 +1,14 @@
 name: Boundary check
 
 # Public/private boundary enforcement.
-# Runs gitleaks for secret detection and a custom pattern denylist
+# Runs gitleaks for secret detection, a custom pattern denylist
 # to catch internal artifact leakage (handoffs, AARs, receipts,
-# private-status markers and fleet inventory).
+# private-status markers and fleet inventory), and a rights/distribution
+# invariant check that prevents restrictive distribution policies from
+# coexisting with published corpus files in the public tree.
 #
 # See AGENTS.md "Public/private boundary" section for the policy.
+# See issue #170 for the rights/distribution invariant origin.
 
 "on":
   pull_request:
@@ -56,3 +59,21 @@ jobs:
 
       - name: Run pattern denylist check
         run: python tools/scripts/check_boundary_patterns.py
+
+  rights-invariant:
+    name: rights-invariant
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.13"
+
+      - name: Test rights/distribution invariant checker
+        run: python -m unittest discover -s tools/scripts -p test_check_rights_distribution.py -v
+
+      - name: Run rights/distribution invariant check
+        run: python tools/scripts/check_rights_distribution.py

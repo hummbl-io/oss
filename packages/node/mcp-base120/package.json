@@ -1,0 +1,42 @@
+{
+  "name": "@hummbl/mcp-base120",
+  "version": "0.1.0-canary.0",
+  "description": "Read-only Base120 catalog for local Model Context Protocol clients",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "bin": {
+    "hummbl-mcp-base120": "bin/mcp-base120.mjs"
+  },
+  "exports": {
+    ".": "./src/catalog.mjs",
+    "./server": "./src/server.mjs",
+    "./product": "./product.json"
+  },
+  "files": [
+    "bin/",
+    "data/",
+    "src/",
+    "CHANGELOG.md",
+    "README.md",
+    "SECURITY.md",
+    "product.json"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate-catalog.mjs",
+    "check:generated": "node scripts/generate-catalog.mjs --check",
+    "check:boundary": "node scripts/check-package-boundary.mjs",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage",
+    "pack:check": "npm pack --dry-run"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "base120",
+    "mcp",
+    "model-context-protocol",
+    "reasoning"
+  ]
+}

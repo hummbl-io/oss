@@ -2,7 +2,7 @@
 
 - **Status:** proposed
 - **Date:** 2026-06-16
-- **Decision owner:** HUMMBL Principal Agent
+- **Decision owner:** Human Principal Agent
 - **Steward:** HUMMBL, LLC
 - **Authors:** devin
 - **Supersedes:** none
