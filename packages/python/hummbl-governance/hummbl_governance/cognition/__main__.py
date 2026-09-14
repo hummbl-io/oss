@@ -47,6 +47,7 @@ from hummbl_governance.cognition.ledger_writer import (
 )
 from hummbl_governance.cognition.query import filter_entries, render
 from hummbl_governance.cognition.scanner import ContentScanError
+from hummbl_governance.cognition.ledger_writer import ProvenanceError
 
 __all__ = ["main"]
 
@@ -66,6 +67,11 @@ def _add_post_parser(sub: argparse._SubParsersAction) -> None:  # noqa: SLF001
     p.add_argument("--evidence", default="", help="source/evidence citation")
     p.add_argument(
         "--assurance-level", default="SELF", help="assurance level (default SELF)"
+    )
+    p.add_argument(
+        "--require-skill-invoke",
+        action="store_true",
+        help="reject the post unless a recent SKILL_INVOKE bus row from --agent exists",
     )
 
 
@@ -121,6 +127,7 @@ def _cmd_post(args: argparse.Namespace) -> int:
         confidence=args.confidence,
         evidence=args.evidence,
         assurance_level=args.assurance_level,
+        enforce_provenance=args.require_skill_invoke,
     )
     print(json.dumps({"posted": record["id"], "timestamp": record["timestamp"]}))
     return 0
@@ -206,6 +213,9 @@ def main(argv: list[str] | None = None) -> int:
         for reason in exc.reasons:
             print(f"  - {reason}", file=sys.stderr)
         return 2
+    except ProvenanceError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 3
 
 
 if __name__ == "__main__":

@@ -22,6 +22,13 @@ Entry schema mirrors the existing on-disk ledger (12 keys):
     id, type, assurance_level, evidence, content, tags, agent,
     timestamp, confidence, model, scope, vendor
 
+Provenance enforcement (opt-in via ``enforce_provenance=True`` or the
+``--require-skill-invoke`` CLI flag): before persisting, the writer reads the
+coordination bus TSV and rejects the entry unless a ``SKILL_INVOKE`` row from
+the same agent exists within ``SKILL_INVOKE_WINDOW_SECONDS`` (default 300s).
+This closes the gap between the documented protocol ("emit SKILL_INVOKE before
+any stateful action") and the write path, which previously did not check.
+
 stdlib-only.
 """
 
@@ -43,10 +50,13 @@ __all__ = [
     "LEDGER_VERSION",
     "MAX_TAGS",
     "SCOPES",
+    "ProvenanceError",
     "append_entry",
+    "bus_path",
     "ledger_path",
     "load_entries",
     "resolve_root",
+    "verify_skill_invoke",
 ]
 
 LEDGER_VERSION = 1
@@ -54,6 +64,18 @@ ENTRY_TYPES = ("lesson", "decision", "discovery", "correction", "convention")
 SCOPES = ("project", "module", "file", "convention", "process")
 MAX_TAGS = 10
 LOCK_TIMEOUT_SECONDS = 10.0
+
+# Provenance enforcement: a ledger post is rejected unless a SKILL_INVOKE bus
+# row from the same agent exists within this window (seconds). 300s is the
+# default; override with $SKILL_INVOKE_WINDOW_SECONDS.
+SKILL_INVOKE_WINDOW_SECONDS = float(
+    os.environ.get("SKILL_INVOKE_WINDOW_SECONDS", "300")
+)
+SKILL_INVOKE_TYPE = "SKILL_INVOKE"
+
+
+class ProvenanceError(RuntimeError):
+    """Raised when provenance enforcement is on and no recent SKILL_INVOKE exists."""
 
 
 def resolve_root() -> Path:
@@ -86,6 +108,91 @@ def ledger_path(root: Path | None = None) -> Path:
     if env and root is None:
         return Path(env)
     return (root or resolve_root()) / "_state" / "cognition" / "ledger.jsonl"
+
+
+def bus_path(root: Path | None = None) -> Path:
+    """Return the coordination bus TSV path.
+
+    Mirrors the resolution in hummbl_bus.bus_writer so the ledger writer can
+    locate the bus without importing the bus package (which would create a
+    cross-package dependency). Resolution order:
+
+    1. ``$COORDINATION_BUS`` — absolute path to the bus file (highest priority).
+    2. *root* argument, if provided.
+    3. ``<resolve_root()>/_state/coordination/messages.tsv`` (default).
+    4. ``~/.cache/bus/messages.tsv`` (local mirror fallback).
+    """
+    env = os.environ.get("COORDINATION_BUS")
+    if env and root is None:
+        return Path(env)
+    candidate = (root or resolve_root()) / "_state" / "coordination" / "messages.tsv"
+    if candidate.is_file():
+        return candidate
+    return Path.home() / ".cache" / "bus" / "messages.tsv"
+
+
+def _parse_bus_timestamp(ts: str) -> datetime | None:
+    """Parse a bus row timestamp (ISO 8601 with Z suffix). Best-effort."""
+    try:
+        if ts.endswith("Z"):
+            return datetime.fromisoformat(ts[:-1]).replace(tzinfo=timezone.utc)
+        return datetime.fromisoformat(ts)
+    except (ValueError, TypeError):
+        return None
+
+
+def verify_skill_invoke(
+    agent: str,
+    *,
+    window_seconds: float | None = None,
+    bus: Path | None = None,
+    now: datetime | None = None,
+) -> bool:
+    """Return True if a SKILL_INVOKE row from *agent* exists in the bus within the window.
+
+    Reads the coordination bus TSV (format: ``timestamp_utc\\tfrom\\tto\\ttype\\tmessage``)
+    and looks for the most recent row whose ``type`` is ``SKILL_INVOKE`` and whose
+    ``from`` matches *agent*. Returns True if that row's timestamp is within
+    *window_seconds* of *now* (both default to module constants / utcnow).
+
+    Returns False if the bus file is missing, unreadable, or contains no
+    qualifying row. Never raises on a missing or malformed bus file — the
+    caller decides whether to treat "no proof" as a hard failure via
+    ``enforce_provenance``.
+    """
+    if window_seconds is None:
+        window_seconds = SKILL_INVOKE_WINDOW_SECONDS
+    if now is None:
+        now = datetime.now(timezone.utc)
+    path = bus or bus_path()
+    if not path.is_file():
+        return False
+    latest: datetime | None = None
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    for line in text.splitlines():
+        parts = line.split("\t")
+        if len(parts) < 5:
+            continue
+        row_type = parts[3].strip()
+        if row_type != SKILL_INVOKE_TYPE:
+            continue
+        if parts[1].strip() != agent:
+            continue
+        ts = _parse_bus_timestamp(parts[0].strip())
+        if ts is None:
+            continue
+        if latest is None or ts > latest:
+            latest = ts
+    if latest is None:
+        return False
+    # Make both sides offset-aware for the comparison.
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+    age = (now - latest).total_seconds()
+    return 0 <= age <= window_seconds
 
 
 def _timestamp() -> str:
@@ -174,10 +281,26 @@ def append_entry(
     evidence: str = "",
     assurance_level: str = "SELF",
     root: Path | None = None,
+    enforce_provenance: bool = False,
+    bus: Path | None = None,
 ) -> dict:
-    """Scan, validate, and append one entry; return the persisted record."""
+    """Scan, validate, and append one entry; return the persisted record.
+
+    When *enforce_provenance* is True, the writer reads the coordination bus
+    and raises :class:`ProvenanceError` unless a ``SKILL_INVOKE`` row from
+    *agent* exists within :data:`SKILL_INVOKE_WINDOW_SECONDS`. This makes the
+    documented protocol ("emit SKILL_INVOKE before any stateful action")
+    enforceable at the write path rather than a convention the caller must
+    remember. *bus* overrides the bus path for tests.
+    """
     _validate(entry_type=entry_type, scope=scope, tags=tags, confidence=confidence)
     scan_entry(content, evidence=evidence, tags=tags)
+    if enforce_provenance and not verify_skill_invoke(agent, bus=bus):
+        raise ProvenanceError(
+            f"no recent SKILL_INVOKE from agent {agent!r} in the coordination bus "
+            f"(window={SKILL_INVOKE_WINDOW_SECONDS}s); emit SKILL_INVOKE before "
+            "posting to the ledger, or pass enforce_provenance=False to bypass"
+        )
 
     record = {
         "id": str(uuid.uuid4()),

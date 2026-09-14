@@ -130,6 +130,93 @@ class TestPost:
         assert rc == 2
 
 
+class TestProvenanceEnforcement:
+    """Provenance-by-construction: ledger posts can require a prior SKILL_INVOKE."""
+
+    @pytest.fixture()
+    def bus_file(self, ledger_root, monkeypatch):
+        """Point the ledger writer at a scratch bus TSV under the same root."""
+        path = ledger_root / "_state" / "coordination" / "messages.tsv"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        monkeypatch.setenv("COORDINATION_BUS", str(path))
+        return path
+
+    @staticmethod
+    def _bus_row(ts: str, sender: str, row_type: str = "SKILL_INVOKE") -> str:
+        return "\t".join([ts, sender, "fleet", row_type, "invoke"]) + "\n"
+
+    def test_post_rejected_without_skill_invoke(self, ledger_root, bus_file, capsys):
+        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        assert rc == 3
+        err = capsys.readouterr().err
+        assert "SKILL_INVOKE" in err
+        assert "test-agent" in err
+        assert len(load_entries()) == 0
+
+    def test_post_accepted_with_recent_skill_invoke(self, ledger_root, bus_file):
+        from hummbl_governance.cognition.ledger_writer import _timestamp
+
+        bus_file.write_text(
+            self._bus_row(_timestamp(), "test-agent"), encoding="utf-8"
+        )
+        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        assert rc == 0
+        assert len(load_entries()) == 1
+
+    def test_post_rejected_when_skill_invoke_is_stale(self, ledger_root, bus_file, capsys):
+        # 1 hour ago — outside the default 300s window
+        from datetime import datetime, timedelta, timezone
+
+        old_ts = (
+            datetime.now(timezone.utc) - timedelta(hours=1)
+        ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        bus_file.write_text(self._bus_row(old_ts, "test-agent"), encoding="utf-8")
+        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        assert rc == 3
+
+    def test_post_rejected_when_skill_invoke_from_other_agent(
+        self, ledger_root, bus_file, capsys
+    ):
+        from hummbl_governance.cognition.ledger_writer import _timestamp
+
+        bus_file.write_text(
+            self._bus_row(_timestamp(), "other-agent"), encoding="utf-8"
+        )
+        rc = main(POST_ARGS + ["--require-skill-invoke"])
+        assert rc == 3
+
+    def test_post_without_flag_ignores_missing_skill_invoke(self, ledger_root, bus_file):
+        # No bus rows at all — backward-compat path still works
+        rc = main(POST_ARGS)
+        assert rc == 0
+        assert len(load_entries()) == 1
+
+    def test_verify_skill_invoke_missing_bus_returns_false(self, ledger_root, monkeypatch):
+        from hummbl_governance.cognition.ledger_writer import verify_skill_invoke
+
+        monkeypatch.setenv("COORDINATION_BUS", str(ledger_root / "nonexistent.tsv"))
+        assert verify_skill_invoke("any-agent") is False
+
+    def test_append_entry_raises_provenance_error_directly(self, ledger_root, bus_file):
+        from hummbl_governance.cognition.ledger_writer import (
+            ProvenanceError,
+            append_entry,
+        )
+
+        with pytest.raises(ProvenanceError, match="SKILL_INVOKE"):
+            append_entry(
+                "x",
+                entry_type="lesson",
+                scope="project",
+                tags=[],
+                agent="a",
+                vendor="v",
+                model="m",
+                enforce_provenance=True,
+                bus=bus_file,
+            )
+
+
 class TestScanner:
     @pytest.mark.parametrize("secret", SCANNER_KEYS)
     def test_credentials_rejected(self, secret):
