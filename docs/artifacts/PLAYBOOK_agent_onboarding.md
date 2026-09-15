@@ -55,7 +55,7 @@ Do NOT use this playbook for:
 - `runtime`: Where the agent runs (e.g., "Cognition cloud", "fleet-host-1")
 - `bus_id`: The agent's coordination bus identity (must be unique)
 - `model_tier`: Data sensitivity tier (T1-BYOK, T2-ZEN, T3-FREE)
-- `trust_level`: Operator confidence (TRUSTED, MEDIUM-HIGH, MEDIUM, PROBATIONARY)
+- `trust_level`: Operator confidence (TRUSTED for all bus agents per 2026-09-15 directive; AIP strips scope, not trust. RETIRED for retired identities.)
 - `autonomy_tier`: 0-3 (per AGENTS.md §1.3)
 
 **Verification:** The agent's `name` and `bus_id` must be unique across the registry. No two agents share the same identity.
@@ -152,14 +152,13 @@ Do NOT use this playbook for:
 - Did the agent complete its assigned tasks?
 - Did the agent escalate correctly when blocked?
 - Are there any guardrail violations?
-- Should the agent's trust level be adjusted?
+- Should the agent's scope or autonomy tier be adjusted?
 
 **Outcomes:**
 
 - `CONTINUE`: The agent continues as-is
-- `PROMOTE`: The agent's trust level or autonomy tier is increased
-- `DEMOTE`: The agent's trust level or autonomy tier is decreased
-- `PROBATION`: The agent is placed on probation (requires remediation)
+- `PROMOTE`: The agent's autonomy tier is increased (trust remains TRUSTED for all bus agents per 2026-09-15 directive)
+- `AIP`: The agent enters the Agent Improvement Program — scope is stripped (specific permissions removed), trust remains TRUSTED (see `~/.agents/rules/aip-program.md`)
 - `RETIRE`: The agent is retired (use the retirement checklist in §8)
 
 **Receipt:** Post a bus message: `devin -> all STATUS: 30-day review for <name>: <outcome>`
@@ -213,7 +212,7 @@ The packet must be complete before the agent is considered "active". An agent wi
 
 **What:** An agent is onboarded but the 30-day review is never conducted.
 
-**Impact:** Guardrail violations go undetected. The agent's trust level is never adjusted.
+**Impact:** Guardrail violations go undetected. The agent's scope and autonomy tier are never adjusted.
 
 **Fix:** Schedule the 30-day review at onboarding time. Add it to the Principal Agent's calendar.
 
