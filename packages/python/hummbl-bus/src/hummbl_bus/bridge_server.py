@@ -2108,7 +2108,7 @@ def get_tailscale_ip() -> str | None:
             for line in result.stdout.split('\n'):
                 line = line.strip()
                 if line.startswith('IPv4 Address') and '100.' in line:
-                    # "IPv4 Address. . . . . . . . . . . : 100.109.69.16"
+                    # "IPv4 Address. . . . . . . . . . . : 100.64.0.1"
                     ip = line.split(':')[-1].strip()
                     if ip.startswith('100.'):
                         return ip

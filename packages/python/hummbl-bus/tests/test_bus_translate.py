@@ -21,11 +21,11 @@ def test_compress_keeps_technical_identifiers() -> None:
 
 
 def test_compress_keeps_paths_and_brackets() -> None:
-    msg = "Updated [skill=start-session] [mode=side_effecting] at C:/Users/reuben/bin/bus-global.py"
+    msg = "Updated [skill=start-session] [mode=side_effecting] at /usr/local/bin/bus-global.py"
     out = compress_message(msg)
     assert "[skill=start-session]" in out
     assert "[mode=side_effecting]" in out
-    assert "C:/Users/reuben/bin/bus-global.py" in out
+    assert "/usr/local/bin/bus-global.py" in out
 
 
 def test_compress_keeps_citations_and_refs() -> None:
