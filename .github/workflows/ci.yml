@@ -71,7 +71,7 @@ jobs:
   test-preview:
     name: test-preview (${{ matrix.package }}, 3.15-dev)
     runs-on: ubuntu-latest
-    # Informational only — runs on push to main, not on PRs.
+    # Informational only - runs on push to main, not on PRs.
     # Cuts 46 jobs from every PR while preserving full preview coverage on main.
     if: github.event_name != 'pull_request'
     continue-on-error: true
