@@ -112,9 +112,12 @@ class SecureBusManager:
         self.bus_path.parent.mkdir(parents=True, exist_ok=True)
 
         if not self.bus_path.exists():
-            # Create new bus with header
-            header = "timestamp\tfrom\tto\ttype\tmessage\tnonce\tsignature\tsigner\n"
-            self.bus_path.write_text(header, encoding="utf-8")
+            from .bus_writer import _append_tsv_line
+
+            _append_tsv_line(
+                self.bus_path,
+                "timestamp\tfrom\tto\ttype\tmessage",
+            )
             self.security_logger.info(f"Created new bus at {self.bus_path}")
 
     def _derive_key(self, identity_id: str) -> bytes:
@@ -235,6 +238,13 @@ class SecureBusManager:
         IdentityError
             If sender identity not registered
         """
+        from .authority import PRIVILEGED_TYPES
+
+        if msg_type.strip().upper() in PRIVILEGED_TYPES:
+            raise PermissionError(
+                "SecureBusManager cannot write privileged message types; "
+                "use bus_writer.post_message with principal proof"
+            )
         identity = self.identities.get(from_id)
         if identity is None:
             raise IdentityError(f"Identity not registered: {from_id}")
@@ -242,18 +252,9 @@ class SecureBusManager:
         # Create and sign message
         msg = identity.create_signed_message(to_id, msg_type, payload)
 
-        # Append to bus under exclusive advisory lock
-        with open(self.bus_path, "a", encoding="utf-8") as f:
-            if fcntl is not None:
-                fcntl.flock(f, fcntl.LOCK_EX)
-            elif msvcrt is not None:
-                msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-            f.write(msg.to_tsv_line() + "\n")
-            f.flush()
-            if fcntl is not None:
-                fcntl.flock(f, fcntl.LOCK_UN)
-            elif msvcrt is not None:
-                msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+        from .bus_writer import _append_tsv_line
+
+        _append_tsv_line(self.bus_path, msg.to_tsv_line())
 
         self.security_logger.info(
             f"Message written: {from_id} -> {to_id}, type={msg_type}"
