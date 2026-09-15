@@ -47,6 +47,7 @@ from hummbl_governance.cognition.ledger_writer import (
 )
 from hummbl_governance.cognition.query import filter_entries, render
 from hummbl_governance.cognition.scanner import ContentScanError
+from hummbl_governance.cognition.ledger_writer import ProvenanceError
 
 __all__ = ["main"]
 
@@ -59,13 +60,18 @@ def _add_post_parser(sub: argparse._SubParsersAction) -> None:  # noqa: SLF001
     p.add_argument("--scope", default="project", choices=SCOPES, help="entry scope")
     p.add_argument("--content", required=True, help="the knowledge to record")
     p.add_argument("--tags", default="", help="comma-separated tags (max %d)" % MAX_TAGS)
-    p.add_argument("--agent", default=None, help="agent identity (default $AGENT_AGENT)")
+    p.add_argument("--agent", default=None, help="agent identity (required, or set $AGENT_AGENT)")
     p.add_argument(
         "--confidence", type=float, default=0.8, help="confidence in [0.0, 1.0]"
     )
     p.add_argument("--evidence", default="", help="source/evidence citation")
     p.add_argument(
         "--assurance-level", default="SELF", help="assurance level (default SELF)"
+    )
+    p.add_argument(
+        "--no-skill-invoke-check",
+        action="store_true",
+        help="bypass provenance enforcement (default: enforce; use only for legacy callers)",
     )
 
 
@@ -108,7 +114,12 @@ def _resolve_agent_vendor(args: argparse.Namespace) -> tuple[str, str]:
 
 def _cmd_post(args: argparse.Namespace) -> int:
     vendor, model = _resolve_agent_vendor(args)
-    agent = args.agent or os.environ.get("AGENT_AGENT") or "unknown"
+    agent = args.agent or os.environ.get("AGENT_AGENT")
+    if not agent:
+        raise SystemExit(
+            "error: --agent is required (or set $AGENT_AGENT); the ledger records "
+            "provenance and 'unknown' is not provenance"
+        )
     tags = [t.strip() for t in args.tags.split(",") if t.strip()]
     record = append_entry(
         args.content,
@@ -121,6 +132,7 @@ def _cmd_post(args: argparse.Namespace) -> int:
         confidence=args.confidence,
         evidence=args.evidence,
         assurance_level=args.assurance_level,
+        enforce_provenance=not args.no_skill_invoke_check,
     )
     print(json.dumps({"posted": record["id"], "timestamp": record["timestamp"]}))
     return 0
@@ -206,6 +218,9 @@ def main(argv: list[str] | None = None) -> int:
         for reason in exc.reasons:
             print(f"  - {reason}", file=sys.stderr)
         return 2
+    except ProvenanceError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 3
 
 
 if __name__ == "__main__":
