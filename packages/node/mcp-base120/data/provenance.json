@@ -1,0 +1,15 @@
+{
+  "schema_version": "hummbl.base120.catalog.provenance.v1",
+  "source": {
+    "repository": "https://github.com/hummbl-io/oss",
+    "path": "packages/python/base120/Base120_Canonical_Model_Registry.yaml",
+    "normalization": "UTF-8 with CRLF and CR normalized to LF",
+    "sha256": "bebd2fa8557abb64261664c552be74e1417d0c53307dce6385ebf834473135d9"
+  },
+  "catalog": {
+    "path": "packages/node/mcp-base120/data/catalog.json",
+    "schema_version": "hummbl.base120.catalog.v1",
+    "model_count": 120,
+    "sha256": "940e8a92a6f6bddc1ca600a716dc3a9c4869723c95c22fbe1651011ae305f7d6"
+  }
+}

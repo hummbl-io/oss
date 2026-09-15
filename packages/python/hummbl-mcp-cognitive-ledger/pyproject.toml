@@ -36,8 +36,11 @@ PyPI = "https://pypi.org/project/hummbl-mcp-cognitive-ledger/"
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
 
+[project.scripts]
+hummbl-mcp-cognitive-ledger = "cognitive_ledger_mcp_server:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.setuptools]
-py-modules = ["mcp_server"]
+py-modules = ["cognitive_ledger_mcp_server"]

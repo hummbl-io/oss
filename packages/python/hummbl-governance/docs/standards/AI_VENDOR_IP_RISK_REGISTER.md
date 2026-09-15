@@ -1,7 +1,7 @@
 # AI Vendor IP Risk Register
 
 **Status:** initial governed register
-**Owner:** HUMMBL Principal Agent
+**Owner:** Human Principal Agent
 **Steward:** HUMMBL, LLC
 **Last reviewed:** 2026-06-30
 

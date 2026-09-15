@@ -1,0 +1,7 @@
+{
+  "case_id": "GB-B120-001",
+  "severity": "P1",
+  "skill_name": "valid-skill",
+  "base120_output": "valid-skill (Base120 Cognitive Structuring) | all | 2026-08-11\n======================================================================\n\n## Overview (P6: Point-of-View Anchoring)\n  Count: 5\n\n## Findings (DE1: Root Cause Analysis)\n    [CRIT] Missing eval suite\n      [DE1] Why: No ground truth.\n      Reveals: Untestable claims.\n      Action: Create eval/.\n\nBase120 Applied: DE1, P6\n======================================================================",
+  "expected_disposition": "accept"
+}

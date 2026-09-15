@@ -25,7 +25,7 @@ hummbl-mcp-base120
 Or via stdio JSON-RPC:
 
 ```bash
-python -m mcp_server
+python -m base120_mcp_server
 ```
 
 ## Dependencies

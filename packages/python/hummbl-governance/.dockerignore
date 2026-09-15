@@ -1,0 +1,27 @@
+# Build artifacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# VCS
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.venv/
+.env
+.env.example
+
+# Lock files (deps resolved from pyproject.toml)
+requirements-build.lock

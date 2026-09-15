@@ -2,7 +2,7 @@
 
 **Status:** draft v0.1
 **Steward:** HUMMBL, LLC
-**Approving human:** HUMMBL Principal Agent
+**Approving human:** Human Principal Agent
 **Source of record:** this file in `hummbl-io/hummbl-governance` (canonical); templates mirrored in `hummbl-io/.github`.
 
 ## 1. Purpose
@@ -170,7 +170,7 @@ repo:
     hummbl_prefix_exception: true
     exception_class: authored_artifact | protocol | reference_archive | research_object
     exception_reason: "<short rationale>"
-    approved_by: "HUMMBL Principal Agent"
+    approved_by: "Human Principal Agent"
     approved_at: "YYYY-MM-DD"
     owning_standard: "HUMMBL Repo Standard"
     allowed_scope: "<explicitly allowed scope>"
@@ -182,9 +182,9 @@ Current approved non-`hummbl-` repo exceptions:
 
 | Repo | Class | Approved by | Approved on |
 |------|-------|-------------|-------------|
-| `whether-book` | `research_object` | HUMMBL Principal Agent | 2026-06-25 |
-| `base120` | `protocol` | HUMMBL Principal Agent | 2026-06-24 |
-| `idp-spec` | `protocol` | HUMMBL Principal Agent | 2026-06-24 |
+| `whether-book` | `research_object` | Human Principal Agent | 2026-06-25 |
+| `base120` | `protocol` | Human Principal Agent | 2026-06-24 |
+| `idp-spec` | `protocol` | Human Principal Agent | 2026-06-24 |
 
 Agents must not create additional non-prefixed repositories without an operator-approved `repo.naming` exception block.
 
@@ -204,4 +204,4 @@ Each repo's `scripts/validate.*` is its deterministic admission gate. The standa
 
 ## 13. Amendment
 
-Changes to this standard require: a PR to `hummbl-io/hummbl-governance`, an ADR under `docs/adr/`, a KRINEIA receipt, and human approval (HUMMBL Principal Agent). Breaking changes bump the standard version (SemVer) and trigger a fleet re-audit.
+Changes to this standard require: a PR to `hummbl-io/hummbl-governance`, an ADR under `docs/adr/`, a KRINEIA receipt, and human approval (Human Principal Agent). Breaking changes bump the standard version (SemVer) and trigger a fleet re-audit.

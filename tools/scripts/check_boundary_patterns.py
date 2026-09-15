@@ -65,6 +65,8 @@ PUBLIC_DOMAIN_PATHS = {
     "packages/python/hummbl-governance/hummbl_governance/kernel/receipt_engine.py",
     "packages/python/hummbl-governance/hummbl_governance/kernel/receipt_integrity_monitor.py",
     "packages/python/hummbl-tuples/schemas/extensions/multi_actor/handoff_event.schema.json",
+    "packages/python/hummbl-eval/tests/fixtures/gatebench/receipt_laundering.json",
+    "packages/python/hummbl-gitops/hummbl_gitops/return_/receipt_sync.py",
 }
 WINDOWS_HOME_PATH = re.compile(r"(?i)[A-Z]:[/\\]+Users[/\\]+[A-Za-z0-9._-]+")
 POSIX_HOME_PATH = re.compile(
