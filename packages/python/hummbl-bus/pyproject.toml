@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hummbl-bus"
-version = "0.2.0"
+version = "0.2.1"
 description = "Secure append-only TSV coordination bus for multi-agent systems"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -22,9 +22,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-dependencies = [
-    "hummbl-governance>=1.2.2",
-]
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/hummbl-io/oss"
@@ -34,6 +32,9 @@ Issues = "https://github.com/hummbl-io/oss/issues"
 PyPI = "https://pypi.org/project/hummbl-bus/"
 
 [project.optional-dependencies]
+security = [
+    "cryptography>=42.0",
+]
 test = [
     "pytest>=7.0",
     "coverage>=7.0",

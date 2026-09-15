@@ -1,0 +1,22 @@
+{
+  "schema": "hummbl.bus.project-topology-manifest.v1",
+  "project": "hummbl-bus",
+  "status": "proposed",
+  "cell": {
+    "boundary": "project",
+    "canonical_writer": "bridge-admission",
+    "message_types": ["STATUS", "PROPOSAL", "ACK", "QUESTION", "MILESTONE"],
+    "retention": "append-only; policy-defined archival",
+    "replicated_state_machine": false
+  },
+  "sidecars": [
+    {"name": "bridge-admission", "role": "admission", "status": "validated"},
+    {"name": "read-projection", "role": "projection", "status": "planned"},
+    {"name": "bus-observability", "role": "observability", "status": "planned"}
+  ],
+  "evidence": {
+    "source_refs": ["docs/architecture/PROJECT_BUS_TOPOLOGIES_2026-08-31.md"],
+    "deployment_verified": false,
+    "notes": "Illustrative contract only; deployment state and retention schedule require independent evidence."
+  }
+}

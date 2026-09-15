@@ -12,6 +12,8 @@ Promoted from hummbl-governance/bus/bus_utils.py 2026-08-15.
 
 from __future__ import annotations
 
+import re
+
 from hummbl_bus.message_types import READABLE_MESSAGE_TYPES
 
 # Allowed message types for the coordination bus. A line whose type field
@@ -22,16 +24,6 @@ from hummbl_bus.message_types import READABLE_MESSAGE_TYPES
 # The set is intentionally a module-level frozenset so it can be extended by
 # callers that register custom types without modifying this file.
 _ALLOWED_MESSAGE_TYPES: set[str] = set(READABLE_MESSAGE_TYPES)
-
-
-def register_message_type(msg_type: str) -> None:
-    """Register a custom message type so parse_bus_line accepts it.
-
-    Callers that introduce a new bus message type should call this once at
-    import time so the reader recognizes the type. This avoids a hard
-    dependency from bus_utils on the full type registry in bus_writer_core.
-    """
-    _ALLOWED_MESSAGE_TYPES.add(msg_type.strip().upper())
 
 
 def parse_bus_line(line: str) -> dict[str, str] | None:
@@ -69,3 +61,23 @@ def parse_bus_line(line: str) -> dict[str, str] | None:
         "type": parts[3],
         "message": "\t".join(parts[4:]),
     }
+
+
+def extract_tag(body: str, tag: str) -> str | None:
+    """Extract ``tag=value`` from a bus message body.
+
+    Single canonical implementation shared by ``lane_classifier`` and
+    ``inference_tier`` to avoid regex duplication.
+
+    Args:
+        body: The raw message body text.
+        tag: The tag name to search for (e.g. ``"priority"``, ``"lane"``).
+
+    Returns:
+        The tag value, or ``None`` if the tag is not present.
+    """
+    pattern = rf"\b{re.escape(tag)}=([^;,\s]+)"
+    match = re.search(pattern, body)
+    if match:
+        return match.group(1)
+    return None
