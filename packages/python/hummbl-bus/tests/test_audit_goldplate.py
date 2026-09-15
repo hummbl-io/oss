@@ -13,21 +13,23 @@ import json
 from pathlib import Path
 
 import pytest
-from hummbl_bus.bus_utils import parse_bus_line
+
 from hummbl_bus.bus_writer import (
-    _sanitize_correlation_id,
-    _validate_content,
     _validate_fields,
+    _validate_content,
+    _sanitize_correlation_id,
     escape_message,
     unescape_message,
     validate_tsv_integrity,
 )
+from hummbl_bus.bus_utils import parse_bus_line
 from hummbl_bus.message_signing import (
     NonceTracker,
     extract_timestamp_from_nonce,
     unwrap_signing_envelope,
 )
 from hummbl_bus.spool import load_spool_record
+
 
 # ---------------------------------------------------------------------------
 # _validate_fields — error paths and boundary conditions
@@ -113,27 +115,24 @@ class TestValidateContent:
 
 class TestSanitizeCorrelationId:
     def test_rejects_empty_string(self) -> None:
-        with pytest.raises(
-            ValueError, match="correlation_id must be a non-empty string"
-        ):
+        with pytest.raises(ValueError, match="correlation_id must be a non-empty string"):
             _sanitize_correlation_id("")
 
     def test_rejects_whitespace_only(self) -> None:
-        with pytest.raises(
-            ValueError, match="correlation_id must be a non-empty string"
-        ):
+        with pytest.raises(ValueError, match="correlation_id must be a non-empty string"):
             _sanitize_correlation_id("   ")
 
     def test_rejects_non_string(self) -> None:
-        with pytest.raises(
-            ValueError, match="correlation_id must be a non-empty string"
-        ):
+        with pytest.raises(ValueError, match="correlation_id must be a non-empty string"):
             _sanitize_correlation_id(None)  # type: ignore[arg-type]
 
-    def test_strips_tabs_and_newlines(self) -> None:
-        result = _sanitize_correlation_id("corr\tabc\ndef")
-        assert "\t" not in result
-        assert "\n" not in result
+    @pytest.mark.parametrize(
+        "value",
+        ["corr\tabc", "corr\nabc", "corr abc", " corr", "corr\x1babc"],
+    )
+    def test_rejects_noncanonical_characters(self, value: str) -> None:
+        with pytest.raises(ValueError, match="correlation_id must match"):
+            _sanitize_correlation_id(value)
 
 
 # ---------------------------------------------------------------------------
@@ -323,10 +322,6 @@ class TestBridgeServerInputValidation:
 
         from hummbl_bus.bridge_server import BusBridgeHandler
 
-        monkeypatch.setenv("BUS_BRIDGE_ALLOW_NO_AUTH", "1")
-        monkeypatch.delenv("BUS_BRIDGE_TOKEN", raising=False)
-        monkeypatch.delenv("BUS_BRIDGE_TOKEN_FILE", raising=False)
-
         handler = object.__new__(BusBridgeHandler)
         handler.path = "/bus/tail?n=-5"
         handler.headers = {}
@@ -367,10 +362,6 @@ class TestBridgeServerInputValidation:
         import io
 
         from hummbl_bus.bridge_server import BusBridgeHandler
-
-        monkeypatch.setenv("BUS_BRIDGE_ALLOW_NO_AUTH", "1")
-        monkeypatch.delenv("BUS_BRIDGE_TOKEN", raising=False)
-        monkeypatch.delenv("BUS_BRIDGE_TOKEN_FILE", raising=False)
 
         handler = object.__new__(BusBridgeHandler)
         handler.path = "/bus/tail?n=abc"

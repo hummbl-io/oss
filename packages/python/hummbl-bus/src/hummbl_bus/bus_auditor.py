@@ -24,10 +24,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from hummbl_bus.message_types import (
-    LEGACY_MESSAGE_TYPES,
-    READABLE_MESSAGE_TYPES,
-)
+from hummbl_bus.message_types import READABLE_MESSAGE_TYPES
 from hummbl_bus.wip_healer import heal as wip_heal
 
 logger = logging.getLogger(__name__)
@@ -113,7 +110,6 @@ def scan_format_drift_details(bus_path: str | Path) -> FormatDriftReport:
     valid = 0
     malformed = 0
     bad_ts = 0
-    legacy_types: set[str] = set()
     unknown_types: set[str] = set()
 
     for raw in lines:
@@ -130,9 +126,7 @@ def scan_format_drift_details(bus_path: str | Path) -> FormatDriftReport:
         if _parse_ts(ts_str) is None:
             bad_ts += 1
         normalized_type = mtype.upper()
-        if normalized_type in LEGACY_MESSAGE_TYPES:
-            legacy_types.add(normalized_type)
-        elif normalized_type not in READABLE_MESSAGE_TYPES:
+        if normalized_type not in READABLE_MESSAGE_TYPES:
             unknown_types.add(mtype)
 
     return FormatDriftReport(
@@ -140,7 +134,7 @@ def scan_format_drift_details(bus_path: str | Path) -> FormatDriftReport:
         valid_rows=valid,
         malformed_rows=malformed,
         invalid_timestamps=bad_ts,
-        legacy_types=tuple(sorted(legacy_types)),
+        legacy_types=(),
         unknown_types=tuple(sorted(unknown_types)),
     )
 
