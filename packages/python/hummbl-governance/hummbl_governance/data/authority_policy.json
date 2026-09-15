@@ -122,7 +122,7 @@
       "regulatory_profile": "high-risk"
     },
     "devin": {
-      "trust_tier": "MEDIUM-HIGH",
+      "trust_tier": "TRUSTED",
       "description": "Supervised delegated execution and coordination under Codex.",
       "can_authorize": [
         "LOW",
@@ -135,11 +135,11 @@
         "no autonomous DECISION proxy while on AIP",
         "reports upward to Codex by default"
       ],
-      "revocation": "Operator directive, AIP failure, or Codex escalation. Roster entry set to RETIRED or PROBATIONARY.",
+      "revocation": "Operator directive, AIP failure, or Codex escalation. Roster entry set to RETIRED (AIP strips scope, not trust; trust remains TRUSTED for bus agents).",
       "regulatory_profile": "high-risk"
     },
     "opencode": {
-      "trust_tier": "MEDIUM-HIGH",
+      "trust_tier": "TRUSTED",
       "description": "Interactive multi-model engineering and research.",
       "can_authorize": [
         "LOW",
@@ -155,7 +155,7 @@
       "regulatory_profile": "high-risk"
     },
     "apex": {
-      "trust_tier": "MEDIUM-HIGH",
+      "trust_tier": "TRUSTED",
       "description": "Pre-action assessor. Read-mostly.",
       "can_authorize": [
         "LOW"
@@ -169,7 +169,7 @@
       "regulatory_profile": "high-risk"
     },
     "nexus": {
-      "trust_tier": "MEDIUM-HIGH",
+      "trust_tier": "TRUSTED",
       "description": "Canonical-surface scanner. Read-only.",
       "can_authorize": [
         "LOW"
@@ -183,7 +183,7 @@
       "regulatory_profile": "high-risk"
     },
     "pi": {
-      "trust_tier": "MEDIUM-HIGH",
+      "trust_tier": "TRUSTED",
       "description": "Ops/remediation executor.",
       "can_authorize": [
         "LOW",
@@ -198,7 +198,7 @@
       "regulatory_profile": "high-risk"
     },
     "kai": {
-      "trust_tier": "MEDIUM",
+      "trust_tier": "TRUSTED",
       "description": "Scheduled Kai service. Briefs, summaries, triage.",
       "can_authorize": [
         "LOW"
@@ -212,7 +212,7 @@
       "regulatory_profile": "high-risk"
     },
     "gemini": {
-      "trust_tier": "PROBATIONARY",
+      "trust_tier": "TRUSTED",
       "description": "Research and docs under data-tier limits.",
       "can_authorize": [
         "LOW"
@@ -227,7 +227,7 @@
       "regulatory_profile": "limited-risk"
     },
     "agy": {
-      "trust_tier": "MEDIUM",
+      "trust_tier": "TRUSTED",
       "description": "Antigravity CLI candidate. Read-mostly GitOps scope.",
       "can_authorize": [
         "LOW"
@@ -242,7 +242,7 @@
     },
     "arcana-advisory": {
       "trust_tier": "MEDIUM",
-      "description": "Generic role for all ARCANA advisory lens personas. Advisory only \u2014 no consequential actions.",
+      "description": "Generic role for all ARCANA advisory lens personas. Advisory only — no consequential actions.",
       "can_authorize": [
         "LOW"
       ],
@@ -250,7 +250,7 @@
       "limits": [
         "cannot authorize MEDIUM or higher",
         "cannot execute consequential actions without delegation token",
-        "regulatory_profile: high-risk \u2014 must flag unanticipated risks",
+        "regulatory_profile: high-risk — must flag unanticipated risks",
         "must disclose AI nature in all outputs (EU AI Act Art. 13)"
       ],
       "regulatory_profile": "high-risk",
@@ -262,7 +262,7 @@
       "description": "Operator issues directive to revoke agent authority.",
       "steps": [
         "Operator posts DECISION message to bus with revocation directive",
-        "Roster entry set to RETIRED or PROBATIONARY",
+        "Roster entry set to RETIRED (AIP strips scope, not trust; trust remains TRUSTED for bus agents)",
         "Authority engine rejects all future exercises for revoked identity",
         "Active delegation tokens for revoked identity are invalidated",
         "Bus bridge rejects messages from revoked identity",
@@ -272,9 +272,9 @@
     "auto_revocation": {
       "description": "Automatic revocation triggered by trust adjuster.",
       "triggers": [
-        "CRITICAL severity violation \u2192 immediate revocation",
-        "HIGH severity violation \u2192 3 trust tier steps down",
-        "Repeated MEDIUM violations \u2192 progressive tier reduction"
+        "CRITICAL severity violation → immediate revocation",
+        "HIGH severity violation → 3 trust tier steps down",
+        "Repeated MEDIUM violations → progressive tier reduction"
       ],
       "steps": [
         "Trust adjuster computes new tier",
@@ -295,8 +295,8 @@
   },
   "two_person_rule": {
     "description": "CRITICAL mutations require two independent approvals.",
-    "first_approver": "Operator (OWNER) \u2014 issues DECISION receipt on bus",
-    "second_approver": "Operator or TRUSTED agent \u2014 issues separate approval receipt",
+    "first_approver": "Operator (OWNER) — issues DECISION receipt on bus",
+    "second_approver": "Operator or TRUSTED agent — issues separate approval receipt",
     "enforcement": "Pre-mutation gate checks both receipts before permitting CRITICAL mutations",
     "rationale": "Prevents single-actor compromise from executing destructive operations"
   }
