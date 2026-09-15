@@ -12,23 +12,26 @@ import json
 import secrets
 import threading
 import time
+import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
 
 def generate_nonce() -> str:
-    """Generate a unique nonce with embedded timestamp.
+    """Generate a unique nonce.
 
-    The nonce format is: {micros_since_epoch}-{random_hex}
-    This provides both uniqueness and temporal information.
+    Uses ``uuid4`` for cryptographic uniqueness without a hand-rolled
+    timestamp+hex format.  The :func:`~hummbl_bus.message_signing.extract_timestamp_from_nonce`
+    helper returns ``None`` for uuid4 nonces; callers that need temporal
+    expiry rely on the in-memory nonce tracker TTL instead.
 
     Returns:
     -------
     str
-        Unique nonce string
+        Unique nonce string (uuid4 hex)
     """
-    return f"{int(time.time() * 1000000)}-{secrets.token_hex(8)}"
+    return uuid.uuid4().hex
 
 
 class SecurityError(Exception):
@@ -128,44 +131,56 @@ class BusMessage:
         )
 
     def to_tsv_line(self) -> str:
-        r"""Convert to TSV line format (legacy or signed).
+        r"""Convert to the canonical five-column TSV format.
 
-        For unsigned messages: timestamp\tsender\trecipient\ttype\tmessage
-        For signed messages: adds nonce and signature columns
+        Signature metadata is carried inside a JSON envelope in column five;
+        it never creates extra TSV columns.
 
         Returns:
         -------
         str
             TSV-formatted line
         """
-        # Main message body from payload
-        if "message" in self.payload:
-            message_body = self.payload["message"]
-        else:
-            message_body = json.dumps(self.payload, separators=(",", ":"))
-
-        # Sanitize to preserve TSV structure
-        message_body = message_body.replace("\t", " ").replace("\n", " ")
-
         if self.signature:
-            # Signed format: 8 columns
-            return (
-                f"{self.timestamp}\t{self.sender}\t{self.recipient}\t"
-                f"{self.msg_type}\t{message_body}\t{self.nonce}\t"
-                f"{self.signature}\t{self.sender}"
+            message_body = json.dumps(
+                {
+                    "c": self.payload,
+                    "n": self.nonce,
+                    "s": self.signature,
+                    "signer": self.sender,
+                    "v": "hummbl_bus.bus_security.v1",
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
             )
         else:
-            # Legacy format: 5 columns
-            return (
-                f"{self.timestamp}\t{self.sender}\t{self.recipient}\t"
-                f"{self.msg_type}\t{message_body}"
+            if "message" in self.payload:
+                message_body = str(self.payload["message"])
+            else:
+                message_body = json.dumps(
+                    self.payload,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+            message_body = (
+                message_body.replace("\t", " ")
+                .replace("\r", " ")
+                .replace("\n", " ")
             )
+
+        return (
+            f"{self.timestamp}\t{self.sender}\t{self.recipient}\t"
+            f"{self.msg_type}\t{message_body}"
+        )
 
     @classmethod
     def from_tsv_line(cls, line: str) -> BusMessage:
         """Parse a TSV line into a BusMessage.
 
-        Handles both legacy 5-column and signed 8-column formats.
+        Handles the canonical five-column signed envelope plus historical
+        unsigned five-column and signed eight-column rows for read compatibility.
 
         Parameters
         ----------
@@ -205,13 +220,34 @@ class BusMessage:
                 nonce=nonce,
                 signature=signature,
             )
-        elif len(parts) >= 5:
-            # Legacy unsigned format
+        elif len(parts) == 5:
             timestamp, sender, recipient, msg_type, message_body = parts[:5]
             try:
-                payload = json.loads(message_body)
+                decoded = json.loads(message_body)
             except json.JSONDecodeError:
                 payload = {"message": message_body}
+            else:
+                if (
+                    isinstance(decoded, dict)
+                    and decoded.get("v") == "hummbl_bus.bus_security.v1"
+                    and set(decoded) == {"c", "n", "s", "signer", "v"}
+                    and isinstance(decoded.get("c"), dict)
+                    and decoded.get("signer") == sender
+                    and isinstance(decoded.get("n"), str)
+                    and isinstance(decoded.get("s"), str)
+                ):
+                    return cls(
+                        timestamp=timestamp,
+                        sender=sender,
+                        recipient=recipient,
+                        msg_type=msg_type,
+                        payload=decoded["c"],
+                        nonce=decoded["n"],
+                        signature=decoded["s"],
+                    )
+                payload = decoded if isinstance(decoded, dict) else {
+                    "message": message_body
+                }
             return cls(
                 timestamp=timestamp,
                 sender=sender,
