@@ -43,6 +43,7 @@ test = [
     "coverage>=7.0",
     "mypy>=1.8",
     "jsonschema>=4.0",
+    "hummbl-governance>=1.2.2",
 ]
 
 [tool.setuptools.packages.find]
