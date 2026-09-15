@@ -4,6 +4,7 @@ import json
 import re
 
 import pytest
+
 from hummbl_bus.bus_writer import (
     _redact_metadata,
     _validate_bridge_url,
@@ -121,10 +122,10 @@ def test_validate_bridge_url_allows_extra_host(
 
 
 def test_generate_request_id_format() -> None:
-    rid = generate_request_id("host-01", "codex")
-    assert rid.startswith("host-01-codex-")
+    rid = generate_request_id("anvil", "codex")
+    assert rid.startswith("anvil-codex-")
     # UUID hex is 32 chars
-    suffix = rid.split("host-01-codex-")[1]
+    suffix = rid.split("anvil-codex-")[1]
     assert len(suffix) == 32
     assert re.match(r"^[0-9a-f]{32}$", suffix)
 
@@ -137,7 +138,7 @@ def test_generate_request_id_sanitizes_special_chars() -> None:
 
 
 def test_generate_request_id_unique() -> None:
-    ids = {generate_request_id("host-01", "codex") for _ in range(100)}
+    ids = {generate_request_id("anvil", "codex") for _ in range(100)}
     assert len(ids) == 100  # All unique
 
 

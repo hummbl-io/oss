@@ -75,24 +75,23 @@ def test_ledger_concurrency():
         print(f"Ledger Chaos Exceptions: {len(errors)}")
         for e in errors[:10]:
             print(e)
-        return False
+        pytest.fail(f"{len(errors)} worker threads raised exceptions")
 
     valid_count, integrity_errors = validate_integrity(ledger_path=ledger_path)
     if integrity_errors:
         print(f"Ledger Integrity Failures: {len(integrity_errors)}")
         for e in integrity_errors[:10]:
             print(e)
-        return False
+        pytest.fail(f"{len(integrity_errors)} ledger integrity failures")
 
     expected_count = num_threads * iterations
-    if valid_count != expected_count:
-        print(f"Ledger Count Mismatch: expected {expected_count}, got {valid_count}")
-        return False
+    assert valid_count == expected_count, (
+        f"Ledger count mismatch: expected {expected_count}, got {valid_count}"
+    )
 
     print(f"Ledger Chaos Passed: {valid_count} entries written safely.")
-    return True
 
 
 if __name__ == "__main__":
-    success = test_ledger_concurrency()
-    exit(0 if success else 1)
+    test_ledger_concurrency()
+    exit(0)

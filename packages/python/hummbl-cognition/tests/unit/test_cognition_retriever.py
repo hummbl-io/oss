@@ -192,14 +192,15 @@ class TestExtractSnippet:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(reason="API changed: retriever constructor signature")
 class TestRetrieverConstruction:
+    @pytest.mark.xfail(reason="API changed: retriever constructor signature")
     def test_default_state_dir(self):
         with patch("hummbl_cognition.retriever._resolve_state_dir") as mock_resolve:
             mock_resolve.return_value = Path("/tmp/state")
             r = OpenBrainRetriever()
             assert r.state_dir == Path("/tmp/state")
 
+    @pytest.mark.xfail(reason="API changed: retriever constructor signature")
     def test_explicit_state_dir(self):
         r = OpenBrainRetriever(state_dir="/tmp/custom")
         assert r.state_dir == Path("/tmp/custom")
