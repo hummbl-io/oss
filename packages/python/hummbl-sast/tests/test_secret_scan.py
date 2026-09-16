@@ -32,7 +32,10 @@ def test_private_key_detection(tmp_path):
 def test_openai_key_detection(tmp_path):
     """OpenAI API key should be detected."""
     f = tmp_path / "test.py"
-    f.write_text('api_key = "sk-proj-abcdefghijklmnopqrstuvwxyz1234567890ABCD"')
+    # Built at runtime: matches SEC012 shape but leaves no literal for
+    # upstream secret scanners to flag as a live OpenAI key.
+    dummy_key = "sk-" + "proj-" + "x" * 48
+    f.write_text(f'api_key = "{dummy_key}"')
     findings = scan_file(f)
     assert any(r.rule_id == "SEC012" and r.severity == "HIGH" for r in findings)
 
@@ -97,7 +100,7 @@ def test_redaction(tmp_path):
 def test_env_file_detection(tmp_path):
     """.env-style files should be scanned."""
     env_file = tmp_path / ".env"
-    env_file.write_text("API_KEY=sk-ant-abcdefghijklmnopqrstuvwxyz1234567890ABCD")
+    env_file.write_text("API_KEY=" + "sk-ant-" + "x" * 48)
 
     findings = scan_directory(tmp_path)
     assert len(findings) > 0
