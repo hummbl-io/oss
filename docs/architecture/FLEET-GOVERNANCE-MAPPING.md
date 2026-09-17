@@ -109,7 +109,7 @@ Related work is three layers, not one IETF token:
 HUMMBL's design principles match (time-bounding, least-privilege, signed)
 but the wire format diverges (HMAC-SHA256 symmetric vs. Ed25519
 asymmetric; no chain structure vs. append-only chain). See
-`docs/DELEGATION-IETF-GAP-ANALYSIS.md` for the detailed audit.
+`docs/research/DELEGATION-IETF-GAP-ANALYSIS.md` for the detailed audit.
 
 ### 3.3 Circuit-breaker layered guardrails
 
@@ -204,7 +204,7 @@ amendments.
 | 2026-08-21 | Pursue ISO 42001 + NIST AI RMF dual adoption | Official crosswalk enables dual compliance; AIMS provides audit wrapper, NIST provides operating model |
 | 2026-08-21 | Preemptive EU AI Act provider/deployer self-classification | Article 25 cannot absorb fleet orchestration; self-classification is lower risk than waiting for regulatory interpretation |
 | 2026-08-21 | Audit delegation tokens against IETF HDP/DCT drafts | Align wire format before drafts ratify; avoid costly refactoring (see DELEGATION-IETF-GAP-ANALYSIS.md) |
-| 2026-08-31 | IETF delegation gap analysis landed; DCT is not IETF | Analysis at `docs/DELEGATION-IETF-GAP-ANALYSIS.md` (not a claim of alignment). HDP = IETF provenance; DCT = DeepMind paper; AAT = `draft-niyikiza-oauth-attenuating-agent-tokens-01` |
+| 2026-08-31 | IETF delegation gap analysis landed; DCT is not IETF | Analysis at `docs/research/DELEGATION-IETF-GAP-ANALYSIS.md` (not a claim of alignment). HDP = IETF provenance; DCT = DeepMind paper; AAT = `draft-niyikiza-oauth-attenuating-agent-tokens-01` |
 | 2026-08-21 | Document cost governor as commons-protection mechanism | GOVSIM (arXiv 2404.16698) validates runtime cost governance as necessary for sustainable fleet operation |
 | 2026-09-04 | Remove private supporting crosswalk references from the public index | Published package coverage matrices remain the review surface. This cleanup does not change coverage verdicts or resolve open questions. |
 

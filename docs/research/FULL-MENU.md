@@ -6,8 +6,8 @@ inventory.
 
 **Status:** Active as a release-discipline note.
 **As of:** 2026-09-02.
-**Canonical inventory:** [`PACKAGES.md`](./PACKAGES.md) and the root
-[`README.md`](../README.md). Do not keep a second live-package table here.
+**Canonical inventory:** [`docs/research/PACKAGES.md`](PACKAGES.md) and the root
+[`README.md`](../../README.md). Do not keep a second live-package table here.
 
 ---
 
@@ -44,7 +44,7 @@ CAN is about capability. SHOULD is about judgment. A package can be CAN
 without being SHOULD (technically publishable but strategically premature),
 and SHOULD without being CAN (strategically ready but technically blocked).
 
-What is actually Live vs in-tree is listed in `PACKAGES.md`. Candidates that
+What is actually Live vs in-tree is listed in `docs/research/PACKAGES.md`. Candidates that
 are not yet both CAN and SHOULD stay private and are not staged into this
 public document ahead of release.
 
@@ -90,13 +90,13 @@ tag from this repo:
 - [ ] Source under `packages/python/<name>/`
 - [ ] Trusted publisher configured on pypi.org (owner: hummbl-io, repo: oss, workflow: publish-pypi.yml, environment: pypi)
 - [ ] Tag pattern `python/<package>/v*` in `.github/workflows/publish-pypi.yml`
-- [ ] Root README, `AGENTS.md`, and `docs/PACKAGES.md` updated in the same PR
+- [ ] Root README, `AGENTS.md`, and `docs/research/PACKAGES.md` updated in the same PR
 
 ---
 
 ## See also
 
-- [PACKAGES.md](./PACKAGES.md) — live vs in-tree inventory and registry collisions
-- [MONOREPO-DESIGN.md](./MONOREPO-DESIGN.md) — directory structure and migration plan
-- [RELEASE.md](../RELEASE.md) — trusted publishing, tag contract, no manual uploads
+- [PACKAGES.md](PACKAGES.md) — live vs in-tree inventory and registry collisions
+- [MONOREPO-DESIGN.md](MONOREPO-DESIGN.md) — directory structure and migration plan
+- [RELEASE.md](../../RELEASE.md) — trusted publishing, tag contract, no manual uploads
 - Issue `#79` — remaining identity work outside this repo (PyPI org blurb, `arbiter-dev`)

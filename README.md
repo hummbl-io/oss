@@ -97,7 +97,7 @@ governance and agent infrastructure stays in private `hummbl-io/*` repos.
 Migration is staged. Package source is moved here incrementally; each
 package links to this repo as its canonical home once migrated. During
 the transition, some packages may still have been published from a
-legacy repo. See `docs/MONOREPO-DESIGN.md` and `docs/PACKAGES.md`.
+legacy repo. See `docs/research/MONOREPO-DESIGN.md` and `docs/research/PACKAGES.md`.
 Publish tags must be `python/<package>/v<version>` (see `RELEASE.md`).
 Legacy tags of the form `<package>/v<version>` do not trigger
 `.github/workflows/publish-pypi.yml`.
