@@ -57,6 +57,10 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-mcp-utf | `packages/python/hummbl-mcp-utf/` | 0.1.0 | In-tree | MCP server exposing HUMMBL Unified Tier Framework |
 | hummbl-mcp-omnichannel | `packages/python/hummbl-mcp-omnichannel/` | 0.1.0 | In-tree | Omnichannel governance gate MCP server (stdlib http.server) |
 | hummbl-mcp-voice | `packages/python/hummbl-mcp-voice/` | 0.1.0 | In-tree | MCP server for vendor-neutral voice interactions (Vapi adapter) |
+| arcana | `packages/python/arcana/` | 0.1.0 | In-tree | Arcana repository scanner and agent memory analysis |
+| hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.1.0 | In-tree | Shared rules and lifecycle hooks for hummbl agents |
+| hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | HUMMBL evaluation primitives and test runner |
+| hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | GitOps synchronization and branch governance |
 
 Node packages:
 

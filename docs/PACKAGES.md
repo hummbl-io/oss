@@ -80,6 +80,10 @@ Tree versions checked 2026-09-02.
 | `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | Omnichannel governance gate MCP server (refactored from FastAPI to stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | MCP server for vendor-neutral voice interactions (Vapi adapter) |
+| `arcana` | 0.1.0 | Arcana repository scanner |
+| `hummbl-agent-governance` | 0.1.0 | Shared rules and lifecycle hooks |
+| `hummbl-eval` | 0.1.0 | HUMMBL evaluation primitives |
+| `hummbl-gitops` | 0.1.0 | GitOps synchronization |
 ### Excluded (not HUMMBL's)
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|

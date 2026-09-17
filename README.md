@@ -71,6 +71,10 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | — | In-tree — omnichannel governance gate MCP server (stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | — | In-tree — MCP server for vendor-neutral voice interactions (Vapi adapter) |
+| `arcana` | 0.1.0 | — | In-tree — Arcana repository scanner and agent memory analysis |
+| `hummbl-agent-governance` | 0.1.0 | — | In-tree — Shared rules and lifecycle hooks for hummbl agents |
+| `hummbl-eval` | 0.1.0 | — | In-tree — HUMMBL evaluation primitives and test runner |
+| `hummbl-gitops` | 0.1.0 | — | In-tree — GitOps synchronization and branch governance |
 Node packages:
 | Package | Tree | npm | Status |
 |---------|------|-----|--------|
