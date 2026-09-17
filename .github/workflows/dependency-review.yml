@@ -22,6 +22,10 @@ jobs:
   dependency-review:
     name: dependency-review
     runs-on: ubuntu-latest
+    # GHAS disabled 2026-09-16: dependency-review requires GHAS on private repos
+    # and fails every PR otherwise. Skipped until the org/repo variable
+    # HUMMBL_GHAS_ENABLED=true is set after GHAS is re-enabled.
+    if: vars.HUMMBL_GHAS_ENABLED == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
