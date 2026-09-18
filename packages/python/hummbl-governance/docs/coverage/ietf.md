@@ -79,5 +79,5 @@ This matrix is internal starter material. It must not be used as public evidence
 ## Cross-references
 
 - ADR: [`docs/adr/ADR-001-coverage-matrix-not-self-grade.md`](../adr/ADR-001-coverage-matrix-not-self-grade.md)
-- HMAC vs HDP/AAT/AIMS narrative: [`docs/DELEGATION-IETF-GAP-ANALYSIS.md`](../../../../../docs/research/DELEGATION-IETF-GAP-ANALYSIS.md) (use the copy on this tree; do not fork PR 89)
+- HMAC vs HDP/AAT/AIMS narrative: [`docs/research/DELEGATION-IETF-GAP-ANALYSIS.md`](../../../../../docs/research/DELEGATION-IETF-GAP-ANALYSIS.md) (use the copy on this tree; do not fork PR 89)
 - Canonical primitives: [`PRIMITIVES.md`](../../PRIMITIVES.md)
