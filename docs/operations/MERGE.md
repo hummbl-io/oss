@@ -1,6 +1,6 @@
 # Merge hygiene
 
-Repo-settings companion to [RELEASE.md](../RELEASE.md). This file names the
+Repo-settings companion to [RELEASE.md](RELEASE.md). This file names the
 check contexts a human must require on `main`. GitHub branch protection and
 rulesets are not in this git tree.
 
@@ -16,7 +16,7 @@ live merge-pipe description.
 | `main` has not moved since Audit-1 | False. #76, #75, #105, #106 and others landed. HEAD was `8a02a6c` when this file was added. |
 | All open PRs BLOCKED; nothing can land | False. Open PR count was 0 after #106. Squash-merge from a maintainer token works. |
 | Only one reviewing identity | Incomplete. Collaborators with admin on this repo: `hummbl-dev`, `hummbl-agent`. |
-| `publish-pypi.yml` and `RELEASE.md` disagree on tag shape | Fixed on main. Canonical tag is `python/<package>/v*`. |
+| `publish-pypi.yml` and `docs/operations/RELEASE.md` disagree on tag shape | Fixed on main. Canonical tag is `python/<package>/v*`. |
 | Boundary scan is filename-only | Partial. Scanner flags CGNAT IPs and home-directory paths. Fleet hostnames in product/research vocabulary are not a global denylist. |
 | Required checks are only `gitleaks` and `pattern-denylist` | Still the likely settings gap. This file exists so that gap can be closed without guessing job names. |
 

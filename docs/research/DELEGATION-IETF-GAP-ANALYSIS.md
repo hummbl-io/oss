@@ -6,7 +6,7 @@
 **Date:** 2026-08-31
 **Scope:** HMAC-SHA256 `DelegationToken` in `hummbl-governance` 1.4.2 vs live IETF/IRTF drafts for agent identity, capability attenuation, and delegation provenance
 **Canonical code:** `packages/python/hummbl-governance/hummbl_governance/delegation.py` and `_types.py` in [hummbl-io/oss](https://github.com/hummbl-io/oss) (tag `hummbl-governance/v1.4.2`)
-**Why this file exists:** `docs/FLEET-GOVERNANCE-MAPPING.md` (2026-08-21) cited this path. It was not in the org.
+**Why this file exists:** `docs/policy/FLEET-GOVERNANCE-MAPPING.md` (2026-08-21) cited this path. It was not in the org.
 
 ## Do not infer
 
@@ -65,7 +65,7 @@ Related: [`draft-sweeney-wimse-credential-delegation-00`](https://datatracker.ie
 
 ### Correction to the Aug 21 mapping
 
-`docs/FLEET-GOVERNANCE-MAPPING.md` listed "IETF HDP, DCT, `delegation_chain` JWT" as one emerging-standards cell. That collapses three layers and one non-IETF paper:
+`docs/policy/FLEET-GOVERNANCE-MAPPING.md` listed "IETF HDP, DCT, `delegation_chain` JWT" as one emerging-standards cell. That collapses three layers and one non-IETF paper:
 
 - **HDP** is IETF, and it is provenance, not capability.
 - **DCT** is DeepMind, February 2026. HUMMBL borrowed the name.
@@ -151,7 +151,7 @@ Not decided here (product / BETS):
 
 ## 7. Recommended next engineering (ordered)
 
-1. **Fix the mapping citation** in `docs/FLEET-GOVERNANCE-MAPPING.md`: point here; split HDP / AAT / DCT-paper.
+1. **Fix the mapping citation** in `docs/policy/FLEET-GOVERNANCE-MAPPING.md`: point here; split HDP / AAT / DCT-paper.
 2. **Ban `expiry=None` on issued tokens** or document it as a non-interop mode. Every live draft requires `exp`.
 3. **If cross-org verify is a 2026 goal:** Ed25519 root signature on an otherwise unchanged token is the smallest HDP-shaped step. It does not give hop chains or PoP.
 4. **If multi-hop least privilege is a 2026 goal:** that is AAT, not HDP. HMAC cannot grow into AAT without replacing the crypto and adding derive + `par_hash` + PoP.
@@ -167,5 +167,5 @@ Primary:
 
 Secondary:
 
-- `docs/FLEET-GOVERNANCE-MAPPING.md` (2026-08-21)
+- `docs/policy/FLEET-GOVERNANCE-MAPPING.md` (2026-08-21)
 - `founder-mode/docs/research/gaas_compliance_landscape_2026.md` (2026-03-22; stale vs current draft revs)
