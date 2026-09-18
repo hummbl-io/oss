@@ -2,7 +2,7 @@
 
 **Status:** CANDIDATE — proposed architecture, not a claim about any existing
 implementation.
-**Artifact:** `governance_kernel_candidate.md`
+**Artifact:** `docs/policy/governance_kernel_candidate.md`
 **Scope:** one minimum viable governance kernel, sized for a single bounded
 implementation task. Everything outside the section "Not needed in v0" is
 out of scope for this candidate.

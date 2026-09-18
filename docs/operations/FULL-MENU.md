@@ -6,8 +6,8 @@ inventory.
 
 **Status:** Active as a release-discipline note.
 **As of:** 2026-09-02.
-**Canonical inventory:** [`PACKAGES.md`](./PACKAGES.md) and the root
-[`README.md`](../README.md). Do not keep a second live-package table here.
+**Canonical inventory:** [`docs/architecture/PACKAGES.md`](../architecture/PACKAGES.md) and the root
+[`README.md`](../../README.md). Do not keep a second live-package table here.
 
 ---
 
@@ -28,7 +28,7 @@ definition of the product.
 
 The Full Menu is the public publishing gate for `hummbl-io/oss`.
 A package appears as installable to the world only when it is **both CAN
-and SHOULD** and has a trusted-publishing tag under `RELEASE.md`.
+and SHOULD** and has a trusted-publishing tag under `docs/operations/RELEASE.md`.
 
 There is one private Node technical canary under `packages/node/`; there is no
 Rust or Go package tree. Do not tell readers they can `npm install`,
@@ -44,7 +44,7 @@ CAN is about capability. SHOULD is about judgment. A package can be CAN
 without being SHOULD (technically publishable but strategically premature),
 and SHOULD without being CAN (strategically ready but technically blocked).
 
-What is actually Live vs in-tree is listed in `PACKAGES.md`. Candidates that
+What is actually Live vs in-tree is listed in `docs/architecture/PACKAGES.md`. Candidates that
 are not yet both CAN and SHOULD stay private and are not staged into this
 public document ahead of release.
 
@@ -90,13 +90,13 @@ tag from this repo:
 - [ ] Source under `packages/python/<name>/`
 - [ ] Trusted publisher configured on pypi.org (owner: hummbl-io, repo: oss, workflow: publish-pypi.yml, environment: pypi)
 - [ ] Tag pattern `python/<package>/v*` in `.github/workflows/publish-pypi.yml`
-- [ ] Root README, `AGENTS.md`, and `docs/PACKAGES.md` updated in the same PR
+- [ ] Root README, `AGENTS.md`, and `docs/architecture/PACKAGES.md` updated in the same PR
 
 ---
 
 ## See also
 
-- [PACKAGES.md](./PACKAGES.md) — live vs in-tree inventory and registry collisions
-- [MONOREPO-DESIGN.md](./MONOREPO-DESIGN.md) — directory structure and migration plan
-- [RELEASE.md](../RELEASE.md) — trusted publishing, tag contract, no manual uploads
+- [PACKAGES.md](../architecture/PACKAGES.md) — live vs in-tree inventory and registry collisions
+- [MONOREPO-DESIGN.md](../architecture/MONOREPO-DESIGN.md) — directory structure and migration plan
+- [RELEASE.md](RELEASE.md) — trusted publishing, tag contract, no manual uploads
 - Issue `#79` — remaining identity work outside this repo (PyPI org blurb, `arbiter-dev`)
