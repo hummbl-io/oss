@@ -20,8 +20,8 @@ The original M&A consolidation plan proposed a phased migration of ~100 HUMMBL p
 
 | Task | Status |
 |------|--------|
-| Create `docs/research/MONOREPO-DESIGN.md` | DONE |
-| Create `docs/research/PACKAGES.md` | DONE |
+| Create `docs/architecture/MONOREPO-DESIGN.md` | DONE |
+| Create `docs/architecture/PACKAGES.md` | DONE |
 | Move to `packages/python/<name>/` layout | DONE |
 | Update `publish-pypi.yml` tag filter | DONE |
 | Update README.md package table | PARTIALLY DONE (9 of 14 tracked packages listed; missing `hummbl-compass`, `hummbl-free-models`, `hummbl-rubric-templates`, `hummbl-taxonomy`, `hummbl-validation`) |

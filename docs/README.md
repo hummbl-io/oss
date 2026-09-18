@@ -12,7 +12,7 @@ regenerate rather than hand-edit.
 | `architecture/` | specs, templates, option spaces, reference maps | 3 |
 | `artifact-compiler/` |  | 1 |
 | `artifacts/` |  | 23 |
-| `audits/` | audits, inventories and scans | 3 |
+| `audits/` | audits, inventories and scans | 2 |
 | `case-studies/` | case studies | 7 |
 | `dev-social/` |  | 1 |
 | `enterprise/` |  | 1 |
@@ -23,12 +23,15 @@ regenerate rather than hand-edit.
 | `integration_examples/` |  | 6 |
 | `model-router/` |  | 1 |
 | `novelty-pilots/` |  | 1 |
+| `operations/` | runbooks, playbooks, plans, status and operator notes | 3 |
 | `ownward/` |  | 1 |
+| `policy/` | policies | 3 |
 | `positions/` |  | 9 |
 | `product/` |  | 4 |
 | `public-writing/` |  | 4 |
-| `research/` | research notes and digests | 74 |
+| `research/` | research notes and digests | 68 |
 | `reviews/` |  | 2 |
+| `schemas/` |  | 2 |
 | `security/` |  | 9 |
 | `sources/` |  | 2 |
 | `tiershift/` |  | 1 |

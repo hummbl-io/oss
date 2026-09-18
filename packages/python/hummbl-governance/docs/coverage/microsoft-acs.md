@@ -17,7 +17,7 @@ This is a **Microsoft** specification. HUMMBL does **not** claim ACS compatibili
 
 ACS is a stateless, deterministic, fail-closed **policy decision** runtime. A host sends a policy manifest plus a complete snapshot at each intervention point; ACS returns a normalized verdict; the **host** enforces it (`SPECIFICATION.md` §1, §17). HUMMBL ships in-process governance primitives. It does not implement the ACS manifest schema, the eight-point host loop, or the five-verdict normalizer.
 
-[`docs/architecture/FLEET-GOVERNANCE-MAPPING.md`](../../../../../docs/architecture/FLEET-GOVERNANCE-MAPPING.md) (2026-08-21) **open question 4** asks whether HUMMBL's circuit breaker should adopt ACS verdicts (`allow` / `warn` / `deny` / `escalate` / `transform`) for interoperability with ACS-adapter frameworks. **This matrix names that question. It does not decide it.**
+[`docs/policy/FLEET-GOVERNANCE-MAPPING.md`](../../../../../docs/policy/FLEET-GOVERNANCE-MAPPING.md) (2026-08-21) **open question 4** asks whether HUMMBL's circuit breaker should adopt ACS verdicts (`allow` / `warn` / `deny` / `escalate` / `transform`) for interoperability with ACS-adapter frameworks. **This matrix names that question. It does not decide it.**
 
 **No public “fulfills ACS.”**
 
@@ -88,12 +88,12 @@ Normalized `decision` values: `allow`, `warn`, `deny`, `escalate`, `transform`. 
 
 ## Draft coverage summary (not public claim)
 
-This matrix is internal starter material. It must not be used as public evidence that HUMMBL is ACS-compatible or AGT-ready. Open question 4 in `docs/architecture/FLEET-GOVERNANCE-MAPPING.md` remains open.
+This matrix is internal starter material. It must not be used as public evidence that HUMMBL is ACS-compatible or AGT-ready. Open question 4 in `docs/policy/FLEET-GOVERNANCE-MAPPING.md` remains open.
 
 ## Cross-references
 
 - ADR: [`docs/adr/ADR-001-coverage-matrix-not-self-grade.md`](../adr/ADR-001-coverage-matrix-not-self-grade.md)
-- Fleet positioning + open question 4: [`docs/architecture/FLEET-GOVERNANCE-MAPPING.md`](../../../../../docs/architecture/FLEET-GOVERNANCE-MAPPING.md)
+- Fleet positioning + open question 4: [`docs/policy/FLEET-GOVERNANCE-MAPPING.md`](../../../../../docs/policy/FLEET-GOVERNANCE-MAPPING.md)
 - OWASP Agentic overlap (not ACS): [`owasp-agentic.md`](./owasp-agentic.md)
 - ACS docs: https://microsoft.github.io/agent-governance-toolkit/packages/agent-control-specification/
 - ACS spec: https://github.com/microsoft/agent-governance-toolkit/blob/main/policy-engine/spec/SPECIFICATION.md

@@ -7,9 +7,9 @@ every release) and inventory accuracy (false ownership claims confuse
 users and can look like name-squatting). This document covers both.
 
 For the full monorepo architecture, directory structure, and per-language
-publishing workflows, see [`docs/research/MONOREPO-DESIGN.md`](docs/research/MONOREPO-DESIGN.md).
-For the package inventory, see [`docs/research/PACKAGES.md`](docs/research/PACKAGES.md).
-For merge gates and required-check names, see [`docs/research/MERGE.md`](docs/research/MERGE.md).
+publishing workflows, see [`docs/architecture/MONOREPO-DESIGN.md`](docs/architecture/MONOREPO-DESIGN.md).
+For the package inventory, see [`docs/architecture/PACKAGES.md`](docs/architecture/PACKAGES.md).
+For merge gates and required-check names, see [`docs/operations/MERGE.md`](docs/operations/MERGE.md).
 
 ---
 
@@ -86,13 +86,13 @@ on:
 ### 1.6 Reference
 
 Full workflow examples for all 8 registries (with SHA-pinned actions) are
-in [`docs/research/MONOREPO-DESIGN.md`](docs/research/MONOREPO-DESIGN.md) section 4.
+in [`docs/architecture/MONOREPO-DESIGN.md`](docs/architecture/MONOREPO-DESIGN.md) section 4.
 
 ---
 
 ## 2. Registry inventory verification protocol
 
-**Any "live" claim in `docs/research/PACKAGES.md` MUST be backed by verification of
+**Any "live" claim in `docs/architecture/PACKAGES.md` MUST be backed by verification of
 the `author`, `repository`, and `maintainers` fields on the registry.**
 Name-existence-on-registry is NOT proof of ownership.
 
@@ -217,7 +217,7 @@ Never `git mv` from a private repo into this public monorepo without
 scanning the full history for PII first. `git mv` is only safe for packages
 already in a public repo.
 
-See [`docs/research/MONOREPO-DESIGN.md`](docs/research/MONOREPO-DESIGN.md) section 1 for
+See [`docs/architecture/MONOREPO-DESIGN.md`](docs/architecture/MONOREPO-DESIGN.md) section 1 for
 the full migration method.
 
 ---
@@ -242,7 +242,7 @@ class. npm and crates.io have analogous risks.
 2. **Publish a final empty/deprecated release** with a deprecation notice
    in the description and README
 3. **Keep the project owned by `hummbl-io`** to prevent name re-registration
-4. **Document the deprecation** in `docs/research/PACKAGES.md` with the date and
+4. **Document the deprecation** in `docs/architecture/PACKAGES.md` with the date and
    reason
 
 This policy applies to PyPI, npm, and crates.io. Maven Central is fully

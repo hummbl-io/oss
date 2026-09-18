@@ -28,7 +28,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
-| `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `RELEASE.md` |
+| `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `docs/operations/RELEASE.md` |
 | `base120` | 3.0.2 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
@@ -97,8 +97,8 @@ governance and agent infrastructure stays in private `hummbl-io/*` repos.
 Migration is staged. Package source is moved here incrementally; each
 package links to this repo as its canonical home once migrated. During
 the transition, some packages may still have been published from a
-legacy repo. See `docs/research/MONOREPO-DESIGN.md` and `docs/research/PACKAGES.md`.
-Publish tags must be `python/<package>/v<version>` (see `RELEASE.md`).
+legacy repo. See `docs/architecture/MONOREPO-DESIGN.md` and `docs/architecture/PACKAGES.md`.
+Publish tags must be `python/<package>/v<version>` (see `docs/operations/RELEASE.md`).
 Legacy tags of the form `<package>/v<version>` do not trigger
 `.github/workflows/publish-pypi.yml`.
 ## Adoption tracking
