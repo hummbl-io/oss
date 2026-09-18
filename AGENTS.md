@@ -65,7 +65,7 @@ Node packages:
 | @hummbl/mcp-base120 | `packages/node/mcp-base120/` | 0.1.0-canary.0 | Private canary | Read-only, no-egress Base120 MCP catalog |
 
 If you add a directory under `packages/python/`, update this table, the
-README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
+README package table, `docs/research/PACKAGES.md`, `.github/workflows/ci.yml`,
 and the tag filter in `.github/workflows/publish-pypi.yml` in the same PR.
 For `packages/node/`, update the same inventory surfaces and Node CI. Do not
 add an npm publish workflow or tag for a package whose manifest is private or
@@ -191,7 +191,7 @@ in the publish workflow and fails closed on a missing or stale lock.
 4. If runtime dependencies changed, regenerate `requirements.lock` for the affected package(s)
 5. If any dependency, extra, or build-system requirement changed, regenerate `requirements-build.lock` (`python .github/scripts/lock_build_env.py lock <package>`)
 6. Verify no internal docs (handoffs, AARs, receipts, trackers) are in the public repo
-7. If the package set changed: README, this file, `docs/PACKAGES.md`, CI matrix, publish tag filter
+7. If the package set changed: README, this file, `docs/research/PACKAGES.md`, CI matrix, publish tag filter
 
 ## PR review protocol
 

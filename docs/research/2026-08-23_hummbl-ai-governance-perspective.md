@@ -90,7 +90,7 @@ To turn the insights of this preservation record into operational reality across
 3. **Ingest the Preservation Archive into `hummbl-io/oss`**:
    - Stage this archive under `docs/research/field-mapping/2026-08-23-governance-field-mapping-chat-archive.md` as canonical source context for the monorepo design.
 4. **Publish the Unified Ontology**:
-   - Update `docs/MONOREPO-DESIGN.md` and `docs/FULL-MENU.md` to reference this field-mapping taxonomy as the structural justification for our multi-package architecture.
+   - Update `docs/research/MONOREPO-DESIGN.md` and `docs/research/FULL-MENU.md` to reference this field-mapping taxonomy as the structural justification for our multi-package architecture.
 
 ---
 

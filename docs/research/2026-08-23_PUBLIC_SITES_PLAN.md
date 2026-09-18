@@ -103,9 +103,9 @@ The two sites share this structural philosophy but with distinct brand voices:
 - **Primary essay surface:** `<repo-root>/PROJECTS\hummbl-governance\docs\research\` — **53 `.md` files** as of 2026-08-23.
 - **Frontmatter:** None. Files are raw prose with an informal header (Author, Date, Canonical Surface as bold text, not YAML).
 - **Most recent essays (publishable now):**
-  1. `2026-08-23_inversion-of-vanity-essay.md`
-  2. `2026-08-23_completeness-over-score-essay.md`
-  3. `2026-08-23_hummbl_ai_governance_field_mapping_archive.md`
+  1. `docs/research/2026-08-23_inversion-of-vanity-essay.md`
+  2. `docs/research/2026-08-23_completeness-over-score-essay.md`
+  3. `docs/architecture/2026-08-23_hummbl_ai_governance_field_mapping_archive.md`
 
 ---
 
@@ -335,8 +335,8 @@ site: hummbl.io     # hummbl.io | operator.com | both
 | [`completeness-over-score-essay.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/research/2026-08-23_completeness-over-score-essay.md) | Essay: architecture of honest AI governance |
 | [`inversion-of-vanity-essay.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancedocs/research/2026-08-23_inversion-of-vanity-essay.md) | Essay: epistemology of humility in AI engineering |
 | [`batch2-compliance-gaps.md`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governancebatch2-compliance-gaps.md) | 11-item compliance audit + gaps report |
-| [`governance_question.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/governance_question.schema.json) | JSON Schema for open governance questions |
-| [`capability_manifest.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/capability_manifest.schema.json) | JSON Schema for capability manifests |
+| [`docs/audits/governance_question.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/governance_question.schema.json) | JSON Schema for open governance questions |
+| [`docs/audits/capability_manifest.schema.json`](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governanceschemas/capability_manifest.schema.json) | JSON Schema for capability manifests |
 | [`essay-peer-review.md`](https://github.com/hummbl-io/oss) | Peer review of both essays with P1/P2/P3 corrections |
 
 ---

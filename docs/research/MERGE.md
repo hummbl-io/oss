@@ -1,6 +1,6 @@
 # Merge hygiene
 
-Repo-settings companion to [RELEASE.md](../RELEASE.md). This file names the
+Repo-settings companion to [RELEASE.md](../../RELEASE.md). This file names the
 check contexts a human must require on `main`. GitHub branch protection and
 rulesets are not in this git tree.
 

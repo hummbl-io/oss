@@ -1,0 +1,5 @@
+{
+  "schema": "hummbl.docs-layout.v1",
+  "root_allow": ["GOVERNANCE.md", "RELEASE.md"],
+  "exempt_dirs": ["packages"]
+}
