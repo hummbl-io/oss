@@ -80,6 +80,10 @@ Tree versions checked 2026-09-02.
 | `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | Omnichannel governance gate MCP server (refactored from FastAPI to stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | MCP server for vendor-neutral voice interactions (Vapi adapter) |
+| `arcana` | 0.10.19 | HUMMBL multi-lens governance and political-philosophy analysis workspace (local package; the PyPI name belongs to another project) |
+| `hummbl-agent-governance` | 0.2.0 | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
+| `hummbl-eval` | 0.1.0 | Evidence-governed evaluation contracts for compositional Human-AI systems |
+| `hummbl-gitops` | 0.1.0 | Bidirectional multi-agent peer-review GitOps loop |
 ### Excluded (not HUMMBL's)
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|
