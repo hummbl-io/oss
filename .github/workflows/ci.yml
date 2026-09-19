@@ -158,15 +158,21 @@ jobs:
         run: |
           set -e
           # Most packages are stdlib-only (zero runtime deps).
-          # Only audit packages that declare runtime dependencies AND are
-          # published on PyPI (pip-audit --strict fails on unpublished packages).
-          for pkg_dir in packages/python/governed-compression packages/python/hummbl-bus packages/python/hummbl-cognition; do
-            echo "::group::Auditing $(basename $pkg_dir)"
-            cd "$pkg_dir"
-            pip install -e . -q 2>/dev/null
-            pip-audit --strict
-            cd - > /dev/null
-            echo "::endgroup::"
+          # Only audit packages that declare runtime dependencies.
+            # Resolve each project's complete dependency graph in isolation.
+            # Freeze excludes only the local editable project, which may not
+            # be published yet. Strict auditing still covers every resolved
+            # dependency; --no-deps uses these exact pins without re-resolution.
+            audit_root=$(mktemp -d "$RUNNER_TEMP/dependency-audit.XXXXXX")
+            trap 'rm -rf -- "$audit_root"' EXIT
+            for pkg_dir in packages/python/governed-compression packages/python/hummbl-bus packages/python/hummbl-cognition; do
+              echo "::group::Auditing $(basename $pkg_dir)"
+              audit_env="$audit_root/$(basename "$pkg_dir")"
+              python -m venv "$audit_env"
+              "$audit_env/bin/python" -m pip install -e "$pkg_dir" -q
+              "$audit_env/bin/python" -m pip freeze --exclude-editable > "$audit_env/dependencies.txt"
+              pip-audit --strict --no-deps --disable-pip -r "$audit_env/dependencies.txt"
+              echo "::endgroup::"
           done
 
   build-lock-check:
