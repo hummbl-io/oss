@@ -159,16 +159,14 @@ jobs:
           set -e
           # Most packages are stdlib-only (zero runtime deps).
           # Only audit packages that declare runtime dependencies.
-          # --skip-editable (not --strict): pip-audit can't resolve the
-          # editable-installed package itself against PyPI, so --strict
-          # flaked whenever a version bump landed on main before its PyPI
-          # release had propagated. --skip-editable drops that self-check
-          # and still audits the real dependency tree.
+          # Skip only the editable project itself, whose new version may not
+          # yet exist on PyPI. Keep strict collection for its dependencies so
+          # unavailable dependency metadata cannot silently pass the audit.
           for pkg_dir in packages/python/governed-compression packages/python/hummbl-bus packages/python/hummbl-cognition; do
             echo "::group::Auditing $(basename $pkg_dir)"
             cd "$pkg_dir"
             pip install -e . -q 2>/dev/null
-            pip-audit --skip-editable
+            pip-audit --strict --skip-editable
             cd - > /dev/null
             echo "::endgroup::"
           done
