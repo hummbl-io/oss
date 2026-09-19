@@ -2,7 +2,7 @@
 
 Status: public claim ledger
 Last updated: 2026-09-11
-Current package metadata: `pyproject.toml` version `1.5.0` (tree, Alpha) — latest published release is `1.4.2` on PyPI; see `RELEASE.md`
+Current package metadata: `pyproject.toml` version `1.5.0` (tree, Alpha) — latest published release is `1.4.2` on PyPI; see `docs/operations/RELEASE.md`
 
 Canonical public promotion source: the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json)
 (`as_of` 2026-08-31T21:56:55Z). Honesty over completeness. A number that is not
@@ -23,7 +23,7 @@ stale — see the Closed evidence gaps table). GAP-002 remains **open**.
 
 | Claim | Status | Receipt | Promotion rule |
 | ----- | ------ | ------- | -------------- |
-| Published package version is `1.4.2` and classified Alpha | verified-with-scope | PyPI-live `pyproject.toml` at tag `hummbl-governance/v1.4.2`, commit `b1b0581`, declares `version = "1.4.2"` and `Development Status :: 3 - Alpha`. Landing claim LANDING-002. The current tree has since moved to `1.5.0` (also Alpha, also verified in-tree 2026-09-11) but has not been released; see `RELEASE.md`. | May be stated as the current published package metadata. State tree work as unreleased when describing `1.5.0`-tree features. Alpha is maturity, not production suitability. |
+| Published package version is `1.4.2` and classified Alpha | verified-with-scope | PyPI-live `pyproject.toml` at tag `hummbl-governance/v1.4.2`, commit `b1b0581`, declares `version = "1.4.2"` and `Development Status :: 3 - Alpha`. Landing claim LANDING-002. The current tree has since moved to `1.5.0` (also Alpha, also verified in-tree 2026-09-11) but has not been released; see `docs/operations/RELEASE.md`. | May be stated as the current published package metadata. State tree work as unreleased when describing `1.5.0`-tree features. Alpha is maturity, not production suitability. |
 | Runtime Core dependencies are zero | verified-with-scope | `pyproject.toml` has `dependencies = []` at tag `hummbl-governance/v1.4.2` (PyPI-live) and confirmed still `dependencies = []` in the current `1.5.0` tree as of 2026-09-11. Landing claim LANDING-005. | May be stated as zero third-party Core runtime dependencies. Optional, test, build, and integration extras are out of scope. |
 | Public oss CI reported 3,479 passed and 16 skipped on Python 3.13 | verified-with-scope | GitHub Actions [run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) at commit `77854dd` on oss main (the PR #222 merge commit). Supersedes the prior 2,463/3 receipt (run 32904924444, commit `7546c4e`), which predated P44-P58/K12-K14. | May be stated as public oss repository CI on Python 3.13. This is not a production-use receipt. |
 | Public oss CI tests Python 3.11, 3.12, 3.13, and 3.14 | verified (GAP-003 closed 2026-09-11) | Same run 34610754121: `test (hummbl-governance, 3.11)`, `3.12`, `3.13`, `3.14` all `success`. `.github/workflows/ci.yml` matrix is `["3.11","3.12","3.13","3.14"]`, not 3.13-only — this row and GAP-003 were themselves stale; corrected 2026-09-11. | May be stated as public CI-tested on 3.11 through 3.14. |
@@ -104,7 +104,7 @@ eligible for current promotion.
 
 | Surface | Version | Tests | Primitives | Scope |
 | ------- | ------- | ----- | ---------- | ----- |
-| `pyproject.toml` / tree (source) | 1.5.0 (tree); 1.4.2 (PyPI live) | 3,495 collected locally (2026-09-11, not a public CI receipt) | 51 | Package metadata and `PrimitiveRegistry` — source of truth for primitive count. Tree version has moved past the last PyPI release; see `RELEASE.md`. |
+| `pyproject.toml` / tree (source) | 1.5.0 (tree); 1.4.2 (PyPI live) | 3,495 collected locally (2026-09-11, not a public CI receipt) | 51 | Package metadata and `PrimitiveRegistry` — source of truth for primitive count. Tree version has moved past the last PyPI release; see `docs/operations/RELEASE.md`. |
 | README.md (repo) | 1.4.2 | 3,479 passed / 16 skipped (current — matches run 34610754121) | 51 | Public docs — primitive count and test-count badge both corrected 2026-09-11. |
 | Public oss CI | — | 3,479 passed / 16 skipped | — | [Run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) at commit `77854dd` (the PR #222 merge) on oss main. Full 3.11-3.14 matrix, coverage collected (no percentage published). Repository CI evidence, not a production-use receipt. |
 | Landing claims ledger | 1.4.2 | 2,463 passed / 3 skipped | 34 (stale) | Canonical public promotion source (`as_of` 2026-08-31T21:56:55Z) — has not yet been refreshed to 51 or to the fresh test-count receipt; landing-claims.json update is a follow-up outside this repo (needs a real hummbl-governance PyPI release + a new landing-release-receipt, not a hand-edit — see `scripts/emit_landing_release_receipt.py` in hummbl-production). |

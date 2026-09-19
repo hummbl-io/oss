@@ -57,10 +57,10 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-mcp-utf | `packages/python/hummbl-mcp-utf/` | 0.1.0 | In-tree | MCP server exposing HUMMBL Unified Tier Framework |
 | hummbl-mcp-omnichannel | `packages/python/hummbl-mcp-omnichannel/` | 0.1.0 | In-tree | Omnichannel governance gate MCP server (stdlib http.server) |
 | hummbl-mcp-voice | `packages/python/hummbl-mcp-voice/` | 0.1.0 | In-tree | MCP server for vendor-neutral voice interactions (Vapi adapter) |
-| arcana | `packages/python/arcana/` | 0.1.0 | In-tree | Arcana repository scanner and agent memory analysis |
-| hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.1.0 | In-tree | Shared rules and lifecycle hooks for hummbl agents |
-| hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | HUMMBL evaluation primitives and test runner |
-| hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | GitOps synchronization and branch governance |
+| arcana | `packages/python/arcana/` | 0.10.19 | In-tree | HUMMBL multi-lens governance and political-philosophy analysis workspace (local package; the PyPI name belongs to another project) |
+| hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.2.0 | In-tree | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
+| hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | Evidence-governed evaluation contracts for compositional Human-AI systems |
+| hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | Bidirectional multi-agent peer-review GitOps loop |
 
 Node packages:
 
@@ -69,7 +69,7 @@ Node packages:
 | @hummbl/mcp-base120 | `packages/node/mcp-base120/` | 0.1.0-canary.0 | Private canary | Read-only, no-egress Base120 MCP catalog |
 
 If you add a directory under `packages/python/`, update this table, the
-README package table, `docs/PACKAGES.md`, `.github/workflows/ci.yml`,
+README package table, `docs/architecture/PACKAGES.md`, `.github/workflows/ci.yml`,
 and the tag filter in `.github/workflows/publish-pypi.yml` in the same PR.
 For `packages/node/`, update the same inventory surfaces and Node CI. Do not
 add an npm publish workflow or tag for a package whose manifest is private or
@@ -195,7 +195,7 @@ in the publish workflow and fails closed on a missing or stale lock.
 4. If runtime dependencies changed, regenerate `requirements.lock` for the affected package(s)
 5. If any dependency, extra, or build-system requirement changed, regenerate `requirements-build.lock` (`python .github/scripts/lock_build_env.py lock <package>`)
 6. Verify no internal docs (handoffs, AARs, receipts, trackers) are in the public repo
-7. If the package set changed: README, this file, `docs/PACKAGES.md`, CI matrix, publish tag filter
+7. If the package set changed: README, this file, `docs/architecture/PACKAGES.md`, CI matrix, publish tag filter
 
 ## PR review protocol
 

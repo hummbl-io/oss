@@ -1,6 +1,6 @@
 # HUMMBL Governance Primitives — Complete Reference
 
-**Version:** v1.5.0 (tree) — latest published release is v1.4.2 on PyPI; see `RELEASE.md`
+**Version:** v1.5.0 (tree) — latest published release is v1.4.2 on PyPI; see `docs/operations/RELEASE.md`
 **Existing primitives:** 26 (P1-P26)
 **Implemented expansion primitives:** 10 (P27-P31, P34-P35, P36-P38) — schemas, modules, and tests
 **Implemented post-v1.2 primitives:** 15 (P44-P58) — modules and tests, shipped v1.3-v1.4

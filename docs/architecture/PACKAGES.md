@@ -34,11 +34,11 @@ Ownership last verified in fleet audits 2026-08-30 / 2026-08-31.
 Tree versions checked 2026-09-02.
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
-| `hummbl-governance` | 1.5.0 | 1.4.2 | Tree version checked 2026-09-08; 1.5.0 remains unreleased under the disposition in `RELEASE.md`. |
+| `hummbl-governance` | 1.5.0 | 1.4.2 | Tree version checked 2026-09-08; 1.5.0 remains unreleased under the disposition in `docs/operations/RELEASE.md`. |
 | `base120` | 3.0.2 | 3.0.2 | 120 reasoning operators. NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
 | `hummbl-tuples` | 0.2.0 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. |
-| `hummbl-bus` | 0.2.0 | 0.2.0 | TSV coordination bus. 0.2.0 was uploaded 2026-08-27 with **no** `python/hummbl-bus/v0.2.0` tag in this repo. Further bus publishes wait on the tag contract in `RELEASE.md`. |
+| `hummbl-bus` | 0.2.0 | 0.2.0 | TSV coordination bus. 0.2.0 was uploaded 2026-08-27 with **no** `python/hummbl-bus/v0.2.0` tag in this repo. Further bus publishes wait on the tag contract in `docs/operations/RELEASE.md`. |
 | `hummbl-cognition` | 0.1.0 | 0.1.0 | CLP + Open Brain. Live license field may still say MIT vs tree Apache-2.0. |
 | `governed-compression` | 0.1.0 | 0.1.0 | Compression experiments. Live summary may still say "Private research surface". |
 | `hummbl` | 0.1.0 | 0.1.0 | Shipped 2026-08-25. |
@@ -80,10 +80,10 @@ Tree versions checked 2026-09-02.
 | `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | Omnichannel governance gate MCP server (refactored from FastAPI to stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | MCP server for vendor-neutral voice interactions (Vapi adapter) |
-| `arcana` | 0.1.0 | Arcana repository scanner |
-| `hummbl-agent-governance` | 0.1.0 | Shared rules and lifecycle hooks |
-| `hummbl-eval` | 0.1.0 | HUMMBL evaluation primitives |
-| `hummbl-gitops` | 0.1.0 | GitOps synchronization |
+| `arcana` | 0.10.19 | HUMMBL multi-lens governance and political-philosophy analysis workspace (local package; the PyPI name belongs to another project) |
+| `hummbl-agent-governance` | 0.2.0 | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
+| `hummbl-eval` | 0.1.0 | Evidence-governed evaluation contracts for compositional Human-AI systems |
+| `hummbl-gitops` | 0.1.0 | Bidirectional multi-agent peer-review GitOps loop |
 ### Excluded (not HUMMBL's)
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|
@@ -133,7 +133,7 @@ oss/
 ### Per-language publishing (current)
 - **Python**: GitHub Actions trusted publishing from
   `.github/workflows/publish-pypi.yml`. Tag shape:
-  `python/<package>/v<version>`. See `RELEASE.md`.
+  `python/<package>/v<version>`. See `docs/operations/RELEASE.md`.
 - **npm / crates / Go / JVM / Nix**: no publish workflow in this repo yet.
 Do not use local `twine upload` for packages that should come from this
 repo.

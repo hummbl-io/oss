@@ -28,7 +28,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
-| `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `RELEASE.md` |
+| `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `docs/operations/RELEASE.md` |
 | `base120` | 3.0.2 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
@@ -71,10 +71,10 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | — | In-tree — omnichannel governance gate MCP server (stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | — | In-tree — MCP server for vendor-neutral voice interactions (Vapi adapter) |
-| `arcana` | 0.1.0 | — | In-tree — Arcana repository scanner and agent memory analysis |
-| `hummbl-agent-governance` | 0.1.0 | — | In-tree — Shared rules and lifecycle hooks for hummbl agents |
-| `hummbl-eval` | 0.1.0 | — | In-tree — HUMMBL evaluation primitives and test runner |
-| `hummbl-gitops` | 0.1.0 | — | In-tree — GitOps synchronization and branch governance |
+| `arcana` | 0.10.19 | — | HUMMBL multi-lens governance and political-philosophy analysis workspace (local package; the PyPI name belongs to another project) |
+| `hummbl-agent-governance` | 0.2.0 | — | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
+| `hummbl-eval` | 0.1.0 | — | Evidence-governed evaluation contracts for compositional Human-AI systems |
+| `hummbl-gitops` | 0.1.0 | — | Bidirectional multi-agent peer-review GitOps loop |
 Node packages:
 | Package | Tree | npm | Status |
 |---------|------|-----|--------|
@@ -101,8 +101,8 @@ governance and agent infrastructure stays in private `hummbl-io/*` repos.
 Migration is staged. Package source is moved here incrementally; each
 package links to this repo as its canonical home once migrated. During
 the transition, some packages may still have been published from a
-legacy repo. See `docs/MONOREPO-DESIGN.md` and `docs/PACKAGES.md`.
-Publish tags must be `python/<package>/v<version>` (see `RELEASE.md`).
+legacy repo. See `docs/architecture/MONOREPO-DESIGN.md` and `docs/architecture/PACKAGES.md`.
+Publish tags must be `python/<package>/v<version>` (see `docs/operations/RELEASE.md`).
 Legacy tags of the form `<package>/v<version>` do not trigger
 `.github/workflows/publish-pypi.yml`.
 ## Adoption tracking

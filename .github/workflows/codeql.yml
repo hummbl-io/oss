@@ -26,7 +26,12 @@ permissions:
 jobs:
   analyze:
     name: analyze (python)
-    runs-on: ubuntu-latest
+    # GitHub-hosted compute unavailable for private org; fleet policy
+    # is self-hosted Linux.
+    runs-on: [self-hosted, Linux]
+    # GHAS disabled 2026-09-16: SARIF upload requires Code Security on
+    # private repos. Skipped until org/repo var HUMMBL_GHAS_ENABLED=true.
+    if: vars.HUMMBL_GHAS_ENABLED == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
