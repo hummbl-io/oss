@@ -12,7 +12,7 @@ for or plan to build for. This document defines the directory structure,
 tag conventions, per-language publishing workflows, and migration path.
 
 The inventory of publishable packages lives in
-[`PACKAGES.md`](./PACKAGES.md) (~100 candidates across 10 registries).
+[`docs/architecture/PACKAGES.md`](PACKAGES.md) (~100 candidates across 10 registries).
 This document defines the container they live in.
 
 ---
@@ -159,7 +159,7 @@ _internal/research/<name>/     -->   hummbl-io/<name> (private)  -->   oss/packa
 2. Create a **clean snapshot** (no git history) -- never `git mv` from
    a private repo without PII-scanning the full history first
 3. Copy the package into `oss/packages/<lang>/<name>/`
-4. Update `docs/PACKAGES.md` inventory and the root `README.md` package
+4. Update `docs/architecture/PACKAGES.md` inventory and the root `README.md` package
    table
 5. Update CI workflow path filters and tag conventions for the new
    package
@@ -293,7 +293,7 @@ before any job starts — with no logs.
 The workflow examples in sections 4.1-4.8 below show SHA-pinned actions
 matching these rules. When updating an action, resolve the new tag to its
 SHA and replace the pin. These rules are also documented in
-[`CONTRIBUTING.md`](../CONTRIBUTING.md) section 1 for contributor visibility.
+[`CONTRIBUTING.md`](../../CONTRIBUTING.md) section 1 for contributor visibility.
 
 ### 4.1 Python → PyPI
 
@@ -933,8 +933,8 @@ dependent's version constraint, tag both.
 
 ### Phase 0: Structure (this PR)
 
-- [x] Create `docs/MONOREPO-DESIGN.md` (this file)
-- [ ] Create `docs/PACKAGES.md` (full inventory from the survey)
+- [x] Create `docs/architecture/MONOREPO-DESIGN.md` (this file)
+- [ ] Create `docs/architecture/PACKAGES.md` (full inventory from the survey)
 - [ ] Move `packages/hummbl-governance/` → `packages/python/hummbl-governance/`
 - [ ] Update `publish-pypi.yml` tag filter to `python/*/v*`
 - [ ] Update `publish-pypi.yml` path extraction for `packages/python/` prefix

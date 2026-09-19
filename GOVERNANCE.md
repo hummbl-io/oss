@@ -34,7 +34,7 @@ Every package MUST have a `PROVENANCE.md` documenting:
    `PROVENANCE.md`, `README.md`, `LICENSE`, `LICENSE-APACHE`, `LICENSE-MIT`.
 2. Add the package to the CI matrix in `.github/workflows/ci.yml`
    (both `test` and `test-preview` jobs).
-3. Update the package tables in `AGENTS.md`, `README.md`, `docs/PACKAGES.md`.
+3. Update the package tables in `AGENTS.md`, `README.md`, `docs/architecture/PACKAGES.md`.
 4. Run gitleaks full-history scan on the source repository.
 5. Verify no internal hostnames, operator names, receipts, or AARs are
    present in the imported content.
@@ -46,7 +46,7 @@ Every package MUST have a `PROVENANCE.md` documenting:
 2. OWNER of the package must ACK or the operator must ratify.
 3. Remove from CI matrix and all doc tables.
 4. If the package was published to PyPI, note the last published version
-   in `docs/PACKAGES.md` under a "Removed" section.
+   in `docs/architecture/PACKAGES.md` under a "Removed" section.
 
 ## 2. Contribution Rules
 
@@ -92,7 +92,7 @@ sanctions apply:
 
 - The package directory is moved to `packages/python/_archived/<name>/`.
 - The package is removed from the CI matrix.
-- The package is marked as "Archived" in `docs/PACKAGES.md`.
+- The package is marked as "Archived" in `docs/architecture/PACKAGES.md`.
 - If published to PyPI, the last version remains available but no new
   releases will be made from this monorepo.
 - The original source repo (if still archived on GitHub) remains as the
@@ -101,7 +101,7 @@ sanctions apply:
 ### Level 4: Removal (archived > 90 days with no restoration)
 
 - The package directory is deleted from the monorepo.
-- An entry is added to `docs/PACKAGES.md` under "Removed" with the last
+- An entry is added to `docs/architecture/PACKAGES.md` under "Removed" with the last
   version and removal date.
 - The package can be re-imported later by following section 1.3.
 
@@ -138,7 +138,7 @@ repository under the following conditions:
    - `pyproject.toml` (adapted for standalone)
    - `OWNERS` and `PROVENANCE.md`
    - License files
-3. The monorepo's `docs/PACKAGES.md` is updated to note the extraction
+3. The monorepo's `docs/architecture/PACKAGES.md` is updated to note the extraction
    and the new standalone repo URL.
 4. If the package was published to PyPI from this monorepo, the Trusted
    Publisher configuration on PyPI must be updated to point to the new

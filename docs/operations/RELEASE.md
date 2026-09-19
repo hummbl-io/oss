@@ -44,7 +44,7 @@ P0.
   says so (tag move is irreversible for consumers who fetched the ref).
 - The workflow step `Refuse known-bad governance v1.5.0 tag (issue 143)`
   must stay. If 1.5.0 is ever meant to ship, cut a **new** tag on the
-  intended release commit after registry/README/`docs/PACKAGES.md` match.
+  intended release commit after registry/README/`docs/architecture/PACKAGES.md` match.
 
 `hummbl-bus==0.2.0` is on PyPI (2026-08-27) without a matching
 `python/hummbl-bus/v0.2.0` tag in this repo. Do not publish another bus
@@ -129,7 +129,7 @@ Use PyPI's pre-release handling — consumers must opt in with `--pre`.
 1. Create `packages/python/<name>/` with source and `pyproject.toml`
 2. Add the tag pattern `python/<name>/v*` to `.github/workflows/publish-pypi.yml`
 3. Add `<name>` to the CI package matrix in `.github/workflows/ci.yml`
-4. Add a row to README, `AGENTS.md`, and `docs/PACKAGES.md`
+4. Add a row to README, `AGENTS.md`, and `docs/architecture/PACKAGES.md`
 5. Configure the trusted publisher on pypi.org (owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`)
 6. Document the package in `packages/python/<name>/README.md`
 
