@@ -5,14 +5,23 @@
 **Scope**: All 47 Python packages in `packages/python/`
 **Method**: Automated static analysis — version, test count, source LOC, documentation, build infrastructure
 
+**Correction (2026-09-19)**: Totals below now reconcile to the 47 recorded
+package rows. These are static test-definition counts, not executed tests or
+coverage measurements. The original per-package scores and tier labels are
+retained as unverified editorial assessments: no per-dimension score receipts
+were supplied, and the published rubric totals 95, not 100. They do not certify
+production readiness. Publication, documentation and dependency counts are
+historical observations, not a fresh registry or repository audit.
+
 ---
 
 ## Executive Summary
 
 The HUMMBL OSS monorepo contains **47 Python packages** totalling approximately
-**320,000 lines of source code** and **7,548 tests**. Nine packages (19%) are
-published on PyPI. Packages are scored on a 0–100 maturity scale across six
-dimensions: PyPI presence, version maturity, test coverage, source substance,
+**328,395 lines of Python** and **7,383 test definitions** in the recorded rows.
+Nine packages (19%) were recorded as published on PyPI. The original score
+rubric has a maximum of 95 across six dimensions: PyPI presence, version
+maturity, static test count, source substance,
 documentation, and build infrastructure.
 
 The fleet shows a clear bimodal distribution: a small production tier with
@@ -36,8 +45,8 @@ many MCP server shims — with minimal test coverage.
 | 7 | hummbl-kernel | 72 | 0.1.0 | 69 | 3,014 | Live |
 
 `hummbl-governance` is the fleet heavyweight: 3,032 tests across 140 test
-files, 303 source files, and 146K LOC. It is HUMMBL's most-downloaded PyPI
-project. `hummbl-cognition` is the second-largest codebase (72K LOC, 1,929
+files, 303 source files, and 146K LOC in the original observations. No download
+ranking is established by this audit. `hummbl-cognition` is the second-largest codebase (72K LOC, 1,929
 tests) but remains at v0.1.0.
 
 ### Tier 2 — Maturing (score 50–69)
@@ -52,6 +61,9 @@ tests) but remains at v0.1.0.
 | 13 | hummbl-gitops | 50 | 0.1.0 | 75 | 3,203 | — |
 
 `arcana` is the most mature unpublished package (305 tests, 12K LOC, v0.10.19).
+Here v0.10.19 is the version in the local `packages/python/arcana/pyproject.toml`
+at audit commit `012fdc60bbc41e3c2ec48af9a1f9f2379d5de6a2`; it is not evidence
+that HUMMBL owns or published the unrelated PyPI project named `arcana`.
 
 ### Tier 3 — Developing (score 35–49)
 
@@ -71,8 +83,8 @@ tests) but remains at v0.1.0.
 | 25 | hummbl-evidence | 36 | 20 | 316 |
 | 26 | hummbl-validation-framework | 36 | 30 | 393 |
 
-`hummbl-mcp` has the worst test density in the fleet: 9,686 LOC with only
-5 tests (0.5 tests/KLOC).
+`hummbl-mcp` has a low recorded test density: 9,686 LOC with only
+5 test definitions (0.5/KLOC). `hummbl-mcp-governance` is lower at 0.3/KLOC.
 
 ### Tier 4 — Early (score 25–34)
 
@@ -89,12 +101,12 @@ tests) but remains at v0.1.0.
 | 35 | hummbl-mcp-bif | 27 | 1 | 924 |
 | 36 | hummbl-mcp-omnichannel | 27 | 1 | 708 |
 | 37 | hummbl-taxonomy | 27 | 4 | 204 |
-| 38 | hummbl-agent-eval-harness | 24 | 3 | 160 |
 
 ### Tier 5 — Stub (score < 25)
 
 | Rank | Package | Score | Tests | Source LOC |
 |------|---------|-------|-------|------------|
+| 38 | hummbl-agent-eval-harness | 24 | 3 | 160 |
 | 39 | hummbl-mcp-discord | 24 | 1 | 213 |
 | 40 | hummbl-mcp-onepassword | 24 | 1 | 488 |
 | 41 | hummbl-mcp-proton | 24 | 1 | 391 |
@@ -113,10 +125,10 @@ tests) but remains at v0.1.0.
 |--------|-------|
 | Total packages | 47 |
 | Live on PyPI | 9 (19%) |
-| Total tests | 7,548 |
-| Total source LOC | ~320,000 |
-| Packages with ≥100 tests | 7 |
-| Packages with exactly 1 test | 16 (34%) |
+| Total test definitions | 7,383 |
+| Total Python LOC (including tests) | 328,395 |
+| Packages with ≥100 test definitions | 9 |
+| Packages with exactly 1 test definition | 13 (28%) |
 | Packages with `docs/` directory | 8 (17%) |
 | Packages with CHANGELOG | 8 (17%) |
 | stdlib-only (zero runtime deps) | 39 (83%) |
@@ -125,13 +137,16 @@ tests) but remains at v0.1.0.
 
 ## Scoring Methodology
 
-Each package was scored across six dimensions:
+The original rubric lists six dimensions, totaling 95 points. The individual
+scores above cannot be reproduced from the supplied report alone because the
+per-package dimension inputs were not recorded; use the raw counts instead
+of treating the scores as verified measurements.
 
 | Dimension | Max | Thresholds |
 |-----------|-----|------------|
 | PyPI presence | 20 | Live = 20 |
 | Version maturity | 15 | ≥3.x = 15 · ≥1.x = 10 · ≥0.5 = 7 · ≥0.2 = 5 · ≥0.1 = 3 |
-| Test coverage | 25 | ≥100 = 25 · ≥50 = 20 · ≥20 = 15 · ≥10 = 10 · ≥5 = 7 · ≥1 = 3 |
+| Static test count | 25 | ≥100 = 25 · ≥50 = 20 · ≥20 = 15 · ≥10 = 10 · ≥5 = 7 · ≥1 = 3 |
 | Source substance | 15 | ≥5K LOC = 15 · ≥2K = 12 · ≥1K = 9 · ≥500 = 6 · ≥100 = 3 |
 | Documentation | 10 | README = 5 · docs/ = 3 · CHANGELOG = 2 |
 | Build infra | 10 | Lock file = 5 · stdlib-only = 5 |
@@ -155,7 +170,7 @@ files in the package directory tree.
 
 ### Test gap priorities
 
-These packages have the lowest test-to-LOC ratios:
+Selected packages with low recorded test-definition-to-LOC ratios:
 
 | Package | LOC | Tests | Tests/KLOC |
 |---------|-----|-------|------------|
@@ -168,12 +183,13 @@ These packages have the lowest test-to-LOC ratios:
 ### Documentation gap
 
 Only 8 of 47 packages (17%) have a `docs/` directory and only 8 have a
-CHANGELOG. All 47 have a README. The MCP server packages (16 total) would
+CHANGELOG. All 47 have a README. The MCP shim packages (13 recorded rows) would
 benefit from a shared documentation template.
 
 ### MCP shim consolidation opportunity
 
-16 MCP server packages average 1.1 tests and 550 LOC each. Many are thin
+The 13 recorded `hummbl-mcp-*` packages average 1.15 test definitions and
+828 LOC each, excluding the core `hummbl-mcp` framework. Many are thin
 shims over the core `hummbl-mcp` framework. Consider whether the messaging
 and channel shims (Discord, Signal, Proton, Voice) could share a common
 adapter pattern to reduce the maintenance surface.
