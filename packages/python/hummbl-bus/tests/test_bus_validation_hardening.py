@@ -25,8 +25,12 @@ from hummbl_bus.bus_writer import (
     _HOST_EXEMPT_SENDERS,
     _PRIVILEGED_TYPES,
     _is_host_exempt_sender,
+    _load_agent_registry_items,
     _message_has_host,
     _validate_host_presence,
+    _validate_sender_identity,
+    load_host_exempt_agent_ids,
+    load_known_agent_ids,
 )
 from hummbl_bus.bridge_server import BusBridgeHandler
 from hummbl_bus.authority import (
@@ -479,3 +483,102 @@ def _make_post_handler(
     handler.send_error = _send_error
     handler.wfile.write = _wfile_write
     return handler
+
+
+# ---------------------------------------------------------------------------
+# Deployment registry (agents_v2.json / BUS_AGENT_REGISTRY) tests
+# ---------------------------------------------------------------------------
+
+
+class TestAgentRegistryFile:
+    """Registry-file identity admission and host_exempt extension."""
+
+    @pytest.fixture
+    def registry_env(self, tmp_path, monkeypatch):
+        registry_path = tmp_path / "agents_v2.json"
+        registry_path.write_text(
+            json.dumps(
+                {
+                    "agents": [
+                        {"id": "fleet-test-agent", "role": "worker"},
+                        {"id": "human-principal", "host_exempt": True},
+                        {"id": "  ", "host_exempt": True},
+                        "not-a-dict",
+                        {"no_id": True, "host_exempt": True},
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("BUS_AGENT_REGISTRY", str(registry_path))
+        for fn in (
+            load_known_agent_ids,
+            load_host_exempt_agent_ids,
+            _load_agent_registry_items,
+        ):
+            fn.cache_clear()
+        yield registry_path
+        for fn in (
+            load_known_agent_ids,
+            load_host_exempt_agent_ids,
+            _load_agent_registry_items,
+        ):
+            fn.cache_clear()
+
+    def test_registry_ids_admitted(self, registry_env):
+        assert "fleet-test-agent" in load_known_agent_ids()
+        assert "human-principal" in load_known_agent_ids()
+        # Built-ins still present
+        assert "devin" in load_known_agent_ids()
+        assert "human" in load_known_agent_ids()
+
+    def test_host_exempt_flag_extends_exempt_set(self, registry_env):
+        assert _is_host_exempt_sender("human-principal") is True
+        assert _is_host_exempt_sender("fleet-test-agent") is False
+        # Blank ids and non-dict items are ignored
+        assert " " not in load_host_exempt_agent_ids()
+        # Built-ins unchanged
+        assert _is_host_exempt_sender("human") is True
+        assert _is_host_exempt_sender("devin") is False
+
+    def test_registry_id_passes_sender_validation(self, registry_env):
+        _validate_sender_identity(sender_id="fleet-test-agent", enforce=True)
+        with pytest.raises(ValueError, match="Unknown bus sender"):
+            _validate_sender_identity(sender_id="not-registered", enforce=True)
+
+    def test_missing_registry_file_falls_back(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUS_AGENT_REGISTRY", str(tmp_path / "absent.json"))
+        for fn in (load_known_agent_ids, _load_agent_registry_items):
+            fn.cache_clear()
+        try:
+            known = load_known_agent_ids()
+            assert "devin" in known  # built-ins still work
+            assert _load_agent_registry_items() == ()
+        finally:
+            for fn in (load_known_agent_ids, _load_agent_registry_items):
+                fn.cache_clear()
+
+    def test_malformed_registry_is_empty_not_fatal(self, tmp_path, monkeypatch):
+        bad = tmp_path / "agents_v2.json"
+        bad.write_text("{not json", encoding="utf-8")
+        monkeypatch.setenv("BUS_AGENT_REGISTRY", str(bad))
+        for fn in (load_known_agent_ids, _load_agent_registry_items):
+            fn.cache_clear()
+        try:
+            assert _load_agent_registry_items() == ()
+            assert "devin" in load_known_agent_ids()
+        finally:
+            for fn in (load_known_agent_ids, _load_agent_registry_items):
+                fn.cache_clear()
+
+    def test_agents_key_not_a_list(self, tmp_path, monkeypatch):
+        bad = tmp_path / "agents_v2.json"
+        bad.write_text(json.dumps({"agents": {"id": "x"}}), encoding="utf-8")
+        monkeypatch.setenv("BUS_AGENT_REGISTRY", str(bad))
+        for fn in (load_known_agent_ids, _load_agent_registry_items):
+            fn.cache_clear()
+        try:
+            assert _load_agent_registry_items() == ()
+        finally:
+            for fn in (load_known_agent_ids, _load_agent_registry_items):
+                fn.cache_clear()
