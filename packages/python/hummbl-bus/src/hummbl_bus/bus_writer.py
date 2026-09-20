@@ -664,9 +664,16 @@ _CANONICAL_HOST_NAMES = frozenset({
 })
 
 # Senders exempt from host= tag requirement (human/system senders).
+# The deployment registry (agents_v2.json) may extend this set per-identity
+# via the "host_exempt": true flag — see load_host_exempt_agent_ids().
 _HOST_EXEMPT_SENDERS = frozenset({
     "human", "system", "scheduler", "user",
 })
+
+# Environment override for the agent registry path. Use on hosts where the
+# package is pip-installed outside a git checkout (e.g. the bus bridge
+# service), where repo-root resolution cannot find registry/agents_v2.json.
+_AGENT_REGISTRY_ENV = "BUS_AGENT_REGISTRY"
 
 # Privileged bus write types that require Ed25519 principal proof.
 # Mirrors authority.PRIVILEGED_TYPES — defined locally to avoid circular import.
@@ -882,6 +889,46 @@ def _resolve_common_repo_root() -> Path | None:
     return None
 
 
+def _resolve_agent_registry_path() -> Path | None:
+    """Resolve the agent registry JSON path, if it exists.
+
+    Prefers the ``BUS_AGENT_REGISTRY`` environment variable so deployments
+    that run outside a git checkout (e.g. the pip-installed bridge service)
+    can still admit registry identities. Falls back to
+    ``<repo root>/registry/agents_v2.json``.
+    """
+    env_path = os.environ.get(_AGENT_REGISTRY_ENV, "").strip()
+    if env_path:
+        path = Path(env_path)
+        return path if path.exists() else None
+    root = _resolve_repo_root()
+    if root is None:
+        return None
+    path = root / DEFAULT_AGENT_REGISTRY_PATH
+    return path if path.exists() else None
+
+
+@lru_cache(maxsize=1)
+def _load_agent_registry_items() -> tuple[dict, ...]:
+    """Load raw agent records from the registry JSON (empty tuple if absent)."""
+    registry_path = _resolve_agent_registry_path()
+    if registry_path is None:
+        return ()
+    try:
+        with open(registry_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        logger.warning(
+            "Failed to load agent registry IDs from %s",
+            registry_path,
+        )
+        return ()
+    items = data.get("agents", [])
+    if not isinstance(items, list):
+        return ()
+    return tuple(item for item in items if isinstance(item, dict))
+
+
 @lru_cache(maxsize=1)
 def load_known_agent_ids() -> set[str]:
     """Load known agent IDs from registry JSON and coordination roster docs."""
@@ -891,25 +938,14 @@ def load_known_agent_ids() -> set[str]:
     # extraction. If you need canonical identity validation, wire in your
     # own identity provider via the known_agent_ids parameter.
 
+    for item in _load_agent_registry_items():
+        agent_id = item.get("id")
+        if isinstance(agent_id, str) and agent_id.strip():
+            known.add(agent_id.strip())
+
     root = _resolve_repo_root()
     if root is None:
         return known
-
-    registry_path = root / DEFAULT_AGENT_REGISTRY_PATH
-    if registry_path.exists():
-        try:
-            with open(registry_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            for item in data.get("agents", []):
-                if isinstance(item, dict):
-                    agent_id = item.get("id")
-                    if isinstance(agent_id, str) and agent_id.strip():
-                        known.add(agent_id.strip())
-        except (OSError, json.JSONDecodeError):
-            logger.warning(
-                "Failed to load agent registry IDs from %s",
-                registry_path,
-            )
 
     roster_path = root / DEFAULT_COORDINATION_ROSTER_PATH
     if roster_path.exists():
@@ -1077,10 +1113,27 @@ def _validate_kimi_constraints(
         logger.warning(message)
 
 
+@lru_cache(maxsize=1)
+def load_host_exempt_agent_ids() -> set[str]:
+    """Load the host=-exempt sender set: built-ins plus registry identities.
+
+    Any agent record in the registry JSON carrying ``"host_exempt": true``
+    is exempt from the ``host=`` tag requirement (e.g. human principals).
+    """
+    exempt = set(_HOST_EXEMPT_SENDERS)
+    for item in _load_agent_registry_items():
+        if item.get("host_exempt") is not True:
+            continue
+        agent_id = item.get("id")
+        if isinstance(agent_id, str) and agent_id.strip():
+            exempt.add(agent_id.strip().lower())
+    return exempt
+
+
 def _is_host_exempt_sender(from_id: str) -> bool:
     """Check if sender is exempt from host= tag requirement."""
     base_id = from_id.split("(")[0].strip() if "(" in from_id else from_id.strip()
-    return base_id.lower() in _HOST_EXEMPT_SENDERS
+    return base_id.lower() in load_host_exempt_agent_ids()
 
 
 def _message_has_host(message: str) -> bool:
