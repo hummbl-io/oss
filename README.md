@@ -71,6 +71,10 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | — | In-tree — omnichannel governance gate MCP server (stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | — | In-tree — MCP server for vendor-neutral voice interactions (Vapi adapter) |
+| `arcana` | 0.10.19 | — | HUMMBL multi-lens governance and political-philosophy analysis workspace (local package; the PyPI name belongs to another project) |
+| `hummbl-agent-governance` | 0.2.0 | — | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
+| `hummbl-eval` | 0.1.0 | — | Evidence-governed evaluation contracts for compositional Human-AI systems |
+| `hummbl-gitops` | 0.1.0 | — | Bidirectional multi-agent peer-review GitOps loop |
 Node packages:
 | Package | Tree | npm | Status |
 |---------|------|-----|--------|
