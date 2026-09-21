@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-21
+
+### Changed
+- Retired-name remediation: README, TUPLES_v2 spec, and `base.py` comments now
+  say Krineia instead of VERUM (name retired 2026-05-04). ADR-004 is an
+  immutable decision record and keeps its original text and filename. No
+  behavior change.
+
 ## [0.2.1] - 2026-09-08
 
 ### Fixed

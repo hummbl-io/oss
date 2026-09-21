@@ -172,7 +172,7 @@ class IDPTuple(TypedTuple):
     Layer 4 (integrity): signature
     """
 
-    # Layer 2 — Governance (VERUM-aligned)
+    # Layer 2 — Governance (Krineia-aligned)
     state: str = "ok"
     drift: float = 0.0
     tier: int = 1

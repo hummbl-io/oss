@@ -29,10 +29,10 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
 | `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `docs/operations/RELEASE.md` |
-| `base120` | 3.0.2 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
+| `base120` | 3.0.3 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
-| `hummbl-tuples` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
+| `hummbl-tuples` | 0.2.2 | [PyPI](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
 | `hummbl-bif` | 1.0.1 | [PyPI](https://pypi.org/project/hummbl-bif/) | Live — Batch Ingestion Framework |
 | `governed-compression` | 0.1.0 | [PyPI](https://pypi.org/project/governed-compression/) | Live — governed vector and KV-cache compression |
 | `hummbl` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl/) | On PyPI (0.1.0, 2026-08-25) — structured reasoning framework |
