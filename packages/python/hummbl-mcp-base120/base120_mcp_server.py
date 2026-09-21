@@ -150,7 +150,7 @@ _TOOLS = [
     {
         "name": "base120_record",
         "description": (
-            "Record a completed Base120 operator application as a VERUM-aligned "
+            "Record a completed Base120 operator application as a Krineia-aligned "
             "governance artifact. Returns the ApplyResult and its OperatorTuple."
         ),
         "inputSchema": {

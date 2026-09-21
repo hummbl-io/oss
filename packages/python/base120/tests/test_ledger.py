@@ -14,7 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for base120.ledger — VERUM-aligned append-only audit log."""
+"""Tests for base120.ledger — Krineia-aligned append-only audit log."""
 
 from __future__ import annotations
 
@@ -251,11 +251,11 @@ class TestCut:
 
 
 # ---------------------------------------------------------------------------
-# VERUM invariants (structural)
+# Krineia invariants (structural)
 # ---------------------------------------------------------------------------
 
 
-class TestVERUMInvariants:
+class TestKrineiaInvariants:
     def test_no_delete_method(self):
         assert not hasattr(Ledger, "delete")
 

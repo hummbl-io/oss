@@ -1,6 +1,6 @@
 [project]
 name = "hummbl-tuples"
-version = "0.2.1"
+version = "0.2.2"
 description = "HUMMBL Typed Tuples governance model"
 readme = "README.md"
 license = {text = "Apache-2.0"}
