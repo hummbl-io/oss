@@ -143,3 +143,12 @@ date,package,downloads_7day,downloads_30day,downloads_total
 2026-09-20,governed-compression,1,17,224
 2026-09-20,hummbl,6,142,142
 2026-09-20,hummbl-kernel,6,140,140
+2026-09-21,hummbl-governance,1411,6018,14707
+2026-09-21,hummbl-bus,1241,3164,3347
+2026-09-21,hummbl-cognition,378,915,1104
+2026-09-21,hummbl-tuples,1,16,223
+2026-09-21,hummbl-bif,6,18,358
+2026-09-21,base120,389,1045,1234
+2026-09-21,governed-compression,1,17,224
+2026-09-21,hummbl,4,142,142
+2026-09-21,hummbl-kernel,4,140,140
