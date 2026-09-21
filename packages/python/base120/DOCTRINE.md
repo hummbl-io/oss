@@ -21,7 +21,7 @@ requires. This keeps the mental models portable across runtimes and immune to
 dependency rot.
 
 Base120 also persists governance-readable records: every operator application
-can be emitted as a VERUM-aligned ledger tuple, giving reasoning a provenance
+can be emitted as a Krineia-aligned ledger tuple, giving reasoning a provenance
 trail. The bet is that auditable reasoning is a prerequisite for trustworthy
 agent fleets, not a nice-to-have.
 
@@ -36,7 +36,7 @@ agent fleets, not a nice-to-have.
 - **Prompt** -- a generated template that instructs an agent or human to apply
   a given operator to a given question.
 - **Ledger tuple** -- an append-only JSONL record of an operator application,
-  VERUM-aligned for governance consumption.
+  Krineia-aligned for governance consumption.
 - **MCP serving** -- exposing operators to AI agents via the Model Context
   Protocol so agents can retrieve and apply them at runtime.
 

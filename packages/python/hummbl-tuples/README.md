@@ -26,11 +26,11 @@ All tuples use a layered envelope. Lower layers are universal; higher layers app
 | Layer | Fields | Applies to | Purpose |
 |-------|--------|-----------|---------|
 | **1 — Universal** | `tuple_type`, `id`, `time`, `tuple_data` | All tuples | Identity + temporality |
-| **2 — Governance** | `state`, `drift`, `tier`, `agent`, `tool` | IDP governance tuples | Outcome + deviation (VERUM-aligned) |
+| **2 — Governance** | `state`, `drift`, `tier`, `agent`, `tool` | IDP governance tuples | Outcome + deviation (Krineia-aligned) |
 | **3 — Domain** | Per-family fields | Each family independently | Domain-specific semantics |
 | **4 — Integrity** | `signature`, `args_hash`, `previous_hash` | Optional, any tuple | Tamper evidence + chain linkage |
 
-VERUM's 4 node fields (`id`, `time`, `state`, `drift`) are deliberately split: `id`/`time` establish *existence* (universal), while `state`/`drift` establish *judgment* (governance-specific). See [TUPLES_v2.md](docs/specs/TUPLES_v2.md) §8 for the rationale.
+Krineia's 4 node fields (`id`, `time`, `state`, `drift`) are deliberately split: `id`/`time` establish *existence* (universal), while `state`/`drift` establish *judgment* (governance-specific). See [TUPLES_v2.md](docs/specs/TUPLES_v2.md) §8 for the rationale.
 
 ## Tuple Taxonomy
 
@@ -113,7 +113,7 @@ This repo is the companion artifact for:
 
 - **"The Governance Tuple: An Atomic Record for Auditable Agentic AI Decision-Making"** — formalizes the (CONTRACT, DCT, EVIDENCE) triple and proves four accountability properties
 - **"A Typed Delegation-Governance Tuple Profile for Multi-Agent Runtime Control"** (CRAI 2026) — the six-tuple IDP profile with composability evidence
-- **"Append-Only as Proof"** — the VERUM governance sovereignty framework
+- **"Append-Only as Proof"** — the Krineia governance sovereignty framework
 
 ORCID: [0009-0002-5620-1103](https://orcid.org/0009-0002-5620-1103)
 
@@ -124,12 +124,12 @@ ORCID: [0009-0002-5620-1103](https://orcid.org/0009-0002-5620-1103)
 | [ADR-001](adrs/ADR-001-create-dedicated-tuple-repo.md) | Create a dedicated tuple spec repo |
 | [ADR-002](adrs/ADR-002-repo-scope.md) | Scope: spec + research, not runtime |
 | [ADR-003](adrs/ADR-003-governance-simulation-mvp.md) | Governance simulation as research instrument |
-| [ADR-004](adrs/ADR-004-verum-fields-and-tier-model.md) | Layered convergence (VERUM + tier model) |
+| [ADR-004](adrs/ADR-004-verum-fields-and-tier-model.md) | Layered convergence (Krineia + tier model) |
 
 ## Related
 
 - **Runtime implementation**: the production `BaseNTuple` dataclass lives in a separate repo (HMAC-SHA256 signing, JSONL persistence, tier classification as policy-as-code)
-- **VERUM**: append-only audit sovereignty framework — 4 invariants for governance proof
+- **Krineia**: append-only audit sovereignty framework — 4 invariants for governance proof
 - **Base120**: governed reasoning vocabulary — 120 operators in 6 families
 
 ## License

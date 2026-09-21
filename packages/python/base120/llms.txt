@@ -17,7 +17,7 @@
 #   BASE120:SYSTEMS Dynamics, emergence, control (SY1–SY20)
 #   BASE120:SDK Python stdlib-only SDK for operator lookup and prompting
 #   BASE120:MCP MCP server integration for AI agents
-#   BASE120:LEDGER Append-only VERUM-aligned JSONL records
+#   BASE120:LEDGER Append-only Krineia-aligned JSONL records
 
 ## The 6 Cognitive Domains
 

@@ -35,9 +35,9 @@ Tree versions checked 2026-09-02.
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
 | `hummbl-governance` | 1.5.0 | 1.4.2 | Tree version checked 2026-09-08; 1.5.0 remains unreleased under the disposition in `docs/operations/RELEASE.md`. |
-| `base120` | 3.0.2 | 3.0.2 | 120 reasoning operators. NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. |
+| `base120` | 3.0.3 | 3.0.2 | 120 reasoning operators. NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. `3.0.3` renames VERUM→Krineia in docstrings/docs; no behavior change. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
-| `hummbl-tuples` | 0.2.0 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. |
+| `hummbl-tuples` | 0.2.2 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. `0.2.2` renames VERUM→Krineia in README/spec; includes the 0.2.1 wheel-contents fix. |
 | `hummbl-bus` | 0.2.0 | 0.2.0 | TSV coordination bus. 0.2.0 was uploaded 2026-08-27 with **no** `python/hummbl-bus/v0.2.0` tag in this repo. Further bus publishes wait on the tag contract in `docs/operations/RELEASE.md`. |
 | `hummbl-cognition` | 0.1.0 | 0.1.0 | CLP + Open Brain. Live license field may still say MIT vs tree Apache-2.0. |
 | `governed-compression` | 0.1.0 | 0.1.0 | Compression experiments. Live summary may still say "Private research surface". |

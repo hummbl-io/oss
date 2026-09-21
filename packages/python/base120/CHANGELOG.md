@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- (placeholder for upcoming changes)
+## [v3.0.3] - 2026-09-21
+
+### Changed
+- Retired-name remediation: docstrings, module docs, `llms.txt`, DOCTRINE,
+  and test names now say Krineia instead of VERUM (name retired 2026-05-04;
+  public language is "Krineia governance receipt chain"). No behavior change.
+  Historical CHANGELOG entries left as-is; the `NOTICE` trademark list is
+  unchanged by design.
 
 ## [v3.0.2] - 2026-09-07
 

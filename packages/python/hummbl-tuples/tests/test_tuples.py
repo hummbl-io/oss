@@ -703,7 +703,7 @@ class TestSchemaCoverage:
 
 class TestVersion:
     def test_version_accessible(self):
-        assert hummbl_tuples.__version__ == "0.2.0"
+        assert hummbl_tuples.__version__ == "0.2.2"
 
 
 class TestGovernanceChain:

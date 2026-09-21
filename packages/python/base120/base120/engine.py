@@ -259,7 +259,7 @@ class Engine:
             **metadata:     Arbitrary context to attach (model name, session id, etc.).
 
         Returns:
-            ApplyResult — call .to_tuple() to emit a VERUM-aligned evidence record.
+            ApplyResult — call .to_tuple() to emit a Krineia-aligned evidence record.
 
         Raises:
             ValueError: If the code is not in the registry.

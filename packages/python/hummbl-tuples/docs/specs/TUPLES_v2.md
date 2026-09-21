@@ -24,7 +24,7 @@ A tuple is not just a log line. It is a typed claim about execution state with e
 - Explicit blast-radius bounds
 - Human-readable and machine-validatable
 - Stable enough for publication, flexible enough for research
-- VERUM-aligned where governance applies, lightweight where it doesn't
+- Krineia-aligned where governance applies, lightweight where it doesn't
 
 ## 3. Layered Envelope
 
@@ -45,12 +45,12 @@ Layer 1 establishes identity, temporality, and type discrimination for every rec
 
 ### 3.2 Layer 2 — Governance (governed tuples only)
 
-Tuples that represent governed decisions, delegations, or enforcement actions carry VERUM-aligned governance fields:
+Tuples that represent governed decisions, delegations, or enforcement actions carry Krineia-aligned governance fields:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `state` | string | yes | Outcome status: `ok`, `blocked`, `error` (VERUM node 3) |
-| `drift` | number | yes | Deviation from setpoint, 0.0 to 1.0 (VERUM node 4) |
+| `state` | string | yes | Outcome status: `ok`, `blocked`, `error` (Krineia node 3) |
+| `drift` | number | yes | Deviation from setpoint, 0.0 to 1.0 (Krineia node 4) |
 | `tier` | integer | yes | Governance tier: 0 (read), 1 (write/evidence), 2 (governed), 3 (chain) |
 | `agent` | string | yes | Actor identity |
 | `tool` | string | yes | Namespaced tool name |
@@ -183,23 +183,23 @@ Tier classification is policy-as-code. See `basen_tier.py` in the runtime repo.
 - This spec does not claim the current taxonomy is complete.
 - This spec does not require Layer 2 for research instrumentation tuples.
 
-## 8. Relationship to VERUM
+## 8. Relationship to Krineia
 
-VERUM defines four node fields: `id`, `time`, `state`, `drift`. In the layered model:
+Krineia defines four node fields: `id`, `time`, `state`, `drift`. In the layered model:
 
 - `id` and `time` are universal (Layer 1) — every record needs identity and temporality
 - `state` and `drift` are governance-specific (Layer 2) — they measure outcome and deviation, which only applies to governed decisions
 
-### 8.1 Why VERUM Fields Are Split Across Layers
+### 8.1 Why Krineia Fields Are Split Across Layers
 
-The four VERUM fields decompose into two functional pairs:
+The four Krineia fields decompose into two functional pairs:
 
 | Pair | Fields | Function | Applies to |
 |------|--------|----------|------------|
 | **Existence** | `id`, `time` | "This record happened" | All records — universal |
 | **Judgment** | `state`, `drift` | "How did it go?" | Governed decisions only |
 
-`id` and `time` are properties of *any* record in *any* system. They are not unique to VERUM — they are prerequisites for it. A log entry, a database row, and an event all have identity and temporality.
+`id` and `time` are properties of *any* record in *any* system. They are not unique to Krineia — they are prerequisites for it. A log entry, a database row, and an event all have identity and temporality.
 
 `state` and `drift` are the fields that make a tuple *governed*. `state` records the outcome of a governed decision. `drift` quantifies deviation from a governance setpoint. These only have meaning when something was being *governed* — when a policy was being enforced, an authority was being exercised, or a boundary was being checked.
 
@@ -211,7 +211,7 @@ Neither outcome serves the spec or the paper.
 
 ### 8.2 Publishable Claim
 
-VERUM's sovereignty claim rests on `state` and `drift` — the fields that distinguish a governed tuple from a mere log entry. The layered decomposition reveals that governance is not a property of all records, but a property of records that assert a policy outcome. This distinction is the boundary between audit (Layer 1: "what happened") and governance (Layer 2: "was it within bounds").
+Krineia's sovereignty claim rests on `state` and `drift` — the fields that distinguish a governed tuple from a mere log entry. The layered decomposition reveals that governance is not a property of all records, but a property of records that assert a policy outcome. This distinction is the boundary between audit (Layer 1: "what happened") and governance (Layer 2: "was it within bounds").
 
 ### 8.3 Upgrade Path
 

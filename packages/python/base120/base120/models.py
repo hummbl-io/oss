@@ -18,9 +18,9 @@
 
 Operator       — a single reasoning operator from the canonical registry.
 ApplyResult    — the structured result of recording an operator application.
-OperatorTuple  — VERUM-aligned evidence tuple emitted by ApplyResult.to_tuple().
+OperatorTuple  — Krineia-aligned evidence tuple emitted by ApplyResult.to_tuple().
 
-VERUM alignment (append-only sovereignty):
+Krineia alignment (append-only sovereignty):
   id    — operator code, e.g. "P6"
   time  — UTC ISO-8601 timestamp of the application
   state — the recommendation produced by the application
@@ -36,12 +36,12 @@ from typing import Any, NamedTuple
 
 
 class OperatorTuple(NamedTuple):
-    """VERUM-aligned evidence tuple for an operator application.
+    """Krineia-aligned evidence tuple for an operator application.
 
     Drop this into any append-only audit log (JSONL, TSV, etc.) as proof
     that a governed reasoning step occurred.
 
-    Fields mirror the 4 VERUM node fields:
+    Fields mirror the 4 Krineia node fields:
       id     → who/what (operator code)
       time   → when     (UTC ISO-8601)
       state  → current condition (recommendation)
@@ -100,7 +100,7 @@ class ApplyResult:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_tuple(self) -> OperatorTuple:
-        """Emit a VERUM-aligned evidence tuple.
+        """Emit a Krineia-aligned evidence tuple.
 
         Returns an OperatorTuple with:
           id    = operator code
