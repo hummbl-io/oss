@@ -453,6 +453,30 @@ class TestLedgerWriter:
         assert len(entries) == 1
         assert entries[0].content == "Round trip test"
 
+    def test_post_entry_multibyte_utf8_at_tail_scan_boundary(self, tmp_path):
+        """Regression: the backward scan for the last line must not crash when
+        file_size - 4096 lands inside a multi-byte UTF-8 character."""
+        ledger = tmp_path / "ledger.jsonl"
+        # The em-dash stays near the start; padding grows until a continuation
+        # byte (0x80-0xBF) sits exactly at offset len-4096 — the old text-mode
+        # seek target.
+        pad = 0
+        while True:
+            raw = ('{"seed":"—' + "x" * pad + '"}\n').encode("utf-8")
+            if len(raw) > 4096 and 0x80 <= raw[len(raw) - 4096] <= 0xBF:
+                break
+            pad += 1
+        ledger.write_bytes(raw)
+
+        entry = _make_entry()
+        written = post_entry(entry, ledger_path=ledger)
+
+        assert written.id == entry.id
+        lines = ledger.read_text(encoding="utf-8").splitlines()
+        assert len(lines) == 2
+        assert json.loads(lines[1])["id"] == entry.id
+        assert json.loads(lines[1])["previous_hash"] is not None
+
     def test_multiple_entries_most_recent_first(self, tmp_path):
         ledger = tmp_path / "ledger.jsonl"
         e1 = _make_entry(content="First entry")

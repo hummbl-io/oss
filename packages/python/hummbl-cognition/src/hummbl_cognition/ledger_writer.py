@@ -609,26 +609,31 @@ def post_entry(
                     # Read the complete final record. A single JSONL record may
                     # exceed any fixed read window, so we scan backward from EOF
                     # to find the last newline boundary, growing the window as
-                    # needed until the preceding newline is found.
+                    # needed until the preceding newline is found. The scan runs
+                    # on the underlying binary buffer: seeking a text-mode
+                    # handle to an arbitrary byte offset can land inside a
+                    # multi-byte UTF-8 sequence, which raises UnicodeDecodeError
+                    # on the next read.
                     last_line = ""
                     read_size = 4096
+                    bf = f.buffer
                     while True:
                         pos = max(0, file_size - read_size)
-                        f.seek(pos)
-                        chunk = f.read()
+                        bf.seek(pos)
+                        chunk = bf.read()
                         # Find the last newline that precedes the final line.
                         # If file ends with \n, rfind gives the boundary before
                         # the (empty) trailing segment; we want the one before that.
                         nl_idx = (
-                            chunk.rfind("\n", 0, len(chunk) - 1)
-                            if chunk.endswith("\n")
-                            else chunk.rfind("\n")
+                            chunk.rfind(b"\n", 0, len(chunk) - 1)
+                            if chunk.endswith(b"\n")
+                            else chunk.rfind(b"\n")
                         )
                         if nl_idx >= 0 or pos == 0:
                             # Found a newline boundary (or reached BOF) — the
                             # final record starts right after it.
                             start = nl_idx + 1 if nl_idx >= 0 else 0
-                            last_line = chunk[start:].strip()
+                            last_line = chunk[start:].strip().decode("utf-8")
                             break
                         # No newline found in this window — record is larger than
                         # read_size. Grow the window and retry.

@@ -80,7 +80,9 @@ def test_default_state_paths_share_one_package_relative_root(monkeypatch):
     )
     assert ledger_writer._resolve_ledger_path() == expected_dir / "ledger.jsonl"
     assert indexer._resolve_index_path() == expected_dir / "index.json"
-    assert expected_dir == mcp_server.LEDGER_DIR
+    # mcp_server.LEDGER_DIR is bound at import time from CLP_STATE_DIR;
+    # its documented fallback is the shared default constant.
+    assert mcp_server.DEFAULT_COGNITION_DIR == expected_dir
 
 
 @pytest.mark.allow_ledger_writes
