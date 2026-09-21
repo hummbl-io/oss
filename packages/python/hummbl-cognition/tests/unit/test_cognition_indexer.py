@@ -187,12 +187,13 @@ class TestResolveIndexPath:
         # Must be an absolute path
         assert p.is_absolute()
 
-    def test_does_not_use_git_rev_parse(self):
+    def test_does_not_use_git_rev_parse(self, monkeypatch):
         """The old implementation used ``git rev-parse --show-toplevel``
         which returns the workspace root when the repo is nested. Verify
         the new implementation does not shell out to git."""
         import hummbl_cognition.indexer as idx_mod
 
+        monkeypatch.delenv("COGNITION_INDEX", raising=False)
         # The resolved path should NOT depend on git
         p = _resolve_index_path()
         # Confirm it matches the __file__-based resolution

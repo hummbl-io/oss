@@ -25,12 +25,14 @@ def isolated_cognition(tmp_path, monkeypatch):
     cog_dir.mkdir()
     cycles = cog_dir / "hrsi_cycles.jsonl"
     baseline = cog_dir / "belonging_baseline.jsonl"
+    ledger = cog_dir / "ledger.jsonl"
 
     monkeypatch.setattr(bc, "COGNITION_DIR", cog_dir)
     monkeypatch.setattr(bc, "BASELINE_PATH", baseline)
     monkeypatch.setattr(hc, "COGNITION_DIR", cog_dir)
     monkeypatch.setattr(hc, "CYCLES_PATH", cycles)
     monkeypatch.setattr(hc, "BASELINE_PATH", baseline)
+    monkeypatch.setattr(hc, "LEDGER_PATH", ledger)
     monkeypatch.setattr(hs, "CYCLES_PATH", cycles)
     monkeypatch.setattr(hs, "BASELINE_PATH", baseline)
 
