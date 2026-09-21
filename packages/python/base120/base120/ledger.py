@@ -14,7 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""VERUM-aligned append-only audit ledger.
+"""Krineia-aligned append-only audit ledger.
 
 Persists OperatorTuple entries as JSONL. Implements exactly three operators:
 
@@ -22,7 +22,7 @@ Persists OperatorTuple entries as JSONL. Implements exactly three operators:
   project(n)           — read the last n entries (all if n is None)
   cut(max_drift)       — return entries where drift > max_drift
 
-VERUM invariants enforced:
+Krineia invariants enforced:
   - Append-only: the file is only opened in 'a' mode; no delete or modify.
   - No self-reference: the Engine never reads its own ledger.
   - Minimal operators: exactly three public methods (append / project / cut).
@@ -45,7 +45,7 @@ _DEFAULT_PATH = Path.home() / ".base120" / "ledger.jsonl"
 class Ledger:
     """Append-only audit log for Base120 operator applications.
 
-    Each entry is a JSONL line with the 4 VERUM fields:
+    Each entry is a JSONL line with the 4 Krineia fields:
       {"id": "P6", "time": "...", "state": "...", "drift": 0.15}
 
     Usage::
@@ -89,7 +89,7 @@ class Ledger:
 
         Raises:
             ValueError: If a ledger line is valid JSON but missing required
-                VERUM fields (id, time, state, drift).
+                Krineia fields (id, time, state, drift).
         """
         if not self._path.exists():
             return []
@@ -127,7 +127,7 @@ class Ledger:
     def cut(self, max_drift: float) -> list[OperatorTuple]:
         """Return entries where drift strictly exceeds max_drift.
 
-        This is VERUM's cut() operator: surfaces decisions with deviation
+        This is Krineia's cut() operator: surfaces decisions with deviation
         above the threshold so external analysis can inspect them.
 
         Args:
