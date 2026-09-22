@@ -456,6 +456,8 @@ def _sender_to_vendor(sender: str) -> str:
         return "moonshot"
     if "gemini" in sender_lower:
         return "google"
+    if "devin" in sender_lower or "swe" in sender_lower:
+        return "cognition"
     return "local"
 
 
@@ -616,6 +618,8 @@ def _author_to_vendor(author: str) -> str:
         return "moonshot"
     if "gemini" in author_lower or "google" in author_lower:
         return "google"
+    if "devin" in author_lower or "cognition" in author_lower:
+        return "cognition"
     return "human"
 
 

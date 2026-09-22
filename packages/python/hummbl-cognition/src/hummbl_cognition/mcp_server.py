@@ -194,7 +194,7 @@ TOOLS = [
                 },
                 "vendor": {
                     "type": "string",
-                    "description": "Vendor (anthropic|openai|google|moonshot|local|human). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
+                    "description": "Vendor (anthropic|cognition|google|human|local|moonshot|openai|zai). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
                 },
                 "model": {
                     "type": "string",
@@ -329,7 +329,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             # Resolve vendor/model from args → env vars → error.
             # Hardcoding "anthropic" would corrupt provenance (any agent may
             # call this MCP). LedgerEntry rejects vendor not in VALID_VENDORS
-            # (anthropic/openai/google/moonshot/local/human), so a missing
+            # (anthropic/cognition/google/human/local/moonshot/openai/zai), so a missing
             # identity must surface as a clear schema error, not "Invalid
             # vendor: 'unknown'".
             vendor = arguments.get("vendor") or os.environ.get("COGNITION_VENDOR")
@@ -343,7 +343,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                         f"Missing required identity: {', '.join(missing_identity)}. "
                         "Supply via arguments or set COGNITION_VENDOR / "
                         "COGNITION_MODEL env vars. Valid vendors: "
-                        "anthropic, openai, google, moonshot, local, human."
+                        "anthropic, cognition, google, human, local, moonshot, openai, zai."
                     )
                 }
             entry = LedgerEntry.create(
