@@ -5,10 +5,14 @@ name: Validate workflows
     paths:
       - ".github/workflows/**"
       - "tools/scripts/validate_workflows.py"
+      - "tools/scripts-inventory.json"
+      - "tools/scripts/check_scripts_inventory.py"
   push:
     paths:
       - ".github/workflows/**"
       - "tools/scripts/validate_workflows.py"
+      - "tools/scripts-inventory.json"
+      - "tools/scripts/check_scripts_inventory.py"
   workflow_dispatch:
 
 
@@ -28,7 +32,9 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.13"
-      - name: Validate
+      - name: Validate workflows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python tools/scripts/validate_workflows.py
+      - name: Validate scripts inventory
+        run: python tools/scripts/check_scripts_inventory.py

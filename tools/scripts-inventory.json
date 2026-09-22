@@ -1,0 +1,193 @@
+{
+  "schema_version": "hummbl.repository-scripts.v1",
+  "updated_at": "2026-09-22",
+  "description": "Authoritative inventory of repository automation, verification, and workflow scripts in hummbl-io/oss.",
+  "scripts": [
+    {
+      "path": ".github/scripts/check_license_consistency.py",
+      "classification": "maintain",
+      "owner": "governance",
+      "invocation_contract": "python .github/scripts/check_license_consistency.py",
+      "system_boundary": "Read-only filesystem scan across package pyproject.toml and license headers; zero network egress.",
+      "failure_behavior": "Exit 0 on clean license compliance; exit 1 on missing license file or mismatched identifier.",
+      "test_path": ".github/workflows/ci.yml (check-licenses job)",
+      "workflow_callers": [
+        ".github/workflows/ci.yml"
+      ],
+      "integration_notes": "Enforces Apache-2.0 / MIT license consistency across all monorepo packages prior to CI build matrix."
+    },
+    {
+      "path": ".github/scripts/lock_build_env.py",
+      "classification": "maintain",
+      "owner": "release-engineering",
+      "invocation_contract": "python .github/scripts/lock_build_env.py check-inputs <package|--all>",
+      "system_boundary": "Read-only filesystem inspection of locked dependency hashes in pyproject.toml; zero network egress.",
+      "failure_behavior": "Exit 0 on locked inputs; exit 1 on unpinned build dependencies or version drift.",
+      "test_path": ".github/workflows/ci.yml and .github/workflows/publish-pypi.yml",
+      "workflow_callers": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish-pypi.yml"
+      ],
+      "integration_notes": "Prerequisite gate in PyPI publish workflow guaranteeing hermetic, reproducible build environments."
+    },
+    {
+      "path": "tools/assessor-v0/verify.py",
+      "classification": "productize",
+      "owner": "governance",
+      "invocation_contract": "python tools/assessor-v0/verify.py [--root <path>]",
+      "system_boundary": "Read-only static verification of governance rules and contract adherence; zero network egress.",
+      "failure_behavior": "Exit 0 on successful verification; exit 1 on broken contracts or missing evidence.",
+      "test_path": "Manual / smoke test against tools/assessor-v0/WHAT_THIS_PROVES.md",
+      "workflow_callers": [],
+      "integration_notes": "Prototype verification engine slated for packaging into hummbl-governance CLI assessment toolset."
+    },
+    {
+      "path": "tools/validate_ai_positions.py",
+      "classification": "maintain",
+      "owner": "research-ethics",
+      "invocation_contract": "python tools/validate_ai_positions.py [--input <file>]",
+      "system_boundary": "Local schema verification of AI position papers and policy claims; zero network egress.",
+      "failure_behavior": "Exit 0 on valid schema and assertions; exit 1 on assertion failure or malformed metadata.",
+      "test_path": "tools/test_validate_ai_positions.py",
+      "workflow_callers": [],
+      "integration_notes": "Verifies structured policy assertions in docs/positions/ prior to public release."
+    },
+    {
+      "path": "tools/scripts/check_boundary_patterns.py",
+      "classification": "maintain",
+      "owner": "security-architecture",
+      "invocation_contract": "python tools/scripts/check_boundary_patterns.py [--root <path>]",
+      "system_boundary": "Read-only regular expression scan for private paths, internal hostnames, and credentials; zero network egress.",
+      "failure_behavior": "Exit 0 on clean scan; exit 1 on pattern violations or forbidden boundary leaks.",
+      "test_path": "tools/scripts/test_check_boundary_patterns.py",
+      "workflow_callers": [
+        ".github/workflows/boundary-check.yml"
+      ],
+      "integration_notes": "Primary gate preventing private architecture artifacts and internal secrets from landing in open source."
+    },
+    {
+      "path": "tools/scripts/check_scripts_inventory.py",
+      "classification": "maintain",
+      "owner": "architecture",
+      "invocation_contract": "python tools/scripts/check_scripts_inventory.py [--root <path>] [--inventory <path>]",
+      "system_boundary": "Read-only inspection of repository automation scripts and scripts-inventory.json; zero network egress.",
+      "failure_behavior": "Exit 0 on complete inventory parity; exit 1 on uncataloged scripts, missing files, or schema discrepancies.",
+      "test_path": "tools/scripts/test_check_scripts_inventory.py",
+      "workflow_callers": [
+        ".github/workflows/validate-workflows.yml"
+      ],
+      "integration_notes": "Enforces repository script lifecycle contracts (Issue #214), preventing unmaintained automation drift."
+    },
+    {
+      "path": "tools/scripts/check_rights_distribution.py",
+      "classification": "maintain",
+      "owner": "compliance",
+      "invocation_contract": "python tools/scripts/check_rights_distribution.py [--root <path>]",
+      "system_boundary": "Read-only scan of product.json manifests against git tracked tree; zero network egress.",
+      "failure_behavior": "Exit 0 on clean distribution rights; exit 1 on rights contradictions; exit 2 on incomplete authorities.",
+      "test_path": "tools/scripts/test_check_rights_distribution.py",
+      "workflow_callers": [
+        ".github/workflows/boundary-check.yml"
+      ],
+      "integration_notes": "Enforces that proprietary or non-redistributable content cannot be bundled into public distributions."
+    },
+    {
+      "path": "tools/scripts/pypi_download_tracker.py",
+      "classification": "connect",
+      "owner": "developer-relations",
+      "invocation_contract": "python tools/scripts/pypi_download_tracker.py [--check | --report]",
+      "system_boundary": "Network egress via HTTPS to PyPI Stats API; appends data rows to tools/data/pypi-downloads.csv.",
+      "failure_behavior": "Exit 0 on successful data poll; exit 1 on API error, rate limit, or invalid response.",
+      "test_path": ".github/workflows/pypi-download-tracker.yml",
+      "workflow_callers": [
+        ".github/workflows/pypi-download-tracker.yml"
+      ],
+      "integration_notes": "Telemetry feeder connecting public package download velocity to commercial product offering prioritization (Issue #215)."
+    },
+    {
+      "path": "tools/scripts/validate_landing_comprehension_receipt.py",
+      "classification": "maintain",
+      "owner": "operations",
+      "invocation_contract": "python tools/scripts/validate_landing_comprehension_receipt.py [--receipt <path>]",
+      "system_boundary": "Local JSON parsing and cryptographic signature checking on landing receipts; zero network egress.",
+      "failure_behavior": "Exit 0 on valid comprehension receipt; exit 1 on schema failure, tamper detection, or missing signature.",
+      "test_path": "tools/scripts/test_validate_landing_comprehension_receipt.py",
+      "workflow_callers": [],
+      "integration_notes": "Provides mathematical provenance verifying human operator and user sign-off on product landing interfaces."
+    },
+    {
+      "path": "tools/scripts/validate_product_manifests.mjs",
+      "classification": "maintain",
+      "owner": "product",
+      "invocation_contract": "node tools/scripts/validate_product_manifests.mjs [--dir <path>]",
+      "system_boundary": "Node.js schema validation of product.json against product-admission-v1.schema.json; zero network egress.",
+      "failure_behavior": "Exit 0 on valid manifest schema; exit 1 on schema validation error.",
+      "test_path": "tools/scripts/test_validate_product_manifests.mjs",
+      "workflow_callers": [
+        ".github/workflows/ci.yml"
+      ],
+      "integration_notes": "Automated admission gate verifying tier, distribution, lifecycle, and tool matrix for all OSS products."
+    },
+    {
+      "path": "tools/scripts/validate_workflows.py",
+      "classification": "maintain",
+      "owner": "ci-cd",
+      "invocation_contract": "python tools/scripts/validate_workflows.py [--root <path>]",
+      "system_boundary": "Read-only static parse of YAML workflow files under .github/workflows/; zero network egress.",
+      "failure_behavior": "Exit 0 on compliant workflows; exit 1 on unpinned 3rd-party actions or YAML 1.1 unquoted boolean keys.",
+      "test_path": "tools/scripts/test_validate_workflows.py",
+      "workflow_callers": [
+        ".github/workflows/validate-workflows.yml"
+      ],
+      "integration_notes": "Enforces supply-chain immutability and StepSecurity pinning across all fleet CI pipelines."
+    },
+    {
+      "path": "packages/python/hummbl-governance/scripts/check_public_count_claims.py",
+      "classification": "connect",
+      "owner": "governance",
+      "invocation_contract": "python packages/python/hummbl-governance/scripts/check_public_count_claims.py",
+      "system_boundary": "Read-only parse of PRIMITIVES.md and test directory in hummbl-governance; zero network egress.",
+      "failure_behavior": "Exit 0 on verified count claims; exit 1 on claim drift or unverified counts.",
+      "test_path": ".github/workflows/ci.yml (verify-claims step)",
+      "workflow_callers": [
+        ".github/workflows/ci.yml"
+      ],
+      "integration_notes": "Direct technical implementation of Claim Honesty Protocol, preventing documentation inflation."
+    },
+    {
+      "path": "packages/python/hummbl-bus/scripts/release/normalize_sdist.py",
+      "classification": "maintain",
+      "owner": "release-engineering",
+      "invocation_contract": "python packages/python/hummbl-bus/scripts/release/normalize_sdist.py <dist_file>",
+      "system_boundary": "Unpacks and repacks sdist archives to enforce deterministic timestamps and UID/GID permissions; local disk writes.",
+      "failure_behavior": "Exit 0 on clean sdist normalization; exit 1 on archive corruption or missing files.",
+      "test_path": "Package build in .github/workflows/publish-pypi.yml",
+      "workflow_callers": [
+        ".github/workflows/publish-pypi.yml"
+      ],
+      "integration_notes": "Guarantees byte-for-byte reproducible package distributions on PyPI for hummbl-bus."
+    },
+    {
+      "path": "packages/python/base120/scripts/extract_deterministic_results.py",
+      "classification": "connect",
+      "owner": "base120",
+      "invocation_contract": "python packages/python/base120/scripts/extract_deterministic_results.py [--eval-dir <dir>]",
+      "system_boundary": "Parses mental model routing results and extracts deterministic baseline fixtures; local disk writes.",
+      "failure_behavior": "Exit 0 on valid extraction; exit 1 on malformed evaluation logs.",
+      "test_path": "packages/python/base120/tests/",
+      "workflow_callers": [],
+      "integration_notes": "Supplies golden baseline data for cross-fleet model evaluation and mental model selection."
+    },
+    {
+      "path": "packages/python/hummbl-tuples/scripts/check_schema_code_consistency.py",
+      "classification": "maintain",
+      "owner": "tuples",
+      "invocation_contract": "python packages/python/hummbl-tuples/scripts/check_schema_code_consistency.py",
+      "system_boundary": "Read-only reflection comparing Python dataclass fields with JSON schema definitions; zero network egress.",
+      "failure_behavior": "Exit 0 on consistent fields; exit 1 on mismatched types, missing fields, or naming drift.",
+      "test_path": "packages/python/hummbl-tuples/tests/",
+      "workflow_callers": [],
+      "integration_notes": "Prevents semantic divergence between Typed Tuples protocols and runtime implementation code."
+    }
+  ]
+}

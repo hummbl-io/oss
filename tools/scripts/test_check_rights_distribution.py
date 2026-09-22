@@ -27,13 +27,13 @@ class RightsDistributionTests(unittest.TestCase):
 
     def init_repo(self):
         self.git("init", "-q")
-        self.git("config", "user.email", "test@example.com")
-        self.git("config", "user.name", "Test")
+        self.git("config", "user.email", "reuben@hummbl.io")
+        self.git("config", "user.name", "Reuben Bowlby")
 
     def add_and_commit(self, *names):
         for name in names:
             self.git("add", name)
-        self.git("commit", "-q", "-m", "test")
+        self.git("commit", "-q", "-m", "test(fixture): sample")
 
     def manifest(self, content_id, policy, authority_path=None):
         m = {

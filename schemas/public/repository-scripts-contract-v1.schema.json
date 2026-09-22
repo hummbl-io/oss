@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/hummbl-io/oss/main/schemas/public/repository-scripts-contract-v1.schema.json",
+  "title": "HUMMBL Repository Scripts Contract",
+  "description": "Lifecycle classification, invocation contracts, and integration metadata for repository automation scripts.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "updated_at",
+    "scripts"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "hummbl.repository-scripts.v1"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scripts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "classification",
+          "owner",
+          "invocation_contract",
+          "system_boundary",
+          "failure_behavior",
+          "test_path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Normalized repository-relative path to script"
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "maintain",
+              "connect",
+              "productize",
+              "deprecate",
+              "retire"
+            ]
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owning persona, team, or maintainer identity"
+          },
+          "invocation_contract": {
+            "type": "string",
+            "description": "Standard CLI arguments and invocation method"
+          },
+          "system_boundary": {
+            "type": "string",
+            "description": "Explicit boundaries: network egress, disk mutation, env vars, git interactions"
+          },
+          "failure_behavior": {
+            "type": "string",
+            "description": "Documented exit codes and failure signals"
+          },
+          "test_path": {
+            "type": "string",
+            "description": "Automated test file or smoke command"
+          },
+          "workflow_callers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "GitHub Actions workflows invoking this script"
+          },
+          "integration_notes": {
+            "type": "string",
+            "description": "Integration hooks into package release, product admission, provenance, or telemetry"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
