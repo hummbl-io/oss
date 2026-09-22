@@ -92,3 +92,6 @@ jobs:
 
       - name: Verify script lifecycle contracts
         run: python tools/scripts/script_contracts.py --check
+
+      - name: Verify adoption-signals report
+        run: python tools/scripts/adoption_signals.py --check
