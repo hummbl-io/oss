@@ -1,0 +1,2782 @@
+{
+  "report_version": "1.0",
+  "generated_at_utc": "2026-09-22T09:38:02.029300+00:00",
+  "package": "packages/python/hummbl-contracts",
+  "upstream_repository": "https://github.com/json-schema-org/JSON-Schema-Test-Suite",
+  "upstream_revision": "f6fd52a0a95472e079cbfc6ef7f089702b80e045",
+  "profile": {
+    "dialect": "https://json-schema.org/draft/2020-12/schema",
+    "profile_id": "hummbl-contracts-draft2020-12-subset-v1",
+    "supported_keywords": [
+      "additionalProperties",
+      "anyOf",
+      "const",
+      "enum",
+      "items",
+      "maxItems",
+      "maxLength",
+      "maximum",
+      "minItems",
+      "minLength",
+      "minimum",
+      "oneOf",
+      "pattern",
+      "properties",
+      "required",
+      "type"
+    ],
+    "boolean_schemas_supported": true,
+    "unsupported_constructs": [
+      "$defs",
+      "$ref",
+      "allOf",
+      "contains",
+      "dependentRequired",
+      "dependentSchemas",
+      "if",
+      "then",
+      "else",
+      "maxContains",
+      "minContains",
+      "not",
+      "patternProperties",
+      "prefixItems",
+      "propertyNames",
+      "unevaluatedItems",
+      "unevaluatedProperties",
+      "uniqueItems"
+    ],
+    "regex_engine": "python-stdlib-re",
+    "known_limitations": [
+      {
+        "keyword": "pattern",
+        "group": "pattern with Unicode property escape requires unicode mode",
+        "test": "ASCII letters match",
+        "rationale": "Python stdlib `re` module does not support ECMA-262 Unicode property escapes (\\p{Letter}) without third-party `regex` library. Prohibited under hummbl-contracts zero-third-party-runtime-dependency policy."
+      },
+      {
+        "keyword": "pattern",
+        "group": "pattern with Unicode property escape requires unicode mode",
+        "test": "Non-ASCII letters match",
+        "rationale": "Python stdlib `re` module does not support ECMA-262 Unicode property escapes (\\p{Letter}) without third-party `regex` library. Prohibited under hummbl-contracts zero-third-party-runtime-dependency policy."
+      }
+    ]
+  },
+  "environment": {
+    "python_version": "3.14.6",
+    "python_implementation": "CPython",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "counts": {
+    "total_selected": 385,
+    "pass": 344,
+    "fail": 0,
+    "outside_subset": 39,
+    "known_limitation": 2,
+    "error": 0,
+    "stale_waiver": 0
+  },
+  "metrics": {
+    "in_profile_total": 346,
+    "selected_corpus_coverage_pct": 89.87,
+    "in_profile_pass_rate_pct": 99.42
+  },
+  "disclaimer": "Selected-corpus coverage measures the proportion of tests in the imported 16-file test suite within the declared subset profile. It does NOT assert full JSON Schema Draft 2020-12 specification conformance.",
+  "results_summary": [
+    {
+      "case_id": "additionalProperties::g0:additionalProperties being false does not allow other properties::t0:no additional properties is valid",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g0:additionalProperties being false does not allow other properties::t1:an additional property is invalid",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g0:additionalProperties being false does not allow other properties::t2:ignores arrays",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g0:additionalProperties being false does not allow other properties::t3:ignores strings",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g0:additionalProperties being false does not allow other properties::t4:ignores other non-objects",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g0:additionalProperties being false does not allow other properties::t5:patternProperties are not additional properties",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g1:non-ASCII pattern with additionalProperties::t0:matching the pattern is valid",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g1:non-ASCII pattern with additionalProperties::t1:not matching the pattern is invalid",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g2:additionalProperties with schema::t0:no additional properties is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g2:additionalProperties with schema::t1:an additional valid property is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g2:additionalProperties with schema::t2:an additional invalid property is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g3:additionalProperties can exist by itself::t0:an additional valid property is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g3:additionalProperties can exist by itself::t1:an additional invalid property is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g4:additionalProperties are allowed by default::t0:additional properties are allowed",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g5:additionalProperties does not look in applicators::t0:properties defined in allOf are not examined",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g6:additionalProperties with null valued instance properties::t0:allows null values",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g7:additionalProperties with propertyNames::t0:Valid against both keywords",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g7:additionalProperties with propertyNames::t1:Valid against propertyNames, but not additionalProperties",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g8:dependentSchemas with additionalProperties::t0:additionalProperties doesn't consider dependentSchemas",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g8:dependentSchemas with additionalProperties::t1:additionalProperties can't see bar",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "additionalProperties::g8:dependentSchemas with additionalProperties::t2:additionalProperties can't see bar even when foo2 is present",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g0:anyOf::t0:first anyOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g0:anyOf::t1:second anyOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g0:anyOf::t2:both anyOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g0:anyOf::t3:neither anyOf valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g1:anyOf with base schema::t0:mismatch base schema",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g1:anyOf with base schema::t1:one anyOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g1:anyOf with base schema::t2:both anyOf invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g2:anyOf with boolean schemas, all true::t0:any value is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g3:anyOf with boolean schemas, some true::t0:any value is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g4:anyOf with boolean schemas, all false::t0:any value is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g5:anyOf complex types::t0:first anyOf valid (complex)",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g5:anyOf complex types::t1:second anyOf valid (complex)",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g5:anyOf complex types::t2:both anyOf valid (complex)",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g5:anyOf complex types::t3:neither anyOf valid (complex)",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g6:anyOf with one empty schema::t0:string is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g6:anyOf with one empty schema::t1:number is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g7:nested anyOf, to check validation semantics::t0:null is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "anyOf::g7:nested anyOf, to check validation semantics::t1:anything non-null is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g0:const validation::t0:same value is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g0:const validation::t1:another value is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g0:const validation::t2:another type is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g1:const with object::t0:same object is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g1:const with object::t1:same object with different property order is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g1:const with object::t2:another object is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g1:const with object::t3:another type is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g2:const with array::t0:same array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g2:const with array::t1:another array item is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g2:const with array::t2:array with additional items is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g3:const with null::t0:null is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g3:const with null::t1:not null is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g4:const with false does not match 0::t0:false is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g4:const with false does not match 0::t1:integer zero is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g4:const with false does not match 0::t2:float zero is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g5:const with true does not match 1::t0:true is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g5:const with true does not match 1::t1:integer one is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g5:const with true does not match 1::t2:float one is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g6:const with [false] does not match [0]::t0:[false] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g6:const with [false] does not match [0]::t1:[0] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g6:const with [false] does not match [0]::t2:[0.0] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g7:const with [true] does not match [1]::t0:[true] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g7:const with [true] does not match [1]::t1:[1] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g7:const with [true] does not match [1]::t2:[1.0] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g8:const with {\"a\": false} does not match {\"a\": 0}::t0:{\"a\": false} is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g8:const with {\"a\": false} does not match {\"a\": 0}::t1:{\"a\": 0} is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g8:const with {\"a\": false} does not match {\"a\": 0}::t2:{\"a\": 0.0} is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g9:const with {\"a\": true} does not match {\"a\": 1}::t0:{\"a\": true} is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g9:const with {\"a\": true} does not match {\"a\": 1}::t1:{\"a\": 1} is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g9:const with {\"a\": true} does not match {\"a\": 1}::t2:{\"a\": 1.0} is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g10:const with 0 does not match other zero-like types::t0:false is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g10:const with 0 does not match other zero-like types::t1:integer zero is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g10:const with 0 does not match other zero-like types::t2:float zero is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g10:const with 0 does not match other zero-like types::t3:empty object is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g10:const with 0 does not match other zero-like types::t4:empty array is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g10:const with 0 does not match other zero-like types::t5:empty string is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g11:const with 1 does not match true::t0:true is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g11:const with 1 does not match true::t1:integer one is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g11:const with 1 does not match true::t2:float one is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g12:const with -2.0 matches integer and float types::t0:integer -2 is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g12:const with -2.0 matches integer and float types::t1:integer 2 is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g12:const with -2.0 matches integer and float types::t2:float -2.0 is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g12:const with -2.0 matches integer and float types::t3:float 2.0 is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g12:const with -2.0 matches integer and float types::t4:float -2.00001 is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g13:float and integers are equal up to 64-bit representation limits::t0:integer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g13:float and integers are equal up to 64-bit representation limits::t1:integer minus one is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g13:float and integers are equal up to 64-bit representation limits::t2:float is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g13:float and integers are equal up to 64-bit representation limits::t3:float minus one is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g14:nul characters in strings::t0:match string with nul",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g14:nul characters in strings::t1:do not match string lacking nul",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g15:characters with the same visual representation but different codepoint::t0:character uses the same codepoint",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g15:characters with the same visual representation but different codepoint::t1:character looks the same but uses a different codepoint",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g16:characters with the same visual representation, but different number of codepoints::t0:character uses the same codepoint",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "const::g16:characters with the same visual representation, but different number of codepoints::t1:character looks the same but uses combining marks",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g0:simple enum validation::t0:one of the enum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g0:simple enum validation::t1:something else is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g1:heterogeneous enum validation::t0:one of the enum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g1:heterogeneous enum validation::t1:something else is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g1:heterogeneous enum validation::t2:objects are deep compared",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g1:heterogeneous enum validation::t3:valid object matches",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g1:heterogeneous enum validation::t4:extra properties in object is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g2:heterogeneous enum-with-null validation::t0:null is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g2:heterogeneous enum-with-null validation::t1:number is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g2:heterogeneous enum-with-null validation::t2:something else is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g3:enums in properties::t0:both properties are valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g3:enums in properties::t1:wrong foo value",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g3:enums in properties::t2:wrong bar value",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g3:enums in properties::t3:missing optional property is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g3:enums in properties::t4:missing required property is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g3:enums in properties::t5:missing all properties is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g4:enum with escaped characters::t0:member 1 is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g4:enum with escaped characters::t1:member 2 is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g4:enum with escaped characters::t2:another string is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g5:enum with false does not match 0::t0:false is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g5:enum with false does not match 0::t1:integer zero is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g5:enum with false does not match 0::t2:float zero is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g6:enum with [false] does not match [0]::t0:[false] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g6:enum with [false] does not match [0]::t1:[0] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g6:enum with [false] does not match [0]::t2:[0.0] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g7:enum with true does not match 1::t0:true is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g7:enum with true does not match 1::t1:integer one is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g7:enum with true does not match 1::t2:float one is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g8:enum with [true] does not match [1]::t0:[true] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g8:enum with [true] does not match [1]::t1:[1] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g8:enum with [true] does not match [1]::t2:[1.0] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g9:enum with 0 does not match false::t0:false is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g9:enum with 0 does not match false::t1:integer zero is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g9:enum with 0 does not match false::t2:float zero is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g10:enum with [0] does not match [false]::t0:[false] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g10:enum with [0] does not match [false]::t1:[0] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g10:enum with [0] does not match [false]::t2:[0.0] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g11:enum with 1 does not match true::t0:true is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g11:enum with 1 does not match true::t1:integer one is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g11:enum with 1 does not match true::t2:float one is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g12:enum with [1] does not match [true]::t0:[true] is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g12:enum with [1] does not match [true]::t1:[1] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g12:enum with [1] does not match [true]::t2:[1.0] is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g13:nul characters in strings::t0:match string with nul",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g13:nul characters in strings::t1:do not match string lacking nul",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g14:empty enum::t0:string is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g14:empty enum::t1:number is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g14:empty enum::t2:null is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g14:empty enum::t3:object is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g14:empty enum::t4:array is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g14:empty enum::t5:boolean is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g15:characters with the same visual representation, but different number of codepoints::t0:character uses the same codepoint",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "enum::g15:characters with the same visual representation, but different number of codepoints::t1:character looks the same but uses combining marks",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g0:a schema given for items::t0:valid items",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g0:a schema given for items::t1:wrong type of items",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g0:a schema given for items::t2:ignores non-arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g0:a schema given for items::t3:JavaScript pseudo-array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g1:items with boolean schema (true)::t0:any array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g1:items with boolean schema (true)::t1:empty array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g2:items with boolean schema (false)::t0:any non-empty array is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g2:items with boolean schema (false)::t1:empty array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g3:items and subitems::t0:valid items",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g3:items and subitems::t1:too many items",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g3:items and subitems::t2:too many sub-items",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g3:items and subitems::t3:wrong item",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g3:items and subitems::t4:wrong sub-item",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g3:items and subitems::t5:fewer items is valid",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g4:nested items::t0:valid nested array",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g4:nested items::t1:nested array with invalid type",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g4:nested items::t2:not deep enough",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g5:prefixItems with no additional items allowed::t0:empty array",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g5:prefixItems with no additional items allowed::t1:fewer number of items present (1)",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g5:prefixItems with no additional items allowed::t2:fewer number of items present (2)",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g5:prefixItems with no additional items allowed::t3:equal number of items present",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g5:prefixItems with no additional items allowed::t4:additional items are not permitted",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g6:items does not look in applicators, valid case::t0:prefixItems in allOf does not constrain items, invalid case",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g6:items does not look in applicators, valid case::t1:prefixItems in allOf does not constrain items, valid case",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g7:prefixItems validation adjusts the starting index for items::t0:valid items",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g7:prefixItems validation adjusts the starting index for items::t1:wrong type of second item",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g8:items with heterogeneous array::t0:heterogeneous invalid instance",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g8:items with heterogeneous array::t1:valid instance",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "items::g9:items with null instance elements::t0:allows null elements",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g0:maximum validation::t0:below the maximum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g0:maximum validation::t1:boundary point is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g0:maximum validation::t2:above the maximum is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g0:maximum validation::t3:ignores non-numbers",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g1:maximum validation with unsigned integer::t0:below the maximum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g1:maximum validation with unsigned integer::t1:boundary point integer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g1:maximum validation with unsigned integer::t2:boundary point float is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maximum::g1:maximum validation with unsigned integer::t3:above the maximum is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "maxItems::g0:maxItems validation::t0:shorter is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxItems::g0:maxItems validation::t1:exact length is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxItems::g0:maxItems validation::t2:too long is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "maxItems::g0:maxItems validation::t3:ignores non-arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxItems::g1:maxItems validation with a decimal::t0:shorter is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxItems::g1:maxItems validation with a decimal::t1:too long is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g0:maxLength validation::t0:shorter is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g0:maxLength validation::t1:exact length is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g0:maxLength validation::t2:too long is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g0:maxLength validation::t3:ignores non-strings",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g0:maxLength validation::t4:two graphemes is long enough",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g1:maxLength validation with a decimal::t0:shorter is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "maxLength::g1:maxLength validation with a decimal::t1:too long is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g0:minimum validation::t0:above the minimum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g0:minimum validation::t1:boundary point is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g0:minimum validation::t2:below the minimum is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g0:minimum validation::t3:ignores non-numbers",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t0:negative above the minimum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t1:positive above the minimum is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t2:boundary point is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t3:boundary point with float is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t4:float below the minimum is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t5:int below the minimum is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minimum::g1:minimum validation with signed integer::t6:ignores non-numbers",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minItems::g0:minItems validation::t0:longer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minItems::g0:minItems validation::t1:exact length is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minItems::g0:minItems validation::t2:too short is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minItems::g0:minItems validation::t3:ignores non-arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minItems::g1:minItems validation with a decimal::t0:longer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minItems::g1:minItems validation with a decimal::t1:too short is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g0:minLength validation::t0:longer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g0:minLength validation::t1:exact length is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g0:minLength validation::t2:too short is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g0:minLength validation::t3:ignores non-strings",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g0:minLength validation::t4:one grapheme is not long enough",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g1:minLength validation with a decimal::t0:longer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "minLength::g1:minLength validation with a decimal::t1:too short is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g0:oneOf::t0:first oneOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g0:oneOf::t1:second oneOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g0:oneOf::t2:both oneOf valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g0:oneOf::t3:neither oneOf valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g1:oneOf with base schema::t0:mismatch base schema",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g1:oneOf with base schema::t1:one oneOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g1:oneOf with base schema::t2:both oneOf valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g2:oneOf with boolean schemas, all true::t0:any value is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g3:oneOf with boolean schemas, one true::t0:any value is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g4:oneOf with boolean schemas, more than one true::t0:any value is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g5:oneOf with boolean schemas, all false::t0:any value is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g6:oneOf complex types::t0:first oneOf valid (complex)",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g6:oneOf complex types::t1:second oneOf valid (complex)",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g6:oneOf complex types::t2:both oneOf valid (complex)",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g6:oneOf complex types::t3:neither oneOf valid (complex)",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g7:oneOf with empty schema::t0:one valid - valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g7:oneOf with empty schema::t1:both valid - invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g8:oneOf with required::t0:both invalid - invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g8:oneOf with required::t1:first valid - valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g8:oneOf with required::t2:second valid - valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g8:oneOf with required::t3:both valid - invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g9:oneOf with missing optional property::t0:first oneOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g9:oneOf with missing optional property::t1:second oneOf valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g9:oneOf with missing optional property::t2:both oneOf valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g9:oneOf with missing optional property::t3:neither oneOf valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g10:nested oneOf, to check validation semantics::t0:null is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "oneOf::g10:nested oneOf, to check validation semantics::t1:anything non-null is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t0:a matching pattern is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t1:a non-matching pattern is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t2:ignores booleans",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t3:ignores integers",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t4:ignores floats",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t5:ignores objects",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t6:ignores arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g0:pattern validation::t7:ignores null",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g1:pattern is not anchored::t0:matches a substring",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "pattern::g2:pattern with Unicode property escape requires unicode mode::t0:ASCII letters match",
+      "classification": "known_limitation",
+      "expected": true,
+      "actual": false,
+      "rationale": "Python stdlib `re` module does not support ECMA-262 Unicode property escapes (\\p{Letter}) without third-party `regex` library. Prohibited under hummbl-contracts zero-third-party-runtime-dependency policy."
+    },
+    {
+      "case_id": "pattern::g2:pattern with Unicode property escape requires unicode mode::t1:Non-ASCII letters match",
+      "classification": "known_limitation",
+      "expected": true,
+      "actual": false,
+      "rationale": "Python stdlib `re` module does not support ECMA-262 Unicode property escapes (\\p{Letter}) without third-party `regex` library. Prohibited under hummbl-contracts zero-third-party-runtime-dependency policy."
+    },
+    {
+      "case_id": "pattern::g2:pattern with Unicode property escape requires unicode mode::t2:Digits do not match",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g0:object properties validation::t0:both properties present and valid is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g0:object properties validation::t1:one property invalid is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g0:object properties validation::t2:both properties invalid is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g0:object properties validation::t3:doesn't invalidate other properties",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g0:object properties validation::t4:ignores arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g0:object properties validation::t5:ignores other non-objects",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t0:property validates property",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t1:property invalidates property",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t2:patternProperty invalidates property",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t3:patternProperty validates nonproperty",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t4:patternProperty invalidates nonproperty",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t5:additionalProperty ignores property",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t6:additionalProperty validates others",
+      "classification": "outside_subset",
+      "expected": true,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g1:properties, patternProperties, additionalProperties interaction::t7:additionalProperty invalidates others",
+      "classification": "outside_subset",
+      "expected": false,
+      "actual": null,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g2:properties with boolean schema::t0:no property present is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g2:properties with boolean schema::t1:only 'true' property present is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g2:properties with boolean schema::t2:only 'false' property present is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g2:properties with boolean schema::t3:both properties present is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g3:properties with escaped characters::t0:object with all numbers is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g3:properties with escaped characters::t1:object with strings is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g4:properties with null valued instance properties::t0:allows null values",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t0:ignores arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t1:ignores other non-objects",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t2:none of the properties mentioned",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t3:__proto__ not valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t4:toString not valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t5:constructor not valid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "properties::g5:properties whose names are Javascript object property names::t6:all present and valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t0:present required property is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t1:non-present required property is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t2:ignores arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t3:ignores strings",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t4:ignores other non-objects",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t5:ignores null",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g0:required validation::t6:ignores boolean",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g1:required default validation::t0:not required by default",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g2:required with empty array::t0:property not required",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g3:required with escaped characters::t0:object with all properties present is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g3:required with escaped characters::t1:object with some properties missing is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t0:ignores arrays",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t1:ignores other non-objects",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t2:none of the properties mentioned",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t3:__proto__ present",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t4:toString present",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t5:constructor present",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "required::g4:required properties whose names are Javascript object property names::t6:all present",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t0:an integer is an integer",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t1:a float with zero fractional part is an integer",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t2:a float is not an integer",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t3:a string is not an integer",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t4:a string is still not an integer, even if it looks like one",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t5:an object is not an integer",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t6:an array is not an integer",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t7:a boolean is not an integer",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g0:integer type matches integers::t8:null is not an integer",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t0:an integer is a number",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t1:a float with zero fractional part is a number (and an integer)",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t2:a float is a number",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t3:a string is not a number",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t4:a string is still not a number, even if it looks like one",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t5:an object is not a number",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t6:an array is not a number",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t7:a boolean is not a number",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g1:number type matches numbers::t8:null is not a number",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t0:1 is not a string",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t1:a float is not a string",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t2:a string is a string",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t3:a string is still a string, even if it looks like a number",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t4:an empty string is still a string",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t5:an object is not a string",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t6:an array is not a string",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t7:a boolean is not a string",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g2:string type matches strings::t8:null is not a string",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t0:an integer is not an object",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t1:a float is not an object",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t2:a string is not an object",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t3:an object is an object",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t4:an array is not an object",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t5:a boolean is not an object",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g3:object type matches objects::t6:null is not an object",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t0:an integer is not an array",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t1:a float is not an array",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t2:a string is not an array",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t3:an object is not an array",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t4:an array is an array",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t5:a boolean is not an array",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g4:array type matches arrays::t6:null is not an array",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t0:an integer is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t1:zero is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t2:a float is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t3:a string is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t4:an empty string is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t5:an object is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t6:an array is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t7:true is a boolean",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t8:false is a boolean",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g5:boolean type matches booleans::t9:null is not a boolean",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t0:an integer is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t1:a float is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t2:zero is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t3:a string is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t4:an empty string is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t5:an object is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t6:an array is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t7:true is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t8:false is not null",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g6:null type matches only the null object::t9:null is null",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t0:an integer is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t1:a string is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t2:a float is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t3:an object is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t4:an array is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t5:a boolean is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g7:multiple types can be specified in an array::t6:null is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g8:type as array with one item::t0:string is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g8:type as array with one item::t1:number is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g9:type: array or object::t0:array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g9:type: array or object::t1:object is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g9:type: array or object::t2:number is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g9:type: array or object::t3:string is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g9:type: array or object::t4:null is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g10:type: array, object or null::t0:array is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g10:type: array, object or null::t1:object is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g10:type: array, object or null::t2:null is valid",
+      "classification": "pass",
+      "expected": true,
+      "actual": true,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g10:type: array, object or null::t3:number is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    },
+    {
+      "case_id": "type::g10:type: array, object or null::t4:string is invalid",
+      "classification": "pass",
+      "expected": false,
+      "actual": false,
+      "rationale": null
+    }
+  ]
+}
