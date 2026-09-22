@@ -41,3 +41,7 @@ packages = ["hummbl_contracts"]
 
 [tool.setuptools.package-data]
 hummbl_contracts = ["../schemas/**/*.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

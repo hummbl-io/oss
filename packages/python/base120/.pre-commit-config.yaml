@@ -20,7 +20,7 @@ repos:
       - id: check-anthropic-keys
         name: Check for Anthropic API keys
         entry: >-
-          bash -c 'if [ "$#" -eq 0 ]; then exit 0; fi; if grep -nH "sk-ant-" "$@"; then exit 1; fi' --
+          bash -c 'if [ "$#" -eq 0 ]; then exit 0; fi; if grep -nHE "sk-ant-[a-zA-Z0-9_-]{20,}" "$@"; then exit 1; fi' --
         language: system
         files: '.*'
         always_run: true

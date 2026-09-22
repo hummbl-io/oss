@@ -45,9 +45,14 @@ BUS_FILE = Path(
 )
 
 # Canonical bridge URL (same default as bus-global.py).
-HUB_BRIDGE_URL = os.environ.get(
+_raw_bridge_url = os.environ.get(
     "BUS_CANONICAL_BRIDGE_URL",
-    "http://hummbl-vps.tail093e19.ts.net:18790",
+    "https://bus.hummbl-dev.com",
+)
+HUB_BRIDGE_URL = (
+    "https://bus.hummbl-dev.com"
+    if not _raw_bridge_url or _raw_bridge_url.startswith("${")
+    else _raw_bridge_url
 )
 
 # Token path mirrors bus-global.py for shared credential resolution.
@@ -92,6 +97,50 @@ HTTP_USER_AGENT = "hummbl-bus-mcp/0.1.0 (+fleet coordination bus MCP client)"
 # ---------------------------------------------------------------------------
 # Bridge write path
 # ---------------------------------------------------------------------------
+def _load_windows_bridge_token(sender: str | None = None) -> str | None:
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class Credential(ctypes.Structure):
+            _fields_ = [
+                ("Flags", wintypes.DWORD), ("Type", wintypes.DWORD),
+                ("TargetName", wintypes.LPWSTR), ("Comment", wintypes.LPWSTR),
+                ("LastWritten", wintypes.FILETIME), ("CredentialBlobSize", wintypes.DWORD),
+                ("CredentialBlob", ctypes.c_void_p), ("Persist", wintypes.DWORD),
+                ("AttributeCount", wintypes.DWORD), ("Attributes", ctypes.c_void_p),
+                ("TargetAlias", wintypes.LPWSTR), ("UserName", wintypes.LPWSTR),
+            ]
+
+        api = ctypes.WinDLL("advapi32", use_last_error=True)
+        api.CredReadW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                                 ctypes.POINTER(ctypes.POINTER(Credential))]
+        api.CredReadW.restype = wintypes.BOOL
+        api.CredFree.argtypes = [ctypes.c_void_p]
+        api.CredFree.restype = None
+
+        def _read_cred(target: str) -> str | None:
+            cred_ptr = ctypes.POINTER(Credential)()
+            if not api.CredReadW(target, 1, 0, ctypes.byref(cred_ptr)):
+                return None
+            try:
+                raw = ctypes.string_at(cred_ptr.contents.CredentialBlob,
+                                       cred_ptr.contents.CredentialBlobSize)
+                return raw.decode("utf-16-le").strip() or None
+            finally:
+                api.CredFree(cred_ptr)
+
+        if sender:
+            val = _read_cred("HUMMBL:BUS_BRIDGE_TOKEN_" + sender.upper().replace("-", "_"))
+            if val:
+                return val
+        return _read_cred("HUMMBL:BUS_BRIDGE_TOKEN")
+    except Exception:
+        return None
+
+
 def _load_bridge_token(sender: str | None = None) -> str | None:
     """Resolve the bridge bearer token, matching bus-global.py priority.
 
@@ -101,7 +150,8 @@ def _load_bridge_token(sender: str | None = None) -> str | None:
        hosts always use their own credential, even when BUS_BRIDGE_TOKEN
        is set in the shell environment.
     2. Default token file on Unix (~/.config/hummbl-bus/bus_bridge_token).
-    3. BUS_BRIDGE_TOKEN env var for legacy clients without a stored token.
+    3. Windows Credential Manager (on Windows hosts).
+    4. BUS_BRIDGE_TOKEN env var for legacy clients without a stored token.
        Storage precedes inherited environment so rotation reaches running shells.
     """
     # Per-sender token file: check first so a restricted sender on a shared
@@ -131,10 +181,16 @@ def _load_bridge_token(sender: str | None = None) -> str | None:
         if token:
             return token
     except OSError:
-        pass  # no default file — fall through to env var
+        pass  # no default file — fall through to Windows Credential Manager / env var
+
+    # Windows Credential Manager
+    win_token = _load_windows_bridge_token(sender)
+    if win_token:
+        return win_token
 
     # Env var (last resort)
     return os.environ.get("BUS_BRIDGE_TOKEN", "").strip().lstrip("\ufeff") or None
+
 
 
 def _bridge_post(
@@ -707,6 +763,12 @@ def send_error(msg_id: object, code: int, message: str) -> None:
 
 
 def main() -> None:
+    # MCP stdio carries UTF-8 independently of the host console code page.
+    # In-memory streams used by callers may not expose reconfigure().
+    for stream in (sys.stdin, sys.stdout):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
     for line in sys.stdin:
         line = line.strip()
         if not line:

@@ -29,6 +29,7 @@ _FOREGROUND_MESSAGE_TYPES = frozenset({
     "WIP_END",
     "QUESTION",
     "BLOCKED",
+    "CORRECTION",
 })
 
 # Message types that are inherently background (reporting, monitoring, receipts)
@@ -44,6 +45,7 @@ _BACKGROUND_MESSAGE_TYPES = frozenset({
     "VERIFY",
     "HRSI_CHECKIN",
     "SKILL_INVOKE",
+    "BELIEF_AUDIT",
 })
 
 if _FOREGROUND_MESSAGE_TYPES | _BACKGROUND_MESSAGE_TYPES != CANONICAL_MESSAGE_TYPES:
