@@ -1,0 +1,67 @@
+name: SBOM (hummbl-governance)
+
+# Drift-checks the committed CycloneDX SBOM for
+# packages/python/hummbl-governance on dependency-relevant changes;
+# uploads a fresh SBOM as a workflow artifact on release tags.
+#
+# GAP-1 remediation (hummbl-compliance): EO 14028 / NIST SSDF PS.3.1 /
+# CMMC 2.0 CM.2.137 / SLSA Build L2.
+#
+# The committed sbom.cdx.json must stay in sync with pyproject.toml —
+# the check compares regenerated output ignoring volatile
+# timestamp/serialNumber fields.
+
+"on":
+  push:
+    branches: [main]
+    paths:
+      - packages/python/hummbl-governance/pyproject.toml
+      - packages/python/hummbl-governance/sbom.cdx.json
+      - packages/python/hummbl-governance/scripts/gap5-generate-sbom.py
+      - .github/workflows/sbom-hummbl-governance.yml
+    tags:
+      - "python/hummbl-governance/v*"
+  pull_request:
+    paths:
+      - packages/python/hummbl-governance/pyproject.toml
+      - packages/python/hummbl-governance/sbom.cdx.json
+      - packages/python/hummbl-governance/scripts/gap5-generate-sbom.py
+      - .github/workflows/sbom-hummbl-governance.yml
+
+permissions:
+  contents: read
+
+jobs:
+  sbom:
+    name: sbom-hummbl-governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+
+      - name: Drift-check committed SBOM
+        working-directory: packages/python/hummbl-governance
+        run: |
+          python scripts/gap5-generate-sbom.py --output /tmp/sbom-new.cdx.json
+          python - <<'PY'
+          import json, sys
+          committed = json.load(open("sbom.cdx.json"))
+          regenerated = json.load(open("/tmp/sbom-new.cdx.json"))
+          for doc in (committed, regenerated):
+              doc.pop("serialNumber", None)
+              doc.get("metadata", {}).pop("timestamp", None)
+          if committed != regenerated:
+              sys.exit("DRIFT: committed sbom.cdx.json differs from regenerated SBOM "
+                       "(ignoring timestamp/serialNumber)")
+          print("OK: sbom.cdx.json matches regenerated SBOM")
+          PY
+
+      - name: Upload SBOM artifact
+        if: startsWith(github.ref, 'refs/tags/python/hummbl-governance/')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom-hummbl-governance-${{ github.ref_name }}
+          path: packages/python/hummbl-governance/sbom.cdx.json
+          retention-days: 90
