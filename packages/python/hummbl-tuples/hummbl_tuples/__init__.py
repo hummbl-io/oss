@@ -33,6 +33,13 @@ from .nodezero import (
     ExperimentRunAssignedTuple,
     RegistryVersionPinnedTuple,
 )
+from .noul import (
+    NoulTuple,
+    SystemOneTuple,
+)
+from .noul_index import (
+    NoulIndex,
+)
 from .traces import (
     PosttrainingTrace,
     PretrainingTrace,
@@ -47,6 +54,10 @@ __all__ = [
     "NodezeroTuple",
     "NodezeroExperimentTuple",
     "TraceArtifact",
+    # System One & Noul decision tuples
+    "SystemOneTuple",
+    "NoulTuple",
+    "NoulIndex",
     # IDP governance tuples
     "ContractTuple",
     "DCTTuple",
