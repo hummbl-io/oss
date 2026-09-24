@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 import time
 import uuid
@@ -25,6 +26,111 @@ try:
     import tomllib
 except ImportError:
     import tomli as tomllib  # type: ignore[no-redef]
+
+# PEP 508: leading distribution name, extras in [], then a version specifier.
+_DEP_NAME_RE = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
+_SPDX_EXPR_RE = re.compile(r"\b(?:AND|OR|WITH)\b")
+_SPDX_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.+-]*$")
+
+# Content signatures for license-file detection. Order matters: check the
+# more specific variant first (BSD-3 before BSD-2, LGPL before GPL).
+_LICENSE_SIGNATURES: list[tuple[str, tuple[str, ...]]] = [
+    ("Apache-2.0", ("Apache License", "Version 2.0")),
+    ("LGPL-3.0-only", ("GNU LESSER GENERAL PUBLIC LICENSE", "Version 3")),
+    ("GPL-3.0-only", ("GNU GENERAL PUBLIC LICENSE", "Version 3")),
+    ("MPL-2.0", ("Mozilla Public License", "2.0")),
+    ("BSD-3-Clause", ("Redistribution and use in source and binary forms", "Neither the name of")),
+    ("BSD-2-Clause", ("Redistribution and use in source and binary forms",)),
+    ("MIT", ("Permission is hereby granted, free of charge",)),
+]
+
+
+def _license_entry(value: str) -> dict:
+    """Build a CycloneDX licenses[] entry from a declared license string."""
+    value = value.strip()
+    if _SPDX_EXPR_RE.search(value):
+        return {"expression": value}
+    if _SPDX_ID_RE.match(value):
+        return {"license": {"id": value}}
+    return {"license": {"name": value}}
+
+
+def _detect_license_file(repo_path: Path, rel_path: str) -> str | None:
+    """Identify a license file's SPDX id by content signature, or None."""
+    try:
+        text = (repo_path / rel_path).read_text(encoding="utf-8", errors="replace")[:200_000]
+    except OSError:
+        return None
+    for spdx_id, needles in _LICENSE_SIGNATURES:
+        if all(n in text for n in needles):
+            return spdx_id
+    return None
+
+
+def _resolve_licenses(
+    license_info: object, license_files: list, repo_path: Path
+) -> tuple[list, list[str], list[str]]:
+    """Resolve declared license metadata into CycloneDX license entries.
+
+    Returns (entries, declared_files, undetected_files). Never emits a
+    license name that was not declared or content-detected — an
+    undetermined file leaves ``entries`` unchanged and lands in
+    ``undetected_files`` instead of producing a fabricated claim.
+    """
+    entries: list = []
+    declared_files: list[str] = []
+    undetected: list[str] = []
+
+    def _detect_files(paths) -> None:
+        for rel in paths:
+            rel = str(rel)
+            declared_files.append(rel)
+            detected = _detect_license_file(repo_path, rel)
+            if detected:
+                entry = {"license": {"id": detected}}
+                if entry not in entries:
+                    entries.append(entry)
+            else:
+                undetected.append(rel)
+
+    if isinstance(license_info, str):
+        if license_info.strip():
+            entries.append(_license_entry(license_info))
+    elif isinstance(license_info, dict):
+        text = license_info.get("text") or ""
+        if text.strip():
+            entries.append(_license_entry(text))
+        file_keys = (
+            license_info.get("files")
+            or license_info.get("license-files")
+            or ([license_info["file"]] if license_info.get("file") else [])
+        )
+        if file_keys:
+            _detect_files(file_keys)
+    if license_files:
+        _detect_files(license_files)
+    return entries, declared_files, undetected
+
+
+def _parse_dep(dep: str) -> tuple[str, str, str]:
+    """Parse a PEP 508 dependency string into (name, pinned_version, spec).
+
+    Environment markers (``; ...``) are stripped before parsing so they
+    cannot leak into version fields. ``pinned_version`` is only populated
+    for an exact ``==`` pin — range specifiers are constraints, not a
+    resolved version, and are preserved in ``spec`` for transparency.
+    """
+    base = dep.split(";", 1)[0].strip()
+    match = _DEP_NAME_RE.match(base)
+    if not match:
+        return base, "", ""
+    name = match.group(1)
+    spec = base[match.end() :].strip()
+    spec = re.sub(r"^\[[^\]]*\]\s*", "", spec)  # extras are not versions
+    version = ""
+    if spec.startswith("=="):
+        version = spec[2:].split(",", 1)[0].strip()
+    return name, version, spec
 
 
 def generate_sbom(repo_path: Path) -> dict:
@@ -74,40 +180,44 @@ def generate_sbom(repo_path: Path) -> dict:
         ],
     }
 
-    # License
-    if isinstance(license_info, dict):
-        lic_text = license_info.get("text", "")
-        if lic_text:
-            main_component["licenses"] = [{"license": {"id": lic_text}}]
-        elif license_info.get("license-files"):
-            main_component["licenses"] = [{"license": {"name": "Apache-2.0"}}]
-    elif isinstance(license_info, str):
-        main_component["licenses"] = [{"license": {"id": license_info}}]
+    # License — derived from declared metadata or file content, never assumed
+    license_files = project.get("license-files") or project.get("license_files") or []
+    lic_entries, lic_declared, lic_undetected = _resolve_licenses(
+        license_info, license_files, repo_path
+    )
+    main_component["licenses"] = lic_entries
+    if lic_declared:
+        main_component["properties"].append(
+            {"name": "hummbl:license_files", "value": ",".join(lic_declared)}
+        )
+    if lic_undetected:
+        main_component["properties"].append(
+            {"name": "hummbl:license_undetected", "value": ",".join(lic_undetected)}
+        )
 
     components.append(main_component)
 
     # Test dependencies (from optional-dependencies.test)
     test_deps = project.get("optional-dependencies", {}).get("test", [])
     for dep in test_deps:
-        # Parse dependency string (e.g., "pytest>=7.0")
-        dep_name = dep.split(">=")[0].split("<=")[0].split("==")[0].split(">")[0].split("<")[0].strip()
-        dep_version = ""
-        if ">=" in dep:
-            dep_version = dep.split(">=")[1].strip()
-        elif "==" in dep:
-            dep_version = dep.split("==")[1].strip()
+        dep_name, dep_version, dep_spec = _parse_dep(dep)
 
         comp = {
             "type": "library",
             "bom-ref": f"pkg:pypi/{dep_name}",
             "name": dep_name,
-            "version": dep_version,
             "scope": "optional",
             "purl": f"pkg:pypi/{dep_name}",
             "properties": [
                 {"name": "hummbl:dependency_type", "value": "test"},
             ],
         }
+        if dep_version:
+            comp["version"] = dep_version
+            comp["bom-ref"] = f"pkg:pypi/{dep_name}@{dep_version}"
+            comp["purl"] = f"pkg:pypi/{dep_name}@{dep_version}"
+        if dep_spec:
+            comp["properties"].append({"name": "hummbl:version_spec", "value": dep_spec})
         components.append(comp)
 
     # Build SBOM
@@ -132,7 +242,7 @@ def generate_sbom(repo_path: Path) -> dict:
         "dependencies": [
             {
                 "ref": f"pkg:pypi/{name}@{version}",
-                "dependsOn": [f"pkg:pypi/{d.split('>')[0].split('=')[0].strip()}" for d in test_deps],
+                "dependsOn": [f"pkg:pypi/{_parse_dep(d)[0]}" for d in test_deps],
             }
         ],
     }

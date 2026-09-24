@@ -127,3 +127,57 @@ class TestCIPinningAudit:
     def test_no_workflows_dir(self, tmp_path: Path) -> None:
         violations = pinning_mod.audit_repo(tmp_path)
         assert violations == []
+
+
+class TestSBOMDefectFixes:
+    """Defect coverage: fabricated license claims + marker leakage (review finding)."""
+
+    def _repo(self, tmp_path: Path, pyproject: str, files: dict | None = None) -> Path:
+        (tmp_path / "pyproject.toml").write_text(pyproject)
+        for rel, content in (files or {}).items():
+            (tmp_path / rel).write_text(content)
+        return tmp_path
+
+    def test_license_files_content_detected_not_fabricated(self, tmp_path: Path) -> None:
+        repo = self._repo(
+            tmp_path,
+            '[project]\nname="p"\nversion="1.0.0"\nlicense={license-files=["L"]}\n',
+            {"L": "MIT License\n\nPermission is hereby granted, free of charge\n"},
+        )
+        sbom = sbom_mod.generate_sbom(repo)
+        assert sbom["metadata"]["component"]["licenses"] == [{"license": {"id": "MIT"}}]
+
+    def test_undetectable_license_file_not_claimed(self, tmp_path: Path) -> None:
+        repo = self._repo(
+            tmp_path,
+            '[project]\nname="p"\nversion="1.0.0"\nlicense={license-files=["C"]}\n',
+            {"C": "All rights reserved.\n"},
+        )
+        sbom = sbom_mod.generate_sbom(repo)
+        main = sbom["metadata"]["component"]
+        assert main["licenses"] == []
+        props = {p["name"]: p["value"] for p in main["properties"]}
+        assert props["hummbl:license_undetected"] == "C"
+
+    def test_marker_stripped_from_dep_version(self, tmp_path: Path) -> None:
+        repo = self._repo(
+            tmp_path,
+            '[project]\nname="p"\nversion="1.0.0"\n'
+            '[project.optional-dependencies]\ntest=["dep==2.9.0.post0; python_version >= \'3.8\'"]\n',
+        )
+        sbom = sbom_mod.generate_sbom(repo)
+        dep = sbom["components"][1]
+        assert dep["version"] == "2.9.0.post0"
+        assert "python_version" not in json.dumps(dep)
+
+    def test_range_dep_omits_version(self, tmp_path: Path) -> None:
+        repo = self._repo(
+            tmp_path,
+            '[project]\nname="p"\nversion="1.0.0"\n'
+            '[project.optional-dependencies]\ntest=["dep>=2.0"]\n',
+        )
+        sbom = sbom_mod.generate_sbom(repo)
+        dep = sbom["components"][1]
+        assert "version" not in dep
+        props = {p["name"]: p["value"] for p in dep["properties"]}
+        assert props["hummbl:version_spec"] == ">=2.0"
