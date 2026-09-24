@@ -181,3 +181,15 @@ class TestSBOMDefectFixes:
         assert "version" not in dep
         props = {p["name"]: p["value"] for p in dep["properties"]}
         assert props["hummbl:version_spec"] == ">=2.0"
+
+    def test_depends_on_refs_resolve_to_component_bom_refs(self, tmp_path: Path) -> None:
+        repo = self._repo(
+            tmp_path,
+            '[project]\nname="p"\nversion="1.0.0"\n'
+            '[project.optional-dependencies]\ntest=["dep==2.9.0", "dep2>=1.0"]\n',
+        )
+        sbom = sbom_mod.generate_sbom(repo)
+        bom_refs = {c["bom-ref"] for c in sbom["components"]}
+        depends_on = sbom["dependencies"][0]["dependsOn"]
+        assert depends_on == ["pkg:pypi/dep@2.9.0", "pkg:pypi/dep2"]
+        assert set(depends_on) <= bom_refs

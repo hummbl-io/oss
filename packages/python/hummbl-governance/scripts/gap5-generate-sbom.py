@@ -199,6 +199,7 @@ def generate_sbom(repo_path: Path) -> dict:
 
     # Test dependencies (from optional-dependencies.test)
     test_deps = project.get("optional-dependencies", {}).get("test", [])
+    test_dep_refs: list[str] = []
     for dep in test_deps:
         dep_name, dep_version, dep_spec = _parse_dep(dep)
 
@@ -219,6 +220,7 @@ def generate_sbom(repo_path: Path) -> dict:
         if dep_spec:
             comp["properties"].append({"name": "hummbl:version_spec", "value": dep_spec})
         components.append(comp)
+        test_dep_refs.append(comp["bom-ref"])
 
     # Build SBOM
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -242,7 +244,7 @@ def generate_sbom(repo_path: Path) -> dict:
         "dependencies": [
             {
                 "ref": f"pkg:pypi/{name}@{version}",
-                "dependsOn": [f"pkg:pypi/{_parse_dep(d)[0]}" for d in test_deps],
+                "dependsOn": test_dep_refs,
             }
         ],
     }
