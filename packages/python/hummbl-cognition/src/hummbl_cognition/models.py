@@ -155,6 +155,7 @@ class IntelType(str, Enum):
 VALID_VENDORS = frozenset(
     {
         "anthropic",
+        "cognition",
         "openai",
         "google",
         "moonshot",
