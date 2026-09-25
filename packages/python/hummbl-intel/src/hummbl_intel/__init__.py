@@ -5,7 +5,7 @@ taxonomy (SIGINT, HUMINT, OSINT, GEOINT, MASINT, FININT, TECHINT, IMINT,
 ALL-SOURCE) and provides tools for source grading, collection posture,
 and structured all-source fusion.
 
-Stdlib-only. PyPI-publishable.
+Stdlib-only. PyPI-publishable. Imported by founder-mode as a dependency.
 
 Key modules:
 - taxonomy: INT enum, discipline definitions, canonical collection surfaces
@@ -15,18 +15,20 @@ Key modules:
 - managers: INT steward role definitions and assignments
 """
 
-from hummbl_intel.taxonomy import (
-    CANONICAL_SURFACES,
-    INT_LABELS,
-    CollectionSurface,
-    IntelligenceDiscipline,
-    from_bus_prefix,
-    get_surface,
-    list_disciplines,
+from hummbl_intel.fusion import (
+    WEP_RANGES,
+    AllSourceProduct,
+    CompetingHypothesesAnalysis,
+    EstimativeProbability,
+    FusedFinding,
+    Hypothesis,
+    fuse_into_finding,
 )
 from hummbl_intel.grading import (
+    ASSERTION_POLARITY_LABELS,
     CREDIBILITY_LABELS,
     RELIABILITY_LABELS,
+    AssertionPolarity,
     ContentCredibility,
     GradedAssertion,
     SourceGrade,
@@ -37,6 +39,15 @@ from hummbl_intel.grading import (
     grade_uncorroborated,
     upgrade_with_corroboration,
 )
+from hummbl_intel.managers import (
+    CANONICAL_MANAGERS,
+    CORONAL_AGENT,
+    INTManager,
+    get_disciplines_for_agent,
+    get_manager,
+    manager_summary_table,
+    to_dict,
+)
 from hummbl_intel.posture import (
     CollectionPostureReport,
     DisciplinePosture,
@@ -44,65 +55,60 @@ from hummbl_intel.posture import (
     SurfaceStatus,
     build_default_posture,
 )
-from hummbl_intel.fusion import (
-    AllSourceProduct,
-    CompetingHypothesesAnalysis,
-    EstimativeProbability,
-    FusedFinding,
-    Hypothesis,
-    WEP_RANGES,
-    fuse_into_finding,
-)
-from hummbl_intel.managers import (
-    CANONICAL_MANAGERS,
-    INTManager,
-    get_disciplines_for_agent,
-    get_manager,
-    manager_summary_table,
-    to_dict,
+from hummbl_intel.taxonomy import (
+    CANONICAL_SURFACES,
+    INT_LABELS,
+    CollectionSurface,
+    IntelligenceDiscipline,
+    from_bus_prefix,
+    get_surface,
+    list_disciplines,
 )
 
 __version__ = "0.1.0"
 __all__ = [
-    # taxonomy
-    "IntelligenceDiscipline",
-    "INT_LABELS",
-    "CollectionSurface",
+    "ASSERTION_POLARITY_LABELS",
+    "CANONICAL_MANAGERS",
     "CANONICAL_SURFACES",
-    "from_bus_prefix",
-    "get_surface",
-    "list_disciplines",
-    # grading
-    "SourceReliability",
-    "ContentCredibility",
-    "RELIABILITY_LABELS",
+    "CORONAL_AGENT",
     "CREDIBILITY_LABELS",
-    "SourceGrade",
-    "GradedAssertion",
-    "grade_human_source",
-    "grade_automated_source",
-    "grade_research_source",
-    "grade_uncorroborated",
-    "upgrade_with_corroboration",
-    # posture
-    "PostureStatus",
-    "SurfaceStatus",
-    "DisciplinePosture",
+    "INT_LABELS",
+    "RELIABILITY_LABELS",
+    "WEP_RANGES",
+    "AllSourceProduct",
+    "AssertionPolarity",
     "CollectionPostureReport",
-    "build_default_posture",
+    "CollectionSurface",
+    "CompetingHypothesesAnalysis",
+    "ContentCredibility",
+    "DisciplinePosture",
     # fusion
     "EstimativeProbability",
-    "WEP_RANGES",
-    "Hypothesis",
-    "CompetingHypothesesAnalysis",
     "FusedFinding",
-    "AllSourceProduct",
-    "fuse_into_finding",
+    "GradedAssertion",
+    "Hypothesis",
     # managers
     "INTManager",
-    "CANONICAL_MANAGERS",
-    "get_manager",
+    # taxonomy
+    "IntelligenceDiscipline",
+    # posture
+    "PostureStatus",
+    "SourceGrade",
+    # grading
+    "SourceReliability",
+    "SurfaceStatus",
+    "build_default_posture",
+    "from_bus_prefix",
+    "fuse_into_finding",
     "get_disciplines_for_agent",
+    "get_manager",
+    "get_surface",
+    "grade_automated_source",
+    "grade_human_source",
+    "grade_research_source",
+    "grade_uncorroborated",
+    "list_disciplines",
     "manager_summary_table",
     "to_dict",
+    "upgrade_with_corroboration",
 ]

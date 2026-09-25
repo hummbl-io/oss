@@ -11,7 +11,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from hummbl_intel.taxonomy import CANONICAL_SURFACES, IntelligenceDiscipline
+from hummbl_intel.taxonomy import IntelligenceDiscipline
+
+CORONAL_AGENT = "coronal"
+"""Role identity for the Coronal Agent.
+
+Not a fixed roster member: resolves at runtime to whichever bus-roster
+agent currently holds coronal (fusion/orchestration) authority for the
+situation at hand.
+"""
 
 
 @dataclass(frozen=True)
@@ -22,7 +30,7 @@ class INTManager:
     """The INT this manager owns."""
 
     steward_agent: str
-    """Canonical agent identity responsible for this INT."""
+    """Canonical agent identity or role responsible for this INT."""
 
     duties: list[str] = field(default_factory=list)
     """Specific responsibilities of this steward."""
@@ -30,13 +38,15 @@ class INTManager:
     reporting_cadence: str = "daily"
     """How often this steward reports posture."""
 
-    escalation_agent: str = "claude-code"
-    """Agent to escalate gaps to if steward cannot resolve."""
+    escalation_agent: str = CORONAL_AGENT
+    """Agent or role to escalate gaps to if steward cannot resolve."""
 
 
 # Canonical INT Manager assignments per the Tier C build.
 # These map agent identities to intelligence disciplines based on
 # their existing operational scope and surface access.
+# "coronal" is a role, not a fixed identity: it resolves to whichever
+# roster agent holds coronal authority for the situation at hand.
 CANONICAL_MANAGERS: tuple[INTManager, ...] = (
     INTManager(
         discipline=IntelligenceDiscipline.SIGINT,
@@ -78,7 +88,7 @@ CANONICAL_MANAGERS: tuple[INTManager, ...] = (
         duties=[
             "Monitor fleet mesh health via steward loop",
             "Track disk watcher and SSH fleet monitoring",
-            "Report fleet host status in SITREPs",
+            "Report anvil/huxley/nodezero status in SITREPs",
             "Escalate degraded machine status to ops",
         ],
         reporting_cadence="continuous",
@@ -129,7 +139,7 @@ CANONICAL_MANAGERS: tuple[INTManager, ...] = (
     ),
     INTManager(
         discipline=IntelligenceDiscipline.ALL_SOURCE,
-        steward_agent="claude-code",
+        steward_agent=CORONAL_AGENT,
         duties=[
             "Produce morning briefing as all-source fusion product",
             "Cross-correlate multi-INT findings",
@@ -152,11 +162,7 @@ def get_manager(discipline: IntelligenceDiscipline) -> INTManager | None:
 
 def get_disciplines_for_agent(agent_id: str) -> list[IntelligenceDiscipline]:
     """Return all INT disciplines stewarded by a given agent."""
-    return [
-        m.discipline
-        for m in CANONICAL_MANAGERS
-        if m.steward_agent == agent_id
-    ]
+    return [m.discipline for m in CANONICAL_MANAGERS if m.steward_agent == agent_id]
 
 
 def manager_summary_table() -> str:

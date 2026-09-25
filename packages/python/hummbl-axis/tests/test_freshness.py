@@ -6,7 +6,6 @@ from pathlib import Path
 
 from hummbl_axis.atlas_reader import (
     FRESHNESS_WINDOWS,
-    FreshnessResult,
     check_freshness,
     scan_freshness,
 )

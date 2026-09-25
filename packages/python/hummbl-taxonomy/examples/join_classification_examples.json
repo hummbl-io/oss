@@ -1,0 +1,30 @@
+[
+  {
+    "name": "ungoverned_analogy",
+    "expected_operator": "SHARE",
+    "expected_altitude": "L0",
+    "expected_join_status": "ungoverned",
+    "notes": "A vibe connection with no artifact, language, or receipts."
+  },
+  {
+    "name": "bus_packet_boundary_object",
+    "expected_operator": "SHARE",
+    "expected_altitude": "L4",
+    "expected_join_status": "governed",
+    "notes": "Shared receipt used by two domains without forcing a common ontology."
+  },
+  {
+    "name": "pidgin_promoted_to_ontology",
+    "expected_operator": "TRANSLATE",
+    "expected_altitude": "L3",
+    "expected_join_status": "partially-governed",
+    "notes": "Local coordination language treated as kinds. Altitude sneak."
+  },
+  {
+    "name": "price_equation_candidate_consil",
+    "expected_operator": "CONSIL",
+    "expected_altitude": "L5",
+    "expected_join_status": "partially-governed",
+    "notes": "Candidate meta-primitive. Governed only after independence is shown."
+  }
+]
