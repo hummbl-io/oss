@@ -16,10 +16,8 @@ import re
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterator
 
 from .contradiction import Contradiction
-
 
 # ─────────────────────────────────────────────────────────────
 # Markdown ledger parser
@@ -29,15 +27,15 @@ from .contradiction import Contradiction
 # We extract the key fields by regex on the field labels.
 
 _FIELD_PATTERNS = {
-    "scope": re.compile(r"(?:\*\*Scope:\*\*|Scope:)\s*(.+)", re.I),
-    "observation": re.compile(r"(?:\*\*Direct observation:\*\*|Direct observation:)\s*(.+)", re.I),
-    "contradiction": re.compile(r"(?:\*\*Contradiction:\*\*|Contradiction:)\s*(.+)", re.I),
-    "verdict": re.compile(r"(?:\*\*Verdict:\*\*|Verdict:)\s*(.+)", re.I),
-    "confidence": re.compile(r"(?:\*\*Confidence:\*\*|Confidence:)\s*(.+)", re.I),
-    "volatility": re.compile(r"(?:\*\*Volatility:\*\*|Volatility:)\s*(.+)", re.I),
+    "scope": re.compile(r"(?:\*\*Scope:\*\*|Scope:)\s*(.+)", re.IGNORECASE),
+    "observation": re.compile(r"(?:\*\*Direct observation:\*\*|Direct observation:)\s*(.+)", re.IGNORECASE),
+    "contradiction": re.compile(r"(?:\*\*Contradiction:\*\*|Contradiction:)\s*(.+)", re.IGNORECASE),
+    "verdict": re.compile(r"(?:\*\*Verdict:\*\*|Verdict:)\s*(.+)", re.IGNORECASE),
+    "confidence": re.compile(r"(?:\*\*Confidence:\*\*|Confidence:)\s*(.+)", re.IGNORECASE),
+    "volatility": re.compile(r"(?:\*\*Volatility:\*\*|Volatility:)\s*(.+)", re.IGNORECASE),
 }
 
-_CLAIM_ID = re.compile(r"##\s+(AR-[A-Z]+-\d+)", re.I)
+_CLAIM_ID = re.compile(r"##\s+(AR-[A-Z]+-\d+)", re.IGNORECASE)
 
 
 def _parse_confidence(text: str) -> float:
@@ -80,7 +78,9 @@ def _parse_volatility(text: str) -> str:
 def _infer_severity(scope: str, contradiction: str, verdict: str) -> str:
     """Infer P0-P3 from the nature of the contradiction."""
     combined = (scope + " " + contradiction + " " + verdict).lower()
-    if any(w in combined for w in ["safety-critical", "kill switch", "emergency", "security-critical"]):
+    if any(
+        w in combined for w in ["safety-critical", "kill switch", "emergency", "security-critical"]
+    ):
         return "P0"
     if any(w in combined for w in ["canonical", "identity", "migration", "release", "deployment"]):
         return "P1"
@@ -128,21 +128,25 @@ def parse_ledger_markdown(path: Path) -> list[Contradiction]:
         volatility = _parse_volatility(volatility_match.group(1)) if volatility_match else "medium"
         severity = _infer_severity(scope, contradiction_text, verdict)
 
-        contradictions.append(Contradiction(
-            scope=scope,
-            claim=contradiction_text,  # The contradiction IS the claim that's wrong
-            observation=observation,
-            severity=severity,
-            confidence=confidence,
-            volatility=volatility,
-            evidence_source=str(path),
-            claim_source=str(path),
-        ))
+        contradictions.append(
+            Contradiction(
+                scope=scope,
+                claim=contradiction_text,  # The contradiction IS the claim that's wrong
+                observation=observation,
+                severity=severity,
+                confidence=confidence,
+                volatility=volatility,
+                evidence_source=str(path),
+                claim_source=str(path),
+            )
+        )
 
     return contradictions
 
 
-def scan_ledger_directory(directory: Path, pattern: str = "hummbl-atlas-*.md") -> list[Contradiction]:
+def scan_ledger_directory(
+    directory: Path, pattern: str = "hummbl-atlas-*.md"
+) -> list[Contradiction]:
     """Scan a directory of Atlas ledger markdown files."""
     all_contradictions = []
     for md_path in sorted(directory.glob(pattern)):
@@ -154,11 +158,13 @@ def scan_ledger_directory(directory: Path, pattern: str = "hummbl-atlas-*.md") -
 # JSON inventory parser — claimed state
 # ─────────────────────────────────────────────────────────────
 
+
 def load_json_inventory(path: Path) -> dict:
     """Load a JSON inventory file (Atlas census, skill manifest, etc.)."""
     if not path.exists():
         return {}
-    return json.loads(path.read_text(encoding="utf-8"))
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
 
 
 def extract_claimed_counts(inventory: dict) -> dict[str, int]:
@@ -195,6 +201,7 @@ def extract_claimed_counts(inventory: dict) -> dict[str, int]:
 # Claimed-vs-observed diff
 # ─────────────────────────────────────────────────────────────
 
+
 def diff_counts(
     claimed: dict[str, int],
     observed: dict[str, int],
@@ -215,41 +222,47 @@ def diff_counts(
 
         if claim_val is None:
             # Observed but not claimed — system has something it doesn't document
-            contradictions.append(Contradiction(
-                scope=f"count:{key}",
-                claim=f"not declared",
-                observation=f"observed: {obs_val}",
-                severity="P2",
-                confidence=0.8,
-                volatility="medium",
-                evidence_source=evidence_source,
-                claim_source=claim_source,
-            ))
+            contradictions.append(
+                Contradiction(
+                    scope=f"count:{key}",
+                    claim="not declared",
+                    observation=f"observed: {obs_val}",
+                    severity="P2",
+                    confidence=0.8,
+                    volatility="medium",
+                    evidence_source=evidence_source,
+                    claim_source=claim_source,
+                )
+            )
         elif obs_val is None:
             # Claimed but not observed — system claims something that doesn't exist
-            contradictions.append(Contradiction(
-                scope=f"count:{key}",
-                claim=f"declared: {claim_val}",
-                observation=f"not observed",
-                severity="P2",
-                confidence=0.7,
-                volatility="medium",
-                evidence_source=evidence_source,
-                claim_source=claim_source,
-            ))
+            contradictions.append(
+                Contradiction(
+                    scope=f"count:{key}",
+                    claim=f"declared: {claim_val}",
+                    observation="not observed",
+                    severity="P2",
+                    confidence=0.7,
+                    volatility="medium",
+                    evidence_source=evidence_source,
+                    claim_source=claim_source,
+                )
+            )
         elif claim_val != obs_val:
             # Mismatch — the core contradiction type
             severity = "P1" if abs(claim_val - obs_val) > claim_val * 0.2 else "P2"
-            contradictions.append(Contradiction(
-                scope=f"count:{key}",
-                claim=f"declared: {claim_val}",
-                observation=f"observed: {obs_val}",
-                severity=severity,
-                confidence=0.85,
-                volatility="medium",
-                evidence_source=evidence_source,
-                claim_source=claim_source,
-            ))
+            contradictions.append(
+                Contradiction(
+                    scope=f"count:{key}",
+                    claim=f"declared: {claim_val}",
+                    observation=f"observed: {obs_val}",
+                    severity=severity,
+                    confidence=0.85,
+                    volatility="medium",
+                    evidence_source=evidence_source,
+                    claim_source=claim_source,
+                )
+            )
 
     return contradictions
 
@@ -260,15 +273,16 @@ def diff_counts(
 
 # Freshness windows from the Atlas scoring standard (in days)
 FRESHNESS_WINDOWS: dict[str, int] = {
-    "metadata": 30,      # Repository metadata and branch state
-    "dependency": 14,    # Dependency/package/release evidence
-    "security": 7,       # Security settings and publishing bindings
+    "metadata": 30,  # Repository metadata and branch state
+    "dependency": 14,  # Dependency/package/release evidence
+    "security": 7,  # Security settings and publishing bindings
 }
 
 
 @dataclass
 class FreshnessResult:
     """Result of a freshness check on an Atlas evidence cut."""
+
     path: str
     category: str
     age_days: float

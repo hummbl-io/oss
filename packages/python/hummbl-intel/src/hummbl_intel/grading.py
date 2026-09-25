@@ -9,9 +9,9 @@ collection surfaces.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, ClassVar
+from datetime import UTC, datetime
+from enum import Enum, IntEnum
+from typing import Any
 
 
 class SourceReliability(Enum):
@@ -42,32 +42,50 @@ class SourceReliability(Enum):
     """No basis exists for evaluating reliability. New or unproven source."""
 
 
-class ContentCredibility(Enum):
+class ContentCredibility(IntEnum):
     """DoD content credibility scale (1-6).
 
     Evaluates the CREDIBILITY of a specific piece of information,
-    independent of the source's general reliability.
+    independent of the source's general reliability. The integer value
+    IS the scale position (1=confirmed ... 6=cannot_be_judged); the
+    `.label` property carries the prose form for serialization.
 
     Source: JP 2-0, Appendix B.
     """
 
-    ONE = "confirmed"
+    ONE = 1
     """Confirmed by other independent sources. Logical. Consistent with other information."""
 
-    TWO = "probably_true"
+    TWO = 2
     """Not confirmed. Logical. Consistent with other information."""
 
-    THREE = "possibly_true"
+    THREE = 3
     """Not confirmed. Reasonably logical. Agrees with some other information."""
 
-    FOUR = "doubtfully_true"
+    FOUR = 4
     """Not confirmed. Possible but not logical. No other information on subject."""
 
-    FIVE = "improbable"
+    FIVE = 5
     """Not confirmed. Not logical. Contradicted by other information."""
 
-    SIX = "cannot_be_judged"
+    SIX = 6
     """No basis exists for evaluating credibility. No other information on subject."""
+
+    @property
+    def label(self) -> str:
+        """Prose form of the credibility level (e.g., 'confirmed')."""
+        return _CREDIBILITY_PROSE[self]
+
+
+# Prose labels keyed by enum member (co-located with the scale).
+_CREDIBILITY_PROSE: dict[ContentCredibility, str] = {
+    ContentCredibility.ONE: "confirmed",
+    ContentCredibility.TWO: "probably_true",
+    ContentCredibility.THREE: "possibly_true",
+    ContentCredibility.FOUR: "doubtfully_true",
+    ContentCredibility.FIVE: "improbable",
+    ContentCredibility.SIX: "cannot_be_judged",
+}
 
 
 # Human-readable labels
@@ -102,15 +120,7 @@ class SourceGrade:
 
     def to_code(self) -> str:
         """Return the grading code string (e.g., 'B/2')."""
-        cred_int = {
-            ContentCredibility.ONE: 1,
-            ContentCredibility.TWO: 2,
-            ContentCredibility.THREE: 3,
-            ContentCredibility.FOUR: 4,
-            ContentCredibility.FIVE: 5,
-            ContentCredibility.SIX: 6,
-        }[self.credibility]
-        return f"{self.reliability.name}/{cred_int}"
+        return f"{self.reliability.name}/{self.credibility.value}"
 
     def is_actionable(self) -> bool:
         """Whether this grade is sufficient for operational use.
@@ -129,6 +139,31 @@ class SourceGrade:
             ContentCredibility.THREE,
         )
         return reliable and credible
+
+
+class AssertionPolarity(Enum):
+    """Direction of an assertion relative to the conclusion it is fused into.
+
+    Replaces the prior string-prefix heuristic in fusion. Callers set
+    polarity explicitly at construction so contradiction detection is
+    a first-class domain fact, not a guess from prose.
+    """
+
+    SUPPORTS = "supports"
+    """Assertion supports the conclusion it is fused into."""
+
+    CONTRADICTS = "contradicts"
+    """Assertion contradicts the conclusion it is fused into."""
+
+    NEUTRAL = "neutral"
+    """Assertion is relevant but neither supports nor contradicts."""
+
+
+ASSERTION_POLARITY_LABELS: dict[AssertionPolarity, str] = {
+    AssertionPolarity.SUPPORTS: "Supports",
+    AssertionPolarity.CONTRADICTS: "Contradicts",
+    AssertionPolarity.NEUTRAL: "Neutral",
+}
 
 
 @dataclass(frozen=True)
@@ -153,17 +188,30 @@ class GradedAssertion:
     corroboration_count: int = 0
     """Number of independent sources confirming this assertion."""
 
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    polarity: AssertionPolarity | None = None
+    """Direction of this assertion relative to the fused conclusion.
+
+    None means the caller has not declared a direction. Fusion then
+    applies a conservative content-based heuristic as a fallback and
+    emits a warning nudging the caller to set polarity explicitly.
+    Explicit SUPPORTS is trusted (no heuristic penalty), but a
+    polarity/content inconsistency is flagged. This distinguishes
+    "caller didn't specify" from "caller declared support" so the
+    fallback cannot reintroduce false positives on explicit support.
+    """
+
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "content": self.content,
             "source": self.source,
             "reliability": self.grade.reliability.name,
-            "credibility": self.grade.credibility.value,
+            "credibility": self.grade.credibility.label,
             "code": self.grade.to_code(),
             "discipline": self.discipline,
             "corroboration_count": self.corroboration_count,
+            "polarity": self.polarity.value if self.polarity else None,
             "timestamp": self.timestamp,
         }
 

@@ -15,12 +15,35 @@ into an intelligence product with audit-trail provenance.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
-from hummbl_intel.grading import ContentCredibility, GradedAssertion, SourceGrade
+from hummbl_intel.grading import (
+    AssertionPolarity,
+    GradedAssertion,
+)
 from hummbl_intel.taxonomy import IntelligenceDiscipline
+
+# ponytail: prose-based contradiction heuristic. Ceiling: false-positive on
+# negated supporting prose that leads with a negation word (e.g. "not delayed"
+# as a standalone supporting claim). Used ONLY as a fallback when the caller
+# has not set polarity (None), never to override an explicit SUPPORTS/NEUTRAL.
+# Upgrade path: callers set AssertionPolarity explicitly; this heuristic exists
+# to catch unlabeled contradictions and to nudge callers toward explicit polarity.
+_CONTRADICTION_PREFIXES: tuple[str, ...] = ("not ", "no ", "never", "contradicts")
+
+
+def _content_suggests_contradiction(content: str) -> bool:
+    """Best-effort prose heuristic: does this content lead with a negation?
+
+    Conservative (prefix-only) on purpose. This is a fallback for callers who
+    omit polarity, not a replacement for explicit AssertionPolarity.
+    """
+    if not content:
+        return False
+    lowered = content.lstrip().lower()
+    return any(lowered.startswith(p) for p in _CONTRADICTION_PREFIXES)
 
 
 class EstimativeProbability(Enum):
@@ -85,15 +108,11 @@ class Hypothesis:
 
     def support_count(self) -> int:
         """Number of corroborated assertions supporting this hypothesis."""
-        return sum(
-            1 for a in self.evidence_for if a.grade.is_actionable()
-        )
+        return sum(1 for a in self.evidence_for if a.grade.is_actionable())
 
     def contradiction_count(self) -> int:
         """Number of actionable assertions contradicting this hypothesis."""
-        return sum(
-            1 for a in self.evidence_against if a.grade.is_actionable()
-        )
+        return sum(1 for a in self.evidence_against if a.grade.is_actionable())
 
     def likelihood(self) -> EstimativeProbability:
         """Compute likelihood from evidence balance.
@@ -139,17 +158,18 @@ class CompetingHypothesesAnalysis:
     hypotheses: list[Hypothesis] = field(default_factory=list)
     """All competing hypotheses."""
 
-    timestamp: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def ranked(self) -> list[Hypothesis]:
         """Return hypotheses ranked by likelihood (most likely first)."""
         likelihood_order = list(EstimativeProbability)
         return sorted(
             self.hypotheses,
-            key=lambda h: likelihood_order.index(h.likelihood())
-            if h.likelihood() in likelihood_order else 999,
+            key=lambda h: (
+                likelihood_order.index(h.likelihood())
+                if h.likelihood() in likelihood_order
+                else 999
+            ),
         )
 
     def most_likely(self) -> Hypothesis | None:
@@ -204,13 +224,20 @@ class FusedFinding:
     uncertainty_notes: str = ""
     """Residual uncertainty: what we don't know, assumptions, gaps."""
 
+    warnings: list[str] = field(default_factory=list)
+    """Polarity/content consistency warnings surfaced during fusion.
+
+    Populated when a caller omits polarity on contradiction-suggesting
+    content (nudge to set polarity explicitly) or declares SUPPORTS on
+    contradiction-suggesting content (inconsistency flag). Not a penalty;
+    an audit trail for mislabeled polarity.
+    """
+
     def source_list(self) -> str:
         """Comma-separated source INT list for attribution."""
         from hummbl_intel.taxonomy import INT_LABELS
 
-        return ", ".join(
-            INT_LABELS.get(s, s.value) for s in self.sources
-        )
+        return ", ".join(INT_LABELS.get(s, s.value) for s in self.sources)
 
     def to_attribution_line(self) -> str:
         """Produce a source-attributed conclusion line.
@@ -232,16 +259,12 @@ class AllSourceProduct:
     title: str
     """Product title (e.g., 'Morning Briefing 2026-05-09')."""
 
-    timestamp: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     findings: list[FusedFinding] = field(default_factory=list)
     """Fused conclusions with source attribution."""
 
-    ach_analyses: dict[str, CompetingHypothesesAnalysis] = field(
-        default_factory=dict
-    )
+    ach_analyses: dict[str, CompetingHypothesesAnalysis] = field(default_factory=dict)
     """Key analytical questions assessed via ACH."""
 
     collection_posture: Any = None
@@ -277,9 +300,7 @@ class AllSourceProduct:
         if self.findings:
             lines.append("KEY JUDGMENTS:")
             for i, finding in enumerate(self.key_judgments(), 1):
-                lines.append(
-                    f"  {i}. {finding.to_attribution_line()}"
-                )
+                lines.append(f"  {i}. {finding.to_attribution_line()}")
                 if finding.uncertainty_notes:
                     lines.append(f"     Caveat: {finding.uncertainty_notes}")
 
@@ -290,8 +311,7 @@ class AllSourceProduct:
                 most_likely = ach.most_likely()
                 if most_likely:
                     lines.append(
-                        f"  {q_id}: {most_likely.statement} "
-                        f"[{most_likely.likelihood().name}]"
+                        f"  {q_id}: {most_likely.statement} [{most_likely.likelihood().name}]"
                     )
 
         if self.collection_posture is not None:
@@ -326,9 +346,8 @@ def fuse_into_finding(
             conclusion=conclusion,
             probability=EstimativeProbability.EVEN_CHANCE,
             confidence=0.0,
-            uncertainty_notes="No supporting evidence." + (
-                f" {uncertainty}" if uncertainty else ""
-            ),
+            uncertainty_notes="No supporting evidence."
+            + (f" {uncertainty}" if uncertainty else ""),
         )
 
     # Extract INTs from assertions
@@ -361,12 +380,35 @@ def fuse_into_finding(
         probability = EstimativeProbability.EVEN_CHANCE
         confidence = 0.50
 
-    # Degrade confidence if any assertions contradict
-    contradictions = [
-        a for a in assertions
-        if a.grade.is_actionable()
-        and a.content.lower().startswith(("not ", "no ", "never", "contradicts"))
-    ]
+    # Degrade confidence for actionable contradictions, and surface
+    # polarity/content consistency warnings. Three cases:
+    #   - explicit CONTRADICTS -> penalty (trusted declaration)
+    #   - polarity None (caller omitted) -> conservative prose heuristic
+    #     fallback; if it fires, penalize AND warn to set polarity explicitly
+    #   - explicit SUPPORTS on contradicting content -> no penalty (trust the
+    #     declaration) but warn (D3: error model for mislabeled polarity)
+    #   - explicit NEUTRAL -> no penalty, no warning (caller considered it)
+    contradictions: list[GradedAssertion] = []
+    warnings: list[str] = []
+    for a in assertions:
+        if not a.grade.is_actionable():
+            continue
+        if a.polarity == AssertionPolarity.CONTRADICTS:
+            contradictions.append(a)
+        elif a.polarity is None:
+            if _content_suggests_contradiction(a.content):
+                contradictions.append(a)
+                warnings.append(
+                    f"assertion {a.source!r} has no polarity set but content "
+                    f"suggests contradiction; set polarity explicitly"
+                )
+        elif a.polarity == AssertionPolarity.SUPPORTS and _content_suggests_contradiction(
+            a.content
+        ):
+            warnings.append(
+                f"assertion {a.source!r} declared SUPPORTS but content "
+                f"suggests contradiction; verify polarity"
+            )
     if contradictions:
         confidence = max(0.10, confidence - 0.25)
 
@@ -377,4 +419,5 @@ def fuse_into_finding(
         assertions=assertions,
         confidence=confidence,
         uncertainty_notes=uncertainty,
+        warnings=warnings,
     )

@@ -31,7 +31,7 @@ Issues = "https://github.com/hummbl-io/oss/issues"
 PyPI = "https://pypi.org/project/hummbl-axis/"
 
 [project.optional-dependencies]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "pytest-cov"]
 
 [project.scripts]
 axis = "hummbl_axis.cli:main"
@@ -39,6 +39,21 @@ axis = "hummbl_axis.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+hummbl_axis = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.mypy]
+files = ["src", "tests"]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
