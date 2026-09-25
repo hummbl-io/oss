@@ -9,6 +9,22 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.5.1] — 2026-09-24
+
+### Security & Hardening
+- Prevent directory traversal in LSP archive extraction (#132).
+- Enforce strict URL scheme validation before urllib network requests (#134).
+- Fail-closed security gates on public intake and repository boundary checks (#166).
+- Redact authority identity fields as human rather than agent roles (#209).
+
+### Added & Fixed
+- Hash-locked build environment verification (`requirements-build.lock`) pinning all build dependencies with SHA-256 hashes (#210).
+- Register missing GDPR primitives and correct stale primitive counts in `PrimitiveRegistry` (#222).
+- Sandbox lifecycle contracts and validation (#139).
+- Enforce SKILL_INVOKE provenance checks at the cognition ledger write path (#236).
+- Support `COGNITION_LEDGER` environment variable override in cognition CLI (#159).
+- Harden IdentityEngine K3 ghost-agent rejection (#179, #182).
+
 ## [1.5.0] — 2026-09-04
 
 ### Added
