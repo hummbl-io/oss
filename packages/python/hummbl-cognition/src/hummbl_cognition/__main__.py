@@ -8,6 +8,7 @@ Commands:
     post-verified  Write a verified ledger entry with evidence + confidence
     query     Query ledger with filters
     search    Open Brain: semantic search across all memory pools
+    novelty-check  Bounded internal-novelty evidence for a claim (nearest neighbors + unseen terms)
     validate  Validate ledger integrity
     state     Show current shared state
     boot      Generate boot context for agent injection
@@ -427,6 +428,28 @@ def cmd_search(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_novelty_check(args: argparse.Namespace) -> int:
+    """Bounded internal-novelty evidence for a claim."""
+    from hummbl_cognition.novelty_check import (
+        format_report_text,
+        novelty_check,
+    )
+
+    report = novelty_check(
+        args.claim,
+        state_dir=args.state_dir,
+        limit=args.limit,
+        sources=args.sources,
+        agent="cli",
+    )
+
+    if args.json:
+        print(report.to_json())
+    else:
+        print(format_report_text(report))
+    return 0
+
+
 def cmd_batch_ingest(args: argparse.Namespace) -> int:
     """Bulk-import a JSONL file of ledger entries with deduplication."""
     source = Path(args.source)
@@ -835,6 +858,28 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_search.add_argument("--json", action="store_true", help="Output as JSON")
 
+    # novelty-check (internal novelty evidence)
+    p_novelty = subparsers.add_parser(
+        "novelty-check",
+        help="Bounded internal-novelty evidence for a claim: nearest neighbors, "
+        "matched terms, unseen terms, caveats",
+    )
+    p_novelty.add_argument("claim", help="Claim text to check for internal novelty")
+    p_novelty.add_argument(
+        "--limit", type=int, default=5, help="Max nearest neighbors (default 5)"
+    )
+    p_novelty.add_argument(
+        "--sources",
+        nargs="*",
+        choices=["ledger", "bus", "briefings", "findings", "memory_md"],
+        help="Memory pools to search (default: all)",
+    )
+    p_novelty.add_argument(
+        "--state-dir",
+        help="Override Open Brain state dir (contains cognition/ index)",
+    )
+    p_novelty.add_argument("--json", action="store_true", help="Output as JSON")
+
     # batch-ingest
     p_batch = subparsers.add_parser(
         "batch-ingest",
@@ -1001,6 +1046,7 @@ def main(argv: list[str] | None = None) -> int:
         "post-verified": cmd_post_verified,
         "query": cmd_query,
         "search": cmd_search,
+        "novelty-check": cmd_novelty_check,
         "reindex": cmd_reindex,
         "validate": cmd_validate,
         "state": cmd_state,
