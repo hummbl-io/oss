@@ -3,10 +3,88 @@
 import json
 import os
 import subprocess
-import tempfile
+import sys
 from pathlib import Path
 
 import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+_GIT_ENV_VARS = (
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_CONFIG",
+    "GIT_CONFIG_PARAMETERS",
+    "GIT_CONFIG_COUNT",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_IMPLICIT_WORK_TREE",
+    "GIT_GRAFT_FILE",
+    "GIT_INDEX_FILE",
+    "GIT_NO_REPLACE_OBJECTS",
+    "GIT_REPLACE_REF_BASE",
+    "GIT_PREFIX",
+    "GIT_SHALLOW_FILE",
+    "GIT_COMMON_DIR",
+    "GIT_QUARANTINE_PATH",
+)
+
+
+def _remove_git_env(environ):
+    """Remove repository-local Git variables and return their prior values."""
+    return {var: environ.pop(var) for var in _GIT_ENV_VARS if var in environ}
+
+
+def _restore_git_env(environ, saved):
+    """Restore the exact pre-session state for repository-local Git variables."""
+    for var in _GIT_ENV_VARS:
+        environ.pop(var, None)
+    environ.update(saved)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _strip_git_env():
+    """Keep subprocess Git commands isolated from the invoking worktree and hooks."""
+    import shutil
+
+    saved = _remove_git_env(os.environ)
+    os.environ["GIT_CONFIG_PARAMETERS"] = "'core.hooksPath='"
+    prior_pythonpath = os.environ.get("PYTHONPATH")
+    os.environ["PYTHONPATH"] = str(ROOT)
+
+    orig_popen = subprocess.Popen
+
+    def _wrapped_popen(args, *pargs, **kwargs):
+        if sys.platform == "win32" and isinstance(args, (list, tuple)) and args:
+            target = Path(args[0])
+            try:
+                if target.is_file() and target.suffix.lower() not in (".exe", ".cmd", ".bat"):
+                    with open(target, "rb") as f:
+                        if f.read(2) == b"#!":
+                            git_bash = r"C:\Program Files\Git\bin\bash.exe"
+                            bash = git_bash if os.path.exists(git_bash) else (shutil.which("bash") or "bash")
+                            args = [bash, str(target).replace("\\", "/"), *args[1:]]
+            except (OSError, UnicodeDecodeError):
+                pass
+        if sys.platform == "win32" and "env" in kwargs and kwargs["env"] is not None:
+            env = kwargs["env"]
+            if env.get("PATH") == "/usr/bin:/bin":
+                git_bin = r"C:\Program Files\Git\usr\bin;C:\Program Files\Git\bin"
+                env["PATH"] = git_bin
+        return orig_popen(args, *pargs, **kwargs)
+
+    subprocess.Popen = _wrapped_popen
+
+    try:
+        yield
+    finally:
+        subprocess.Popen = orig_popen
+        _restore_git_env(os.environ, saved)
+        if prior_pythonpath is None:
+            os.environ.pop("PYTHONPATH", None)
+        else:
+            os.environ["PYTHONPATH"] = prior_pythonpath
 
 
 @pytest.fixture
