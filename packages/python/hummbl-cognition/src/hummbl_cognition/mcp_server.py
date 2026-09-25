@@ -12,7 +12,7 @@ Tools:
     ledger_post      - Append a new entry to the ledger
     ledger_stats     - Entry count, agent breakdown, type breakdown, index health
     boot_context     - Get session boot context (recent high-value entries)
-    memory_search    - Unified search across 5 memory pools (ledger, bus, briefings, findings, MEMORY.md)
+    memory_search    - Unified search across memory pools (ledger, bus, briefings, findings, session, MEMORY.md)
     reindex          - Rebuild the BM25 index from ledger
 """
 
@@ -241,6 +241,62 @@ TOOLS = [
         },
     },
     {
+        "name": "memory_search",
+        "description": "Unified search across all Open Brain memory pools: ledger (BM25), bus digests, briefings, autoresearch findings, session claims/ledgers, and MEMORY.md. Returns ranked results within a token budget.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search query (natural language or keywords)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results before token-budget filtering (default: 20)",
+                    "default": 20,
+                },
+                "token_budget": {
+                    "type": "integer",
+                    "description": "Max estimated tokens across returned results (default: 2000)",
+                    "default": 2000,
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "ledger",
+                            "bus",
+                            "briefings",
+                            "findings",
+                            "session",
+                            "memory_md",
+                        ],
+                    },
+                    "description": "Restrict to specific memory pools (default: all)",
+                },
+                "scope": {
+                    "type": "string",
+                    "description": "Filter ledger results by scope",
+                },
+                "entry_type": {
+                    "type": "string",
+                    "description": "Filter ledger results by entry type",
+                },
+                "since": {
+                    "type": "string",
+                    "description": "ISO timestamp — only return entries after this time",
+                },
+                "agent": {
+                    "type": "string",
+                    "description": "Agent ID for retrieval feedback tracking (default: mcp-client)",
+                    "default": "mcp-client",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
         "name": "reindex",
         "description": "Rebuild the BM25 full-text index from the ledger. Run after bulk imports or if search quality degrades.",
         "inputSchema": {"type": "object", "properties": {}, "required": []},
@@ -451,6 +507,52 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             }
         except Exception as e:
             return {"error": f"Boot context failed: {e}"}
+
+    elif name == "memory_search":
+        query_text = arguments.get("query")
+        if not query_text:
+            return {"error": "Missing required argument: query"}
+        sources_arg = arguments.get("sources")
+        if sources_arg is not None:
+            allowed = {
+                "ledger", "bus", "briefings", "findings", "session",
+                "memory_md",
+            }
+            bad = [s for s in sources_arg if s not in allowed]
+            if bad:
+                return {
+                    "error": f"Invalid source(s): {', '.join(map(str, bad))}. "
+                    f"Allowed: {', '.join(sorted(allowed))}"
+                }
+        try:
+            from hummbl_cognition.retriever import OpenBrainRetriever
+
+            # Share the MCP server's index instance so memory_search sees
+            # the same ledger state as ledger_search/reindex. state_dir is
+            # the parent of the cognition dir (the _state/ root) so the
+            # retriever resolves pool paths like <state>/cognition/.
+            retriever = OpenBrainRetriever(
+                state_dir=LEDGER_DIR.parent,
+                index=get_indexer(),
+            )
+            retriever._index_loaded = True
+            results = retriever.search(
+                query_text,
+                token_budget=arguments.get("token_budget", 2000),
+                scope=arguments.get("scope"),
+                entry_type=arguments.get("entry_type"),
+                since=arguments.get("since"),
+                sources=sources_arg,
+                agent=arguments.get("agent", "mcp-client"),
+                limit=arguments.get("limit", 20),
+            )
+            return {
+                "query": query_text,
+                "count": len(results),
+                "results": [r.to_dict() for r in results],
+            }
+        except Exception as e:
+            return {"error": f"Memory search failed: {e}"}
 
     elif name == "reindex":
         try:

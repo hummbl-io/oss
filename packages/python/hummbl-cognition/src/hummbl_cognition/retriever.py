@@ -1,7 +1,8 @@
 """Open Brain Retriever -- unified search across all memory pools.
 
 Queries ledger index, bus digests, briefings, autoresearch findings,
-and MEMORY.md. Returns ranked results within a token budget.
+session claims/ledgers, and MEMORY.md. Returns ranked results within
+a token budget.
 
 This is the primary query interface for the Open Brain.
 """
@@ -131,10 +132,11 @@ class OpenBrainRetriever:
 
     Memory pools:
       1. Cognitive Ledger (ledger.jsonl via BM25 index)
-      2. Bus digests (_state/bus_digests/)
-      3. Briefings (state/briefings/)
-      4. Autoresearch findings (_state/autoresearch/)
+      2. Bus digests (_state/coordination/*.tsv)
+      3. Briefings (<state-sibling>/state/briefings/*.md)
+      4. Autoresearch findings (_state/autoresearch/findings_*.json)
       5. MEMORY.md (Claude Code auto-memory)
+      6. Session surfaces (cognition/session-claims/*, cognition/session-ledgers/*)
     """
 
     def __init__(
@@ -192,7 +194,8 @@ class OpenBrainRetriever:
             ISO timestamp — only return entries after this time.
         sources : list[str] | None
             Which memory pools to search. Default: all.
-            Options: "ledger", "bus", "briefings", "findings", "memory_md"
+            Options: "ledger", "bus", "briefings", "findings", "memory_md",
+            "session"
         agent : str
             Agent making the query (for feedback tracking).
         limit : int
@@ -221,6 +224,7 @@ class OpenBrainRetriever:
             "bus",
             "briefings",
             "findings",
+            "session",
             "memory_md",
         ]
 
@@ -277,6 +281,11 @@ class OpenBrainRetriever:
                         limit=limit // 4,
                     )
                 )
+
+        if "session" in all_sources:
+            results.extend(
+                self._search_session(query, since=since, limit=limit // 4)
+            )
 
         if "memory_md" in all_sources:
             results.extend(self._search_memory_md(query, limit=limit // 4))
@@ -351,7 +360,7 @@ class OpenBrainRetriever:
                     continue
                 if full and len(full) > len(result.content):
                     result.content_window = full
-            elif result.source in ("bus", "bus_digest", "briefings"):
+            elif result.source in ("bus", "bus_digest", "briefings", "session"):
                 # Text pool results: try to fetch more context from source
                 src_file = result.metadata.get("path") or result.metadata.get(
                     "file", ""
@@ -532,6 +541,58 @@ class OpenBrainRetriever:
                         },
                     )
                 )
+
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:limit]
+
+    def _search_session(
+        self,
+        query: str,
+        *,
+        since: str | None = None,
+        limit: int = 5,
+    ) -> list[MemoryResult]:
+        """Search session claims and session ledgers.
+
+        Session surfaces live under each cognition dir as
+        ``session-claims/`` and ``session-ledgers/`` (``.md`` and
+        ``.jsonl`` files). A cognition dir is resolved relative to each
+        state dir as ``<state>/cognition`` or the state dir itself when
+        it already is one; the sibling ``state/cognition`` layout and
+        the conventional ``~/.agents/state/cognition`` location are
+        also checked (mirroring the memory_md pool's home-relative
+        convention).
+        """
+        bases: list[Path] = []
+        for d in self.state_dirs:
+            bases.append(d / "cognition")
+            bases.append(d.parent / "state" / "cognition")
+            bases.append(d)
+        bases.append(Path.home() / ".agents" / "state" / "cognition")
+
+        results: list[MemoryResult] = []
+        seen: set[str] = set()
+        for base in bases:
+            for sub in ("session-claims", "session-ledgers"):
+                search_dir = base / sub
+                try:
+                    key = str(search_dir.resolve())
+                except OSError:
+                    key = str(search_dir)
+                if key in seen or not search_dir.is_dir():
+                    continue
+                seen.add(key)
+                for pattern in ("*.md", "*.jsonl"):
+                    results.extend(
+                        self._search_text_pool(
+                            query,
+                            pool_name="session",
+                            search_dir=search_dir,
+                            glob_pattern=pattern,
+                            since=since,
+                            limit=limit,
+                        )
+                    )
 
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
