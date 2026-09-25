@@ -40,11 +40,26 @@ TEMPLATE_DIR_CANDIDATES = (
     Path.cwd() / "templates",
     Path(sys.prefix) / "templates",
 )
-SESSIONS_DIR = Path(tempfile.gettempdir()) / "bif-sessions"
 
-_env_sessions = os.environ.get("BIF_SESSIONS_DIR")
-if _env_sessions:
-    SESSIONS_DIR = Path(_env_sessions)
+
+def _default_sessions_dir() -> Path:
+    """Durable per-user directory for BIF session state.
+
+    Sessions are cross-lane coordination state (read by `bif status` and peer
+    lanes), not scratch data — a tmpdir default loses them on reboot (tmpfs)
+    and fragments visibility across environments. BIF_SESSIONS_DIR overrides.
+    """
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA")
+        if base:
+            return Path(base) / "bif" / "sessions"
+        return Path(tempfile.gettempdir()) / "bif-sessions"
+    xdg = os.environ.get("XDG_STATE_HOME")
+    root = Path(xdg) if xdg else Path.home() / ".local" / "state"
+    return root / "bif" / "sessions"
+
+
+SESSIONS_DIR = Path(os.environ.get("BIF_SESSIONS_DIR") or _default_sessions_dir())
 
 # ---------------------------------------------------------------------------
 # BIF Phase Definitions (from FRAMEWORK.md)
