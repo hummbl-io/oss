@@ -118,6 +118,57 @@ class TestNoveltyCheck:
         assert rep.unseen_terms == ("freshterm",)
         assert "seen" not in rep.unseen_terms
 
+    def test_exclude_ids_forwarded_and_recorded(self):
+        r = _stub_retriever([_result("clp-b", 1.0, "other")], index_terms=["other"])
+        rep = novelty_check("other", retriever=r, exclude_ids={"clp-a", "clp-c"})
+        kwargs = r.search.call_args.kwargs
+        assert kwargs["exclude_ids"] == {"clp-a", "clp-c"}
+        assert rep.masked_ids == ("clp-a", "clp-c")
+        assert "masked" in rep.caveats[0].lower()
+        assert rep.to_dict()["masked_ids"] == ["clp-a", "clp-c"]
+
+
+class TestMaskingRealIndex:
+    """exclude_ids against a real BM25Index (not a stub)."""
+
+    def _index(self, tmp_path):
+        from hummbl_cognition.indexer import BM25Index
+
+        meta = {
+            "timestamp": "2026-09-25T00:00:00Z",
+            "agent": "t",
+            "type": "discovery",
+            "scope": "project",
+        }
+        idx = BM25Index(index_path=tmp_path / "idx.json")
+        idx.add_document(
+            "clp-mask", "quorum sensing bacterial biofilm signaling", dict(meta)
+        )
+        idx.add_document(
+            "clp-keep", "agent coordination ledger entries", dict(meta)
+        )
+        return idx
+
+    def test_masked_doc_absent_from_hits(self, tmp_path):
+        idx = self._index(tmp_path)
+        hits = idx.search("quorum sensing", exclude_ids={"clp-mask"})
+        assert all(h["id"] != "clp-mask" for h in hits)
+
+    def test_masking_only_doc_yields_zero_hits(self, tmp_path):
+        idx = self._index(tmp_path)
+        hits = idx.search("quorum", exclude_ids={"clp-mask"})
+        assert hits == []
+
+    def test_unmasked_query_unaffected(self, tmp_path):
+        idx = self._index(tmp_path)
+        hits = idx.search("coordination", exclude_ids={"clp-mask"})
+        assert hits and hits[0]["id"] == "clp-keep"
+
+    def test_masking_nonexistent_id_is_noop(self, tmp_path):
+        idx = self._index(tmp_path)
+        hits = idx.search("quorum", exclude_ids={"clp-nonexistent"})
+        assert hits and hits[0]["id"] == "clp-mask"
+
 
 # ---------------------------------------------------------------------------
 # Serialization

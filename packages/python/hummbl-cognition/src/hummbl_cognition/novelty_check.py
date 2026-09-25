@@ -53,6 +53,12 @@ _CAVEAT_NO_NEIGHBORS = (
     "claim is lexically disjoint."
 )
 
+_CAVEAT_MASKED = (
+    "entries were masked from retrieval for this check -- distances reflect "
+    "the corpus MINUS the masked ids (blind rediscovery context), not the "
+    "full corpus."
+)
+
 
 class NoveltyNeighbor:
     """A single nearest-neighbor hit with the claim terms it shares."""
@@ -97,6 +103,7 @@ class NoveltyReport:
         "top_score",
         "nearest_neighbors",
         "unseen_terms",
+        "masked_ids",
         "caveats",
     )
 
@@ -110,6 +117,7 @@ class NoveltyReport:
         nearest_neighbors: tuple[NoveltyNeighbor, ...],
         unseen_terms: tuple[str, ...],
         caveats: tuple[str, ...],
+        masked_ids: tuple[str, ...] = (),
     ) -> None:
         self.claim = claim
         self.sources = sources
@@ -118,6 +126,7 @@ class NoveltyReport:
         self.nearest_neighbors = nearest_neighbors
         self.unseen_terms = unseen_terms
         self.caveats = caveats
+        self.masked_ids = masked_ids
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -130,6 +139,7 @@ class NoveltyReport:
             "top_score": None if self.top_score is None else round(self.top_score, 4),
             "nearest_neighbors": [n.to_dict() for n in self.nearest_neighbors],
             "unseen_terms": list(self.unseen_terms),
+            "masked_ids": list(self.masked_ids),
             "caveats": list(self.caveats),
         }
 
@@ -155,6 +165,7 @@ def novelty_check(
     limit: int = 5,
     sources: list[str] | None = None,
     agent: str = "novelty-check",
+    exclude_ids: set[str] | None = None,
 ) -> NoveltyReport:
     """Measure a claim's nearest neighbors in the internal corpus.
 
@@ -174,6 +185,8 @@ def novelty_check(
         "memory_md"). None = all pools.
     agent : str
         Agent identifier for retrieval feedback tracking.
+    exclude_ids : set[str] | None
+        Ledger entry ids masked from results (blind rediscovery evaluation).
 
     Returns
     -------
@@ -190,6 +203,7 @@ def novelty_check(
         sources=sources,
         agent=agent,
         limit=limit,
+        exclude_ids=exclude_ids,
     )
 
     claim_tokens = set(tokenize(claim))
@@ -215,6 +229,8 @@ def novelty_check(
     caveats: list[str] = list(_CAVEATS_BASE)
     if not results:
         caveats.insert(0, _CAVEAT_NO_NEIGHBORS)
+    if exclude_ids:
+        caveats.insert(0, _CAVEAT_MASKED)
 
     return NoveltyReport(
         claim=claim,
@@ -226,6 +242,7 @@ def novelty_check(
         nearest_neighbors=neighbors,
         unseen_terms=unseen,
         caveats=tuple(caveats),
+        masked_ids=tuple(sorted(exclude_ids)) if exclude_ids else (),
     )
 
 

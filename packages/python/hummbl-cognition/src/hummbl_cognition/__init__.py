@@ -38,6 +38,11 @@ from hummbl_cognition.novelty_check import (
     NoveltyReport,
     novelty_check,
 )
+from hummbl_cognition.novelty_proof import (
+    build_novelty_proof,
+    grade_for_scopes,
+    post_novelty_proof,
+)
 from hummbl_cognition.retriever import OpenBrainRetriever
 from hummbl_cognition.schema_validator import (
     ValidationError,
@@ -99,4 +104,7 @@ __all__ = [
     "NoveltyNeighbor",
     "NoveltyReport",
     "novelty_check",
+    "build_novelty_proof",
+    "grade_for_scopes",
+    "post_novelty_proof",
 ]
