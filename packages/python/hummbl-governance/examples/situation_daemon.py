@@ -2,30 +2,45 @@
 HUMMBL Global Situation Daemon — Lightweight Multi-Domain Telemetry Aggregator
 
 A zero-third-party-dependency, asyncio-powered background daemon for real-time global
-situational monitoring. Ingests live telemetry streams (Aviation Emergency Squawks,
-USGS/EMSC Seismic Activity, NOAA Space Weather Alerts, and Tsunami Warnings),
-deduplicates events, triages severity (P0/P1/P2), dispatches webhooks, and serves
-an embedded local tactical war room map and REST API.
+situational monitoring. Ingests live telemetry streams:
+  1. Aviation Emergency Squawks (ADSB.lol: 7700 emergency, 7600 lost comms, 7500 hijack)
+  2. USGS Seismic Activity (M4.5+ and significant earthquakes)
+  3. NOAA SWPC Space Weather Alerts (Geomagnetic storms, solar radiation)
+  4. EMSC Real-Time Seismic Stream (Sub-second native WebSocket stream)
+  5. RIPE RIS Live Global BGP Stream (Sub-second native WebSocket stream)
 
-Standard library only: Python 3.11+ (asyncio, urllib, http.server, sqlite3, json).
+Features:
+- Native stdlib RFC 6455 WebSocket client (zero third-party packages)
+- Multi-channel alert dispatching (Console SITREP, Discord, Telegram, ntfy, Webhooks)
+- In-memory EventStore with time-to-live deduplication
+- Embedded HTTP Tactical Radar map & REST API (/api/events, /api/status)
+- Headless Terminal TUI mode (--tui) via standard ANSI escapes
+
+Standard library only: Python 3.11+ (asyncio, ssl, struct, base64, hashlib, urllib, http.server).
 """
 
 from __future__ import annotations
 
+import argparse
 import asyncio
+import base64
+import hashlib
 import http.server
 import json
 import logging
 import os
+import socket
 import socketserver
 import ssl
+import struct
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,7 +72,7 @@ class TelemetryEvent:
 
 
 # ---------------------------------------------------------------------------
-# Deduplication & State Store (Memory + SQLite)
+# Deduplication & State Store (Memory + Lock)
 # ---------------------------------------------------------------------------
 
 
@@ -126,6 +141,165 @@ def fetch_json(url: str, headers: Optional[Dict[str, str]] = None, timeout: floa
 
 
 # ---------------------------------------------------------------------------
+# Minimal Native RFC 6455 Asyncio WebSocket Client (Stdlib Only)
+# ---------------------------------------------------------------------------
+
+WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
+
+class SimpleWebSocketClient:
+    """Zero-dependency RFC 6455 WebSocket client using asyncio and ssl."""
+
+    def __init__(
+        self,
+        host: str,
+        port: int = 443,
+        path: str = "/",
+        use_ssl: bool = True,
+        extra_headers: Optional[Dict[str, str]] = None,
+    ):
+        self.host = host
+        self.port = port
+        self.path = path
+        self.use_ssl = use_ssl
+        self.extra_headers = extra_headers or {}
+        self.reader: Optional[asyncio.StreamReader] = None
+        self.writer: Optional[asyncio.StreamWriter] = None
+        self.closed: bool = True
+
+    async def connect(self, timeout: float = 10.0) -> None:
+        ssl_ctx = ssl.create_default_context() if self.use_ssl else None
+        self.reader, self.writer = await asyncio.wait_for(
+            asyncio.open_connection(self.host, self.port, ssl=ssl_ctx),
+            timeout=timeout,
+        )
+
+        nonce = base64.b64encode(os.urandom(16)).decode("ascii")
+        expected_accept = base64.b64encode(
+            hashlib.sha1((nonce + WS_GUID).encode("utf-8")).digest()
+        ).decode("ascii")
+
+        req_lines = [
+            f"GET {self.path} HTTP/1.1",
+            f"Host: {self.host}:{self.port}" if self.port not in (80, 443) else f"Host: {self.host}",
+            "Upgrade: websocket",
+            "Connection: Upgrade",
+            f"Sec-WebSocket-Key: {nonce}",
+            "Sec-WebSocket-Version: 13",
+            "User-Agent: HUMMBL-SituationDaemon/1.0",
+        ]
+        for k, v in self.extra_headers.items():
+            req_lines.append(f"{k}: {v}")
+        req_lines.extend(["", ""])
+        req_data = "\r\n".join(req_lines).encode("ascii")
+
+        self.writer.write(req_data)
+        await self.writer.drain()
+
+        # Read HTTP handshake response headers
+        header_data = b""
+        while b"\r\n\r\n" not in header_data:
+            chunk = await asyncio.wait_for(self.reader.read(1024), timeout=timeout)
+            if not chunk:
+                raise ConnectionError("Connection closed during WebSocket handshake")
+            header_data += chunk
+
+        lines = header_data.split(b"\r\n")
+        status_line = lines[0].decode("latin-1", errors="replace")
+        if "101" not in status_line:
+            raise ConnectionError(f"WebSocket upgrade rejected: {status_line}")
+
+        accept_header = None
+        for line in lines[1:]:
+            if line.lower().startswith(b"sec-websocket-accept:"):
+                accept_header = line.split(b":", 1)[1].strip().decode("ascii")
+                break
+
+        if accept_header != expected_accept:
+            raise ConnectionError("Sec-WebSocket-Accept handshake validation mismatch")
+
+        self.closed = False
+
+    async def send_text(self, text: str) -> None:
+        if self.closed or not self.writer:
+            raise ConnectionError("WebSocket is not connected")
+        data = text.encode("utf-8")
+        mask_key = os.urandom(4)
+        masked_data = bytes(b ^ mask_key[i % 4] for i, b in enumerate(data))
+
+        length = len(data)
+        if length <= 125:
+            header = struct.pack("!BB", 0x81, 0x80 | length)
+        elif length <= 65535:
+            header = struct.pack("!BBH", 0x81, 0x80 | 126, length)
+        else:
+            header = struct.pack("!BBQ", 0x81, 0x80 | 127, length)
+
+        self.writer.write(header + mask_key + masked_data)
+        await self.writer.drain()
+
+    async def recv_frame(self) -> Tuple[int, bytes]:
+        if self.closed or not self.reader:
+            raise ConnectionError("WebSocket is not connected")
+
+        b1_b2 = await self.reader.readexactly(2)
+        b1, b2 = b1_b2[0], b1_b2[1]
+        opcode = b1 & 0x0F
+        is_masked = bool(b2 & 0x80)
+        payload_len = b2 & 0x7F
+
+        if payload_len == 126:
+            ext_len = await self.reader.readexactly(2)
+            payload_len = struct.unpack("!H", ext_len)[0]
+        elif payload_len == 127:
+            ext_len = await self.reader.readexactly(8)
+            payload_len = struct.unpack("!Q", ext_len)[0]
+
+        mask_key = b""
+        if is_masked:
+            mask_key = await self.reader.readexactly(4)
+
+        payload = await self.reader.readexactly(payload_len)
+        if is_masked:
+            payload = bytes(b ^ mask_key[i % 4] for i, b in enumerate(payload))
+
+        if opcode == 0x9:  # Ping -> reply with Pong (0x8A)
+            if self.writer and not self.closed:
+                pong_mask = os.urandom(4)
+                masked_pong = bytes(b ^ pong_mask[i % 4] for i, b in enumerate(payload))
+                pong_header = struct.pack("!BB", 0x8A, 0x80 | len(payload))
+                self.writer.write(pong_header + pong_mask + masked_pong)
+                await self.writer.drain()
+            return await self.recv_frame()
+        elif opcode == 0x8:  # Close
+            await self.close()
+            return 0x8, b""
+
+        return opcode, payload
+
+    async def recv_text(self) -> Optional[str]:
+        opcode, data = await self.recv_frame()
+        if opcode == 0x8:
+            return None
+        return data.decode("utf-8", errors="replace")
+
+    async def close(self) -> None:
+        if self.closed:
+            return
+        self.closed = True
+        if self.writer:
+            try:
+                mask = os.urandom(4)
+                header = struct.pack("!BB", 0x88, 0x80)
+                self.writer.write(header + mask)
+                await self.writer.drain()
+                self.writer.close()
+                await self.writer.wait_closed()
+            except Exception:
+                pass
+
+
+# ---------------------------------------------------------------------------
 # Feed Ingestion Workers
 # ---------------------------------------------------------------------------
 
@@ -182,7 +356,6 @@ class AviationSquawkWorker(BaseWorker):
                 if not hex_id:
                     continue
 
-                # Fingerprint per aircraft + squawk code
                 event_id = f"squawk_{code}_{hex_id}"
                 callsign = ac.get("flight", "UNKNOWN").strip()
                 alt = ac.get("alt_baro", "N/A")
@@ -236,7 +409,6 @@ class SeismicWorker(BaseWorker):
             time_ms = props.get("time", 0)
             ts = datetime.fromtimestamp(time_ms / 1000.0, timezone.utc).isoformat()
 
-            # Triage severity
             if mag >= 7.0 or tsunami == 1:
                 severity = "P0_CRITICAL"
                 icon = "🌋 TSUNAMI/MAJOR QUAKE"
@@ -286,7 +458,6 @@ class SpaceWeatherWorker(BaseWorker):
 
             event_id = f"swpc_{msg_id}"
 
-            # Simple keyword triage
             if "WARNING: Geomagnetic Storm Category G5" in msg or "WARNING: Solar Radiation Storm Category S5" in msg:
                 severity = "P0_CRITICAL"
                 title = "☀️ EXTREME SPACE WEATHER (G5/S5)"
@@ -299,7 +470,6 @@ class SpaceWeatherWorker(BaseWorker):
             else:
                 continue
 
-            # First 200 chars of message
             summary_snippet = msg.replace("\r", " ").replace("\n", " ").strip()[:200]
 
             event = TelemetryEvent(
@@ -317,14 +487,250 @@ class SpaceWeatherWorker(BaseWorker):
                 self.on_event(event)
 
 
+class EMSCWebSocketWorker(BaseWorker):
+    """Native WebSocket stream consumer for EMSC global seismic events."""
+
+    name = "emsc_ws"
+
+    def __init__(
+        self,
+        store: EventStore,
+        on_event: Callable[[TelemetryEvent], None],
+        host: str = "www.seismicportal.eu",
+        port: int = 443,
+        path: str = "/standing_order/websocket",
+        use_ssl: bool = True,
+    ):
+        super().__init__(store, on_event)
+        self.host = host
+        self.port = port
+        self.path = path
+        self.use_ssl = use_ssl
+        self._client: Optional[SimpleWebSocketClient] = None
+
+    async def run_loop(self) -> None:
+        backoff = 2.0
+        while True:
+            try:
+                self.last_status = "connecting"
+                self._client = SimpleWebSocketClient(
+                    host=self.host,
+                    port=self.port,
+                    path=self.path,
+                    use_ssl=self.use_ssl,
+                )
+                await self._client.connect(timeout=10.0)
+                self.last_status = "streaming"
+                backoff = 2.0
+                logger.info("[emsc_ws] Connected to EMSC Seismic WebSocket stream")
+
+                while not self._client.closed:
+                    self.last_run = time.time()
+                    raw = await self._client.recv_text()
+                    if raw is None:
+                        break
+                    self._process_message(raw)
+
+            except asyncio.CancelledError:
+                if self._client:
+                    await self._client.close()
+                break
+            except Exception as e:
+                self.error_count += 1
+                self.last_status = f"error: {e}"
+                logger.warning("[emsc_ws] Connection dropped: %s. Reconnecting in %.1fs...", e, backoff)
+                await asyncio.sleep(backoff)
+                backoff = min(backoff * 1.5, 60.0)
+
+    def _process_message(self, raw: str) -> None:
+        try:
+            doc = json.loads(raw)
+        except Exception:
+            return
+
+        # EMSC can send GeoJSON Feature or enveloped payload
+        data = doc.get("data", doc)
+        props = data.get("properties", {})
+        geom = data.get("geometry", {})
+        coords = geom.get("coordinates", [None, None, None])
+
+        unid = data.get("unid") or data.get("id") or props.get("unid")
+        if not unid:
+            return
+
+        mag = float(props.get("mag", 0.0) or 0.0)
+        place = props.get("flynn_region") or props.get("region") or "Unknown Region"
+        depth = coords[2] if len(coords) > 2 else props.get("depth")
+        ts = props.get("time") or datetime.now(timezone.utc).isoformat()
+
+        if mag >= 7.0:
+            severity = "P0_CRITICAL"
+            icon = "🌋 MAJOR EARTHQUAKE"
+        elif mag >= 6.0:
+            severity = "P1_HIGH"
+            icon = "🌍 STRONG EARTHQUAKE"
+        else:
+            severity = "P2_ADVISORY"
+            icon = "🌐 MODERATE EARTHQUAKE"
+
+        event = TelemetryEvent(
+            id=f"emsc_{unid}",
+            domain="seismic",
+            severity=severity,
+            title=f"{icon}: M{mag:.1f} — {place}",
+            summary=f"Depth: {depth} km | Real-Time WebSocket EMSC Feed | Source: {props.get('source_catalog', 'EMSC')}",
+            timestamp=ts,
+            longitude=coords[0] if len(coords) > 0 and coords[0] is not None else None,
+            latitude=coords[1] if len(coords) > 1 and coords[1] is not None else None,
+            metadata={"mag": mag, "region": place, "depth": depth, "raw": props},
+            source_url="https://www.seismicportal.eu/",
+        )
+
+        if self.store.add(event):
+            self.on_event(event)
+
+
+class RipeRisWebSocketWorker(BaseWorker):
+    """Native WebSocket stream consumer for RIPE RIS Live global BGP updates and anomalies."""
+
+    name = "ripe_ris_ws"
+
+    def __init__(
+        self,
+        store: EventStore,
+        on_event: Callable[[TelemetryEvent], None],
+        host: str = "ris-live.ripe.net",
+        port: int = 443,
+        path: str = "/v1/ws?client=hummbl-situation",
+        use_ssl: bool = True,
+    ):
+        super().__init__(store, on_event)
+        self.host = host
+        self.port = port
+        self.path = path
+        self.use_ssl = use_ssl
+        self._client: Optional[SimpleWebSocketClient] = None
+
+    async def run_loop(self) -> None:
+        backoff = 2.0
+        while True:
+            try:
+                self.last_status = "connecting"
+                self._client = SimpleWebSocketClient(
+                    host=self.host,
+                    port=self.port,
+                    path=self.path,
+                    use_ssl=self.use_ssl,
+                )
+                await self._client.connect(timeout=10.0)
+                # Subscribe to BGP updates
+                sub_payload = json.dumps({"type": "ris_subscribe", "data": {"moreSpecific": True, "type": "UPDATE"}})
+                await self._client.send_text(sub_payload)
+                self.last_status = "streaming"
+                backoff = 2.0
+                logger.info("[ripe_ris_ws] Connected to RIPE RIS Live BGP stream")
+
+                while not self._client.closed:
+                    self.last_run = time.time()
+                    raw = await self._client.recv_text()
+                    if raw is None:
+                        break
+                    self._process_message(raw)
+
+            except asyncio.CancelledError:
+                if self._client:
+                    await self._client.close()
+                break
+            except Exception as e:
+                self.error_count += 1
+                self.last_status = f"error: {e}"
+                logger.warning("[ripe_ris_ws] BGP Stream dropped: %s. Reconnecting in %.1fs...", e, backoff)
+                await asyncio.sleep(backoff)
+                backoff = min(backoff * 1.5, 60.0)
+
+    def _process_message(self, raw: str) -> None:
+        try:
+            doc = json.loads(raw)
+        except Exception:
+            return
+
+        if doc.get("type") != "ris_message":
+            return
+
+        data = doc.get("data", {})
+        peer = data.get("peer", "unknown")
+        peer_asn = data.get("peer_asn", "unknown")
+        msg_id = data.get("id") or f"{peer}_{time.time()}"
+        path = data.get("path", [])
+        withdrawals = data.get("withdrawals", [])
+        announcements = data.get("announcements", [])
+
+        # Detect BGP route anomalies
+        num_withdrawn = len(withdrawals)
+        is_large_withdrawal = num_withdrawn >= 10
+        is_path_anomaly = len(path) >= 12
+
+        if num_withdrawn >= 50:
+            severity = "P0_CRITICAL"
+            title = f"⚡ MASS BGP WITHDRAWAL: {num_withdrawn} prefixes (AS{peer_asn})"
+        elif is_large_withdrawal:
+            severity = "P1_HIGH"
+            title = f"⚠️ BGP ROUTE FLAP: {num_withdrawn} withdrawals via AS{peer_asn}"
+        elif is_path_anomaly:
+            severity = "P1_HIGH"
+            title = f"🔁 AS-PATH LOOP / INFLATION: {len(path)} hops (AS{peer_asn})"
+        else:
+            severity = "P2_ADVISORY"
+            title = f"🌐 BGP ROUTE UPDATE: AS{peer_asn} via {peer}"
+
+        total_prefixes = num_withdrawn + sum(len(a.get("prefixes", [])) for a in announcements)
+        summary = (
+            f"Peer: {peer} (AS{peer_asn}) | Path: {path[:6]}{'...' if len(path) > 6 else ''} | "
+            f"Withdrawals: {num_withdrawn} | Announcements: {len(announcements)} | Total Prefixes: {total_prefixes}"
+        )
+
+        event = TelemetryEvent(
+            id=f"bgp_{msg_id}",
+            domain="network",
+            severity=severity,
+            title=title,
+            summary=summary,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            metadata={
+                "peer": peer,
+                "peer_asn": peer_asn,
+                "path": path,
+                "withdrawals_count": num_withdrawn,
+                "announcements_count": len(announcements),
+            },
+            source_url="https://ris-live.ripe.net/",
+        )
+
+        if self.store.add(event):
+            self.on_event(event)
+
+
 # ---------------------------------------------------------------------------
-# Multi-Channel Alert Dispatcher
+# Multi-Channel Alert Dispatcher (Discord, Telegram, ntfy, Webhooks)
 # ---------------------------------------------------------------------------
 
 
 class AlertDispatcher:
-    def __init__(self, webhook_urls: Optional[List[str]] = None):
+    def __init__(
+        self,
+        webhook_urls: Optional[List[str]] = None,
+        discord_webhook_url: Optional[str] = None,
+        telegram_bot_token: Optional[str] = None,
+        telegram_chat_id: Optional[str] = None,
+        ntfy_topic: Optional[str] = None,
+        ntfy_url: str = "https://ntfy.sh",
+    ):
         self.webhook_urls = webhook_urls or []
+        self.discord_webhook_url = discord_webhook_url or os.getenv("DISCORD_WEBHOOK_URL", "").strip() or None
+        self.telegram_bot_token = telegram_bot_token or os.getenv("TELEGRAM_BOT_TOKEN", "").strip() or None
+        self.telegram_chat_id = telegram_chat_id or os.getenv("TELEGRAM_CHAT_ID", "").strip() or None
+        self.ntfy_topic = ntfy_topic or os.getenv("NTFY_TOPIC", "").strip() or None
+        self.ntfy_url = (ntfy_url or os.getenv("NTFY_URL", "https://ntfy.sh")).rstrip("/")
 
     def dispatch(self, event: TelemetryEvent) -> None:
         # 1. Console / Terminal SITREP output
@@ -342,11 +748,27 @@ class AlertDispatcher:
             print(f"  Location:  {event.latitude:.4f}, {event.longitude:.4f}")
         print(f"  Timestamp: {event.timestamp}\n")
 
-        # 2. Webhooks (Async or threaded to avoid blocking)
-        if self.webhook_urls:
-            threading.Thread(target=self._send_webhooks, args=(event,), daemon=True).start()
+        # 2. Dispatch to external channels asynchronously in background thread
+        threading.Thread(target=self._send_all_channels, args=(event,), daemon=True).start()
 
-    def _send_webhooks(self, event: TelemetryEvent) -> None:
+    def _send_all_channels(self, event: TelemetryEvent) -> None:
+        # Discord Dispatch
+        if self.discord_webhook_url:
+            self._send_discord(event, self.discord_webhook_url)
+
+        # Telegram Dispatch
+        if self.telegram_bot_token and self.telegram_chat_id:
+            self._send_telegram(event, self.telegram_bot_token, self.telegram_chat_id)
+
+        # ntfy Dispatch
+        if self.ntfy_topic:
+            self._send_ntfy(event, self.ntfy_url, self.ntfy_topic)
+
+        # Generic Webhooks
+        for url in self.webhook_urls:
+            self._send_generic_webhook(event, url)
+
+    def _send_discord(self, event: TelemetryEvent, url: str) -> None:
         payload = json.dumps(
             {
                 "content": f"**[{event.severity}] {event.title}**\n{event.summary}\n`Timestamp: {event.timestamp}`",
@@ -354,12 +776,12 @@ class AlertDispatcher:
                     {
                         "title": event.title,
                         "description": event.summary,
-                        "color": 15158332 if "P0" in event.severity else 15105570,
+                        "color": 15158332 if "P0" in event.severity else (15105570 if "P1" in event.severity else 3447003),
                         "fields": [
-                            {"name": "Domain", "value": event.domain, "inline": True},
+                            {"name": "Domain", "value": event.domain.upper(), "inline": True},
                             {
                                 "name": "Coordinates",
-                                "value": f"{event.latitude},{event.longitude}" if event.latitude else "N/A",
+                                "value": f"{event.latitude:.4f},{event.longitude:.4f}" if event.latitude else "N/A",
                                 "inline": True,
                             },
                         ],
@@ -367,18 +789,43 @@ class AlertDispatcher:
                 ],
             }
         ).encode("utf-8")
+        self._post_http(url, payload, {"Content-Type": "application/json"})
 
-        for url in self.webhook_urls:
-            try:
-                req = urllib.request.Request(
-                    url,
-                    data=payload,
-                    headers={"Content-Type": "application/json", "User-Agent": "HUMMBL-SituationDaemon/1.0"},
-                )
-                with urllib.request.urlopen(req, timeout=5.0):
-                    pass
-            except Exception as e:
-                logger.debug("Webhook delivery failed to %s: %s", url, e)
+    def _send_telegram(self, event: TelemetryEvent, token: str, chat_id: str) -> None:
+        api_url = f"https://api.telegram.org/bot{token}/sendMessage"
+        text = (
+            f"<b>[{event.severity}] {event.title}</b>\n\n"
+            f"<b>Domain:</b> {event.domain.upper()}\n"
+            f"<b>Summary:</b> {event.summary}\n"
+            f"<b>Timestamp:</b> <code>{event.timestamp}</code>"
+        )
+        payload = json.dumps({"chat_id": chat_id, "text": text, "parse_mode": "HTML"}).encode("utf-8")
+        self._post_http(api_url, payload, {"Content-Type": "application/json"})
+
+    def _send_ntfy(self, event: TelemetryEvent, base_url: str, topic: str) -> None:
+        target_url = f"{base_url}/{topic}"
+        priority_map = {"P0_CRITICAL": "5", "P1_HIGH": "4", "P2_ADVISORY": "3"}
+        headers = {
+            "Title": event.title,
+            "Priority": priority_map.get(event.severity, "3"),
+            "Tags": f"{event.domain},warning",
+        }
+        payload = event.summary.encode("utf-8")
+        self._post_http(target_url, payload, headers)
+
+    def _send_generic_webhook(self, event: TelemetryEvent, url: str) -> None:
+        payload = json.dumps(event.to_dict()).encode("utf-8")
+        self._post_http(url, payload, {"Content-Type": "application/json"})
+
+    def _post_http(self, url: str, data: bytes, headers: Dict[str, str]) -> None:
+        req_headers = {"User-Agent": "HUMMBL-SituationDaemon/1.0"}
+        req_headers.update(headers)
+        req = urllib.request.Request(url, data=data, headers=req_headers)
+        try:
+            with urllib.request.urlopen(req, timeout=5.0):
+                pass
+        except Exception as e:
+            logger.debug("Dispatch failure to %s: %s", url, e)
 
 
 # ---------------------------------------------------------------------------
@@ -451,50 +898,42 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       maxZoom: 18
     }).addTo(map);
 
-    let markers = [];
-    const startTime = Date.now();
-
-    function formatTime(iso) {
-      try { return new Date(iso).toLocaleTimeString(); } catch(e) { return iso; }
-    }
+    const markers = [];
 
     async function refreshData() {
       try {
-        const res = await fetch('/api/events');
-        const events = await res.json();
+        const [evResp, stResp] = await Promise.all([
+          fetch('/api/events'),
+          fetch('/api/status')
+        ]);
+        const events = await evResp.json();
+        const status = await stResp.json();
 
-        // Update stats
-        document.getElementById('stat-events').innerText = `${events.length} Active Events`;
-        document.getElementById('stat-uptime').innerText = `Uptime: ${Math.floor((Date.now() - startTime)/1000)}s`;
+        document.getElementById('stat-events').innerText = `${status.events_in_memory} Active Telemetries`;
+        document.getElementById('stat-uptime').innerText = `Uptime: ${status.uptime_seconds}s`;
 
-        // Clear markers
+        const listContainer = document.getElementById('events-list');
+        listContainer.innerHTML = '';
         markers.forEach(m => map.removeLayer(m));
-        markers = [];
-
-        const list = document.getElementById('events-list');
-        list.innerHTML = '';
+        markers.length = 0;
 
         events.forEach(ev => {
-          // Add to feed list
           const card = document.createElement('div');
           card.className = `event-card ${ev.severity}`;
           card.innerHTML = `
             <div class="card-title">${ev.title}</div>
             <div class="card-summary">${ev.summary}</div>
             <div class="card-meta">
-              <span>${ev.domain.toUpperCase()}</span>
-              <span>${formatTime(ev.timestamp)}</span>
+              <span><b>${ev.domain.toUpperCase()}</b></span>
+              <span>${new Date(ev.timestamp).toLocaleTimeString()}</span>
             </div>
           `;
-          list.appendChild(card);
+          listContainer.appendChild(card);
 
-          // Add map marker if coordinates exist
-          if (ev.latitude !== null && ev.longitude !== null) {
-            const color = ev.severity === 'P0_CRITICAL' ? '#ef4444' : ev.severity === 'P1_HIGH' ? '#f59e0b' : '#3b82f6';
-            const radius = ev.domain === 'seismic' ? Math.max(6, (ev.metadata.mag || 4) * 2.5) : 6;
-
+          if (ev.latitude != null && ev.longitude != null) {
+            const color = ev.severity === 'P0_CRITICAL' ? '#ef4444' : (ev.severity === 'P1_HIGH' ? '#f59e0b' : '#3b82f6');
             const marker = L.circleMarker([ev.latitude, ev.longitude], {
-              radius: radius,
+              radius: ev.severity === 'P0_CRITICAL' ? 9 : 6,
               color: color,
               fillColor: color,
               fillOpacity: 0.6,
@@ -553,7 +992,6 @@ class SituationHTTPHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
 
     def log_message(self, format: str, *args: Any) -> None:
-        # Suppress routine GET logs
         pass
 
 
@@ -562,7 +1000,6 @@ def run_http_server(store: EventStore, port: int = 8765) -> socketserver.TCPServ
     handler.store = store
     handler.start_time = time.time()
 
-    # Threading server
     class ReusableServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         allow_reuse_address = True
 
@@ -574,32 +1011,108 @@ def run_http_server(store: EventStore, port: int = 8765) -> socketserver.TCPServ
 
 
 # ---------------------------------------------------------------------------
+# Terminal TUI Mode (ANSI Escapes)
+# ---------------------------------------------------------------------------
+
+
+async def run_tui_dashboard(daemon: SituationDaemon) -> None:
+    """Headless Terminal TUI monitoring loop displaying real-time ASCII war room metrics."""
+    CLEAR_SCREEN = "\033[2J\033[H"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+    CYAN = "\033[36m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    RED = "\033[31m"
+
+    while True:
+        try:
+            uptime = int(time.time() - daemon.start_time)
+            recent_events = daemon.store.get_recent(15)
+
+            lines = [
+                CLEAR_SCREEN,
+                f"{BOLD}{CYAN}╔══════════════════════════════════════════════════════════════════════════════════╗{RESET}",
+                f"{BOLD}{CYAN}║             HUMMBL GLOBAL SITUATION RADAR // TACTICAL HEADLESS TUI               ║{RESET}",
+                f"{BOLD}{CYAN}╚══════════════════════════════════════════════════════════════════════════════════╝{RESET}",
+                f" Uptime: {GREEN}{uptime}s{RESET} | Radar Web: {GREEN}http://127.0.0.1:{daemon.port}/{RESET} | Total Cached Events: {BOLD}{len(daemon.store.get_recent(500))}{RESET}",
+                "-" * 84,
+                f"{BOLD}ACTIVE TELEMETRY WORKERS:{RESET}",
+            ]
+
+            for w in daemon.workers:
+                status_color = GREEN if "stream" in w.last_status or "health" in w.last_status else (RED if "error" in w.last_status else YELLOW)
+                lines.append(f"  • {w.name:<18} Status: {status_color}{w.last_status:<12}{RESET} Errors: {w.error_count:<4}")
+
+            lines.extend([
+                "-" * 84,
+                f"{BOLD}RECENT TELEMETRY EVENTS:{RESET}",
+                f" {'TIME':<10} {'SEV':<12} {'DOMAIN':<14} {'TITLE'}",
+                f" {'-'*8} {'-'*10} {'-'*12} {'-'*48}",
+            ])
+
+            for ev in recent_events[:10]:
+                sev_color = RED if "P0" in ev.severity else (YELLOW if "P1" in ev.severity else CYAN)
+                t_str = ev.timestamp[11:19] if len(ev.timestamp) >= 19 else ev.timestamp
+                title_snip = ev.title[:48]
+                lines.append(f" {t_str:<10} {sev_color}{ev.severity:<12}{RESET} {ev.domain.upper():<14} {title_snip}")
+
+            lines.append("\n[Press Ctrl+C to terminate Situation Daemon]\n")
+            print("\n".join(lines), end="", flush=True)
+
+        except Exception as e:
+            logger.debug("TUI render error: %s", e)
+
+        await asyncio.sleep(2.0)
+
+
+# ---------------------------------------------------------------------------
 # Daemon Core Orchestrator
 # ---------------------------------------------------------------------------
 
 
 class SituationDaemon:
-    def __init__(self, port: int = 8765, webhook_urls: Optional[List[str]] = None):
+    def __init__(
+        self,
+        port: int = 8765,
+        webhook_urls: Optional[List[str]] = None,
+        enable_ws: bool = True,
+        enable_tui: bool = False,
+    ):
         self.port = port
+        self.enable_ws = enable_ws
+        self.enable_tui = enable_tui
+        self.start_time = time.time()
         self.store = EventStore(ttl_seconds=7200)
         self.dispatcher = AlertDispatcher(webhook_urls=webhook_urls)
+
+        # Standard polling workers
         self.workers: List[BaseWorker] = [
             AviationSquawkWorker(self.store, self.dispatcher.dispatch),
             SeismicWorker(self.store, self.dispatcher.dispatch),
             SpaceWeatherWorker(self.store, self.dispatcher.dispatch),
         ]
+
+        # Native WebSocket streaming workers
+        if self.enable_ws:
+            self.workers.append(EMSCWebSocketWorker(self.store, self.dispatcher.dispatch))
+            self.workers.append(RipeRisWebSocketWorker(self.store, self.dispatcher.dispatch))
+
         self.http_server: Optional[socketserver.TCPServer] = None
 
     async def start(self) -> None:
-        logger.info("Initializing HUMMBL Situation Monitoring Daemon...")
+        logger.info("Initializing HUMMBL Situation Monitoring Daemon (WS enabled: %s)...", self.enable_ws)
         self.http_server = run_http_server(self.store, port=self.port)
 
-        # Start all polling workers concurrently
-        tasks = [asyncio.create_task(w.run_loop()) for w in self.workers]
+        worker_tasks = [asyncio.create_task(w.run_loop()) for w in self.workers]
         logger.info("All telemetry workers engaged (%d workers active).", len(self.workers))
 
+        if self.enable_tui:
+            tui_task = asyncio.create_task(run_tui_dashboard(self))
+            worker_tasks.append(tui_task)
+
         try:
-            await asyncio.gather(*tasks)
+            await asyncio.gather(*worker_tasks)
         except asyncio.CancelledError:
             logger.info("Shutting down Situation Daemon...")
         finally:
@@ -607,10 +1120,26 @@ class SituationDaemon:
                 self.http_server.shutdown()
 
 
+def build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="HUMMBL Tactical Global Situation Monitoring Daemon")
+    parser.add_argument("--port", type=int, default=int(os.getenv("SITUATION_PORT", "8765")), help="HTTP Radar port")
+    parser.add_argument("--webhooks", type=str, default=os.getenv("SITUATION_WEBHOOKS", ""), help="Comma-separated webhooks")
+    parser.add_argument("--no-ws", action="store_true", help="Disable WebSocket stream workers (polling only)")
+    parser.add_argument("--tui", action="store_true", help="Enable terminal TUI monitoring dashboard")
+    return parser
+
+
 if __name__ == "__main__":
-    port = int(os.getenv("SITUATION_PORT", "8765"))
-    webhooks = [u.strip() for u in os.getenv("SITUATION_WEBHOOKS", "").split(",") if u.strip()]
-    daemon = SituationDaemon(port=port, webhook_urls=webhooks)
+    parser = build_arg_parser()
+    args = parser.parse_args()
+
+    webhooks_list = [u.strip() for u in args.webhooks.split(",") if u.strip()]
+    daemon = SituationDaemon(
+        port=args.port,
+        webhook_urls=webhooks_list,
+        enable_ws=not args.no_ws,
+        enable_tui=args.tui,
+    )
     try:
         asyncio.run(daemon.start())
     except KeyboardInterrupt:
