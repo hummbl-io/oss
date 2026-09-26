@@ -133,6 +133,88 @@ def test_chain_continuity_with_signed_entries(tmp_path: Path) -> None:
     assert valid == 2
 
 
+def test_verify_rejects_malformed_key_ids(tmp_path: Path) -> None:
+    """Path-traversal and malformed signer_key_ids never reach the filesystem."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    post_entry(_entry(), ledger_path=ledger)
+    d = json.loads(ledger.read_text(encoding="utf-8").strip().splitlines()[-1])
+    for bad in (
+        "..:aaaaaaaaaaaaaaaa",
+        "../x:aaaaaaaaaaaaaaaa",
+        "a/b:aaaaaaaaaaaaaaaa",
+        "a:b:c:aaaaaaaaaaaaaaaa",
+        "devin:zzzzzzzzzzzzzzzz",
+        "devin:aaaaaaaaaaaaaaaa:",  # extra colon
+        ":aaaaaaaaaaaaaaaa",
+        "devin:",  # missing fp16
+        "devin:aaaaaaaaaaaaaaa",  # 15 hex
+        "devin:AAAAAAAAAAAAAAAA",  # uppercase hex
+        "devin",  # no colon
+        "",
+    ):
+        d["signer_key_id"] = bad
+        ok, detail = ed25519_signing.verify(d, ledger)
+        assert not ok, f"malformed id {bad!r} verified: {detail}"
+
+
+def test_verify_missing_public_key(tmp_path: Path) -> None:
+    """A valid-shaped but absent pubkey fails closed, not open."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    post_entry(_entry(), ledger_path=ledger)
+    d = json.loads(ledger.read_text(encoding="utf-8").strip().splitlines()[-1])
+    d["signer_key_id"] = "ghost:0123456789abcdef"
+    ok, detail = ed25519_signing.verify(d, ledger)
+    assert not ok
+    assert "not found" in detail
+
+
+def test_verify_wrong_key_fails(tmp_path: Path) -> None:
+    """Signature verifies only under its own key — cross-agent forgery fails."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    key_id_eve, _, _ = ed25519_signing.keygen("eve", ledger)
+    post_entry(_entry(), ledger_path=ledger)
+    d = json.loads(ledger.read_text(encoding="utf-8").strip().splitlines()[-1])
+    # Sig was made by devin's key; claim it was eve's
+    d["signer_key_id"] = key_id_eve
+    ok, _ = ed25519_signing.verify(d, ledger)
+    assert not ok
+
+
+def test_model_rejects_malformed_signer_key_id() -> None:
+    e = _entry()
+    d = e.to_dict()
+    d["ed25519_sig"] = "ab" * 64
+    d["signer_key_id"] = "not a key id"
+    with pytest.raises(ValueError):
+        LedgerEntry.from_dict(d)
+    d["signer_key_id"] = "devin:0123456789abcdef"  # valid shape
+    LedgerEntry.from_dict(d)
+
+
+def test_model_rejects_orphan_signer_key_id() -> None:
+    d = _entry().to_dict()
+    d["signer_key_id"] = "devin:0123456789abcdef"
+    with pytest.raises(ValueError):
+        LedgerEntry.from_dict(d)
+
+
+def test_hmac_and_ed25519_coexist(tmp_path: Path) -> None:
+    """Entry carrying both signatures passes integrity when keys are present."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    secret = b"unit-test-secret"
+    post_entry(_entry(), ledger_path=ledger, secret=secret)
+    valid, errors = validate_integrity(ledger_path=ledger, secret=secret)
+    assert errors == []
+    assert valid == 1
+    line = ledger.read_text(encoding="utf-8").strip().splitlines()[-1]
+    d = json.loads(line)
+    assert d.get("signature") and d.get("ed25519_sig")
+
+
 def test_key_rotation_preserves_verification(tmp_path: Path) -> None:
     ledger = tmp_path / "ledger.jsonl"
     key_id_1, _, _ = ed25519_signing.keygen("devin", ledger)

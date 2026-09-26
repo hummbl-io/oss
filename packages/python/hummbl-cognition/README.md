@@ -72,7 +72,7 @@ python -m hummbl_cognition scitt-export --id <clp-id>   # SCITT-shaped statement
 - `previous_hash`: SHA-256 hex digest of the preceding raw ledger JSONL line (cryptographic tamper-evidence)
 - `valid_time`: ISO 8601 UTC timestamp tracking when a fact occurred in reality (bi-temporal support)
 - `contests`: Target entry ID being disputed/refuted (explicit belief-DAG support)
-- `ed25519_sig` / `signer_key_id`: optional per-agent Ed25519 signature over the canonical entry (sorted-keys JSON minus signature fields). Opt-in by key presence under `<ledger_dir>/keys/`; verification needs only the public key — no shared secret
+- `ed25519_sig` / `signer_key_id`: optional per-agent Ed25519 signature over the canonical entry (sorted-keys JSON minus signature fields). Opt-in by key presence under `<ledger_dir>/keys/` — keep that directory out of version control; verification needs only the public key, no shared secret
 
 ## State Files
 

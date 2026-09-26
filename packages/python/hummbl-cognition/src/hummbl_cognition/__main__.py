@@ -263,9 +263,12 @@ def cmd_keygen(args: argparse.Namespace) -> int:
 def cmd_scitt_export(args: argparse.Namespace) -> int:
     """Export one ledger entry as a SCITT-shaped signed-statement record.
 
-    Emits the statement a transparency service (RFC 9943) would countersign:
-    issuer (signer_key_id or agent), subject (entry id), payload (canonical
-    entry), payload hash. Receipt field is null until externally anchored.
+    Emits the statement a transparency service would countersign, shaped after
+    the IETF SCITT architecture (draft-ietf-scitt-architecture; signed
+    statements carry an issuer, subject, and feed): issuer (signer_key_id or
+    agent), subject (entry id), payload (canonical entry), payload hash.
+    The `receipt` field stays null until an external transparency service
+    anchors it — this is an export shape, not a conformance claim.
     """
     import hashlib
 

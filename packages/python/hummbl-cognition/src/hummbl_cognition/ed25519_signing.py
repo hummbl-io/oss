@@ -44,8 +44,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import stat
+import tempfile
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -121,18 +124,41 @@ def keygen(agent: str, ledger_path: Path) -> tuple[str, Path, Path]:
     priv_path = kdir / f"{slug}-{fp16}.key.pem"
     pub_path = kdir / f"{slug}-{fp16}.pub.pem"
 
-    priv_path.write_bytes(
-        priv.private_bytes(
-            serialization.Encoding.PEM,
-            serialization.PrivateFormat.PKCS8,
-            serialization.NoEncryption(),
-        )
-    )
-    # Best-effort 0600; on Windows ACLs this is advisory.
+    # Atomic restrictive creation: write to a 0600 temp file then rename into
+    # place, so no window exposes a loosely-permissioned private key.
+    fd, tmp_name = tempfile.mkstemp(dir=kdir, prefix=".tmp-key-", suffix=".pem")
     try:
-        priv_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(
+                priv.private_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PrivateFormat.PKCS8,
+                    serialization.NoEncryption(),
+                )
+            )
+        os.chmod(tmp_name, stat.S_IRUSR | stat.S_IWUSR)
+        os.replace(tmp_name, priv_path)
     except OSError:
-        pass
+        try:
+            os.unlink(tmp_name)
+        except OSError:
+            pass
+        raise
+    # Verify final permissions are owner-only where POSIX mode bits are
+    # authoritative. On Windows, NT ACLs govern instead — mode bits always
+    # read permissive (0o666) and real restriction comes from directory ACLs,
+    # so the check is skipped rather than warning spuriously.
+    if os.name == "posix":
+        try:
+            mode = stat.S_IMODE(priv_path.stat().st_mode)
+            if mode & (stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH):
+                warnings.warn(
+                    f"private key {priv_path} is group/world-accessible (mode "
+                    f"{oct(mode)}); restrict permissions manually"
+                )
+        except OSError:
+            pass
+
     pub_path.write_bytes(
         priv.public_key().public_bytes(
             serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
@@ -168,11 +194,23 @@ def _private_key_path(agent: str, ledger_path: Path) -> Path | None:
     return matches[-1] if matches else None
 
 
+_SIGNER_KEY_ID_RE = re.compile(r"^[A-Za-z0-9_-]+:[a-f0-9]{16}$")
+
+
 def _public_key_path(signer_key_id: str, ledger_path: Path) -> Path | None:
-    slug, _, fp16 = signer_key_id.partition(":")
-    if not slug or not fp16:
+    """Resolve a signer_key_id to its pubkey file inside the keys dir.
+
+    Grammar-checked before any path join — a malformed or traversal-shaped
+    id (path separators, extra colons, '..') yields None, never a path.
+    """
+    if not _SIGNER_KEY_ID_RE.match(signer_key_id):
         return None
-    path = keys_dir(ledger_path) / f"{slug}-{fp16}.pub.pem"
+    slug, _, fp16 = signer_key_id.partition(":")
+    kdir = keys_dir(ledger_path)
+    path = (kdir / f"{slug}-{fp16}.pub.pem").resolve()
+    # Defense in depth: resolved path must stay inside the keys dir.
+    if path.parent != kdir.resolve():
+        return None
     return path if path.is_file() else None
 
 
