@@ -441,6 +441,25 @@ class TestSchemaIntegration:
         is_valid, errors = validate_state_dict(self._valid_state_dict(), schema=schema)
         assert is_valid is True
 
+    def test_all_scopes_against_packaged_schema(self):
+        """All canonical and aliased scopes must pass validation against packaged CLP schema."""
+        scopes = [
+            "project",
+            "module",
+            "file",
+            "convention",
+            "process",
+            "session",
+            "agent",
+            "system",
+            "global",
+        ]
+        for scope_val in scopes:
+            entry = self._valid_entry_dict()
+            entry["scope"] = scope_val
+            is_valid, errors = validate_entry_dict(entry)
+            assert is_valid is True, f"Scope {scope_val} failed validation: {errors}"
+
     def test_entry_against_real_schema(self):
         """Test against the actual CLP schema if available."""
         schema_path = Path("contracts/cognition/schemas/clp.ledger_entry.schema.json")
