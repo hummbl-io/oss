@@ -318,6 +318,11 @@ def test_mixed_ledger_unsigned_hmac_signed(tmp_path: Path) -> None:
     # for that layer and must not fail closed.
     ok3, _ = ed25519_signing.verify(dicts[2], ledger)
     assert ok3
+    # Whole-ledger integrity: unsigned + HMAC-only + signed all validate
+    # together under the same secret.
+    valid, errors = validate_integrity(ledger_path=ledger, secret=b"shared-secret")
+    assert errors == []
+    assert valid == 3
 
 
 def test_latest_pointer_malformed_contents_ignored(tmp_path: Path) -> None:
@@ -368,3 +373,32 @@ def test_fallback_key_symlink_escape_rejected(tmp_path: Path) -> None:
     assert p is not None
     assert p.parent == kdir.resolve()
     assert p.name != decoy.name
+
+
+def test_crypto_absent_hmac_and_unsigned_still_work(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Simulates cryptography being unavailable: writes stay unsigned and
+    HMAC verification is unaffected — the core never hard-depends on the
+    optional extra."""
+    monkeypatch.setattr(ed25519_signing, "_crypto", lambda: None)
+    ledger = tmp_path / "ledger.jsonl"
+    # Unsigned write is a no-op for the Ed25519 layer.
+    post_entry(_entry(), ledger_path=ledger)
+    e2 = LedgerEntry.from_dict({**_entry().to_dict(), "id": "clp-000000000004"})
+    post_entry(e2, ledger_path=ledger, secret=b"shared-secret")
+    lines = ledger.read_text(encoding="utf-8").strip().splitlines()
+    assert all(json.loads(x).get("ed25519_sig") is None for x in lines)
+    # maybe_sign explicitly no-ops.
+    d = json.loads(lines[1])
+    assert ed25519_signing.maybe_sign(dict(d), "devin", ledger) == d
+    # verify() reports the missing dependency rather than raising.
+    d2 = dict(d)
+    d2["ed25519_sig"] = "ab" * 64
+    d2["signer_key_id"] = "devin:0123456789abcdef"
+    ok, detail = ed25519_signing.verify(d2, ledger)
+    assert not ok and "cryptography" in detail
+    # HMAC layer still validates the signed entry.
+    valid, errors = validate_integrity(ledger_path=ledger, secret=b"shared-secret")
+    assert errors == []
+    assert valid == 2
