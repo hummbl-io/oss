@@ -47,6 +47,9 @@ class LedgerScope(str, Enum):
     DREAM = "dream"  # HRSI dream entries
     SESSION = "session"  # Session summary entries
     SKILL_SYSTEM = "skill-system"  # Skill system milestone entries
+    AGENT = "agent"  # Schema/historical alias
+    SYSTEM = "system"  # Schema/historical alias
+    GLOBAL = "global"  # Schema/historical alias
 
 
 # Canonical values for new writes (pre-append lint uses these).
