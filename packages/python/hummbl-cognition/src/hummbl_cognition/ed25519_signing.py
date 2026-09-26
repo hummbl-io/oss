@@ -216,7 +216,10 @@ def _private_key_path(agent: str, ledger_path: Path) -> Path | None:
     """
     slug = slugify_agent(agent)
     kdir = keys_dir(ledger_path)
-    if not kdir.is_dir():
+    # A symlinked keys dir must not be followed — containment anchored at
+    # kdir.resolve() would validate against the TARGET, not the intended
+    # directory. Fail closed, matching keygen's write-side rejection.
+    if kdir.is_symlink() or not kdir.is_dir():
         return None
     pointer = kdir / f"{slug}.latest"
     # The pointer file is an input boundary too — it must resolve inside
@@ -264,6 +267,10 @@ def _public_key_path(signer_key_id: str, ledger_path: Path) -> Path | None:
         return None
     slug, _, fp16 = signer_key_id.partition(":")
     kdir = keys_dir(ledger_path)
+    # Same symlink guard as the private-key path: never resolve through a
+    # symlinked keys dir — verification fails closed instead.
+    if kdir.is_symlink():
+        return None
     path = (kdir / f"{slug}-{fp16}.pub.pem").resolve()
     # Defense in depth: resolved path must stay inside the keys dir.
     if path.parent != kdir.resolve():

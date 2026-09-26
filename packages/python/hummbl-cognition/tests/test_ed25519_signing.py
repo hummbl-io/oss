@@ -433,3 +433,31 @@ def test_keygen_rejects_symlinked_destinations(tmp_path: Path) -> None:
     with pytest.raises(OSError):
         ed25519_signing.keygen("devin", ledger)
     assert outside.read_text(encoding="utf-8") == "must not be overwritten"
+
+
+def test_symlinked_keys_dir_blocks_signing_and_verification(
+    tmp_path: Path,
+) -> None:
+    """Read-side mirror of keygen's guard: a symlinked keys/ dir is never
+    followed — signing silently no-ops and verify fails closed."""
+    ledger = tmp_path / "ledger.jsonl"
+    real_keys = tmp_path / "attacker_keys"
+    real_keys.mkdir()
+    # Plant an attacker's key inside the redirect target.
+    ed25519_signing.keygen("devin", tmp_path / "other" / "ledger.jsonl")
+    other_kdir = tmp_path / "other" / "keys"
+    for p in other_kdir.iterdir():
+        (real_keys / p.name).write_bytes(p.read_bytes())
+    _link(tmp_path / "keys", real_keys)
+
+    # Signing: _private_key_path must not see through the symlink.
+    assert ed25519_signing._private_key_path("devin", ledger) is None
+    post_entry(_entry(), ledger_path=ledger)
+    d = json.loads(ledger.read_text(encoding="utf-8").strip())
+    assert d.get("ed25519_sig") is None  # stayed unsigned
+
+    # Verification: _public_key_path must not resolve through it either.
+    d["ed25519_sig"] = "ab" * 64
+    d["signer_key_id"] = "devin:0123456789abcdef"
+    ok, detail = ed25519_signing.verify(d, ledger)
+    assert not ok and "not found" in detail
