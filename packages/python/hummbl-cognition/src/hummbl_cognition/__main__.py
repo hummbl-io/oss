@@ -19,6 +19,7 @@ Commands:
     migrate    Import existing knowledge stores (bus, MEMORY.md, git log) into the ledger
     belonging-check  HRSI Gap 1 — daily belonging baseline (safety/mattering/connection)
     hrsi-checkin     HRSI Gap 2 — unified daily cycle (cogstate+belonging+HULE+lens+delta)
+    arsi-checkin     ARSI — agent self-check-in (self-report + probe layers)
 """
 
 from __future__ import annotations
@@ -1155,6 +1156,13 @@ def build_parser() -> argparse.ArgumentParser:
         add_help=False,  # hrsi_checkin.run_cli handles its own --help
     )
 
+    # arsi-checkin (agent self-check-in)
+    subparsers.add_parser(
+        "arsi-checkin",
+        help="ARSI — agent self-check-in (self-report + probe layers)",
+        add_help=False,  # arsi_checkin.run_cli handles its own --help
+    )
+
     # startup
     p_startup = subparsers.add_parser(
         "startup",
@@ -1225,6 +1233,13 @@ def main(argv: list[str] | None = None) -> int:
         idx = (argv or sys.argv[1:]).index("hrsi-checkin") + 1
         remaining = (argv or sys.argv[1:])[idx:]
         return hc_run_cli(remaining)
+
+    if args.command == "arsi-checkin":
+        from hummbl_cognition.arsi_checkin import run_cli as ac_run_cli
+
+        idx = (argv or sys.argv[1:]).index("arsi-checkin") + 1
+        remaining = (argv or sys.argv[1:])[idx:]
+        return ac_run_cli(remaining)
 
     handlers = {
         "post": cmd_post,
