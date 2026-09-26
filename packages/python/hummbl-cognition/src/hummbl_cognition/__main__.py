@@ -271,12 +271,17 @@ def cmd_scitt_export(args: argparse.Namespace) -> int:
     from hummbl_cognition.ledger_writer import _resolve_ledger_path, read_entries
 
     path = _resolve_ledger_path(getattr(args, "ledger", None))
-    matches = [e for e in read_entries(ledger_path=path, limit=100000) if e.id == args.id]
+    matches = [
+        e for e in read_entries(ledger_path=path, limit=100000) if e.id == args.id
+    ]
     if not matches:
         print(f"error: no ledger entry with id {args.id!r}", file=sys.stderr)
         return 1
     entry = matches[0]
     d = entry.to_dict()
+    # payload must be exactly the bytes payload_sha256 commits to — the
+    # canonical form (signature fields stripped), not the raw entry dict.
+    payload_bytes = ed25519_signing.canonical_bytes(d)
     stmt = {
         "profile": "hummbl-clp-scitt-statement/0.1",
         "protected_header": {
@@ -284,10 +289,8 @@ def cmd_scitt_export(args: argparse.Namespace) -> int:
             "subject": entry.id,
             "feed": "clp-ledger",
         },
-        "payload": d,
-        "payload_sha256": hashlib.sha256(
-            ed25519_signing.canonical_bytes(d)
-        ).hexdigest(),
+        "payload": json.loads(payload_bytes),
+        "payload_sha256": hashlib.sha256(payload_bytes).hexdigest(),
         "receipt": None,
     }
     print(json.dumps(stmt, indent=2, sort_keys=True))
@@ -608,9 +611,11 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         # Build msg_types set based on --include-noisy flag
         if args.include_noisy:
             from hummbl_cognition.migration import NOISY_BUS_TYPES, TIER1_BUS_TYPES
+
             msg_types = TIER1_BUS_TYPES | NOISY_BUS_TYPES
         else:
             from hummbl_cognition.migration import TIER1_BUS_TYPES
+
             msg_types = TIER1_BUS_TYPES
 
         entries = import_from_bus_history(
@@ -650,7 +655,9 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         print(f"{prefix}Imported {len(entries)} entries from git log")
         total_imported += len(entries)
 
-    print(f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---")
+    print(
+        f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---"
+    )
     return 0
 
 
@@ -924,14 +931,30 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["bus", "memory", "git", "all"],
         help="Knowledge source to import",
     )
-    p_migrate.add_argument("--dry-run", action="store_true", help="Show what would be imported without writing")
+    p_migrate.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be imported without writing",
+    )
     p_migrate.add_argument("--ledger", help="Override ledger file path")
     p_migrate.add_argument("--bus", help="Override bus messages.tsv path")
-    p_migrate.add_argument("--memory-path", help="Path to MEMORY.md file (for 'memory' source)")
-    p_migrate.add_argument("--since", help="Only import entries after this ISO 8601 timestamp")
-    p_migrate.add_argument("--max-commits", type=int, default=100, help="Max git commits to import")
-    p_migrate.add_argument("--agent", default="migration", help="Agent identifier for imported entries")
-    p_migrate.add_argument("--include-noisy", action="store_true", help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)")
+    p_migrate.add_argument(
+        "--memory-path", help="Path to MEMORY.md file (for 'memory' source)"
+    )
+    p_migrate.add_argument(
+        "--since", help="Only import entries after this ISO 8601 timestamp"
+    )
+    p_migrate.add_argument(
+        "--max-commits", type=int, default=100, help="Max git commits to import"
+    )
+    p_migrate.add_argument(
+        "--agent", default="migration", help="Agent identifier for imported entries"
+    )
+    p_migrate.add_argument(
+        "--include-noisy",
+        action="store_true",
+        help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)",
+    )
 
     # validate
     p_validate = subparsers.add_parser("validate", help="Validate ledger integrity")

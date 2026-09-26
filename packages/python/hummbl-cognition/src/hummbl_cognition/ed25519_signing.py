@@ -153,8 +153,8 @@ def keygen(agent: str, ledger_path: Path) -> tuple[str, Path, Path]:
             mode = stat.S_IMODE(priv_path.stat().st_mode)
             if mode & (stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH):
                 warnings.warn(
-                    f"private key {priv_path} is group/world-accessible (mode "
-                    f"{oct(mode)}); restrict permissions manually"
+                    "newly generated private key is group/world-accessible "
+                    f"(mode {oct(mode)}); restrict permissions manually"
                 )
         except OSError:
             pass
@@ -282,10 +282,14 @@ def verify(entry_dict: dict[str, Any], ledger_path: Path) -> tuple[bool, str]:
         return False, f"public key not found for {key_id!r}"
 
     serialization, _, _ = crypto
-    pub = serialization.load_pem_public_key(pub_path.read_bytes())
-    pub_raw = pub.public_bytes(
-        serialization.Encoding.Raw, serialization.PublicFormat.Raw
-    )
+    try:
+        pub = serialization.load_pem_public_key(pub_path.read_bytes())
+        pub_raw = pub.public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw
+        )
+    except Exception:
+        # Malformed/corrupted pubkey file fails closed, not with a traceback.
+        return False, f"public key for {key_id!r} unreadable or invalid"
     _, _, fp16 = key_id.partition(":")
     if fingerprint(pub_raw) != fp16:
         return False, f"public key fingerprint does not match key id {key_id!r}"

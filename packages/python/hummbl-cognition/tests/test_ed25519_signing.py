@@ -267,16 +267,30 @@ def test_cmd_keygen_never_emits_private_path(tmp_path: Path, capsys) -> None:
 
 
 def test_canonical_payload_parity_across_sig_layers(tmp_path: Path) -> None:
+    """Ed25519 and HMAC sign the same bytes: LedgerEntry.to_jsonl() minus sigs.
+
+    Independently reconstructs the HMAC payload (a LedgerEntry serialized via
+    to_jsonl() with signature fields absent) and asserts the Ed25519
+    canonical_bytes() output is byte-identical — if the two canonical forms
+    ever drift, one signature layer verifies a different byte string.
+    """
     ledger = tmp_path / "ledger.jsonl"
     ed25519_signing.keygen("devin", ledger)
     post_entry(_entry(), ledger_path=ledger, secret=b"shared-secret")
     raw = json.loads(ledger.read_text(encoding="utf-8").strip())
-    # The Ed25519 payload equals the dict minus ALL signature fields —
-    # the same canonical base the HMAC layer verifies over.
-    stripped = {k: v for k, v in raw.items() if k not in ed25519_signing._SIGN_FIELDS}
-    assert ed25519_signing.canonical_bytes(raw) == ed25519_signing.canonical_bytes(
-        stripped
+    # Independent construction: rebuild the unsigned LedgerEntry and emit
+    # its canonical JSONL — the exact bytes the HMAC layer signs/verifies.
+    unsigned = LedgerEntry.from_dict(
+        {k: v for k, v in raw.items() if k not in ed25519_signing._SIGN_FIELDS}
     )
+    hmac_payload = unsigned.to_jsonl().encode("utf-8")
+    assert ed25519_signing.canonical_bytes(raw) == hmac_payload
+    # And the HMAC actually verifies over those bytes.
+    import hashlib
+    import hmac as _hmac
+
+    expected = _hmac.new(b"shared-secret", hmac_payload, hashlib.sha256).hexdigest()
+    assert expected == raw["signature"]
 
 
 def test_mixed_ledger_unsigned_hmac_signed(tmp_path: Path) -> None:
