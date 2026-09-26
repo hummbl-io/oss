@@ -184,9 +184,12 @@ def _private_key_path(agent: str, ledger_path: Path) -> Path | None:
     pointer = kdir / f"{slug}.latest"
     if pointer.is_file():
         fp16 = pointer.read_text(encoding="utf-8").strip()
-        pointed = kdir / f"{slug}-{fp16}.key.pem"
-        if pointed.is_file():
-            return pointed
+        # The pointer file is an input boundary too — validate the
+        # fingerprint grammar and containment before any path join.
+        if _FP16_RE.fullmatch(fp16):
+            pointed = (kdir / f"{slug}-{fp16}.key.pem").resolve()
+            if pointed.parent == kdir.resolve() and pointed.is_file():
+                return pointed
     matches = sorted(
         kdir.glob(f"{slug}-*.key.pem"),
         key=lambda p: (p.stat().st_mtime, p.name),
@@ -194,7 +197,8 @@ def _private_key_path(agent: str, ledger_path: Path) -> Path | None:
     return matches[-1] if matches else None
 
 
-_SIGNER_KEY_ID_RE = re.compile(r"^[A-Za-z0-9_-]+:[a-f0-9]{16}$")
+_SIGNER_KEY_ID_RE = re.compile(r"[A-Za-z0-9_-]+:[a-f0-9]{16}")
+_FP16_RE = re.compile(r"[a-f0-9]{16}")
 
 
 def _public_key_path(signer_key_id: str, ledger_path: Path) -> Path | None:
@@ -203,7 +207,7 @@ def _public_key_path(signer_key_id: str, ledger_path: Path) -> Path | None:
     Grammar-checked before any path join — a malformed or traversal-shaped
     id (path separators, extra colons, '..') yields None, never a path.
     """
-    if not _SIGNER_KEY_ID_RE.match(signer_key_id):
+    if not _SIGNER_KEY_ID_RE.fullmatch(signer_key_id):
         return None
     slug, _, fp16 = signer_key_id.partition(":")
     kdir = keys_dir(ledger_path)

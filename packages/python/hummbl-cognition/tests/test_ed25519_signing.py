@@ -9,15 +9,22 @@ opt-in by key presence and the package must remain stdlib-functional.
 """
 
 import json
+import os
+import stat
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from hummbl_cognition import ed25519_signing  # noqa: E402
-from hummbl_cognition.ledger_writer import post_entry, validate_integrity  # noqa: E402
+from hummbl_cognition.ledger_writer import (  # noqa: E402
+    post_entry,
+    read_entries,
+    validate_integrity,
+)
 from hummbl_cognition.models import LedgerEntry, compute_content_hash  # noqa: E402
 
 pytestmark = pytest.mark.skipif(
@@ -229,3 +236,71 @@ def test_key_rotation_preserves_verification(tmp_path: Path) -> None:
     assert ok1 and ok2
     assert json.loads(lines[0])["signer_key_id"] == key_id_1
     assert json.loads(lines[1])["signer_key_id"] == key_id_2
+
+
+def test_keygen_posix_private_mode_0600(tmp_path: Path) -> None:
+    if os.name != "posix":
+        pytest.skip("POSIX mode bits only authoritative on POSIX")
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    priv = next((tmp_path / "keys").glob("devin-*.key.pem"))
+    assert stat.S_IMODE(priv.stat().st_mode) == 0o600
+
+
+def test_keygen_leaves_no_temp_files(tmp_path: Path) -> None:
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    for p in (tmp_path / "keys").iterdir():
+        assert not p.name.startswith("tmp")
+        assert p.name.endswith((".key.pem", ".pub.pem", ".latest"))
+
+
+def test_cmd_keygen_never_emits_private_path(tmp_path: Path, capsys) -> None:
+    from hummbl_cognition import __main__ as cli
+
+    args = SimpleNamespace(agent="devin", ledger=str(tmp_path / "ledger.jsonl"))
+    assert cli.cmd_keygen(args) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert set(out) == {"signer_key_id", "public_key"}
+    assert "private" not in json.dumps(out).lower()
+    assert "key.pem" not in out["public_key"] or out["public_key"].endswith(".pub.pem")
+
+
+def test_canonical_payload_parity_across_sig_layers(tmp_path: Path) -> None:
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    post_entry(_entry(), ledger_path=ledger, secret=b"shared-secret")
+    raw = json.loads(ledger.read_text(encoding="utf-8").strip())
+    # The Ed25519 payload equals the dict minus ALL signature fields —
+    # the same canonical base the HMAC layer verifies over.
+    stripped = {k: v for k, v in raw.items() if k not in ed25519_signing._SIGN_FIELDS}
+    assert ed25519_signing.canonical_bytes(raw) == ed25519_signing.canonical_bytes(
+        stripped
+    )
+
+
+def test_mixed_ledger_unsigned_hmac_signed(tmp_path: Path) -> None:
+    ledger = tmp_path / "ledger.jsonl"
+    # 1: unsigned entry written before any key exists
+    post_entry(_entry(), ledger_path=ledger)
+    # 2: HMAC-only entry
+    e2 = LedgerEntry.from_dict({**_entry().to_dict(), "id": "clp-000000000002"})
+    post_entry(e2, ledger_path=ledger, secret=b"shared-secret")
+    # 3: Ed25519 (+HMAC) entry after keygen
+    ed25519_signing.keygen("devin", ledger)
+    e3 = LedgerEntry.from_dict({**_entry().to_dict(), "id": "clp-000000000003"})
+    post_entry(e3, ledger_path=ledger, secret=b"shared-secret")
+
+    lines = ledger.read_text(encoding="utf-8").strip().splitlines()
+    assert len(lines) == 3
+    dicts = [json.loads(x) for x in lines]
+    assert dicts[0].get("ed25519_sig") is None
+    assert dicts[1].get("ed25519_sig") is None and dicts[1].get("signature")
+    assert dicts[2].get("ed25519_sig") and dicts[2].get("signature")
+    # All three parse back into entries without error.
+    entries = read_entries(ledger_path=ledger)
+    assert len(entries) == 3
+    # Only the third verifies asymmetrically; the other two are unsigned
+    # for that layer and must not fail closed.
+    ok3, _ = ed25519_signing.verify(dicts[2], ledger)
+    assert ok3

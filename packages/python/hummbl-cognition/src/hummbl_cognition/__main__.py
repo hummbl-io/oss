@@ -247,28 +247,23 @@ def cmd_keygen(args: argparse.Namespace) -> int:
         return 2
 
     path = _resolve_ledger_path(getattr(args, "ledger", None))
-    key_id, priv_path, pub_path = ed25519_signing.keygen(args.agent, path)
-    print(
-        json.dumps(
-            {
-                "signer_key_id": key_id,
-                "private_key": str(priv_path),
-                "public_key": str(pub_path),
-            }
-        )
-    )
+    key_id, _priv_path, pub_path = ed25519_signing.keygen(args.agent, path)
+    # Emit identity + public material only — never the private-key path.
+    print(json.dumps({"signer_key_id": key_id, "public_key": str(pub_path)}))
     return 0
 
 
 def cmd_scitt_export(args: argparse.Namespace) -> int:
     """Export one ledger entry as a SCITT-shaped signed-statement record.
 
-    Emits the statement a transparency service would countersign, shaped after
-    the IETF SCITT architecture (draft-ietf-scitt-architecture; signed
-    statements carry an issuer, subject, and feed): issuer (signer_key_id or
-    agent), subject (entry id), payload (canonical entry), payload hash.
-    The `receipt` field stays null until an external transparency service
-    anchors it — this is an export shape, not a conformance claim.
+    Emits the statement a transparency service would countersign, shaped
+    after the IETF SCITT architecture — draft-ietf-scitt-architecture-13,
+    https://datatracker.ietf.org/doc/html/draft-ietf-scitt-architecture-13
+    (signed statements carry an issuer, subject, and feed): issuer
+    (signer_key_id or agent), subject (entry id), payload (canonical
+    entry), payload hash. The `receipt` field stays null until an external
+    transparency service anchors it — this is an export shape, not a
+    conformance claim.
     """
     import hashlib
 

@@ -19,7 +19,7 @@ from hummbl_cognition._timeutils import utc_now as _utc_now_iso
 # signer_key_id grammar: "<slug>:<fp16>" — slug charset mirrors
 # ed25519_signing.slugify_agent; fp16 is 16 lowercase hex of the pubkey hash.
 # Enforced at model level so malformed ids never reach filesystem path joins.
-_SIGNER_KEY_ID_RE = re.compile(r"^[A-Za-z0-9_-]+:[a-f0-9]{16}$")
+_SIGNER_KEY_ID_RE = re.compile(r"[A-Za-z0-9_-]+:[a-f0-9]{16}")
 
 
 class LedgerEntryType(str, Enum):
@@ -358,7 +358,7 @@ class LedgerEntry:
                     f"ed25519_sig must be 128 hex chars (64-byte signature): "
                     f"{self.ed25519_sig!r}"
                 )
-            if not self.signer_key_id or not _SIGNER_KEY_ID_RE.match(
+            if not self.signer_key_id or not _SIGNER_KEY_ID_RE.fullmatch(
                 self.signer_key_id
             ):
                 raise ValueError(

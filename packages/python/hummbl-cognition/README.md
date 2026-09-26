@@ -51,6 +51,8 @@ python -m hummbl_cognition search "pattern"
 python -m hummbl_cognition reindex
 python -m hummbl_cognition keygen --agent <name>        # generate Ed25519 signing keypair
 python -m hummbl_cognition scitt-export --id <clp-id>   # SCITT-shaped statement for one entry
+                                                        # (shaped after draft-ietf-scitt-architecture-13;
+                                                        #  export shape, not a conformance claim)
 ```
 
 ## Key Modules
