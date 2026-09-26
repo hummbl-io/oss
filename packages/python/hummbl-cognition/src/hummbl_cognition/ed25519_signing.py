@@ -89,6 +89,25 @@ def keys_dir(ledger_path: Path) -> Path:
     return Path(ledger_path).parent / "keys"
 
 
+def _atomic_write(dest: Path, data: bytes, kdir: Path) -> None:
+    """Write *data* to *dest* atomically: temp file in *kdir* + os.replace.
+
+    os.replace swaps the directory entry, so a pre-existing symlink at
+    *dest* is unlinked — never followed out of the keys directory.
+    """
+    fd, tmp_name = tempfile.mkstemp(dir=kdir, prefix=".tmp-", suffix=".part")
+    try:
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        os.replace(tmp_name, dest)
+    except OSError:
+        try:
+            os.unlink(tmp_name)
+        except OSError:
+            pass
+        raise
+
+
 def canonical_bytes(entry_dict: dict[str, Any]) -> bytes:
     """Canonical signing payload: sorted-keys compact JSON minus all signature
     fields. Same canonical form as ``LedgerEntry.to_jsonl()``."""
@@ -120,9 +139,21 @@ def keygen(agent: str, ledger_path: Path) -> tuple[str, Path, Path]:
     key_id = f"{slug}:{fp16}"
 
     kdir = keys_dir(ledger_path)
+    # A symlinked keys dir would redirect all key material elsewhere —
+    # refuse before creating or writing anything inside it.
+    if kdir.is_symlink():
+        raise OSError(f"keys directory is a symlink: {kdir}")
     kdir.mkdir(parents=True, exist_ok=True)
+    kdir_resolved = kdir.resolve()
     priv_path = kdir / f"{slug}-{fp16}.key.pem"
     pub_path = kdir / f"{slug}-{fp16}.pub.pem"
+    for dest in (priv_path, pub_path, kdir / f"{slug}.latest"):
+        try:
+            rd = dest.resolve()
+        except OSError:
+            continue  # broken symlink — os.replace will unlink it safely
+        if rd.parent != kdir_resolved:
+            raise OSError(f"key path escapes keys dir (symlink?): {dest} -> {rd}")
 
     # Atomic restrictive creation: write to a 0600 temp file then rename into
     # place, so no window exposes a loosely-permissioned private key.
@@ -159,14 +190,20 @@ def keygen(agent: str, ledger_path: Path) -> tuple[str, Path, Path]:
         except OSError:
             pass
 
-    pub_path.write_bytes(
+    # Public key and rotation pointer use the same atomic temp+replace
+    # pattern — os.replace substitutes the directory entry, so a planted
+    # symlink at the destination is unlinked rather than followed.
+    _atomic_write(
+        pub_path,
         priv.public_key().public_bytes(
-            serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
-        )
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        ),
+        kdir,
     )
+    _atomic_write(kdir / f"{slug}.latest", fp16.encode("utf-8"), kdir)
     # Rotation pointer: the latest keygen'd key signs new entries. Older
     # <slug>-<fp16> files remain for verifying historical signer_key_ids.
-    (kdir / f"{slug}.latest").write_text(fp16, encoding="utf-8")
     return key_id, priv_path, pub_path
 
 

@@ -402,3 +402,34 @@ def test_crypto_absent_hmac_and_unsigned_still_work(
     valid, errors = validate_integrity(ledger_path=ledger, secret=b"shared-secret")
     assert errors == []
     assert valid == 2
+
+
+def _link(src: Path, dst: Path) -> None:
+    try:
+        src.symlink_to(dst)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation unavailable (Windows without privilege)")
+
+
+def test_keygen_rejects_symlinked_keys_dir(tmp_path: Path) -> None:
+    ledger = tmp_path / "ledger.jsonl"
+    real = tmp_path / "elsewhere"
+    real.mkdir()
+    _link(tmp_path / "keys", real)
+    with pytest.raises(OSError):
+        ed25519_signing.keygen("devin", ledger)
+    assert list(real.iterdir()) == []  # nothing written outside
+
+
+def test_keygen_rejects_symlinked_destinations(tmp_path: Path) -> None:
+    ledger = tmp_path / "ledger.jsonl"
+    kdir = tmp_path / "keys"
+    kdir.mkdir()
+    outside = tmp_path / "escape.txt"
+    outside.write_text("must not be overwritten", encoding="utf-8")
+    # Pre-plant a symlink at every destination keygen will write.
+    _link(kdir / "devin-0000000000000000.pub.pem", outside)
+    _link(kdir / "devin.latest", outside)
+    with pytest.raises(OSError):
+        ed25519_signing.keygen("devin", ledger)
+    assert outside.read_text(encoding="utf-8") == "must not be overwritten"
