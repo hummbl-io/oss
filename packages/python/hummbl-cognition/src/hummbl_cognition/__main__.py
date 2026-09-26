@@ -8,6 +8,8 @@ Commands:
     post-verified  Write a verified ledger entry with evidence + confidence
     query     Query ledger with filters
     search    Open Brain: semantic search across all memory pools
+    novelty-check  Bounded internal-novelty evidence for a claim (nearest neighbors + unseen terms)
+    novelty-proof  Assemble a NOVELTY_PROOF receipt (internal + external scope grades)
     validate  Validate ledger integrity
     state     Show current shared state
     boot      Generate boot context for agent injection
@@ -427,6 +429,111 @@ def cmd_search(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_novelty_check(args: argparse.Namespace) -> int:
+    """Bounded internal-novelty evidence for a claim."""
+    from hummbl_cognition.novelty_check import (
+        format_report_text,
+        novelty_check,
+    )
+
+    report = novelty_check(
+        args.claim,
+        state_dir=args.state_dir,
+        limit=args.limit,
+        sources=args.sources,
+        agent="cli",
+        exclude_ids=set(args.mask) if args.mask else None,
+    )
+
+    if args.json:
+        print(report.to_json())
+    else:
+        print(format_report_text(report))
+    return 0
+
+
+def _parse_external_arg(raw: str) -> dict[str, str]:
+    """Parse --external 'scope|source|query|nearest_ref|note' (trailing fields optional)."""
+    parts = (raw.split("|") + [""] * 5)[:5]
+    keys = ("scope", "source", "query", "nearest_ref", "note")
+    return {k: v.strip() for k, v in zip(keys, parts)}
+
+
+def cmd_novelty_proof(args: argparse.Namespace) -> int:
+    """Assemble a NOVELTY_PROOF receipt; optionally append it to the ledger."""
+    from hummbl_cognition.novelty_proof import (
+        build_novelty_proof,
+        format_proof_text,
+        post_novelty_proof,
+    )
+
+    # Internal scope: file-provided report, live check, or none
+    internal: dict | None = None
+    if args.internal_report:
+        try:
+            internal = json.loads(Path(args.internal_report).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"ERROR: cannot read --internal-report: {e}", file=sys.stderr)
+            return 1
+    elif not args.no_internal:
+        from hummbl_cognition.novelty_check import novelty_check
+
+        internal = novelty_check(
+            args.claim,
+            state_dir=args.state_dir,
+            limit=args.limit,
+            sources=args.sources,
+            agent="cli",
+            exclude_ids=set(args.mask) if args.mask else None,
+        ).to_dict()
+
+    external: list[dict] = [_parse_external_arg(x) for x in args.external]
+    if args.external_json:
+        try:
+            loaded = json.loads(Path(args.external_json).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"ERROR: cannot read --external-json: {e}", file=sys.stderr)
+            return 1
+        if not isinstance(loaded, list):
+            print("ERROR: --external-json must contain a JSON array", file=sys.stderr)
+            return 1
+        external.extend(loaded)
+
+    try:
+        receipt = build_novelty_proof(
+            args.claim,
+            falsifier=args.falsifier,
+            internal_report=internal,
+            external_evidence=external,
+            falsification_attempts=args.attempt,
+            recheck_due=args.recheck_due,
+        )
+    except ValueError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(receipt, indent=2))
+    else:
+        print(format_proof_text(receipt))
+
+    if args.post:
+        try:
+            entry = post_novelty_proof(
+                receipt,
+                agent=args.agent,
+                vendor=args.vendor,
+                model=args.model,
+                confidence=args.confidence,
+                ledger_path=args.ledger,
+            )
+        except (ValueError, OSError) as e:
+            print(f"ERROR: ledger post failed: {e}", file=sys.stderr)
+            return 1
+        print(f"Posted: {entry.id} (discovery/project) tags={list(entry.tags)}")
+    return 0
+
+
 def cmd_batch_ingest(args: argparse.Namespace) -> int:
     """Bulk-import a JSONL file of ledger entries with deduplication."""
     source = Path(args.source)
@@ -599,7 +706,12 @@ def cmd_reindex(args: argparse.Namespace) -> int:
 
     index = BM25Index()
     count = index.build(ledger_path=args.ledger)
-    path = index.save()
+    try:
+        path = index.save(allow_shrink=args.force)
+    except RuntimeError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        print("re-run with --force to overwrite a larger existing index", file=sys.stderr)
+        return 1
     print(f"Indexed {count} entries -> {path}")
     return 0
 
@@ -835,6 +947,117 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_search.add_argument("--json", action="store_true", help="Output as JSON")
 
+    # novelty-check (internal novelty evidence)
+    p_novelty = subparsers.add_parser(
+        "novelty-check",
+        help="Bounded internal-novelty evidence for a claim: nearest neighbors, "
+        "matched terms, unseen terms, caveats",
+    )
+    p_novelty.add_argument("claim", help="Claim text to check for internal novelty")
+    p_novelty.add_argument(
+        "--limit", type=int, default=5, help="Max nearest neighbors (default 5)"
+    )
+    p_novelty.add_argument(
+        "--sources",
+        nargs="*",
+        choices=["ledger", "bus", "briefings", "findings", "memory_md"],
+        help="Memory pools to search (default: all)",
+    )
+    p_novelty.add_argument(
+        "--state-dir",
+        help="Override Open Brain state dir (contains cognition/ index)",
+    )
+    p_novelty.add_argument(
+        "--mask",
+        action="append",
+        default=[],
+        metavar="ENTRY_ID",
+        help="Mask a ledger entry id from results (repeatable; blind "
+        "rediscovery evaluation)",
+    )
+    p_novelty.add_argument("--json", action="store_true", help="Output as JSON")
+
+    # novelty-proof (NOVELTY_PROOF receipt)
+    p_proof = subparsers.add_parser(
+        "novelty-proof",
+        help="Assemble a NOVELTY_PROOF receipt (internal + external scope "
+        "grades); optionally append to the ledger",
+    )
+    p_proof.add_argument("--claim", required=True, help="Bounded novelty claim")
+    p_proof.add_argument(
+        "--falsifier",
+        required=True,
+        help="What finding would kill this claim (required)",
+    )
+    p_proof.add_argument(
+        "--internal-report",
+        help="Path to a novelty-check --json receipt file (skips live check)",
+    )
+    p_proof.add_argument(
+        "--no-internal",
+        action="store_true",
+        help="Skip the internal corpus check entirely",
+    )
+    p_proof.add_argument(
+        "--external",
+        action="append",
+        default=[],
+        metavar="SCOPE|SOURCE|QUERY|NEAREST_REF|NOTE",
+        help="Caller-attested external search record (repeatable; scope is "
+        "literature or market)",
+    )
+    p_proof.add_argument(
+        "--external-json",
+        help="Path to a JSON array of external evidence records",
+    )
+    p_proof.add_argument(
+        "--attempt",
+        action="append",
+        default=[],
+        help="A falsification query actually run (repeatable; recorded so "
+        "coverage is replayable)",
+    )
+    p_proof.add_argument(
+        "--recheck-due",
+        help="ISO date when this receipt should be re-verified",
+    )
+    p_proof.add_argument("--limit", type=int, default=5, help="Internal neighbors")
+    p_proof.add_argument(
+        "--sources",
+        nargs="*",
+        choices=["ledger", "bus", "briefings", "findings", "memory_md"],
+        help="Memory pools for the internal check (default: all)",
+    )
+    p_proof.add_argument(
+        "--state-dir",
+        help="Override Open Brain state dir (contains cognition/ index)",
+    )
+    p_proof.add_argument(
+        "--mask",
+        action="append",
+        default=[],
+        metavar="ENTRY_ID",
+        help="Mask a ledger entry id from the internal check (repeatable)",
+    )
+    p_proof.add_argument(
+        "--post",
+        action="store_true",
+        help="Append the receipt to the ledger (discovery/project + "
+        "novelty-proof tag)",
+    )
+    p_proof.add_argument("--agent", help="Agent identifier or COGNITION_AGENT")
+    p_proof.add_argument(
+        "--vendor", choices=sorted(VALID_VENDORS), help="Vendor or COGNITION_VENDOR"
+    )
+    p_proof.add_argument("--model", help="Model identifier or COGNITION_MODEL")
+    p_proof.add_argument(
+        "--confidence",
+        type=float,
+        default=0.5,
+        help="Confidence for --post (reflects coverage, not truth)",
+    )
+    p_proof.add_argument("--json", action="store_true", help="Output as JSON")
+
     # batch-ingest
     p_batch = subparsers.add_parser(
         "batch-ingest",
@@ -851,7 +1074,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # reindex (Open Brain)
-    subparsers.add_parser("reindex", help="Rebuild the Open Brain search index")
+    p_reindex = subparsers.add_parser(
+        "reindex", help="Rebuild the Open Brain search index"
+    )
+    p_reindex.add_argument(
+        "--force",
+        action="store_true",
+        help="allow overwriting a larger existing index (shrink guard override)",
+    )
 
     # migrate
     p_migrate = subparsers.add_parser(
@@ -1001,6 +1231,8 @@ def main(argv: list[str] | None = None) -> int:
         "post-verified": cmd_post_verified,
         "query": cmd_query,
         "search": cmd_search,
+        "novelty-check": cmd_novelty_check,
+        "novelty-proof": cmd_novelty_proof,
         "reindex": cmd_reindex,
         "validate": cmd_validate,
         "state": cmd_state,

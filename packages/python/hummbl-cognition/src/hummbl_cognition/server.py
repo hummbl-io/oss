@@ -91,7 +91,7 @@ class OpenBrainState:
         # Try to save index
         try:
             self.index.save()
-        except OSError as e:
+        except (OSError, RuntimeError) as e:
             logger.warning("Could not save index: %s", e)
         return count
 
