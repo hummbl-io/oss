@@ -8,12 +8,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
 from hummbl_cognition._timeutils import utc_now as _utc_now_iso
+
+# signer_key_id grammar: "<slug>:<fp16>" — slug charset mirrors
+# ed25519_signing.slugify_agent; fp16 is 16 lowercase hex of the pubkey hash.
+# Enforced at model level so malformed ids never reach filesystem path joins.
+_SIGNER_KEY_ID_RE = re.compile(r"[A-Za-z0-9_-]+:[a-f0-9]{16}")
 
 
 class LedgerEntryType(str, Enum):
@@ -267,6 +273,10 @@ class LedgerEntry:
     tags: tuple[str, ...] = ()  # Categorization tags (max 10)
     assurance_level: str | None = None  # SELF, PEER, or VERIFIED
     signature: str | None = None  # HMAC-SHA256 hex (optional)
+    ed25519_sig: str | None = None  # Ed25519 hex signature (optional, asymmetric)
+    signer_key_id: str | None = (
+        None  # "<agent-slug>:<fp16>" identifying the signing key
+    )
     links: tuple[str, ...] = ()  # Related entry IDs (max 20, Zettelkasten-style)
     claim: dict[str, Any] | None = (
         None  # Optional JSON-LD schema:Claim (ADR-FM-048 Phase 0)
@@ -340,6 +350,24 @@ class LedgerEntry:
                 raise ValueError(
                     f"previous_hash must be 64 hex chars SHA-256 digest: {self.previous_hash!r}"
                 )
+        if self.ed25519_sig is not None:
+            if len(self.ed25519_sig) != 128 or not all(
+                c in "0123456789abcdef" for c in self.ed25519_sig.lower()
+            ):
+                raise ValueError(
+                    f"ed25519_sig must be 128 hex chars (64-byte signature): "
+                    f"{self.ed25519_sig!r}"
+                )
+            if not self.signer_key_id or not _SIGNER_KEY_ID_RE.fullmatch(
+                self.signer_key_id
+            ):
+                raise ValueError(
+                    "ed25519_sig requires signer_key_id matching "
+                    "'<slug>:<fp16>' ([A-Za-z0-9_-]+:[a-f0-9]{16}): "
+                    f"{self.signer_key_id!r}"
+                )
+        if self.signer_key_id is not None and self.ed25519_sig is None:
+            raise ValueError("signer_key_id requires ed25519_sig")
         # Color team validation (v1.1.0)
         if self.color_team is not None:
             if self.color_team not in VALID_COLOR_TEAMS:
@@ -394,6 +422,9 @@ class LedgerEntry:
             d["assurance_level"] = self.assurance_level
         if self.signature is not None:
             d["signature"] = self.signature
+        if self.ed25519_sig is not None:
+            d["ed25519_sig"] = self.ed25519_sig
+            d["signer_key_id"] = self.signer_key_id
         if self.links:
             d["links"] = list(self.links)
         if self.claim is not None:
@@ -473,6 +504,8 @@ class LedgerEntry:
             tags=tags,
             assurance_level=data.get("assurance_level"),
             signature=data.get("signature"),
+            ed25519_sig=data.get("ed25519_sig"),
+            signer_key_id=data.get("signer_key_id"),
             links=links,
             claim=data.get("claim"),
             color_team=data.get("color_team"),

@@ -660,9 +660,22 @@ def post_entry(
                     # Clear signature if pre-existing to ensure signature covers computed previous_hash
                     d = entry.to_dict()
                     d.pop("signature", None)
+                    d.pop("ed25519_sig", None)
+                    d.pop("signer_key_id", None)
                     entry_to_sign = LedgerEntry.from_dict(d)
                     sig = _sign_entry(entry_to_sign.to_jsonl(), secret)
                     d["signature"] = sig
+                    entry = LedgerEntry.from_dict(d)
+
+                # Ed25519 asymmetric signature: opt-in by key presence under
+                # <ledger_dir>/keys/. Independent of the HMAC layer — signs the
+                # entry minus all signature fields (see ed25519_signing.py).
+                from hummbl_cognition import ed25519_signing
+
+                d = ed25519_signing.maybe_sign(
+                    entry.to_dict(), entry.agent, path
+                )
+                if "ed25519_sig" in d:
                     entry = LedgerEntry.from_dict(d)
 
                 line = entry.to_jsonl() + "\n"
@@ -734,6 +747,8 @@ def _verify_entry_signature(
     """
     d = entry.to_dict()
     d.pop("signature", None)
+    d.pop("ed25519_sig", None)
+    d.pop("signer_key_id", None)
     unsigned_entry = LedgerEntry.from_dict({**d, "signature": None})
     unsigned_jsonl = unsigned_entry.to_jsonl()
     expected_sig = _sign_entry(unsigned_jsonl, signing_key)
@@ -954,14 +969,28 @@ def validate_integrity(
 
             # Verify signature if present and secret available
             if entry.signature and secret:
-                # Reconstruct unsigned JSONL to verify
+                # Reconstruct unsigned JSONL to verify (strip all signature
+                # fields — the HMAC was computed before ed25519 was attached)
                 d = entry.to_dict()
-                d.pop("signature", None)
+                for _f in ("signature", "ed25519_sig", "signer_key_id"):
+                    d.pop(_f, None)
                 unsigned_entry = LedgerEntry.from_dict({**d, "signature": None})
                 unsigned_jsonl = unsigned_entry.to_jsonl()
                 expected_sig = _sign_entry(unsigned_jsonl, secret)
                 if not hmac.compare_digest(entry.signature, expected_sig):
                     errors.append(f"Line {line_num}: signature mismatch for {entry.id}")
+                    continue
+
+            # Verify Ed25519 signature if present (public-key only; no secret needed)
+            if entry.ed25519_sig:
+                from hummbl_cognition import ed25519_signing
+
+                ok, detail = ed25519_signing.verify(data, path)
+                if not ok:
+                    errors.append(
+                        f"Line {line_num}: ed25519 signature check failed for "
+                        f"{entry.id} ({detail})"
+                    )
                     continue
 
             # Verify previous_hash chain continuity if present

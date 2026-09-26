@@ -34,6 +34,9 @@ pip install hummbl-cognition
 
 # With governance integration (kill switch, security arbiter):
 pip install "hummbl-cognition[governance]"
+
+# With Ed25519 entry signing (asymmetric receipts):
+pip install "hummbl-cognition[primitives]"
 ```
 
 ## CLI
@@ -46,6 +49,10 @@ python -m hummbl_cognition state
 python -m hummbl_cognition boot
 python -m hummbl_cognition search "pattern"
 python -m hummbl_cognition reindex
+python -m hummbl_cognition keygen --agent <name>        # generate Ed25519 signing keypair
+python -m hummbl_cognition scitt-export --id <clp-id>   # SCITT-shaped statement for one entry
+                                                        # (shaped after draft-ietf-scitt-architecture-13;
+                                                        #  export shape, not a conformance claim)
 ```
 
 ## Key Modules
@@ -67,6 +74,7 @@ python -m hummbl_cognition reindex
 - `previous_hash`: SHA-256 hex digest of the preceding raw ledger JSONL line (cryptographic tamper-evidence)
 - `valid_time`: ISO 8601 UTC timestamp tracking when a fact occurred in reality (bi-temporal support)
 - `contests`: Target entry ID being disputed/refuted (explicit belief-DAG support)
+- `ed25519_sig` / `signer_key_id`: optional per-agent Ed25519 signature over the canonical entry (sorted-keys JSON minus signature fields). Opt-in by key presence under `<ledger_dir>/keys/` — keep that directory out of version control; verification needs only the public key, no shared secret
 
 ## State Files
 
@@ -78,6 +86,7 @@ python -m hummbl_cognition reindex
 
 - **Required**: `hummbl-bus` (bus writer for coordination messages)
 - **Optional**: `hummbl-governance` (kill switch, security arbiter — install with `[governance]` extra)
+- **Optional**: `cryptography` (Ed25519 ledger signing — install with `[primitives]` extra)
 - **Stdlib-only core** — no other third-party runtime dependencies
 
 ## Rules
