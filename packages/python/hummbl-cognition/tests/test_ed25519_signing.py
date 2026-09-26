@@ -304,3 +304,53 @@ def test_mixed_ledger_unsigned_hmac_signed(tmp_path: Path) -> None:
     # for that layer and must not fail closed.
     ok3, _ = ed25519_signing.verify(dicts[2], ledger)
     assert ok3
+
+
+def test_latest_pointer_malformed_contents_ignored(tmp_path: Path) -> None:
+    """A poisoned .latest pointer is ignored; fallback mtime selection applies."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    kdir = tmp_path / "keys"
+    pointer = kdir / "devin.latest"
+    for bad in ("../../escape", "nothex!!", "", "g" * 16, "A" * 16):
+        pointer.write_text(bad, encoding="utf-8")
+        p = ed25519_signing._private_key_path("devin", ledger)
+        # Falls back to the real key file (only one exists), never escapes.
+        assert p is not None and p.parent == kdir.resolve()
+        assert p.name.endswith(".key.pem")
+
+
+def test_latest_pointer_symlink_escape_rejected(tmp_path: Path) -> None:
+    """A .latest symlink pointing outside keys/ must not be followed."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    kdir = tmp_path / "keys"
+    outside = tmp_path / "outside.latest"
+    outside.write_text("0123456789abcdef", encoding="utf-8")
+    pointer = kdir / "devin.latest"
+    pointer.unlink()
+    try:
+        pointer.symlink_to(outside)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation unavailable (Windows without privilege)")
+    p = ed25519_signing._private_key_path("devin", ledger)
+    assert p is not None and p.parent == kdir.resolve()
+
+
+def test_fallback_key_symlink_escape_rejected(tmp_path: Path) -> None:
+    """A slug-*.key.pem symlink to an outside file never becomes the signer."""
+    ledger = tmp_path / "ledger.jsonl"
+    ed25519_signing.keygen("devin", ledger)
+    kdir = tmp_path / "keys"
+    (kdir / "devin.latest").unlink()  # force fallback path
+    outside = tmp_path / "evil.key.pem"
+    outside.write_text("not a key", encoding="utf-8")
+    decoy = kdir / "devin-ffffffffffffffff.key.pem"
+    try:
+        decoy.symlink_to(outside)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation unavailable (Windows without privilege)")
+    p = ed25519_signing._private_key_path("devin", ledger)
+    assert p is not None
+    assert p.parent == kdir.resolve()
+    assert p.name != decoy.name

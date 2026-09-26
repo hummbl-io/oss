@@ -182,19 +182,35 @@ def _private_key_path(agent: str, ledger_path: Path) -> Path | None:
     if not kdir.is_dir():
         return None
     pointer = kdir / f"{slug}.latest"
-    if pointer.is_file():
-        fp16 = pointer.read_text(encoding="utf-8").strip()
-        # The pointer file is an input boundary too — validate the
-        # fingerprint grammar and containment before any path join.
-        if _FP16_RE.fullmatch(fp16):
-            pointed = (kdir / f"{slug}-{fp16}.key.pem").resolve()
-            if pointed.parent == kdir.resolve() and pointed.is_file():
-                return pointed
-    matches = sorted(
-        kdir.glob(f"{slug}-*.key.pem"),
-        key=lambda p: (p.stat().st_mtime, p.name),
-    )
-    return matches[-1] if matches else None
+    # The pointer file is an input boundary too — it must resolve inside
+    # kdir (a symlinked pointer could otherwise redirect reads), and its
+    # contents must match the fingerprint grammar before any path join.
+    try:
+        resolved_pointer = pointer.resolve()
+        if resolved_pointer.parent == kdir.resolve() and resolved_pointer.is_file():
+            try:
+                fp16 = resolved_pointer.read_text(encoding="utf-8").strip()
+            except (OSError, UnicodeDecodeError):
+                fp16 = ""
+            if _FP16_RE.fullmatch(fp16):
+                pointed = (kdir / f"{slug}-{fp16}.key.pem").resolve()
+                if pointed.parent == kdir.resolve() and pointed.is_file():
+                    return pointed
+    except OSError:
+        pass
+    # Fallback for key dirs predating the pointer convention: newest
+    # matching file by mtime — each candidate resolved and containment-
+    # checked so a symlinked key name cannot redirect signing outside kdir.
+    candidates = []
+    for p in kdir.glob(f"{slug}-*.key.pem"):
+        try:
+            rp = p.resolve()
+        except OSError:
+            continue
+        if rp.parent == kdir.resolve() and rp.is_file():
+            candidates.append(rp)
+    candidates.sort(key=lambda p: (p.stat().st_mtime, p.name))
+    return candidates[-1] if candidates else None
 
 
 _SIGNER_KEY_ID_RE = re.compile(r"[A-Za-z0-9_-]+:[a-f0-9]{16}")
