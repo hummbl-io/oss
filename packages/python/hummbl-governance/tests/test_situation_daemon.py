@@ -344,7 +344,10 @@ class TestWebSocketClientAndWorkers(unittest.IsolatedAsyncioTestCase):
             frame = struct.pack("!BB", 0x81, len(reply)) + reply
             writer.write(frame)
             await writer.drain()
-            # Let client close the connection
+            # Close the accepted connection deterministically: on 3.12+
+            # Server.wait_closed() waits for accepted connections, and an
+            # orphaned transport can reset before the reply is delivered.
+            writer.close()
 
         server = await asyncio.start_server(ws_handler, "127.0.0.1", 0)
         port = server.sockets[0].getsockname()[1]
@@ -353,13 +356,13 @@ class TestWebSocketClientAndWorkers(unittest.IsolatedAsyncioTestCase):
         try:
             await client.connect(timeout=5.0)
             await client.send_text("PING_FROM_CLIENT")
-            reply = await client.recv_text()
+            reply = await asyncio.wait_for(client.recv_text(), timeout=10.0)
             self.assertEqual(reply, "PONG_FROM_MOCK")
             self.assertEqual(server_received_messages, ["PING_FROM_CLIENT"])
         finally:
-            await client.close()
+            await asyncio.wait_for(client.close(), timeout=10.0)
             server.close()
-            await server.wait_closed()
+            await asyncio.wait_for(server.wait_closed(), timeout=10.0)
 
 
 class TestDaemonCLI(unittest.TestCase):
