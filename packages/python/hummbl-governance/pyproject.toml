@@ -84,6 +84,7 @@ select = ["E", "F"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+faulthandler_timeout = 120
 
 [tool.bandit]
 exclude_dirs = ["tests"]
