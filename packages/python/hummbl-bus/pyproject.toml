@@ -35,6 +35,9 @@ PyPI = "https://pypi.org/project/hummbl-bus/"
 security = [
     "cryptography>=42.0",
 ]
+xmpp = [
+    "slixmpp>=1.8,<2",
+]
 test = [
     "pytest>=7.0",
     "coverage>=7.0",
