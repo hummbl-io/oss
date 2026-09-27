@@ -7,7 +7,7 @@ name: SBOM (hummbl-governance)
 # GAP-1 remediation (hummbl-compliance): EO 14028 / NIST SSDF PS.3.1 /
 # CMMC 2.0 CM.2.137 / SLSA Build L2.
 #
-# The committed sbom.cdx.json must stay in sync with pyproject.toml —
+# The committed sbom.cdx.json must stay in sync with pyproject.toml --
 # the check compares regenerated output ignoring volatile
 # timestamp/serialNumber fields.
 
