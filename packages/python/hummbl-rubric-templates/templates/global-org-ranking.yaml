@@ -1,0 +1,148 @@
+# Global Organization Ranking Evaluation Template
+# Version: 2.0 (MCDA/AHP Calibrated)
+# Context: Global AI governance body evaluation and ranking
+
+template_metadata:
+  template_name: "Global AI Governance Organization Ranking Evaluation"
+  template_version: "2.0"
+  template_type: "global_org_ranking"
+  base_schema: "hummbl-rubric-master.yaml"
+  created_date: "2026-09-25"
+  last_updated: "2026-09-25"
+  author: "HUMMBL Governance Team"
+
+parameters:
+  context_name: "global_org_ranking"
+  framework_reference: "HUMMBL Global AI Governance Ranking Framework v2.0 (MCDA/AHP Calibrated)"
+  evaluation_scope: "cross_repo"
+  artifact_types: ["policy", "compliance_report", "evidence_pack", "risk_assessment"]
+  governance_level: "external"
+  stakeholder_type: "regulator"
+  risk_profile: "critical"
+  compliance_criticality: "mandatory"
+
+hard_gates:
+  framework_compliance:
+    fail_condition: "Organization lacks verifiable charter or operates outside recognized international law and public treaties"
+    max_score_if_failed: 40
+    severity: "critical"
+
+  governance_process:
+    fail_condition: "No documented audit trails, decision minutes, or formal stakeholder review mechanisms"
+    max_score_if_failed: 50
+    severity: "critical"
+
+  evidence_quality:
+    fail_condition: "Score claims lack primary source citations or rely solely on self-reported marketing statements"
+    max_score_if_failed: 60
+    severity: "high"
+
+  scope_completion:
+    fail_condition: "Fails to address frontier AI safety horizons or catastrophic CBRN/cyber risk vectors"
+    max_score_if_failed: 70
+    severity: "high"
+
+  risk_containment:
+    fail_condition: "No formal threshold triggers, emergency shutdown protocols, or enforceable intervention capabilities"
+    max_score_if_failed: 50
+    severity: "critical"
+
+  stakeholder_control:
+    fail_condition: "Operates without independent oversight or multi-stakeholder civil society representation"
+    max_score_if_failed: 65
+    severity: "medium"
+
+weighted_dimensions:
+  # Dimension 1: Legal mandate and enforcement teeth (25% total weight)
+  teeth_enforcement_authority:
+    weight: 25
+    description: "Legal mandate, statutory inspection rights, subpoena powers, and binding sanction or shutdown enforcement mechanisms"
+    scoring_anchors:
+      "0-5": "Level 1 (Deficient): Purely aspirational, non-binding declarations, no legal authority or sanction capability"
+      "6-10": "Level 2 (Emerging): Advisory guidelines, voluntary corporate commitments, no statutory enforcement"
+      "11-15": "Level 3 (Partial): Statutory mandate with investigative rights, but financial fines capped low (<$10M) or requiring slow judicial action"
+      "16-20": "Level 4 (Substantive): Direct regulatory enforcement, substantial financial penalties (>1% global turnover), mandatory licensing"
+      "21-25": "Level 5 (Sovereign): Binding treaty-level enforcement, immediate compute cutoff / operational injunctions, criminal penalties for willful circumvention"
+
+  # Dimension 2: Frontier technical evaluation depth (20% total weight)
+  frontier_technical_capability:
+    weight: 20
+    description: "In-house technical evaluation depth, compute resources, access to model weights/gradients, and automated red-teaming harnesses"
+    scoring_anchors:
+      "0-4": "Level 1 (Deficient): No in-house technical staff; evaluation relies entirely on model vendor self-certification"
+      "5-8": "Level 2 (Emerging): Small advisory panel with outsourced academic benchmarks; black-box API testing only"
+      "9-12": "Level 3 (Partial): Dedicated technical evaluation team, standardized benchmark suite, grey-box API access with prompt injection testing"
+      "13-16": "Level 4 (Substantive): Sovereign AI evaluation lab, dedicated compute cluster (>500 H100 equivalents), pre-deployment fine-tuning and weight inspection"
+      "17-20": "Level 5 (Frontier Sovereign): Autonomous evaluation harness, mechanistic interpretability toolchains, unconstrained white-box cluster access, real-time autonomous capability discovery"
+
+  # Dimension 3: Safety red lines and non-derogable human rights (15% total weight)
+  safety_red_lines_human_rights:
+    weight: 15
+    description: "Explicit non-negotiable prohibitions, CBRN/cyber-weapon tripwires, and fundamental human rights guarantees"
+    scoring_anchors:
+      "0-3": "Level 1 (Deficient): Vague ethics principles without defined forbidden lines or actionable prohibitions"
+      "4-6": "Level 2 (Emerging): High-level list of unacceptable risks without technical definitions or measurable indicators"
+      "7-9": "Level 3 (Partial): Clear technical red lines for CBRN synthesis and automated offensive cyber, with basic compliance checklists"
+      "10-12": "Level 4 (Substantive): Comprehensive red line taxonomy with automated verification criteria, human rights impact assessments, and mandatory whistleblowing routes"
+      "13-15": "Level 5 (Strict Invariant): Mathematically formal non-negotiable constraints, cryptographic containment tripwires, absolute non-derogable human rights protections"
+
+  # Dimension 4: Institutional independence from industry capture (15% total weight)
+  institutional_independence:
+    weight: 15
+    description: "Structural autonomy from regulated frontier AI labs, diversified non-commercial funding, and conflict-of-interest firewalls"
+    scoring_anchors:
+      "0-3": "Level 1 (Deficient): Funded or governed predominantly by frontier AI vendors or single partisan interest groups"
+      "4-6": "Level 2 (Emerging): Mixed industry advisory boards with substantial informal corporate steering and revolving-door incentives"
+      "7-9": "Level 3 (Partial): Statutorily independent public agency with independent funding, but reliant on industry secondments"
+      "10-12": "Level 4 (Substantive): Rigid conflict-of-interest firewalls, strict post-employment revolving-door cooling-off periods (>=2 years), independent civil service staff"
+      "13-15": "Level 5 (Fully Insulated): Multilateral sovereign trust funding, cryptographic governance verifiability, complete institutional immunity from corporate and political capture"
+
+  # Dimension 5: Adaptive velocity and regulatory agility (10% total weight)
+  adaptive_velocity:
+    weight: 10
+    description: "Velocity of regulatory response, algorithmic update cycles, and rapid reaction to sudden capability jumps"
+    scoring_anchors:
+      "0-2": "Level 1 (Deficient): Static multi-year bureaucratic rulemaking cycles (>3 years to respond to paradigm shifts)"
+      "3-4": "Level 2 (Emerging): Periodic annual guidance revisions; reactive policy briefs following public incidents"
+      "5-6": "Level 3 (Partial): Semi-annual benchmark updates, fast-track consultation procedures for major model releases"
+      "7-8": "Level 4 (Substantive): Dynamic living standards updated quarterly, emergency provisional order authority within 72 hours of catastrophic threat detection"
+      "9-10": "Level 5 (Continuous Agility): Continuous automated telemetry integration, real-time threat-model synchronization, algorithmic sandbox iteration within hours"
+
+  # Dimension 6: Transparency and epistemic auditability (10% total weight)
+  transparency_auditability:
+    weight: 10
+    description: "Public availability of evaluations, model registries, primary data sources, and machine-readable audit receipts"
+    scoring_anchors:
+      "0-2": "Level 1 (Deficient): Opaque closed-door determinations; zero public evaluation data or rationale published"
+      "3-4": "Level 2 (Emerging): High-level summary reports with heavily redacted methodology and no raw data"
+      "5-6": "Level 3 (Partial): Published public evaluation reports, public model registry with basic metadata, documented audit methodologies"
+      "7-8": "Level 4 (Substantive): Comprehensive open evaluation artifacts, machine-readable audit trails, public dissenting opinions and appeal records"
+      "9-10": "Level 5 (Radical Verifiability): Cryptographically verifiable evaluation ledgers, open-source evaluation harnesses, open data benchmarks, full public reproducibility"
+
+  # Dimension 7: Global reach and jurisdictional coverage (5% total weight)
+  global_reach_jurisdiction:
+    weight: 5
+    description: "Multinational treaty jurisdiction, cross-border mutual recognition, and prevention of regulatory arbitrage havens"
+    scoring_anchors:
+      "0-1": "Level 1 (Deficient): Single local jurisdiction with no international reach; trivial to circumvent via relocation"
+      "2": "Level 2 (Emerging): Bilateral Memoranda of Understanding (MOUs) with informal cross-border information sharing"
+      "3": "Level 3 (Partial): Regional multilateral block (e.g. EU, G7) with formal mutual recognition within members"
+      "4": "Level 4 (Substantive): Broad multilateral treaty spanning >=50% global compute capacity with synchronized export controls and enforcement"
+      "5": "Level 5 (Omni-Jurisdictional): Universal international regime (e.g. IAEA-model) with global compute tracking, seamless cross-border inspection, and zero arbitrage havens"
+
+required_outputs:
+  numeric_score: 0
+  hard_gate_status: ""
+  weighted_breakdown: {}
+  top_3_strengths: []
+  top_3_weaknesses: []
+  score_caps_triggered: []
+  next_validation_test: "Empirical primary-source evaluation against target global governance organizations with inter-rater reliability scoring"
+  limitations: "Evaluates institutional architecture, mandate, and observed capability; actual enforcement deterrence subject to geopolitical stability"
+
+usage_notes:
+  - "Calibrated using Multi-Criteria Decision Analysis (MCDA) and Analytic Hierarchy Process (AHP) pairwise weighting"
+  - "Weights emphasize operational enforcement teeth (25%) and frontier technical capability (20%) over static paperwork"
+  - "Hard gates prevent high composite scores when fundamental accountability, legal mandate, or safety containment fail"
+  - "Each evaluated score requires minimum 2 primary source citations per metric (treaty texts, statutes, audit logs)"
+  - "Scoring anchors establish quantifiable empirical thresholds for Levels 1 through 5"
