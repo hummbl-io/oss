@@ -196,7 +196,7 @@ A repo may declare a tiny local language/grammar/interpreter under `.hummbl/repo
 Git + receipts -> CONSTITUTION.md -> KRINEIA.md -> AGENTS.md -> schemas/tests -> RepoLM
 ```
 
-RepoLM/RepoBit must never be sovereign. See `docs/standards/REPOLM.md` (to be drafted).
+RepoLM/RepoBit must never be the final authority. See `docs/standards/REPOLM.md` (to be drafted).
 
 ## 12. Validation
 

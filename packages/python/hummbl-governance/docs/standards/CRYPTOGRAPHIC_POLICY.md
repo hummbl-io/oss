@@ -12,7 +12,7 @@
 |-----------|----------|----------|--------|
 | SHA-256 | Hashing, HMAC construction | FIPS 180-4 | Approved |
 | HMAC-SHA256 | Message authentication, audit log signing, receipt integrity | FIPS 198-1 | Approved |
-| AES-256-GCM | Authenticated encryption at rest (`sovereign_cryptosystem.py`) | FIPS 197, SP 800-38D | Approved |
+| AES-256-GCM | Authenticated encryption at rest (`envelope_cryptosystem.py`) | FIPS 197, SP 800-38D | Approved |
 | Ed25519 | Principal authentication, bus message signing | FIPS 186-5 | Approved |
 
 ## 2. Prohibited Algorithms
@@ -53,7 +53,7 @@ Keys are resolved from environment variables per component:
 
 ### 4.3 Key Derivation
 
-**Current:** `sovereign_cryptosystem.py` derives keys via SHA-256 of concatenated strings. This is informal and not compliant with NIST SP 800-108.
+**Current:** `envelope_cryptosystem.py` derives keys via SHA-256 of concatenated strings. This is informal and not compliant with NIST SP 800-108.
 
 **Roadmap:** Replace with HKDF-SHA256 (RFC 5869) for all key derivation. The standard library does not include HKDF; a stdlib-only implementation is tracked as a roadmap item.
 
@@ -86,8 +86,8 @@ Keys are resolved from environment variables per component:
 ## 7. Encryption at Rest
 
 - Audit logs, receipt files, and bus TSV files are stored as plaintext on disk with `0o600` file permissions.
-- `sovereign_cryptosystem.py` provides AES-256-GCM authenticated encryption but is not the default for persisted data.
-- **Recommendation:** For deployments requiring encryption at rest, use filesystem-level encryption (LUKS, BitLocker) or apply `sovereign_cryptosystem.py` as a wrapper.
+- `envelope_cryptosystem.py` provides AES-256-GCM authenticated encryption but is not the default for persisted data.
+- **Recommendation:** For deployments requiring encryption at rest, use filesystem-level encryption (LUKS, BitLocker) or apply `envelope_cryptosystem.py` as a wrapper.
 
 ## 8. Signature Verification
 

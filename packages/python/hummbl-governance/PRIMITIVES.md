@@ -183,7 +183,7 @@ These primitives shipped in v1.3-v1.4 but were not tracked in PRIMITIVES.md unti
 | P46 | CrossRepoContract | Cross-repository contract validation standard (v0.1) | `cross_repo_contract.py` | ✅ Implemented |
 | P47 | CorpusAdapter | Bridges hummbl-governance receipts to unified-framework corpus formats | `corpus_adapter.py` | ✅ Implemented |
 | P48 | DelegationContext | Immutable delegation context with depth and scope attenuation — extends P7 Delegation | `delegation_context.py` | ✅ Implemented |
-| P49 | SovereignCryptosystem | Hardened cryptographic sync router (GFSCR) envelope for sovereign key management | `sovereign_cryptosystem.py` | ✅ Implemented |
+| P49 | EnvelopeCryptosystem | Hardened cryptographic sync router (GFSCR) envelope for operator-held key management | `envelope_cryptosystem.py` | ✅ Implemented |
 | P50 | MerkleAnchor | CT-style Merkle anchoring for governance tuple logs — signed tree heads with witness cosignature | `primitives/merkle_anchor.py` | ✅ Implemented |
 | P51 | TransitionReceipt | Transition receipts for governed agent/tool execution — tracks tool handoff state | `transition_receipt.py` | ✅ Implemented |
 | P52 | ToolAudit | Tool-call audit hook for AI agent integrations — records and validates tool invocations | `tool_audit.py` | ✅ Implemented |

@@ -113,7 +113,7 @@ This repo is the companion artifact for:
 
 - **"The Governance Tuple: An Atomic Record for Auditable Agentic AI Decision-Making"** — formalizes the (CONTRACT, DCT, EVIDENCE) triple and proves four accountability properties
 - **"A Typed Delegation-Governance Tuple Profile for Multi-Agent Runtime Control"** (CRAI 2026) — the six-tuple IDP profile with composability evidence
-- **"Append-Only as Proof"** — the Krineia governance sovereignty framework
+- **"Append-Only as Proof"** — the Krineia governance framework
 
 ORCID: [0009-0002-5620-1103](https://orcid.org/0009-0002-5620-1103)
 
@@ -129,7 +129,7 @@ ORCID: [0009-0002-5620-1103](https://orcid.org/0009-0002-5620-1103)
 ## Related
 
 - **Runtime implementation**: the production `BaseNTuple` dataclass lives in a separate repo (HMAC-SHA256 signing, JSONL persistence, tier classification as policy-as-code)
-- **Krineia**: append-only audit sovereignty framework — 4 invariants for governance proof
+- **Krineia**: append-only audit governance framework — 4 invariants for governance proof
 - **Base120**: governed reasoning vocabulary — 120 operators in 6 families
 
 ## License

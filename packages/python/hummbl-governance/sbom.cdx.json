@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:178dc3e8-d006-4e5e-a9a9-332b9add25f9",
+  "serialNumber": "urn:uuid:b7656856-1d7a-4547-847f-0a57ec33b623",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-27T09:53:09Z",
+    "timestamp": "2026-09-27T14:13:18Z",
     "tools": [
       {
         "vendor": "HUMMBL",
@@ -17,7 +17,7 @@
       "bom-ref": "pkg:pypi/hummbl-governance@1.5.1",
       "name": "hummbl-governance",
       "version": "1.5.1",
-      "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem.",
+      "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, EnvelopeCryptosystem.",
       "licenses": [
         {
           "license": {
@@ -48,7 +48,7 @@
       "bom-ref": "pkg:pypi/hummbl-governance@1.5.1",
       "name": "hummbl-governance",
       "version": "1.5.1",
-      "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem.",
+      "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, EnvelopeCryptosystem.",
       "licenses": [
         {
           "license": {
