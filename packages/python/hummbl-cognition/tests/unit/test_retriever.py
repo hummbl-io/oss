@@ -552,6 +552,141 @@ class TestSearchMemoryMd:
 
 
 # ---------------------------------------------------------------------------
+# OpenBrainRetriever._search_bibliography
+# ---------------------------------------------------------------------------
+
+
+class TestSearchBibliography:
+    def test_finds_matching_entries(self, tmp_path):
+        bib_file = tmp_path / "unified-bibliography.json"
+        data = {
+            "entries": [
+                {
+                    "id": "Levin2022TAME",
+                    "tier": "T8",
+                    "tier_name": "Cognition",
+                    "title": "Technological Approach to Mind Everywhere",
+                    "author": "Michael Levin",
+                    "year": "2022",
+                    "abstract": "Framework for multiscale competency architecture and basal cognition.",
+                    "keywords": ["tame", "cognition", "basal"],
+                    "transformations": ["P", "SY"],
+                    "journal": "Frontiers in Systems Neuroscience",
+                    "url": "https://doi.org/10.3389/fnsys.2022.768201",
+                },
+                {
+                    "id": "WissnerGross2013Causal",
+                    "tier": "T12",
+                    "tier_name": "Complexity",
+                    "title": "Causal Entropic Forces",
+                    "author": "Alexander D. Wissner-Gross and Cameron E. Freer",
+                    "year": "2013",
+                    "abstract": "Physical principle maximizing future action possibilities.",
+                    "keywords": ["entropy", "path integral"],
+                    "transformations": ["SY", "IN"],
+                    "journal": "Physical Review Letters",
+                    "url": "https://doi.org/10.1103/PhysRevLett.110.168702",
+                },
+            ]
+        }
+        bib_file.write_text(json.dumps(data), encoding="utf-8")
+
+        idx = MagicMock()
+        r = OpenBrainRetriever(
+            state_dir=tmp_path, index=idx, bibliography_path=bib_file
+        )
+        results = r._search_bibliography("Michael Levin TAME", limit=5)
+        assert len(results) == 1
+        assert results[0].source == "bibliography"
+        assert results[0].entry_id == "bib:Levin2022TAME"
+        assert "Levin" in results[0].content
+        assert results[0].metadata["tier"] == "T8"
+        assert "P" in results[0].metadata["transformations"]
+
+    def test_tier_filtering(self, tmp_path):
+        bib_file = tmp_path / "unified-bibliography.json"
+        data = {
+            "entries": [
+                {
+                    "id": "PaperA",
+                    "tier": "T8",
+                    "title": "Cognitive Agents",
+                    "author": "Author A",
+                    "year": "2024",
+                    "abstract": "Cognitive study.",
+                },
+                {
+                    "id": "PaperB",
+                    "tier": "T12",
+                    "title": "Complex Agents",
+                    "author": "Author B",
+                    "year": "2024",
+                    "abstract": "Complexity study.",
+                },
+            ]
+        }
+        bib_file.write_text(json.dumps(data), encoding="utf-8")
+
+        idx = MagicMock()
+        r = OpenBrainRetriever(
+            state_dir=tmp_path, index=idx, bibliography_path=bib_file
+        )
+        results = r._search_bibliography("Agents", tier="T12", limit=5)
+        assert len(results) == 1
+        assert results[0].entry_id == "bib:PaperB"
+
+    def test_missing_file_returns_empty(self, tmp_path):
+        idx = MagicMock()
+        r = OpenBrainRetriever(
+            state_dir=tmp_path,
+            index=idx,
+            bibliography_path=tmp_path / "nonexistent.json",
+        )
+        assert r._search_bibliography("anything", limit=5) == []
+
+    def test_empty_query_returns_empty(self, tmp_path):
+        bib_file = tmp_path / "unified-bibliography.json"
+        bib_file.write_text(
+            json.dumps({"entries": [{"id": "Test", "title": "Test"}]}),
+            encoding="utf-8",
+        )
+        idx = MagicMock()
+        r = OpenBrainRetriever(
+            state_dir=tmp_path, index=idx, bibliography_path=bib_file
+        )
+        assert r._search_bibliography("", limit=5) == []
+
+    def test_caching_behavior(self, tmp_path):
+        bib_file = tmp_path / "unified-bibliography.json"
+        data = {
+            "entries": [
+                {
+                    "id": "Paper1",
+                    "title": "Test Paper",
+                    "author": "Smith",
+                    "year": "2020",
+                    "abstract": "Abstract",
+                }
+            ]
+        }
+        bib_file.write_text(json.dumps(data), encoding="utf-8")
+
+        idx = MagicMock()
+        r = OpenBrainRetriever(
+            state_dir=tmp_path, index=idx, bibliography_path=bib_file
+        )
+        res1 = r._search_bibliography("Smith", limit=5)
+        assert len(res1) == 1
+        assert r._bibliography_cache is not None
+
+        # Verify cache reuse without reloading file
+        with patch.object(Path, "read_text") as mock_read:
+            res2 = r._search_bibliography("Smith", limit=5)
+            assert len(res2) == 1
+            mock_read.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
 # OpenBrainRetriever.search -- full pipeline
 # ---------------------------------------------------------------------------
 
@@ -680,7 +815,7 @@ class TestSearch:
 
     @patch("hummbl_cognition.retriever.log_retrieval")
     def test_default_sources_all(self, mock_log, tmp_path):
-        """When no sources specified, all 5 pools are searched."""
+        """When no sources specified, all 6 pools are searched."""
         idx = MagicMock()
         idx.load.return_value = True
         idx.search.return_value = []
@@ -693,6 +828,7 @@ class TestSearch:
             patch.object(r, "_search_text_pool", return_value=[]) as m_text,
             patch.object(r, "_search_findings", return_value=[]) as m_findings,
             patch.object(r, "_search_memory_md", return_value=[]) as m_memory,
+            patch.object(r, "_search_bibliography", return_value=[]) as m_bib,
         ):
             r.search("test", token_budget=1000)
             m_ledger.assert_called_once()
@@ -700,6 +836,7 @@ class TestSearch:
             assert m_text.call_count == 2
             m_findings.assert_called_once()
             m_memory.assert_called_once()
+            m_bib.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
