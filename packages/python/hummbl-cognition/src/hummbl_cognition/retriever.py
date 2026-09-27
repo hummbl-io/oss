@@ -1,7 +1,8 @@
 """Open Brain Retriever -- unified search across all memory pools.
 
 Queries ledger index, bus digests, briefings, autoresearch findings,
-and MEMORY.md. Returns ranked results within a token budget.
+MEMORY.md, hummbl-bibliography, and session claims/ledgers.
+Returns ranked results within a token budget.
 
 This is the primary query interface for the Open Brain.
 """
@@ -82,6 +83,46 @@ def _resolve_state_dirs(override: str | Path | None = None) -> list[Path]:
     return dirs
 
 
+def _resolve_bibliography_path(override: str | Path | None = None) -> Path | None:
+    """Resolve hummbl-bibliography unified-bibliography.json path."""
+    if override is not None:
+        return Path(override)
+
+    env_path = os.environ.get("HUMMBL_BIBLIOGRAPHY_PATH")
+    if env_path:
+        p = Path(env_path)
+        if p.exists():
+            return p
+
+    # Standard home/projects location
+    home_path = Path.home() / "PROJECTS" / "hummbl-bibliography" / "dist" / "unified-bibliography.json"
+    if home_path.exists():
+        return home_path
+
+    # Relative to git root / current working directory
+    try:
+        import subprocess
+
+        root = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=5,
+        ).strip()
+        if root:
+            candidate = Path(root).parent / "hummbl-bibliography" / "dist" / "unified-bibliography.json"
+            if candidate.exists():
+                return candidate
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
+        pass
+
+    return None
+
+
 class MemoryResult:
     """A single result from the Open Brain retriever."""
 
@@ -131,10 +172,12 @@ class OpenBrainRetriever:
 
     Memory pools:
       1. Cognitive Ledger (ledger.jsonl via BM25 index)
-      2. Bus digests (_state/bus_digests/)
-      3. Briefings (state/briefings/)
-      4. Autoresearch findings (_state/autoresearch/)
+      2. Bus digests (_state/coordination/*.tsv)
+      3. Briefings (<state-sibling>/state/briefings/*.md)
+      4. Autoresearch findings (_state/autoresearch/findings_*.json)
       5. MEMORY.md (Claude Code auto-memory)
+      6. Bibliography (hummbl-bibliography unified index / dist)
+      7. Session surfaces (cognition/session-claims/*, cognition/session-ledgers/*)
     """
 
     def __init__(
@@ -142,12 +185,16 @@ class OpenBrainRetriever:
         *,
         state_dir: str | Path | None = None,
         index: BM25Index | None = None,
+        bibliography_path: str | Path | None = None,
     ) -> None:
         self.state_dirs = _resolve_state_dirs(state_dir)
         # Primary state dir for saving index/logs (usually the first one)
         self.primary_state_dir = self.state_dirs[0]
         self.index = index or BM25Index()
         self._index_loaded = False
+        self.bibliography_path = _resolve_bibliography_path(bibliography_path)
+        self._bibliography_cache: list[dict[str, Any]] | None = None
+        self._bibliography_mtime: float = 0.0
 
     def ensure_index(self, ledger_path: str | Path | None = None) -> None:
         """Load or build the index."""
@@ -155,10 +202,25 @@ class OpenBrainRetriever:
             return
         index_path = self.primary_state_dir / "cognition" / "index.json"
         if not self.index.load(index_path):
+            if index_path.exists():
+                # An existing-but-unloadable index is corrupted or transiently
+                # locked state, NOT absent state. Rebuilding from a possibly
+                # wrong default ledger and saving over it once stomped a
+                # healthy index (2026-09-25: 2549 -> 3 docs mid-session).
+                # Never auto-repair shared state; the explicit `reindex`
+                # command is the repair path. The index stays empty for this
+                # session; the file is left untouched for the next reader.
+                logger.warning(
+                    "Index at %s exists but failed to load; refusing to "
+                    "rebuild over it (run 'reindex' to repair)",
+                    index_path,
+                )
+                self._index_loaded = True
+                return
             self.index.build(ledger_path)
             try:
                 self.index.save(index_path)
-            except OSError as e:
+            except (OSError, RuntimeError) as e:
                 logger.warning("Could not save index: %s", e)
         self._index_loaded = True
 
@@ -175,6 +237,7 @@ class OpenBrainRetriever:
         limit: int = 50,
         time_decay: bool | None = None,
         retrieval_decay: bool | None = None,
+        exclude_ids: set[str] | None = None,
     ) -> list[MemoryResult]:
         """Search all memory pools and return ranked results within token budget.
 
@@ -192,7 +255,8 @@ class OpenBrainRetriever:
             ISO timestamp — only return entries after this time.
         sources : list[str] | None
             Which memory pools to search. Default: all.
-            Options: "ledger", "bus", "briefings", "findings", "memory_md"
+            Options: "ledger", "bus", "briefings", "findings", "memory_md",
+            "bibliography", "session"
         agent : str
             Agent making the query (for feedback tracking).
         limit : int
@@ -205,6 +269,10 @@ class OpenBrainRetriever:
             Apply exponential decay to retrieval counts based on time
             since last retrieval. None = use module default (True unless
             COGNITION_RETRIEVER_RETRIEVAL_DECAY=0).
+        exclude_ids : set[str] | None
+            Ledger entry ids to mask from results (blind rediscovery
+            evaluation). Applies to the ledger pool only; other pools are
+            unaffected.
 
         Returns:
         -------
@@ -221,7 +289,9 @@ class OpenBrainRetriever:
             "bus",
             "briefings",
             "findings",
+            "session",
             "memory_md",
+            "bibliography",
         ]
 
         results: list[MemoryResult] = []
@@ -236,6 +306,7 @@ class OpenBrainRetriever:
                     limit=limit,
                     time_decay=time_decay,
                     retrieval_decay=retrieval_decay,
+                    exclude_ids=exclude_ids,
                 )
             )
 
@@ -278,8 +349,16 @@ class OpenBrainRetriever:
                     )
                 )
 
+        if "session" in all_sources:
+            results.extend(
+                self._search_session(query, since=since, limit=limit // 4)
+            )
+
         if "memory_md" in all_sources:
             results.extend(self._search_memory_md(query, limit=limit // 4))
+
+        if "bibliography" in all_sources:
+            results.extend(self._search_bibliography(query, limit=limit // 4))
 
         # Sort all results by score
         results.sort(key=lambda r: r.score, reverse=True)
@@ -351,7 +430,7 @@ class OpenBrainRetriever:
                     continue
                 if full and len(full) > len(result.content):
                     result.content_window = full
-            elif result.source in ("bus", "bus_digest", "briefings"):
+            elif result.source in ("bus", "bus_digest", "briefings", "session"):
                 # Text pool results: try to fetch more context from source
                 src_file = result.metadata.get("path") or result.metadata.get(
                     "file", ""
@@ -386,10 +465,12 @@ class OpenBrainRetriever:
         limit: int = 20,
         time_decay: bool = False,
         retrieval_decay: bool = False,
+        exclude_ids: set[str] | None = None,
     ) -> list[MemoryResult]:
         """Search the cognitive ledger via BM25 index."""
         self.ensure_index()
 
+        mask_kw = {"exclude_ids": exclude_ids} if exclude_ids else {}
         hits = self.index.search(
             query,
             limit=limit,
@@ -398,6 +479,7 @@ class OpenBrainRetriever:
             since=since,
             time_decay=time_decay,
             retrieval_decay=retrieval_decay,
+            **mask_kw,
         )
 
         results = []
@@ -536,6 +618,58 @@ class OpenBrainRetriever:
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
 
+    def _search_session(
+        self,
+        query: str,
+        *,
+        since: str | None = None,
+        limit: int = 5,
+    ) -> list[MemoryResult]:
+        """Search session claims and session ledgers.
+
+        Session surfaces live under each cognition dir as
+        ``session-claims/`` and ``session-ledgers/`` (``.md`` and
+        ``.jsonl`` files). A cognition dir is resolved relative to each
+        state dir as ``<state>/cognition`` or the state dir itself when
+        it already is one; the sibling ``state/cognition`` layout and
+        the conventional ``~/.agents/state/cognition`` location are
+        also checked (mirroring the memory_md pool's home-relative
+        convention).
+        """
+        bases: list[Path] = []
+        for d in self.state_dirs:
+            bases.append(d / "cognition")
+            bases.append(d.parent / "state" / "cognition")
+            bases.append(d)
+        bases.append(Path.home() / ".agents" / "state" / "cognition")
+
+        results: list[MemoryResult] = []
+        seen: set[str] = set()
+        for base in bases:
+            for sub in ("session-claims", "session-ledgers"):
+                search_dir = base / sub
+                try:
+                    key = str(search_dir.resolve())
+                except OSError:
+                    key = str(search_dir)
+                if key in seen or not search_dir.is_dir():
+                    continue
+                seen.add(key)
+                for pattern in ("*.md", "*.jsonl"):
+                    results.extend(
+                        self._search_text_pool(
+                            query,
+                            pool_name="session",
+                            search_dir=search_dir,
+                            glob_pattern=pattern,
+                            since=since,
+                            limit=limit,
+                        )
+                    )
+
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:limit]
+
     def _search_memory_md(
         self,
         query: str,
@@ -579,6 +713,113 @@ class OpenBrainRetriever:
                 )
         except OSError:
             pass
+
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:limit]
+
+    def _load_bibliography_entries(self) -> list[dict[str, Any]]:
+        """Load bibliography entries with cached in-memory representation."""
+        if not self.bibliography_path or not self.bibliography_path.exists():
+            return []
+        try:
+            mtime = self.bibliography_path.stat().st_mtime
+            if (
+                self._bibliography_cache is not None
+                and self._bibliography_mtime == mtime
+            ):
+                return self._bibliography_cache
+            data = json.loads(self.bibliography_path.read_text(encoding="utf-8"))
+            entries = data.get("entries", [])
+            self._bibliography_cache = entries
+            self._bibliography_mtime = mtime
+            return entries
+        except (json.JSONDecodeError, OSError):
+            return []
+
+    def _search_bibliography(
+        self,
+        query: str,
+        *,
+        limit: int = 5,
+        tier: str | None = None,
+    ) -> list[MemoryResult]:
+        """Search hummbl-bibliography unified index.
+
+        Scores matching entries based on token overlap in ID, title, author,
+        abstract, keywords, and transformations.
+        """
+        entries = self._load_bibliography_entries()
+        if not entries:
+            return []
+
+        query_tokens = set(tokenize(query))
+        if not query_tokens:
+            return []
+
+        results = []
+        for entry in entries:
+            if tier and entry.get("tier") != tier:
+                continue
+
+            entry_id = entry.get("id", "")
+            title = entry.get("title", "")
+            author = entry.get("author", "")
+            abstract = entry.get("abstract", "")
+            keywords = " ".join(entry.get("keywords") or [])
+            search_text = f"{entry_id} {title} {author} {abstract} {keywords}"
+            tokens = set(tokenize(search_text))
+            overlap = query_tokens & tokens
+            if not overlap:
+                continue
+
+            title_tokens = set(tokenize(f"{entry_id} {title}"))
+            title_overlap = query_tokens & title_tokens
+
+            # Base score proportional to query coverage (up to 0.75)
+            score = (len(overlap) / len(query_tokens)) * 0.75
+            if title_overlap:
+                score = min(1.0, score + 0.20 * (len(title_overlap) / len(query_tokens)))
+
+            tier_str = entry.get("tier", "")
+            year_str = str(entry.get("year", ""))
+            content_text = f"[{tier_str}] {title} - {author} ({year_str}): {abstract}"
+            if len(content_text) > 400:
+                content_text = content_text[:397] + "..."
+
+            transformations = entry.get("transformations", [])
+            trans_str = (
+                ", ".join(transformations)
+                if isinstance(transformations, list)
+                else str(transformations)
+            )
+
+            full_window = (
+                f"[{tier_str} - {entry.get('tier_name', '')}] {title}\n"
+                f"Authors: {author} ({year_str})\n"
+                f"Journal: {entry.get('journal', '')}\n"
+                f"URL: {entry.get('url', '')}\n"
+                f"Transformations: {trans_str}\n\n"
+                f"Abstract:\n{abstract}"
+            )
+
+            results.append(
+                MemoryResult(
+                    source="bibliography",
+                    entry_id=f"bib:{entry_id}",
+                    score=score,
+                    content=content_text,
+                    content_window=full_window,
+                    metadata={
+                        "citation_id": entry_id,
+                        "tier": tier_str,
+                        "tier_name": entry.get("tier_name"),
+                        "author": author,
+                        "year": year_str,
+                        "transformations": transformations,
+                        "url": entry.get("url"),
+                    },
+                )
+            )
 
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]

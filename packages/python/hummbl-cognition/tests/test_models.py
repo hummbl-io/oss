@@ -208,6 +208,11 @@ class TestLedgerEntry:
         with pytest.raises(ValueError, match="Invalid vendor"):
             self._make_entry(vendor="invalid-vendor")
 
+    def test_all_valid_vendors_accepted(self) -> None:
+        for vendor in VALID_VENDORS:
+            entry = self._make_entry(vendor=vendor)
+            assert entry.vendor == vendor
+
     def test_invalid_type_raises(self) -> None:
         with pytest.raises(ValueError, match="Invalid type"):
             self._make_entry(entry_type="invalid-type")

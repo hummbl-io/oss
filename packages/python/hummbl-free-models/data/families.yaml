@@ -19,3 +19,148 @@ families:
     provider: alibaba
     open_weights: true
     notes: Alibaba Qwen family of open-weight models.
+  - id: nemotron
+    name: Nemotron
+    provider: nvidia
+    open_weights: true
+    notes: NVIDIA Nemotron family (nano/super/ultra, embed, parse variants).
+  - id: deepseek
+    name: DeepSeek
+    provider: deepseek-ai
+    open_weights: true
+    notes: DeepSeek open-weight models including v4.1-flash and coder variants.
+  - id: gemma
+    name: Gemma
+    provider: google
+    open_weights: true
+    notes: Google Gemma open-weight family incl. CodeGemma and RecurrentGemma.
+  - id: glm
+    name: GLM
+    provider: z-ai
+    open_weights: true
+    notes: Z.ai (Zhipu) GLM family — glm-5.3 and glm-5.3-flash on NIM.
+  - id: kimi
+    name: Kimi
+    provider: moonshotai
+    open_weights: true
+    notes: Moonshot AI Kimi family — kimi-k2.6, kimi-k3 on NIM.
+  - id: gpt-oss
+    name: GPT OSS
+    provider: openai
+    open_weights: true
+    notes: OpenAI open-weight releases (gpt-oss-20b, gpt-oss-120b).
+  - id: granite
+    name: Granite
+    provider: ibm
+    open_weights: true
+    notes: IBM Granite code and instruct models.
+  - id: dbrx
+    name: DBRX
+    provider: databricks
+    open_weights: true
+    notes: Databricks DBRX MoE instruct model.
+  - id: starcoder
+    name: StarCoder
+    provider: bigcode
+    open_weights: true
+    notes: BigCode StarCoder code-generation models.
+  - id: jamba
+    name: Jamba
+    provider: ai21labs
+    open_weights: true
+    notes: AI21 Jamba hybrid SSM-transformer models.
+  - id: fuyu
+    name: Fuyu
+    provider: adept
+    open_weights: true
+    notes: Adept Fuyu multimodal model.
+  - id: yi
+    name: Yi
+    provider: 01-ai
+    open_weights: true
+    notes: 01.AI Yi family.
+  - id: phi
+    name: Phi
+    provider: microsoft
+    open_weights: true
+    notes: Microsoft Phi small-language-model family.
+  - id: arctic
+    name: Arctic
+    provider: snowflake
+    open_weights: true
+    notes: Snowflake Arctic models incl. arctic-embed embedding endpoints.
+  - id: zamba
+    name: Zamba
+    provider: zyphra
+    open_weights: true
+    notes: Zyphra Zamba hybrid models.
+  - id: sea-lion
+    name: Sea Lion
+    provider: aisingapore
+    open_weights: true
+    notes: AI Singapore SEA-LION Southeast-Asian language models.
+  - id: neva
+    name: NeVA
+    provider: nvidia
+    open_weights: true
+    notes: NVIDIA NeVA vision-language model.
+  - id: vila
+    name: VILA
+    provider: nvidia
+    open_weights: true
+    notes: NVIDIA VILA vision-language model.
+  - id: cosmos
+    name: Cosmos
+    provider: nvidia
+    open_weights: true
+    notes: NVIDIA Cosmos world-model reasoning family.
+  - id: deplot
+    name: DePlot
+    provider: google
+    open_weights: true
+    notes: Google DePlot chart/plot understanding model.
+  - id: kosmos
+    name: Kosmos
+    provider: microsoft
+    open_weights: true
+    notes: Microsoft Kosmos multimodal research models.
+  - id: muse
+    name: Muse
+    provider: meta
+    open_weights: true
+    notes: Meta Muse text-to-image generation models.
+  - id: ising
+    name: Ising
+    provider: nvidia
+    open_weights: false
+    notes: NVIDIA Ising calibration/quantum-computing models.
+  - id: embed-qa
+    name: Embed QA
+    provider: nvidia
+    open_weights: false
+    notes: NVIDIA embedding models for question-answering retrieval.
+  - id: nvclip
+    name: NVCLIP
+    provider: nvidia
+    open_weights: false
+    notes: NVIDIA CLIP-based vision encoder.
+  - id: riva
+    name: Riva
+    provider: nvidia
+    open_weights: false
+    notes: NVIDIA Riva speech/translation NIM microservices.
+  - id: laguna
+    name: Laguna
+    provider: poolside
+    open_weights: false
+    notes: Poolside Laguna code models.
+  - id: palmyra
+    name: Palmyra
+    provider: writer
+    open_weights: false
+    notes: Writer Palmyra enterprise models (finance, medical, creative variants).
+  - id: synthetic-video-detector
+    name: AI Synthetic Video Detector
+    provider: nvidia
+    open_weights: false
+    notes: NVIDIA deepfake/synthetic video detection model.
