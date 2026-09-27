@@ -233,6 +233,70 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_keygen(args: argparse.Namespace) -> int:
+    """Generate an Ed25519 keypair for the calling agent."""
+    from hummbl_cognition import ed25519_signing
+    from hummbl_cognition.ledger_writer import _resolve_ledger_path
+
+    if not ed25519_signing.available():
+        print(
+            "error: ed25519 signing requires the 'cryptography' package "
+            "(pip install 'hummbl-cognition[primitives]' or cryptography>=42)",
+            file=sys.stderr,
+        )
+        return 2
+
+    path = _resolve_ledger_path(getattr(args, "ledger", None))
+    key_id, _priv_path, pub_path = ed25519_signing.keygen(args.agent, path)
+    # Emit identity + public material only — never the private-key path.
+    print(json.dumps({"signer_key_id": key_id, "public_key": str(pub_path)}))
+    return 0
+
+
+def cmd_scitt_export(args: argparse.Namespace) -> int:
+    """Export one ledger entry as a SCITT-shaped signed-statement record.
+
+    Emits the statement a transparency service would countersign, shaped
+    after the IETF SCITT architecture — draft-ietf-scitt-architecture-13,
+    https://datatracker.ietf.org/doc/html/draft-ietf-scitt-architecture-13
+    (signed statements carry an issuer, subject, and feed): issuer
+    (signer_key_id or agent), subject (entry id), payload (canonical
+    entry), payload hash. The `receipt` field stays null until an external
+    transparency service anchors it — this is an export shape, not a
+    conformance claim.
+    """
+    import hashlib
+
+    from hummbl_cognition import ed25519_signing
+    from hummbl_cognition.ledger_writer import _resolve_ledger_path, read_entries
+
+    path = _resolve_ledger_path(getattr(args, "ledger", None))
+    matches = [
+        e for e in read_entries(ledger_path=path, limit=100000) if e.id == args.id
+    ]
+    if not matches:
+        print(f"error: no ledger entry with id {args.id!r}", file=sys.stderr)
+        return 1
+    entry = matches[0]
+    d = entry.to_dict()
+    # payload must be exactly the bytes payload_sha256 commits to — the
+    # canonical form (signature fields stripped), not the raw entry dict.
+    payload_bytes = ed25519_signing.canonical_bytes(d)
+    stmt = {
+        "profile": "hummbl-clp-scitt-statement/0.1",
+        "protected_header": {
+            "issuer": entry.signer_key_id or entry.agent,
+            "subject": entry.id,
+            "feed": "clp-ledger",
+        },
+        "payload": json.loads(payload_bytes),
+        "payload_sha256": hashlib.sha256(payload_bytes).hexdigest(),
+        "receipt": None,
+    }
+    print(json.dumps(stmt, indent=2, sort_keys=True))
+    return 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     """Generate a structured CLP validation report."""
     report = validate_integrity_report(ledger_path=args.ledger)
@@ -547,9 +611,11 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         # Build msg_types set based on --include-noisy flag
         if args.include_noisy:
             from hummbl_cognition.migration import NOISY_BUS_TYPES, TIER1_BUS_TYPES
+
             msg_types = TIER1_BUS_TYPES | NOISY_BUS_TYPES
         else:
             from hummbl_cognition.migration import TIER1_BUS_TYPES
+
             msg_types = TIER1_BUS_TYPES
 
         entries = import_from_bus_history(
@@ -589,7 +655,9 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         print(f"{prefix}Imported {len(entries)} entries from git log")
         total_imported += len(entries)
 
-    print(f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---")
+    print(
+        f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---"
+    )
     return 0
 
 
@@ -863,14 +931,30 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["bus", "memory", "git", "all"],
         help="Knowledge source to import",
     )
-    p_migrate.add_argument("--dry-run", action="store_true", help="Show what would be imported without writing")
+    p_migrate.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be imported without writing",
+    )
     p_migrate.add_argument("--ledger", help="Override ledger file path")
     p_migrate.add_argument("--bus", help="Override bus messages.tsv path")
-    p_migrate.add_argument("--memory-path", help="Path to MEMORY.md file (for 'memory' source)")
-    p_migrate.add_argument("--since", help="Only import entries after this ISO 8601 timestamp")
-    p_migrate.add_argument("--max-commits", type=int, default=100, help="Max git commits to import")
-    p_migrate.add_argument("--agent", default="migration", help="Agent identifier for imported entries")
-    p_migrate.add_argument("--include-noisy", action="store_true", help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)")
+    p_migrate.add_argument(
+        "--memory-path", help="Path to MEMORY.md file (for 'memory' source)"
+    )
+    p_migrate.add_argument(
+        "--since", help="Only import entries after this ISO 8601 timestamp"
+    )
+    p_migrate.add_argument(
+        "--max-commits", type=int, default=100, help="Max git commits to import"
+    )
+    p_migrate.add_argument(
+        "--agent", default="migration", help="Agent identifier for imported entries"
+    )
+    p_migrate.add_argument(
+        "--include-noisy",
+        action="store_true",
+        help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)",
+    )
 
     # validate
     p_validate = subparsers.add_parser("validate", help="Validate ledger integrity")
@@ -885,6 +969,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument(
         "--json", action="store_true", help="Output as JSON instead of Markdown"
     )
+
+    # keygen — Ed25519 agent signing keys (asymmetric receipts)
+    p_keygen = subparsers.add_parser(
+        "keygen", help="Generate an Ed25519 signing keypair for an agent"
+    )
+    p_keygen.add_argument("--agent", required=True, help="Agent identifier")
+    p_keygen.add_argument("--ledger", help="Override ledger file path")
+
+    # scitt-export — emit a SCITT-shaped signed statement for one entry
+    p_scitt = subparsers.add_parser(
+        "scitt-export",
+        help="Export a ledger entry as a SCITT-style signed statement (JSON)",
+    )
+    p_scitt.add_argument("--id", required=True, help="Ledger entry id (clp-*)")
+    p_scitt.add_argument("--ledger", help="Override ledger file path")
 
     # state & status alias
     p_state = subparsers.add_parser("state", help="Show shared state")
@@ -1010,6 +1109,8 @@ def main(argv: list[str] | None = None) -> int:
         "batch-ingest": cmd_batch_ingest,
         "migrate": cmd_migrate,
         "report": cmd_report,
+        "keygen": cmd_keygen,
+        "scitt-export": cmd_scitt_export,
     }
 
     handler = handlers.get(args.command)
