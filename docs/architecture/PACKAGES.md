@@ -34,7 +34,7 @@ Ownership last verified in fleet audits 2026-08-30 / 2026-08-31.
 Tree versions checked 2026-09-02.
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
-| `hummbl-governance` | 1.5.0 | 1.4.2 | Tree version checked 2026-09-08; 1.5.0 remains unreleased under the disposition in `docs/operations/RELEASE.md`. |
+| `hummbl-governance` | 1.5.1 | 1.4.2 | Tree version checked 2026-09-27; 1.5.1 remains unreleased under the disposition in `docs/operations/RELEASE.md`. |
 | `base120` | 3.0.3 | 3.0.2 | 120 reasoning operators. NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. `3.0.3` renames VERUM→Krineia in docstrings/docs; no behavior change. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
 | `hummbl-tuples` | 0.2.2 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. `0.2.2` renames VERUM→Krineia in README/spec; includes the 0.2.1 wheel-contents fix. |
