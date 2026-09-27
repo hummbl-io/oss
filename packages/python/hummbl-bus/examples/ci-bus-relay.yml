@@ -1,0 +1,50 @@
+# GitHub Actions -> bus-ingress webhook relay.
+#
+# Any repo can post to the bus: a commit message starting with "bus:"
+# or a manual workflow_dispatch input. Offline-queued for free — git
+# push only happens when you have connectivity, and CI posts once it
+# runs. One of the ~40 mapped channels, zero new infra.
+#
+# Secrets: BUS_INGRESS_URL (https://ingress.example.com/i/ci),
+#          BUS_INGRESS_TOKEN_CI (bearer for the "ci" channel).
+
+name: bus-relay
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Bus message (e.g. "STATUS deploy green")'
+        required: true
+  push:
+    branches: [main]
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build message
+        id: msg
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "body=${{ inputs.message }}" >> "$GITHUB_OUTPUT"
+            echo "id=dispatch-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+          else
+            SUBJECT="$(git log -1 --pretty=%s)"
+            case "$SUBJECT" in
+              bus:*)
+                echo "body=${SUBJECT#bus: }" >> "$GITHUB_OUTPUT"
+                echo "id=gh-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+                ;;
+              *) echo "skip=1" >> "$GITHUB_OUTPUT" ;;
+            esac
+          fi
+      - name: Post to bus
+        if: steps.msg.outputs.skip != '1'
+        env:
+          URL: ${{ secrets.BUS_INGRESS_URL }}
+          TOK: ${{ secrets.BUS_INGRESS_TOKEN_CI }}
+        run: |
+          curl -fsS -X POST "$URL" \
+            -H "Authorization: Bearer $TOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"id\":\"${{ steps.msg.outputs.id }}\",\"from\":\"ci-${{ github.repository }}\",\"body\":\"${{ steps.msg.outputs.body }}\"}"

@@ -31,7 +31,14 @@ def test_ed25519_support_is_an_explicit_optional_extra() -> None:
 
 
 def test_source_has_no_undeclared_third_party_imports() -> None:
-    allowed = {"cryptography", "hummbl_bus"}
+    project = _project_metadata()
+    declared = set(project.get("dependencies") or [])
+    for extra_deps in (project.get("optional-dependencies") or {}).values():
+        declared.update(extra_deps)
+    allowed = {
+        dep.split(">")[0].split("<")[0].split("=")[0].split("[")[0].strip()
+        for dep in declared
+    } | {"hummbl_bus"}
     violations: list[str] = []
 
     for path in (PROJECT_ROOT / "src" / "hummbl_bus").rglob("*.py"):

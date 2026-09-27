@@ -1,0 +1,95 @@
+{
+  "comment": "Local deployment config for bus-ingress. Copy to a private, uncommitted path (e.g. ~/.config/hummbl/channels.json). Real addresses/numbers live here or in env vars named below -- NEVER in the repo.",
+  "origin_machine": "ingress-host",
+  "bridge": {"host": "127.0.0.1", "port": 8080},
+  "spool_dir": "~/.local/state/hummbl-bus/spool",
+  "allowlist": {
+    "unknown_sender": "quarantine",
+    "senders": {
+      "+15550001111": {"from": "operator", "channels": ["sms", "voice", "signal", "gv-email", "jmp", "android"], "pin_env": "BUS_INGRESS_OPERATOR_PIN"},
+      "you@example.com": {"from": "operator", "channels": ["email"], "pin_env": "BUS_INGRESS_OPERATOR_PIN"},
+      "U0123ABCD": {"from": "operator", "channels": ["slack"], "pin_env": "BUS_INGRESS_OPERATOR_PIN"},
+      "123456789": {"from": "operator", "channels": ["telegram", "discord"], "pin_env": "BUS_INGRESS_OPERATOR_PIN"},
+      "default": {"from": "channel-ingress", "channels": ["*"]}
+    },
+    "comment_senders": "Key = sender_addr: phone, email, or immutable provider ID (slack U..., telegram/discord numeric id). Usernames are editable -- never allowlist them."
+  },
+  "webhook": {
+    "host": "127.0.0.1",
+    "port": 18796,
+    "channel_tokens": {
+      "sms": "BUS_INGRESS_TOKEN_SMS",
+      "voice": "BUS_INGRESS_TOKEN_VOICE",
+      "shortcuts": "BUS_INGRESS_TOKEN_SHORTCUTS",
+      "telegram": "BUS_INGRESS_TOKEN_TELEGRAM",
+      "slack": "BUS_INGRESS_TOKEN_SLACK",
+      "ci": "BUS_INGRESS_TOKEN_CI",
+      "email": "BUS_INGRESS_TOKEN_EMAIL",
+      "tasker": "BUS_INGRESS_TOKEN_TASKER",
+      "android": "BUS_INGRESS_TOKEN_ANDROID"
+    },
+    "comment_provider_secrets": "Optional provider sig-checks: BUS_INGRESS_TWILIO_TOKEN (twilio auth token), BUS_INGRESS_SLACK_SECRET (slack signing secret). Unset = bearer-only auth.",
+    "comment_query_auth": "Header-less senders authenticate with ?token= or ?secret= query params matching the channel token (LibreSMS appends ?secret= automatically; SMSGate uses its own auth or the token param)."
+  },
+  "email": {
+    "host": "127.0.0.1",
+    "port": 1143,
+    "user": "bus@example.com",
+    "password_env": "BUS_INGRESS_IMAP_PASSWORD",
+    "mailbox": "INBOX",
+    "poll_seconds": 30
+  },
+  "signal": {
+    "account": "+15550002222",
+    "config_dir": "/path/to/signal-cli/config",
+    "poll_seconds": 10
+  },
+  "mesh": {
+    "relay_cmd": "meshtastic --host 127.0.0.1 --listen-json"
+  },
+  "discord": {
+    "token_env": "DISCORD_BOT_TOKEN",
+    "bot_id": "your-bot-user-id",
+    "channels": ["channel-id-1", "dm-channel-id"],
+    "poll_seconds": 15,
+    "watermark_path": "~/.local/state/hummbl-bus/discord-watermarks.json"
+  },
+  "telegram": {
+    "token_env": "TELEGRAM_BOT_TOKEN",
+    "poll_seconds": 2
+  },
+  "ntfy": {
+    "base_url": "https://ntfy.sh",
+    "topic": "your-bus-topic",
+    "token_env": "NTFY_TOKEN"
+  },
+  "jmp": {
+    "comment": "JMP.chat: a real US/CA number bound to an XMPP JID. SMS/MMS/voicemail arrive as chat messages from +<E164>@<gateway>. Needs pip install 'hummbl-bus[xmpp]'.",
+    "jid": "you@your-xmpp-server.example",
+    "password_env": "BUS_JMP_PASSWORD",
+    "gateway": "cheogram.com",
+    "channel": "jmp",
+    "reconnect_seconds": 15
+  },
+  "fanout": {
+    "bus_path": "/path/to/local/messages-mirror.tsv",
+    "from_end": true,
+    "routes": [
+      {
+        "comment": "critical -> signal (via your existing dispatch tool)",
+        "recipients": ["operator"],
+        "urgency": ["ALERT", "VETO", "BLOCKED"],
+        "channel": "signal",
+        "target_env": "BUS_FANOUT_SIGNAL_TO",
+        "cmd": ["your-dispatch-tool", "{to}", "{msg}"]
+      },
+      {
+        "comment": "everything -> email fallback",
+        "recipients": ["operator"],
+        "channel": "email",
+        "target_env": "BUS_FANOUT_EMAIL_TO",
+        "cmd": ["your-send-mail-tool", "{to}", "bus", "{msg}"]
+      }
+    ]
+  }
+}
