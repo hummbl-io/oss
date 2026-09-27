@@ -24,6 +24,11 @@ Commands:
   base120 families                — list the 6 families with descriptions
   base120 verify-docs             — check README.md and llms.txt against registry
   base120 run program.b120        — execute a .b120 reasoning program
+  base120 glyph render            — render the ledger as a glyph image (SVG/PNG)
+  base120 glyph decode glyph.png  — read the ledger back out of a glyph image
+
+Signing: ``glyph render --sign`` and ``glyph decode --verify`` read the
+HMAC key from the BASE120_SIGNING_SECRET environment variable (>= 32 bytes).
 
 Stdlib only. Zero third-party dependencies.
 """
@@ -31,11 +36,17 @@ Stdlib only. Zero third-party dependencies.
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import re
 import sys
 from pathlib import Path
 
 from base120.engine import FAMILY_NAMES, Engine
+from base120.glyph import DEFAULT_MAX_DRIFT, MIN_KEY_BYTES, GlyphError, decode, encode
+from base120.ledger import Ledger
+
+SIGNING_SECRET_ENV = "BASE120_SIGNING_SECRET"
 
 
 def _cmd_list(engine: Engine, args: argparse.Namespace) -> int:
@@ -195,6 +206,69 @@ def _cmd_run(engine: Engine, args: argparse.Namespace) -> int:
     return 0
 
 
+def _signing_key() -> bytes:
+    raw = os.environ.get(SIGNING_SECRET_ENV)
+    if not raw:
+        raise GlyphError(f"{SIGNING_SECRET_ENV} is not set")
+    key = raw.encode("utf-8")
+    if len(key) < MIN_KEY_BYTES:
+        raise GlyphError(f"{SIGNING_SECRET_ENV} must be at least {MIN_KEY_BYTES} bytes, got {len(key)}")
+    return key
+
+
+def _cmd_glyph_render(engine: Engine, args: argparse.Namespace) -> int:
+    try:
+        key = _signing_key() if args.sign else None
+        ledger = Ledger(args.ledger) if args.ledger else Ledger()
+        entries = ledger.project(args.last)
+        glyph = encode(entries, max_drift=args.max_drift, key=key)
+        if args.format == "png":
+            data = glyph.to_png(scale=args.scale)
+        else:
+            data = glyph.to_svg().encode("utf-8")
+    except (GlyphError, ValueError, OSError) as exc:
+        print(f"glyph render failed: {exc}", file=sys.stderr)
+        return 1
+    if args.output:
+        Path(args.output).write_bytes(data)
+    else:
+        sys.stdout.buffer.write(data)
+        sys.stdout.flush()
+    return 0
+
+
+def _cmd_glyph_decode(engine: Engine, args: argparse.Namespace) -> int:
+    try:
+        key = _signing_key() if args.verify else None
+        glyph = decode(Path(args.file).read_bytes(), key=key)
+    except (GlyphError, OSError, UnicodeDecodeError) as exc:
+        print(f"glyph decode failed: {exc}", file=sys.stderr)
+        return 1
+    if args.json:
+        print(json.dumps(glyph.payload, sort_keys=True, indent=2))
+    else:
+        verified = "n/a" if glyph.verified is None else str(glyph.verified).lower()
+        print(f"entries:   {len(glyph.entries)}")
+        print(f"max_drift: {glyph.max_drift}")
+        print(f"signed:    {str(glyph.signed).lower()}")
+        print(f"verified:  {verified}")
+        print(f"flagged:   {', '.join(sorted(glyph.flagged)) or '-'}")
+        for e in glyph.entries:
+            print(f"  {e.id:<5} {e.time}  drift={e.drift}")
+    if args.verify and glyph.verified is not True:
+        return 2
+    return 0
+
+
+def _cmd_glyph(engine: Engine, args: argparse.Namespace) -> int:
+    if args.glyph_command == "render":
+        return _cmd_glyph_render(engine, args)
+    if args.glyph_command == "decode":
+        return _cmd_glyph_decode(engine, args)
+    print("usage: base120 glyph {render,decode}", file=sys.stderr)
+    return 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="base120",
@@ -233,6 +307,33 @@ def build_parser() -> argparse.ArgumentParser:
     p_run = sub.add_parser("run", help="Execute a .b120 reasoning program")
     p_run.add_argument("file", help="Path to .b120 program file")
 
+    # glyph
+    p_glyph = sub.add_parser("glyph", help="Encode the ledger as an image, or decode one")
+    glyph_sub = p_glyph.add_subparsers(dest="glyph_command", metavar="subcommand")
+    glyph_sub.required = True
+
+    p_render = glyph_sub.add_parser("render", help="Render ledger entries as a glyph image")
+    p_render.add_argument("--ledger", metavar="PATH", help="Ledger JSONL path (default: ~/.base120/ledger.jsonl)")
+    p_render.add_argument("--last", type=int, metavar="N", help="Only the last N entries")
+    p_render.add_argument(
+        "--max-drift",
+        type=float,
+        default=DEFAULT_MAX_DRIFT,
+        metavar="F",
+        help=f"cut() threshold for ring marks (default {DEFAULT_MAX_DRIFT})",
+    )
+    p_render.add_argument("--format", choices=("svg", "png"), default="svg", help="Output format (default svg)")
+    p_render.add_argument("--scale", type=int, default=12, metavar="PX", help="PNG pixels per grid cell (default 12)")
+    p_render.add_argument("--sign", action="store_true", help=f"HMAC-sign the payload with ${SIGNING_SECRET_ENV}")
+    p_render.add_argument("-o", "--output", metavar="FILE", help="Write to FILE instead of stdout")
+
+    p_decode = glyph_sub.add_parser("decode", help="Read the ledger back out of a glyph image")
+    p_decode.add_argument("file", help="Glyph .svg or .png")
+    p_decode.add_argument(
+        "--verify", action="store_true", help=f"Verify the signature with ${SIGNING_SECRET_ENV}; exit 2 on failure"
+    )
+    p_decode.add_argument("--json", action="store_true", help="Print the raw payload as JSON")
+
     return parser
 
 
@@ -248,6 +349,7 @@ def main(argv: list[str] | None = None) -> int:
         "families": _cmd_families,
         "verify-docs": _cmd_verify_docs,
         "run": _cmd_run,
+        "glyph": _cmd_glyph,
     }
     handler = dispatch.get(args.command)
     if handler is None:
