@@ -626,7 +626,7 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
                 "type": mtype,
                 "message": message[:200],
                 "method": "bridge",
-                "bridge_response": detail[:200],
+                "bridge_response": detail,
             }
 
         # Emergency fallback: local file append ONLY when BUS_FILE is explicitly
