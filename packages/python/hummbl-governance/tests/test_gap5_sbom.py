@@ -54,8 +54,8 @@ class TestSBOMGeneration:
         sbom = sbom_mod.generate_sbom(repo)
         main = sbom["metadata"]["component"]
         assert main["name"] == "hummbl-governance"
-        assert main["version"] == "1.5.0"
-        assert main["purl"] == "pkg:pypi/hummbl-governance@1.5.0"
+        assert main["version"] == "1.5.1"
+        assert main["purl"] == "pkg:pypi/hummbl-governance@1.5.1"
 
     def test_sbom_has_zero_runtime_deps(self) -> None:
         """hummbl-governance has zero runtime dependencies."""

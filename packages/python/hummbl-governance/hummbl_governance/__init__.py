@@ -31,7 +31,7 @@ Copyright 2026 HUMMBL, LLC. Licensed under Apache 2.0.
 
 import threading
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 
 # Kernel — Governance operating system (v1.2.2)
 from hummbl_governance.kernel import (
