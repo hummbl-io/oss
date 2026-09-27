@@ -5,15 +5,33 @@ Tests for HUMMBL rubric template validation
 
 import pytest
 import yaml
+import sys
 from pathlib import Path
-from tools.validate_template import (
-    load_yaml_file,
-    validate_parameters,
-    validate_hard_gates,
-    validate_weighted_dimensions,
-    validate_required_outputs,
-    validate_template
-)
+
+# Ensure package root is in sys.path for standalone or monorepo test runs
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
+if str(PACKAGE_ROOT) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_ROOT))
+
+try:
+    from hummbl_rubric_templates.validate_template import (
+        load_yaml_file,
+        validate_parameters,
+        validate_hard_gates,
+        validate_weighted_dimensions,
+        validate_required_outputs,
+        validate_template
+    )
+except ModuleNotFoundError:
+    from tools.validate_template import (
+        load_yaml_file,
+        validate_parameters,
+        validate_hard_gates,
+        validate_weighted_dimensions,
+        validate_required_outputs,
+        validate_template
+    )
+
 
 
 @pytest.fixture
@@ -41,6 +59,21 @@ def base120_template():
     """Load the Base120 template for testing."""
     template_path = Path(__file__).parent.parent / 'templates' / 'base120-protocol-run.yaml'
     return load_yaml_file(template_path)
+
+
+@pytest.fixture
+def agent_coordination_template():
+    """Load the Agent Coordination template for testing."""
+    template_path = Path(__file__).parent.parent / 'templates' / 'agent-coordination.yaml'
+    return load_yaml_file(template_path)
+
+
+@pytest.fixture
+def global_org_ranking_template():
+    """Load the Global Organization Ranking template for testing."""
+    template_path = Path(__file__).parent.parent / 'templates' / 'global-org-ranking.yaml'
+    return load_yaml_file(template_path)
+
 
 
 def test_master_schema_parameters(master_schema):
@@ -84,6 +117,39 @@ def test_base120_template_validation(base120_template):
     errors.extend(validate_required_outputs(base120_template))
     
     assert len(errors) == 0, f"Base120 template validation failed: {errors}"
+
+
+def test_agent_coordination_template_validation(agent_coordination_template):
+    """Test that Agent Coordination template validates correctly with 100 weight sum."""
+    errors = []
+    errors.extend(validate_parameters(agent_coordination_template))
+    errors.extend(validate_hard_gates(agent_coordination_template))
+    errors.extend(validate_weighted_dimensions(agent_coordination_template))
+    errors.extend(validate_required_outputs(agent_coordination_template))
+    
+    assert len(errors) == 0, f"Agent coordination template validation failed: {errors}"
+
+
+def test_global_org_ranking_template_validation(global_org_ranking_template):
+    """Test that MCDA calibrated Global Organization Ranking template validates correctly."""
+    errors = []
+    errors.extend(validate_parameters(global_org_ranking_template))
+    errors.extend(validate_hard_gates(global_org_ranking_template))
+    errors.extend(validate_weighted_dimensions(global_org_ranking_template))
+    errors.extend(validate_required_outputs(global_org_ranking_template))
+    
+    assert len(errors) == 0, f"Global organization ranking template validation failed: {errors}"
+
+
+def test_all_templates_in_directory():
+    """Test that all YAML templates in the templates directory pass complete validation."""
+    templates_dir = Path(__file__).parent.parent / 'templates'
+    template_files = list(templates_dir.glob('*.yaml')) + list(templates_dir.glob('*.yml'))
+    assert len(template_files) >= 4, f"Expected at least 4 templates, found {len(template_files)}"
+    
+    for t_path in template_files:
+        is_valid, errors = validate_template(t_path)
+        assert is_valid, f"Template {t_path.name} failed validation: {errors}"
 
 
 def test_weight_sum_validation():

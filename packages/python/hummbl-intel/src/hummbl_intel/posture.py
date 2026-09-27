@@ -11,9 +11,8 @@ and by INT manager agents.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
-from typing import Any
 
 from hummbl_intel.taxonomy import CANONICAL_SURFACES, IntelligenceDiscipline
 
@@ -63,7 +62,7 @@ class SurfaceStatus:
         """
         if self.last_collection is None:
             return False
-        now = now or datetime.now(timezone.utc)
+        now = now or datetime.now(UTC)
         age = now - self.last_collection
         return age > timedelta(hours=self.stale_threshold_hours)
 
@@ -80,10 +79,8 @@ class DisciplinePosture:
 
     def active_surfaces(self) -> int:
         """Count of currently active (non-stale) surfaces."""
-        now = datetime.now(timezone.utc)
-        return sum(
-            1 for s in self.surfaces if s.active and not s.is_stale(now)
-        )
+        now = datetime.now(UTC)
+        return sum(1 for s in self.surfaces if s.active and not s.is_stale(now))
 
     def total_surfaces(self) -> int:
         """Total defined surfaces for this discipline."""
@@ -122,9 +119,7 @@ class CollectionPostureReport:
     Consumable by the morning briefing as a "Collection Posture" section.
     """
 
-    timestamp: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     disciplines: dict[str, DisciplinePosture] = field(default_factory=dict)
     overall_status: PostureStatus = PostureStatus.BLACK
 
@@ -161,9 +156,7 @@ class CollectionPostureReport:
                 continue  # Skip all-source — it's fusion output, not collection
             posture = self.disciplines.get(disc.value)
             if posture is None:
-                lines.append(
-                    f"{INT_LABELS[disc]}: BLACK (no posture data)"
-                )
+                lines.append(f"{INT_LABELS[disc]}: BLACK (no posture data)")
                 continue
 
             status = posture.status.value.upper()
@@ -172,7 +165,7 @@ class CollectionPostureReport:
 
             last_str = "never"
             if posture.last_full_collection:
-                age = datetime.now(timezone.utc) - posture.last_full_collection
+                age = datetime.now(UTC) - posture.last_full_collection
                 mins = int(age.total_seconds() / 60)
                 if mins < 60:
                     last_str = f"{mins}m ago"
@@ -207,8 +200,10 @@ def build_default_posture() -> CollectionPostureReport:
                 name=name,
                 active=True,
                 stale_threshold_hours=(
-                    1.0 if surface_def.collection_frequency == "continuous"
-                    else 24.0 if surface_def.collection_frequency == "daily"
+                    1.0
+                    if surface_def.collection_frequency == "continuous"
+                    else 24.0
+                    if surface_def.collection_frequency == "daily"
                     else 168.0  # weekly for on_demand
                 ),
             )

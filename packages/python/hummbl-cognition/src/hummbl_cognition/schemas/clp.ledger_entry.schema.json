@@ -55,10 +55,14 @@
       "type": "string",
       "enum": [
         "project",
+        "module",
+        "file",
+        "convention",
+        "process",
+        "session",
         "agent",
         "system",
-        "global",
-        "session"
+        "global"
       ]
     },
     "content": {
@@ -103,6 +107,22 @@
         "string",
         "null"
       ]
+    },
+    "ed25519_sig": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{128}$",
+      "description": "Ed25519 signature (hex) over the canonical entry minus signature fields; asymmetric counterpart to the HMAC 'signature' field"
+    },
+    "signer_key_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9_-]+:[a-f0-9]{16}$",
+      "description": "Key identifier '<agent-slug>:<fp16>' where fp16 is the first 16 hex of sha256(raw public key)"
     },
     "links": {
       "type": "array",

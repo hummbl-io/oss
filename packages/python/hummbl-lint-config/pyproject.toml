@@ -22,7 +22,7 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "pytest-cov"]
 
 [project.urls]
 Homepage = "https://github.com/hummbl-io/oss"
@@ -35,4 +35,16 @@ PyPI = "https://pypi.org/project/hummbl-lint-config/"
 packages = ["hummbl_lint_config"]
 
 [tool.setuptools.package-data]
-hummbl_lint_config = ["ruff.toml"]
+hummbl_lint_config = ["ruff.toml", "py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.mypy]
+files = ["hummbl_lint_config", "tests"]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+

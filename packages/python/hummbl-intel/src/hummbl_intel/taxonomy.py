@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import ClassVar
 
 
 class IntelligenceDiscipline(Enum):
@@ -186,7 +185,7 @@ CANONICAL_SURFACES: dict[IntelligenceDiscipline, CollectionSurface] = {
             "memory_city_architecture",
             "cross_session_consolidation",
         ],
-        lead_agency="claude-code",
+        lead_agency="coronal",
         collection_frequency="daily",
     ),
 }
@@ -199,9 +198,9 @@ def from_bus_prefix(tag: str) -> IntelligenceDiscipline | None:
 
     Returns None if the tag is not recognized.
     """
-    if not tag.startswith("[int=") or not tag.endswith("]"):
+    if not (tag.startswith("[int=") and tag.endswith("]")):
         return None
-    key = tag[5:-1].upper()
+    key = tag.removeprefix("[int=").removesuffix("]").upper()
     try:
         return IntelligenceDiscipline[key]
     except KeyError:
