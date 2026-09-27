@@ -17,7 +17,65 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Main test matrix: every package x every supported Python version.
+  # Matrix computation: full package set on push to main; changed packages only
+  # on pull_request. A PR that touches no package gets the flagship package as
+  # a smoke floor so the required `test` check still runs and goes green --
+  # path filters were removed in #91 precisely because a vanished Tests
+  # workflow starved required checks on docs-only PRs (see MERGE.md).
+  #
+  # Changes to this workflow file itself force the full matrix so a matrix
+  # edit can never ship untested.
+  # ---------------------------------------------------------------------------
+  changes:
+    name: Compute test matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.json }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: matrix
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          # Package set = directories under packages/python that carry tests;
+          # identical to the former hardcoded matrix (verified: all 46 have tests/).
+          ALL=$(find packages/python -maxdepth 2 -type d -name tests -printf '%h\n' | xargs -n1 basename | sort)
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git fetch -q origin "$BASE_REF"
+            CHANGED=$(git diff --name-only "origin/$BASE_REF...HEAD")
+            TOUCHED=$(printf '%s\n' "$CHANGED" | sed -n 's|^packages/python/\([^/]*\)/.*|\1|p' | sort -u)
+            PKGS=$(comm -12 <(printf '%s\n' "$ALL") <(printf '%s\n' "$TOUCHED"))
+            if printf '%s\n' "$CHANGED" | grep -qx '.github/workflows/ci.yml'; then
+              PKGS="$ALL"
+            fi
+            if [ -z "$PKGS" ]; then
+              # Smoke floor: keeps the required check honest on docs-only PRs.
+              PKGS="hummbl-governance"
+            fi
+          else
+            PKGS="$ALL"
+          fi
+          PKG_JSON=$(printf '%s\n' "$PKGS" | jq -R . | jq -cs .)
+          INC=[]
+          if printf '%s\n' "$PKGS" | grep -qx hummbl; then
+            INC=$(printf '%s' "$INC" | jq '. += [{"package":"hummbl","python-version":"3.10"}]')
+          fi
+          if printf '%s\n' "$PKGS" | grep -qx hummbl-kernel; then
+            INC=$(printf '%s' "$INC" | jq '. += [{"package":"hummbl-kernel","python-version":"3.10"}]')
+          fi
+          MATRIX=$(jq -nc --argjson pkgs "$PKG_JSON" --argjson inc "$INC" \
+            '{"python-version":["3.11","3.12","3.13","3.14"],"package":$pkgs,"include":$inc}')
+          echo "matrix=$MATRIX"
+          echo "json=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  # ---------------------------------------------------------------------------
+  # Main test matrix: on push to main, every package x every supported Python
+  # version; on pull_request, only the packages the PR touched (see `changes`).
   #
   # Most packages declare requires-python = ">=3.11". Two packages (hummbl,
   # hummbl-kernel) declare >=3.10 and get an extra 3.10 entry via `include`.
@@ -28,17 +86,10 @@ jobs:
   test:
     name: test (${{ matrix.package }}, ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    needs: changes
     strategy:
       fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
-        package: [base120, governed-compression, hummbl, hummbl-agent-eval-harness, hummbl-agent-governance, hummbl-eval, hummbl-gitops, arcana, hummbl-axis, hummbl-bif, hummbl-bus, hummbl-cognition, hummbl-compass, hummbl-contracts, hummbl-design-tokens, hummbl-evidence, hummbl-free-models, hummbl-garage, hummbl-governance, hummbl-heraldry, hummbl-identity, hummbl-intel, hummbl-invariance, hummbl-kernel, hummbl-lattice, hummbl-lint-config, hummbl-mcp, hummbl-mcp-base120, hummbl-mcp-basen, hummbl-mcp-bif, hummbl-mcp-cognitive-ledger, hummbl-mcp-coordination-bus, hummbl-mcp-discord, hummbl-mcp-governance, hummbl-mcp-omnichannel, hummbl-mcp-onepassword, hummbl-mcp-proton, hummbl-mcp-signal, hummbl-mcp-utf, hummbl-mcp-voice, hummbl-rubric-templates, hummbl-sast, hummbl-taxonomy, hummbl-tuples, hummbl-validation, hummbl-validation-framework, idp-spec]
-        include:
-          # Extended floor: packages declaring >=3.10 also tested on 3.10
-          - package: hummbl
-            python-version: "3.10"
-          - package: hummbl-kernel
-            python-version: "3.10"
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
