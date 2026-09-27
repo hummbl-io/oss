@@ -3,22 +3,22 @@ from __future__ import annotations
 import secrets
 import pytest
 
-from hummbl_governance.sovereign_cryptosystem import SovereignCryptosystem
+from hummbl_governance.envelope_cryptosystem import EnvelopeCryptosystem
 
 
 def test_invalid_key_lengths() -> None:
     # Must be 32 bytes each
     with pytest.raises(ValueError, match="Encryption key must be exactly 32-bytes"):
-        SovereignCryptosystem(secrets.token_bytes(16), secrets.token_bytes(32))
+        EnvelopeCryptosystem(secrets.token_bytes(16), secrets.token_bytes(32))
 
     with pytest.raises(ValueError, match="MAC key must be exactly 32-bytes"):
-        SovereignCryptosystem(secrets.token_bytes(32), secrets.token_bytes(16))
+        EnvelopeCryptosystem(secrets.token_bytes(32), secrets.token_bytes(16))
 
 
 def test_encrypt_decrypt_lifecycle() -> None:
     enc_key = secrets.token_bytes(32)
     mac_key = secrets.token_bytes(32)
-    crypto = SovereignCryptosystem(enc_key, mac_key)
+    crypto = EnvelopeCryptosystem(enc_key, mac_key)
 
     payloads = [
         b"hello world",
@@ -40,7 +40,7 @@ def test_encrypt_decrypt_lifecycle() -> None:
 def test_tamper_integrity_verification() -> None:
     enc_key = secrets.token_bytes(32)
     mac_key = secrets.token_bytes(32)
-    crypto = SovereignCryptosystem(enc_key, mac_key)
+    crypto = EnvelopeCryptosystem(enc_key, mac_key)
 
     payload = b"Top secret operational data."
     envelope = crypto.encrypt_envelope(payload)
@@ -73,13 +73,13 @@ def test_padding_validation_integrity(monkeypatch) -> None:
     mac_key = secrets.token_bytes(32)
 
     # Encrypt some dummy data to form a valid MAC signature envelope FIRST using real Popen
-    real_crypto = SovereignCryptosystem(enc_key, mac_key)
+    real_crypto = EnvelopeCryptosystem(enc_key, mac_key)
     envelope = real_crypto.encrypt_envelope(b"dummy")
 
     # Force the openssl fallback path so subprocess mocking works.
     # When the cryptography library is available, decrypt_envelope uses
     # in-process AES and never calls subprocess.Popen.
-    import hummbl_governance.sovereign_cryptosystem as sc_module
+    import hummbl_governance.envelope_cryptosystem as sc_module
     monkeypatch.setattr(sc_module, "_HAS_CRYPTOGRAPHY", False)
 
     # We mock subprocess.Popen entirely to return a successful run
@@ -97,7 +97,7 @@ def test_padding_validation_integrity(monkeypatch) -> None:
     mock_proc = MockPopen([])
     monkeypatch.setattr(subprocess, "Popen", lambda *args, **kwargs: mock_proc)
 
-    crypto = SovereignCryptosystem(enc_key, mac_key)
+    crypto = EnvelopeCryptosystem(enc_key, mac_key)
 
     # Test bad padding length (> 16)
     mock_proc.output = b"A" * 15 + b"\x11"

@@ -9,6 +9,15 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Renamed the P49 primitive module `sovereign_cryptosystem` to
+  `envelope_cryptosystem` and the class `SovereignCryptosystem` to
+  `EnvelopeCryptosystem`, per the retired-vocabulary rule and the rename
+  recommended in `docs/PRIMITIVE_CRITICAL_ANALYSIS_2026-08-27.md`. The module
+  was added after 1.5.0 and has not shipped to PyPI, so no released import
+  path changes. Registry, PRIMITIVES.md, README, cryptographic policy, and
+  the package description follow.
+
 ## [1.5.1] — 2026-09-24
 
 ### Security & Hardening
