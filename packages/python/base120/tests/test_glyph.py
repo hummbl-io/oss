@@ -26,6 +26,8 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
+
+from base120 import Engine, Ledger, decode_glyph, encode_glyph
 from base120.cli import main
 from base120.glyph import (
     FAMILY_COLORS,
@@ -37,8 +39,6 @@ from base120.glyph import (
     encode,
 )
 from base120.models import OperatorTuple
-
-from base120 import Engine, Ledger, decode_glyph, encode_glyph
 
 KEY = b"k" * 32
 OTHER_KEY = b"j" * 32

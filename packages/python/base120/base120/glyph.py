@@ -304,9 +304,11 @@ class Glyph:
         """Render the glyph as an SVG document with the payload in <metadata>."""
         out = [
             '<?xml version="1.0" encoding="UTF-8"?>',
-            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_WIDTH:g} {_HEIGHT:g}" '
-            f'width="{_WIDTH * 12:g}" height="{_HEIGHT * 12:g}" '
-            f'data-format="{GLYPH_FORMAT}" data-version="{GLYPH_VERSION}">',
+            (
+                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_WIDTH:g} {_HEIGHT:g}" '
+                f'width="{_WIDTH * 12:g}" height="{_HEIGHT * 12:g}" '
+                f'data-format="{GLYPH_FORMAT}" data-version="{GLYPH_VERSION}">'
+            ),
             f'<metadata id="{PAYLOAD_KEY}">{escape(self.payload_text)}</metadata>',
             f'<rect width="{_WIDTH:g}" height="{_HEIGHT:g}" fill="{SURFACE}"/>',
         ]

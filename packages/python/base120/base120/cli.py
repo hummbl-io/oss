@@ -156,7 +156,11 @@ def _cmd_verify_docs(engine: Engine, _args: argparse.Namespace) -> int:
 def _cmd_run(engine: Engine, args: argparse.Namespace) -> int:
     """Execute a .b120 reasoning program."""
     try:
-        from base120lang.interpreter import BudgetExceededError, Interpreter, SchemaValidationError
+        from base120lang.interpreter import (
+            BudgetExceededError,
+            Interpreter,
+            SchemaValidationError,
+        )
         from base120lang.loader import LoadError, load_program
         from base120lang.mock_runner import MockRunner
     except ImportError:
