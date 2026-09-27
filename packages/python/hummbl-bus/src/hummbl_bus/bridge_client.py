@@ -13,7 +13,6 @@ import os
 import sys
 import urllib.error
 import urllib.request
-
 from pathlib import Path
 
 DEFAULT_PORT = 18790
@@ -57,6 +56,33 @@ def _request_headers(
     return headers
 
 
+def _bus_url(host: str, port: int) -> str:
+    """Build the bridge write URL.
+
+    ``host`` may be a bare hostname (+ ``port``) or a full
+    ``http(s)://`` base URL -- the real deployment terminates TLS at a
+    proxy, so scheme-aware URLs are required for HTTPS bridges.
+    When ``host`` is a URL without an explicit port, ``port`` is
+    appended (callers always pass one; port 80/443 was silently
+    dropped otherwise).
+    """
+    return _endpoint_url(host, port, "/bus")
+
+
+def _health_url(host: str, port: int) -> str:
+    return _endpoint_url(host, port, "/health")
+
+
+def _endpoint_url(host: str, port: int, path: str) -> str:
+    if host.startswith(("http://", "https://")):
+        from urllib.parse import urlsplit
+
+        split = urlsplit(host.rstrip("/"))
+        netloc = split.netloc if ":" in split.netloc else f"{split.netloc}:{port}"
+        return f"{split.scheme}://{netloc}{path}"
+    return f"http://{host}:{port}{path}"
+
+
 def post_to_remote_bus(
     host: str,
     from_agent: str,
@@ -69,7 +95,7 @@ def post_to_remote_bus(
     client_id: str | None = None,
 ) -> bool:
     """Post a message to a remote machine's bus via HTTP."""
-    url = f"http://{host}:{port}/bus"
+    url = _bus_url(host, port)
 
     data = json.dumps(
         {"from": from_agent, "to": to_agent, "type": msg_type, "message": message}
@@ -131,7 +157,7 @@ def post_to_remote_bus_result(
     ``duplicate=true``. HTTP 409 instead means that the idempotency key is
     already bound to a different request and is therefore a permanent error.
     """
-    url = f"http://{host}:{port}/bus"
+    url = _bus_url(host, port)
     payload: dict[str, object] = {
         "from": from_agent,
         "to": to_agent,
@@ -213,7 +239,7 @@ def post_to_remote_bus_result(
 
 def health_check(host: str, port: int = DEFAULT_PORT) -> bool:
     """Check if remote bridge is healthy."""
-    url = f"http://{host}:{port}/health"
+    url = _health_url(host, port)
 
     try:
         with urllib.request.urlopen(url, timeout=5) as response:
