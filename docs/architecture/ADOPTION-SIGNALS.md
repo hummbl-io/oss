@@ -20,7 +20,7 @@ offering fit are **assumptions** and are labeled as such.
 
 | Package | 30d downloads (latest) | Data points | Errors | Tree | PyPI | State |
 |---------|---------------------:|------------:|-------:|------|------|-------|
-| `hummbl-governance` | 1429 | 2 | 0 | 1.5.0 | 1.4.2 | live |
+| `hummbl-governance` | 1429 | 2 | 0 | 1.5.1 | 1.4.2 | live |
 | `hummbl-bus` | 204 | 2 | 0 | 0.2.1 | 0.2.0 | live |
 | `hummbl-cognition` | 207 | 2 | 1 | 0.1.0 | 0.1.0 | live |
 | `hummbl-tuples` | 11 | 2 | 0 | 0.2.2 | 0.2.0 | live |
