@@ -825,7 +825,12 @@ class AlertDispatcher:
             with urllib.request.urlopen(req, timeout=5.0):
                 pass
         except Exception as e:
-            logger.debug("Dispatch failure to %s: %s", url, e)
+            # Redact to scheme+host: caller URLs embed credentials in the path
+            # (telegram bot<token>, discord webhook token, ntfy topic) and must
+            # never reach logs.
+            parsed = urllib.parse.urlparse(url)
+            safe_url = f"{parsed.scheme}://{parsed.hostname or '?'}"
+            logger.debug("Dispatch failure to %s: %s", safe_url, e)
 
 
 # ---------------------------------------------------------------------------

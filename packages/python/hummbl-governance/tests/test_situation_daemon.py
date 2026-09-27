@@ -130,6 +130,28 @@ class TestSituationDaemonCore(unittest.TestCase):
         ntfy_req = [r for r in captured_requests if "ntfy.sh" in r["url"]][0]
         self.assertEqual(ntfy_req["headers"]["Priority"], "5")
 
+    def test_dispatch_failure_redacts_credentials(self):
+        # Sink URLs embed credentials in the path (telegram bot<token>,
+        # discord webhook token, ntfy topic); failure logging must redact them.
+        dispatcher = AlertDispatcher(telegram_bot_token="SECRET_TOKEN_XYZ", telegram_chat_id="chat")
+        with (
+            patch("examples.situation_daemon.urllib.request.urlopen", side_effect=OSError("boom")),
+            self.assertLogs("situation_daemon", level="DEBUG") as captured,
+        ):
+            dispatcher._send_all_channels(
+                TelemetryEvent(
+                    id="redact_test",
+                    domain="seismic",
+                    severity="P1_HIGH",
+                    title="t",
+                    summary="s",
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                )
+            )
+        output = "\n".join(captured.output)
+        self.assertNotIn("SECRET_TOKEN_XYZ", output)
+        self.assertIn("https://api.telegram.org", output)
+
     def test_http_radar_server_endpoints(self):
         test_port = 8798
         ev = TelemetryEvent(
