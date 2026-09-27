@@ -1,14 +1,13 @@
 """Tests for the Contradiction model and CycleState loop tracking."""
 
-import json
 from pathlib import Path
 
 from hummbl_axis.contradiction import Contradiction, CycleState, prioritize
 
-
 # ─────────────────────────────────────────────────────────────
 # Contradiction
 # ─────────────────────────────────────────────────────────────
+
 
 class TestContradiction:
     def test_id_is_deterministic(self):
@@ -34,7 +33,7 @@ class TestContradiction:
         )
         assert c.id == c2.id
         assert c.id.startswith("AX-")
-        assert len(c.id) == 15  # "AX-" + 12 hex chars
+        assert len(c.id) == 19  # "AX-" + 16 hex chars
 
     def test_id_differs_on_different_scope(self):
         c1 = Contradiction("scope-a", "claim", "obs", "P2", 0.5, "low", "", "")
@@ -74,6 +73,7 @@ class TestContradiction:
 # Prioritization
 # ─────────────────────────────────────────────────────────────
 
+
 class TestPrioritize:
     def test_p0_before_p2(self):
         c_p0 = Contradiction("s", "c", "o", "P0", 0.5, "low", "", "")
@@ -91,6 +91,7 @@ class TestPrioritize:
 # ─────────────────────────────────────────────────────────────
 # CycleState — loop tracking and exit conditions
 # ─────────────────────────────────────────────────────────────
+
 
 class TestCycleState:
     def test_first_cycle_sets_unchanged_to_zero(self):
@@ -147,6 +148,12 @@ class TestCycleState:
         state.update([])  # c not seen → stale
         assert state.seen[c.id] == -1  # stale, not deleted
 
+    def test_id_delimiter_safety(self):
+        """Delimiter injection test: pipes in fields do not produce collisions."""
+        c1 = Contradiction("scope|a", "claim", "obs", "P2", 0.5, "low", "", "")
+        c2 = Contradiction("scope", "a|claim", "obs", "P2", 0.5, "low", "", "")
+        assert c1.id != c2.id
+
     def test_save_and_load_roundtrip(self, tmp_path: Path):
         state = CycleState()
         c = Contradiction("s", "c", "o", "P2", 0.5, "low", "", "")
@@ -160,6 +167,25 @@ class TestCycleState:
         assert loaded.cycle == state.cycle
         assert loaded.seen == state.seen
         assert loaded.history == state.history
+        assert loaded.consecutive_healthy == state.consecutive_healthy
+        assert loaded.flaps == state.flaps
+
+    def test_flap_dampening(self):
+        """Alternating between active and stale increments flap penalty."""
+        state = CycleState()
+        c = Contradiction("s", "c", "o", "P2", 0.5, "low", "", "")
+        state.update([c])  # cycle 1: seen=0
+        assert state.seen[c.id] == 0
+        state.update([])  # cycle 2: stale, seen=-1
+        assert state.seen[c.id] == -1
+        state.update([c])  # cycle 3: re-appears! flap penalty added -> seen=2
+        assert state.flaps[c.id] == 1
+        assert state.seen[c.id] == 2
+        state.update([c])  # cycle 4: seen=3 -> reaches stuck
+        assert state.seen[c.id] == 3
+        should_exit, reason = state.should_exit()
+        assert should_exit
+        assert "stuck" in reason
 
     def test_load_nonexistent_returns_fresh(self, tmp_path: Path):
         state = CycleState.load(tmp_path / "nonexistent.json")

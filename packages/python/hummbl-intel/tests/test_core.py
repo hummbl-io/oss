@@ -3,30 +3,8 @@
 Stdlib-only — no external test dependencies beyond pytest.
 """
 
-from hummbl_intel.taxonomy import (
-    CANONICAL_SURFACES,
-    IntelligenceDiscipline,
-    from_bus_prefix,
-    get_surface,
-    list_disciplines,
-)
-from hummbl_intel.grading import (
-    ContentCredibility,
-    SourceGrade,
-    SourceReliability,
-    grade_automated_source,
-    grade_human_source,
-    grade_research_source,
-    grade_uncorroborated,
-    upgrade_with_corroboration,
-)
-from hummbl_intel.posture import (
-    CollectionPostureReport,
-    DisciplinePosture,
-    PostureStatus,
-    SurfaceStatus,
-    build_default_posture,
-)
+from datetime import UTC
+
 from hummbl_intel.fusion import (
     AllSourceProduct,
     CompetingHypothesesAnalysis,
@@ -35,10 +13,37 @@ from hummbl_intel.fusion import (
     Hypothesis,
     fuse_into_finding,
 )
+from hummbl_intel.grading import (
+    AssertionPolarity,
+    ContentCredibility,
+    GradedAssertion,
+    SourceGrade,
+    SourceReliability,
+    grade_automated_source,
+    grade_human_source,
+    grade_research_source,
+    grade_uncorroborated,
+    upgrade_with_corroboration,
+)
 from hummbl_intel.managers import (
     CANONICAL_MANAGERS,
+    CORONAL_AGENT,
     get_disciplines_for_agent,
     get_manager,
+)
+from hummbl_intel.posture import (
+    CollectionPostureReport,
+    DisciplinePosture,
+    PostureStatus,
+    SurfaceStatus,
+    build_default_posture,
+)
+from hummbl_intel.taxonomy import (
+    CANONICAL_SURFACES,
+    IntelligenceDiscipline,
+    from_bus_prefix,
+    get_surface,
+    list_disciplines,
 )
 
 
@@ -134,6 +139,54 @@ class TestGrading:
         grade = grade_research_source(peer_reviewed=False)
         assert grade.reliability == SourceReliability.C
 
+    def test_contentcredibility_is_intenum(self):
+        assert ContentCredibility.ONE.value == 1
+        assert ContentCredibility.SIX.value == 6
+        assert int(ContentCredibility.THREE) == 3
+
+    def test_contentcredibility_label(self):
+        assert ContentCredibility.ONE.label == "confirmed"
+        assert ContentCredibility.THREE.label == "possibly_true"
+
+    def test_to_code_uses_intenum_value(self):
+        # B/2 — credibility int comes from IntEnum value, not a side dict.
+        grade = SourceGrade(SourceReliability.B, ContentCredibility.TWO)
+        assert grade.to_code() == "B/2"
+        grade6 = SourceGrade(SourceReliability.A, ContentCredibility.SIX)
+        assert grade6.to_code() == "A/6"
+
+    def test_graded_assertion_default_polarity_none(self):
+        # Default polarity is None ("caller did not declare"), not SUPPORTS.
+        # This lets fusion distinguish omission (run heuristic fallback) from
+        # explicit support (trust the declaration).
+        ga = GradedAssertion(
+            content="x",
+            source="s",
+            grade=grade_automated_source(),
+        )
+        assert ga.polarity is None
+
+    def test_graded_assertion_to_dict_shape(self):
+        ga = GradedAssertion(
+            content="deployment was not delayed",
+            source="s",
+            grade=SourceGrade(SourceReliability.B, ContentCredibility.TWO),
+            polarity=AssertionPolarity.CONTRADICTS,
+        )
+        d = ga.to_dict()
+        assert d["polarity"] == "contradicts"
+        # credibility stays the prose label (stable serialization shape)
+        assert d["credibility"] == "probably_true"
+        assert d["code"] == "B/2"
+
+    def test_graded_assertion_to_dict_polarity_none_serializes(self):
+        ga = GradedAssertion(
+            content="x",
+            source="s",
+            grade=grade_automated_source(),
+        )
+        assert ga.to_dict()["polarity"] is None
+
 
 class TestPosture:
     def test_default_posture_has_all_disciplines(self):
@@ -150,9 +203,9 @@ class TestPosture:
             ), f"{posture.discipline.name} is {posture.status}"
 
     def test_surface_stale_detection(self):
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         fresh = SurfaceStatus(
             name="test",
             last_collection=now,
@@ -224,6 +277,125 @@ class TestFusion:
         finding = fuse_into_finding("test conclusion", [])
         assert finding.probability == EstimativeProbability.EVEN_CHANCE
         assert finding.confidence == 0.0
+
+    def _two_actionable_assertions(self, polarity_a):
+        """Two actionable assertions, one corroborated -> base HIGHLY_LIKELY/0.85."""
+        a1 = GradedAssertion(
+            content="deployment was not delayed",
+            source="codex-steward-loop",
+            grade=grade_automated_source(),  # B/3, actionable
+            discipline="SIGINT",
+            corroboration_count=2,
+            polarity=polarity_a,
+        )
+        a2 = GradedAssertion(
+            content="ops confirmed fleet is live",
+            source="human",
+            grade=grade_human_source(),  # A/2, actionable
+            discipline="HUMINT",
+            polarity=AssertionPolarity.SUPPORTS,
+        )
+        return [a1, a2]
+
+    def test_polarity_supports_not_penalized(self):
+        # Regression: content starts with "not " but polarity=SUPPORTS must
+        # NOT trigger the contradiction penalty. The old string-prefix
+        # heuristic would have wrongly degraded this to 0.60.
+        finding = fuse_into_finding(
+            "Fleet coordination is active",
+            self._two_actionable_assertions(AssertionPolarity.SUPPORTS),
+        )
+        assert finding.confidence == 0.85
+        assert finding.probability == EstimativeProbability.HIGHLY_LIKELY
+
+    def test_polarity_contradicts_penalized(self):
+        # Explicit CONTRADICTS polarity degrades confidence by 0.25.
+        finding = fuse_into_finding(
+            "Fleet coordination is active",
+            self._two_actionable_assertions(AssertionPolarity.CONTRADICTS),
+        )
+        assert finding.confidence == 0.60  # max(0.10, 0.85 - 0.25)
+
+    def test_polarity_neutral_not_penalized(self):
+        finding = fuse_into_finding(
+            "Fleet coordination is active",
+            self._two_actionable_assertions(AssertionPolarity.NEUTRAL),
+        )
+        assert finding.confidence == 0.85
+
+    def _omitted_polarity_pair(self, content_a):
+        """Two actionable assertions; a1 omits polarity (None), a2 supports."""
+        a1 = GradedAssertion(
+            content=content_a,
+            source="sigint-bot",
+            grade=grade_automated_source(),  # B/3, actionable
+            discipline="SIGINT",
+            corroboration_count=2,
+            polarity=None,
+        )
+        a2 = GradedAssertion(
+            content="ops confirmed fleet is live",
+            source="human",
+            grade=grade_human_source(),  # A/2, actionable
+            discipline="HUMINT",
+            polarity=AssertionPolarity.SUPPORTS,
+        )
+        return [a1, a2]
+
+    def test_polarity_omission_heuristic_fallback_penalizes_and_warns(self):
+        # C2: a caller who omits polarity on contradiction-suggesting content
+        # is NOT silently let off — the conservative heuristic fallback fires,
+        # confidence is penalized, and a warning nudges explicit polarity.
+        finding = fuse_into_finding(
+            "Fleet coordination is active",
+            self._omitted_polarity_pair("not true that the fleet is live"),
+        )
+        assert finding.confidence == 0.60  # max(0.10, 0.85 - 0.25)
+        assert finding.probability == EstimativeProbability.HIGHLY_LIKELY
+        assert len(finding.warnings) == 1
+        assert "sigint-bot" in finding.warnings[0]
+        assert "set polarity explicitly" in finding.warnings[0]
+
+    def test_polarity_omission_no_match_no_penalty_no_warning(self):
+        # Omission on clearly-supporting content: heuristic does not fire,
+        # no penalty, no warning. The fallback is conservative (prefix-only).
+        finding = fuse_into_finding(
+            "Fleet coordination is active",
+            self._omitted_polarity_pair("fleet telemetry looks healthy"),
+        )
+        assert finding.confidence == 0.85
+        assert finding.warnings == []
+
+    def test_explicit_supports_contradicting_content_warns_only(self):
+        # D3: explicit SUPPORTS is trusted (no penalty — the original P1 fix
+        # holds), but a polarity/content inconsistency warning is emitted as
+        # an audit trail for mislabeled polarity.
+        a1 = GradedAssertion(
+            content="not true that the fleet is live",
+            source="sigint-bot",
+            grade=grade_automated_source(),
+            discipline="SIGINT",
+            corroboration_count=2,
+            polarity=AssertionPolarity.SUPPORTS,
+        )
+        a2 = GradedAssertion(
+            content="ops confirmed fleet is live",
+            source="human",
+            grade=grade_human_source(),
+            discipline="HUMINT",
+            polarity=AssertionPolarity.SUPPORTS,
+        )
+        finding = fuse_into_finding("Fleet coordination is active", [a1, a2])
+        assert finding.confidence == 0.85  # no penalty — explicit SUPPORTS trusted
+        assert len(finding.warnings) == 1
+        assert "verify polarity" in finding.warnings[0]
+
+    def test_fused_finding_warnings_default_empty(self):
+        finding = FusedFinding(
+            conclusion="x",
+            probability=EstimativeProbability.EVEN_CHANCE,
+        )
+        assert finding.warnings == []
 
     def test_all_source_product_key_judgments(self):
         product = AllSourceProduct(title="Test Briefing")
@@ -303,13 +475,13 @@ class TestManagers:
             assert len(manager.duties) > 0, f"No duties for {manager.discipline}"
 
     def test_get_disciplines_for_agent(self):
-        discs = get_disciplines_for_agent("claude-code")
+        discs = get_disciplines_for_agent(CORONAL_AGENT)
         assert IntelligenceDiscipline.ALL_SOURCE in discs
 
-    def test_claude_code_is_all_source_steward(self):
+    def test_coronal_is_all_source_steward(self):
         manager = get_manager(IntelligenceDiscipline.ALL_SOURCE)
         assert manager is not None
-        assert manager.steward_agent == "claude-code"
+        assert manager.steward_agent == CORONAL_AGENT
         assert "morning briefing" in " ".join(manager.duties).lower()
 
     def test_human_is_humint_steward(self):
@@ -323,7 +495,7 @@ class TestManagers:
 
         table = manager_summary_table()
         assert "SIGINT" in table
-        assert "claude-code" in table
+        assert CORONAL_AGENT in table
         assert len(table.split("\n")) >= 10
 
 
@@ -354,8 +526,6 @@ class TestIntegration:
         )
 
         # 3. Fuse into findings
-        from hummbl_intel.taxonomy import IntelligenceDiscipline
-
         f1 = fuse_into_finding(
             "Fleet coordination is active",
             [ga1, ga2],
