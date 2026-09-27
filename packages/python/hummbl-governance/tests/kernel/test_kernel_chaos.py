@@ -205,6 +205,10 @@ class TestChaosIdentityEngine:
             engine = IdentityEngine(Path(tmpdir))
             assert len(engine._identities) == 0
 
+    @pytest.mark.skipif(
+        hasattr(os, "geteuid") and os.geteuid() == 0,
+        reason="root bypasses file permission bits, so chmod 0o444 cannot deny the write",
+    )
     def test_permission_denied_graceful(self) -> None:
         """Make state dir read-only; verify KernelPanics gracefully."""
         with tempfile.TemporaryDirectory() as tmpdir:
