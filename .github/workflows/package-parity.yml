@@ -7,7 +7,7 @@ name: Package parity
 #     the declared dependency names with satisfying versions
 #
 # Freshness is structural (declared deps vs lock pins), not
-# re-resolution — a lock remains fresh until pyproject.toml deps change,
+# re-resolution -- a lock remains fresh until pyproject.toml deps change,
 # regardless of upstream releases.
 
 "on":
