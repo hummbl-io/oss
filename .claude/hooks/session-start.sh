@@ -59,7 +59,7 @@ fi
 if [ "$want_stamp" = "$have_stamp" ] && "$VENV/bin/python" -c "import pytest, ruff" >/dev/null 2>&1; then
   log "python packages up to date (stamp match), skipping install"
 else
-  log "installing ${#specs[@]} python packages + ruff into $VENV"
+  log "installing $(( ${#specs[@]} / 2 )) python packages + ruff into $VENV"
   if "${INSTALLER[@]}" ruff "${specs[@]}"; then
     printf '%s\n' "$want_stamp" > "$STAMP"
   else
@@ -106,3 +106,12 @@ if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
 fi
 
 log "session ready: $("$VENV/bin/python" --version), pytest $("$VENV/bin/python" -m pytest --version 2>&1 | awk '{print $2}'), ruff $("$VENV/bin/ruff" --version | awk '{print $2}')"
+
+# ---------------------------------------------------------------------------
+# Coordination bus heartbeat (no-op unless the environment configures a bus;
+# see .claude/hooks/bus-post.sh for the variables)
+# ---------------------------------------------------------------------------
+branch="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+head="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+timeout 20 "$ROOT/.claude/hooks/bus-post.sh" "*" HEARTBEAT \
+  "claude-code-web session start repo=hummbl-io/oss branch=$branch head=$head" || true
