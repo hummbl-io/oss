@@ -2,7 +2,7 @@
 **Scope:** Packages in this monorepo and their public release state.
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
-**Tree inventory updated:** 2026-09-09, `packages/python/` = 42 packages.
+**Tree inventory updated:** 2026-09-09, `packages/python/` = 47 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
