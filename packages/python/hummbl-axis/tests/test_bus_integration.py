@@ -1,9 +1,9 @@
 """Tests for bus integration — message formatting and posting logic."""
 
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from hummbl_axis.cli import _format_bus_message, _bus_post
+from hummbl_axis.cli import _bus_post, _format_bus_message
 from hummbl_axis.contradiction import Contradiction
 
 
@@ -98,9 +98,6 @@ class TestBusPost:
         bus_script = tmp_path / "bus-global.py"
         bus_script.write_text("# mock", encoding="utf-8")
 
-        # Create a fallback TSV path
-        fallback_tsv = tmp_path / "messages.tsv"
-
         c = _make_contradiction("P1", "test")
         results = [(c, 0)]
 
@@ -128,10 +125,11 @@ class TestBusPost:
 
         nonexistent = tmp_path / "nonexistent-bus.py"
         # Patch Path.home to a path where we can't create directories
-        # and also patch open to raise on the fallback TSV paths
-        with patch("hummbl_axis.cli.Path.home", return_value=tmp_path / "nonexistent-home"):
-            with patch("builtins.open", side_effect=PermissionError("no write access")):
-                posted = _bus_post(results, "delta", cycle=1, host="delta", bus_path=nonexistent)
+        with (
+            patch("hummbl_axis.cli.Path.home", return_value=tmp_path / "nonexistent-home"),
+            patch("builtins.open", side_effect=PermissionError("no write access")),
+        ):
+            posted = _bus_post(results, "delta", cycle=1, host="delta", bus_path=nonexistent)
 
         assert posted is False
         err = capsys.readouterr().err

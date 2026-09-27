@@ -2,3 +2,4 @@
 #    uv pip compile pyproject.toml --output-file requirements.lock
 pyyaml==6.0.3
     # via hummbl-free-models (pyproject.toml)
+# inputs-sha256: cf4efe186221aed63f8595e2eb6c53f7f143c6a79c11e6e2c48fa7605b8f985a

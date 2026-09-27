@@ -55,10 +55,14 @@
       "type": "string",
       "enum": [
         "project",
+        "module",
+        "file",
+        "convention",
+        "process",
+        "session",
         "agent",
         "system",
-        "global",
-        "session"
+        "global"
       ]
     },
     "content": {

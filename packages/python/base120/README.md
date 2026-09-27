@@ -5,7 +5,7 @@
 
 **120 named mental models for structured reasoning — a stdlib-only Python library.**
 
-**Version 3.0.3** · [Changelog](CHANGELOG.md) · [PyPI](https://pypi.org/project/base120/) · [Documentation](docs/) · [Examples](examples/) · [Contributing](CONTRIBUTING.md)
+**Version 3.1.0** · [Changelog](CHANGELOG.md) · [PyPI](https://pypi.org/project/base120/) · [Documentation](docs/) · [Examples](examples/) · [Contributing](CONTRIBUTING.md)
 
 Use them to analyze problems, design systems, and make decisions — whether you are a human, an AI agent, or a fleet of both.
 
@@ -354,6 +354,10 @@ base120 prompt P6 "How should we price the certification tier?"
 
 # List the 6 transformation families
 base120 families
+
+# Render the ledger as an image, then read it back
+base120 glyph render --format png -o ledger.png
+base120 glyph decode ledger.png
 ```
 
 ### CLI examples
@@ -455,6 +459,41 @@ Each ledger entry is a JSONL tuple with:
 The ledger is append-only — records are never modified or deleted, making it suitable for audit trails and governance review.
 
 ---
+
+
+## Glyph
+
+A glyph is a round-trippable image encoding of a ledger. It has two layers:
+
+| Layer | Content | Purpose |
+|-------|---------|---------|
+| Visual | 6 × 20 grid (one row per family, one cell per operator), an order strip, and a digest strip | Read at a glance; sequence is preserved because composition is non-commutative |
+| Machine | Canonical JSON payload in SVG `<metadata>` or a PNG `iTXt` chunk, optionally HMAC-SHA256 signed | Byte-exact round-trip, tamper evident |
+
+Cell intensity is the number of applications of that operator. An amber ring
+marks any operator with an application above the `cut()` threshold. The
+encoder only reads `project()` and `cut()` output; it never writes a ledger
+and the Engine never calls it.
+
+```python
+import os
+from base120 import Ledger, decode_glyph, encode_glyph
+
+key = os.environ["BASE120_SIGNING_SECRET"].encode()   # >= 32 bytes
+glyph = encode_glyph(Ledger().project(), max_drift=0.5, key=key)
+
+open("ledger.png", "wb").write(glyph.to_png(scale=12))
+open("ledger.svg", "w").write(glyph.to_svg())
+
+back = decode_glyph(open("ledger.png", "rb").read(), key=key)
+assert back.entries == glyph.entries   # machine layer is exact
+assert back.verified is True           # signature checks out
+assert back.to_svg() == glyph.to_svg() # visual layer regenerates
+```
+
+An unsigned glyph is still decodable. Its payload says `"signed": false`, so
+absence of a signature reads as unknown rather than clean. The key is
+optional, injected as bytes, and rejected below 32 bytes.
 
 ## Examples
 
@@ -666,6 +705,12 @@ base120 families
 
 # Verify README.md and llms.txt match the canonical registry
 base120 verify-docs
+
+# Encode the ledger as a glyph image (SVG default, PNG with --format png)
+base120 glyph render --format png --sign -o ledger.png
+
+# Decode a glyph and verify its signature (exit 2 if it does not verify)
+base120 glyph decode ledger.png --verify
 ```
 
 ## Ledger
