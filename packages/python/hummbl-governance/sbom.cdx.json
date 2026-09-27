@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:5a063673-0d46-4e4c-8a1e-0a558db7061b",
+  "serialNumber": "urn:uuid:178dc3e8-d006-4e5e-a9a9-332b9add25f9",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-22T05:56:59Z",
+    "timestamp": "2026-09-27T09:53:09Z",
     "tools": [
       {
         "vendor": "HUMMBL",
@@ -14,9 +14,9 @@
     ],
     "component": {
       "type": "library",
-      "bom-ref": "pkg:pypi/hummbl-governance@1.5.0",
+      "bom-ref": "pkg:pypi/hummbl-governance@1.5.1",
       "name": "hummbl-governance",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem.",
       "licenses": [
         {
@@ -25,7 +25,7 @@
           }
         }
       ],
-      "purl": "pkg:pypi/hummbl-governance@1.5.0",
+      "purl": "pkg:pypi/hummbl-governance@1.5.1",
       "properties": [
         {
           "name": "hummbl:runtime_deps",
@@ -33,7 +33,11 @@
         },
         {
           "name": "hummbl:pkg_sha256",
-          "value": "d17e6c9817863275c9151727780c4b8b450c2fdf98f8715305b83eec050ef201"
+          "value": "17e80955678fbfad9ef02d52afaf4957d943fdbe7296b69dfce396decfdc46f8"
+        },
+        {
+          "name": "hummbl:license_files",
+          "value": "LICENSE,NOTICE"
         }
       ]
     }
@@ -41,9 +45,9 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:pypi/hummbl-governance@1.5.0",
+      "bom-ref": "pkg:pypi/hummbl-governance@1.5.1",
       "name": "hummbl-governance",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "description": "Governance primitives for AI agent orchestration: kill switch, circuit breaker, cost governor, delegation tokens, audit log, identity registry, schema validation, coordination bus, compliance mapper, health probes, BaseNTuple universal governance tuples, TupleSchemaRegistry, AdversarialTupleGenerator, MerkleAnchor, SovereignCryptosystem.",
       "licenses": [
         {
@@ -52,7 +56,7 @@
           }
         }
       ],
-      "purl": "pkg:pypi/hummbl-governance@1.5.0",
+      "purl": "pkg:pypi/hummbl-governance@1.5.1",
       "properties": [
         {
           "name": "hummbl:runtime_deps",
@@ -60,7 +64,11 @@
         },
         {
           "name": "hummbl:pkg_sha256",
-          "value": "d17e6c9817863275c9151727780c4b8b450c2fdf98f8715305b83eec050ef201"
+          "value": "17e80955678fbfad9ef02d52afaf4957d943fdbe7296b69dfce396decfdc46f8"
+        },
+        {
+          "name": "hummbl:license_files",
+          "value": "LICENSE,NOTICE"
         }
       ]
     },
@@ -68,13 +76,16 @@
       "type": "library",
       "bom-ref": "pkg:pypi/build",
       "name": "build",
-      "version": "1.0",
       "scope": "optional",
       "purl": "pkg:pypi/build",
       "properties": [
         {
           "name": "hummbl:dependency_type",
           "value": "test"
+        },
+        {
+          "name": "hummbl:version_spec",
+          "value": ">=1.0"
         }
       ]
     },
@@ -82,13 +93,16 @@
       "type": "library",
       "bom-ref": "pkg:pypi/pytest",
       "name": "pytest",
-      "version": "7.0",
       "scope": "optional",
       "purl": "pkg:pypi/pytest",
       "properties": [
         {
           "name": "hummbl:dependency_type",
           "value": "test"
+        },
+        {
+          "name": "hummbl:version_spec",
+          "value": ">=7.0"
         }
       ]
     },
@@ -96,13 +110,16 @@
       "type": "library",
       "bom-ref": "pkg:pypi/pytest-cov",
       "name": "pytest-cov",
-      "version": "4.0",
       "scope": "optional",
       "purl": "pkg:pypi/pytest-cov",
       "properties": [
         {
           "name": "hummbl:dependency_type",
           "value": "test"
+        },
+        {
+          "name": "hummbl:version_spec",
+          "value": ">=4.0"
         }
       ]
     },
@@ -110,13 +127,16 @@
       "type": "library",
       "bom-ref": "pkg:pypi/ruff",
       "name": "ruff",
-      "version": "0.4",
       "scope": "optional",
       "purl": "pkg:pypi/ruff",
       "properties": [
         {
           "name": "hummbl:dependency_type",
           "value": "test"
+        },
+        {
+          "name": "hummbl:version_spec",
+          "value": ">=0.4"
         }
       ]
     },
@@ -124,20 +144,23 @@
       "type": "library",
       "bom-ref": "pkg:pypi/cryptography",
       "name": "cryptography",
-      "version": "42.0",
       "scope": "optional",
       "purl": "pkg:pypi/cryptography",
       "properties": [
         {
           "name": "hummbl:dependency_type",
           "value": "test"
+        },
+        {
+          "name": "hummbl:version_spec",
+          "value": ">=42.0"
         }
       ]
     }
   ],
   "dependencies": [
     {
-      "ref": "pkg:pypi/hummbl-governance@1.5.0",
+      "ref": "pkg:pypi/hummbl-governance@1.5.1",
       "dependsOn": [
         "pkg:pypi/build",
         "pkg:pypi/pytest",
