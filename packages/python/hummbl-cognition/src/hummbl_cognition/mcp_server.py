@@ -19,6 +19,7 @@ Tools:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 import traceback
@@ -33,6 +34,9 @@ from hummbl_cognition.indexer import BM25Index
 from hummbl_cognition.ledger_writer import DEFAULT_COGNITION_DIR, post_entry
 from hummbl_cognition.models import LedgerEntry
 from hummbl_cognition.query import query_entries
+
+# stderr only -- stdout carries the JSON-RPC protocol on stdio MCP
+logger = logging.getLogger(__name__)
 
 SERVER_NAME = "cognitive-ledger"
 SERVER_VERSION = "0.1.0"
@@ -73,7 +77,12 @@ def get_indexer() -> BM25Index:
 def _rebuild_index(indexer: BM25Index) -> None:
     """Rebuild and persist the derived index from the canonical ledger."""
     indexer.build(ledger_path=str(LEDGER_FILE))
-    indexer.save(str(INDEX_FILE))
+    try:
+        indexer.save(str(INDEX_FILE))
+    except (OSError, RuntimeError) as e:
+        # Keep serving the freshly built in-memory index; a refused write
+        # (e.g. shrink guard) must not take the reader down with it.
+        logger.warning("Could not save index: %s", e)
 
 
 def _check_and_rebuild_if_stale(indexer: BM25Index) -> None:

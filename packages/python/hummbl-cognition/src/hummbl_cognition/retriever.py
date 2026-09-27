@@ -200,10 +200,25 @@ class OpenBrainRetriever:
             return
         index_path = self.primary_state_dir / "cognition" / "index.json"
         if not self.index.load(index_path):
+            if index_path.exists():
+                # An existing-but-unloadable index is corrupted or transiently
+                # locked state, NOT absent state. Rebuilding from a possibly
+                # wrong default ledger and saving over it once stomped a
+                # healthy index (2026-09-25: 2549 -> 3 docs mid-session).
+                # Never auto-repair shared state; the explicit `reindex`
+                # command is the repair path. The index stays empty for this
+                # session; the file is left untouched for the next reader.
+                logger.warning(
+                    "Index at %s exists but failed to load; refusing to "
+                    "rebuild over it (run 'reindex' to repair)",
+                    index_path,
+                )
+                self._index_loaded = True
+                return
             self.index.build(ledger_path)
             try:
                 self.index.save(index_path)
-            except OSError as e:
+            except (OSError, RuntimeError) as e:
                 logger.warning("Could not save index: %s", e)
         self._index_loaded = True
 
@@ -220,6 +235,7 @@ class OpenBrainRetriever:
         limit: int = 50,
         time_decay: bool | None = None,
         retrieval_decay: bool | None = None,
+        exclude_ids: set[str] | None = None,
     ) -> list[MemoryResult]:
         """Search all memory pools and return ranked results within token budget.
 
@@ -250,6 +266,10 @@ class OpenBrainRetriever:
             Apply exponential decay to retrieval counts based on time
             since last retrieval. None = use module default (True unless
             COGNITION_RETRIEVER_RETRIEVAL_DECAY=0).
+        exclude_ids : set[str] | None
+            Ledger entry ids to mask from results (blind rediscovery
+            evaluation). Applies to the ledger pool only; other pools are
+            unaffected.
 
         Returns:
         -------
@@ -282,6 +302,7 @@ class OpenBrainRetriever:
                     limit=limit,
                     time_decay=time_decay,
                     retrieval_decay=retrieval_decay,
+                    exclude_ids=exclude_ids,
                 )
             )
 
@@ -435,10 +456,12 @@ class OpenBrainRetriever:
         limit: int = 20,
         time_decay: bool = False,
         retrieval_decay: bool = False,
+        exclude_ids: set[str] | None = None,
     ) -> list[MemoryResult]:
         """Search the cognitive ledger via BM25 index."""
         self.ensure_index()
 
+        mask_kw = {"exclude_ids": exclude_ids} if exclude_ids else {}
         hits = self.index.search(
             query,
             limit=limit,
@@ -447,6 +470,7 @@ class OpenBrainRetriever:
             since=since,
             time_decay=time_decay,
             retrieval_decay=retrieval_decay,
+            **mask_kw,
         )
 
         results = []
