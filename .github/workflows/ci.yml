@@ -105,6 +105,7 @@ jobs:
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
+        timeout-minutes: 15
         run: |
           if [ "${{ matrix.package }}" = "hummbl-governance" ]; then
             python -m pytest tests/ -q --cov=hummbl_governance --cov-report=term
