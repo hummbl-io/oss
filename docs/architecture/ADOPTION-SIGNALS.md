@@ -25,7 +25,7 @@ offering fit are **assumptions** and are labeled as such.
 | `hummbl-cognition` | 207 | 2 | 1 | 0.1.0 | 0.1.0 | live |
 | `hummbl-tuples` | 11 | 2 | 0 | 0.2.2 | 0.2.0 | live |
 | `hummbl-bif` | 16 | 2 | 0 | 1.0.1 | 1.0.1 | live |
-| `base120` | 210 | 2 | 1 | 3.0.3 | 3.0.2 | live |
+| `base120` | 210 | 2 | 1 | 3.1.0 | 3.0.2 | live |
 | `governed-compression` | 12 | 2 | 0 | 0.1.0 | 0.1.0 | live |
 | `hummbl` | 104 | 2 | 1 | 0.1.0 | 0.1.0 | live |
 | `hummbl-kernel` | 102 | 2 | 1 | 0.1.0 | 0.1.0 | live |

@@ -29,7 +29,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
 | `hummbl-governance` | 1.5.1 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.1 remains unreleased; see `docs/operations/RELEASE.md` |
-| `base120` | 3.0.3 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
+| `base120` | 3.1.0 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
 | `hummbl-tuples` | 0.2.2 | [PyPI](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
