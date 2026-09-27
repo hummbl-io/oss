@@ -233,6 +233,7 @@ class BM25Index:
         time_decay: bool = False,
         retrieval_decay: bool = False,
         now: str | None = None,
+        exclude_ids: set[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Search the index using BM25 scoring.
 
@@ -248,6 +249,10 @@ class BM25Index:
                 compatibility.
             now: Optional UTC timestamp for decay computation (defaults to
                 current time). Useful for deterministic testing.
+            exclude_ids: Optional set of entry ids to mask from results.
+                Masked ids contribute no score and cannot appear in hits --
+                used for blind rediscovery evaluation where held-out findings
+                must be invisible to the corpus.
         """
         query_tokens = tokenize(query)
         if not query_tokens:
@@ -255,16 +260,28 @@ class BM25Index:
 
         scores: dict[str, float] = {}
 
+        # Effective corpus size: masked docs are invisible, so they do not
+        # count toward N or document frequency. Masking a common-term
+        # carrier cannot silently inflate the score of what remains.
+        effective_docs = self.total_docs
+        if exclude_ids:
+            effective_docs -= sum(1 for eid in exclude_ids if eid in self.doc_lengths)
+
         for term in query_tokens:
             postings = self.inverted_index.get(term, [])
             if not postings:
                 continue
 
-            # IDF: log((N - n + 0.5) / (n + 0.5) + 1)
             n = len(postings)
-            idf = math.log((self.total_docs - n + 0.5) / (n + 0.5) + 1.0)
+            if exclude_ids:
+                n -= sum(1 for doc_id, _ in postings if doc_id in exclude_ids)
+                if n <= 0:
+                    continue
+            idf = math.log((effective_docs - n + 0.5) / (n + 0.5) + 1.0)
 
             for doc_id, tf in postings:
+                if exclude_ids and doc_id in exclude_ids:
+                    continue
                 doc_len = self.doc_lengths.get(doc_id, 0)
                 # BM25 term score
                 numerator = tf * (BM25_K1 + 1)
@@ -396,9 +413,34 @@ class BM25Index:
         self.avg_doc_length = total_len / self.total_docs
         self.entry_count += 1
 
-    def save(self, path: str | Path | None = None) -> Path:
-        """Save index to disk (crash-safe: temp + rename)."""
+    def save(
+        self, path: str | Path | None = None, *, allow_shrink: bool = False
+    ) -> Path:
+        """Save index to disk (crash-safe: temp + rename).
+
+        Refuses to overwrite an existing index with a strictly smaller one
+        unless allow_shrink=True -- a silent shrink is how a healthy index
+        gets stomped by a build from the wrong ledger (observed 2026-09-25:
+        2549 -> 3 docs). A corrupt/unparseable existing file counts as
+        absent, so repair writes always proceed.
+        """
         index_path = _resolve_index_path(path or self.index_path)
+
+        if not allow_shrink and index_path.exists():
+            try:
+                existing = json.loads(index_path.read_text(encoding="utf-8"))
+                existing_count = int(
+                    existing.get("stats", {}).get("entry_count", 0)
+                )
+            except (OSError, json.JSONDecodeError, ValueError):
+                existing_count = 0
+            if existing_count > self.entry_count:
+                raise RuntimeError(
+                    f"refusing to shrink index at {index_path}: existing "
+                    f"entry_count={existing_count} > new entry_count="
+                    f"{self.entry_count} (pass allow_shrink=True to force)"
+                )
+
         index_path.parent.mkdir(parents=True, exist_ok=True)
 
         data = {

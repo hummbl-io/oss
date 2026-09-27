@@ -12,13 +12,14 @@ Tools:
     ledger_post      - Append a new entry to the ledger
     ledger_stats     - Entry count, agent breakdown, type breakdown, index health
     boot_context     - Get session boot context (recent high-value entries)
-    memory_search    - Unified search across 5 memory pools (ledger, bus, briefings, findings, MEMORY.md)
+    memory_search    - Unified search across memory pools (ledger, bus, briefings, findings, session, MEMORY.md)
     reindex          - Rebuild the BM25 index from ledger
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 import traceback
@@ -33,6 +34,9 @@ from hummbl_cognition.indexer import BM25Index
 from hummbl_cognition.ledger_writer import DEFAULT_COGNITION_DIR, post_entry
 from hummbl_cognition.models import LedgerEntry
 from hummbl_cognition.query import query_entries
+
+# stderr only -- stdout carries the JSON-RPC protocol on stdio MCP
+logger = logging.getLogger(__name__)
 
 SERVER_NAME = "cognitive-ledger"
 SERVER_VERSION = "0.1.0"
@@ -73,7 +77,12 @@ def get_indexer() -> BM25Index:
 def _rebuild_index(indexer: BM25Index) -> None:
     """Rebuild and persist the derived index from the canonical ledger."""
     indexer.build(ledger_path=str(LEDGER_FILE))
-    indexer.save(str(INDEX_FILE))
+    try:
+        indexer.save(str(INDEX_FILE))
+    except (OSError, RuntimeError) as e:
+        # Keep serving the freshly built in-memory index; a refused write
+        # (e.g. shrink guard) must not take the reader down with it.
+        logger.warning("Could not save index: %s", e)
 
 
 def _check_and_rebuild_if_stale(indexer: BM25Index) -> None:
@@ -194,7 +203,7 @@ TOOLS = [
                 },
                 "vendor": {
                     "type": "string",
-                    "description": "Vendor (anthropic|openai|google|moonshot|local|human). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
+                    "description": "Vendor (anthropic|cognition|openai|google|moonshot|local|human|zai). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
                 },
                 "model": {
                     "type": "string",
@@ -238,6 +247,62 @@ TOOLS = [
                 },
             },
             "required": [],
+        },
+    },
+    {
+        "name": "memory_search",
+        "description": "Unified search across all Open Brain memory pools: ledger (BM25), bus digests, briefings, autoresearch findings, session claims/ledgers, and MEMORY.md. Returns ranked results within a token budget.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search query (natural language or keywords)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results before token-budget filtering (default: 20)",
+                    "default": 20,
+                },
+                "token_budget": {
+                    "type": "integer",
+                    "description": "Max estimated tokens across returned results (default: 2000)",
+                    "default": 2000,
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "ledger",
+                            "bus",
+                            "briefings",
+                            "findings",
+                            "session",
+                            "memory_md",
+                        ],
+                    },
+                    "description": "Restrict to specific memory pools (default: all)",
+                },
+                "scope": {
+                    "type": "string",
+                    "description": "Filter ledger results by scope",
+                },
+                "entry_type": {
+                    "type": "string",
+                    "description": "Filter ledger results by entry type",
+                },
+                "since": {
+                    "type": "string",
+                    "description": "ISO timestamp — only return entries after this time",
+                },
+                "agent": {
+                    "type": "string",
+                    "description": "Agent ID for retrieval feedback tracking (default: mcp-client)",
+                    "default": "mcp-client",
+                },
+            },
+            "required": ["query"],
         },
     },
     {
@@ -329,7 +394,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             # Resolve vendor/model from args → env vars → error.
             # Hardcoding "anthropic" would corrupt provenance (any agent may
             # call this MCP). LedgerEntry rejects vendor not in VALID_VENDORS
-            # (anthropic/openai/google/moonshot/local/human), so a missing
+            # (anthropic/cognition/openai/google/moonshot/local/human/zai), so a missing
             # identity must surface as a clear schema error, not "Invalid
             # vendor: 'unknown'".
             vendor = arguments.get("vendor") or os.environ.get("COGNITION_VENDOR")
@@ -343,7 +408,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                         f"Missing required identity: {', '.join(missing_identity)}. "
                         "Supply via arguments or set COGNITION_VENDOR / "
                         "COGNITION_MODEL env vars. Valid vendors: "
-                        "anthropic, openai, google, moonshot, local, human."
+                        "anthropic, cognition, openai, google, moonshot, local, human, zai."
                     )
                 }
             entry = LedgerEntry.create(
@@ -451,6 +516,52 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             }
         except Exception as e:
             return {"error": f"Boot context failed: {e}"}
+
+    elif name == "memory_search":
+        query_text = arguments.get("query")
+        if not query_text:
+            return {"error": "Missing required argument: query"}
+        sources_arg = arguments.get("sources")
+        if sources_arg is not None:
+            allowed = {
+                "ledger", "bus", "briefings", "findings", "session",
+                "memory_md",
+            }
+            bad = [s for s in sources_arg if s not in allowed]
+            if bad:
+                return {
+                    "error": f"Invalid source(s): {', '.join(map(str, bad))}. "
+                    f"Allowed: {', '.join(sorted(allowed))}"
+                }
+        try:
+            from hummbl_cognition.retriever import OpenBrainRetriever
+
+            # Share the MCP server's index instance so memory_search sees
+            # the same ledger state as ledger_search/reindex. state_dir is
+            # the parent of the cognition dir (the _state/ root) so the
+            # retriever resolves pool paths like <state>/cognition/.
+            retriever = OpenBrainRetriever(
+                state_dir=LEDGER_DIR.parent,
+                index=get_indexer(),
+            )
+            retriever._index_loaded = True
+            results = retriever.search(
+                query_text,
+                token_budget=arguments.get("token_budget", 2000),
+                scope=arguments.get("scope"),
+                entry_type=arguments.get("entry_type"),
+                since=arguments.get("since"),
+                sources=sources_arg,
+                agent=arguments.get("agent", "mcp-client"),
+                limit=arguments.get("limit", 20),
+            )
+            return {
+                "query": query_text,
+                "count": len(results),
+                "results": [r.to_dict() for r in results],
+            }
+        except Exception as e:
+            return {"error": f"Memory search failed: {e}"}
 
     elif name == "reindex":
         try:
