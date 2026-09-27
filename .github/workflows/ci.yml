@@ -246,6 +246,29 @@ jobs:
         # stale lock; this job surfaces that on the PR instead of at release.
         run: python .github/scripts/lock_build_env.py check-inputs --all
 
+  package-parity:
+    name: package-parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Test the parity checker
+        run: python -m unittest discover -s .github/scripts -p 'test_package_parity.py' -v
+
+      - name: Packages documented and runtime locks current
+        # Stdlib only, no network or uv needed. Fails if a packages/python/
+        # directory is absent from docs/architecture/PACKAGES.md or if a
+        # package with dependencies has a missing/stale requirements.lock
+        # (issue #264). Regenerate with:
+        #   python .github/scripts/package_parity.py lock <package>
+        run: python .github/scripts/package_parity.py check
+
   claim-drift-check:
     name: claim-drift-check
     runs-on: ubuntu-latest
@@ -299,7 +322,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit, build-lock-check, claim-drift-check, docker-test]
+    needs: [test, test-preview, pip-audit, build-lock-check, package-parity, claim-drift-check, docker-test]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
@@ -308,6 +331,7 @@ jobs:
           echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           echo "build-lock-check=${{ needs.build-lock-check.result }}"
+          echo "package-parity=${{ needs.package-parity.result }}"
           echo "claim-drift-check=${{ needs.claim-drift-check.result }}"
           echo "docker-test=${{ needs.docker-test.result }}"
           # test-preview has continue-on-error so its result is always
@@ -316,5 +340,6 @@ jobs:
 
           test "${{ needs.pip-audit.result }}" = success
           test "${{ needs.build-lock-check.result }}" = success
+          test "${{ needs.package-parity.result }}" = success
           test "${{ needs.claim-drift-check.result }}" = success
           test "${{ needs.docker-test.result }}" = success
