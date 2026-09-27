@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hummbl-intel"
 version = "0.1.0"
-description = "INT taxonomy framework for agent intelligence collection"
+description = "INT taxonomy framework: intelligence discipline categorization, source reliability grading, collection posture, and all-source fusion for agent systems."
 readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
 authors = [{ name = "HUMMBL Open Source", email = "oss@hummbl.io" }]
+keywords = ["intelligence", "taxonomy", "all-source", "fusion", "collection", "agents"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
@@ -31,10 +32,13 @@ Issues = "https://github.com/hummbl-io/oss/issues"
 PyPI = "https://pypi.org/project/hummbl-intel/"
 
 [project.optional-dependencies]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "pytest-cov"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+hummbl_intel = ["py.typed"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -42,3 +46,15 @@ package-dir = { "" = "src" }
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.mypy]
+files = ["src", "tests"]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+

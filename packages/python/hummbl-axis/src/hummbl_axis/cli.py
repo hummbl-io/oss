@@ -19,16 +19,18 @@ The scan command:
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import os
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Force UTF-8 output — Atlas evidence cuts contain Unicode that cp1252 can't encode
-if hasattr(sys.stdout, "reconfigure"):
+if isinstance(sys.stdout, io.TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if isinstance(sys.stderr, io.TextIOWrapper):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from .atlas_reader import (
@@ -38,11 +40,11 @@ from .atlas_reader import (
     scan_freshness,
     scan_ledger_directory,
 )
-from .contradiction import CycleState, Contradiction, prioritize
+from .contradiction import Contradiction, CycleState, prioritize
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _format_row(c: Contradiction, unchanged: int = 0) -> str:
@@ -65,20 +67,34 @@ def cmd_scan(args: argparse.Namespace) -> int:
     if atlas_dir.is_dir():
         md_contradictions = scan_ledger_directory(atlas_dir, args.atlas_pattern)
         contradictions.extend(md_contradictions)
-        print(f"# Atlas markdown: {len(md_contradictions)} contradictions from {atlas_dir}", file=sys.stderr)
+        print(
+            f"# Atlas markdown: {len(md_contradictions)} contradictions from {atlas_dir}",
+            file=sys.stderr,
+        )
 
         # 1a. Check freshness if requested
         if args.check_freshness:
-            freshness_results = scan_freshness(atlas_dir, args.atlas_pattern, args.freshness_category)
+            freshness_results = scan_freshness(
+                atlas_dir, args.atlas_pattern, args.freshness_category
+            )
             stale = [r for r in freshness_results if r.is_stale]
             if stale:
-                print(f"# FRESHNESS WARNING: {len(stale)}/{len(freshness_results)} evidence cuts are stale ({args.freshness_category} window: {stale[0].max_age_days}d)", file=sys.stderr)
+                print(
+                    f"# FRESHNESS WARNING: {len(stale)}/{len(freshness_results)} evidence cuts are stale ({args.freshness_category} window: {stale[0].max_age_days}d)",
+                    file=sys.stderr,
+                )
                 for r in stale[:5]:
-                    print(f"#   STALE: {r.path} ({r.age_days:.0f}d old, max {r.max_age_days}d)", file=sys.stderr)
+                    print(
+                        f"#   STALE: {r.path} ({r.age_days:.0f}d old, max {r.max_age_days}d)",
+                        file=sys.stderr,
+                    )
                 if len(stale) > 5:
                     print(f"#   ... and {len(stale) - 5} more stale", file=sys.stderr)
             else:
-                print(f"# Freshness OK: all {len(freshness_results)} evidence cuts within {args.freshness_category} window", file=sys.stderr)
+                print(
+                    f"# Freshness OK: all {len(freshness_results)} evidence cuts within {args.freshness_category} window",
+                    file=sys.stderr,
+                )
     else:
         print(f"# Atlas dir not found: {atlas_dir}", file=sys.stderr)
 
@@ -94,16 +110,19 @@ def cmd_scan(args: argparse.Namespace) -> int:
                 if obs_path.exists():
                     observed = json.loads(obs_path.read_text(encoding="utf-8"))
                     count_contradictions = diff_counts(
-                        claimed, observed,
+                        claimed,
+                        observed,
                         evidence_source=str(inv_path),
                         claim_source=str(obs_path),
                     )
                     contradictions.extend(count_contradictions)
-                    print(f"# Count diff: {len(count_contradictions)} contradictions", file=sys.stderr)
+                    print(
+                        f"# Count diff: {len(count_contradictions)} contradictions", file=sys.stderr
+                    )
                 else:
                     print(f"# Observed counts file not found: {obs_path}", file=sys.stderr)
             else:
-                print(f"# No --observed-counts provided; skipping count diff", file=sys.stderr)
+                print("# No --observed-counts provided; skipping count diff", file=sys.stderr)
         else:
             print(f"# Inventory file not found: {inv_path}", file=sys.stderr)
 
@@ -111,7 +130,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
     prioritized = prioritize(contradictions)
 
     # 4. Update cycle state
-    state_path = Path(args.cycle_state).expanduser() if args.cycle_state else Path(".axis-state.json")
+    state_path = (
+        Path(args.cycle_state).expanduser() if args.cycle_state else Path(".axis-state.json")
+    )
     state = CycleState.load(state_path)
     results = state.update(prioritized)
     state.save(state_path)
@@ -122,8 +143,14 @@ def cmd_scan(args: argparse.Namespace) -> int:
     print(f"# State: {state_path}")
     print()
 
-    for c, unchanged in results:
+    display_results = results[: args.top] if args.top and args.top > 0 else results
+    for c, unchanged in display_results:
         print(_format_row(c, unchanged))
+
+    if args.top and len(results) > args.top:
+        print(
+            f"\n# ... and {len(results) - args.top} more (capped at Top {args.top} per ISA-18.2)."
+        )
 
     # 6. Check exit condition
     should_exit, reason = state.should_exit()
@@ -154,7 +181,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
 def cmd_report(args: argparse.Namespace) -> int:
     """Print cycle state history without running a new cycle."""
-    state_path = Path(args.cycle_state).expanduser() if args.cycle_state else Path(".axis-state.json")
+    state_path = (
+        Path(args.cycle_state).expanduser() if args.cycle_state else Path(".axis-state.json")
+    )
     state = CycleState.load(state_path)
     print(json.dumps(state.to_dict(), indent=2))
     return 0
@@ -224,16 +253,22 @@ def _bus_post(
         try:
             proc = subprocess.run(
                 [sys.executable, str(bus_path), "post", "axis", "all", "SITREP", message],
-                capture_output=True, text=True, timeout=15,
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
             )
             if proc.returncode == 0:
                 print(f"# Bus posted: {message}", file=sys.stderr)
                 return True
             else:
-                print(f"# Bus post failed (exit {proc.returncode}): {proc.stderr.strip()}", file=sys.stderr)
+                print(
+                    f"# Bus post failed (exit {proc.returncode}): {proc.stderr.strip()}",
+                    file=sys.stderr,
+                )
         except subprocess.TimeoutExpired:
-            print(f"# Bus post timed out", file=sys.stderr)
-        except Exception as exc:
+            print("# Bus post timed out", file=sys.stderr)
+        except Exception as exc:  # noqa: BLE001
             print(f"# Bus post error: {exc}", file=sys.stderr)
 
     # Fallback: direct TSV append to local mirror
@@ -242,7 +277,7 @@ def _bus_post(
         Path.home() / ".agents" / "bus" / "messages.tsv",
     ]
 
-    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     line = f"{ts}\taxis\tall\tSITREP\t{message}"
 
     for fb_path in fallback_paths:
@@ -252,11 +287,11 @@ def _bus_post(
                 f.write(line + "\n")
             print(f"# Bus posted (fallback TSV): {fb_path}", file=sys.stderr)
             return True
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f"# Bus fallback failed ({fb_path}): {exc}", file=sys.stderr)
             continue
 
-    print(f"# Bus post failed — no delivery path available", file=sys.stderr)
+    print("# Bus post failed — no delivery path available", file=sys.stderr)
     return False
 
 
@@ -269,17 +304,42 @@ def build_parser() -> argparse.ArgumentParser:
 
     # scan
     scan = sub.add_parser("scan", help="Run one Axis cycle")
-    scan.add_argument("--atlas-dir", default="~/docs", help="Directory of Atlas markdown evidence cuts")
-    scan.add_argument("--atlas-pattern", default="hummbl-atlas-*.md", help="Glob pattern for ledger files")
+    scan.add_argument(
+        "--atlas-dir", default="~/docs", help="Directory of Atlas markdown evidence cuts"
+    )
+    scan.add_argument(
+        "--atlas-pattern", default="hummbl-atlas-*.md", help="Glob pattern for ledger files"
+    )
     scan.add_argument("--inventory", help="JSON inventory file (claimed state)")
-    scan.add_argument("--observed-counts", help="JSON file of observed counts to diff against inventory")
+    scan.add_argument(
+        "--observed-counts", help="JSON file of observed counts to diff against inventory"
+    )
     scan.add_argument("--cycle-state", default=".axis-state.json", help="Cycle state file path")
-    scan.add_argument("--bus-post", help="Post SITREP summary to coordination bus (any value enables)")
+    scan.add_argument(
+        "--bus-post", help="Post SITREP summary to coordination bus (any value enables)"
+    )
     scan.add_argument("--bus-path", help="Path to bus-global.py (default: ~/bin/bus-global.py)")
-    scan.add_argument("--bus-dry-run", action="store_true", help="Format bus message without posting")
+    scan.add_argument(
+        "--bus-dry-run", action="store_true", help="Format bus message without posting"
+    )
     scan.add_argument("--host", help="Host tag for bus messages (default: $AXIS_HOST or 'unknown')")
-    scan.add_argument("--check-freshness", action="store_true", help="Check Atlas evidence cut freshness per scoring standard")
-    scan.add_argument("--freshness-category", default="metadata", choices=["metadata", "dependency", "security"], help="Freshness window category (default: metadata=30d)")
+    scan.add_argument(
+        "--top",
+        type=int,
+        default=None,
+        help="Cap contradiction rows printed to Top N (default: all, recommended: 3 per ISA-18.2)",
+    )
+    scan.add_argument(
+        "--check-freshness",
+        action="store_true",
+        help="Check Atlas evidence cut freshness per scoring standard",
+    )
+    scan.add_argument(
+        "--freshness-category",
+        default="metadata",
+        choices=["metadata", "dependency", "security"],
+        help="Freshness window category (default: metadata=30d)",
+    )
     scan.set_defaults(func=cmd_scan)
 
     # report
@@ -289,8 +349,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # contradictions
     con = sub.add_parser("contradictions", help="List contradictions (one-shot, no cycle tracking)")
-    con.add_argument("--atlas-dir", default="~/docs", help="Directory of Atlas markdown evidence cuts")
-    con.add_argument("--atlas-pattern", default="hummbl-atlas-*.md", help="Glob pattern for ledger files")
+    con.add_argument(
+        "--atlas-dir", default="~/docs", help="Directory of Atlas markdown evidence cuts"
+    )
+    con.add_argument(
+        "--atlas-pattern", default="hummbl-atlas-*.md", help="Glob pattern for ledger files"
+    )
     con.set_defaults(func=cmd_contradictions)
 
     return parser
@@ -299,7 +363,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return args.func(args)
+    return int(args.func(args))
 
 
 if __name__ == "__main__":
