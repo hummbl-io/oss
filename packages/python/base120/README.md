@@ -93,7 +93,7 @@ Base120 organizes mental models into 6 families based on the type of cognitive t
 | Family | Code | Focus | Question it answers | Example Models |
 |--------|------|-------|---------------------|----------------|
 | **Perspective** | P | Viewpoints, framing, empathy | "How else can I see this?" | P1 First Principles, P5 Empathy Mapping, P10 Context Windowing |
-| **Inversion** | IN | Counterfactuals, negation, contradiction | "What if the opposite is true?" | IN1 Reductio ad Absurdum, IN5 Worst-Case Analysis, IN6 Pre-Mortem |
+| **Inversion** | IN | Counterfactuals, negation, contradiction | "What if the opposite is true?" | IN1 Reductio ad Absurdum, IN2 Premortem Analysis, IN6 Inverse/Proof by Contradiction |
 | **Composition** | CO | Building, combining, layering | "How do I assemble this from parts?" | CO1 Modularity, CO5 Interface Design, CO10 Protocol Layering |
 | **Decomposition** | DE | Breaking down, isolating, factoring | "What are the pieces?" | DE1 Root Cause Analysis, DE5 Separation of Concerns, DE8 Dimensional Reduction |
 | **Recursion** | RE | Self-reference, iteration, meta-reasoning | "How does this feed back on itself?" | RE1 Feedback Loop, RE5 Recursion, RE8 Self-Reference |
@@ -363,13 +363,13 @@ base120 glyph decode ledger.png
 ### CLI examples
 
 ```bash
-$ base120 get IN6
-ID:          IN6
-Name:        Pre-Mortem
+$ base120 get IN2
+ID:          IN2
+Name:        Premortem Analysis
 Family:      IN (Inversion)
-Description: Imagine the project has failed; work backward to identify causes
+Description: Assume failure has occurred and work backward to identify causes
 
-$ base120 prompt IN6 "Should we migrate from REST to GraphQL?"
+$ base120 prompt IN2 "Should we migrate from REST to GraphQL?"
 # Generates a pre-mortem prompt: "Assume the migration has shipped and
 # failed catastrophically. What went wrong? List the top 5 failure modes
 # and their early-warning signals."
@@ -539,7 +539,7 @@ ledger = Ledger("launch-premortem.jsonl")
 
 # Run a pre-mortem on the launch plan
 result = engine.record(
-    "IN6",  # Pre-Mortem
+    "IN2",  # Premortem Analysis
     "Launch the new pricing tier next Monday.",  # problem
     "Top failure mode: existing customers downgrade to the new tier, cannibalizing revenue.",
     0.8,  # confidence
@@ -686,7 +686,7 @@ pip install -e ".[test]"
 python -m pytest tests/ -v
 ```
 
-The canonical package name is `base120` (published on PyPI as `base120` v2.0.0).
+The canonical package name is `base120` (published on PyPI as `base120` v3.1.0).
 
 ## CLI
 
@@ -733,8 +733,7 @@ high_drift = ledger.cut(0.5)
 This repository is the **authoritative source** for the Base120 v1 registry,
 reference artifacts, and current Python v2 SDK. Other language
 implementations should conform to the frozen registry and corpus artifacts
-defined here. The `2.0.0` Python SDK API remains source-install only until a
-package distribution is published.
+defined here. The `3.1.0` Python SDK is published directly on PyPI (`pip install base120`).
 
 ### v1 Artifact Policy
 

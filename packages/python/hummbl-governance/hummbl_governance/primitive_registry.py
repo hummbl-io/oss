@@ -284,9 +284,9 @@ _PRIMITIVES: list[PrimitiveEntry] = [
     PrimitiveEntry("P44", _fc("CR", 1), "Attest", "Cryptography", "attest",
         enforced_invariants=("K3",), layer=PrimitiveLayer.AUTHORITY,
         description="MCP server identity attestation and policy compliance verification"),
-    PrimitiveEntry("P49", _fc("CR", 2), "SovereignCryptosystem", "Cryptography", "sovereign_cryptosystem",
+    PrimitiveEntry("P49", _fc("CR", 2), "EnvelopeCryptosystem", "Cryptography", "envelope_cryptosystem",
         enforced_invariants=("K3",), layer=PrimitiveLayer.AUTHORITY,
-        description="Hardened cryptographic sync router for sovereign key management"),
+        description="Hardened cryptographic sync router for operator-held key management"),
 
     # ── Corpus Integration (CI) ──────────────────────────────────
     PrimitiveEntry("P47", _fc("CI", 1), "CorpusAdapter", "Corpus Integration", "corpus_adapter",

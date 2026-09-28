@@ -211,7 +211,7 @@ Neither outcome serves the spec or the paper.
 
 ### 8.2 Publishable Claim
 
-Krineia's sovereignty claim rests on `state` and `drift` — the fields that distinguish a governed tuple from a mere log entry. The layered decomposition reveals that governance is not a property of all records, but a property of records that assert a policy outcome. This distinction is the boundary between audit (Layer 1: "what happened") and governance (Layer 2: "was it within bounds").
+Krineia's governance claim rests on `state` and `drift` — the fields that distinguish a governed tuple from a mere log entry. The layered decomposition reveals that governance is not a property of all records, but a property of records that assert a policy outcome. This distinction is the boundary between audit (Layer 1: "what happened") and governance (Layer 2: "was it within bounds").
 
 ### 8.3 Upgrade Path
 
