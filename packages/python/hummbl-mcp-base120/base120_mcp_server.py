@@ -45,6 +45,7 @@ from typing import Any
 
 from base120 import __version__
 from base120.engine import Engine
+from base120.ledger import Ledger
 
 # JSON-RPC 2.0 error codes
 _METHOD_NOT_FOUND = -32601
@@ -329,6 +330,12 @@ class Base120Server:
         except ValueError as exc:
             return _error_content(str(exc))
         t = result.to_tuple()
+        ledger = Ledger()
+        persisted = True
+        try:
+            ledger.append(t)
+        except OSError:
+            persisted = False
         return _ok_content(
             json.dumps(
                 {
@@ -338,6 +345,8 @@ class Base120Server:
                     "recommendation": result.recommendation,
                     "confidence": result.confidence,
                     "evidence_id": result.evidence_id,
+                    "persisted": persisted,
+                    "ledger_path": str(ledger.path),
                     "tuple": {
                         "id": t.id,
                         "time": t.time,
