@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           # Package set = directories under packages/python that carry tests;
-          # identical to the former hardcoded matrix (verified: all 46 have tests/).
+          # identical to the former hardcoded matrix (verified: all 47 have tests/).
           ALL=$(find packages/python -maxdepth 2 -type d -name tests -printf '%h\n' | xargs -n1 basename | sort)
           if [ "$EVENT_NAME" = "pull_request" ]; then
             git fetch -q origin "$BASE_REF"
@@ -126,7 +126,7 @@ jobs:
     name: test-preview (${{ matrix.package }}, 3.15-dev)
     runs-on: ubuntu-latest
     # Informational only - runs on push to main, not on PRs.
-    # Cuts 46 jobs from every PR while preserving full preview coverage on main.
+    # Cuts 47 jobs from every PR while preserving full preview coverage on main.
     if: github.event_name != 'pull_request'
     continue-on-error: true
     strategy:
