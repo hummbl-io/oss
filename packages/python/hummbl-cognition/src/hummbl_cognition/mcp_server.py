@@ -251,7 +251,7 @@ TOOLS = [
     },
     {
         "name": "memory_search",
-        "description": "Unified search across all Open Brain memory pools: ledger (BM25), bus digests, briefings, autoresearch findings, session claims/ledgers, and MEMORY.md. Returns ranked results within a token budget.",
+        "description": "Unified search across all Open Brain memory pools: ledger (BM25), local bus cache (cached evidence, not live authority), briefings, autoresearch findings, session claims/ledgers, and MEMORY.md. Returns ranked results within a token budget and source diagnostics.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -559,6 +559,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 "query": query_text,
                 "count": len(results),
                 "results": [r.to_dict() for r in results],
+                "source_diagnostics": retriever.source_diagnostics,
             }
         except Exception as e:
             return {"error": f"Memory search failed: {e}"}

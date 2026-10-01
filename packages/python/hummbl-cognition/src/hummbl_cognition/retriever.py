@@ -1,6 +1,6 @@
 """Open Brain Retriever -- unified search across all memory pools.
 
-Queries ledger index, bus digests, briefings, autoresearch findings,
+Queries ledger index, the local bus cache, briefings, autoresearch findings,
 MEMORY.md, hummbl-bibliography, and session claims/ledgers.
 Returns ranked results within a token budget.
 
@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import stat
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,10 @@ logger = logging.getLogger(__name__)
 
 # Approximate tokens per character (conservative estimate for English)
 _CHARS_PER_TOKEN = 4
+
+# The bus pool is a bounded view of cached evidence, never a live bus query.
+_BUS_CACHE_MAX_BYTES = 1024 * 1024
+_BUS_CACHE_MAX_LINES = 200
 
 # Tier 1: time-decay and retrieval-decay defaults for the retriever.
 # The retriever turns decay ON by default (the indexer keeps it OFF for
@@ -172,7 +178,7 @@ class OpenBrainRetriever:
 
     Memory pools:
       1. Cognitive Ledger (ledger.jsonl via BM25 index)
-      2. Bus digests (_state/coordination/*.tsv)
+      2. Local bus cache (~/.cache/bus/messages.tsv; not live authority)
       3. Briefings (<state-sibling>/state/briefings/*.md)
       4. Autoresearch findings (_state/autoresearch/findings_*.json)
       5. MEMORY.md (Claude Code auto-memory)
@@ -186,6 +192,7 @@ class OpenBrainRetriever:
         state_dir: str | Path | None = None,
         index: BM25Index | None = None,
         bibliography_path: str | Path | None = None,
+        bus_cache_path: str | Path | None = None,
     ) -> None:
         self.state_dirs = _resolve_state_dirs(state_dir)
         # Primary state dir for saving index/logs (usually the first one)
@@ -195,6 +202,9 @@ class OpenBrainRetriever:
         self.bibliography_path = _resolve_bibliography_path(bibliography_path)
         self._bibliography_cache: list[dict[str, Any]] | None = None
         self._bibliography_mtime: float = 0.0
+        self.bus_cache_path = bus_cache_path
+        # Diagnostics for the most recent search, including pools with no hits.
+        self.source_diagnostics: dict[str, dict[str, Any]] = {}
 
     def ensure_index(self, ledger_path: str | Path | None = None) -> None:
         """Load or build the index."""
@@ -294,6 +304,7 @@ class OpenBrainRetriever:
             "bibliography",
         ]
 
+        self.source_diagnostics = {}
         results: list[MemoryResult] = []
 
         if "ledger" in all_sources:
@@ -311,17 +322,7 @@ class OpenBrainRetriever:
             )
 
         if "bus" in all_sources:
-            for s_dir in self.state_dirs:
-                results.extend(
-                    self._search_text_pool(
-                        query,
-                        pool_name="bus",
-                        search_dir=s_dir / "coordination",
-                        glob_pattern="*.tsv",
-                        since=since,
-                        limit=limit // 4,
-                    )
-                )
+            results.extend(self._search_bus_cache(query, since=since, limit=limit))
 
         if "briefings" in all_sources:
             for s_dir in self.state_dirs:
@@ -409,6 +410,166 @@ class OpenBrainRetriever:
 
         return budgeted
 
+    def _search_bus_cache(
+        self, query: str, *, since: str | None, limit: int
+    ) -> list[MemoryResult]:
+        """Search complete rows in a bounded cache tail without refreshing it."""
+        observed = datetime.now(timezone.utc)
+        diagnostics: dict[str, Any] = {
+            "source_kind": "local_bus_cache",
+            "live_verified": False,
+            "freshness": "cache_only_unverified",
+            "observed_at": observed.isoformat(),
+            "since": since,
+            "max_bytes": _BUS_CACHE_MAX_BYTES,
+            "max_rows": _BUS_CACHE_MAX_LINES,
+        }
+        self.source_diagnostics["bus"] = diagnostics
+        configured = self.bus_cache_path
+        selection = "argument"
+        if configured is None:
+            configured = os.environ.get("HUMMBL_BUS_CACHE_PATH")
+            selection = "environment"
+        if configured is None:
+            configured = Path.home() / ".cache" / "bus" / "messages.tsv"
+            selection = "default"
+        diagnostics["source_selection"] = selection
+        raw_path = str(configured)
+        path = Path(raw_path)
+        # Do not interpret relative paths, URLs, UNC paths, or device paths as
+        # local cache configuration. Invalid overrides never fall back.
+        if (
+            not raw_path
+            or "\x00" in raw_path
+            or "://" in raw_path
+            or raw_path.replace("\\", "/").startswith("//")
+            or not path.is_absolute()
+        ):
+            diagnostics["status"] = "invalid_cache_path"
+            return []
+        diagnostics["path"] = str(path)
+        since_timestamp: datetime | None = None
+        if since is not None:
+            try:
+                since_timestamp = datetime.fromisoformat(since.replace("Z", "+00:00"))
+                # Date-only and naive datetime lower bounds mean UTC.
+                if since_timestamp.tzinfo is None:
+                    since_timestamp = since_timestamp.replace(tzinfo=timezone.utc)
+                since_timestamp = since_timestamp.astimezone(timezone.utc)
+            except (AttributeError, TypeError, ValueError, OverflowError):
+                diagnostics["status"] = "invalid_since"
+                return []
+        diagnostics["since_utc"] = since_timestamp.isoformat() if since_timestamp else None
+        try:
+            if not stat.S_ISREG(path.stat().st_mode):
+                diagnostics["status"] = "not_regular_file"
+                return []
+            # Avoid BufferedReader read-ahead past the captured file length.
+            with path.open("rb", buffering=0) as cache:
+                before = os.fstat(cache.fileno())
+                if not stat.S_ISREG(before.st_mode):
+                    diagnostics["status"] = "not_regular_file"
+                    return []
+                start = max(0, before.st_size - _BUS_CACHE_MAX_BYTES)
+                cache.seek(max(0, start - 1))
+                previous = cache.read(1) if start else b"\n"
+                data = cache.read(min(before.st_size, _BUS_CACHE_MAX_BYTES))
+                after = os.fstat(cache.fileno())
+        except FileNotFoundError:
+            diagnostics["status"] = "missing"
+            return []
+        except OSError as exc:
+            diagnostics.update(status="unreadable", error_type=type(exc).__name__)
+            return []
+
+        diagnostics.update(
+            file_bytes=before.st_size,
+            bytes_read=len(data) + bool(start),
+            cache_mtime=datetime.fromtimestamp(before.st_mtime, timezone.utc).isoformat(),
+            cache_mtime_age_seconds=round(observed.timestamp() - before.st_mtime, 3),
+            changed_during_read=(
+                before.st_size != after.st_size or before.st_mtime_ns != after.st_mtime_ns
+            ),
+            byte_tail_truncated=bool(start),
+            partial_first_row_discarded=bool(start and previous != b"\n"),
+            partial_last_row_discarded=bool(data and not data.endswith(b"\n")),
+            latest_valid_timestamp=None,
+            latest_valid_timestamp_scope="scanned_rows",
+            latest_message_age_seconds=None,
+        )
+        if start and previous != b"\n":
+            _, _, data = data.partition(b"\n")
+        if data and not data.endswith(b"\n"):
+            data = data.rpartition(b"\n")[0]
+        rows = data.splitlines()
+        diagnostics["row_tail_truncated"] = len(rows) > _BUS_CACHE_MAX_LINES
+        rows = rows[-_BUS_CACHE_MAX_LINES:]
+        diagnostics["rows_scanned"] = len(rows)
+        diagnostics["coverage"] = (
+            "partial_cache"
+            if any(diagnostics[key] for key in (
+                "byte_tail_truncated", "row_tail_truncated",
+                "partial_first_row_discarded", "partial_last_row_discarded",
+                "changed_during_read",
+            ))
+            else "complete_cache"
+        )
+        messages: list[str] = []
+        latest: datetime | None = None
+        malformed_rows = 0
+        valid_rows = 0
+        for row in rows:
+            try:
+                fields = row.decode("utf-8").split("\t", 4)
+                if len(fields) != 5:
+                    raise ValueError("Expected five TSV columns")
+                timestamp = datetime.fromisoformat(fields[0].replace("Z", "+00:00"))
+                if timestamp.tzinfo is None:
+                    raise ValueError("Expected a timezone-aware timestamp")
+                timestamp = timestamp.astimezone(timezone.utc)
+            except (UnicodeError, ValueError, OverflowError):
+                malformed_rows += 1
+                continue
+            valid_rows += 1
+            latest = max(latest, timestamp) if latest else timestamp
+            # Inclusive lower bound, independent of ISO spelling or offset.
+            if since_timestamp is not None and timestamp < since_timestamp:
+                continue
+            messages.append(f"{fields[0]} {fields[1]} {fields[3]} {fields[4]}")
+        diagnostics.update(
+            valid_rows=valid_rows, malformed_rows=malformed_rows,
+            rows_after_since=len(messages),
+        )
+        if latest is not None:
+            diagnostics.update(
+                latest_valid_timestamp=latest.astimezone(timezone.utc).isoformat(),
+                latest_message_age_seconds=round((observed - latest).total_seconds(), 3),
+            )
+        text = "\n".join(messages)
+        query_tokens = set(tokenize(query))
+        overlap = query_tokens & set(tokenize(text)) if query_tokens else set()
+        diagnostics["status"] = (
+            "empty" if before.st_size == 0 else
+            "no_valid_rows" if not valid_rows else
+            "no_rows_after_since" if not messages else
+            "no_match" if not overlap else
+            "available"
+        )
+        if not overlap or limit <= 0:
+            return []
+        return [MemoryResult(
+            source="bus",
+            entry_id=f"bus:{path.name}",
+            score=len(overlap) / len(query_tokens) * 0.7,
+            content=_extract_snippet(
+                text, query_tokens, max_chars=500, search_chars=len(text)
+            ),
+            content_window=_extract_snippet(
+                text, query_tokens, max_chars=1500, search_chars=len(text)
+            ),
+            metadata={"file": path.name, **diagnostics},
+        )]
+
     def _expand_windows(self, results: list[MemoryResult]) -> None:
         """Expand content_window for each result with surrounding context.
 
@@ -422,6 +583,9 @@ class OpenBrainRetriever:
         """
         get_entry = getattr(self.index, "get_entry", None)
         for result in results:
+            if result.source == "bus":
+                # Bus producers supply bounded context; never reread their paths.
+                continue
             if result.source == "ledger" and get_entry is not None:
                 # Fetch full entry from index if the producer side supports it
                 try:
@@ -430,7 +594,7 @@ class OpenBrainRetriever:
                     continue
                 if full and len(full) > len(result.content):
                     result.content_window = full
-            elif result.source in ("bus", "bus_digest", "briefings", "session"):
+            elif result.source in ("bus_digest", "briefings", "session"):
                 # Text pool results: try to fetch more context from source
                 src_file = result.metadata.get("path") or result.metadata.get(
                     "file", ""
@@ -857,6 +1021,8 @@ def _extract_snippet(
     text: str,
     query_tokens: set[str],
     max_chars: int = 500,
+    *,
+    search_chars: int = 5000,
 ) -> str:
     """Extract the most relevant snippet from text around query term matches."""
     text_lower = text.lower()
@@ -865,7 +1031,7 @@ def _extract_snippet(
 
     # Slide a window and find the position with most query term overlap
     window = max_chars
-    for i in range(0, min(len(text), 5000), 100):
+    for i in range(0, min(len(text), search_chars), 100):
         chunk = text_lower[i : i + window]
         chunk_tokens = set(tokenize(chunk))
         score = len(query_tokens & chunk_tokens)

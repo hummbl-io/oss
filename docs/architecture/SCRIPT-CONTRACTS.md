@@ -147,6 +147,7 @@ the package version at `packages/*/pyproject.toml`.
 | hummbl-heraldry | `hummbl-heraldry` | `hummbl_heraldry.__main__:main` |
 | hummbl-lattice | `hummbl-lattice` | `hummbl_lattice.cli:main` |
 | hummbl-mcp-base120 | `hummbl-mcp-base120` | `base120_mcp_server:main` |
+| hummbl-mcp-basen | `hummbl-mcp-basen` | `basen.mcp_server:main` |
 | hummbl-mcp-bif | `hummbl-mcp-bif` | `bif_mcp_server:main` |
 | hummbl-mcp-cognitive-ledger | `hummbl-mcp-cognitive-ledger` | `cognitive_ledger_mcp_server:main` |
 | hummbl-mcp-coordination-bus | `hummbl-mcp-coordination-bus` | `coordination_bus_mcp_server:main` |
