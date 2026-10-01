@@ -36,6 +36,7 @@ hummbl-heraldry = "hummbl_heraldry.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
+exclude = ["tests", "tests.*"]
 
 [tool.setuptools.package-data]
 hummbl_heraldry = ["data/*.json"]
