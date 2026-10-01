@@ -14,10 +14,13 @@ MCP servers exposing HUMMBL governance primitives — 7 servers, 32+ JSON-RPC to
 | **Reasoning** | `hummbl-reasoning-mcp` | — | ReasoningEngine, SchemaValidator, ContractNetManager |
 | **Physical AI** | `hummbl-physical-mcp` | 6 | KinematicGovernor, pHRISafetyMonitor |
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-governance
+python -m pip install ./packages/python/hummbl-mcp-governance
 ```
 
 ## Run

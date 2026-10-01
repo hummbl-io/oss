@@ -12,10 +12,13 @@ implementation.
 - `bus_stats` — message count, agent activity, type breakdown
 - `bus_agents` — list all agents with message counts and last activity
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-coordination-bus
+python -m pip install ./packages/python/hummbl-mcp-coordination-bus
 ```
 
 This pulls in `hummbl-bus` as a dependency.
