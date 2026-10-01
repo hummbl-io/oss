@@ -24,6 +24,9 @@ classifiers = [
 requires-python = ">=3.11"
 dependencies = []
 
+[project.scripts]
+hummbl-mcp-basen = "basen.mcp_server:main"
+
 [project.urls]
 Homepage = "https://github.com/hummbl-io/oss"
 Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-mcp-basen/README.md"
