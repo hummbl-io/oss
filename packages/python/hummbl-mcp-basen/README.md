@@ -118,7 +118,7 @@ operators against the actual problem and operator definitions.
 ## File layout
 
 ```text
-packages/python/basen/
+packages/python/hummbl-mcp-basen/
 ├── basen/
 │   ├── __init__.py
 │   ├── mcp_server.py          # MCP server (4 tools, 127 resources, 3 prompts)
@@ -132,7 +132,7 @@ packages/python/basen/
 
 ## Relationship to hummbl-mcp-base120
 
-The `hummbl-mcp-base120` package (in `packages/python/base120/`) is a simpler
+The `hummbl-mcp-base120` package (in `packages/python/hummbl-mcp-base120/`) is a simpler
 public SDK server with 5 tools (get, list, families, prompt, record) that wraps
 the `base120` PyPI package's `Engine` API.
 
