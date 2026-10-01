@@ -24,6 +24,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from hummbl_cognition.retriever import (
     MemoryResult,
     OpenBrainRetriever,
@@ -915,6 +916,7 @@ class TestSearch:
 
         with (
             patch.object(r, "_search_ledger", return_value=[]) as m_ledger,
+            patch.object(r, "_search_bus_cache", return_value=[]) as m_bus,
             patch.object(r, "_search_text_pool", return_value=[]) as m_text,
             patch.object(r, "_search_findings", return_value=[]) as m_findings,
             patch.object(r, "_search_session", return_value=[]) as m_session,
@@ -923,8 +925,9 @@ class TestSearch:
         ):
             r.search("test", token_budget=1000)
             m_ledger.assert_called_once()
-            # _search_text_pool called twice (bus + briefings)
-            assert m_text.call_count == 2
+            m_bus.assert_called_once_with("test", since=None, limit=50)
+            # Briefings use the generic text pool; bus uses its bounded cache.
+            m_text.assert_called_once()
             m_findings.assert_called_once()
             m_session.assert_called_once()
             m_memory.assert_called_once()

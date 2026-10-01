@@ -82,6 +82,48 @@ python -m hummbl_cognition scitt-export --id <clp-id>   # SCITT-shaped statement
 - `_state/cognition/state.json` — current cognitive state
 - `_state/cognition/intent.md` — current sprint intent
 
+## Local bus cache retrieval
+
+The `bus` pool in `OpenBrainRetriever` and the MCP `memory_search` tool reads
+`~/.cache/bus/messages.tsv`. This is cached evidence, not live bus authority.
+Retrieval does not contact or refresh the bus. There is no automatic search
+or fallback to retired `_state/coordination/*.tsv` mirrors. An explicit cache
+override can select any permitted local file, including an older mirror;
+diagnostics identify the selected path.
+
+Set `HUMMBL_BUS_CACHE_PATH` to an absolute local file path to select another
+cache, or pass `bus_cache_path=` when constructing the retriever. The explicit
+argument takes precedence. Relative paths, URLs, UNC/device paths, empty
+overrides, and non-regular files are rejected without fallback. Local filesystem
+mounts and concurrent path changes are not an OS-enforced network boundary.
+
+Each search reads at most the final 1 MiB plus one leading boundary byte of
+the captured file length and considers the last 200 complete TSV rows. A
+complete row must end with a newline within that captured length. A trailing
+row without a newline is intentionally discarded even if its columns look
+valid; retrieval does not read beyond the captured EOF or invent a newline.
+Incomplete boundary rows, malformed UTF-8, and rows without a valid
+timezone-aware timestamp are excluded. For the bus pool, `since` is an
+inclusive time bound: compact and extended ISO timestamps are compared as
+datetimes in UTC, including explicit offsets. Date-only and naive datetime
+lower bounds mean UTC; an invalid or empty bound produces `invalid_since`
+diagnostics and no bus results. Result context uses the same filtered read;
+bus results are never expanded by rereading their source paths.
+
+Bus results include provenance and freshness metadata: selected path, selection
+method, observation time, file modification time and age, latest valid timestamp
+and age in the scanned rows, and `live_verified: false`. Ages are observations,
+not a freshness SLA; negative ages indicate timestamps ahead of the local clock.
+The latest timestamp describes the scanned cache rows, not necessarily the
+matched message. Result text retains message timestamps.
+
+`retriever.source_diagnostics["bus"]` records the most recent search even when
+there are no results; MCP returns it under `source_diagnostics.bus`. Its status
+distinguishes unavailable or invalid caches, empty/invalid rows, `since` filtering,
+and no query match. Byte/row truncation, discarded partial rows, malformed-row
+counts, and detected changes during the read are explicit. A complete cache
+scan does not establish complete bus history or verify the cache's provenance.
+
 ## Dependencies
 
 - **Required**: `hummbl-bus` (bus writer for coordination messages)
