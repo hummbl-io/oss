@@ -64,7 +64,7 @@ def make_handler(normalizer: Normalizer, channel_tokens: dict[str, str]):
             if not expected:
                 return False  # token env unset -> fail closed
             auth = self.headers.get("Authorization", "")
-            if auth == f"Bearer {expected}":
+            if auth.startswith("Bearer ") and hmac.compare_digest(auth[7:], expected):
                 return True
             # Header-less senders: token rides a query param.
             given = params.get("token") or params.get("secret") or ""

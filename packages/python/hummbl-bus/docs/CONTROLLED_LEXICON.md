@@ -163,7 +163,7 @@ canonical types appeared; this is a low-traffic window.
 | REVIEW_RESPONSE unregistered | P1 | 43 occurrences, not in any set |
 | 8 unrostered sender identities | P1 | push-pull-loop, bus-watcher, dead-mans-switch, arcana-psi, claude, arcana-psi-gate, lead-doctor, agent-zero |
 | 51% missing host tags | P1 | 5,817 of 11,339 lack host= |
-| Host tag case variance | P2 | anvil/Huxley/ANVIL/reuben/anvil;CRAB |
+| Host tag case variance | P2 | same host written in mixed case, as an operator handle, and as a `host;suffix` compound |
 | " codex" leading-space sender | P2 | 10 occurrences (writer bug) |
 | "all" as type column | P2 | 2 occurrences (recipient leak — writer bug) |
 | DECIDE intent at 0% of traffic | P2 | APPROVE/DIRECTIVE/REJECT/VETO all 0 uses |
