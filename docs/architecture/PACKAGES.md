@@ -31,14 +31,14 @@ Do not document `pip install arbiter`, `agent-governance`, or `base120-mcp`.
 ## 1. PyPI (Python)
 ### Live — wheel on the registry, HUMMBL-owned
 Ownership last verified in fleet audits 2026-08-30 / 2026-08-31.
-Tree versions checked 2026-09-02.
+Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Matching version strings do not certify identical source bytes.
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
-| `hummbl-governance` | 1.5.1 | 1.4.2 | Tree version checked 2026-09-27; 1.5.1 remains unreleased under the disposition in `docs/operations/RELEASE.md`. |
-| `base120` | 3.1.0 | 3.0.2 | 120 reasoning operators. `3.1.0` adds the glyph image codec (`base120.glyph`, `base120 glyph`). NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. `3.0.3` renames VERUM→Krineia in docstrings/docs; no behavior change. |
+| `hummbl-governance` | 1.5.1 | 1.5.1 | Published 1.5.1 corresponds to [release commit a8ad4c31](https://github.com/hummbl-io/oss/commit/a8ad4c3150a8357df28f488c51cdda6c5215b8f6). Current tree includes post-release changes; future publication follows `docs/operations/RELEASE.md`. |
+| `base120` | 3.1.0 | 3.1.0 | 120 reasoning operators. `3.1.0` adds the glyph image codec (`base120.glyph`, `base120 glyph`). NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. `3.0.3` renames VERUM→Krineia in docstrings/docs; no behavior change. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
-| `hummbl-tuples` | 0.2.2 | 0.2.0 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. `0.2.2` renames VERUM→Krineia in README/spec; includes the 0.2.1 wheel-contents fix. |
-| `hummbl-bus` | 0.2.0 | 0.2.0 | TSV coordination bus. 0.2.0 was uploaded 2026-08-27 with **no** `python/hummbl-bus/v0.2.0` tag in this repo. Further bus publishes wait on the tag contract in `docs/operations/RELEASE.md`. |
+| `hummbl-tuples` | 0.2.2 | 0.2.2 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. `0.2.2` renames VERUM→Krineia in README/spec; includes the 0.2.1 wheel-contents fix. |
+| `hummbl-bus` | 0.2.1 | 0.2.1 | TSV coordination bus. Published 0.2.1 has the canonical `python/hummbl-bus/v0.2.1` tag. The historical 0.2.0 missing-tag gap remains documented in `docs/operations/RELEASE.md`; future releases must follow its tag contract. |
 | `hummbl-cognition` | 0.1.0 | 0.1.0 | CLP + Open Brain. Live license field may still say MIT vs tree Apache-2.0. |
 | `governed-compression` | 0.1.0 | 0.1.0 | Compression experiments. Live summary may still say "Private research surface". |
 | `hummbl` | 0.1.0 | 0.1.0 | Shipped 2026-08-25. |
