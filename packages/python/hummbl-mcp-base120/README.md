@@ -10,10 +10,13 @@ MCP server exposing the HUMMBL Base120 mental models engine.
 - `base120_prompt` — generate a system prompt for an operator + problem
 - `base120_record` — record an operator application as a governance artifact
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-base120
+python -m pip install ./packages/python/hummbl-mcp-base120
 ```
 
 ## Run
