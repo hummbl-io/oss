@@ -1,0 +1,18 @@
+{
+  "schema": "hummbl.demo.media-manifest.v1",
+  "source_base_commit": "4ea8e686d4d4de3c3371b8f1e92279255dd82ccc",
+  "duration_seconds": 56,
+  "presentation": "captioned playback of captured offline output; silent",
+  "files": {
+    "budget-stop-1080p.mp4": "658d4db3c4c38ed53c6b8bcd3b2321900eaec3c4e0b87a0530cc2d37208c5db6",
+    "budget-stop-preview.gif": "0f6feb89b6498a251b2ec4b4e0125d9470a24b9aaffc66c484480f950bf8ba25",
+    "captions.srt": "50ce98ccbb4220ce3da92889288032e1aa8128dc1fac829f13f5b17df186d7b5",
+    "transcript.txt": "8bc933f7c975ec600bf215ba34eb8456036e8dd680a7887863e73abc5d787f84",
+    "run.json": "518cdc86cde354f2dd361fbd27ae4ad30e6b4640803084fd08e5b9bf8eb132c9",
+    "terminal.txt": "2f691ef7e5a62b24ccb78acb85f35f053076aeb810abe63225285538a22f8700"
+  },
+  "source_files": {
+    "examples/budget_stop_demo.py": "c7f475485b447b2896d41abd6bcdc6f683cf06f6b2e897902fb7ab3e51df55b0",
+    "tools/render_budget_video.py": "b22e08fd0b256b5adabe1b9a2574bcb59629600eb03ce6167a8e1207cf637d73"
+  }
+}

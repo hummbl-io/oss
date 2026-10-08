@@ -1,0 +1,10 @@
+SYNTHETIC / OFFLINE / NO REAL CHARGES
+Soft cap: 0.50 DEMO | Hard cap: 1.00 DEMO | Task cost: 0.25 DEMO
+Task 1: ALLOW | recorded before: 0.00 | executed
+Task 2: ALLOW | recorded before: 0.25 | executed
+Task 3: WARN  | recorded before: 0.50 | executed
+Task 4: WARN  | recorded before: 0.75 | executed
+Task 5: DENY  | recorded before: 1.00 | NOT EXECUTED
+Completed: 4 | Blocked: task 5 | Recorded: 1.00 DEMO
+The runner enforces DENY. This does not reserve future or concurrent costs.
+JSON output, when requested, is an unsigned local run summary.
