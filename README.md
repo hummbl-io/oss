@@ -81,8 +81,9 @@ Node packages:
 | `@hummbl/mcp-base120` | 0.1.0-canary.0 | — | Private technical canary — read-only Base120 MCP catalog; not publishable while admission blockers remain |
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
-Try the [standalone tree-recovery proof](packages/lean/hummbl-formalization/README.md#try-a-proof-what-flattening-loses):
-synthetic data, a pinned Lean compiler, and no Mathlib dependency.
+Explore the [formal reasoning exhibits](packages/lean/hummbl-formalization/README.md#exhibit-gallery):
+tree recovery, operation order, quantifier scope, and vacuous checks. Synthetic
+data, a pinned Lean compiler, and no Mathlib dependency.
 Canonical install names owned by HUMMBL and recommended from this repo:
 ```text
 pip install base120
