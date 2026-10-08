@@ -5,9 +5,9 @@ runner. Four synthetic tasks each record 0.25 DEMO units. Before task five,
 the governor returns `DENY` at the 1.00 hard cap, and the runner stops.
 `WARN` remains advisory in this example.
 
-![Budget stop: ALLOW, WARN, then task five denied](budget-stop-media/budget-stop-preview.gif)
+![Budget stop: ALLOW, WARN, then task five denied](https://github.com/hummbl-io/oss/releases/download/demo-budget-stop-2026-10-07/budget-stop-preview.gif)
 
-[Watch the 56-second captioned video](budget-stop-media/budget-stop-1080p.mp4)
+[Watch the 56-second captioned video](https://github.com/hummbl-io/oss/releases/download/demo-budget-stop-2026-10-07/budget-stop-1080p.mp4)
 or read the [transcript](budget-stop-media/transcript.txt).
 This is a captioned playback of captured demo output, not a live terminal recording.
 
@@ -68,6 +68,9 @@ pixels; the synthetic run result should be the same. Pillow's
 requires version 10.1 or newer; this video was rendered with Pillow 12.3.0.
 
 The [media manifest](budget-stop-media/manifest.json) records the packaged bytes.
+The MP4 and GIF are distributed as demo prerelease assets; the text and source
+are in this checkout. Download the two assets alongside the manifest to verify
+all media hashes locally. The demo prerelease is not a Python package release.
 Its `source_files` are the demo and renderer code. In `files`, `run.json` and
 `terminal.txt` are captured inputs; the MP4, GIF, captions and transcript are
 presentation outputs. Hashes detect byte changes; they do not authenticate origin.
