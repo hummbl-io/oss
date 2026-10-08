@@ -49,7 +49,7 @@ def main() -> None:
         [sys.executable, "-m", "examples.budget_stop_demo", "--output", str(out / "run.json")],
         cwd=package, capture_output=True, text=True, encoding="utf-8", check=True,
     )
-    (out / "terminal.txt").write_text(run.stdout, encoding="utf-8")
+    (out / "terminal.txt").write_text(run.stdout, encoding="utf-8", newline="\n")
     result = json.loads((out / "run.json").read_text(encoding="utf-8"))
     # Refuse to render a success narrative if the recorded demonstration disagrees.
     if (result["completed_tasks"] != [1, 2, 3, 4] or result["blocked_task"] != 5
@@ -105,10 +105,10 @@ def main() -> None:
         elapsed += duration
     full.append(f"file 'scene-{len(scenes)-1:02}.png'")
     preview.append(f"file 'scene-{len(scenes)-1:02}.png'")
-    (out / "video.ffconcat").write_text("\n".join(full) + "\n", encoding="utf-8")
-    (out / "preview.ffconcat").write_text("\n".join(preview) + "\n", encoding="utf-8")
-    (out / "captions.srt").write_text("\n".join(srt), encoding="utf-8")
-    (out / "transcript.txt").write_text("\n".join(transcript), encoding="utf-8")
+    (out / "video.ffconcat").write_text("\n".join(full) + "\n", encoding="utf-8", newline="\n")
+    (out / "preview.ffconcat").write_text("\n".join(preview) + "\n", encoding="utf-8", newline="\n")
+    (out / "captions.srt").write_text("\n".join(srt), encoding="utf-8", newline="\n")
+    (out / "transcript.txt").write_text("\n".join(transcript), encoding="utf-8", newline="\n")
     common = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-n"]
     subprocess.run(common + ["-f", "concat", "-safe", "1", "-i", "video.ffconcat", "-t", str(elapsed),
                    "-vf", "fps=24,format=yuv420p", "-c:v", "libx264", "-preset", "fast", "-crf", "21",
@@ -120,7 +120,8 @@ def main() -> None:
     for p in sorted(out.iterdir()):
         if p.is_file():
             manifest[p.name] = {"sha256": hashlib.sha256(p.read_bytes()).hexdigest(), "bytes": p.stat().st_size}
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    (out / "manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps({"duration_seconds": elapsed, "output": str(out), "artifacts": manifest}, indent=2))
 
 
