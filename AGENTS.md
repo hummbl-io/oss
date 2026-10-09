@@ -14,13 +14,13 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 
 | Package | Path | Tree | PyPI | Description |
 |---------|------|------|------|-------------|
-| hummbl-governance | `packages/python/hummbl-governance/` | 1.5.1 | Live 1.4.2 | Governance primitives for AI agent orchestration |
-| base120 | `packages/python/base120/` | 3.1.0 | Live 3.0.2 | 120 reasoning operators for structured thinking |
+| hummbl-governance | `packages/python/hummbl-governance/` | 1.5.1 | Live 1.5.1 | Governance primitives for AI agent orchestration |
+| base120 | `packages/python/base120/` | 3.1.0 | Live 3.1.0 | 120 reasoning operators for structured thinking |
 | hummbl-kernel | `packages/python/hummbl-kernel/` | 0.1.0 | Live 0.1.0 | Orchestration kernel with security and compliance enforcement |
 | hummbl | `packages/python/hummbl/` | 0.1.0 | Live 0.1.0 | Structured reasoning framework for AI agents |
 | hummbl-bif | `packages/python/hummbl-bif/` | 1.0.1 | Live 1.0.1 | Batch Ingestion Framework for technical knowledge acquisition |
-| hummbl-tuples | `packages/python/hummbl-tuples/` | 0.2.2 | Live 0.2.0 | HUMMBL Typed Tuples governance model |
-| hummbl-bus | `packages/python/hummbl-bus/` | 0.2.0 | Live 0.2.0 | Secure append-only TSV coordination bus for multi-agent systems |
+| hummbl-tuples | `packages/python/hummbl-tuples/` | 0.2.2 | Live 0.2.2 | HUMMBL Typed Tuples governance model |
+| hummbl-bus | `packages/python/hummbl-bus/` | 0.2.1 | Live 0.2.1 | Secure append-only TSV coordination bus for multi-agent systems |
 | hummbl-cognition | `packages/python/hummbl-cognition/` | 0.1.0 | Live 0.1.0 | Cognitive Ledger Protocol (CLP) and Open Brain server |
 | governed-compression | `packages/python/governed-compression/` | 0.1.0 | Live 0.1.0 | Governed compression experiments (numpy dependency exception) |
 | hummbl-lattice | `packages/python/hummbl-lattice/` | 0.1.0 | In-tree | Domain-specific reasoning operator lattices for Domain120 |
@@ -61,6 +61,8 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.2.0 | In-tree | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
 | hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | Evidence-governed evaluation contracts for compositional Human-AI systems |
 | hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | Bidirectional multi-agent peer-review GitOps loop |
+
+Published-version metadata checked on 2026-10-02 UTC: [governance 1.5.1](https://pypi.org/pypi/hummbl-governance/1.5.1/json), [base120 3.1.0](https://pypi.org/pypi/base120/3.1.0/json), [tuples 0.2.2](https://pypi.org/pypi/hummbl-tuples/0.2.2/json), [bus 0.2.1](https://pypi.org/pypi/hummbl-bus/0.2.1/json). Equal tree and published version strings do not certify identical source bytes.
 
 Node packages:
 
