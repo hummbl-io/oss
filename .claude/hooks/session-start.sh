@@ -56,16 +56,16 @@ else
   fi
 fi
 
-if [ "$want_stamp" = "$have_stamp" ] && "$VENV/bin/python" -c "import pytest, ruff" >/dev/null 2>&1; then
+if [ "$want_stamp" = "$have_stamp" ] && "$VENV/bin/python" -c "import pytest, ruff, pip" >/dev/null 2>&1; then
   log "python packages up to date (stamp match), skipping install"
 else
   log "installing $(( ${#specs[@]} / 2 )) python packages + ruff into $VENV"
-  if "${INSTALLER[@]}" ruff "${specs[@]}"; then
+  if "${INSTALLER[@]}" ruff pip "${specs[@]}"; then
     printf '%s\n' "$want_stamp" > "$STAMP"
   else
     log "combined install failed; retrying per package (CI mode)"
     failed=()
-    "${INSTALLER[@]}" ruff pytest || true
+    "${INSTALLER[@]}" ruff pytest pip || true
     for pkg in "$PKG_DIR"/*/; do
       [ -f "$pkg/pyproject.toml" ] || continue
       name="$(basename "$pkg")"
