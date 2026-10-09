@@ -24,17 +24,19 @@ unless disabled with `BASEN_PERSIST_TUPLES=0`. `basen_apply` is mode-sensitive:
 `advisory` is a Tier 0 descriptive read, while `analytic` and `empirical` are
 Tier 1 calls.
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-basen
+python -m pip install ./packages/python/hummbl-mcp-basen
 ```
 
-Or from the monorepo:
+For an editable development install, from the same repository root:
 
 ```bash
-cd packages/python/basen
-pip install -e .
+python -m pip install -e ./packages/python/hummbl-mcp-basen
 ```
 
 ## Run
@@ -116,7 +118,7 @@ operators against the actual problem and operator definitions.
 ## File layout
 
 ```text
-packages/python/basen/
+packages/python/hummbl-mcp-basen/
 ├── basen/
 │   ├── __init__.py
 │   ├── mcp_server.py          # MCP server (4 tools, 127 resources, 3 prompts)
@@ -130,7 +132,7 @@ packages/python/basen/
 
 ## Relationship to hummbl-mcp-base120
 
-The `hummbl-mcp-base120` package (in `packages/python/base120/`) is a simpler
+The `hummbl-mcp-base120` package (in `packages/python/hummbl-mcp-base120/`) is a simpler
 public SDK server with 5 tools (get, list, families, prompt, record) that wraps
 the `base120` PyPI package's `Engine` API.
 
