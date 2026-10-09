@@ -36,6 +36,7 @@ hummbl-garage = "hummbl_garage.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
+exclude = ["tests", "tests.*"]
 
 [tool.setuptools.package-data]
 hummbl_garage = ["data/*.json"]
