@@ -13,10 +13,13 @@ without human intervention.
 - `onepassword_fields` — discover field names for an item (no values revealed)
 - `onepassword_resolve` — look up a secret by common name (e.g. "github pat", "anthropic key")
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-onepassword
+python -m pip install ./packages/python/hummbl-mcp-onepassword
 ```
 
 ## Run
