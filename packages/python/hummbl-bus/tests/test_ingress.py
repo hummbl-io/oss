@@ -250,6 +250,11 @@ class TestWebhook:
         code, _ = self._post(srv.server_port, "sms", {"id": "x"}, token="bad")
         assert code == 401
 
+    def test_non_ascii_bearer_is_401_not_500(self, server):
+        srv, _ = server
+        code, _ = self._post(srv.server_port, "sms", {"id": "x"}, token="\xe9\x80")
+        assert code == 401
+
     def test_unconfigured_channel_closed(self, server):
         srv, _ = server
         code, _ = self._post(srv.server_port, "fax", {"id": "x"})
