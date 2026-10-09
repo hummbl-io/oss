@@ -6,10 +6,13 @@ Local MCP server (stdio) for Proton services (Mail, Drive, Calendar, Meet).
 
 This server communicates over standard input/output using the Model Context Protocol (MCP).
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-proton
+python -m pip install ./packages/python/hummbl-mcp-proton
 ```
 
 ## Run

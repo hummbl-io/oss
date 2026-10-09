@@ -13,10 +13,13 @@ server implementation.
 - `boot_context` — build session startup context from the ledger
 - `reindex` — rebuild the BM25 search index
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-cognitive-ledger
+python -m pip install ./packages/python/hummbl-mcp-cognitive-ledger
 ```
 
 This pulls in `hummbl-cognition` as a dependency.
