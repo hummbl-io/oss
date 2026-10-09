@@ -234,6 +234,10 @@ Shipped after the original 26 (v1.3–v1.5); see [PRIMITIVES.md](PRIMITIVES.md) 
 
 ## Runnable Examples
 
+Start with the [budget-stop demo and captioned video](examples/BUDGET_STOP_DEMO.md):
+four synthetic tasks run, then the cooperative runner obeys `DENY` before task
+five. No API keys or real charges; the guide explains the accounting limits.
+
 Every primitive has a standalone example in `examples/`. Each runs with just `python examples/<name>.py` -- no setup, no config.
 
 | Example | Primitive | What it shows |

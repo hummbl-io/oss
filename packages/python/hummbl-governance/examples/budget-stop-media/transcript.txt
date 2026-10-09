@@ -1,0 +1,23 @@
+00:00:00  Four tasks. One budget.
+An offline demonstration of a runner obeying a budget decision.
+
+00:00:06  Run it locally.
+From the package directory, run python -m examples.budget_stop_demo.
+
+00:00:13  Check before each task.
+Tasks one and two are allowed. The ledger records half of the hard cap.
+
+00:00:20  A warning is a decision.
+Tasks three and four run with warnings. Recorded usage reaches 1.00 DEMO.
+
+00:00:27  DENY means: do not call it.
+The hard cap is reached. Task five never reaches the executor.
+
+00:00:35  Keep the result inspectable.
+The JSON is an unsigned local run summary, not an authenticated receipt.
+
+00:00:42  Know the boundary.
+There is no reservation for future or concurrent costs, and no forced process termination.
+
+00:00:50  Run it. Inspect it. Reproduce it.
+Open an issue with your commit, Python version and a synthetic reproduction.
