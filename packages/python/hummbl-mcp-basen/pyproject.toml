@@ -42,6 +42,7 @@ testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
 where = ["."]
+include = ["basen", "basen.*"]
 
 [tool.setuptools.package-data]
 basen = ["data/*.json"]
