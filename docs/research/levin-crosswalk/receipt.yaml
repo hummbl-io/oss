@@ -8,7 +8,7 @@ crosswalk_issue:
   url: https://github.com/hummbl-io/hummbl-production/issues/751
   title: "BaseN x Levin crosswalk v0.1"
   status: APPROVED_RESEARCH_CROSSWALK_NOT_CANON
-  approved_by: Operator-bowlby
+  approved_by: Operator
   approved_date: 2026-07-11
 
 parent_research_packet:
