@@ -64,10 +64,34 @@ python -m hummbl_cognition scitt-export --id <clp-id>   # SCITT-shaped statement
 | `boot_context.py` | Loads session context at startup |
 | `server.py` | Open Brain HTTP server — GET /status, POST /search, GET /lineage/{id} |
 | `consolidator.py` | Nightly ledger consolidation |
-| `lattice_advisor.py` | Base120 / Domain120 / BaseN operator recommendations |
+| `lattice_advisor.py` | Base120 keyword recommendations with optional ledger usage signals |
 | `belonging_check.py` | BKI belonging baseline checks |
 | `feedback_tracker.py` | Tracks user feedback for learning |
 | `sigil_forge/` | DSL compiler, execution engine, policy enforcement, rituals |
+
+### Base120 advisor data availability
+
+`Base120Advisor` uses the complete bundled Base120 registry through its Python
+interface. Missing, unreadable, malformed, incomplete, or duplicate registry
+data raises `RegistryUnavailableError` when constructing or reading an advisor,
+before ledger reads. The module remains importable so callers can handle this
+feature being unavailable. It does not substitute generic numbered operators.
+Restore valid package data and restart the process to load a fresh snapshot.
+
+```python
+from hummbl_cognition.lattice_advisor import Base120Advisor, RegistryUnavailableError
+
+try:
+    advisor = Base120Advisor()
+except RegistryUnavailableError:
+    advisor = None  # Report unavailable data to the calling application.
+```
+
+Registry shape validation does not authenticate source provenance or establish
+recommendation quality. This advisor supports Base120 only; Domain120 and other
+BaseN catalogs require separate adapters. The Open Brain server in this package
+does not expose these methods as `/base120/recommend` or
+`/base120/transformations` HTTP routes.
 
 ## CLP v1.1 Metadata Extensions
 

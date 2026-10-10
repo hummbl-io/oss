@@ -1,4 +1,4 @@
-"""Lattice Advisor — Base120 / Domain120 / BaseN operator recommendation engine.
+"""Lattice Advisor — offline Base120 operator recommendations.
 
 Recommends Base120 mental models from the 120-model corpus based on:
 1. Keyword + definition matching against the query (BM25-style scoring)
@@ -6,7 +6,7 @@ Recommends Base120 mental models from the 120-model corpus based on:
 3. Domain and difficulty filtering
 
 The advisor is stdlib-only and works offline.  Model definitions are loaded
-from ``cognition/data/base120_registry.json`` (generated from the canonical
+from ``hummbl_cognition/data/base120_registry.json`` (generated from the canonical
 YAML at PROJECTS/base120/Base120_Canonical_Model_Registry.yaml).
 
 Usage::
@@ -17,15 +17,20 @@ Usage::
     for rec in advisor.recommend("I need to find the root cause of a bug"):
         print(rec["id"], rec["name"], rec["score"])
 
-HTTP integration: the Open Brain server (``cognition/server.py``) exposes
-this advisor at ``POST /base120/recommend`` and ``GET /base120/transformations``
-so that external callers (e.g. the hummbl-api Cloudflare Worker) can query it
-over HTTP without importing the Python package.
+This module supplies a Python interface for the bundled Base120 catalog. The
+package's Open Brain server does not wire these advisor methods to HTTP routes.
+Domain120 and other BaseN catalogs are not supported by this advisor.
+
+Invalid or unavailable bundle data leaves the module importable, but advisor
+construction and reads raise RegistryUnavailableError before reading a ledger.
+No placeholder operators are substituted. Restore the package data and restart
+the process to load a fresh registry snapshot.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -134,47 +139,94 @@ DOMAIN_NAMES: dict[str, str] = {
 }
 
 _REGISTRY_PATH = Path(__file__).parent / "data" / "base120_registry.json"
+_REGISTRY_UNAVAILABLE = (
+    "Bundled Base120 registry is unavailable; restore valid package data and restart."
+)
+
+
+class RegistryUnavailableError(RuntimeError):
+    """The bundled Base120 registry could not be loaded and validated."""
+
+
+def _json_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate JSON object key")
+        result[key] = value
+    return result
+
+
+def _json_constant(value):
+    raise ValueError("Non-JSON numeric constant")
+
+
+def _json_float(value):
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("Non-finite JSON number")
+    return number
 
 
 def _load_registry() -> dict[str, dict[str, Any]]:
-    """Load the 120-model registry from the bundled JSON file.
+    """Load the complete bundled registry or raise a safe, explicit error.
 
     Returns a dict keyed by model id (e.g. ``"P1"``, ``"SY14"``).
+    Shape checks establish neither source authenticity nor reasoning quality.
     """
     try:
         with open(_REGISTRY_PATH, encoding="utf-8") as fh:
-            models: list[dict[str, Any]] = json.load(fh)
-    except (OSError, json.JSONDecodeError):
-        # Fallback: generate a minimal registry when the data file is absent
-        models = []
-        for domain in DOMAIN_NAMES:
-            for n in range(1, 21):
-                diff = (
-                    "beginner"
-                    if n <= 7
-                    else ("intermediate" if n <= 14 else "advanced")
-                )
-                models.append(
-                    {
-                        "id": f"{domain}{n}",
-                        "name": f"{DOMAIN_NAMES[domain]} {n}",
-                        "domain": domain,
-                        "domain_name": DOMAIN_NAMES[domain],
-                        "definition": f"{DOMAIN_NAMES[domain]} model {n}",
-                        "difficulty": diff,
-                    }
-                )
+            models = json.load(fh, object_pairs_hook=_json_pairs,
+                               parse_constant=_json_constant, parse_float=_json_float)
+        expected = {f"{domain}{n}": domain for domain in DOMAIN_NAMES for n in range(1, 21)}
+        if not isinstance(models, list) or len(models) != len(expected):
+            raise ValueError("Registry must contain exactly 120 records")
+        registry: dict[str, dict[str, Any]] = {}
+        for model in models:
+            if not isinstance(model, dict):
+                raise ValueError("Registry record must be an object")
+            mid = model.get("id")
+            if not isinstance(mid, str) or mid not in expected or mid in registry:
+                raise ValueError("Invalid or duplicate Base120 identifier")
+            domain = model.get("domain")
+            if domain != expected[mid] or model.get("domain_name") != DOMAIN_NAMES[domain]:
+                raise ValueError("Identifier and family must agree")
+            for key in ("name", "definition"):
+                value = model.get(key)
+                if not isinstance(value, str) or not value.strip():
+                    raise ValueError("Missing model text")
+                value.encode("utf-8")
+            if model.get("difficulty") not in ("beginner", "intermediate", "advanced"):
+                raise ValueError("Invalid difficulty")
+            keywords = model.get("keywords", DOMAIN_KEYWORDS[domain])
+            if not isinstance(keywords, list) or any(
+                not isinstance(word, str) or not word.strip() for word in keywords
+            ):
+                raise ValueError("Invalid keyword list")
+            for word in keywords:
+                word.encode("utf-8")
+            model["keywords"] = list(keywords)
+            registry[mid] = model
+        if set(registry) != set(expected):
+            raise ValueError("Registry identifiers are incomplete")
+        return registry
+    except (OSError, ValueError, RecursionError):
+        raise RegistryUnavailableError(_REGISTRY_UNAVAILABLE) from None
 
-    registry: dict[str, dict[str, Any]] = {}
-    for m in models:
-        mid = m["id"]
-        m.setdefault("keywords", DOMAIN_KEYWORDS.get(m.get("domain", ""), []))
-        registry[mid] = m
-    return registry
+
+# Load once. A failed snapshot must not fabricate model definitions or prevent
+# callers from importing the error type and handling this feature's absence.
+try:
+    REGISTRY: dict[str, dict[str, Any]] = _load_registry()
+    _REGISTRY_LOAD_FAILED = False
+except RegistryUnavailableError:
+    REGISTRY = {}
+    _REGISTRY_LOAD_FAILED = True
 
 
-# Module-level registry (loaded once)
-REGISTRY: dict[str, dict[str, Any]] = _load_registry()
+def _require_registry() -> None:
+    if _REGISTRY_LOAD_FAILED or not REGISTRY:
+        raise RegistryUnavailableError(_REGISTRY_UNAVAILABLE)
 
 
 @dataclass
@@ -205,6 +257,7 @@ class Base120Advisor:
                          past ledger entries that reference Base120 model ids
                          boost those models in future recommendations.
         """
+        _require_registry()
         self.ledger_path: Path | None = Path(ledger_path) if ledger_path else None
         self._ledger_signals: dict[str, float] = {}
         self._signals_loaded = False
@@ -335,6 +388,7 @@ class Base120Advisor:
             List of model dicts with added ``"score"`` and ``"reasons"`` keys,
             sorted descending by score.
         """
+        _require_registry()
         self._load_ledger_signals()
         limit = max(1, min(limit, 20))
         query_lower = query.lower()
@@ -383,6 +437,7 @@ class Base120Advisor:
 
         Returns ``None`` if the model id is unknown.
         """
+        _require_registry()
         mid = model_id.upper()
         if mid not in REGISTRY:
             return None
@@ -393,6 +448,7 @@ class Base120Advisor:
 
     def list_domains(self) -> list[dict[str, Any]]:
         """Return metadata for the 6 Base120 transformation domains."""
+        _require_registry()
         return [
             {
                 "code": code,
