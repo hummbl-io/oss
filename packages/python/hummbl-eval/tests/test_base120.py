@@ -206,6 +206,13 @@ class RegistryLoadingTests(unittest.TestCase):
 
     def test_fallback_when_no_registry_available(self) -> None:
         """When env var is unset and bundled is missing, fallback is used."""
+        # Read the reference before simulating unavailable package data.
+        registry_path = (
+            Path(__file__).resolve().parents[1]
+            / "src/hummbl_eval/data/base120_registry.json"
+        )
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        expected_names = {entry["id"]: entry["name"] for entry in registry}
         # Clear env var and mock the bundled path to fail
         env = {k: v for k, v in os.environ.items() if k != "BASE120_REGISTRY_PATH"}
         with patch.dict(os.environ, env, clear=True):
@@ -214,6 +221,10 @@ class RegistryLoadingTests(unittest.TestCase):
         self.assertEqual(source, "fallback")
         self.assertIn("P6", codes)
         self.assertEqual(len(codes), 27)
+        for code, name in codes.items():
+            with self.subTest(code=code):
+                self.assertIn(code, expected_names)
+                self.assertEqual(name, expected_names[code])
 
 
 class CliBase120Tests(unittest.TestCase):
