@@ -35,9 +35,12 @@ only.
 ### Known-bad tag — do not re-run (issue #143)
 
 Operator disposition 2026-09-07: **leave and ignore** origin tag
-`python/hummbl-governance/v1.5.0` (SHA `4d40da8`). Live PyPI is
-`hummbl-governance==1.4.2`. Re-running Publish on that tag is the known
-P0.
+`python/hummbl-governance/v1.5.0` (SHA `4d40da8`). At that disposition,
+live PyPI was `hummbl-governance==1.4.2`. Re-running Publish on that tag
+remains prohibited. The separately published [1.5.1 artifacts](https://pypi.org/pypi/hummbl-governance/1.5.1/json)
+use `python/hummbl-governance/v1.5.1` and release commit
+`a8ad4c3150a8357df28f488c51cdda6c5215b8f6`; this does not rehabilitate the
+known-bad 1.5.0 tag.
 
 - Do **not** re-run the Publish workflow on `python/hummbl-governance/v1.5.0`.
 - Do **not** delete or retarget that tag unless a later operator instruction
@@ -49,7 +52,9 @@ P0.
 `hummbl-bus==0.2.0` is on PyPI (2026-08-27) without a matching
 `python/hummbl-bus/v0.2.0` tag in this repo. Do not publish another bus
 version until that provenance gap is documented in the package changelog
-or backfilled from the matching commit.
+or backfilled from the matching commit. The current [0.2.1 artifacts](https://pypi.org/pypi/hummbl-bus/0.2.1/json)
+have a separate canonical `python/hummbl-bus/v0.2.1` tag; their availability
+does not backfill the missing 0.2.0 tag.
 
 ## Rules
 
@@ -103,8 +108,8 @@ filter.
 These must be configured outside the workflow file:
 
 - **PyPI trusted publisher**: for each package, configure on pypi.org with owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`
-- **GitHub `pypi` environment**: configure required reviewers and/or wait timer for production safety
-- **Branch protection on `main`**: require PR reviews + CI before merge
+- **GitHub `pypi` environment**: retain the environment used by trusted publishing. Any wait timer follows the owner's explicit disposition; approval settings must not make the owner depend on another person, account, or agent to publish.
+- **Owner merge authority**: branch protections and rulesets are disabled by default. CI, signing, and review receipts remain evidence and agent verification obligations; do not configure a requirement for another person, account, or agent to approve the owner's decisions or merges.
 - **Tag protection**: prevent force-pushing or deleting tags
 - **No PyPI API tokens**: remove any legacy API tokens from PyPI account settings; trusted publishing replaces them
 
