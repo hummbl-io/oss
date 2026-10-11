@@ -206,6 +206,10 @@ base120 prompt P6 "How should we price the certification tier?"
 
 # List transformation families
 base120 families
+
+# Encode the ledger as an image and decode it back
+base120 glyph render --format png -o ledger.png
+base120 glyph decode ledger.png
 ```
 
 ## MCP Integration

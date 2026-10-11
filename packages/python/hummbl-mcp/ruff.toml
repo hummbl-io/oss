@@ -1,6 +1,6 @@
 # HUMMBL Fleet Lint Configuration
 # Extends shared config from hummbl-lint-config
-extend = "hummbl_lint_config/ruff.toml"
+extend = "../hummbl-lint-config/hummbl_lint_config/ruff.toml"
 
 [lint.per-file-ignores]
 "tests/*" = ["PLR2004"]

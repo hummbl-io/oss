@@ -28,9 +28,9 @@ proposal. Company adoption and deployed public copy remain separate review steps
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
-| `hummbl-governance` | 1.5.0 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.4.2 — tree 1.5.0 remains unreleased; see `docs/operations/RELEASE.md` |
-| `base120` | 3.0.3 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
-| `hummbl-bus` | 0.2.0 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
+| `hummbl-governance` | 1.5.1 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.5.1 — current tree includes post-release changes; see `docs/operations/RELEASE.md` |
+| `base120` | 3.1.0 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
+| `hummbl-bus` | 0.2.1 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
 | `hummbl-tuples` | 0.2.2 | [PyPI](https://pypi.org/project/hummbl-tuples/) | Live — HUMMBL Typed Tuples governance model |
 | `hummbl-bif` | 1.0.1 | [PyPI](https://pypi.org/project/hummbl-bif/) | Live — Batch Ingestion Framework |
@@ -81,6 +81,9 @@ Node packages:
 | `@hummbl/mcp-base120` | 0.1.0-canary.0 | — | Private technical canary — read-only Base120 MCP catalog; not publishable while admission blockers remain |
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
+Explore the [formal reasoning exhibits](packages/lean/hummbl-formalization/README.md#exhibit-gallery):
+tree recovery, operation order, quantifier scope, and vacuous checks. Synthetic
+data, a pinned Lean compiler, and no Mathlib dependency.
 Canonical install names owned by HUMMBL and recommended from this repo:
 ```text
 pip install base120
@@ -132,8 +135,8 @@ CycloneDX SBOM and SHA-256 checksums to the GitHub release.
 To check a wheel you downloaded, verify its provenance attestation against this
 repository with the GitHub CLI:
 ```bash
-pip download --no-deps hummbl-governance==1.5.0 -d ./dl
-gh attestation verify ./dl/hummbl_governance-1.5.0-py3-none-any.whl --repo hummbl-io/oss
+pip download --no-deps hummbl-governance==1.4.2 -d ./dl
+gh attestation verify ./dl/hummbl_governance-1.4.2-py3-none-any.whl --repo hummbl-io/oss
 ```
 A successful result means GitHub's Sigstore instance attests that this exact
 file was produced by the `publish-pypi.yml` workflow in `hummbl-io/oss`. Then

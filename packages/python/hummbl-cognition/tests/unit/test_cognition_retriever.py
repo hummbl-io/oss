@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from hummbl_cognition.retriever import (
     MemoryResult,
     OpenBrainRetriever,
@@ -377,7 +378,7 @@ class TestSearchTextPool:
             assert results[0].source == "bus"
             assert results[0].metadata["path"] == str(p)
 
-    def test_bus_content_window_expands_from_tsv_source_path(self):
+    def test_bus_content_window_comes_from_bounded_cache_read(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "messages.tsv"
             long_message = (
@@ -388,20 +389,16 @@ class TestSearchTextPool:
                 encoding="utf-8",
             )
 
-            r = OpenBrainRetriever(state_dir="/tmp/s")
-            results = r._search_text_pool(
-                "governance retrieval",
-                pool_name="bus",
-                search_dir=Path(td),
-                glob_pattern="*.tsv",
-                limit=5,
-            )
+            r = OpenBrainRetriever(state_dir="/tmp/s", bus_cache_path=p)
+            results = r.search("governance retrieval", sources=["bus"], limit=5)
             assert results
             original_len = len(results[0].content)
+            original_window = results[0].content_window
 
             r._expand_windows(results)
 
             assert len(results[0].content_window) > original_len
+            assert results[0].content_window == original_window
             assert "prefix" in results[0].content_window
 
     def test_empty_query_returns_empty(self):
@@ -596,8 +593,8 @@ class TestSearchIntegration:
     def test_search_all_sources(self):
         with tempfile.TemporaryDirectory() as td:
             state = Path(td)
-            # Create coordination dir for bus
-            coord = state / "coordination"
+            # Use an explicit temporary cache, independent of the host cache.
+            coord = state / "bus-cache"
             coord.mkdir()
             (coord / "messages.tsv").write_text(
                 "2026-03-01T00:00:00Z\tagent\tall\tSTATUS\tgovernance update\n"
@@ -607,6 +604,7 @@ class TestSearchIntegration:
             # Not creating -- will just return empty for that pool
 
             r = self._make_retriever(state)
+            r.bus_cache_path = coord / "messages.tsv"
             with patch("hummbl_cognition.retriever.log_retrieval"):
                 results = r.search(
                     "governance",
@@ -778,14 +776,18 @@ class TestSearchIntegration:
         idx.search.return_value = []
         r = OpenBrainRetriever(state_dir="/tmp/nonexistent_all", index=idx)
         with patch("hummbl_cognition.retriever.log_retrieval"):
-            with patch.object(r, "_search_text_pool", return_value=[]) as mock_tp:
+            with (
+                patch.object(r, "_search_text_pool", return_value=[]) as mock_tp,
+                patch.object(r, "_search_bus_cache", return_value=[]) as mock_bus,
+            ):
                 with patch.object(r, "_search_findings", return_value=[]):
                     with patch.object(r, "_search_memory_md", return_value=[]):
                         r.search("test", agent="t")
         # Ledger searched via index
         idx.search.assert_called_once()
-        # Text pool called for bus and briefings
-        assert mock_tp.call_count == 2
+        mock_bus.assert_called_once_with("test", since=None, limit=50)
+        # Text pool is only used for briefings.
+        mock_tp.assert_called_once()
 
     def test_results_sorted_by_score_descending(self):
         idx = MagicMock()

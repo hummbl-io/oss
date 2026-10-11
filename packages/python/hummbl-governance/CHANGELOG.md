@@ -9,6 +9,35 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Renamed the P49 primitive module `sovereign_cryptosystem` to
+  `envelope_cryptosystem` and the class `SovereignCryptosystem` to
+  `EnvelopeCryptosystem`, per the retired-vocabulary rule and the rename
+  recommended in `docs/PRIMITIVE_CRITICAL_ANALYSIS_2026-08-27.md`. The module
+  shipped under its old module and class names in the published
+  [1.5.1 artifacts](https://pypi.org/pypi/hummbl-governance/1.5.1/json).
+  Version 1.5.1 therefore retains the old import path; the new names are in
+  current source for a subsequent release. Consumers of the old path will
+  need an explicit migration or compatibility path when adopting that release.
+  Registry, PRIMITIVES.md, README, cryptographic policy, and the package
+  description follow the new naming.
+
+## [1.5.1] — 2026-09-24
+
+### Security & Hardening
+- Prevent directory traversal in LSP archive extraction (#132).
+- Enforce strict URL scheme validation before urllib network requests (#134).
+- Fail-closed security gates on public intake and repository boundary checks (#166).
+- Redact authority identity fields as human rather than agent roles (#209).
+
+### Added & Fixed
+- Hash-locked build environment verification (`requirements-build.lock`) pinning all build dependencies with SHA-256 hashes (#210).
+- Register missing GDPR primitives and correct stale primitive counts in `PrimitiveRegistry` (#222).
+- Sandbox lifecycle contracts and validation (#139).
+- Enforce SKILL_INVOKE provenance checks at the cognition ledger write path (#236).
+- Support `COGNITION_LEDGER` environment variable override in cognition CLI (#159).
+- Harden IdentityEngine K3 ghost-agent rejection (#179, #182).
+
 ## [1.5.0] — 2026-09-04
 
 ### Added

@@ -33,6 +33,16 @@ from hummbl_cognition.models import (
     LedgerScope,
     SharedState,
 )
+from hummbl_cognition.novelty_check import (
+    NoveltyNeighbor,
+    NoveltyReport,
+    novelty_check,
+)
+from hummbl_cognition.novelty_proof import (
+    build_novelty_proof,
+    grade_for_scopes,
+    post_novelty_proof,
+)
 from hummbl_cognition.retriever import OpenBrainRetriever
 from hummbl_cognition.schema_validator import (
     ValidationError,
@@ -91,4 +101,10 @@ __all__ = [
     "validate_file",
     "BM25Index",
     "OpenBrainRetriever",
+    "NoveltyNeighbor",
+    "NoveltyReport",
+    "novelty_check",
+    "build_novelty_proof",
+    "grade_for_scopes",
+    "post_novelty_proof",
 ]

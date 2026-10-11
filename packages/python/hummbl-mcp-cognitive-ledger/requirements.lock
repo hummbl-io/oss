@@ -8,3 +8,4 @@ hummbl-cognition==0.1.0 \
     --hash=sha256:3b1016df04bd20e809c91df06995d56a2e30b54a113c114327098cb6b6d9ba8a \
     --hash=sha256:3c172fe8fe82f04490bf1a386c4eda11115267d53fca32f124d8b4b98906721a
     # via hummbl-mcp-cognitive-ledger (pyproject.toml)
+# inputs-sha256: af5b0c12d8aa70175e3b0f4884453a27cf504116a8b4e5014cc63791e0eb6af0

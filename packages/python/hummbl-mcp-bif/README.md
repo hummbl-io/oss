@@ -2,10 +2,13 @@
 
 MCP server exposing BIF methodology tools: session management, templates, validation, and status tracking via stdio JSON-RPC.
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-bif
+python -m pip install ./packages/python/hummbl-mcp-bif
 ```
 
 ## Run

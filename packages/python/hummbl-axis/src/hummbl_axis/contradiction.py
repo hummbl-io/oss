@@ -16,9 +16,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class Contradiction:
     """A single mismatch between claimed and observed state.
 
     The ID is deterministic — same scope+claim+observation always produces the
-    same ID. This is how cycle tracking detects "unchanged for N cycles."
+    same ID. Uses JSON array serialization to prevent delimiter collision attacks.
     """
 
     scope: str
@@ -37,12 +37,13 @@ class Contradiction:
     volatility: str  # low, medium, high
     evidence_source: str  # path or URL to the Atlas evidence cut
     claim_source: str  # path or URL to the claimed state
+    status: str = "ACTIVE"  # ACTIVE, EXPECTANT, ACCEPTED_DEBT
 
     @property
     def id(self) -> str:
-        """Deterministic ID from scope + claim + observation."""
-        raw = f"{self.scope}|{self.claim}|{self.observation}"
-        return "AX-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+        """Deterministic ID from scope + claim + observation via JSON array."""
+        raw = json.dumps([self.scope, self.claim, self.observation], separators=(",", ":"))
+        return "AX-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -62,31 +63,51 @@ class CycleState:
     cycle: int = 0
     seen: dict[str, int] = field(default_factory=dict)  # id → unchanged_cycles
     history: list[dict] = field(default_factory=list)
+    consecutive_healthy: int = 0
+    flaps: dict[str, int] = field(default_factory=dict)  # id → flap penalty count
 
-    def update(self, contradictions: Iterable[Contradiction]) -> list[Contradiction]:
+    def update(self, contradictions: Iterable[Contradiction]) -> list[tuple[Contradiction, int]]:
         """Advance one cycle. Returns the contradictions with unchanged count attached."""
         current_ids = set()
         results = []
+        new_count = 0
         for c in contradictions:
             current_ids.add(c.id)
             if c.id in self.seen:
-                self.seen[c.id] += 1
+                if self.seen[c.id] == -1:
+                    # Flapping re-appearance: was stale, now back
+                    self.flaps[c.id] = self.flaps.get(c.id, 0) + 1
+                    self.seen[c.id] = 1 + self.flaps[c.id]
+                else:
+                    self.seen[c.id] += 1
             else:
                 self.seen[c.id] = 0
+                new_count += 1
             results.append((c, self.seen[c.id]))
 
         # Decay: contradictions not seen this cycle get stale
-        stale = [cid for cid in self.seen if cid not in current_ids]
+        stale = [cid for cid in self.seen if cid not in current_ids and self.seen[cid] != -1]
         for cid in stale:
             self.seen[cid] = -1  # marked stale, not deleted (lattice decay)
 
         self.cycle += 1
-        self.history.append({
-            "cycle": self.cycle,
-            "contradiction_count": len(current_ids),
-            "stale_count": len(stale),
-            "unchanged_3plus": sum(1 for v in self.seen.values() if v >= 3),
-        })
+
+        # Track consecutive healthy cycles (0 new and 0 active contradictions)
+        if len(current_ids) == 0 or new_count == 0:
+            self.consecutive_healthy += 1
+        else:
+            self.consecutive_healthy = 0
+
+        self.history.append(
+            {
+                "cycle": self.cycle,
+                "contradiction_count": len(current_ids),
+                "stale_count": len(stale),
+                "new_count": new_count,
+                "consecutive_healthy": self.consecutive_healthy,
+                "unchanged_3plus": sum(1 for v in self.seen.values() if v >= 3),
+            }
+        )
         return results
 
     def should_exit(self, threshold: float = 0.0) -> tuple[bool, str]:
@@ -97,10 +118,8 @@ class CycleState:
         stuck = [cid for cid, count in self.seen.items() if count >= 3]
         if stuck:
             return True, f"stuck: {len(stuck)} contradiction(s) unchanged for 3+ cycles"
-        if self.cycle > 0:
-            rate = len([v for v in self.seen.values() if v == 0])  # new this cycle
-            if self.cycle >= 3 and rate == 0:
-                return True, f"healthy: 0 new contradictions for 3 consecutive cycles"
+        if self.cycle > 0 and self.consecutive_healthy >= 3:
+            return True, "healthy: 0 new contradictions for 3 consecutive cycles"
         return False, ""
 
     def to_dict(self) -> dict:
@@ -108,6 +127,8 @@ class CycleState:
             "cycle": self.cycle,
             "seen": dict(self.seen),
             "history": self.history,
+            "consecutive_healthy": self.consecutive_healthy,
+            "flaps": dict(self.flaps),
         }
 
     @classmethod
@@ -116,6 +137,8 @@ class CycleState:
         state.cycle = d.get("cycle", 0)
         state.seen = dict(d.get("seen", {}))
         state.history = list(d.get("history", []))
+        state.consecutive_healthy = d.get("consecutive_healthy", 0)
+        state.flaps = dict(d.get("flaps", {}))
         return state
 
     def save(self, path: Path) -> None:

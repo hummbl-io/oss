@@ -13,3 +13,23 @@ providers:
     notes: |
       Template entry for any OpenAI-compatible API endpoint.
       Set base_url and api_key_env in your environment.
+  - id: nvidia-nim
+    name: NVIDIA NIM (build.nvidia.com)
+    api_base: https://integrate.api.nvidia.com/v1
+    models_endpoint: https://integrate.api.nvidia.com/v1/models
+    api_compat: openai
+    api_key_env: NVIDIA_API_KEY
+    api_key_url: https://build.nvidia.com/settings
+    free_filter: all
+    free_tier:
+      type: freemium
+      rate_limit: "up to 40 rpm (nominal; per-model contention varies)"
+      requires_cc: false
+    features:
+      function_calling: true
+      search_grounding: false
+      streaming: true
+    notes: |
+      OpenAI-compatible hosted catalog (82 models, 21 vendors as of 2026-09-26).
+      Catalog includes removed endpoints — verify a model with a real
+      chat/completions call, not just its catalog row.

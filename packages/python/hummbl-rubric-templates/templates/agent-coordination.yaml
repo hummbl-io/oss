@@ -58,38 +58,37 @@ hard_gates:
     severity: "medium"
     
 weighted_dimensions:
-  # Core dimensions (40% total)
+  # Core dimensions (35% total)
   framework_fidelity:
-    weight: 20
+    weight: 15
     description: "How faithfully the coordination follows HUMMBL framework patterns and agent interaction protocols"
     scoring_anchors:
       "0-5": "Does not follow HUMMBL coordination framework, no standard patterns, missing required protocols"
       "6-10": "Partial HUMMBL framework compliance, some standard patterns, incomplete protocol coverage"
       "11-13": "Complete HUMMBL framework compliance, full standard patterns, all protocols covered"
       "14-15": "Complete HUMMBL framework compliance with precise pattern application, demonstrates deep coordination understanding"
-      "16-20": "Complete HUMMBL framework compliance with nuanced pattern adaptation, shows coordination mastery and optimization"
       
   applied_transformation:
-    weight: 15
+    weight: 10
     description: "How well coordination patterns are transformed into effective agent interactions"
     scoring_anchors:
-      "0-5": "No transformation from patterns to interactions, abstract coordination only, no effective agent collaboration"
-      "6-10": "Partial transformation, some patterns applied but not effective, limited agent collaboration"
-      "11-13": "Complete transformation to effective agent interactions, clear collaboration patterns, coordination well-applied"
-      "14-15": "Complete transformation with sophisticated agent interactions, highly effective collaboration, coordination mastery demonstrated"
+      "0-3": "No transformation from patterns to interactions, abstract coordination only, no effective agent collaboration"
+      "4-6": "Partial transformation, some patterns applied but not effective, limited agent collaboration"
+      "7-8": "Complete transformation to effective agent interactions, clear collaboration patterns, coordination well-applied"
+      "9-10": "Complete transformation with sophisticated agent interactions, highly effective collaboration, coordination mastery demonstrated"
       
   evidence_quality:
-    weight: 15
+    weight: 10
     description: "Quality, completeness, and traceability of coordination evidence (bus receipts, logs, state objects)"
     scoring_anchors:
       "0-3": "No coordination evidence or placeholder logs, no traceability, critical decisions missing receipts"
-      "4-6": "Partial evidence coverage, weak traceability, some critical decisions with insufficient receipts"
+      "4-6": "Partial evidence coverage, weak traceability, some critical decisions with insufficient evidence"
       "7-8": "Complete evidence coverage for all coordination events, strong traceability, evidence clearly linked to decisions"
       "9-10": "Complete evidence coverage with strong traceability, evidence quality validated, includes evidence collection procedures"
       
-  # Governance dimensions (30% total)
+  # Governance dimensions (25% total)
   governance_process:
-    weight: 15
+    weight: 10
     description: "Evidence of proper coordination process and stakeholder engagement"
     scoring_anchors:
       "0-3": "No governance process evidence, no stakeholder review, no coordination process documentation"
@@ -98,16 +97,16 @@ weighted_dimensions:
       "9-10": "Complete governance process with documented coordination workflow, stakeholder sign-off, governance receipts with decision rationale"
       
   stakeholder_control:
-    weight: 10
+    weight: 5
     description: "Degree of stakeholder control and oversight over the coordination process"
     scoring_anchors:
-      "0-3": "No stakeholder control, no approval mechanisms, no oversight"
-      "4-6": "Limited stakeholder control, basic approval mechanisms, minimal oversight"
-      "7-8": "Strong stakeholder control, clear approval mechanisms, documented oversight"
-      "9-10": "Complete stakeholder control with documented escalation paths, approval workflows, and oversight procedures"
+      "0-1": "No stakeholder control, no approval mechanisms, no oversight"
+      "2-3": "Limited stakeholder control, basic approval mechanisms, minimal oversight"
+      "4": "Strong stakeholder control, clear approval mechanisms, documented oversight"
+      "5": "Complete stakeholder control with documented escalation paths, approval workflows, and oversight procedures"
       
   risk_containment:
-    weight: 15
+    weight: 10
     description: "Identification, assessment, and mitigation of coordination risks and failures"
     scoring_anchors:
       "0-3": "No failure mode analysis, unmitigated critical risks, no risk assessment"
@@ -142,7 +141,7 @@ weighted_dimensions:
       "0-2": "Clear coordination theater, no evidence of genuine collaboration, box-checking approach"
       "3-5": "Mixed coordination theater and genuine collaboration, partial truth-seeking"
       "6-7": "Genuine collaboration with evidence of truth-seeking, minimal coordination theater"
-      "8": "Strong truth-seeking throughout, evidence of critical self-assessment, no coordination theater"
+      "8-10": "Strong truth-seeking throughout, evidence of critical self-assessment, no coordination theater"
       
   # External validity dimensions (10% total)
   external_validity:
@@ -150,10 +149,9 @@ weighted_dimensions:
     description: "Evidence that coordination produces valid external outcomes and operational results"
     scoring_anchors:
       "0-2": "No external validity evidence, coordination produces no operational results"
-      "3-4": "Limited external validity evidence, coordination produces partial operational results"
-      "5": "Good external validity evidence, coordination produces clear operational results"
-      "6": "Excellent external validity evidence, coordination produces validated operational outcomes"
-      
+      "3-5": "Limited external validity evidence, coordination produces partial operational results"
+      "6-7": "Good external validity evidence, coordination produces clear operational results"
+      "8-10": "Excellent external validity evidence, coordination produces validated operational outcomes"
 required_outputs:
   numeric_score: 0
   hard_gate_status: ""

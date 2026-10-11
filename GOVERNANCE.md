@@ -191,7 +191,7 @@ The operator and monorepo maintainers coordinate:
 
 ### 7.3 No monocentric control
 
-No single maintainer controls all packages. Package OWNERS are sovereign
+No single maintainer controls all packages. Package OWNERS have final say
 within their package scope. The operator's role is ratification and
 arbitration, not day-to-day package management.
 

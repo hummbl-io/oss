@@ -1,4 +1,4 @@
-"""sovereign_cryptosystem — Hardened Cryptographic Sync Router (GFSCR) envelope.
+"""envelope_cryptosystem — Hardened Cryptographic Sync Router (GFSCR) envelope.
 
 Implements timing-safe Encrypt-then-MAC using AES-256-CBC. Prefers the
 ``cryptography`` library (in-process, no subprocess overhead) when available,
@@ -72,7 +72,7 @@ def _pkcs7_unpad(padded: bytes) -> bytes:
     return padded[:-pad_len]
 
 
-class SovereignCryptosystem:
+class EnvelopeCryptosystem:
     """Hardened cryptosystem providing authenticated AES-256-CBC envelope encryption."""
 
     def __init__(self, key_256: bytes, mac_key_256: bytes):

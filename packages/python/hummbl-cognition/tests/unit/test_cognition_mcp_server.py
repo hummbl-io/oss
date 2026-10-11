@@ -1,6 +1,6 @@
 """Unit tests for hummbl_cognition.mcp_server.
 
-Covers: handle_tool dispatch (all 7 tools), get_indexer singleton,
+Covers: handle_tool dispatch (all tools), get_indexer singleton,
 send_response/send_error JSON-RPC helpers, and main() stdin loop.
 """
 
@@ -1137,6 +1137,98 @@ class TestBootContext:
 
 
 # ---------------------------------------------------------------------------
+# handle_tool: memory_search
+# ---------------------------------------------------------------------------
+
+
+class TestMemorySearch:
+    def test_missing_query(self, tmp_state):
+        import hummbl_cognition.mcp_server as mod
+
+        out = mod.handle_tool("memory_search", {})
+        assert "error" in out
+        assert "query" in out["error"]
+
+    def test_dispatch_calls_retriever(self, tmp_state):
+        import hummbl_cognition.mcp_server as mod
+
+        fake = mock.MagicMock()
+        fake.search.return_value = []
+        with (
+            mock.patch.object(mod, "get_indexer", return_value=mock.MagicMock()),
+            mock.patch(
+                "hummbl_cognition.retriever.OpenBrainRetriever",
+                return_value=fake,
+            ) as m_cls,
+        ):
+            out = mod.handle_tool(
+                "memory_search",
+                {
+                    "query": "q",
+                    "sources": ["session"],
+                    "token_budget": 500,
+                },
+            )
+        assert out["count"] == 0
+        assert out["query"] == "q"
+        m_cls.assert_called_once()
+        fake.search.assert_called_once()
+        assert fake.search.call_args.kwargs["sources"] == ["session"]
+        assert fake.search.call_args.kwargs["token_budget"] == 500
+
+    def test_result_shape(self, tmp_state):
+        import hummbl_cognition.mcp_server as mod
+        from hummbl_cognition.retriever import MemoryResult
+
+        fake = mock.MagicMock()
+        fake.search.return_value = [
+            MemoryResult(
+                source="session",
+                entry_id="session:claims.md",
+                score=0.5,
+                content="hit content",
+                metadata={"file": "claims.md"},
+            )
+        ]
+        with (
+            mock.patch.object(mod, "get_indexer", return_value=mock.MagicMock()),
+            mock.patch(
+                "hummbl_cognition.retriever.OpenBrainRetriever",
+                return_value=fake,
+            ),
+        ):
+            out = mod.handle_tool("memory_search", {"query": "hit"})
+        assert out["count"] == 1
+        assert out["results"][0]["source"] == "session"
+        assert out["results"][0]["entry_id"] == "session:claims.md"
+
+    def test_invalid_source_rejected(self, tmp_state):
+        import hummbl_cognition.mcp_server as mod
+
+        out = mod.handle_tool(
+            "memory_search", {"query": "q", "sources": ["ledgerr"]}
+        )
+        assert "error" in out
+        assert "ledgerr" in out["error"]
+
+    def test_retriever_failure_returns_error(self, tmp_state):
+        import hummbl_cognition.mcp_server as mod
+
+        fake = mock.MagicMock()
+        fake.search.side_effect = RuntimeError("pool exploded")
+        with (
+            mock.patch.object(mod, "get_indexer", return_value=mock.MagicMock()),
+            mock.patch(
+                "hummbl_cognition.retriever.OpenBrainRetriever",
+                return_value=fake,
+            ),
+        ):
+            out = mod.handle_tool("memory_search", {"query": "q"})
+        assert "error" in out
+        assert "pool exploded" in out["error"]
+
+
+# ---------------------------------------------------------------------------
 # handle_tool: reindex
 # ---------------------------------------------------------------------------
 
@@ -1248,8 +1340,8 @@ class TestToolsDefinitions:
         import hummbl_cognition.mcp_server as mod
 
         assert (
-            len(mod.TOOLS) == 6
-        )  # ledger_search, ledger_query, ledger_post, ledger_stats, boot_context, reindex
+            len(mod.TOOLS) == 7
+        )  # ledger_search, ledger_query, ledger_post, ledger_stats, boot_context, memory_search, reindex
 
     def test_all_tools_have_required_fields(self):
         import hummbl_cognition.mcp_server as mod
@@ -1269,6 +1361,7 @@ class TestToolsDefinitions:
             "ledger_post",
             "ledger_stats",
             "boot_context",
+            "memory_search",
             "reindex",
         }
         assert names == expected
@@ -1329,7 +1422,7 @@ class TestMain:
         )
         assert len(responses) == 1
         tools = responses[0]["result"]["tools"]
-        assert len(tools) == 6
+        assert len(tools) == 7
 
     def test_ping(self):
         responses = self._run_main(

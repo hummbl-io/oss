@@ -78,9 +78,30 @@ def test_mcp_stdio_preserves_non_ascii_round_trip(tmp_path: Path) -> None:
         {"name": "bus_read", "arguments": {"limit": 5}},
     )
 
-    env = os.environ.copy()
-    env["BUS_FILE"] = str(bus_file)
-    env["FM_TEST_MODE"] = "1"  # relax sender identity validation for test agent
+    # Hermetic child env (oss#299): on credentialed hosts the subprocess
+    # resolves bridge tokens from ~/.config/hummbl-bus/ and posts to the
+    # live bus instead of the temporary BUS_FILE. Build the minimal env the
+    # interpreter needs, scrub inherited BUS_* vars, and redirect HOME/
+    # USERPROFILE plus the token path into tmp_path so no credential
+    # resolves and every bridge call short-circuits to the local fallback.
+    env = {
+        name: os.environ[name]
+        for name in (
+            "SYSTEMROOT", "WINDIR", "LD_LIBRARY_PATH", "PATH", "PYTHONPATH",
+        )
+        if name in os.environ
+    }
+    env.update(
+        HOME=str(tmp_path),
+        USERPROFILE=str(tmp_path),
+        TEMP=str(tmp_path),
+        TMP=str(tmp_path),
+        BUS_FILE=str(bus_file),
+        BUS_BRIDGE_TOKEN_PATH=str(tmp_path / "absent-token"),
+        BUS_ORIGIN_MACHINE="unknown",
+        BUS_ORIGIN_SURFACE="test",
+        FM_TEST_MODE="1",  # relax sender identity validation for test agent
+    )
 
     # Spawn the MCP server. We must send/receive raw bytes -- if we let
     # subprocess decode through the system codepage we'd reproduce the

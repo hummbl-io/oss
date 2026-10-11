@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff check:*)",
+      "Bash(ruff format --check:*)",
+      "Bash(python -m build:*)",
+      "Bash(python .github/scripts/lock_build_env.py check-inputs:*)",
+      "Bash(python tools/scripts/validate_workflows.py:*)",
+      "Bash(python tools/scripts/check_boundary_patterns.py:*)",
+      "Bash(node tools/scripts/validate_product_manifests.mjs:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run check:*)",
+      "Bash(node --test:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)"
+    ]
+  }
+}

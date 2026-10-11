@@ -37,6 +37,9 @@ PyPI = "https://pypi.org/project/hummbl-cognition/"
 governance = [
     "hummbl-governance>=1.2.2",
 ]
+primitives = [
+    "cryptography>=42.0",
+]
 test = [
     "pytest>=7.0",
     "pytest-timeout>=2.3",

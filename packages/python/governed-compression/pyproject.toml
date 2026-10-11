@@ -27,7 +27,7 @@ classifiers = [
 # The package performs array operations that fundamentally require numpy.
 dependencies = [
   "numpy>=2.4.6",
-  "hummbl-governance>=1.4.2",
+  "hummbl-governance>=1.5.1",
 ]
 
 [project.urls]
@@ -40,7 +40,7 @@ PyPI = "https://pypi.org/project/governed-compression/"
 [project.optional-dependencies]
 test = [
   "pytest>=9.1.1",
-  "ruff>=0.16.7",
+  "ruff>=0.16.8",
 ]
 
 [project.scripts]

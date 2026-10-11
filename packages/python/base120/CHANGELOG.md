@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v3.1.0] - 2026-09-27
+
+### Added
+- `base120.glyph`: round-trippable image encoding of a ledger. Visual layer
+  is a 6 × 20 grid (family rows, operator columns) with an order strip and a
+  digest strip; machine layer is a canonical JSON payload embedded in SVG
+  `<metadata>` or a PNG `iTXt` chunk. Optional HMAC-SHA256 signature with a
+  32-byte key floor; unsigned glyphs carry `"signed": false`.
+- `base120 glyph render` and `base120 glyph decode` CLI subcommands. Signing
+  and verification read `BASE120_SIGNING_SECRET`.
+- Package exports `Glyph`, `GlyphError`, `encode_glyph`, `decode_glyph`.
+- Stdlib PNG writer (RGB8, `zlib` + `struct`), no new dependencies.
+
+### Changed
+- Family palette for rendered artifacts now clears the fleet design-token
+  floors (pairwise CIEDE2000 >= 10, 4.5:1 contrast on the canonical
+  surface). Mirrored in `hummbl-design-tokens` as `base120_families`.
+
 ## [v3.0.3] - 2026-09-21
 
 ### Changed

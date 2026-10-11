@@ -232,7 +232,7 @@ def infer_family_from_slug(slug):
         ("qwen", r"qwen"),
         ("gemma", r"gemma"),
         ("gemini", r"gemini"),
-        ("mistral", r"mistral|codestral|pixtral|nemo"),
+        ("mistral", r"mistral|codestral|pixtral|\bnemo\b"),
         ("deepseek", r"deepseek"),
         ("nemotron", r"nemotron"),
         ("gpt-oss", r"gpt-oss|gptoss"),
@@ -243,6 +243,27 @@ def infer_family_from_slug(slug):
         ("lfm", r"lfm-|liquid"),
         ("dbrx", r"dbrx"),
         ("north", r"north"),
+        ("kimi", r"kimi"),
+        ("fuyu", r"fuyu"),
+        ("jamba", r"jamba"),
+        ("sea-lion", r"sea-lion|sealion"),
+        ("starcoder", r"starcoder"),
+        ("deplot", r"deplot"),
+        ("granite", r"granite"),
+        ("muse", r"\bmuse\b"),
+        ("kosmos", r"kosmos"),
+        ("cosmos", r"cosmos"),
+        ("ising", r"ising"),
+        ("neva", r"\bneva\b"),
+        ("nvclip", r"nvclip"),
+        ("riva", r"\briva\b"),
+        ("vila", r"\bvila\b"),
+        ("laguna", r"laguna"),
+        ("arctic", r"arctic"),
+        ("palmyra", r"palmyra"),
+        ("zamba", r"zamba"),
+        ("embed-qa", r"embed-qa|embedqa"),
+        ("synthetic-video-detector", r"ai-synthetic-video"),
     ]
     for family_id, pattern in family_patterns:
         if re.search(pattern, slug_lower):
@@ -262,6 +283,8 @@ def infer_size_from_slug(slug):
 def infer_variant_from_slug(slug):
     """Best-effort variant inference from a model slug."""
     slug_lower = slug.lower()
+    if "embed" in slug_lower:
+        return "embed"
     if any(v in slug_lower for v in ["vision", "vl", "pixtral"]):
         return "vision"
     if any(v in slug_lower for v in ["reasoning", "r1", "qwq", "thinking"]):
@@ -317,6 +340,7 @@ def crawl_provider(provider, registry_entries, dry_run=False):
     # Match against registry
     verified_ids = set()
     discovered = []
+    seen_ids = {e["id"] for e in registry_entries}
 
     for slug in free_models:
         match = match_to_registry(slug, provider["id"], registry_entries)
@@ -329,9 +353,21 @@ def crawl_provider(provider, registry_entries, dry_run=False):
             variant = infer_variant_from_slug(slug)
 
             if family_id:
+                entry_id = f"{family_id}-{int(size) if size else 'unk'}b-{variant}-{provider['id']}"
+                label_suffix = ""
+                if entry_id in seen_ids:
+                    # Disambiguate with the unique slug tail (deterministic)
+                    tail = slug.split("/")[-1].lower().replace("_", "-")
+                    entry_id = f"{entry_id}-{tail}"
+                    label_suffix = f" [{tail}]"
+                    n = 2
+                    while entry_id in seen_ids:
+                        entry_id = f"{entry_id.rsplit('-', 1)[0]}-{n}"
+                        n += 1
+                seen_ids.add(entry_id)
                 entry = {
-                    "id": f"{family_id}-{int(size) if size else 'unk'}b-{variant}-{provider['id']}",
-                    "label": f"{family_id.title()} {int(size) if size else '?'}B {variant.title()} ({provider['name']})",
+                    "id": entry_id,
+                    "label": f"{family_id.title()} {int(size) if size else '?'}B {variant.title()}{label_suffix} ({provider['name']})",
                     "family": family_id,
                     "family_name": family_id.title(),
                     "vendor": family_id,

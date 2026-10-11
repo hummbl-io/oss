@@ -13,7 +13,7 @@ pytestmark = pytest.mark.allow_ledger_writes
 
 
 @pytest.mark.timeout(120)
-def test_ledger_concurrency():
+def test_ledger_concurrency(tmp_path):
     # 100 threads x 50 iterations = 5,000 post_entry() calls. This test is
     # scoped to LEDGER write concurrency, not the post-write-hooks queue
     # subsystem -- so hooks are disabled for the duration.
@@ -32,9 +32,9 @@ def test_ledger_concurrency():
     prior_hooks_setting = os.environ.get("CLP_POST_WRITE_HOOKS")
     os.environ["CLP_POST_WRITE_HOOKS"] = "off"
     try:
-        ledger_path = Path("tests/chaos/ledger_chaos.jsonl")
-        if ledger_path.exists():
-            os.remove(ledger_path)
+        # Write under pytest's tmp_path so the stress run never dirties the
+        # working tree or depends on the current directory.
+        ledger_path = tmp_path / "ledger_chaos.jsonl"
 
         num_threads = 100
         iterations = 50
@@ -93,5 +93,8 @@ def test_ledger_concurrency():
 
 
 if __name__ == "__main__":
-    test_ledger_concurrency()
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as _tmp:
+        test_ledger_concurrency(Path(_tmp))
     exit(0)

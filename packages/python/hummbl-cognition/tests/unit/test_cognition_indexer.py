@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+
 from hummbl_cognition.indexer import (
     _STOPWORDS,
     BM25_B,
@@ -477,6 +478,64 @@ class TestSaveLoad:
             results = idx2.search("circuit breaker")
             assert len(results) > 0
             assert results[0]["id"] == "clp-aaaaaaaaaaaa"
+
+
+class TestSaveShrinkGuard:
+    """save() must not silently overwrite a larger existing index.
+
+    Guards the observed failure mode where a fallback build from the wrong
+    ledger wrote a tiny index over a healthy one.
+    """
+
+    def _build_index(self, n_docs: int) -> BM25Index:
+        idx = BM25Index()
+        for i in range(n_docs):
+            idx.add_document(f"doc-{i}", f"some content {i}")
+        return idx
+
+    def test_shrink_refused(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            self._build_index(3).save(path)
+
+            small = self._build_index(1)
+            with pytest.raises(RuntimeError, match="refusing to shrink"):
+                small.save(path)
+
+            # File still holds the original index
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 3
+
+    def test_shrink_allowed_with_flag(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            self._build_index(3).save(path)
+
+            small = self._build_index(1)
+            small.save(path, allow_shrink=True)
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 1
+
+    def test_grow_or_same_size_allowed(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            self._build_index(1).save(path)
+            self._build_index(5).save(path)
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 5
+
+    def test_corrupt_existing_counts_as_absent(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text("corrupt{{{", encoding="utf-8")
+            # Repair path: a corrupt file must never block a rebuild
+            self._build_index(2).save(path)
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 2
 
 
 # ---------------------------------------------------------------------------

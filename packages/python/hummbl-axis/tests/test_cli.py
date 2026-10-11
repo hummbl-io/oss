@@ -5,7 +5,6 @@ from pathlib import Path
 
 from hummbl_axis.cli import main
 
-
 SAMPLE_LEDGER = """\
 # HUMMBL Atlas — Test Ledger
 
@@ -74,13 +73,19 @@ class TestCLIScan:
         obs_path.write_text(json.dumps({"skills": 547}), encoding="utf-8")
 
         state_path = tmp_path / "state.json"
-        rc = main([
-            "scan",
-            "--atlas-dir", str(atlas_dir),
-            "--inventory", str(inv_path),
-            "--observed-counts", str(obs_path),
-            "--cycle-state", str(state_path),
-        ])
+        rc = main(
+            [
+                "scan",
+                "--atlas-dir",
+                str(atlas_dir),
+                "--inventory",
+                str(inv_path),
+                "--observed-counts",
+                str(obs_path),
+                "--cycle-state",
+                str(state_path),
+            ]
+        )
         out = capsys.readouterr().out
         assert rc == 0
         # Should have both markdown + count diff contradictions
@@ -93,7 +98,7 @@ class TestCLIScan:
         state_path = tmp_path / "state.json"
 
         # Run 4 cycles with the same contradiction
-        for i in range(4):
+        for _ in range(4):
             rc = main(["scan", "--atlas-dir", str(atlas_dir), "--cycle-state", str(state_path)])
 
         out = capsys.readouterr().out

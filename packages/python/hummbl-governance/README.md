@@ -132,7 +132,7 @@ Every HUMMBL package ships a `governance.yml` file declaring its governance post
 # hummbl_governance/governance.yml (shipped in the wheel)
 package:
   name: hummbl-governance
-  version: 1.4.2
+  version: 1.5.1
   license: Apache-2.0
 
 safety:
@@ -221,7 +221,7 @@ Shipped after the original 26 (v1.3–v1.5); see [PRIMITIVES.md](PRIMITIVES.md) 
 | P46 | `cross_repo_contract` | K6 | Cross-repository contract validation standard |
 | P47 | `corpus_adapter` | — | Bridges receipts to unified-framework corpus formats |
 | P48 | `delegation_context` | K6 | Immutable delegation context with depth and scope attenuation |
-| P49 | `sovereign_cryptosystem` | K3 | Hardened cryptographic sync router for sovereign key management |
+| P49 | `envelope_cryptosystem` | K3 | Hardened cryptographic sync router for operator-held key management |
 | P50 | `primitives/merkle_anchor` | K11 | CT-style Merkle anchoring with signed tree heads |
 | P51 | `transition_receipt` | K1 | Transition receipts for governed agent/tool execution |
 | P52 | `tool_audit` | K1 | Tool-call audit hook for AI agent integrations |

@@ -4,3 +4,4 @@ hummbl-bus==0.2.1 \
     --hash=sha256:56bfae50982779a66de8931f69e3c06031426803789b58f1793b5426fea23e97 \
     --hash=sha256:b145b42efa4abe539c40c0ee5ff614d94c9eac8bba7ee4693be9dbf1a01bbfb4
     # via hummbl-mcp-coordination-bus (pyproject.toml)
+# inputs-sha256: c4d96fee0e273c8bdc8b1912450c543cc733d28c1ba75eeddf918047d0e29796

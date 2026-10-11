@@ -4,7 +4,7 @@ from hummbl_taxonomy import ClassificationInput, classify
 
 
 class ClassifierTests(unittest.TestCase):
-    def test_narrow_tool_classifies_as_ani_partially_governed(self):
+    def test_narrow_tool_classifies_as_ani_partially_governed(self) -> None:
         result = classify(
             ClassificationInput(
                 domain_breadth="single_task",
@@ -24,7 +24,7 @@ class ClassifierTests(unittest.TestCase):
         self.assertFalse(result.may_act)
         self.assertTrue(result.must_stop)
 
-    def test_governed_domain_agent_classifies_as_aspi_governed(self):
+    def test_governed_domain_agent_classifies_as_aspi_governed(self) -> None:
         result = classify(
             ClassificationInput(
                 domain_breadth="coherent_domain",
@@ -47,7 +47,7 @@ class ClassifierTests(unittest.TestCase):
         self.assertTrue(result.should_continue)
         self.assertFalse(result.must_stop)
 
-    def test_cross_domain_transfer_triggers_agi_review(self):
+    def test_cross_domain_transfer_triggers_agi_review(self) -> None:
         result = classify(
             ClassificationInput(
                 domain_breadth="arbitrary",
@@ -67,7 +67,7 @@ class ClassifierTests(unittest.TestCase):
         self.assertEqual(result.governance_status, "governed")
         self.assertIn("domain_bounds_weakened", result.reason_codes)
 
-    def test_ungoverned_capability_must_stop(self):
+    def test_ungoverned_capability_must_stop(self) -> None:
         result = classify(
             ClassificationInput(
                 domain_breadth="coherent_domain",

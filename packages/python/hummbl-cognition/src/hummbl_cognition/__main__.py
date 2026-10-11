@@ -8,6 +8,8 @@ Commands:
     post-verified  Write a verified ledger entry with evidence + confidence
     query     Query ledger with filters
     search    Open Brain: semantic search across all memory pools
+    novelty-check  Bounded internal-novelty evidence for a claim (nearest neighbors + unseen terms)
+    novelty-proof  Assemble a NOVELTY_PROOF receipt (internal + external scope grades)
     validate  Validate ledger integrity
     state     Show current shared state
     boot      Generate boot context for agent injection
@@ -17,6 +19,7 @@ Commands:
     migrate    Import existing knowledge stores (bus, MEMORY.md, git log) into the ledger
     belonging-check  HRSI Gap 1 — daily belonging baseline (safety/mattering/connection)
     hrsi-checkin     HRSI Gap 2 — unified daily cycle (cogstate+belonging+HULE+lens+delta)
+    arsi-checkin     ARSI — agent self-check-in (self-report + probe layers)
 """
 
 from __future__ import annotations
@@ -233,6 +236,70 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_keygen(args: argparse.Namespace) -> int:
+    """Generate an Ed25519 keypair for the calling agent."""
+    from hummbl_cognition import ed25519_signing
+    from hummbl_cognition.ledger_writer import _resolve_ledger_path
+
+    if not ed25519_signing.available():
+        print(
+            "error: ed25519 signing requires the 'cryptography' package "
+            "(pip install 'hummbl-cognition[primitives]' or cryptography>=42)",
+            file=sys.stderr,
+        )
+        return 2
+
+    path = _resolve_ledger_path(getattr(args, "ledger", None))
+    key_id, _priv_path, pub_path = ed25519_signing.keygen(args.agent, path)
+    # Emit identity + public material only — never the private-key path.
+    print(json.dumps({"signer_key_id": key_id, "public_key": str(pub_path)}))
+    return 0
+
+
+def cmd_scitt_export(args: argparse.Namespace) -> int:
+    """Export one ledger entry as a SCITT-shaped signed-statement record.
+
+    Emits the statement a transparency service would countersign, shaped
+    after the IETF SCITT architecture — draft-ietf-scitt-architecture-13,
+    https://datatracker.ietf.org/doc/html/draft-ietf-scitt-architecture-13
+    (signed statements carry an issuer, subject, and feed): issuer
+    (signer_key_id or agent), subject (entry id), payload (canonical
+    entry), payload hash. The `receipt` field stays null until an external
+    transparency service anchors it — this is an export shape, not a
+    conformance claim.
+    """
+    import hashlib
+
+    from hummbl_cognition import ed25519_signing
+    from hummbl_cognition.ledger_writer import _resolve_ledger_path, read_entries
+
+    path = _resolve_ledger_path(getattr(args, "ledger", None))
+    matches = [
+        e for e in read_entries(ledger_path=path, limit=100000) if e.id == args.id
+    ]
+    if not matches:
+        print(f"error: no ledger entry with id {args.id!r}", file=sys.stderr)
+        return 1
+    entry = matches[0]
+    d = entry.to_dict()
+    # payload must be exactly the bytes payload_sha256 commits to — the
+    # canonical form (signature fields stripped), not the raw entry dict.
+    payload_bytes = ed25519_signing.canonical_bytes(d)
+    stmt = {
+        "profile": "hummbl-clp-scitt-statement/0.1",
+        "protected_header": {
+            "issuer": entry.signer_key_id or entry.agent,
+            "subject": entry.id,
+            "feed": "clp-ledger",
+        },
+        "payload": json.loads(payload_bytes),
+        "payload_sha256": hashlib.sha256(payload_bytes).hexdigest(),
+        "receipt": None,
+    }
+    print(json.dumps(stmt, indent=2, sort_keys=True))
+    return 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     """Generate a structured CLP validation report."""
     report = validate_integrity_report(ledger_path=args.ledger)
@@ -427,6 +494,111 @@ def cmd_search(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_novelty_check(args: argparse.Namespace) -> int:
+    """Bounded internal-novelty evidence for a claim."""
+    from hummbl_cognition.novelty_check import (
+        format_report_text,
+        novelty_check,
+    )
+
+    report = novelty_check(
+        args.claim,
+        state_dir=args.state_dir,
+        limit=args.limit,
+        sources=args.sources,
+        agent="cli",
+        exclude_ids=set(args.mask) if args.mask else None,
+    )
+
+    if args.json:
+        print(report.to_json())
+    else:
+        print(format_report_text(report))
+    return 0
+
+
+def _parse_external_arg(raw: str) -> dict[str, str]:
+    """Parse --external 'scope|source|query|nearest_ref|note' (trailing fields optional)."""
+    parts = (raw.split("|") + [""] * 5)[:5]
+    keys = ("scope", "source", "query", "nearest_ref", "note")
+    return {k: v.strip() for k, v in zip(keys, parts)}
+
+
+def cmd_novelty_proof(args: argparse.Namespace) -> int:
+    """Assemble a NOVELTY_PROOF receipt; optionally append it to the ledger."""
+    from hummbl_cognition.novelty_proof import (
+        build_novelty_proof,
+        format_proof_text,
+        post_novelty_proof,
+    )
+
+    # Internal scope: file-provided report, live check, or none
+    internal: dict | None = None
+    if args.internal_report:
+        try:
+            internal = json.loads(Path(args.internal_report).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"ERROR: cannot read --internal-report: {e}", file=sys.stderr)
+            return 1
+    elif not args.no_internal:
+        from hummbl_cognition.novelty_check import novelty_check
+
+        internal = novelty_check(
+            args.claim,
+            state_dir=args.state_dir,
+            limit=args.limit,
+            sources=args.sources,
+            agent="cli",
+            exclude_ids=set(args.mask) if args.mask else None,
+        ).to_dict()
+
+    external: list[dict] = [_parse_external_arg(x) for x in args.external]
+    if args.external_json:
+        try:
+            loaded = json.loads(Path(args.external_json).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"ERROR: cannot read --external-json: {e}", file=sys.stderr)
+            return 1
+        if not isinstance(loaded, list):
+            print("ERROR: --external-json must contain a JSON array", file=sys.stderr)
+            return 1
+        external.extend(loaded)
+
+    try:
+        receipt = build_novelty_proof(
+            args.claim,
+            falsifier=args.falsifier,
+            internal_report=internal,
+            external_evidence=external,
+            falsification_attempts=args.attempt,
+            recheck_due=args.recheck_due,
+        )
+    except ValueError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(receipt, indent=2))
+    else:
+        print(format_proof_text(receipt))
+
+    if args.post:
+        try:
+            entry = post_novelty_proof(
+                receipt,
+                agent=args.agent,
+                vendor=args.vendor,
+                model=args.model,
+                confidence=args.confidence,
+                ledger_path=args.ledger,
+            )
+        except (ValueError, OSError) as e:
+            print(f"ERROR: ledger post failed: {e}", file=sys.stderr)
+            return 1
+        print(f"Posted: {entry.id} (discovery/project) tags={list(entry.tags)}")
+    return 0
+
+
 def cmd_batch_ingest(args: argparse.Namespace) -> int:
     """Bulk-import a JSONL file of ledger entries with deduplication."""
     source = Path(args.source)
@@ -547,9 +719,11 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         # Build msg_types set based on --include-noisy flag
         if args.include_noisy:
             from hummbl_cognition.migration import NOISY_BUS_TYPES, TIER1_BUS_TYPES
+
             msg_types = TIER1_BUS_TYPES | NOISY_BUS_TYPES
         else:
             from hummbl_cognition.migration import TIER1_BUS_TYPES
+
             msg_types = TIER1_BUS_TYPES
 
         entries = import_from_bus_history(
@@ -589,7 +763,9 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         print(f"{prefix}Imported {len(entries)} entries from git log")
         total_imported += len(entries)
 
-    print(f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---")
+    print(
+        f"\n--- {total_imported} total entries {'would be ' if dry_run else ''}imported ---"
+    )
     return 0
 
 
@@ -599,7 +775,12 @@ def cmd_reindex(args: argparse.Namespace) -> int:
 
     index = BM25Index()
     count = index.build(ledger_path=args.ledger)
-    path = index.save()
+    try:
+        path = index.save(allow_shrink=args.force)
+    except RuntimeError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        print("re-run with --force to overwrite a larger existing index", file=sys.stderr)
+        return 1
     print(f"Indexed {count} entries -> {path}")
     return 0
 
@@ -835,6 +1016,117 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_search.add_argument("--json", action="store_true", help="Output as JSON")
 
+    # novelty-check (internal novelty evidence)
+    p_novelty = subparsers.add_parser(
+        "novelty-check",
+        help="Bounded internal-novelty evidence for a claim: nearest neighbors, "
+        "matched terms, unseen terms, caveats",
+    )
+    p_novelty.add_argument("claim", help="Claim text to check for internal novelty")
+    p_novelty.add_argument(
+        "--limit", type=int, default=5, help="Max nearest neighbors (default 5)"
+    )
+    p_novelty.add_argument(
+        "--sources",
+        nargs="*",
+        choices=["ledger", "bus", "briefings", "findings", "memory_md"],
+        help="Memory pools to search (default: all)",
+    )
+    p_novelty.add_argument(
+        "--state-dir",
+        help="Override Open Brain state dir (contains cognition/ index)",
+    )
+    p_novelty.add_argument(
+        "--mask",
+        action="append",
+        default=[],
+        metavar="ENTRY_ID",
+        help="Mask a ledger entry id from results (repeatable; blind "
+        "rediscovery evaluation)",
+    )
+    p_novelty.add_argument("--json", action="store_true", help="Output as JSON")
+
+    # novelty-proof (NOVELTY_PROOF receipt)
+    p_proof = subparsers.add_parser(
+        "novelty-proof",
+        help="Assemble a NOVELTY_PROOF receipt (internal + external scope "
+        "grades); optionally append to the ledger",
+    )
+    p_proof.add_argument("--claim", required=True, help="Bounded novelty claim")
+    p_proof.add_argument(
+        "--falsifier",
+        required=True,
+        help="What finding would kill this claim (required)",
+    )
+    p_proof.add_argument(
+        "--internal-report",
+        help="Path to a novelty-check --json receipt file (skips live check)",
+    )
+    p_proof.add_argument(
+        "--no-internal",
+        action="store_true",
+        help="Skip the internal corpus check entirely",
+    )
+    p_proof.add_argument(
+        "--external",
+        action="append",
+        default=[],
+        metavar="SCOPE|SOURCE|QUERY|NEAREST_REF|NOTE",
+        help="Caller-attested external search record (repeatable; scope is "
+        "literature or market)",
+    )
+    p_proof.add_argument(
+        "--external-json",
+        help="Path to a JSON array of external evidence records",
+    )
+    p_proof.add_argument(
+        "--attempt",
+        action="append",
+        default=[],
+        help="A falsification query actually run (repeatable; recorded so "
+        "coverage is replayable)",
+    )
+    p_proof.add_argument(
+        "--recheck-due",
+        help="ISO date when this receipt should be re-verified",
+    )
+    p_proof.add_argument("--limit", type=int, default=5, help="Internal neighbors")
+    p_proof.add_argument(
+        "--sources",
+        nargs="*",
+        choices=["ledger", "bus", "briefings", "findings", "memory_md"],
+        help="Memory pools for the internal check (default: all)",
+    )
+    p_proof.add_argument(
+        "--state-dir",
+        help="Override Open Brain state dir (contains cognition/ index)",
+    )
+    p_proof.add_argument(
+        "--mask",
+        action="append",
+        default=[],
+        metavar="ENTRY_ID",
+        help="Mask a ledger entry id from the internal check (repeatable)",
+    )
+    p_proof.add_argument(
+        "--post",
+        action="store_true",
+        help="Append the receipt to the ledger (discovery/project + "
+        "novelty-proof tag)",
+    )
+    p_proof.add_argument("--agent", help="Agent identifier or COGNITION_AGENT")
+    p_proof.add_argument(
+        "--vendor", choices=sorted(VALID_VENDORS), help="Vendor or COGNITION_VENDOR"
+    )
+    p_proof.add_argument("--model", help="Model identifier or COGNITION_MODEL")
+    p_proof.add_argument(
+        "--confidence",
+        type=float,
+        default=0.5,
+        help="Confidence for --post (reflects coverage, not truth)",
+    )
+    p_proof.add_argument("--json", action="store_true", help="Output as JSON")
+
     # batch-ingest
     p_batch = subparsers.add_parser(
         "batch-ingest",
@@ -851,7 +1143,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # reindex (Open Brain)
-    subparsers.add_parser("reindex", help="Rebuild the Open Brain search index")
+    p_reindex = subparsers.add_parser(
+        "reindex", help="Rebuild the Open Brain search index"
+    )
+    p_reindex.add_argument(
+        "--force",
+        action="store_true",
+        help="allow overwriting a larger existing index (shrink guard override)",
+    )
 
     # migrate
     p_migrate = subparsers.add_parser(
@@ -863,14 +1162,30 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["bus", "memory", "git", "all"],
         help="Knowledge source to import",
     )
-    p_migrate.add_argument("--dry-run", action="store_true", help="Show what would be imported without writing")
+    p_migrate.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be imported without writing",
+    )
     p_migrate.add_argument("--ledger", help="Override ledger file path")
     p_migrate.add_argument("--bus", help="Override bus messages.tsv path")
-    p_migrate.add_argument("--memory-path", help="Path to MEMORY.md file (for 'memory' source)")
-    p_migrate.add_argument("--since", help="Only import entries after this ISO 8601 timestamp")
-    p_migrate.add_argument("--max-commits", type=int, default=100, help="Max git commits to import")
-    p_migrate.add_argument("--agent", default="migration", help="Agent identifier for imported entries")
-    p_migrate.add_argument("--include-noisy", action="store_true", help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)")
+    p_migrate.add_argument(
+        "--memory-path", help="Path to MEMORY.md file (for 'memory' source)"
+    )
+    p_migrate.add_argument(
+        "--since", help="Only import entries after this ISO 8601 timestamp"
+    )
+    p_migrate.add_argument(
+        "--max-commits", type=int, default=100, help="Max git commits to import"
+    )
+    p_migrate.add_argument(
+        "--agent", default="migration", help="Agent identifier for imported entries"
+    )
+    p_migrate.add_argument(
+        "--include-noisy",
+        action="store_true",
+        help="Include noisy bus types (SITREP, STATUS, SKILL_INVOKE, WIP_*)",
+    )
 
     # validate
     p_validate = subparsers.add_parser("validate", help="Validate ledger integrity")
@@ -885,6 +1200,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument(
         "--json", action="store_true", help="Output as JSON instead of Markdown"
     )
+
+    # keygen — Ed25519 agent signing keys (asymmetric receipts)
+    p_keygen = subparsers.add_parser(
+        "keygen", help="Generate an Ed25519 signing keypair for an agent"
+    )
+    p_keygen.add_argument("--agent", required=True, help="Agent identifier")
+    p_keygen.add_argument("--ledger", help="Override ledger file path")
+
+    # scitt-export — emit a SCITT-shaped signed statement for one entry
+    p_scitt = subparsers.add_parser(
+        "scitt-export",
+        help="Export a ledger entry as a SCITT-style signed statement (JSON)",
+    )
+    p_scitt.add_argument("--id", required=True, help="Ledger entry id (clp-*)")
+    p_scitt.add_argument("--ledger", help="Override ledger file path")
 
     # state & status alias
     p_state = subparsers.add_parser("state", help="Show shared state")
@@ -923,6 +1253,13 @@ def build_parser() -> argparse.ArgumentParser:
         "hrsi-checkin",
         help="HRSI Gap 2 — unified daily cycle (cogstate+belonging+HULE+lens+delta)",
         add_help=False,  # hrsi_checkin.run_cli handles its own --help
+    )
+
+    # arsi-checkin (agent self-check-in)
+    subparsers.add_parser(
+        "arsi-checkin",
+        help="ARSI — agent self-check-in (self-report + probe layers)",
+        add_help=False,  # arsi_checkin.run_cli handles its own --help
     )
 
     # startup
@@ -996,11 +1333,20 @@ def main(argv: list[str] | None = None) -> int:
         remaining = (argv or sys.argv[1:])[idx:]
         return hc_run_cli(remaining)
 
+    if args.command == "arsi-checkin":
+        from hummbl_cognition.arsi_checkin import run_cli as ac_run_cli
+
+        idx = (argv or sys.argv[1:]).index("arsi-checkin") + 1
+        remaining = (argv or sys.argv[1:])[idx:]
+        return ac_run_cli(remaining)
+
     handlers = {
         "post": cmd_post,
         "post-verified": cmd_post_verified,
         "query": cmd_query,
         "search": cmd_search,
+        "novelty-check": cmd_novelty_check,
+        "novelty-proof": cmd_novelty_proof,
         "reindex": cmd_reindex,
         "validate": cmd_validate,
         "state": cmd_state,
@@ -1010,6 +1356,8 @@ def main(argv: list[str] | None = None) -> int:
         "batch-ingest": cmd_batch_ingest,
         "migrate": cmd_migrate,
         "report": cmd_report,
+        "keygen": cmd_keygen,
+        "scitt-export": cmd_scitt_export,
     }
 
     handler = handlers.get(args.command)

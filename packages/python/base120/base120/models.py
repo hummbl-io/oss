@@ -20,7 +20,7 @@ Operator       — a single reasoning operator from the canonical registry.
 ApplyResult    — the structured result of recording an operator application.
 OperatorTuple  — Krineia-aligned evidence tuple emitted by ApplyResult.to_tuple().
 
-Krineia alignment (append-only sovereignty):
+Krineia alignment (append-only governance):
   id    — operator code, e.g. "P6"
   time  — UTC ISO-8601 timestamp of the application
   state — the recommendation produced by the application

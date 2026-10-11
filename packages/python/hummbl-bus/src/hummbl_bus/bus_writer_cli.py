@@ -201,3 +201,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(f"OK: {from_id} -> {to_id} [{msg_type}] -> {bus_path}")
     return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

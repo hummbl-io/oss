@@ -11,7 +11,6 @@ from hummbl_axis.atlas_reader import (
     scan_ledger_directory,
 )
 
-
 # ─────────────────────────────────────────────────────────────
 # Markdown ledger parser
 # ─────────────────────────────────────────────────────────────
@@ -106,6 +105,7 @@ class TestParseLedgerMarkdown:
 # JSON inventory
 # ─────────────────────────────────────────────────────────────
 
+
 class TestJsonInventory:
     def test_load_json_inventory(self, tmp_path: Path):
         data = {"name": "test", "stats": {"skills": 360, "agents": 76}}
@@ -140,6 +140,7 @@ class TestJsonInventory:
 # ─────────────────────────────────────────────────────────────
 # Count diff — the skill-count contradiction (547/360/126)
 # ─────────────────────────────────────────────────────────────
+
 
 class TestDiffCounts:
     def test_skill_count_contradiction_547_vs_360(self):

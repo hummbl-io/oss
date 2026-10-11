@@ -54,12 +54,72 @@ src/
     bridge_server.py     # Bridge server for remote bus
     bridge_tcp_client.py # Legacy low-level TCP client
     mcp_server.py        # MCP tool interface
+    ingress/             # Inbound channel adapters (see below)
 docs/
   protocol.md          # Bus protocol specification
   security-model.md    # Signing and verification
 tests/
 examples/
+  channels.example.json  # bus-ingress deployment config template
 ```
+
+## Inbound channel adapters (`hummbl_bus.ingress`)
+
+Many redundant transports, one bus. Every inbound channel (email, SMS,
+Signal, voice, webhook, mesh radio...) produces the same
+`InboundEnvelope`; one `Normalizer` applies the sender allowlist, the
+type policy, deterministic dedup, and posts through the authenticated
+`remote_write` bridge — with spool fallback for offline links.
+
+```
+channel adapter -> InboundEnvelope -> Normalizer -> bridge -> canonical TSV
+                                             \-> local spool (offline)
+```
+
+Message syntax from any channel: `TYPE [@to|to:] body` — e.g.
+`STATUS fleet sync green`, `QUESTION operator: eta on #551`,
+`ALERT @devin: disk at 92%`. Unknown first words default to `STATUS`/`all`.
+
+Adapters included:
+
+| Adapter | Transport | Direction |
+|---------|-----------|-----------|
+| `webhook` | POST `/i/<channel>` — auto-detects Twilio (form+sig check), Telegram, Slack Events API (+url_verification +v0 sig), Vapi tool-calls, SMSGate (android-sms-gateway) events incl. `*:batch:*` multi-message, or generic JSON. Also GET `/i/<channel>?params` for header-less senders (LibreSMS appends `?secret=`; `?token=`/`?secret=` accepted as auth alternates) | in |
+| `email_imap` | IMAP poller (works with local mail bridges) | in |
+| `gv_parse` | Google Voice SMS/voicemail->email forwards | in |
+| `signal_cli` | `signal-cli` JSON receive loop | in |
+| `meshtastic` | JSON-line relay / mesh packets + multi-part reassembly | in |
+| `discord` | Discord Bot API poller (DM + channels, watermark-persistent) | in |
+| `telegram` | Telegram Bot API `getUpdates` long-poll | in |
+| `ntfy` | ntfy.sh topic subscriber (SSE stream, auto-reconnect) | in |
+| `jmp` | JMP.chat XMPP client — a real US/CA phone number bound to a JID; SMS/MMS/voicemail arrive as chat from `+<E164>@cheogram.com`. Needs `pip install 'hummbl-bus[xmpp]'` | in |
+| `fanout` | Tails the bus, routes rows to outbound channels by urgency | out |
+
+Security model: sender identity is allowlisted per-channel (a number is
+not proof — `From:` and caller-ID are spoofable); elevated types
+(`VETO`, `APPROVE`, `REJECT`, `DECISION`, `DIRECTIVE`) require an
+in-body `pin=` match from an allowlisted sender or downgrade to
+`STATUS` with `attempted_type=` annotation; unknown senders quarantine
+as `<channel>-ingress` or drop; bridge failures spool locally for
+replay — never a second bus.
+
+Run an adapter:
+
+```bash
+python -m hummbl_bus.ingress webhook  --config channels.json
+python -m hummbl_bus.ingress email    --config channels.json
+python -m hummbl_bus.ingress signal   --config channels.json
+python -m hummbl_bus.ingress mesh     --config channels.json
+python -m hummbl_bus.ingress discord  --config channels.json
+python -m hummbl_bus.ingress telegram --config channels.json
+python -m hummbl_bus.ingress ntfy     --config channels.json
+python -m hummbl_bus.ingress jmp      --config channels.json
+python -m hummbl_bus.ingress fanout   --config channels.json --bus mirror.tsv
+```
+
+Config shape: `examples/channels.example.json`. Deployment values
+(addresses, tokens, PINs) come from env vars and local files — never
+committed.
 
 ## Origin
 

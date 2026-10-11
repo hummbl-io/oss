@@ -17,7 +17,7 @@
 """base120 — 120 reasoning operators for structured thinking.
 
 Version 2 of the base120 Python SDK. Stdlib-only. Zero third-party runtime
-dependencies. Tuple-native output aligned to the Krineia sovereignty model.
+dependencies. Tuple-native output aligned to the Krineia governance model.
 
 Quick start::
 
@@ -55,6 +55,15 @@ CLI::
     base120 get P6
     base120 prompt P6 "your problem here"
     base120 families
+    base120 glyph render --format png -o ledger.png
+    base120 glyph decode ledger.png
+
+Glyph::
+
+    from base120 import Ledger, encode_glyph, decode_glyph
+    glyph = encode_glyph(Ledger().project(), max_drift=0.5)
+    png = glyph.to_png()                 # 6x20 grid + order strip + payload
+    assert decode_glyph(png).entries == glyph.entries
 
 Apache 2.0. Copyright 2026 HUMMBL, LLC.
 """
@@ -62,18 +71,25 @@ Apache 2.0. Copyright 2026 HUMMBL, LLC.
 from __future__ import annotations
 
 from base120.engine import FAMILIES, FAMILY_NAMES, Engine
+from base120.glyph import Glyph, GlyphError
+from base120.glyph import decode as decode_glyph
+from base120.glyph import encode as encode_glyph
 from base120.ledger import Ledger
 from base120.models import ApplyResult, Operator, OperatorTuple
 
-__version__ = "3.0.3"
+__version__ = "3.1.0"
 
 __all__ = [
     "FAMILIES",
     "FAMILY_NAMES",
     "ApplyResult",
     "Engine",
+    "Glyph",
+    "GlyphError",
     "Ledger",
     "Operator",
     "OperatorTuple",
     "__version__",
+    "decode_glyph",
+    "encode_glyph",
 ]

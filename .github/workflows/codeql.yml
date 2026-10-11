@@ -28,7 +28,7 @@ jobs:
     name: analyze (python)
     # GitHub-hosted compute unavailable for private org; fleet policy
     # is self-hosted Linux.
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-24.04
     # GHAS disabled 2026-09-16: SARIF upload requires Code Security on
     # private repos. Skipped until org/repo var HUMMBL_GHAS_ENABLED=true.
     if: vars.HUMMBL_GHAS_ENABLED == 'true'
@@ -38,12 +38,12 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2
         with:
           languages: python
           build-mode: none
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2
         with:
           category: "/language:python"

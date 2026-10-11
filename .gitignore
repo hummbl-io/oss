@@ -87,3 +87,6 @@ _test_out.txt
 _test_stdout.txt
 pytest_out.txt
 tmp_test/
+
+# Claude Code per-user overrides (never commit)
+.claude/settings.local.json
