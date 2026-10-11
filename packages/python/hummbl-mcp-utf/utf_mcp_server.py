@@ -1007,7 +1007,7 @@ TOOLS = [
             "Recommend BASE120 mental models for a given problem tier or "
             "problem description. Returns models from all 6 transformations "
             "(Perspective, Inversion, Composition, Decomposition, Recursion, "
-            "Meta-Systems) ranked by relevance to the tier."
+            "Systems) ranked by relevance to the tier."
         ),
         "inputSchema": {
             "type": "object",

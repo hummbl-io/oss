@@ -44,6 +44,14 @@ def _now_z() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _token_matches(given: str, expected: str) -> bool:
+    """Constant-time compare on bytes; non-ASCII input fails closed, not 500."""
+    return hmac.compare_digest(
+        given.encode("utf-8", "surrogateescape"),
+        expected.encode("utf-8", "surrogateescape"),
+    )
+
+
 def make_handler(normalizer: Normalizer, channel_tokens: dict[str, str]):
     """channel_tokens: channel name -> env var holding its bearer token."""
 
@@ -64,11 +72,11 @@ def make_handler(normalizer: Normalizer, channel_tokens: dict[str, str]):
             if not expected:
                 return False  # token env unset -> fail closed
             auth = self.headers.get("Authorization", "")
-            if auth == f"Bearer {expected}":
+            if auth.startswith("Bearer ") and _token_matches(auth[7:], expected):
                 return True
             # Header-less senders: token rides a query param.
             given = params.get("token") or params.get("secret") or ""
-            return bool(given) and hmac.compare_digest(given, expected)
+            return bool(given) and _token_matches(given, expected)
 
         def _handle_envs(self, channel: str, envs) -> None:
             """Run normalizer over 1..N envelopes and answer."""

@@ -62,7 +62,7 @@
             "family": {
               "type": "string",
               "enum": ["P", "IN", "CO", "DE", "RE", "SY"],
-              "description": "Base120 family: P=Perspective, IN=Inversion, CO=Composition, DE=Decomposition, RE=Recursion, SY=Meta-Systems"
+              "description": "Base120 family: P=Perspective, IN=Inversion, CO=Composition, DE=Decomposition, RE=Recursion, SY=Systems"
             },
             "arity": {
               "type": "integer",
