@@ -1,0 +1,31 @@
+1
+00:00:00,000 --> 00:00:06,000
+An offline demonstration of a runner obeying a budget decision.
+
+2
+00:00:06,000 --> 00:00:13,000
+From the package directory, run python -m examples.budget_stop_demo.
+
+3
+00:00:13,000 --> 00:00:20,000
+Tasks one and two are allowed. The ledger records half of the hard cap.
+
+4
+00:00:20,000 --> 00:00:27,000
+Tasks three and four run with warnings. Recorded usage reaches 1.00 DEMO.
+
+5
+00:00:27,000 --> 00:00:35,000
+The hard cap is reached. Task five never reaches the executor.
+
+6
+00:00:35,000 --> 00:00:42,000
+The JSON is an unsigned local run summary, not an authenticated receipt.
+
+7
+00:00:42,000 --> 00:00:50,000
+There is no reservation for future or concurrent costs, and no forced process termination.
+
+8
+00:00:50,000 --> 00:00:56,000
+Open an issue with your commit, Python version and a synthetic reproduction.
