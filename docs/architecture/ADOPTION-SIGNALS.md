@@ -20,12 +20,12 @@ offering fit are **assumptions** and are labeled as such.
 
 | Package | 30d downloads (latest) | Data points | Errors | Tree | PyPI | State |
 |---------|---------------------:|------------:|-------:|------|------|-------|
-| `hummbl-governance` | 1429 | 2 | 0 | 1.5.1 | 1.4.2 | live |
-| `hummbl-bus` | 204 | 2 | 0 | 0.2.1 | 0.2.0 | live |
+| `hummbl-governance` | 1429 | 2 | 0 | 1.5.1 | 1.5.1 | live |
+| `hummbl-bus` | 204 | 2 | 0 | 0.2.1 | 0.2.1 | live |
 | `hummbl-cognition` | 207 | 2 | 1 | 0.1.0 | 0.1.0 | live |
-| `hummbl-tuples` | 11 | 2 | 0 | 0.2.2 | 0.2.0 | live |
+| `hummbl-tuples` | 11 | 2 | 0 | 0.2.2 | 0.2.2 | live |
 | `hummbl-bif` | 16 | 2 | 0 | 1.0.1 | 1.0.1 | live |
-| `base120` | 210 | 2 | 1 | 3.1.0 | 3.0.2 | live |
+| `base120` | 210 | 2 | 1 | 3.1.0 | 3.1.0 | live |
 | `governed-compression` | 12 | 2 | 0 | 0.1.0 | 0.1.0 | live |
 | `hummbl` | 104 | 2 | 1 | 0.1.0 | 0.1.0 | live |
 | `hummbl-kernel` | 102 | 2 | 1 | 0.1.0 | 0.1.0 | live |
@@ -38,14 +38,14 @@ Tracked for downloads: 9 packages. In-tree but untracked:
 | Package | Priority | Rationale |
 |---------|----------|-----------|
 | `arcana` | P3 | in-tree only; no release to maintain |
-| `base120` | P1 | live with demand signal and unreleased tree changes |
+| `base120` | P1 | live with demand signal |
 | `governed-compression` | P2 | live, low signal |
 | `hummbl` | P1 | live with demand signal |
 | `hummbl-agent-eval-harness` | P3 | in-tree only; no release to maintain |
 | `hummbl-agent-governance` | P3 | in-tree only; no release to maintain |
 | `hummbl-axis` | P3 | in-tree only; no release to maintain |
 | `hummbl-bif` | P2 | live, low signal |
-| `hummbl-bus` | P1 | live with demand signal and unreleased tree changes |
+| `hummbl-bus` | P1 | live with demand signal |
 | `hummbl-cognition` | P1 | live with demand signal |
 | `hummbl-compass` | P3 | in-tree only; no release to maintain |
 | `hummbl-contracts` | P3 | in-tree only; no release to maintain |
@@ -55,7 +55,7 @@ Tracked for downloads: 9 packages. In-tree but untracked:
 | `hummbl-free-models` | P3 | in-tree only; no release to maintain |
 | `hummbl-garage` | P3 | in-tree only; no release to maintain |
 | `hummbl-gitops` | P3 | in-tree only; no release to maintain |
-| `hummbl-governance` | P1 | live with demand signal and unreleased tree changes |
+| `hummbl-governance` | P1 | live with demand signal |
 | `hummbl-heraldry` | P3 | in-tree only; no release to maintain |
 | `hummbl-identity` | P3 | in-tree only; no release to maintain |
 | `hummbl-intel` | P3 | in-tree only; no release to maintain |
@@ -80,7 +80,7 @@ Tracked for downloads: 9 packages. In-tree but untracked:
 | `hummbl-rubric-templates` | P3 | in-tree only; no release to maintain |
 | `hummbl-sast` | P3 | in-tree only; no release to maintain |
 | `hummbl-taxonomy` | P3 | in-tree only; no release to maintain |
-| `hummbl-tuples` | P1 | live with demand signal and unreleased tree changes |
+| `hummbl-tuples` | P2 | live, low signal |
 | `hummbl-validation` | P3 | in-tree only; no release to maintain |
 | `hummbl-validation-framework` | P3 | in-tree only; no release to maintain |
 | `idp-spec` | P3 | in-tree only; no release to maintain |
