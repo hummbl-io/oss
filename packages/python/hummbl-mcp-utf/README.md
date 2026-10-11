@@ -2,10 +2,13 @@
 
 MCP server exposing the HUMMBL Unified Tier Framework: problem classification, model recommendation, tier assessment, and framework overview via stdio JSON-RPC.
 
-## Install
+## Install from source
+
+From the root of a checkout of
+[hummbl-io/oss](https://github.com/hummbl-io/oss):
 
 ```bash
-pip install hummbl-mcp-utf
+python -m pip install ./packages/python/hummbl-mcp-utf
 ```
 
 ## Run

@@ -7,6 +7,11 @@ baseline download rate deviates from the established dogfooding pattern.
 Stdlib-only — no third-party dependencies. Uses urllib for HTTP and
 csv/json for data handling.
 
+The overall endpoint retains up to 180 days of daily data, excluding known
+mirrors here. The legacy downloads_total CSV column stores that available
+window sum, not a lifetime total. Counts include CI and repeat downloads;
+they do not measure unique users or paying customers.
+
 Usage:
     python tools/scripts/pypi_download_tracker.py          # append today's stats
     python tools/scripts/pypi_download_tracker.py --report  # print trend report
@@ -115,10 +120,12 @@ def fetch_recent(pkg: str) -> tuple[int, int]:
 
 
 def fetch_total(pkg: str) -> int:
-    """Return total all-time downloads for a package.
+    """Return the sum over the available API window (up to 180 days).
 
-    The pypistats overall endpoint returns a list of {category, date, downloads}
-    objects. We sum the downloads field.
+    The pypistats overall endpoint returns daily {category, date, downloads}
+    objects. We request mirrors=false and sum the downloads field. The function
+    and downloads_total CSV names are retained for compatibility; this value
+    is not an all-time total. See https://pypistats.org/api/ for retention.
     """
     try:
         data = _fetch_json(PYPISTATS_OVERALL.format(pkg=pkg))
@@ -202,9 +209,9 @@ def collect_today() -> None:
 
         try:
             total = fetch_total(pkg)
-            print(f", total={total}")
+            print(f", window_sum={total}")
         except Exception as e:
-            print(f", total=ERROR: {e}")
+            print(f", window_sum=ERROR: {e}")
             total = -1
 
         append_row(today, pkg, d7, d30, total)
@@ -224,7 +231,7 @@ def report() -> None:
         print("No data yet. Run without --report first to collect stats.")
         return
 
-    print(f"{'Package':30s} {'Latest 7d':>10s} {'Latest 30d':>11s} {'Total':>10s} {'Entries':>8s} {'30d Trend':>10s}")
+    print(f"{'Package':30s} {'Latest 7d':>10s} {'Latest 30d':>11s} {'Window sum':>10s} {'Entries':>8s} {'30d Trend':>10s}")
     print("-" * 85)
 
     # Group by package
@@ -276,6 +283,7 @@ def report() -> None:
         print(f"  ({skipped} package(s) skipped due to fetch errors)")
     print(f"Data file: {DATA_FILE}")
     print(f"Entries: {len(rows)} rows across {len(by_pkg)} packages")
+    print("Window sum: available API history (up to 180 days), excluding known mirrors; -1 means unknown.")
 
 
 # ─── Anomaly Detection ───────────────────────────────────────────────────────
