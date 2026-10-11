@@ -225,3 +225,54 @@ def test_bus_post_missing_token_returns_false(
     assert result["posted"] is False
     assert "error" in result
     assert "missing BUS_BRIDGE_TOKEN" in result["error"]
+
+
+def _long_bridge_receipt() -> bytes:
+    """Build a production-shaped bridge receipt (>200 chars when serialized)."""
+    receipt = {
+        "status": "ok",
+        "duplicate": False,
+        "request_id": "2496ea474cf3482280485270517b7068",
+        "message_sha256": "5b5bfb54633f0e7122b98cfd26301e0519eaddceece9833175395c251fb35dfe",
+        "accepted_at": "2026-09-27T13:42:16Z",
+        "auth_recorded": True,
+        "receipt_durable": True,
+        "record": {"bus_path": "/fixture/messages.tsv", "row_sha256": "ab" * 32},
+    }
+    body = json.dumps(receipt).encode("utf-8")
+    assert len(body) > 200, "fixture must stay production-shaped (>200 chars)"
+    return body
+
+
+def test_bus_post_preserves_full_bridge_receipt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression for oss#297: bridge_response must carry the full receipt.
+
+    The vendored server once returned detail[:200], cutting the receipt
+    mid-payload so consumers could not extract request_id / message_sha256 /
+    accepted_at / auth_recorded / receipt_durable. The adjacent
+    message[:200] preview truncation is display-only and stays.
+    """
+    monkeypatch.setenv("BUS_BRIDGE_TOKEN", "test-token")
+    monkeypatch.delenv("BUS_FILE", raising=False)
+
+    def fake_open(request, timeout=None):
+        return _ok_bridge_response(_long_bridge_receipt())
+
+    with patch("hummbl_bus.mcp_server.HTTP_OPENER") as mock_opener:
+        mock_opener.open.side_effect = fake_open
+        result = handle_tool("bus_post", {
+            "from_agent": "devin",
+            "to": "all",
+            "type": "STATUS",
+            "message": "receipt-preservation-test marker=regression-receipt",
+        })
+
+    assert result["posted"] is True
+    assert result["method"] == "bridge"
+    assert len(result["bridge_response"]) > 200
+    returned = json.loads(result["bridge_response"])
+    for key in ("request_id", "message_sha256", "accepted_at",
+                "auth_recorded", "receipt_durable"):
+        assert key in returned, f"receipt field lost: {key}"
