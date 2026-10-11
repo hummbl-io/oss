@@ -203,7 +203,7 @@ TOOLS = [
                 },
                 "vendor": {
                     "type": "string",
-                    "description": "Vendor (anthropic|cognition|openai|google|moonshot|local|human|zai). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
+                    "description": "Vendor (anthropic|cognition|deepseek|openai|google|moonshot|local|human|zai). If omitted, resolves from COGNITION_VENDOR env var; missing both → error.",
                 },
                 "model": {
                     "type": "string",

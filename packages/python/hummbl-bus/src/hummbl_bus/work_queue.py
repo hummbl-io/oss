@@ -1,4 +1,4 @@
-﻿"""Push/Pull work loop for the coordination bus.
+"""Push/Pull work loop for the coordination bus.
 
 Component 3 of PROPOSAL-012: Autonomous Agent Orchestration.
 

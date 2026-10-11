@@ -165,6 +165,7 @@ VALID_VENDORS = frozenset(
     {
         "anthropic",
         "cognition",
+        "deepseek",
         "openai",
         "google",
         "moonshot",
