@@ -1,0 +1,58 @@
+{
+  "schema": "hummbl.demo.budget-stop.v1",
+  "synthetic": true,
+  "currency": "DEMO",
+  "unit_cost": 0.25,
+  "soft_cap": 0.5,
+  "hard_cap": 1.0,
+  "events": [
+    {
+      "task": 1,
+      "decision": "ALLOW",
+      "spend_before": 0.0,
+      "executed": true,
+      "spend_after": 0.25
+    },
+    {
+      "task": 2,
+      "decision": "ALLOW",
+      "spend_before": 0.25,
+      "executed": true,
+      "spend_after": 0.5
+    },
+    {
+      "task": 3,
+      "decision": "WARN",
+      "spend_before": 0.5,
+      "executed": true,
+      "spend_after": 0.75
+    },
+    {
+      "task": 4,
+      "decision": "WARN",
+      "spend_before": 0.75,
+      "executed": true,
+      "spend_after": 1.0
+    },
+    {
+      "task": 5,
+      "decision": "DENY",
+      "spend_before": 1.0,
+      "executed": false
+    }
+  ],
+  "completed_tasks": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "blocked_task": 5,
+  "recorded_spend": 1.0,
+  "limitations": [
+    "Sequential cooperative runner; no OS isolation or forced process termination.",
+    "Recorded usage is checked before the next task; no reservation of future costs.",
+    "Variable costs or concurrent callers can overshoot; this example does not prevent that.",
+    "Unsigned local run summary; not an authenticated receipt or proof of an external event."
+  ]
+}
