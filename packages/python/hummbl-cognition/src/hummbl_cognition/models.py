@@ -167,6 +167,7 @@ VALID_VENDORS = frozenset(
         "cognition",
         "deepseek",
         "openai",
+        "openrouter",
         "google",
         "moonshot",
         "local",
