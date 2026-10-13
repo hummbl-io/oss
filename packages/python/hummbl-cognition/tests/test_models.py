@@ -402,6 +402,7 @@ class TestEnums:
     def test_valid_vendors_contains_known(self) -> None:
         assert "anthropic" in VALID_VENDORS
         assert "openai" in VALID_VENDORS
+        assert "deepseek" in VALID_VENDORS
 
     def test_color_team_values(self) -> None:
         assert ColorTeam.RED.value == "red"

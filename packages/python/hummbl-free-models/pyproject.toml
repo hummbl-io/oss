@@ -35,6 +35,7 @@ test = ["pytest>=7.0"]
 
 [tool.setuptools.packages.find]
 where = ["."]
+exclude = ["tests", "tests.*"]
 
 [tool.setuptools.package-data]
 hummbl_free_models = ["../data/*.yaml"]
