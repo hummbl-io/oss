@@ -137,7 +137,8 @@ class GovernanceLifecycle:
     When a registry is wired, ``authorize()`` fails closed for unregistered
     agents (reason ``agent:unknown``). Pass ``allow_unregistered_agents=True``
     to restore the 1.5.1 pass-through for unknown identities. Suspended and
-    retired agents stay denied either way.
+    retired agents stay denied either way. The MCP ``lifecycle_authorize``
+    path does not enable that opt-in; hosts register agents instead.
     """
 
     def __init__(

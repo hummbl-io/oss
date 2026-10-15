@@ -197,8 +197,7 @@ class TestLifecycleAuthorize:
         assert "reason" in result
         assert "checks" in result
 
-    def test_empty_registry_allows_unknown_via_opt_in(self):
-        """MCP wires an empty registry and opts into unknown-agent pass-through."""
+    def test_unknown_agent_denied(self):
         m = fresh_module()
         result = m.handle_tool(
             "lifecycle_authorize",
@@ -207,14 +206,23 @@ class TestLifecycleAuthorize:
                 "action": "read",
             },
         )
-        assert result["allowed"] is True
-        assert result["reason"] == "authorized"
+        assert result["allowed"] is False
+        assert result["reason"] == "agent:unknown"
         assert result["checks"]["agent_registered"] is False
         assert result["checks"]["agent_status"] == "unknown"
+        assert m._lifecycle._allow_unregistered_agents is False
 
     def test_registered_active_agent_allowed(self):
         m = fresh_module()
-        m._reg.register_agent("worker-1", trust="medium", status="active")
+        registered = m.handle_tool(
+            "lifecycle_register_agent",
+            {
+                "agent": "worker-1",
+                "trust": "medium",
+                "status": "active",
+            },
+        )
+        assert registered["registered"] is True
         result = m.handle_tool(
             "lifecycle_authorize",
             {
@@ -227,9 +235,51 @@ class TestLifecycleAuthorize:
         assert result["checks"]["agent_status"] == "active"
         assert result["checks"]["agent_trust"] == "medium"
 
-    def test_suspended_denied_even_with_opt_in(self):
+    def test_preload_monitor_registry_allows_listed_agent(self, tmp_path, monkeypatch):
+        roster = tmp_path / "agents.json"
+        roster.write_text(
+            '{"agents": [{"name": "worker-1", "trust": "high", "status": "active"}]}',
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("MONITOR_REGISTRY", str(roster))
         m = fresh_module()
-        m._reg.register_agent("bad", trust="low", status="suspended")
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "worker-1",
+                "action": "read",
+            },
+        )
+        assert result["allowed"] is True
+        assert result["checks"]["agent_trust"] == "high"
+        unknown = m.handle_tool(
+            "lifecycle_authorize",
+            {"agent": "ghost", "action": "read"},
+        )
+        assert unknown["allowed"] is False
+        assert unknown["reason"] == "agent:unknown"
+
+    def test_register_agent_missing_name(self):
+        m = fresh_module()
+        result = m.handle_tool("lifecycle_register_agent", {})
+        assert "error" in result
+
+    def test_missing_monitor_registry_file_fails_closed(self, tmp_path, monkeypatch):
+        m = fresh_module()
+        monkeypatch.setenv("MONITOR_REGISTRY", str(tmp_path / "missing.json"))
+        try:
+            m.load_monitor_registry()
+        except RuntimeError as exc:
+            assert "MONITOR_REGISTRY" in str(exc)
+        else:
+            raise AssertionError("expected MONITOR_REGISTRY missing-file error")
+
+    def test_suspended_denied(self):
+        m = fresh_module()
+        m.handle_tool(
+            "lifecycle_register_agent",
+            {"agent": "bad", "trust": "low", "status": "suspended"},
+        )
         result = m.handle_tool(
             "lifecycle_authorize",
             {
@@ -240,9 +290,12 @@ class TestLifecycleAuthorize:
         assert result["allowed"] is False
         assert result["reason"] == "agent:suspended"
 
-    def test_retired_denied_even_with_opt_in(self):
+    def test_retired_denied(self):
         m = fresh_module()
-        m._reg.register_agent("old", trust="low", status="retired")
+        m.handle_tool(
+            "lifecycle_register_agent",
+            {"agent": "old", "trust": "low", "status": "retired"},
+        )
         result = m.handle_tool(
             "lifecycle_authorize",
             {
@@ -451,8 +504,9 @@ class TestProtocol:
         assert "monitor_record" in tools
         assert "convergence_check" in tools
         assert "lifecycle_authorize" in tools
+        assert "lifecycle_register_agent" in tools
         assert "lineage_record_variant" in tools
-        assert len(tools) == 11
+        assert len(tools) == 12
 
     def test_tools_call_lifecycle_status(self):
         resp = self._call(
