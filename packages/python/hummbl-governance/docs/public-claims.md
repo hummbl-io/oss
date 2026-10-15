@@ -2,7 +2,7 @@
 
 Status: public claim ledger
 Last updated: 2026-09-27
-Current package metadata: `pyproject.toml` version `1.5.1` (tree, Alpha) — latest published release is `1.4.2` on PyPI; see `docs/operations/RELEASE.md`
+Current package metadata: `pyproject.toml` version `1.5.1` (tree, Alpha) — latest published release is `1.5.1` on PyPI. Fail-closed `authorize` is proposed for **1.6.0** and is not tagged; see `docs/operations/RELEASE.md`
 
 Canonical public promotion source: the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json)
 (`as_of` 2026-08-31T21:56:55Z). Honesty over completeness. A number that is not

@@ -197,6 +197,62 @@ class TestLifecycleAuthorize:
         assert "reason" in result
         assert "checks" in result
 
+    def test_empty_registry_allows_unknown_via_opt_in(self):
+        """MCP wires an empty registry and opts into unknown-agent pass-through."""
+        m = fresh_module()
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "worker-1",
+                "action": "read",
+            },
+        )
+        assert result["allowed"] is True
+        assert result["reason"] == "authorized"
+        assert result["checks"]["agent_registered"] is False
+        assert result["checks"]["agent_status"] == "unknown"
+
+    def test_registered_active_agent_allowed(self):
+        m = fresh_module()
+        m._reg.register_agent("worker-1", trust="medium", status="active")
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "worker-1",
+                "action": "read",
+            },
+        )
+        assert result["allowed"] is True
+        assert result["checks"]["agent_registered"] is True
+        assert result["checks"]["agent_status"] == "active"
+        assert result["checks"]["agent_trust"] == "medium"
+
+    def test_suspended_denied_even_with_opt_in(self):
+        m = fresh_module()
+        m._reg.register_agent("bad", trust="low", status="suspended")
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "bad",
+                "action": "read",
+            },
+        )
+        assert result["allowed"] is False
+        assert result["reason"] == "agent:suspended"
+
+    def test_retired_denied_even_with_opt_in(self):
+        m = fresh_module()
+        m._reg.register_agent("old", trust="low", status="retired")
+        result = m.handle_tool(
+            "lifecycle_authorize",
+            {
+                "agent": "old",
+                "action": "read",
+            },
+        )
+        assert result["allowed"] is False
+        assert result["reason"] == "agent:retired"
+
     def test_authorize_with_cost(self):
         m = fresh_module()
         result = m.handle_tool(

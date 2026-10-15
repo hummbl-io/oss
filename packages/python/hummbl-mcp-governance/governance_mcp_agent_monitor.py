@@ -28,7 +28,11 @@ Tools:
     convergence_record      - Record an action and classify convergent goal
     convergence_check       - Check an agent for convergent behavior
     convergence_scores      - Get per-goal scores for an agent
-    lifecycle_authorize     - Run full NIST RMF authorization check
+    lifecycle_authorize     - Run full NIST RMF authorization check.
+                              Uses an empty in-process AgentRegistry, so the
+                              lifecycle opts into allow_unregistered_agents
+                              (unknown callers stay usable). Suspended and
+                              retired agents are still denied if registered.
     lifecycle_status        - Get full governance lifecycle status snapshot
     lineage_record_variant  - Register a new variant in the lineage graph
     lineage_get             - Get variant details and ancestry
@@ -63,7 +67,12 @@ _behavior_monitor = BehaviorMonitor()
 _convergence_detector = ConvergenceDetector()
 _lineage = EvolutionLineage()
 
-# Lifecycle wired with default primitives
+# Lifecycle wired with default primitives.
+#
+# The in-process AgentRegistry starts empty. GovernanceLifecycle fails closed
+# for unknown agents when a registry is wired. This MCP tool path therefore
+# opts into allow_unregistered_agents so lifecycle_authorize stays usable
+# without a pre-populated registry. Suspended/retired stay denied if registered.
 _state_dir = Path(
     os.environ.get("MONITOR_STATE_DIR", tempfile.mkdtemp(prefix="hummbl-monitor-"))
 )
@@ -76,6 +85,7 @@ _lifecycle = GovernanceLifecycle(
     circuit_breaker=_cb,
     cost_governor=_cg,
     registry=_reg,
+    allow_unregistered_agents=True,
 )
 
 
@@ -356,7 +366,12 @@ _TOOL_SCHEMAS = [
     },
     {
         "name": "lifecycle_authorize",
-        "description": "Run full NIST AI RMF governance check (kill switch + identity + circuit breaker + cost)",
+        "description": (
+            "Run full NIST AI RMF governance check (kill switch + identity + "
+            "circuit breaker + cost). This server wires an empty in-process "
+            "registry and allows unregistered agents so the tool stays usable; "
+            "suspended/retired agents are still denied."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {

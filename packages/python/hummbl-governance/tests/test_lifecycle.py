@@ -36,6 +36,7 @@ class TestAuthorize:
         self.reg = AgentRegistry()
         self.reg.register_agent("worker-1", trust="medium", status="active")
         self.reg.register_agent("suspended-agent", trust="low", status="suspended")
+        self.reg.register_agent("retired-agent", trust="low", status="retired")
 
         self.lifecycle = GovernanceLifecycle(
             kill_switch=self.ks,
@@ -78,7 +79,63 @@ class TestAuthorize:
     def test_suspended_agent_denied(self):
         decision = self.lifecycle.authorize("suspended-agent", "db", "read")
         assert not decision.allowed
-        assert "suspended" in decision.reason
+        assert decision.reason == "agent:suspended"
+        assert decision.checks["agent_status"] == "suspended"
+        assert decision.checks["agent_trust"] == "low"
+        assert decision.checks["agent_registered"] is True
+
+    def test_retired_agent_denied(self):
+        decision = self.lifecycle.authorize("retired-agent", "db", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:retired"
+        assert decision.checks["agent_registered"] is True
+
+    def test_unknown_agent_denied(self):
+        decision = self.lifecycle.authorize("ghost-agent", "db", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:unknown"
+        assert decision.checks["agent_status"] == "unknown"
+        assert decision.checks["agent_trust"] == "unknown"
+        assert decision.checks["agent_registered"] is False
+
+    def test_allow_unregistered_agents_opt_in(self):
+        lifecycle = GovernanceLifecycle(
+            registry=self.reg,
+            allow_unregistered_agents=True,
+        )
+        decision = lifecycle.authorize("ghost-agent", "db", "read")
+        assert decision.allowed
+        assert decision.reason == "authorized"
+        assert decision.checks["agent_registered"] is False
+        assert decision.checks["agent_status"] == "unknown"
+
+    def test_authorize_override_allows_unknown(self):
+        decision = self.lifecycle.authorize(
+            "ghost-agent",
+            "db",
+            "read",
+            allow_unregistered_agents=True,
+        )
+        assert decision.allowed
+        assert decision.checks["agent_registered"] is False
+
+    def test_allow_unregistered_still_denies_suspended(self):
+        lifecycle = GovernanceLifecycle(
+            registry=self.reg,
+            allow_unregistered_agents=True,
+        )
+        decision = lifecycle.authorize("suspended-agent", "db", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:suspended"
+
+    def test_allow_unregistered_still_denies_retired(self):
+        lifecycle = GovernanceLifecycle(
+            registry=self.reg,
+            allow_unregistered_agents=True,
+        )
+        decision = lifecycle.authorize("retired-agent", "db", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:retired"
 
     def test_circuit_breaker_open_denies(self):
         # Trip the circuit breaker by calling a failing function
@@ -110,7 +167,9 @@ class TestAuthorize:
     def test_checks_populated(self):
         decision = self.lifecycle.authorize("worker-1", "db", "read")
         assert "kill_switch" in decision.checks
-        assert "agent_status" in decision.checks
+        assert decision.checks["agent_status"] == "active"
+        assert decision.checks["agent_trust"] == "medium"
+        assert decision.checks["agent_registered"] is True
         assert "circuit_breaker" in decision.checks
 
 
@@ -170,6 +229,42 @@ class TestLogDecision:
         assert entries[0].tuple_data["allowed"] is True
         al.close()
 
+    def test_log_decision_writes_identity_checks(self):
+        tmpdir = tempfile.mkdtemp()
+        al = AuditLog(base_dir=tmpdir, require_signature=False)
+        reg = AgentRegistry()
+        reg.register_agent("worker-1", trust="high", status="active")
+        lifecycle = GovernanceLifecycle(audit_log=al, registry=reg)
+
+        decision = lifecycle.authorize("worker-1", "db", "write")
+        lifecycle.log_decision("worker-1", "db", "write", decision)
+
+        entries = list(al.query_by_intent("lifecycle"))
+        assert len(entries) == 1
+        checks = entries[0].tuple_data["checks"]
+        assert checks["agent_status"] == "active"
+        assert checks["agent_trust"] == "high"
+        assert checks["agent_registered"] is True
+        al.close()
+
+    def test_log_decision_writes_unknown_denial(self):
+        tmpdir = tempfile.mkdtemp()
+        al = AuditLog(base_dir=tmpdir, require_signature=False)
+        lifecycle = GovernanceLifecycle(audit_log=al, registry=AgentRegistry())
+
+        decision = lifecycle.authorize("ghost", "db", "write")
+        lifecycle.log_decision("ghost", "db", "write", decision)
+
+        entries = list(al.query_by_intent("lifecycle"))
+        assert len(entries) == 1
+        assert entries[0].tuple_data["allowed"] is False
+        assert entries[0].tuple_data["reason"] == "agent:unknown"
+        checks = entries[0].tuple_data["checks"]
+        assert checks["agent_status"] == "unknown"
+        assert checks["agent_trust"] == "unknown"
+        assert checks["agent_registered"] is False
+        al.close()
+
     def test_log_decision_without_audit_log(self):
         """Should silently no-op when audit log is not configured."""
         lifecycle = GovernanceLifecycle()
@@ -193,3 +288,9 @@ class TestPartialConfiguration:
         lifecycle = GovernanceLifecycle(registry=reg)
         decision = lifecycle.authorize("ok-agent", "x", "read")
         assert decision.allowed
+
+    def test_only_registry_denies_unknown(self):
+        lifecycle = GovernanceLifecycle(registry=AgentRegistry())
+        decision = lifecycle.authorize("anyone", "x", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:unknown"
