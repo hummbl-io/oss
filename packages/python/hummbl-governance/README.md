@@ -73,6 +73,9 @@ before selecting a governance layer.
 
 **Sponsorship boundary.** The canonical draft sponsorship policy (in the HUMMBL OSS monorepo) does not sell support, priority, favorable findings, or roadmap control. Sponsorship is not active until its documented launch gates pass.
 
+**Paid advisory (separate from this package).** Teams deploying AI agents can book the [Bridge Method Diagnostic](https://hummbl.io/services#bridge-diagnostic): a paid 30-minute, 1-on-1 session with Reuben Bowlby ($400) on one decision, workflow, or agent deployment, ending with a concrete next-step list.
+This is a separate HUMMBL service, not package support. It buys no issue priority, roadmap control, or favorable findings, consistent with the sponsorship boundary above.
+
 **OWASP Top 10 for Agentic Applications.** The README includes an engineering mapping to the [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/). It is not a third-party certification or attestation. See the [mapping below](#owasp-top-10-for-agentic-applications-2026-engineering-mapping).
 
 ## Quick Start
@@ -489,6 +492,7 @@ This package is part of the [HUMMBL](https://hummbl.io) cognitive AI architectur
 - [hummbl.io](https://hummbl.io)
 - [Linktree](https://linktr.ee/hummbl)
 - [HUMMBL Slop Tracker (Substack)](https://hummbl.substack.com)
+- [Bridge Method Diagnostic — paid 1-on-1 advisory, $400](https://hummbl.io/services#bridge-diagnostic)
 
 ## License
 
