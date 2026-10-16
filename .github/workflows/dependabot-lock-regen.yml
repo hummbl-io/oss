@@ -1,0 +1,187 @@
+# Regenerate requirements-build.lock / requirements.lock on dependabot PRs.
+#
+# Dependabot can edit pyproject.toml inputs but cannot run the lock scripts
+# (they need `uv`), so `build-lock-check` / `package-parity` fail on every
+# dependency bump until a maintainer regenerates by hand. That loop is pure
+# mechanics - this workflow closes it.
+#
+# Trigger: a collaborator comments  /regen-locks  on a dependabot PR.
+# `issue_comment` workflows run with a write-capable GITHUB_TOKEN (dependabot
+# `pull_request` events are restricted to read-only), so the regen commit can
+# be pushed straight to the dependabot head branch in this repo.
+#
+# Fail-closed: API errors abort via `set -e`; non-dependabot PRs, fork heads,
+# and PRs that touch no packages/python/* files are skipped.
+
+name: Dependabot Lock Regen
+
+"on":
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  regen:
+    name: Regenerate dependency locks
+    if: >
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/regen-locks') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Gate - dependabot PR in this repo
+        id: meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          python3 - "$REPO" "$PR_NUMBER" <<'PYEOF' > /tmp/pr_meta
+          import json, os, sys, urllib.request
+          repo, pr, token = sys.argv[1], sys.argv[2], os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/pulls/{pr}",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              })
+          with urllib.request.urlopen(req, timeout=30) as r:
+              d = json.load(r)
+          print(d["user"]["login"])
+          print(d["head"]["ref"])
+          print(d["head"]["repo"]["full_name"] or "")
+          PYEOF
+          AUTHOR=$(sed -n '1p' /tmp/pr_meta)
+          HEAD_REF=$(sed -n '2p' /tmp/pr_meta)
+          HEAD_REPO=$(sed -n '3p' /tmp/pr_meta)
+          if [ "$AUTHOR" != "dependabot[bot]" ]; then
+            echo "PR author is $AUTHOR - skipping"
+            echo "head_ref=" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$HEAD_REPO" != "$REPO" ]; then
+            echo "Fork head $HEAD_REPO - cannot push"
+            echo "head_ref=" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: steps.meta.outputs.head_ref != ''
+        with:
+          ref: ${{ steps.meta.outputs.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        if: steps.meta.outputs.head_ref != ''
+        with:
+          python-version: "3.12"
+
+      - name: Detect affected packages
+        id: pkgs
+        if: steps.meta.outputs.head_ref != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          python3 - "$REPO" "$PR_NUMBER" <<'PYEOF' > /tmp/pr_pkgs
+          import json, os, sys, urllib.request
+          repo, pr, token = sys.argv[1], sys.argv[2], os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/pulls/{pr}/files?per_page=100",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              })
+          with urllib.request.urlopen(req, timeout=30) as r:
+              files = json.load(r)
+          for pkg in sorted({
+              f["filename"].split("/")[2]
+              for f in files
+              if f["filename"].startswith("packages/python/")
+              and len(f["filename"].split("/")) > 3
+          }):
+              print(pkg)
+          PYEOF
+          if [ -s /tmp/pr_pkgs ]; then
+            cat /tmp/pr_pkgs
+            echo "has_pkgs=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No packages/python/* files changed - nothing to regen"
+            echo "has_pkgs=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install uv
+        if: steps.pkgs.outputs.has_pkgs == 'true'
+        run: pip install uv
+
+      - name: Regenerate locks
+        id: regen
+        if: steps.pkgs.outputs.has_pkgs == 'true'
+        run: |
+          set -euo pipefail
+          while IFS= read -r pkg; do
+            [ -n "$pkg" ] || continue
+            echo "=== $pkg ==="
+            # requirements-build.lock tracks pyproject inputs + extras (always)
+            python .github/scripts/lock_build_env.py lock "$pkg"
+            # requirements.lock only exists for packages with runtime deps
+            if [ -f "packages/python/$pkg/requirements.lock" ]; then
+              python .github/scripts/package_parity.py lock "$pkg"
+            fi
+          done < /tmp/pr_pkgs
+
+      - name: Commit and push
+        id: push
+        if: success() && steps.pkgs.outputs.has_pkgs == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'packages/python/*/requirements-build.lock' 'packages/python/*/requirements.lock'
+          if git diff --cached --quiet; then
+            echo "Locks already up to date - nothing to push"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          git commit -m "chore(deps): regenerate dependency locks for dependabot inputs"
+          git push origin "HEAD:refs/heads/${{ steps.meta.outputs.head_ref }}"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Comment result
+        if: always() && steps.meta.outputs.head_ref != '' && steps.pkgs.outputs.has_pkgs == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          PUSHED: ${{ steps.push.outputs.pushed }}
+          REGEN_OUTCOME: ${{ steps.regen.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 - "$REPO" "$PR_NUMBER" "$PUSHED" "$REGEN_OUTCOME" "$RUN_URL" <<'PYEOF'
+          import json, os, sys, urllib.request
+          repo, pr, pushed, regen_outcome, run_url, token = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], os.environ["GH_TOKEN"]
+          if regen_outcome == "failure":
+              body = f"Lock regeneration failed - see {run_url} for logs."
+          elif pushed == "true":
+              body = "Lock regeneration complete - pushed regenerated lockfile(s) to this branch; CI will re-run."
+          else:
+              body = "Lock regeneration complete - lockfiles already up to date, no push needed."
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/issues/{pr}/comments",
+              data=json.dumps({"body": body}).encode(),
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              }, method="POST")
+          with urllib.request.urlopen(req, timeout=30):
+              pass
+          PYEOF
