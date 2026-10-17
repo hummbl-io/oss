@@ -101,7 +101,11 @@ jobs:
 
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
-        run: pip install -e ".[test]"
+        run: |
+          if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ]; then
+            pip install -e ../hummbl-governance
+          fi
+          pip install -e ".[test]"
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
@@ -144,7 +148,11 @@ jobs:
 
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
-        run: pip install -e ".[test]"
+        run: |
+          if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ]; then
+            pip install -e ../hummbl-governance
+          fi
+          pip install -e ".[test]"
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}

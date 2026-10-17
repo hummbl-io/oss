@@ -47,6 +47,27 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .domain120_catalogs import TOOL_NAMES as DOMAIN120_TOOL_NAMES
+from .domain120_catalogs import load_catalogs
+from .domain120_catalogs import tool_definitions as domain120_tool_definitions
+from .domain120_inspection import InspectionError
+
+# A fully validated, explicitly configured snapshot. No import-time file reads.
+_DOMAIN120_SERVICE = None
+
+
+def _configure_domain120() -> None:
+    """Select the optional inspection snapshot once at stdio startup."""
+    global _DOMAIN120_SERVICE
+    _DOMAIN120_SERVICE = None
+    manifest = os.environ.get("BASEN_DOMAIN120_MANIFEST")
+    digest = os.environ.get("BASEN_DOMAIN120_MANIFEST_SHA256")
+    if manifest is None and digest is None:
+        return
+    if not manifest or not digest:
+        raise InspectionError("Both Domain120 configuration variables are required")
+    _DOMAIN120_SERVICE = load_catalogs(manifest, digest)
+
 
 # ---------------------------------------------------------------------------
 # MCP protocol primitives (stdlib JSON-RPC 2.0)
@@ -107,6 +128,60 @@ _FAMILY_NAMES = {
 }
 
 
+def _registry_json_bytes(value: Any) -> bytes:
+    """Named Python JSON recipe for content observation, not RFC 8785."""
+    def check(item):
+        if isinstance(item, dict):
+            if any(not isinstance(key, str) for key in item):
+                raise ValueError("Non-string JSON key")
+            for child in item.values():
+                check(child)
+        elif isinstance(item, list):
+            for child in item:
+                check(child)
+        elif item is not None and type(item) not in (str, int, float, bool):
+            raise ValueError("Non-JSON value")
+    check(value)
+    return json.dumps(value, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=True, allow_nan=False).encode("utf-8")
+
+
+def _unique_registry_json(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate registry JSON key")
+        result[key] = value
+    return result
+
+
+def _reject_registry_constant(value):
+    raise ValueError("Non-finite registry JSON constant")
+
+
+@dataclass(frozen=True)
+class _RegistrySourceObservation:
+    artifact_sha256: str
+    normalized_content_sha256: str
+
+
+class _LoadedRegistry(list):
+    """Legacy list interface with an immutable observation of its loaded bytes.
+
+    The list remains mutable for compatibility. Application capture compares its
+    current content to this observation before claiming a raw-artifact binding.
+    """
+    __slots__ = ("_source_observation",)
+
+    def __init__(self, rows, source):
+        super().__init__(rows)
+        self._source_observation = source
+
+    @property
+    def source_observation(self):
+        return self._source_observation
+
+
 def _load_registry(variant: str = "base120") -> list[dict[str, Any]]:
     """Load operator records for a variant. Cached in-process at module level."""
     if variant != "base120":
@@ -116,17 +191,18 @@ def _load_registry(variant: str = "base120") -> list[dict[str, Any]]:
             f"unknown variant: {variant!r} (only 'base120' supported in v0.1)",
         )
 
-    if not DEFAULT_REGISTRY_JSON.exists():
-        raise JsonRpcError(
-            INTERNAL_ERROR,
-            f"registry not found at {DEFAULT_REGISTRY_JSON}",
-        )
-
-    with DEFAULT_REGISTRY_JSON.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-    if not isinstance(data, list):
-        raise JsonRpcError(INTERNAL_ERROR, "registry root must be a JSON array")
-    return data
+    try:
+        raw = DEFAULT_REGISTRY_JSON.read_bytes()
+        data = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_registry_json,
+                          parse_constant=_reject_registry_constant)
+        if not isinstance(data, list):
+            raise TypeError("Registry root must be an array")
+        source = _RegistrySourceObservation(
+            hashlib.sha256(raw).hexdigest(),
+            hashlib.sha256(_registry_json_bytes(data)).hexdigest())
+        return _LoadedRegistry(data, source)
+    except (OSError, ValueError, TypeError, RecursionError, OverflowError):
+        raise JsonRpcError(INTERNAL_ERROR, "Registry input is unavailable or invalid") from None
 
 
 # Lazy in-process cache: variant -> list of operator records
@@ -148,6 +224,57 @@ def _operator_by_id(variant: str, operator_id: str) -> dict[str, Any] | None:
         if op.get("id") == operator_id:
             return op
     return None
+
+
+def _capture_application_operator(variant: str, operator_id: str):
+    """Select from one detached content snapshot before any execution effect."""
+    if not isinstance(variant, str):
+        raise JsonRpcError(INVALID_PARAMS, "variant must be a string")
+    rows = _registry(variant)
+    source = rows.source_observation if isinstance(rows, _LoadedRegistry) else None
+    try:
+        if not isinstance(rows, list):
+            raise TypeError("Registry must be an array")
+        encoded = _registry_json_bytes(rows)
+        captured = json.loads(encoded)
+        by_id = {}
+        for row in captured:
+            if not isinstance(row, dict):
+                raise TypeError("Registry row must be an object")
+            key = row.get("id")
+            if not isinstance(key, str) or not key.strip() or key in by_id:
+                raise ValueError("Registry IDs must be unique nonempty strings")
+            by_id[key] = row
+        op = by_id.get(operator_id)
+        if op is not None:
+            if any(not isinstance(op.get(field), str) for field in ("name", "definition")):
+                raise ValueError("Selected record text must be strings")
+            if "domain" in op and not isinstance(op["domain"], str):
+                raise ValueError("Selected family must be a string")
+    except (ValueError, TypeError, RecursionError, OverflowError):
+        raise JsonRpcError(INTERNAL_ERROR, "Registry content cannot support application capture") from None
+    if op is None:
+        raise JsonRpcError(INVALID_PARAMS, f"operator not found: {operator_id!r}")
+    content_sha = hashlib.sha256(encoded).hexdigest()
+    if source is None:
+        binding, artifact_sha = "raw-source-unavailable", None
+    elif source.normalized_content_sha256 != content_sha:
+        binding, artifact_sha = "cache-content-changed", None
+    else:
+        binding, artifact_sha = "loaded-bytes-matched", source.artifact_sha256
+    observation = {
+        "schema": "hummbl.basen.registry-observation.v1",
+        "artifact_sha256": artifact_sha,
+        "normalized_content_sha256": content_sha,
+        "operator_content_sha256": hashlib.sha256(_registry_json_bytes(op)).hexdigest(),
+        "artifact_binding": binding,
+        "content_hash_format": "utf8-python-json-sorted-compact-ascii-no-nonfinite-v1",
+        "registry_version": None,
+        "source_authority": "not authenticated",
+        "semantic_validation": "not performed",
+        "admission": "not assessed",
+    }
+    return op, observation
 
 
 # ---------------------------------------------------------------------------
@@ -172,9 +299,10 @@ _TUPLE_LOG_PATH = Path(
 def _append_tuple_jsonl(record: dict[str, Any]) -> bool:
     """Append a tuple record to the JSONL log (KRINEIA-aligned: append-only).
 
-    Cross-platform: tries the canonical `founder_mode.services.basen_tuple.append_tuple`
-    first (POSIX with fcntl); falls back to a stdlib-only msvcrt-based appender on
-    Windows. Returns True on successful write, False otherwise.
+    Prefer the bundled BaseNTuple writer when importable. A compatibility
+    appender is used only when that import is unavailable. Once a writer is
+    attempted, never retry through another writer: an error may leave bytes.
+    True means the writer returned; it is not independent durability evidence.
     """
     try:
         _TUPLE_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -183,29 +311,34 @@ def _append_tuple_jsonl(record: dict[str, Any]) -> bool:
 
     line = json.dumps(record, separators=(",", ":"), sort_keys=True) + "\n"
 
-    # Prefer canonical writer when importable.
+    # Import availability is separate from constructing or invoking the writer.
     try:
         from basen.basen_tuple import (  # type: ignore
             BaseNTuple,
             append_tuple,
         )
+    except ImportError:
+        append_tuple = None
+
+    if append_tuple is not None:
         import uuid as _uuid
 
-        t = BaseNTuple(
-            id=record.get("id", str(_uuid.uuid4())[:12]),
-            time=record["time"],
-            state=record["state"],
-            drift=float(record.get("drift", 0.0)),
-            agent=record["agent"],
-            tool=record["tool"],
-            args_hash=record["args_hash"],
-            evidence=record.get("evidence", {}),
-            tier=record["tier"],
-        )
-        append_tuple(t, path=str(_TUPLE_LOG_PATH))
+        try:
+            t = BaseNTuple(
+                id=record.get("id", str(_uuid.uuid4())[:12]),
+                time=record["time"],
+                state=record["state"],
+                drift=float(record.get("drift", 0.0)),
+                agent=record["agent"],
+                tool=record["tool"],
+                args_hash=record["args_hash"],
+                evidence=record.get("evidence", {}),
+                tier=record["tier"],
+            )
+            append_tuple(t, path=str(_TUPLE_LOG_PATH))
+        except Exception:  # noqa: BLE001 — a failed write must never select a second appender
+            return False
         return True
-    except (ImportError, ModuleNotFoundError, AttributeError, KeyError):
-        pass
 
     # Cross-platform fallback (Windows or canonical-unavailable).
     try:
@@ -245,6 +378,8 @@ def _emit_tuple(
     state: str = "ok",
     drift: float = 0.0,
     evidence: dict[str, Any] | None = None,
+    *,
+    report_persistence: bool = False,
 ) -> dict[str, Any]:
     """Emit a basen_tuple-shaped governance record alongside a tool response.
 
@@ -275,12 +410,18 @@ def _emit_tuple(
 
     if tier == 0:
         # Reads do not emit governance writes — per BaseNTuple tier model.
+        if report_persistence:
+            rec["persistence_status"] = "not_applicable"
         return rec
 
     if os.environ.get("BASEN_PERSIST_TUPLES", "1") != "0":
         rec["persisted"] = _append_tuple_jsonl(rec)
+        persistence_status = "saved" if rec["persisted"] else "failed"
     else:
         rec["persisted"] = False
+        persistence_status = "disabled"
+    if report_persistence:
+        rec["persistence_status"] = persistence_status
     return rec
 
 
@@ -357,7 +498,8 @@ MCP_TOOLS: list[ToolDefinition] = [
         description=(
             "Recommend operators for a problem description. Tier 0 read. "
             "Returns ranked operator suggestions with rationale. "
-            "v0.1: keyword-scoring stub; planned upgrade to embedding-based."
+            "Uses embeddings with an explicit keyword fallback when embeddings are unavailable. "
+            "May contact the configured embedding endpoint and write local cache files."
         ),
         input_schema={
             "type": "object",
@@ -500,37 +642,120 @@ EMBED_CACHE_DIR = Path(
     )
 )
 
+_EMBED_CACHE_SCHEMA = "hummbl.basen.operator-embeddings.v1"
 
-def _embed_text(text: str) -> list[float] | None:
-    """Embed text via local Ollama nomic-embed-text. None on failure."""
+
+@dataclass(frozen=True, repr=False)
+class _EmbeddingInputs:
+    # Do not expose the endpoint through repr or persisted cache metadata.
+    items: tuple[tuple[str, str], ...]
+    model: str
+    endpoint: str
+    fingerprint: str
+
+
+def _embedding_inputs(registry: list[dict[str, Any]]) -> _EmbeddingInputs | None:
+    """Capture exactly the text and configuration used by this computation."""
+    if not isinstance(registry, list) or not registry:
+        return None
+    model, endpoint = OLLAMA_EMBED_MODEL, OLLAMA_EMBED_URL
+    if not isinstance(model, str) or not model or not isinstance(endpoint, str) or not endpoint:
+        return None
+    items: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for op in registry:
+        if not isinstance(op, dict):
+            return None
+        operator_id = op.get("id")
+        if not isinstance(operator_id, str) or not operator_id or operator_id in seen:
+            return None
+        seen.add(operator_id)
+        items.append((operator_id, _operator_corpus_text(op)))
+    payload = json.dumps({"schema": _EMBED_CACHE_SCHEMA, "model": model,
+                          "endpoint": endpoint, "operators": items},
+                         sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+    fingerprint = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    return _EmbeddingInputs(tuple(items), model, endpoint, fingerprint)
+
+
+def _unique_embedding_json(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate embedding JSON key")
+        result[key] = value
+    return result
+
+
+def _embedding_vector(value) -> list[float] | None:
+    """Reject coerced, non-finite, empty and zero vectors before using them."""
+    import math
+
+    if not isinstance(value, list) or not value:
+        return None
+    if any(type(item) not in (int, float) for item in value):
+        return None
+    try:
+        vector = [float(item) for item in value]
+    except (OverflowError, ValueError):
+        return None
+    if not all(math.isfinite(item) for item in vector) or not any(vector):
+        return None
+    return vector
+
+
+def _embedding_set(value, inputs: _EmbeddingInputs) -> dict[str, list[float]] | None:
+    if not isinstance(value, dict) or set(value) != {key for key, _ in inputs.items}:
+        return None
+    result = {}
+    dimension = None
+    for key, _ in inputs.items:
+        vector = _embedding_vector(value[key])
+        if vector is None or (dimension is not None and len(vector) != dimension):
+            return None
+        dimension = len(vector)
+        result[key] = vector
+    return result
+
+
+def _embed_text(text: str, *, model: str | None = None,
+                endpoint: str | None = None) -> list[float] | None:
+    """Embed through the configured endpoint; safely return None on failure."""
+    import http.client
     import urllib.error
     import urllib.request
 
-    payload = json.dumps({"model": OLLAMA_EMBED_MODEL, "prompt": text}).encode("utf-8")
-    req = urllib.request.Request(
-        OLLAMA_EMBED_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
     try:
+        payload = json.dumps({"model": OLLAMA_EMBED_MODEL if model is None else model,
+                              "prompt": text}).encode("utf-8")
+        req = urllib.request.Request(
+            OLLAMA_EMBED_URL if endpoint is None else endpoint,
+            data=payload, headers={"Content-Type": "application/json"}, method="POST",
+        )
         with urllib.request.urlopen(req, timeout=OLLAMA_EMBED_TIMEOUT) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        embedding = data.get("embedding")
-        if isinstance(embedding, list) and embedding:
-            return [float(x) for x in embedding]
-        return None
-    except (urllib.error.URLError, OSError, ValueError, json.JSONDecodeError):
+            data = json.loads(resp.read().decode("utf-8"), object_pairs_hook=_unique_embedding_json)
+        return _embedding_vector(data.get("embedding")) if isinstance(data, dict) else None
+    except (urllib.error.URLError, http.client.HTTPException, OSError,
+            ValueError, TypeError, OverflowError, RecursionError):
         return None
 
 
-def _registry_fingerprint(registry: list[dict[str, Any]]) -> str:
-    """Deterministic hash of registry contents — invalidates cache on change."""
-    payload = json.dumps(
-        [(op.get("id"), op.get("name"), op.get("definition")) for op in registry],
-        sort_keys=True,
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+def _registry_fingerprint(registry: list[dict[str, Any]]) -> str | None:
+    """Computation identity, not a source-authentication or admission digest."""
+    inputs = _embedding_inputs(registry)
+    return inputs.fingerprint if inputs is not None else None
+
+
+def _new_embedding_observation() -> dict[str, Any]:
+    return {
+        "computation_fingerprint": None,
+        "configured_model": None,
+        "operator_cache_read": "not_attempted",
+        "operator_cache_write": "not_attempted",
+        "operator_embedding_calls": 0,
+        "query_embedding_calls": 0,
+        "failure_stage": None,
+    }
 
 
 def _operator_corpus_text(op: dict[str, Any]) -> str:
@@ -545,81 +770,114 @@ def _operator_corpus_text(op: dict[str, Any]) -> str:
 
 
 def _load_or_compute_operator_embeddings(
-    variant: str,
+    variant: str, *, inputs: _EmbeddingInputs | None = None,
+    observation: dict[str, Any] | None = None,
 ) -> dict[str, list[float]] | None:
-    """Load operator embeddings from disk cache, computing on miss.
-
-    Returns None if Ollama is unreachable AND no cache exists (fully degraded).
-    Returns the cache if it exists even when Ollama is unreachable.
-    """
-    registry = _registry(variant)
-    fp = _registry_fingerprint(registry)
-    cache_path = EMBED_CACHE_DIR / f"embeddings_{variant}_{fp}.json"
-
-    if cache_path.exists():
-        try:
-            with cache_path.open(encoding="utf-8") as f:
-                cached = json.load(f)
-            if isinstance(cached, dict) and cached:
-                return {k: [float(x) for x in v] for k, v in cached.items()}
-        except (OSError, ValueError, json.JSONDecodeError):
-            pass  # fall through to recompute
-
-    # Cache miss — try to compute. Probe Ollama with the first operator;
-    # if it fails, bail rather than burn 120 timeouts.
-    probe = _embed_text(_operator_corpus_text(registry[0]))
-    if probe is None:
+    """Reuse a complete matching vector set, or compute it from captured inputs."""
+    if observation is None:
+        observation = _new_embedding_observation()
+    if inputs is None:
+        inputs = _embedding_inputs(_registry(variant))
+    if inputs is None:
         return None
+    cache_path = EMBED_CACHE_DIR / f"embeddings_v1_{variant}_{inputs.fingerprint}.json"
 
-    embeddings: dict[str, list[float]] = {registry[0]["id"]: probe}
-    for op in registry[1:]:
-        emb = _embed_text(_operator_corpus_text(op))
-        if emb is None:
-            return None  # partial failure — don't cache a partial set
-        embeddings[op["id"]] = emb
+    try:
+        with cache_path.open(encoding="utf-8") as f:
+            cached = json.load(f, object_pairs_hook=_unique_embedding_json)
+        if (isinstance(cached, dict)
+                and set(cached) == {"schema", "fingerprint", "dimension", "embeddings"}
+                and cached["schema"] == _EMBED_CACHE_SCHEMA
+                and cached["fingerprint"] == inputs.fingerprint
+                and type(cached["dimension"]) is int):
+            vectors = _embedding_set(cached["embeddings"], inputs)
+            if vectors is not None and cached["dimension"] == len(next(iter(vectors.values()))):
+                observation["operator_cache_read"] = "hit"
+                return vectors
+        observation["operator_cache_read"] = "invalid"
+    except FileNotFoundError:
+        observation["operator_cache_read"] = "miss"
+    except OSError:
+        observation["operator_cache_read"] = "unavailable"
+    except (ValueError, RecursionError):
+        observation["operator_cache_read"] = "invalid"
+
+    # Fail on the first invalid result; never persist a partial vector set.
+    embeddings: dict[str, list[float]] = {}
+    dimension = None
+    for operator_id, text in inputs.items:
+        observation["operator_embedding_calls"] += 1
+        vector = _embedding_vector(_embed_text(text, model=inputs.model, endpoint=inputs.endpoint))
+        if vector is None or (dimension is not None and len(vector) != dimension):
+            return None
+        dimension = len(vector)
+        embeddings[operator_id] = vector
 
     try:
         EMBED_CACHE_DIR.mkdir(parents=True, exist_ok=True)
         with cache_path.open("w", encoding="utf-8") as f:
-            json.dump(embeddings, f)
+            json.dump({"schema": _EMBED_CACHE_SCHEMA, "fingerprint": inputs.fingerprint,
+                       "dimension": dimension, "embeddings": embeddings}, f, allow_nan=False)
+        observation["operator_cache_write"] = "write_returned"
     except OSError:
-        pass  # cache write failure is non-fatal; we still have in-memory data
+        observation["operator_cache_write"] = "failed"
 
     return embeddings
 
 
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Stdlib cosine similarity in [-1, 1]. Returns 0.0 on degenerate input."""
+def _cosine_similarity(a: list[float], b: list[float]) -> float | None:
+    """Stable cosine in [-1, 1]; None for invalid, zero or mismatched vectors."""
     import math
 
-    if len(a) != len(b) or not a:
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(y * y for y in b))
-    if norm_a == 0.0 or norm_b == 0.0:
-        return 0.0
-    return dot / (norm_a * norm_b)
+    left, right = _embedding_vector(a), _embedding_vector(b)
+    if left is None or right is None or len(left) != len(right):
+        return None
+    scaled = []
+    for vector in (left, right):
+        scale = max(abs(item) for item in vector)
+        values = [item / scale for item in vector]
+        norm = math.sqrt(math.fsum(item * item for item in values))
+        scaled.append([item / norm for item in values])
+    score = math.fsum(x * y for x, y in zip(*scaled))
+    return max(-1.0, min(1.0, score)) if math.isfinite(score) else None
 
 
 def _recommend_via_embeddings(
-    desc: str, variant: str, top_k: int
+    desc: str, variant: str, top_k: int, *,
+    registry: list[dict[str, Any]] | None = None,
+    observation: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Embedding-cosine recommender. None on Ollama failure (caller falls back)."""
-    op_embeddings = _load_or_compute_operator_embeddings(variant)
-    if op_embeddings is None:
+    """Return None on invalid vectors or computation failure for explicit fallback."""
+    import math
+
+    if registry is None:
+        registry, _ = _capture_recommendation_registry(variant)
+    if observation is None:
+        observation = _new_embedding_observation()
+    inputs = _embedding_inputs(registry)
+    if inputs is None:
+        observation["failure_stage"] = "embedding_inputs"
         return None
-    query_emb = _embed_text(desc)
-    if query_emb is None:
+    observation["computation_fingerprint"] = inputs.fingerprint
+    observation["configured_model"] = inputs.model
+    op_embeddings = _embedding_set(_load_or_compute_operator_embeddings(
+        variant, inputs=inputs, observation=observation), inputs)
+    if op_embeddings is None:
+        observation["failure_stage"] = "operator_embeddings"
+        return None
+    observation["query_embedding_calls"] += 1
+    query_emb = _embedding_vector(_embed_text(desc, model=inputs.model, endpoint=inputs.endpoint))
+    if query_emb is None or len(query_emb) != len(next(iter(op_embeddings.values()))):
+        observation["failure_stage"] = "query_embedding"
         return None
 
-    registry = _registry(variant)
     scored: list[tuple[dict[str, Any], float]] = []
     for op in registry:
-        emb = op_embeddings.get(op["id"])
-        if emb is None:
-            continue
-        scored.append((op, _cosine_similarity(query_emb, emb)))
+        score = _cosine_similarity(query_emb, op_embeddings[op["id"]])
+        if score is None or not math.isfinite(score):
+            observation["failure_stage"] = "similarity"
+            return None
+        scored.append((op, score))
     scored.sort(key=lambda x: x[1], reverse=True)
     top = scored[: max(1, top_k)]
     return {
@@ -634,7 +892,76 @@ def _recommend_via_embeddings(
             for op, score in top
         ],
         "method": "embedding-cosine-v0.2",
-        "embedding_model": OLLAMA_EMBED_MODEL,
+        "embedding_model": inputs.model,
+    }
+
+
+def _capture_recommendation_registry(variant: str):
+    """Detach all participating records before cache or embedding effects."""
+    if not isinstance(variant, str):
+        raise JsonRpcError(INVALID_PARAMS, "variant must be a string")
+    rows = _registry(variant)
+    source = rows.source_observation if isinstance(rows, _LoadedRegistry) else None
+    try:
+        if not isinstance(rows, list):
+            raise TypeError("Registry must be an array")
+        encoded = _registry_json_bytes(rows)
+        captured = json.loads(encoded)
+        seen = set()
+        for row in captured:
+            if not isinstance(row, dict):
+                raise TypeError("Registry row must be an object")
+            key = row.get("id")
+            if not isinstance(key, str) or not key.strip() or key in seen:
+                raise ValueError("Registry IDs must be unique nonempty strings")
+            seen.add(key)
+            if any(not isinstance(row.get(field), str) for field in ("name", "definition")):
+                raise ValueError("Participating record text must be strings")
+            if any(field in row and not isinstance(row[field], str)
+                   for field in ("domain", "domain_name")):
+                raise ValueError("Participating family text must be strings")
+    except (ValueError, TypeError, RecursionError, OverflowError):
+        raise JsonRpcError(INTERNAL_ERROR, "Registry content cannot support recommendation capture") from None
+    content_sha = hashlib.sha256(encoded).hexdigest()
+    if source is None:
+        binding, artifact_sha = "raw-source-unavailable", None
+    elif source.normalized_content_sha256 != content_sha:
+        binding, artifact_sha = "cache-content-changed", None
+    else:
+        binding, artifact_sha = "loaded-bytes-matched", source.artifact_sha256
+    return captured, {
+        "artifact_sha256": artifact_sha,
+        "normalized_content_sha256": content_sha,
+        "artifact_binding": binding,
+        "content_hash_format": "utf8-python-json-sorted-compact-ascii-no-nonfinite-v1",
+        "registry_version": None,
+        "source_authority": "not authenticated",
+        "semantic_validation": "not performed",
+        "admission": "not assessed",
+    }
+
+
+def _recommendation_result(body, args, registry, registry_observation, embedding_observation):
+    by_id = {row["id"]: row for row in registry}
+    selection = {
+        "schema": "hummbl.basen.recommendation-observation.v1",
+        "variant": body["variant"],
+        "actual_method": body["method"],
+        "fallback_used": body["method"] == "keyword-overlap-v0.1-fallback",
+        "registry": registry_observation,
+        "selected_operators": [
+            {"operator_id": row["operator_id"],
+             "operator_content_sha256": hashlib.sha256(
+                 _registry_json_bytes(by_id[row["operator_id"]])).hexdigest()}
+            for row in body["recommendations"]
+        ],
+        "embedding": embedding_observation,
+    }
+    return {
+        **body,
+        "_selection": selection,
+        "_governance": _emit_tuple("recommend", args, tier=0,
+                                   evidence={"recommendation": json.loads(_registry_json_bytes(selection))}),
     }
 
 
@@ -647,16 +974,18 @@ def _tool_recommend(args: dict[str, Any]) -> dict[str, Any]:
             INVALID_PARAMS, "problem_description must be a non-empty string"
         )
 
+    registry, registry_observation = _capture_recommendation_registry(variant)
+    embedding_observation = _new_embedding_observation()
     # Try embedding-based recommender first (v0.2). Falls back to keyword
     # overlap on Ollama failure to keep the tool responsive in degraded mode.
-    emb_result = _recommend_via_embeddings(desc, variant, top_k)
+    emb_result = _recommend_via_embeddings(desc, variant, top_k, registry=registry,
+                                          observation=embedding_observation)
     if emb_result is not None:
-        return {
+        return _recommendation_result({
             "problem_description": desc,
             **emb_result,
             "variant": variant,
-            "_governance": _emit_tuple("recommend", args, tier=0),
-        }
+        }, args, registry, registry_observation, embedding_observation)
 
     # Fallback: lowercased keyword tokens (>=4 chars) for naive overlap scoring.
     tokens = [
@@ -664,10 +993,10 @@ def _tool_recommend(args: dict[str, Any]) -> dict[str, Any]:
         for t in "".join(c.lower() if c.isalnum() else " " for c in desc).split()
         if len(t) >= 4
     ]
-    scored = [(op, _score_operator(op, tokens)) for op in _registry(variant)]
+    scored = [(op, _score_operator(op, tokens)) for op in registry]
     scored.sort(key=lambda x: x[1], reverse=True)
     top = scored[: max(1, top_k)]
-    return {
+    return _recommendation_result({
         "problem_description": desc,
         "recommendations": [
             {
@@ -694,8 +1023,7 @@ def _tool_recommend(args: dict[str, Any]) -> dict[str, Any]:
         ],
         "method": "keyword-overlap-v0.1-fallback",
         "variant": variant,
-        "_governance": _emit_tuple("recommend", args, tier=0),
-    }
+    }, args, registry, registry_observation, embedding_observation)
 
 
 # ---------------------------------------------------------------------------
@@ -814,31 +1142,40 @@ def _apply_analytic(op: dict[str, Any], input_text: str) -> dict[str, Any]:
     }
 
 
-def _chat_complete(prompt: str, model: str = "") -> str | None:
+def _chat_complete(prompt: str, model: str | None = None, *, endpoint: str | None = None) -> str | None:
     """One-shot Ollama chat completion. None on failure."""
+    import http.client
     import urllib.error
     import urllib.request
 
-    payload = json.dumps(
-        {
-            "model": model or OLLAMA_CHAT_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
-            "stream": False,
-            "options": {"think": False},
-        }
-    ).encode("utf-8")
-    req = urllib.request.Request(
-        OLLAMA_CHAT_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
     try:
+        selected_model = OLLAMA_CHAT_MODEL if model is None else model
+        selected_endpoint = OLLAMA_CHAT_URL if endpoint is None else endpoint
+        if (not isinstance(selected_model, str) or not selected_model.strip()
+                or not isinstance(selected_endpoint, str) or not selected_endpoint.strip()):
+            return None
+        payload = json.dumps(
+            {
+                "model": selected_model,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False,
+                "options": {"think": False},
+            }
+        ).encode("utf-8")
+        req = urllib.request.Request(
+            selected_endpoint,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
         with urllib.request.urlopen(req, timeout=OLLAMA_CHAT_TIMEOUT) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        msg = data.get("message", {}).get("content")
+        if not isinstance(data, dict) or not isinstance(data.get("message"), dict):
+            return None
+        msg = data["message"].get("content")
         return msg if isinstance(msg, str) and msg.strip() else None
-    except (urllib.error.URLError, OSError, ValueError, json.JSONDecodeError):
+    except (urllib.error.URLError, http.client.HTTPException, OSError,
+            ValueError, TypeError, OverflowError, RecursionError):
         return None
 
 
@@ -857,12 +1194,16 @@ def _apply_empirical(op: dict[str, Any], input_text: str) -> dict[str, Any]:
         f"INPUT:\n{input_text}\n\n"
         f"ANALYSIS:"
     )
-    completion = _chat_complete(prompt)
+    model, endpoint = OLLAMA_CHAT_MODEL, OLLAMA_CHAT_URL
+    completion = None
+    if (isinstance(model, str) and model.strip()
+            and isinstance(endpoint, str) and endpoint.strip()):
+        completion = _chat_complete(prompt, model=model, endpoint=endpoint)
     if completion is None:
         # Degrade to analytic + flag
         result = _apply_analytic(op, input_text)
         result["method"] = "empirical-degraded-to-analytic"
-        result["_note"] = "Ollama unreachable; returning analytic template instead."
+        result["_note"] = "Usable chat completion unavailable; returning analytic template instead."
         return result
     return {
         "operator_id": op["id"],
@@ -872,7 +1213,7 @@ def _apply_empirical(op: dict[str, Any], input_text: str) -> dict[str, Any]:
         "input_excerpt": input_text[:200],
         "analysis": completion,
         "method": "ollama-chat-v0.2",
-        "model": OLLAMA_CHAT_MODEL,
+        "model": model,
     }
 
 
@@ -891,27 +1232,49 @@ def _tool_apply(args: dict[str, Any]) -> dict[str, Any]:
             f"mode must be one of advisory|analytic|empirical; got {mode!r}",
         )
 
-    op = _operator_by_id(variant, op_id)
-    if op is None:
-        raise JsonRpcError(INVALID_PARAMS, f"operator not found: {op_id!r}")
+    op, registry_observation = _capture_application_operator(variant, op_id)
 
     # Mode dispatch. Tier mapping: advisory=0 (read), analytic=1, empirical=1.
     if mode == "advisory":
         body = _apply_advisory(op, input_text)
         tier = 0
+        actual_mode, actual_method = "advisory", "operator-description-v0.1"
     elif mode == "analytic":
         body = _apply_analytic(op, input_text)
         tier = 1
+        actual_mode, actual_method = "analytic", "family-template-v0.2"
     else:  # empirical
         body = _apply_empirical(op, input_text)
         tier = 1
+        if body["method"] == "empirical-degraded-to-analytic":
+            actual_mode, actual_method = "analytic", "family-template-v0.2"
+        else:
+            actual_mode, actual_method = "empirical", "ollama-chat-v0.2"
+
+    application = {
+        "variant": variant,
+        "operator_id": op_id,
+        "requested_mode": mode,
+        "actual_mode": actual_mode,
+        "actual_method": actual_method,
+        "fallback_used": mode != actual_mode,
+        "registry": registry_observation,
+    }
+    if application["fallback_used"]:
+        application["fallback_reason"] = "completion_unavailable"
+    if actual_mode == "empirical":
+        application["configured_model"] = body["model"]
 
     return {
         "operator_id": op_id,
         "mode": mode,
         "variant": variant,
         **body,
-        "_governance": _emit_tuple("apply", args, tier=tier),
+        "_execution": application,
+        "_governance": _emit_tuple("apply", args, tier=tier,
+                                   evidence={"application": {**application,
+                                                             "registry": registry_observation.copy()}},
+                                   report_persistence=True),
     }
 
 
@@ -1120,9 +1483,29 @@ def handle_request(method: str, params: dict[str, Any]) -> Any:
     if method == "ping":
         return {}
     if method == "tools/list":
-        return {"tools": [t.to_obj() for t in MCP_TOOLS]}
+        extra = domain120_tool_definitions() if _DOMAIN120_SERVICE is not None else []
+        return {"tools": [t.to_obj() for t in MCP_TOOLS] + extra}
     if method == "tools/call":
         name = params.get("name")
+        if isinstance(name, str) and name in DOMAIN120_TOOL_NAMES:
+            if _DOMAIN120_SERVICE is None:
+                raise JsonRpcError(TOOL_NOT_FOUND, "Domain120 inspection is not configured")
+            # Preserve explicitly supplied malformed/falsey values for validation.
+            # This scoped branch leaves the existing Base120 handlers unchanged.
+            arguments = params.get("arguments", {})
+            try:
+                result = _DOMAIN120_SERVICE.call(name, arguments)
+                serialized = json.dumps(result, indent=2)
+            except InspectionError as exc:
+                raise JsonRpcError(
+                    INVALID_PARAMS,
+                    "Domain120 inspection request rejected; use the tool schema and an exact listed catalog identity",
+                ) from exc
+            except Exception as exc:
+                # Never expose private source payloads or exception/path details.
+                raise JsonRpcError(INTERNAL_ERROR, "Domain120 inspection failed") from exc
+            return {"content": [{"type": "text", "text": serialized}],
+                    "isError": False}
         args = params.get("arguments") or {}
         if not isinstance(name, str):
             raise JsonRpcError(INVALID_PARAMS, "tools/call: 'name' is required")
@@ -1179,6 +1562,12 @@ def _success_obj(req_id: Any, result: Any) -> dict[str, Any]:
 
 def serve_stdio() -> None:
     """Read newline-delimited JSON-RPC from stdin, write responses to stdout."""
+    try:
+        _configure_domain120()
+    except Exception:  # noqa: BLE001 — startup errors must not disclose source content
+        # Fail before initialization/tool discovery; do not leak source content.
+        sys.stderr.write("Domain120 inspection configuration rejected.\n")
+        raise SystemExit(2) from None
     for raw_line in sys.stdin:
         line = raw_line.strip()
         if not line:
@@ -1206,7 +1595,7 @@ def serve_stdio() -> None:
                 result = handle_request(method, params)
             except JsonRpcError:
                 raise
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 raise JsonRpcError(
                     INTERNAL_ERROR, f"internal error: {type(e).__name__}: {e}"
                 ) from e

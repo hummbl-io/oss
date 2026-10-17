@@ -9,6 +9,28 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+Proposed next release: **1.6.0**. This change is a breaking default and is
+not tagged or published from this PR.
+
+### Security
+- **Breaking default:** `GovernanceLifecycle.authorize()` now fails closed
+  when an `AgentRegistry` is wired. Unregistered/unknown agents are denied
+  with reason `agent:unknown`. 1.5.1 denied only suspended/retired agents
+  and let unknown identities through, contradicting the "known and active"
+  contract. Registered active agents remain allowed. Decision `checks`
+  include `agent_status`, `agent_trust`, and `agent_registered`;
+  `log_decision` writes those fields into the audit record.
+- Keyword-only opt-in `allow_unregistered_agents=True` (constructor or
+  `authorize()`) restores the 1.5.1 unknown-agent pass-through.
+  Suspended and retired agents stay denied under the opt-in. The flag
+  stays off unless a caller sets it explicitly.
+- MCP `lifecycle_authorize` (`mcp_agent_monitor.py` and the
+  `hummbl-mcp-governance` copy) uses the same fail-closed default.
+  The in-process registry starts empty, so unknown agents are denied.
+  Hosts register agents with `lifecycle_register_agent` or preload a
+  JSON roster via `MONITOR_REGISTRY`. Embedders may pass their own
+  `AgentRegistry`. This path does not set `allow_unregistered_agents`.
+
 ### Changed
 - Renamed the P49 primitive module `sovereign_cryptosystem` to
   `envelope_cryptosystem` and the class `SovereignCryptosystem` to

@@ -238,10 +238,10 @@ These primitives shipped in v1.3-v1.4 but were not tracked in PRIMITIVES.md unti
 | `mcp_compliance` | 5 | NIST AI RMF, SOC2, ISO crosswalk, STRIDE, evidence export |
 | `mcp_sandbox` | 5 | CapabilityFence, OutputValidator |
 | `mcp_identity` | 10 | AgentRegistry, DelegationTokenManager, LamportClock |
-| `mcp_agent_monitor` | 11 | BehaviorMonitor, ConvergenceDetector, GovernanceLifecycle, EvolutionLineage |
+| `mcp_agent_monitor` | 12 | BehaviorMonitor, ConvergenceDetector, GovernanceLifecycle, EvolutionLineage |
 | `mcp_reasoning` | 10 | ReasoningEngine, SchemaValidator, ContractNetManager |
 | `mcp_physical` | 6 | KinematicGovernor, pHRISafetyMonitor |
-| **Total** | **57** | — |
+| **Total** | **58** | — |
 
 ---
 

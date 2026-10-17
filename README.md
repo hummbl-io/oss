@@ -28,7 +28,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
-| `hummbl-governance` | 1.5.1 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.5.1 — current tree includes post-release changes; see `docs/operations/RELEASE.md` |
+| `hummbl-governance` | 1.5.1 | [PyPI](https://pypi.org/project/hummbl-governance/) | Live 1.5.1 — current tree includes the proposed 1.6.0 fail-closed `authorize` change (not tagged); see `docs/operations/RELEASE.md` |
 | `base120` | 3.1.0 | [PyPI](https://pypi.org/project/base120/) | Live — 120 reasoning operators for structured thinking |
 | `hummbl-bus` | 0.2.1 | [PyPI](https://pypi.org/project/hummbl-bus/) | Live — secure append-only TSV coordination bus |
 | `hummbl-cognition` | 0.1.0 | [PyPI](https://pypi.org/project/hummbl-cognition/) | Live — Cognitive Ledger Protocol and Open Brain server |
