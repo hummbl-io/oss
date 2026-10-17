@@ -28,7 +28,14 @@ Tools:
     convergence_record      - Record an action and classify convergent goal
     convergence_check       - Check an agent for convergent behavior
     convergence_scores      - Get per-goal scores for an agent
-    lifecycle_authorize     - Run full NIST RMF authorization check
+    lifecycle_register_agent - Register an agent on the in-process registry
+    lifecycle_authorize     - Run full NIST RMF authorization check.
+                              Fail-closed: unknown agents are denied
+                              (agent:unknown). Register via
+                              lifecycle_register_agent or preload
+                              MONITOR_REGISTRY JSON. Suspended/retired
+                              stay denied. allow_unregistered_agents is
+                              off by default and is not set here.
     lifecycle_status        - Get full governance lifecycle status snapshot
     lineage_record_variant  - Register a new variant in the lineage graph
     lineage_get             - Get variant details and ancestry
@@ -63,14 +70,69 @@ _behavior_monitor = BehaviorMonitor()
 _convergence_detector = ConvergenceDetector()
 _lineage = EvolutionLineage()
 
-# Lifecycle wired with default primitives
+def load_monitor_registry(
+    registry: AgentRegistry | None = None,
+    *,
+    env_var: str = "MONITOR_REGISTRY",
+) -> AgentRegistry:
+    """Load agents into a registry from ``MONITOR_REGISTRY`` JSON.
+
+    Hosts wire a roster without enabling ``allow_unregistered_agents``.
+    Unset or empty env leaves the registry empty (authorize then denies
+    unknown agents). A set path that is missing or invalid raises so the
+    host notices instead of starting with a silent empty roster.
+
+    File shape::
+
+        {"agents": [{"name": "worker-1", "trust": "medium", "status": "active"}]}
+
+    A top-level JSON array of the same objects is also accepted.
+    """
+    registry = AgentRegistry() if registry is None else registry
+    raw = os.environ.get(env_var, "").strip()
+    if not raw:
+        return registry
+    path = Path(raw)
+    if not path.is_file():
+        raise RuntimeError(f"{env_var} is not a readable file: {path}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"{env_var} is not valid JSON: {path}") from exc
+    if isinstance(payload, dict):
+        agents = payload.get("agents", [])
+    elif isinstance(payload, list):
+        agents = payload
+    else:
+        raise TypeError(f"{env_var} must be a JSON object or array")
+    if not isinstance(agents, list):
+        raise TypeError(f"{env_var} agents must be a list")
+    for item in agents:
+        if not isinstance(item, dict) or not str(item.get("name", "")).strip():
+            raise ValueError(f"{env_var} each agent needs a name")
+        registry.register_agent(
+            str(item["name"]).strip(),
+            display=item.get("display"),
+            trust=item.get("trust", "medium"),
+            status=item.get("status", "active"),
+        )
+    return registry
+
+
+# Lifecycle wired with default primitives.
+#
+# The in-process AgentRegistry starts empty unless MONITOR_REGISTRY points at
+# a JSON roster. GovernanceLifecycle fails closed for unknown agents
+# (reason agent:unknown). Hosts register agents with lifecycle_register_agent
+# or preload MONITOR_REGISTRY. Embedders may pass their own AgentRegistry
+# instead. allow_unregistered_agents stays off (explicit opt-in only).
 _state_dir = Path(
     os.environ.get("MONITOR_STATE_DIR", tempfile.mkdtemp(prefix="hummbl-monitor-"))
 )
 _ks = KillSwitch(state_dir=_state_dir)
 _cb = CircuitBreaker()
 _cg = CostGovernor(db_path=":memory:")
-_reg = AgentRegistry()
+_reg = load_monitor_registry()
 _lifecycle = GovernanceLifecycle(
     kill_switch=_ks,
     circuit_breaker=_cb,
@@ -150,6 +212,25 @@ def _convergence_scores(args: dict) -> dict:
     return {
         "agent_id": agent_id,
         "scores": {goal.value: round(score, 4) for goal, score in raw_scores.items()},
+    }
+
+
+def _lifecycle_register_agent(args: dict) -> dict:
+    agent = args.get("agent") or args.get("agent_id") or ""
+    if not agent:
+        return {"error": "agent required"}
+    trust = args.get("trust", "medium")
+    status = args.get("status", "active")
+    display = args.get("display")
+    try:
+        _reg.register_agent(agent, display=display, trust=trust, status=status)
+    except (TypeError, ValueError) as exc:
+        return {"error": str(exc)}
+    return {
+        "agent": agent,
+        "trust": _reg.get_trust_tier(agent),
+        "status": _reg.get_status(agent),
+        "registered": True,
     }
 
 
@@ -266,6 +347,7 @@ _TOOLS = {
     "convergence_record": _convergence_record,
     "convergence_check": _convergence_check,
     "convergence_scores": _convergence_scores,
+    "lifecycle_register_agent": _lifecycle_register_agent,
     "lifecycle_authorize": _lifecycle_authorize,
     "lifecycle_status": _lifecycle_status,
     "lineage_record_variant": _lineage_record_variant,
@@ -355,8 +437,40 @@ _TOOL_SCHEMAS = [
         },
     },
     {
+        "name": "lifecycle_register_agent",
+        "description": (
+            "Register an agent on this server's in-process registry so "
+            "lifecycle_authorize can allow it. Unknown agents are denied by "
+            "default. Hosts may also preload a JSON roster via MONITOR_REGISTRY "
+            "or construct GovernanceLifecycle with their own AgentRegistry. "
+            "This does not enable allow_unregistered_agents."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "agent": {"type": "string"},
+                "trust": {
+                    "type": "string",
+                    "description": "Trust tier (default medium)",
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Registry status (default active)",
+                },
+                "display": {"type": "string"},
+            },
+            "required": ["agent"],
+        },
+    },
+    {
         "name": "lifecycle_authorize",
-        "description": "Run full NIST AI RMF governance check (kill switch + identity + circuit breaker + cost)",
+        "description": (
+            "Run full NIST AI RMF governance check (kill switch + identity + "
+            "circuit breaker + cost). Fail-closed: unknown agents are denied "
+            "(agent:unknown). Register agents with lifecycle_register_agent "
+            "or MONITOR_REGISTRY JSON. Suspended/retired stay denied. "
+            "allow_unregistered_agents is not enabled on this path."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {

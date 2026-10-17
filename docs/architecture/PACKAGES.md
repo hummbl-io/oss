@@ -34,7 +34,7 @@ Ownership last verified in fleet audits 2026-08-30 / 2026-08-31.
 Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Matching version strings do not certify identical source bytes.
 | Package | Tree | PyPI | Notes |
 |---------|------|------|-------|
-| `hummbl-governance` | 1.5.1 | 1.5.1 | Published 1.5.1 corresponds to [release commit a8ad4c31](https://github.com/hummbl-io/oss/commit/a8ad4c3150a8357df28f488c51cdda6c5215b8f6). Current tree includes post-release changes; future publication follows `docs/operations/RELEASE.md`. |
+| `hummbl-governance` | 1.5.1 | 1.5.1 | Published 1.5.1 corresponds to [release commit a8ad4c31](https://github.com/hummbl-io/oss/commit/a8ad4c3150a8357df28f488c51cdda6c5215b8f6). Current tree includes the proposed 1.6.0 fail-closed `GovernanceLifecycle.authorize` change; not tagged or published. Future publication follows `docs/operations/RELEASE.md`. |
 | `base120` | 3.1.0 | 3.1.0 | 120 reasoning operators. `3.1.0` adds the glyph image codec (`base120.glyph`, `base120 glyph`). NOTICE-aligned wheel (issue #141). `3.0.0` is not yanked. `3.0.1` was tagged but not published. `3.0.3` renames VERUM→Krineia in docstrings/docs; no behavior change. |
 | `hummbl-bif` | 1.0.1 | 1.0.1 | Batch Ingestion Framework. |
 | `hummbl-tuples` | 0.2.2 | 0.2.2 | Typed tuples. Empty `project_urls` on live metadata as of 2026-08-31. `0.2.2` renames VERUM→Krineia in README/spec; includes the 0.2.1 wheel-contents fix. |
