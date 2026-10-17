@@ -101,6 +101,9 @@ def write_lock(pkg_dir: Path) -> Path:
         cmd = [
             uv, "pip", "compile", str(req_in),
             "--generate-hashes",
+            # Resolve wheels only: never execute a proposed release's build
+            # backend inside a privileged CI job.
+            "--no-build",
             "--python-version", PYTHON_VERSION,
             "--python-platform", PYTHON_PLATFORM,
             "--no-header",

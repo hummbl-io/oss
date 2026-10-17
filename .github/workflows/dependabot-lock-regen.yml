@@ -28,7 +28,7 @@ jobs:
     name: Regenerate dependency locks
     if: >
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/regen-locks') &&
+      startsWith(github.event.comment.body, '/regen-locks') &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -74,7 +74,9 @@ jobs:
         if: steps.meta.outputs.head_ref != ''
         with:
           ref: ${{ steps.meta.outputs.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Do not persist the write-capable token in .git/config while a
+          # proposed release's resolver runs; the push step injects it inline.
+          persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         if: steps.meta.outputs.head_ref != ''
@@ -120,7 +122,7 @@ jobs:
 
       - name: Install uv
         if: steps.pkgs.outputs.has_pkgs == 'true'
-        run: pip install uv
+        run: pip install "uv>=0.9.0,<1"
 
       - name: Regenerate locks
         id: regen
@@ -141,6 +143,10 @@ jobs:
       - name: Commit and push
         id: push
         if: success() && steps.pkgs.outputs.has_pkgs == 'true'
+        env:
+          GH_PUSH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ steps.meta.outputs.head_ref }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -151,7 +157,9 @@ jobs:
             echo "pushed=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           git commit -m "chore(deps): regenerate dependency locks for dependabot inputs"
-          git push origin "HEAD:refs/heads/${{ steps.meta.outputs.head_ref }}"
+          # Token enters only this command's environment - never persisted in
+          # .git/config during the resolver steps above.
+          git push "https://x-access-token:${GH_PUSH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${HEAD_REF}"
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: Comment result
@@ -171,7 +179,13 @@ jobs:
           if regen_outcome == "failure":
               body = f"Lock regeneration failed - see {run_url} for logs."
           elif pushed == "true":
-              body = "Lock regeneration complete - pushed regenerated lockfile(s) to this branch; CI will re-run."
+              body = (
+                  "Lock regeneration complete - pushed regenerated lockfile(s) to this branch. "
+                  "NOTE: pushes made with GITHUB_TOKEN do not start new workflow runs, so "
+                  "required checks (build-lock-check, package-parity, ci-ok) will NOT report on "
+                  "the new head automatically. To retrigger CI: close and reopen this PR, or "
+                  "push any commit. A dedicated bot token is the durable fix."
+              )
           else:
               body = "Lock regeneration complete - lockfiles already up to date, no push needed."
           req = urllib.request.Request(
