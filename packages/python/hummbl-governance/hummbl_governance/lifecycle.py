@@ -42,7 +42,8 @@ Usage::
         health_collector=hc,
     )
 
-    # Check if an agent action is permitted
+    # Check if an agent action is permitted (unknown agents denied
+    # when a registry is wired; opt in with allow_unregistered_agents=True)
     decision = lifecycle.authorize("worker-1", "database", "write")
 
     # Get a full governance status snapshot
@@ -132,6 +133,12 @@ class GovernanceLifecycle:
 
     All parameters are optional. Provide only the modules you have wired up.
     Missing modules are gracefully skipped in authorization checks and status.
+
+    When a registry is wired, ``authorize()`` fails closed for unregistered
+    agents (reason ``agent:unknown``). Pass ``allow_unregistered_agents=True``
+    to restore the 1.5.1 pass-through for unknown identities. Suspended and
+    retired agents stay denied either way. The MCP ``lifecycle_authorize``
+    path does not enable that opt-in; hosts register agents instead.
     """
 
     def __init__(
@@ -143,6 +150,8 @@ class GovernanceLifecycle:
         audit_log: AuditLog | None = None,
         registry: AgentRegistry | None = None,
         health_collector: HealthCollector | None = None,
+        *,
+        allow_unregistered_agents: bool = False,
     ) -> None:
         self._ks = kill_switch
         self._cb = circuit_breaker
@@ -151,6 +160,7 @@ class GovernanceLifecycle:
         self._al = audit_log
         self._reg = registry
         self._hc = health_collector
+        self._allow_unregistered_agents = allow_unregistered_agents
 
     def _check_kill_switch(self, action, checks):
         """Check kill switch mode. Returns denial or None."""
@@ -170,16 +180,25 @@ class GovernanceLifecycle:
             return AuthorizationDecision(False, "kill_switch:HALT_NONCRITICAL", checks)
         return None
 
-    def _check_agent_identity(self, agent, checks):
-        """Check agent identity. Returns denial or None."""
+    def _check_agent_identity(self, agent, checks, allow_unregistered_agents):
+        """Check agent identity. Returns denial or None.
+
+        Fail-closed when a registry is wired: unknown/unregistered agents
+        are denied unless ``allow_unregistered_agents`` is true.
+        Suspended and retired agents are always denied.
+        """
         if self._reg is None:
             return None
         status = self._reg.get_status(agent)
         trust = self._reg.get_trust_tier(agent)
+        registered = status != "unknown"
         checks["agent_status"] = status
         checks["agent_trust"] = trust
+        checks["agent_registered"] = registered
         if status in ("suspended", "retired"):
             return AuthorizationDecision(False, f"agent:{status}", checks)
+        if not registered and not allow_unregistered_agents:
+            return AuthorizationDecision(False, "agent:unknown", checks)
         return None
 
     def _check_circuit_breaker(self, checks):
@@ -212,6 +231,7 @@ class GovernanceLifecycle:
         cost: float = 0.0,
         provider: str = "",
         model: str = "",
+        allow_unregistered_agents: bool | None = None,
     ) -> AuthorizationDecision:
         """Run the full governance check sequence for an agent action.
 
@@ -221,6 +241,15 @@ class GovernanceLifecycle:
         3. **Manage**: Circuit breaker (is the target service healthy?)
         4. **Measure**: Cost governor (is there budget remaining?)
 
+        When a registry is wired, step 2 fails closed: unknown agents are
+        denied with reason ``agent:unknown``. Set
+        ``allow_unregistered_agents=True`` (constructor or this call) to
+        opt into the 1.5.1 unknown-agent pass-through. Suspended and
+        retired agents remain denied under that opt-in. Decision ``checks``
+        include ``agent_status``, ``agent_trust``, and ``agent_registered``.
+
+        No registry means the identity step is skipped (nothing is wired).
+
         Args:
             agent: The agent requesting authorization.
             target: The resource or service being accessed.
@@ -228,15 +257,22 @@ class GovernanceLifecycle:
             cost: Estimated cost of the action (for budget check).
             provider: API provider name (for cost tracking).
             model: Model name (for cost tracking).
+            allow_unregistered_agents: Override the constructor policy for
+                this call. ``None`` uses the instance default (deny).
 
         Returns:
             AuthorizationDecision with allowed/denied and reason.
         """
         checks: dict[str, Any] = {}
+        allow_unknown = (
+            self._allow_unregistered_agents
+            if allow_unregistered_agents is None
+            else allow_unregistered_agents
+        )
 
         for check_fn in [
             lambda: self._check_kill_switch(action, checks),
-            lambda: self._check_agent_identity(agent, checks),
+            lambda: self._check_agent_identity(agent, checks, allow_unknown),
             lambda: self._check_circuit_breaker(checks),
             lambda: self._check_cost_governor(cost, checks),
         ]:
