@@ -1,0 +1,16 @@
+name: Documentation problem
+description: Stale, wrong, or missing docs (README, SECURITY, package docs)
+labels: ["documentation", "triage"]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: File or page
+      description: Path or URL
+    validations: {required: true}
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing
+      description: Quote the text and say what it should say. Link the source that shows the correct value.
+    validations: {required: true}
