@@ -94,6 +94,13 @@ Do not document `pip install arbiter`, `agent-governance`, or
 on PyPI (`#79`). Other live wheels from this tree (`hummbl-bus`,
 `hummbl-cognition`, and the rest of the Live column) may be installed by
 name; they are not the two names used on the public landing page.
+## Research data
+
+[HUMMBL Bibliography — public edition](https://github.com/hummbl-io/hummbl-bibliography-public)
+is a standalone citation-metadata corpus distributed as sharded BibTeX with an
+offline integrity verifier. See its README and preview release for contents,
+licensing scope, and metadata-quality limits.
+
 ## Why a monorepo
 HUMMBL's "small libraries over platforms" mission produced a large private
 fleet. Link maintenance, cross-package refactors, and CI hygiene did not
