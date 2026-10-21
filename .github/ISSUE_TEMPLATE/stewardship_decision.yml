@@ -1,0 +1,43 @@
+name: Maintainer decision needed
+description: Maintainers only. Track an open decision with public-safe wording.
+labels: ["decision", "maintainers"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Maintainers and agents acting for them. State questions and options, not conclusions. Never include money details, credentials, client information, or unfixed vulnerability detail. Use a private repo for those.
+  - type: textarea
+    id: question
+    attributes:
+      label: Decision needed
+      description: One question per bullet, each answerable yes/no or by choosing an option.
+    validations: {required: true}
+  - type: textarea
+    id: context
+    attributes:
+      label: Evidence
+      description: Link PRs, issues, and files (with verification date).
+    validations: {required: true}
+  - type: input
+    id: owner
+    attributes:
+      label: Decider
+      description: Role, not personal contact details (for example "repo owner")
+    validations: {required: true}
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Blocks
+      options: [Nothing, A merge, A release, A security fix]
+    validations: {required: true}
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Public-safety check
+      options:
+        - label: No secrets, pricing, billing, client, or personal data.
+          required: true
+        - label: No unfixed vulnerability detail.
+          required: true
+        - label: Nothing here has been changed in the repo yet (or says what changed).
+          required: true
