@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose a new capability or change
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: This issue is public. Keep pricing, client, and unannounced business details out.
+  - type: textarea
+    id: problem
+    attributes: {label: Problem to solve}
+    validations: {required: true}
+  - type: textarea
+    id: proposal
+    attributes: {label: Proposed change}
+    validations: {required: true}
+  - type: textarea
+    id: alternatives
+    attributes: {label: Alternatives considered}
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Could this break existing users?
+      options: ["No", "Possibly", "Yes", "Unsure"]
+    validations: {required: true}
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Public-safety check
+      options:
+        - label: No secrets, personal data, pricing, or client information included.
+          required: true
