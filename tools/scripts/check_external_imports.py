@@ -15,8 +15,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -30,7 +31,7 @@ def _compute_hashes(content: bytes) -> tuple[str, str]:
 
 
 def _simple_validate(instance: Any, schema: dict[str, Any], path: str = "") -> list[str]:
-    """Minimal schema validator for external-import records using stdlib."""
+    """Validate the schema keywords used by external-import records using stdlib."""
     errors: list[str] = []
     if "type" in schema:
         expected_type = schema["type"]
@@ -50,6 +51,19 @@ def _simple_validate(instance: Any, schema: dict[str, Any], path: str = "") -> l
 
     if "enum" in schema and instance not in schema["enum"]:
         errors.append(f"{path}: {instance!r} not in enum {schema['enum']!r}")
+
+    if isinstance(instance, str):
+        if "minLength" in schema and len(instance) < schema["minLength"]:
+            errors.append(f"{path}: length {len(instance)} is below minLength {schema['minLength']}")
+        if "pattern" in schema and re.search(schema["pattern"], instance) is None:
+            errors.append(f"{path}: {instance!r} does not match pattern {schema['pattern']!r}")
+
+    if isinstance(instance, list) and "minItems" in schema and len(instance) < schema["minItems"]:
+        errors.append(f"{path}: item count {len(instance)} is below minItems {schema['minItems']}")
+
+    if isinstance(instance, (int, float)) and not isinstance(instance, bool):
+        if "minimum" in schema and instance < schema["minimum"]:
+            errors.append(f"{path}: {instance} is below minimum {schema['minimum']}")
 
     if isinstance(instance, dict):
         if schema.get("additionalProperties") is False:
@@ -74,9 +88,28 @@ def _simple_validate(instance: Any, schema: dict[str, Any], path: str = "") -> l
     return errors
 
 
+def _repository_path(root: Path, value: str) -> Path:
+    """Resolve a repository-relative path without permitting an outside target."""
+    relative = Path(value)
+    windows = PureWindowsPath(value)
+    # Reject Windows drive-relative and rooted paths on every host, including POSIX CI.
+    if relative.is_absolute() or windows.drive or windows.root:
+        raise ValueError("must be repository-relative")
+    if ".." in relative.parts or ".." in windows.parts:
+        raise ValueError("parent traversal is not allowed")
+    resolved = (root / relative).resolve()
+    if not resolved.is_relative_to(root):
+        raise ValueError("resolves outside repository")
+    return resolved
+
+
 def check_external_imports(root: Path) -> tuple[int, list[str]]:
     """Scan and verify all external import records under root."""
-    schema_path = root / "schemas" / "public" / "external-import-record-v1.schema.json"
+    root = root.resolve()
+    try:
+        schema_path = _repository_path(root, "schemas/public/external-import-record-v1.schema.json")
+    except (OSError, RuntimeError, ValueError) as exc:
+        return 1, [f"unsafe schema path: {exc}"]
     if not schema_path.exists():
         return 1, [f"Schema not found: {schema_path}"]
 
@@ -95,6 +128,11 @@ def check_external_imports(root: Path) -> tuple[int, list[str]]:
     for rf in record_files:
         rel_rf = rf.relative_to(root)
         print(f"Checking {rel_rf}...")
+        try:
+            rf = _repository_path(root, str(rel_rf))
+        except (OSError, RuntimeError, ValueError) as exc:
+            errors.append(f"{rel_rf}: unsafe record path: {exc}")
+            continue
         try:
             record = json.loads(rf.read_text(encoding="utf-8"))
         except Exception as exc:
@@ -117,12 +155,16 @@ def check_external_imports(root: Path) -> tuple[int, list[str]]:
 
         for item in inventory:
             dest_rel = Path(item["destination_path"])
-            dest_file = root / dest_rel
+            try:
+                dest_file = _repository_path(root, item["destination_path"])
+            except (OSError, RuntimeError, ValueError) as exc:
+                errors.append(f"{rel_rf}: unsafe destination path {str(dest_rel)!r}: {exc}")
+                continue
             parent_dir = dest_file.parent
             fixture_dirs.add(parent_dir)
             recorded_filenames.setdefault(parent_dir, set()).add(dest_file.name)
 
-            if not dest_file.exists():
+            if not dest_file.is_file():
                 errors.append(f"{rel_rf}: destination file does not exist: {dest_rel}")
                 continue
 
@@ -157,8 +199,12 @@ def check_external_imports(root: Path) -> tuple[int, list[str]]:
         # Check rights and attributions
         rights = record["rights"]
         for lic_file_rel in rights.get("license_files", []):
-            lic_path = root / lic_file_rel
-            if not lic_path.exists():
+            try:
+                lic_path = _repository_path(root, lic_file_rel)
+            except (OSError, RuntimeError, ValueError) as exc:
+                errors.append(f"{rel_rf}: unsafe license path {lic_file_rel!r}: {exc}")
+                continue
+            if not lic_path.is_file():
                 errors.append(f"{rel_rf}: declared license file does not exist: {lic_file_rel}")
             else:
                 lic_text = lic_path.read_text(encoding="utf-8")
