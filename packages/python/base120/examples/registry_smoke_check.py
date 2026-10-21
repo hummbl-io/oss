@@ -19,7 +19,7 @@ FAMILIES = ["P", "IN", "CO", "DE", "RE", "SY"]
 def main() -> int:
     engine = Engine()
     ops = engine.list()
-    counts = Counter(op.code.rstrip("0123456789") for op in ops)
+    counts = Counter(op.family for op in ops)
     for fam in FAMILIES:
         print(f"{fam}: {counts.get(fam, 0)}")
     print(f"TOTAL: {len(ops)}")
