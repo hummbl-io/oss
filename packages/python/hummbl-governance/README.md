@@ -73,6 +73,9 @@ before selecting a governance layer.
 
 **Sponsorship boundary.** The canonical draft sponsorship policy (in the HUMMBL OSS monorepo) does not sell support, priority, favorable findings, or roadmap control. Sponsorship is not active until its documented launch gates pass.
 
+**Paid advisory (separate from this package).** Teams deploying AI agents can book the [Bridge Method Diagnostic](https://hummbl.io/services#bridge-diagnostic): a paid 30-minute, 1-on-1 session with Reuben Bowlby ($400) on one decision, workflow, or agent deployment, ending with a concrete next-step list.
+This is a separate HUMMBL service, not package support. It buys no issue priority, roadmap control, or favorable findings, consistent with the sponsorship boundary above.
+
 **OWASP Top 10 for Agentic Applications.** The README includes an engineering mapping to the [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/). It is not a third-party certification or attestation. See the [mapping below](#owasp-top-10-for-agentic-applications-2026-engineering-mapping).
 
 ## Quick Start
@@ -289,7 +292,7 @@ The table below maps hummbl-governance primitives to the [OWASP Top 10 for Agent
 | **ASI07** Insecure Inter-Agent Comms | [`LamportClock`](hummbl_governance/lamport_clock.py), [`ContractNetManager`](hummbl_governance/contract_net.py) | [20](tests/test_lamport_clock.py) + [19](tests/test_contract_net.py) | Hardened logical clocks for causal ordering. Contract Net protocol for structured multi-agent task allocation with bid verification. |
 | **ASI08** Cascading Failures | [`CircuitBreaker`](hummbl_governance/circuit_breaker.py), [`HealthProbe`](hummbl_governance/health_probe.py) | [17](tests/test_circuit_breaker.py) + [30](tests/test_health_probe.py) | CLOSED/HALF_OPEN/OPEN state machine isolates failing components. Health probes detect degradation before cascade. |
 | **ASI09** Human-Agent Trust Exploitation | [`ReasoningEngine`](hummbl_governance/reasoning.py), [`ComplianceMapper`](hummbl_governance/compliance_mapper.py) | [7](tests/test_explain.py) + [112](tests/test_compliance_mapper.py) | Structured decision traces explain *why* a governance decision was made. Compliance mapping to NIST/ISO provides external validation anchor. |
-| **ASI10** Rogue Agents | [`BehaviorMonitor`](hummbl_governance/reward_monitor.py), [`GovernanceLifecycle`](hummbl_governance/lifecycle.py) | [20](tests/test_reward_monitor.py) + [17](tests/test_lifecycle.py) | Jensen-Shannon divergence detects behavioral drift from baseline. Lifecycle FSM enforces PROVISIONED → ACTIVE → SUSPENDED → DECOMMISSIONED transitions. |
+| **ASI10** Rogue Agents | [`BehaviorMonitor`](hummbl_governance/reward_monitor.py), [`GovernanceLifecycle`](hummbl_governance/lifecycle.py) | [20](tests/test_reward_monitor.py) + [26](tests/test_lifecycle.py) | Jensen-Shannon divergence detects behavioral drift from baseline. When a registry is wired, `authorize()` fails closed for unknown agents (`agent:unknown`); suspended/retired stay denied. |
 
 **Current posture:** 51 implemented primitives, 7 MCP server entry points, and zero third-party Core runtime dependencies. Public oss CI on the full 3.11-3.14 matrix last reported 3,479 passed and 16 skipped ([run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121), commit 77854dd), with coverage collected (no percentage published). That figure is repository CI evidence, not a production-use receipt. See [docs/public-claims.md](docs/public-claims.md).
 
@@ -489,6 +492,7 @@ This package is part of the [HUMMBL](https://hummbl.io) cognitive AI architectur
 - [hummbl.io](https://hummbl.io)
 - [Linktree](https://linktr.ee/hummbl)
 - [HUMMBL Slop Tracker (Substack)](https://hummbl.substack.com)
+- [Bridge Method Diagnostic — paid 1-on-1 advisory, $400](https://hummbl.io/services#bridge-diagnostic)
 
 ## License
 
