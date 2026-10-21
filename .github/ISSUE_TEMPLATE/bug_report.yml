@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in a package behaves incorrectly
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is public. Do not paste secrets, tokens, customer data, or private logs. For vulnerabilities use the Security link instead.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options: [hummbl-governance, base120, hummbl-bus, hummbl-cognition, hummbl-tuples, hummbl-bif, governed-compression, hummbl, hummbl-kernel, other in-tree package, CI / tooling, docs]
+    validations: {required: true}
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: PyPI version or git SHA
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes: {label: Expected behavior}
+    validations: {required: true}
+  - type: textarea
+    id: actual
+    attributes: {label: Actual behavior}
+    validations: {required: true}
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      render: shell
+    validations: {required: true}
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Public-safety check
+      options:
+        - label: This report contains no secrets, credentials, personal data, or unfixed security detail.
+          required: true

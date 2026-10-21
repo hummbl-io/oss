@@ -223,6 +223,9 @@ def write_lock(pkg_dir: Path) -> Path:
     cmd = [uv, "pip", "compile", "pyproject.toml"]
     if hashed:
         cmd.append("--generate-hashes")
+    # Resolve wheels only: never execute a proposed release's build backend
+    # inside a privileged CI job.
+    cmd.append("--no-build")
     cmd += ["--output-file", LOCK_NAME]
     result = subprocess.run(cmd, cwd=pkg_dir, capture_output=True, text=True, check=False)
     if result.returncode != 0:
