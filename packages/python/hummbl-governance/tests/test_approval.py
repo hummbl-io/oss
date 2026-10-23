@@ -415,6 +415,17 @@ class TestApprovalNotifications:
         assert mock_send.called
         assert "webhook" in req.notification_channels
 
+    def test_slack_webhook_url_is_deprecated(self):
+        with pytest.warns(DeprecationWarning, match="slack_webhook_url is deprecated"):
+            ApprovalManager(slack_webhook_url="https://hooks.slack.com/T/B/X")
+
+    def test_no_deprecation_warning_without_slack(self):
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            ApprovalManager(webhook_url="https://example.invalid/hook")
+
     @patch("hummbl_governance.approval.ApprovalManager._send_slack")
     def test_slack_notification(self, mock_send):
         mock_send.return_value = True
