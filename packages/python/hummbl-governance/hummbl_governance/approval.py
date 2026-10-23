@@ -65,6 +65,7 @@ import ssl
 import threading
 import time
 import uuid
+import warnings
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -123,7 +124,7 @@ class ApprovalManager:
     Args:
         state_dir: Directory for persistent state. None disables persistence.
         webhook_url: Generic webhook URL for notifications (POST JSON).
-        slack_webhook_url: Slack incoming webhook URL (optional, dedicated).
+        slack_webhook_url: Deprecated. Slack incoming webhook URL (optional, dedicated).
         email_config: Dict with keys ``host``, ``port``, ``from``, ``to``,
             and optional ``username``, ``password``, ``use_tls`` for SMTP.
         audit_log: Optional AuditLog instance. If provided, every state change
@@ -173,6 +174,13 @@ class ApprovalManager:
         self._state_dir = state_dir
         self._webhook_url = webhook_url
         self._slack_webhook_url = slack_webhook_url
+        if slack_webhook_url:
+            warnings.warn(
+                "slack_webhook_url is deprecated and will be removed in a future release; "
+                "use webhook_url with a generic HTTP endpoint.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self._email_config = email_config
         self._audit_log = audit_log
         self._default_timeout = default_timeout
