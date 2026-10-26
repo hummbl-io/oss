@@ -442,3 +442,45 @@ class TestKillSwitchReasonEnum:
         assert event.affected_tasks == 5
         assert event.failure_class is None
         assert ks.mode == KillSwitchMode.HALT_ALL
+
+
+class TestGetKillSwitchCore:
+    """The process-wide accessor imported by the kill-switch MCP server."""
+
+    @pytest.fixture(autouse=True)
+    def _reset_core(self, tmp_path, monkeypatch):
+        import hummbl_governance.kill_switch as ks_module
+
+        monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
+        monkeypatch.setattr(ks_module, "_core_instance", None)
+        yield
+        monkeypatch.setattr(ks_module, "_core_instance", None)
+
+    def test_returns_kill_switch_instance(self):
+        from hummbl_governance.kill_switch import get_kill_switch_core
+
+        ks = get_kill_switch_core()
+        assert isinstance(ks, KillSwitch)
+        assert ks.mode == KillSwitchMode.DISENGAGED
+        assert ks.engaged is False
+
+    def test_singleton_identity_across_calls(self):
+        from hummbl_governance.kill_switch import get_kill_switch_core
+
+        assert get_kill_switch_core() is get_kill_switch_core()
+
+    def test_engagement_visible_through_shared_instance(self):
+        from hummbl_governance.kill_switch import get_kill_switch_core
+
+        ks = get_kill_switch_core()
+        ks.engage(
+            KillSwitchMode.HALT_ALL,
+            reason="test engagement",
+            triggered_by="test",
+        )
+        # HALT_ALL blocks non-critical tasks and exempts critical ones.
+        assert get_kill_switch_core().check_task_allowed("briefing_generation")["allowed"] is False
+        assert get_kill_switch_core().check_task_allowed("safety_monitoring")["allowed"] is True
+        status = get_kill_switch_core().get_status()
+        assert status["mode"] == "HALT_ALL"
+        assert status["engaged"] is True
