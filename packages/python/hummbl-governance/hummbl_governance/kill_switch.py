@@ -47,6 +47,7 @@ import hmac
 import json
 import logging
 import os
+import tempfile
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -498,3 +499,40 @@ class KillSwitch:
         if limit:
             events = events[-limit:]
         return events
+
+
+# ---------------------------------------------------------------------------
+# Process-wide shared instance
+# ---------------------------------------------------------------------------
+
+_core_instance: KillSwitch | None = None
+_core_lock = threading.Lock()
+
+
+def get_kill_switch_core() -> KillSwitch:
+    """Return the process-wide shared KillSwitch instance.
+
+    The instance is created lazily on first call from persisted state,
+    mirroring the governance MCP server's wiring
+    (``hummbl_governance/mcp_server.py``): state is loaded with
+    :meth:`KillSwitch.load_from_file` from the directory named by the
+    ``GOVERNANCE_STATE_DIR`` environment variable, defaulting to
+    ``<tempdir>/governance``. Every caller in the process shares the one
+    instance, so an engagement made through any surface is visible to
+    all others.
+
+    Raises:
+        KillSwitchTamperError: If persisted state exists but fails its
+            mandatory HMAC verification. The accessor fails closed
+            rather than fabricate a disengaged state.
+    """
+    global _core_instance
+    if _core_instance is None:
+        with _core_lock:
+            if _core_instance is None:
+                state_dir = Path(
+                    os.environ.get("GOVERNANCE_STATE_DIR")
+                    or Path(tempfile.gettempdir()) / "governance"
+                )
+                _core_instance = KillSwitch.load_from_file(state_dir)
+    return _core_instance

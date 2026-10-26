@@ -52,7 +52,12 @@ from hummbl_governance.kernel import (
     Stage,
 )
 
-from hummbl_governance.kill_switch import KillSwitch, KillSwitchMode, KillSwitchReason
+from hummbl_governance.kill_switch import (
+    KillSwitch,
+    KillSwitchMode,
+    KillSwitchReason,
+    get_kill_switch_core,
+)
 from hummbl_governance.circuit_breaker import CircuitBreaker, CircuitBreakerState
 from hummbl_governance.cost_governor import CostGovernor
 from hummbl_governance.approval import (
@@ -344,6 +349,7 @@ __all__ = [
     "DoctrineEngine",
     "Stage",
     "KillSwitch",
+    "get_kill_switch_core",
     "KillSwitchMode",
     "KillSwitchReason",
     "CircuitBreaker",
