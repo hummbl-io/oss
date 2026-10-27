@@ -21,8 +21,23 @@ try:
     from hummbl_governance.kill_switch import (
         get_kill_switch_core,
     )
-except ImportError:
-    pass
+except ImportError:  # hummbl_governance is not installed in this environment
+    get_kill_switch_core = None  # type: ignore[assignment]
+
+
+def _core():
+    """Return the shared kill switch core, or fail loudly.
+
+    A safety surface must never fabricate a state: when the governance
+    package is unavailable the tool call errors explicitly (surfaced to
+    the caller as an MCP error result) instead of reporting a default
+    DISENGAGED state that nothing has verified.
+    """
+    if get_kill_switch_core is None:
+        raise RuntimeError(
+            "kill switch core unavailable: hummbl_governance is not installed"
+        )
+    return get_kill_switch_core()
 
 logger = logging.getLogger(__name__)
 
@@ -65,19 +80,20 @@ MCP_TOOLS: list[dict[str, Any]] = [
 
 def handle_ks_status() -> dict[str, Any]:
     """Get current kill switch state."""
-    ks = get_kill_switch_core()
+    ks = _core()
     status = ks.get_status()
+    state_dir = getattr(ks, "_state_dir", None)
     return {
         "mode": status.get("mode", "UNKNOWN"),
         "engaged": status.get("engaged", False),
-        "critical_tasks": sorted(ks.CRITICAL_TASKS) if hasattr(ks, "CRITICAL_TASKS") else [],
-        "state_file": str(ks._state_file) if hasattr(ks, "_state_file") else None,
+        "critical_tasks": sorted(ks.critical_tasks),
+        "state_dir": str(state_dir) if state_dir is not None else None,
     }
 
 
 def handle_ks_check_task(task_name: str) -> dict[str, Any]:
     """Check if a task is allowed."""
-    ks = get_kill_switch_core()
+    ks = _core()
     result = ks.check_task_allowed(task_name)
     return {
         "task": task_name,
@@ -89,14 +105,14 @@ def handle_ks_check_task(task_name: str) -> dict[str, Any]:
 
 def handle_ks_history(limit: int = 10) -> dict[str, Any]:
     """Get recent state transitions."""
-    ks = get_kill_switch_core()
+    ks = _core()
     events = []
-    if hasattr(ks, "_event_history"):
-        for event in ks._event_history[-limit:]:
-            events.append({
-                "mode": str(event.mode) if hasattr(event, "mode") else str(event),
-                "timestamp": str(event.timestamp) if hasattr(event, "timestamp") else None,
-            })
+    for event in ks.get_history(limit):
+        mode = getattr(event, "mode", None)
+        events.append({
+            "mode": mode.name if hasattr(mode, "name") else str(mode),
+            "timestamp": str(event.timestamp) if hasattr(event, "timestamp") else None,
+        })
     return {"events": events, "count": len(events)}
 
 
