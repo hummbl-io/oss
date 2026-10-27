@@ -44,6 +44,8 @@ import mcp_server  # noqa: E402
 @pytest.fixture(autouse=True)
 def _fresh_instances(tmp_path, monkeypatch):
     """Each test gets a clean state dir and fresh singleton instances."""
+    monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
+    monkeypatch.delenv("DCT_SECRET", raising=False)
     monkeypatch.setitem(mcp_server._instances, "ks", None)
     mcp_server._instances.clear()
     monkeypatch.setattr(mcp_server, "STATE_DIR", str(tmp_path / "state"))
