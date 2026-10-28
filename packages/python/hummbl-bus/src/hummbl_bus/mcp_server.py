@@ -602,13 +602,16 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
             return {"error": "missing required argument: type"}
         if not message:
             return {"error": "missing required argument: message"}
-        if str(mtype).strip().upper() in {"DECISION", "DIRECTIVE"}:
+        from .authority import PRIVILEGED_TYPES
+
+        PRIVILEGED_OR_ELEVATED = PRIVILEGED_TYPES | {"VETO", "COMMAND", "APPROVE", "REJECT"}
+        if str(mtype).strip().upper() in PRIVILEGED_OR_ELEVATED:
             return {
                 "posted": False,
                 "type": mtype,
                 "error": "MCP bus_post cannot issue privileged message types",
             }
-        from_agent = arguments.get("from_agent", "mcp-client")
+        from_agent = os.environ.get("BUS_SENDER_ID", "").strip() or str(arguments.get("from_agent", "mcp-client")).strip() or "mcp-client"
         to_agent = arguments.get("to", "all")
 
         # Per bus-protocol.md §75, agent-originated posts must carry

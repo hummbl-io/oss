@@ -29,6 +29,7 @@ from hummbl_mcp.protocol import (
     serialize_response,
     success_response,
 )
+from hummbl_mcp.mcp_gateway import MCPCallRequest, MCPGateway
 from hummbl_mcp.receipts import ReceiptTimer
 from hummbl_mcp import gcp_tools, bridge_tools, billing_tools
 from hummbl_mcp.billing_middleware import BillingMiddleware, apply_billing_middleware
@@ -66,6 +67,7 @@ class HummblMCPServer:
         self._initialized = False
         self.cost_tracker = cost_tracker
         self.enable_billing = enable_billing
+        self.gateway = MCPGateway(bus_poster=lambda *a: None)
         
         # Add billing tools if enabled
         if enable_billing and cost_tracker is not None:
@@ -147,6 +149,20 @@ class HummblMCPServer:
         handler = self.handlers.get(name)
         if handler is None:
             raise JsonRpcError(TOOL_NOT_FOUND, f"tool not found: {name}")
+
+        decision = self.gateway.evaluate(
+            MCPCallRequest(
+                tool_name=name,
+                adapter=self.receipt_identity,
+                arguments=args,
+                delegation_token=str(args.get("_delegation_token", "")),
+            )
+        )
+        if not decision.allowed:
+            return {
+                "content": [{"type": "text", "text": json.dumps({"error": decision.summary(), "verdict": decision.verdict.value})}],
+                "isError": True,
+            }
 
         with ReceiptTimer(name, args, identity=self.receipt_identity) as timer:
             try:
