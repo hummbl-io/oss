@@ -153,6 +153,19 @@ def test_unverifiable_delegation_token_is_unsigned(monkeypatch):
         assert "MISSING_DELEGATION" in payload["error"]
 
 
+def test_vault_git_stage_uses_literal_pathspecs(tmp_path: Path):
+    (tmp_path / "file[12].txt").write_text("x", encoding="utf-8")
+    with patch("hummbl_mcp.mcp_git_vault.get_git_root", return_value=str(tmp_path)):
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value.returncode = 0
+            mock_run.return_value.stdout = ""
+            mock_run.return_value.stderr = ""
+            res = handle_git_stage({"paths": ["file[12].txt"]})
+    assert res["isError"] is False
+    cmd = mock_run.call_args[0][0]
+    assert "--literal-pathspecs" in cmd
+
+
 def test_gateway_denied_call_emits_receipt():
     server = _make_server(blocked_tools=["demo_write"])
     with patch("hummbl_mcp.receipts.post_receipt") as mock_post:

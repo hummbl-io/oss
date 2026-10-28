@@ -254,7 +254,7 @@ def handle_git_diff(arguments):
     staged = arguments.get("staged", False)
     paths = arguments.get("paths", [])
 
-    cmd = ["git", "diff"]
+    cmd = ["git", "--literal-pathspecs", "diff"]
     if staged:
         cmd.append("--staged")
 
@@ -294,7 +294,7 @@ def handle_git_stage(arguments):
         if resolve_inside(git_root, p) is None:
             return {"content": [{"type": "text", "text": f"Path '{p}' resolves outside the workspace."}], "isError": True}
 
-    cmd = ["git", "add", "--"] + list(paths)
+    cmd = ["git", "--literal-pathspecs", "add", "--"] + list(paths)
     res = subprocess.run(cmd, capture_output=True, text=True, cwd=git_root)
     if res.returncode != 0:
         return {"content": [{"type": "text", "text": f"Error running git add: {res.stderr.strip()}"}], "isError": True}
