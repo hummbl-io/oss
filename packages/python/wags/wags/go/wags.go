@@ -367,7 +367,10 @@ func verifyEntryOpt(entry *StreamEntry, secretKey string, allowLegacy bool) (boo
 	if entry.EntryHash != expectedHash {
 		return false, fmt.Sprintf("Hash mismatch: stored %s != computed %s", entry.EntryHash, expectedHash)
 	}
-	if secretKey != "" && entry.Signature != "" {
+	if secretKey != "" {
+		if entry.Signature == "" {
+			return false, "HMAC signature is required when a verification key is supplied"
+		}
 		mac := hmac.New(sha256.New, []byte(secretKey))
 		mac.Write([]byte(expectedHash))
 		expectedSig := hex.EncodeToString(mac.Sum(nil))
@@ -435,7 +438,8 @@ func (ws *WagsWorkspace) InitReview(targetPath, targetType, desc, initiator, cus
 		reviewID = fmt.Sprintf("rev-%s-%s", ts, sha[:8])
 	}
 	revDir := filepath.Join(ws.ReviewsDir, reviewID)
-	if err := os.MkdirAll(revDir, 0755); err != nil {
+	// Claim the ID atomically; an existing review must never be rebound.
+	if err := os.Mkdir(revDir, 0755); err != nil {
 		return nil, err
 	}
 
@@ -486,33 +490,68 @@ func (ws *WagsWorkspace) InitReview(targetPath, targetType, desc, initiator, cus
 	return manifest, nil
 }
 
-func (ws *WagsWorkspace) RegisterReviewer(reviewID, reviewerName, secretKey, role string) error {
-	revDir := filepath.Join(ws.ReviewsDir, reviewID)
-	if _, err := os.Stat(revDir); os.IsNotExist(err) {
-		return fmt.Errorf("review %s not found", reviewID)
+// lockReviewerRegistry shares its directory-lock protocol with Python. A crashed
+// writer leaves the lock in place; timeout fails closed instead of stealing it.
+func lockReviewerRegistry(revDir string) (func() error, error) {
+	lockDir := filepath.Join(revDir, ".reviewers.lock")
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		if err := os.Mkdir(lockDir, 0755); err == nil {
+			return func() error { return os.Remove(lockDir) }, nil
+		} else if !os.IsExist(err) {
+			return nil, err
+		}
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("reviewer registry is locked: %s", lockDir)
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
+}
+
+func (ws *WagsWorkspace) RegisterReviewer(reviewID, reviewerName, secretKey, role string) (err error) {
+	revDir := filepath.Join(ws.ReviewsDir, reviewID)
+	if _, err := os.Stat(revDir); err != nil {
+		return fmt.Errorf("review %s unavailable: %w", reviewID, err)
+	}
+	unlock, err := lockReviewerRegistry(revDir)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if unlockErr := unlock(); err == nil {
+			err = unlockErr
+		}
+	}()
 	regFile := filepath.Join(revDir, "reviewers.json")
 	reg := map[string]interface{}{}
 	if b, err := os.ReadFile(regFile); err == nil {
-		_ = json.Unmarshal(b, &reg)
+		if err := json.Unmarshal(b, &reg); err != nil {
+			return err
+		}
+		if reg == nil {
+			return fmt.Errorf("reviewer registry must be a JSON object")
+		}
+	} else if !os.IsNotExist(err) {
+		return err
 	}
 	reg[reviewerName] = map[string]interface{}{
 		"registered_at": time.Now().UTC().Format("2006-01-02T15:04:05.000000Z"),
 		"role":          role,
 		"has_hmac":      secretKey != "",
 	}
-	if b, err := json.MarshalIndent(reg, "", "  "); err == nil {
-		_ = atomicWriteFile(regFile, b)
+	b, err := json.MarshalIndent(reg, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := atomicWriteFile(regFile, b); err != nil {
+		return err
 	}
 	streamPath := filepath.Join(revDir, reviewerName+".jsonl")
-	if _, err := os.Stat(streamPath); os.IsNotExist(err) {
-		f, err := os.Create(streamPath)
-		if err != nil {
-			return err
-		}
-		f.Close()
+	f, err := os.OpenFile(streamPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return err
 	}
-	return nil
+	return f.Close()
 }
 
 func (ws *WagsWorkspace) SubmitEntry(reviewID, reviewerName, phase string, findings []Finding, verdict string, secretKey string) (*StreamEntry, error) {
@@ -605,7 +644,12 @@ func (ws *WagsWorkspace) SubmitEntryWithMetadata(reviewID, reviewerName, phase s
 		return nil, err
 	}
 
-	bytes, err := json.Marshal(entry)
+	// Persist the same numeric representation used by computeEntryHash. Marshaling
+	// the struct with encoding/json collapses integral floats (1.0 -> 1).
+	payload := entryPayload(entry)
+	payload["entry_hash"] = entry.EntryHash
+	payload["signature"] = entry.Signature
+	bytes, err := canonicalJSON(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -831,6 +875,10 @@ func (ws *WagsWorkspace) VerifyReview(reviewID string, keys map[string]string) (
 			if entry.Reviewer != reviewer {
 				valid = false
 				errorsList = append(errorsList, fmt.Sprintf("%s line %d: reviewer '%s' does not match stream", reviewer, idx+1, entry.Reviewer))
+			}
+			if entry.ReviewID != reviewID {
+				valid = false
+				errorsList = append(errorsList, fmt.Sprintf("%s line %d: review_id '%s' does not match review '%s'", reviewer, idx+1, entry.ReviewID, reviewID))
 			}
 			for _, m := range checkResolutionRefs(prior, entry.Metadata) {
 				valid = false

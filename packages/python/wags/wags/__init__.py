@@ -7,6 +7,7 @@ Stdlib-only: zero third-party runtime dependencies.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 import datetime
 import hashlib
@@ -15,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 PROTOCOL_VERSION = "0.2.0"
@@ -123,6 +125,29 @@ def _read_json(path: Path) -> Any:
             time.sleep(0.05)
 
 
+@contextmanager
+def _reviewer_registry_lock(review_dir: Path):
+    """Serialize registry updates across processes and both reference implementations.
+
+    A crashed writer leaves the lock in place; fail closed after five seconds
+    rather than guessing whether another writer is still active.
+    """
+    lock_dir = review_dir / ".reviewers.lock"
+    deadline = time.monotonic() + 5
+    while True:
+        try:
+            lock_dir.mkdir()
+            break
+        except FileExistsError:
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"Reviewer registry is locked: {lock_dir}")
+            time.sleep(0.01)
+    try:
+        yield
+    finally:
+        lock_dir.rmdir()
+
+
 def _compute_sha256(content_bytes: bytes) -> str:
     return hashlib.sha256(content_bytes).hexdigest()
 
@@ -215,7 +240,9 @@ class StreamEntry:
             expected_hash = self.entry_hash  # accepted: wags-go 0.1.0 legacy encoding (0.1.0 targets only)
         if self.entry_hash != expected_hash:
             return False, f"Hash mismatch: stored {self.entry_hash} != computed {expected_hash}"
-        if secret_key and self.signature:
+        if secret_key:
+            if not self.signature:
+                return False, "HMAC signature is required when a verification key is supplied"
             expected_sig = hmac.new(
                 secret_key.encode("utf-8"),
                 self.entry_hash.encode("utf-8"),
@@ -277,7 +304,8 @@ class WagsWorkspace:
             review_id = f"rev-{ts_compact}-{short_hash}"
 
         rev_dir = self.reviews_dir / review_id
-        rev_dir.mkdir(parents=True, exist_ok=True)
+        # Claim the ID atomically; an existing review must never be rebound.
+        rev_dir.mkdir()
 
         target_manifest = {
             "protocol_version": PROTOCOL_VERSION,
@@ -324,26 +352,23 @@ class WagsWorkspace:
         if not rev_dir.exists():
             raise ValueError(f"Review {review_id} not found")
 
-        reg_file = rev_dir / "reviewers.json"
-        data = {}
-        if reg_file.exists():
-            with open(reg_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
+        with _reviewer_registry_lock(rev_dir):
+            reg_file = rev_dir / "reviewers.json"
+            data = _read_json(reg_file) if reg_file.exists() else {}
 
-        data[reviewer_name] = {
-            "registered_at": _now_iso_utc(),
-            "role": role,
-            "has_hmac": bool(secret_key),
-        }
+            data[reviewer_name] = {
+                "registered_at": _now_iso_utc(),
+                "role": role,
+                "has_hmac": bool(secret_key),
+            }
 
-        _atomic_write_json(reg_file, data)
+            _atomic_write_json(reg_file, data)
 
-        # Ensure reviewer JSONL file exists
-        stream_path = rev_dir / f"{reviewer_name}.jsonl"
-        if not stream_path.exists():
+            # touch preserves existing stream contents.
+            stream_path = rev_dir / f"{reviewer_name}.jsonl"
             stream_path.touch()
 
-        return data[reviewer_name]
+            return data[reviewer_name]
 
     def _get_reviewer_last_entry(self, review_id: str, reviewer_name: str) -> Tuple[int, str]:
         stream_path = self.reviews_dir / review_id / f"{reviewer_name}.jsonl"
@@ -549,6 +574,9 @@ class WagsWorkspace:
                         if entry.reviewer != reviewer:
                             stream_valid = False
                             errors.append(f"Line {idx}: reviewer '{entry.reviewer}' does not match stream '{reviewer}'")
+                        if entry.review_id != review_id:
+                            stream_valid = False
+                            errors.append(f"Line {idx}: review_id '{entry.review_id}' does not match review '{review_id}'")
                         # Validate resolution refs (own stream, earlier entries only)
                         res, sup = self._resolution_refs(d)
                         md_d = d.get("metadata") if isinstance(d.get("metadata"), dict) else {}

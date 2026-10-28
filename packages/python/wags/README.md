@@ -16,8 +16,8 @@ or external platforms.
    and JSON Lines (JSONL). Reference implementations rely strictly on
    standard library utilities.
 3. **Single-Writer-Per-Stream** -- each reviewer appends solely to their
-   dedicated log (`<reviewer>.jsonl`). Eliminates concurrency locks and
-   merge conflicts.
+   dedicated log (`<reviewer>.jsonl`). Stream appends need no shared lock;
+   registration serializes updates to the shared reviewer registry.
 4. **Tamper-Evident Hash Chaining** -- every log entry references the
    SHA-256 hash of the preceding entry (`prev_hash`), ensuring
    chronological auditability.
@@ -61,6 +61,18 @@ ws.verify_review(review_id)
 result = ws.converge_review(review_id)
 print(result["overall_verdict"])
 ```
+
+Review IDs are immutable: initializing an existing ID fails without changing
+its target or approvals. Verification rejects entries copied from another
+review. Pass reviewer keys to `verify_review` (or Python `converge_review`)
+to authenticate signatures; without keys, verification checks public hashes
+and stream integrity only. A supplied key requires a valid, nonempty HMAC.
+
+Python and Go share a `.reviewers.lock` directory while registering reviewers.
+Registration waits up to five seconds, then fails if the lock remains. If a
+writer crashes, first confirm no registration process is running, then remove
+the empty lock directory before retrying; the registry is not overwritten on
+lock timeout or malformed JSON.
 
 ## Go Reference Implementation
 

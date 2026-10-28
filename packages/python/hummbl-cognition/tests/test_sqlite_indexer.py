@@ -1,8 +1,39 @@
 """Unit tests for Tier 1 SQLite WAL indexer (relational + FTS5 + recursive graph traversal)."""
 import tempfile
 from pathlib import Path
+import pytest
+from hummbl_cognition.ledger_writer import read_entries
 from hummbl_cognition.models import LedgerEntry, compute_content_hash
-from hummbl_cognition.sqlite_indexer import build_sqlite_index, search_entries, traverse_graph
+from hummbl_cognition.sqlite_indexer import build_sqlite_index, index_single_entry, search_entries, traverse_graph
+
+
+@pytest.mark.parametrize("entry_type", ["MILESTONE", "HULE"])
+@pytest.mark.parametrize("incremental", [False, True])
+def test_metadata_filters_preserve_stored_case(tmp_path, entry_type, incremental):
+    """SQLite exact filters match ledger reads, including historical types and tags."""
+    entry = LedgerEntry.create(
+        agent="reviewer", vendor="local", model="test", entry_type=entry_type,
+        scope="project", content="Recorded release milestone", tags=("ReleaseCandidate",),
+    )
+    ledger = tmp_path / "ledger.jsonl"
+    ledger.write_text(entry.to_jsonl() + "\n", encoding="utf-8")
+    database = tmp_path / "index.db"
+    if incremental:
+        index_single_entry(entry, db_path=database)
+    else:
+        assert build_sqlite_index(ledger_path=ledger, db_path=database) == 1
+
+    for filters in (
+        {"entry_type": entry_type},
+        {"tags": ["ReleaseCandidate"]},
+        {"entry_type": entry_type, "tags": ["ReleaseCandidate"], "scope": "project"},
+        {"entry_type": entry_type.lower()},
+        {"tags": ["releasecandidate"]},
+        {"scope": "PROJECT"},
+    ):
+        expected = [row.id for row in read_entries(ledger_path=ledger, **filters)]
+        found = [row["id"] for row in search_entries("", db_path=database, **filters)]
+        assert found == expected, filters
 
 def test_sqlite_indexer_lifecycle_and_traversal():
     """Verify build, FTS5 search, and recursive graph traversal in SQLite indexer."""

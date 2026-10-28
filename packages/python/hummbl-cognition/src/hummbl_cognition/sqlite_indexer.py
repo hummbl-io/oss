@@ -222,11 +222,11 @@ def search_entries(
 
     if scope:
         conditions.append("e.scope = ?")
-        params.append(scope.lower())
+        params.append(scope)
 
     if entry_type:
         conditions.append("e.type = ?")
-        params.append(entry_type.lower())
+        params.append(entry_type)
 
     if since:
         conditions.append("e.timestamp >= ?")
@@ -235,7 +235,7 @@ def search_entries(
     if tags:
         for t in tags:
             conditions.append("e.id IN (SELECT entry_id FROM tags WHERE tag = ?)")
-            params.append(t.lower())
+            params.append(t)
 
     where_clause = " AND ".join(conditions)
     sql = f"""
