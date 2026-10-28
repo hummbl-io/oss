@@ -389,23 +389,37 @@ class MCPGateway:
         ks = self._kill_switch
         if ks is not None:
             try:
-                state = ks.get_state()
+                state = ks.mode if hasattr(ks, "mode") else ks.get_state()
                 return state.name if hasattr(state, "name") else str(state)
             except Exception:
-                return "DISENGAGED"
+                # An explicitly configured kill switch that cannot be read must
+                # not silently disengage: fail closed.
+                return "EMERGENCY"
 
         env_override = os.environ.get("MCP_KILL_SWITCH_STATE", "")
         if env_override:
             return env_override.upper()
 
         try:
-            try:
-                from hummbl_governance.kill_switch import KillSwitchCore
-            except ImportError:
-                pass
+            import tempfile
+            from pathlib import Path
 
-            ks = KillSwitchCore()
-            return ks.get_state().name
+            from hummbl_governance.kill_switch import (
+                KillSwitch,
+                KillSwitchTamperError,
+            )
+        except ImportError:
+            return "DISENGAGED"
+
+        state_dir = Path(
+            os.environ.get("GOVERNANCE_STATE_DIR")
+            or Path(tempfile.gettempdir()) / "governance"
+        )
+        try:
+            return KillSwitch.load_from_file(state_dir).mode.name
+        except KillSwitchTamperError:
+            # Required state is absent or tampered: fail closed.
+            return "EMERGENCY"
         except Exception:
             return "DISENGAGED"
 

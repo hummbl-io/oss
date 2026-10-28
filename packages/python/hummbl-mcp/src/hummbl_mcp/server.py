@@ -29,6 +29,7 @@ from hummbl_mcp.protocol import (
     serialize_response,
     success_response,
 )
+from hummbl_mcp._auth import verify_token
 from hummbl_mcp.mcp_gateway import MCPCallRequest, MCPGateway
 from hummbl_mcp.receipts import ReceiptTimer
 from hummbl_mcp import gcp_tools, bridge_tools, billing_tools
@@ -150,15 +151,26 @@ class HummblMCPServer:
         if handler is None:
             raise JsonRpcError(TOOL_NOT_FOUND, f"tool not found: {name}")
 
+        raw_token = args.get("_delegation_token")
         decision = self.gateway.evaluate(
             MCPCallRequest(
                 tool_name=name,
                 adapter=self.receipt_identity,
                 arguments=args,
-                delegation_token=str(args.get("_delegation_token", "")),
+                delegation_token=(
+                    raw_token
+                    if isinstance(raw_token, str) and verify_token(raw_token)
+                    else ""
+                ),
             )
         )
         if not decision.allowed:
+            with ReceiptTimer(
+                name, args, identity=self.receipt_identity
+            ) as timer:
+                timer.error(
+                    f"gateway denied tool '{name}': {decision.verdict.value}"
+                )
             return {
                 "content": [{"type": "text", "text": json.dumps({"error": decision.summary(), "verdict": decision.verdict.value})}],
                 "isError": True,

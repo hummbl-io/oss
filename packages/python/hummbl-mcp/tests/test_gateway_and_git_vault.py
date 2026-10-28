@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from hummbl_mcp.mcp_gateway import MCPGateway
 from hummbl_mcp.mcp_git_vault import handle_git_diff, handle_git_stage
 from hummbl_mcp.protocol import JsonRpcRequest, ToolDefinition
@@ -99,3 +101,72 @@ def test_vault_git_stage_rejects_option_shaped_path(tmp_path: Path):
         res = handle_git_stage({"paths": ["--all"]})
     assert res["isError"] is True
     assert "Option-shaped path" in res["content"][0]["text"]
+
+
+def test_engaged_kill_switch_state_file_blocks_tool_calls(
+    tmp_path: Path, monkeypatch
+):
+    pytest.importorskip("hummbl_governance")
+    (tmp_path / "kill_switch_state.json").write_text(
+        json.dumps({"mode": "HALT_ALL", "reason": "test halt"}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
+    server = _make_server()
+    resp = server.handle(
+        JsonRpcRequest(
+            jsonrpc="2.0",
+            id=4,
+            method="tools/call",
+            params={"name": "demo_write", "arguments": {"path": "ok.txt"}},
+        )
+    )
+    assert resp is not None
+    assert resp["result"]["isError"] is True
+    payload = json.loads(resp["result"]["content"][0]["text"])
+    assert payload["verdict"] == "BLOCK"
+    assert "KILL_SWITCH" in payload["error"]
+
+
+def test_unverifiable_delegation_token_is_unsigned(monkeypatch):
+    monkeypatch.setenv("MCP_GATEWAY_STRICT", "true")
+    server = _make_server()
+    for spoofed in (None, "arbitrary-string", 1234):
+        resp = server.handle(
+            JsonRpcRequest(
+                jsonrpc="2.0",
+                id=5,
+                method="tools/call",
+                params={
+                    "name": "demo_write",
+                    "arguments": {
+                        "path": "ok.txt",
+                        "_delegation_token": spoofed,
+                    },
+                },
+            )
+        )
+        assert resp is not None
+        assert resp["result"]["isError"] is True
+        payload = json.loads(resp["result"]["content"][0]["text"])
+        assert payload["verdict"] == "BLOCK"
+        assert "MISSING_DELEGATION" in payload["error"]
+
+
+def test_gateway_denied_call_emits_receipt():
+    server = _make_server(blocked_tools=["demo_write"])
+    with patch("hummbl_mcp.receipts.post_receipt") as mock_post:
+        resp = server.handle(
+            JsonRpcRequest(
+                jsonrpc="2.0",
+                id=6,
+                method="tools/call",
+                params={"name": "demo_write", "arguments": {"path": "ok.txt"}},
+            )
+        )
+    assert resp is not None
+    assert resp["result"]["isError"] is True
+    mock_post.assert_called_once()
+    receipt = mock_post.call_args[0][0]
+    assert receipt.tool == "demo_write"
+    assert receipt.status == "error"
