@@ -602,7 +602,10 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
             return {"error": "missing required argument: type"}
         if not message:
             return {"error": "missing required argument: message"}
-        from .authority import PRIVILEGED_TYPES
+        try:
+            from .authority import PRIVILEGED_TYPES
+        except ImportError:
+            from hummbl_bus.authority import PRIVILEGED_TYPES
 
         PRIVILEGED_OR_ELEVATED = PRIVILEGED_TYPES | {"VETO", "COMMAND", "APPROVE", "REJECT"}
         if str(mtype).strip().upper() in PRIVILEGED_OR_ELEVATED:
@@ -627,6 +630,7 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
             return {
                 "posted": True,
                 "type": mtype,
+                "sender": from_agent,
                 "message": message[:200],
                 "method": "bridge",
                 "bridge_response": detail,

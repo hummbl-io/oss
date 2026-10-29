@@ -32,7 +32,11 @@ except ImportError:
                 os.environ.get("GOVERNANCE_STATE_DIR")
                 or Path(tempfile.gettempdir()) / "governance"
             )
-            return KillSwitch.load_from_file(state_dir, require_existing=True)
+            try:
+                return KillSwitch.load_from_file(state_dir, require_existing=True)
+            except TypeError:
+                # Governance releases before require_existing lack the parameter.
+                return KillSwitch.load_from_file(state_dir)
     except ImportError:  # hummbl_governance is not installed in this environment
         get_kill_switch_core = None  # type: ignore[assignment]
 

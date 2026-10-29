@@ -416,7 +416,9 @@ class MCPGateway:
             or Path(tempfile.gettempdir()) / "governance"
         )
         try:
-            return KillSwitch.load_from_file(state_dir).mode.name
+            ks = KillSwitch.load_from_file(state_dir)
+            state = ks.mode if hasattr(ks, "mode") else ks.get_state()
+            return state.name if hasattr(state, "name") else str(state)
         except KillSwitchTamperError:
             # Required state is absent or tampered: fail closed.
             return "EMERGENCY"

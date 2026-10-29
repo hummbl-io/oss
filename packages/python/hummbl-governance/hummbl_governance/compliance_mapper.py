@@ -23,7 +23,7 @@ an Ed25519 principal proof) mapped to regulatory control identifiers.
 
 SOC 2 (AICPA Trust Services Criteria) Controls Mapped:
 - CC6.1: Logical and Physical Access Controls (mapped to DCT tuples)
-- CC7.2: System Monitoring and Anomaly Detection (mapped to HMAC-authenticated governance entries)
+- CC7.2: System Monitoring and Anomaly Detection (mapped to governance entries carrying a signature; presence-checked unless a shared HMAC secret is configured)
 - CC6.3: Role-Based Access Authorization (mapped to subject/issuer in DCTs)
 
 GDPR Articles Mapped:
