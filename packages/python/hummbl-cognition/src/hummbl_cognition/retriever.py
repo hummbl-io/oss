@@ -12,8 +12,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import stat
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -150,6 +151,23 @@ def _to_utc(value: str) -> datetime:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+_FILENAME_DATE = re.compile(r"(?<!\d)(\d{4})-?(\d{2})-?(\d{2})(?!\d)")
+
+
+def _filename_day(name: str) -> datetime | None:
+    """Return the UTC start of the first calendar date in a file name, if any.
+
+    Briefings, handoffs and AARs are named by date (``2026-09-22.md``,
+    ``AAR-20261029-...``); that date survives a checkout or copy, mtime does not.
+    """
+    for match in _FILENAME_DATE.finditer(name):
+        try:
+            return datetime(*(int(g) for g in match.groups()), tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
 
 
 class MemoryResult:
@@ -298,7 +316,10 @@ class OpenBrainRetriever:
         agent : str
             Agent making the query (for feedback tracking).
         limit : int
-            Maximum number of results before budget filtering.
+            Per-pool result cap before budget filtering: the ledger and bus
+            pools return up to ``limit`` each, every other pool up to
+            ``max(1, limit // 4)``. The merged list can exceed ``limit``;
+            ``token_budget`` bounds the final size.
         time_decay : bool | None
             Apply exponential time decay to ledger BM25 scores based on
             entry age. None = use module default (True unless
@@ -309,8 +330,8 @@ class OpenBrainRetriever:
             COGNITION_RETRIEVER_RETRIEVAL_DECAY=0).
         exclude_ids : set[str] | None
             Ledger entry ids to mask from results (blind rediscovery
-            evaluation). Applies to the ledger pool only; other pools are
-            unaffected.
+            evaluation). Applies to the ledger and closeouts pools; other
+            pools are unaffected.
 
         Returns:
         -------
@@ -402,9 +423,15 @@ class OpenBrainRetriever:
 
         if "closeouts" in all_sources:
             seen_ids = {r.entry_id for r in results if r.source == "ledger"}
+            seen_ids |= set(exclude_ids or ())
             results.extend(
                 self._search_secondary_ledgers(
-                    query, since=since, limit=pool_limit, exclude_ids=seen_ids
+                    query,
+                    scope=scope,
+                    entry_type=entry_type,
+                    since=since,
+                    limit=pool_limit,
+                    exclude_ids=seen_ids,
                 )
             )
 
@@ -767,7 +794,8 @@ class OpenBrainRetriever:
         if not query_tokens:
             return []
 
-        # TSV rows carry their own timestamps; other files are bounded by mtime.
+        # TSV rows carry their own timestamps; other files are bounded by the
+        # date in their name, or by mtime when the name has none.
         since_ts: float | None = None
         if since:
             try:
@@ -792,12 +820,14 @@ class OpenBrainRetriever:
 
         for filepath in files[:max_files]:  # Cap file scan
             try:
-                if (
-                    since_ts is not None
-                    and filepath.suffix != ".tsv"
-                    and filepath.stat().st_mtime < since_ts
-                ):
-                    continue
+                if since_ts is not None and filepath.suffix != ".tsv":
+                    # A dated name covers its whole day; otherwise use mtime.
+                    day = _filename_day(filepath.name)
+                    if day is not None:
+                        if (day + timedelta(days=1)).timestamp() <= since_ts:
+                            continue
+                    elif filepath.stat().st_mtime < since_ts:
+                        continue
                 text = filepath.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
@@ -837,6 +867,8 @@ class OpenBrainRetriever:
         self,
         query: str,
         *,
+        scope: str | None = None,
+        entry_type: str | None = None,
         since: str | None = None,
         limit: int = 5,
         exclude_ids: set[str] | None = None,
@@ -868,12 +900,18 @@ class OpenBrainRetriever:
             try:
                 with ledger.open("rb") as handle:
                     size = handle.seek(0, os.SEEK_END)
-                    handle.seek(max(0, size - _BUS_CACHE_MAX_BYTES))
-                    lines = handle.read().decode("utf-8", errors="replace").splitlines()
+                    start = max(0, size - _BUS_CACHE_MAX_BYTES)
+                    # Read one byte early to learn whether start is a record start.
+                    handle.seek(max(0, start - 1))
+                    data = handle.read()
             except OSError:
                 continue
-            if size > _BUS_CACHE_MAX_BYTES:
-                lines = lines[1:]  # drop the partial first record
+            if start > 0:
+                newline = data.find(b"\n")
+                # Drop through the first newline: the byte before start when the
+                # boundary is aligned, otherwise the tail of a partial record.
+                data = data[newline + 1 :] if newline >= 0 else b""
+            lines = data.decode("utf-8", errors="replace").splitlines()
             for line in lines:
                 try:
                     entry = json.loads(line)
@@ -884,6 +922,10 @@ class OpenBrainRetriever:
                 entry_id = str(entry.get("id", ""))
                 timestamp = str(entry.get("timestamp", ""))
                 if entry_id in skip:
+                    continue
+                if scope and entry.get("scope") != scope:
+                    continue
+                if entry_type and entry.get("type") != entry_type:
                     continue
                 if since_utc is not None:
                     try:

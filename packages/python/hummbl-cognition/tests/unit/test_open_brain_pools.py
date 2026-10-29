@@ -2,8 +2,9 @@
 
 Covers:
 - Briefings resolved from the fleet governance checkout and from an override
-- Closeout (secondary) ledgers: retrieval, since filter, malformed lines, dedup
-- Handoff and AAR text pools, newest-first scanning, since by mtime, trimmed overrides
+- Closeout (secondary) ledgers: retrieval, since/scope/type filters, exclude_ids,
+  tail-boundary handling, malformed lines, dedup
+- Handoff and AAR text pools, newest-first scanning, since by file-name date or mtime, trimmed overrides
 - validate_integrity reporting one break once instead of cascading
 """
 
@@ -17,6 +18,7 @@ import pytest
 
 from hummbl_cognition.ledger_writer import post_entry, validate_integrity
 from hummbl_cognition.models import LedgerEntry, LedgerEntryType, LedgerScope
+from hummbl_cognition import retriever as retriever_module
 from hummbl_cognition.retriever import OpenBrainRetriever
 
 
@@ -125,6 +127,54 @@ class TestCloseoutsPool:
             {"id": "clp-dddddddddddd", "timestamp": "2026-10-29T00:00:00Z", "content": "okapi"},
         ])
         assert len(r.search("okapi", sources=["closeouts"], limit=1)) == 1
+    def test_scope_and_entry_type_filters_apply(self, retriever):
+        r, home = retriever
+        self._ledger(home, [
+            {"id": "clp-project00000", "timestamp": "2026-10-29T00:00:00Z",
+             "scope": "project", "type": "discovery", "content": "kudu"},
+            {"id": "clp-file00000000", "timestamp": "2026-10-29T00:00:00Z",
+             "scope": "file", "type": "lesson", "content": "kudu"},
+        ])
+        by_scope = r.search("kudu", sources=["closeouts"], scope="project")
+        by_type = r.search("kudu", sources=["closeouts"], entry_type="lesson")
+        assert [x.entry_id for x in by_scope] == ["clp-project00000"]
+        assert [x.entry_id for x in by_type] == ["clp-file00000000"]
+
+    def test_caller_exclude_ids_mask_closeouts(self, retriever):
+        r, home = retriever
+        self._ledger(home, [
+            {"id": "clp-masked000000", "timestamp": "2026-10-29T00:00:00Z", "content": "dingo"},
+        ])
+        assert r.search("dingo", sources=["closeouts"], exclude_ids={"clp-masked000000"}) == []
+
+    def test_record_starting_on_tail_boundary_is_kept(self, retriever, monkeypatch):
+        r, home = retriever
+        filler = json.dumps({"id": "clp-filler000000", "timestamp": "2026-10-29T00:00:00Z",
+                             "content": "x" * 40})
+        needle = json.dumps({"id": "clp-needle000000", "timestamp": "2026-10-29T00:00:00Z",
+                             "content": "serval"})
+        raw = self._ledger(home, [filler, needle]).read_bytes()
+        # Cap the read so it starts exactly at the first byte of the needle record
+        # (measured from the file, since text mode may write CRLF line endings).
+        cap = len(raw) - raw.index(needle.encode())
+        monkeypatch.setattr(retriever_module, "_BUS_CACHE_MAX_BYTES", cap)
+        assert [x.entry_id for x in r.search("serval", sources=["closeouts"])] == [
+            "clp-needle000000"
+        ]
+
+    def test_partial_record_at_tail_boundary_is_dropped(self, retriever, monkeypatch):
+        r, home = retriever
+        first = json.dumps({"id": "clp-first0000000", "timestamp": "2026-10-29T00:00:00Z",
+                            "content": "serval " + "y" * 40})
+        last = json.dumps({"id": "clp-last00000000", "timestamp": "2026-10-29T00:00:00Z",
+                           "content": "serval"})
+        raw = self._ledger(home, [first, last]).read_bytes()
+        # Start the read ten bytes inside the first record; only the last one is kept.
+        cap = len(raw) - raw.index(last.encode()) + 10
+        monkeypatch.setattr(retriever_module, "_BUS_CACHE_MAX_BYTES", cap)
+        assert [x.entry_id for x in r.search("serval", sources=["closeouts"])] == [
+            "clp-last00000000"
+        ]
 
 class TestHandoffAndAarPools:
     def test_handoffs_default_dirs(self, retriever):
@@ -171,6 +221,21 @@ class TestHandoffAndAarPools:
         os.utime(new, (1_900_000_000, 1_900_000_000))  # 2030-03-17
         results = r.search("pangolin", sources=["aar"], since="2026-01-01T00:00:00Z")
         assert [x.metadata["file"] for x in results] == ["new.md"]
+    def test_since_prefers_date_in_file_name_over_mtime(self, retriever):
+        r, home = retriever
+        aar = home / ".agents" / "docs" / "aar"
+        stale = _write(aar / "AAR-20260105-stale.md", "civet")      # fresh mtime, old name
+        recent = _write(aar / "2026-10-29_recent.md", "civet")      # old mtime, new name
+        os.utime(recent, (1_000_000_000, 1_000_000_000))
+        assert stale.stat().st_mtime > 1_700_000_000
+        results = r.search("civet", sources=["aar"], since="2026-06-01T00:00:00Z")
+        assert [x.metadata["file"] for x in results] == ["2026-10-29_recent.md"]
+
+    def test_since_keeps_a_dated_file_for_its_whole_day(self, retriever):
+        r, home = retriever
+        _write(home / ".agents" / "_state" / "briefings" / "2026-10-29.md", "lynx")
+        results = r.search("lynx", sources=["briefings"], since="2026-10-29T18:00:00Z")
+        assert [x.metadata["file"] for x in results] == ["2026-10-29.md"]
 
 class TestValidateDoesNotCascade:
     def test_one_tampered_entry_does_not_poison_later_links(self, tmp_path):
