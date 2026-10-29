@@ -251,7 +251,7 @@ TOOLS = [
     },
     {
         "name": "memory_search",
-        "description": "Unified search across all Open Brain memory pools: ledger (BM25), local bus cache (cached evidence, not live authority), briefings, autoresearch findings, session claims/ledgers, and MEMORY.md. Returns ranked results within a token budget and source diagnostics.",
+        "description": "Unified search across all Open Brain memory pools: ledger (BM25), local bus cache (cached evidence, not live authority), briefings, autoresearch findings, session claims/ledgers, MEMORY.md, bibliography, closeout ledgers, handoffs, and AARs. Returns ranked results within a token budget and source diagnostics.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -280,6 +280,10 @@ TOOLS = [
                             "findings",
                             "session",
                             "memory_md",
+                            "bibliography",
+                            "closeouts",
+                            "handoffs",
+                            "aar",
                         ],
                     },
                     "description": "Restrict to specific memory pools (default: all)",
@@ -525,7 +529,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         if sources_arg is not None:
             allowed = {
                 "ledger", "bus", "briefings", "findings", "session",
-                "memory_md",
+                "memory_md", "bibliography", "closeouts", "handoffs", "aar",
             }
             bad = [s for s in sources_arg if s not in allowed]
             if bad:

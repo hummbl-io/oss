@@ -948,6 +948,12 @@ def validate_integrity(
             if not line:
                 continue
 
+            # The writer chains each entry to the physical line before it,
+            # whether or not that line validates. Advance the predecessor
+            # before any `continue`, or one rejected line makes every later
+            # chain check compare against a stale line.
+            predecessor, prev_line = prev_line, line
+
             # Parse
             try:
                 data = json.loads(line)
@@ -994,15 +1000,14 @@ def validate_integrity(
                     continue
 
             # Verify previous_hash chain continuity if present
-            if entry.previous_hash and prev_line:
-                expected_prev = hashlib.sha256(prev_line.encode("utf-8")).hexdigest()
+            if entry.previous_hash and predecessor:
+                expected_prev = hashlib.sha256(predecessor.encode("utf-8")).hexdigest()
                 if entry.previous_hash != expected_prev:
                     errors.append(
                         f"Line {line_num}: previous_hash chain mismatch for {entry.id}"
                     )
                     continue
 
-            prev_line = line
             valid_count += 1
 
     return valid_count, errors

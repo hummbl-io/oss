@@ -906,7 +906,7 @@ class TestSearch:
 
     @patch("hummbl_cognition.retriever.log_retrieval")
     def test_default_sources_all(self, mock_log, tmp_path):
-        """When no sources specified, all 6 pools are searched."""
+        """When no sources specified, every pool is searched."""
         idx = MagicMock()
         idx.load.return_value = True
         idx.search.return_value = []
@@ -922,16 +922,20 @@ class TestSearch:
             patch.object(r, "_search_session", return_value=[]) as m_session,
             patch.object(r, "_search_memory_md", return_value=[]) as m_memory,
             patch.object(r, "_search_bibliography", return_value=[]) as m_bib,
+            patch.object(r, "_search_secondary_ledgers", return_value=[]) as m_close,
         ):
             r.search("test", token_budget=1000)
             m_ledger.assert_called_once()
             m_bus.assert_called_once_with("test", since=None, limit=50)
-            # Briefings use the generic text pool; bus uses its bounded cache.
-            m_text.assert_called_once()
+            # Briefings, handoffs and AARs use the generic text pool (one call
+            # per directory); bus uses its bounded cache.
+            pools = sorted({c.kwargs["pool_name"] for c in m_text.call_args_list})
+            assert pools == ["aar", "briefings", "handoffs"]
             m_findings.assert_called_once()
             m_session.assert_called_once()
             m_memory.assert_called_once()
             m_bib.assert_called_once()
+            m_close.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
