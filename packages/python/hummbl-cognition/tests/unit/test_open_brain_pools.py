@@ -3,7 +3,7 @@
 Covers:
 - Briefings resolved from the fleet governance checkout and from an override
 - Closeout (secondary) ledgers: retrieval, since filter, malformed lines, dedup
-- Handoff and AAR text pools, newest-first scanning
+- Handoff and AAR text pools, newest-first scanning, since by mtime, trimmed overrides
 - validate_integrity reporting one break once instead of cascading
 """
 
@@ -108,6 +108,23 @@ class TestCloseoutsPool:
         self._ledger(home, [row, row])
         assert len(r.search("ocelot", sources=["closeouts"])) == 1
 
+    def test_since_compares_instants_across_offsets(self, retriever):
+        r, home = retriever
+        self._ledger(home, [
+            # 2026-10-29T03:00Z, earlier than the bound despite sorting later as text.
+            {"id": "clp-early0000000", "timestamp": "2026-10-29T05:00:00+02:00", "content": "tapir"},
+            # 2026-10-29T05:00Z, later than the bound.
+            {"id": "clp-late00000000", "timestamp": "2026-10-29T01:00:00-04:00", "content": "tapir"},
+        ])
+        results = r.search("tapir", sources=["closeouts"], since="2026-10-29T04:00:00Z")
+        assert [x.entry_id for x in results] == ["clp-late00000000"]
+
+    def test_small_limit_still_returns_a_closeout(self, retriever):
+        r, home = retriever
+        self._ledger(home, [
+            {"id": "clp-dddddddddddd", "timestamp": "2026-10-29T00:00:00Z", "content": "okapi"},
+        ])
+        assert len(r.search("okapi", sources=["closeouts"], limit=1)) == 1
 
 class TestHandoffAndAarPools:
     def test_handoffs_default_dirs(self, retriever):
@@ -136,6 +153,24 @@ class TestHandoffAndAarPools:
         )
         assert [x.metadata["file"] for x in results] == ["b.md"]
 
+    def test_override_paths_are_trimmed(self, retriever, monkeypatch, tmp_path):
+        r, _ = retriever
+        first, second = tmp_path / "first", tmp_path / "second"
+        _write(first / "a.md", "wombat one")
+        _write(second / "b.md", "wombat two")
+        monkeypatch.setenv("HUMMBL_HANDOFF_DIRS", f"{first}{os.pathsep} {second} ")
+        results = r.search("wombat", sources=["handoffs"])
+        assert sorted(x.metadata["file"] for x in results) == ["a.md", "b.md"]
+
+    def test_since_skips_markdown_older_than_bound(self, retriever):
+        r, home = retriever
+        aar = home / ".agents" / "docs" / "aar"
+        old = _write(aar / "old.md", "pangolin")
+        new = _write(aar / "new.md", "pangolin")
+        os.utime(old, (1_000_000_000, 1_000_000_000))  # 2001-09-09
+        os.utime(new, (1_900_000_000, 1_900_000_000))  # 2030-03-17
+        results = r.search("pangolin", sources=["aar"], since="2026-01-01T00:00:00Z")
+        assert [x.metadata["file"] for x in results] == ["new.md"]
 
 class TestValidateDoesNotCascade:
     def test_one_tampered_entry_does_not_poison_later_links(self, tmp_path):

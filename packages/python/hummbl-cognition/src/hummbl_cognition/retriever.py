@@ -137,8 +137,19 @@ def _resolve_pool_paths(env_var: str, defaults: list[Path]) -> list[Path]:
     """
     configured = os.environ.get(env_var)
     if configured:
-        return [Path(p) for p in configured.split(os.pathsep) if p.strip()]
+        return [Path(p.strip()) for p in configured.split(os.pathsep) if p.strip()]
     return defaults
+
+
+def _to_utc(value: str) -> datetime:
+    """Parse an ISO timestamp as an aware UTC instant; naive or date-only means UTC.
+
+    Raises ValueError (or TypeError/OverflowError) when the value cannot be parsed.
+    """
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 class MemoryResult:
@@ -283,7 +294,7 @@ class OpenBrainRetriever:
         sources : list[str] | None
             Which memory pools to search. Default: all.
             Options: "ledger", "bus", "briefings", "findings", "memory_md",
-            "bibliography", "session"
+            "bibliography", "session", "closeouts", "handoffs", "aar"
         agent : str
             Agent making the query (for feedback tracking).
         limit : int
@@ -326,6 +337,8 @@ class OpenBrainRetriever:
 
         self.source_diagnostics = {}
         results: list[MemoryResult] = []
+        # Secondary pools share a quarter of the limit, never less than one slot.
+        pool_limit = max(1, limit // 4)
 
         if "ledger" in all_sources:
             results.extend(
@@ -360,7 +373,7 @@ class OpenBrainRetriever:
                         search_dir=brief_dir,
                         glob_pattern="*.md",
                         since=since,
-                        limit=limit // 4,
+                        limit=pool_limit,
                         newest_by_mtime=True,
                     )
                 )
@@ -372,26 +385,26 @@ class OpenBrainRetriever:
                         query,
                         search_dir=s_dir / "autoresearch",
                         since=since,
-                        limit=limit // 4,
+                        limit=pool_limit,
                     )
                 )
 
         if "session" in all_sources:
             results.extend(
-                self._search_session(query, since=since, limit=limit // 4)
+                self._search_session(query, since=since, limit=pool_limit)
             )
 
         if "memory_md" in all_sources:
-            results.extend(self._search_memory_md(query, limit=limit // 4))
+            results.extend(self._search_memory_md(query, limit=pool_limit))
 
         if "bibliography" in all_sources:
-            results.extend(self._search_bibliography(query, limit=limit // 4))
+            results.extend(self._search_bibliography(query, limit=pool_limit))
 
         if "closeouts" in all_sources:
             seen_ids = {r.entry_id for r in results if r.source == "ledger"}
             results.extend(
                 self._search_secondary_ledgers(
-                    query, since=since, limit=limit // 4, exclude_ids=seen_ids
+                    query, since=since, limit=pool_limit, exclude_ids=seen_ids
                 )
             )
 
@@ -416,7 +429,7 @@ class OpenBrainRetriever:
                         search_dir=search_dir,
                         glob_pattern="*.md",
                         since=since,
-                        limit=limit // 4,
+                        limit=pool_limit,
                         max_files=50,
                         newest_by_mtime=True,
                     )
@@ -754,6 +767,14 @@ class OpenBrainRetriever:
         if not query_tokens:
             return []
 
+        # TSV rows carry their own timestamps; other files are bounded by mtime.
+        since_ts: float | None = None
+        if since:
+            try:
+                since_ts = _to_utc(since).timestamp()
+            except (AttributeError, TypeError, ValueError, OverflowError):
+                return []
+
         results = []
         try:
             if newest_by_mtime:
@@ -771,6 +792,12 @@ class OpenBrainRetriever:
 
         for filepath in files[:max_files]:  # Cap file scan
             try:
+                if (
+                    since_ts is not None
+                    and filepath.suffix != ".tsv"
+                    and filepath.stat().st_mtime < since_ts
+                ):
+                    continue
                 text = filepath.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
@@ -824,6 +851,13 @@ class OpenBrainRetriever:
         if not query_tokens:
             return []
 
+        since_utc: datetime | None = None
+        if since:
+            try:
+                since_utc = _to_utc(since)
+            except (AttributeError, TypeError, ValueError, OverflowError):
+                return []
+
         ledgers = _resolve_pool_paths(
             "HUMMBL_SECONDARY_LEDGERS",
             [Path.home() / ".agents" / "state" / "cognition" / "ledger.jsonl"],
@@ -849,8 +883,14 @@ class OpenBrainRetriever:
                     continue
                 entry_id = str(entry.get("id", ""))
                 timestamp = str(entry.get("timestamp", ""))
-                if entry_id in skip or (since and timestamp < since):
+                if entry_id in skip:
                     continue
+                if since_utc is not None:
+                    try:
+                        if _to_utc(timestamp) < since_utc:
+                            continue
+                    except (TypeError, ValueError, OverflowError):
+                        continue  # undatable entries cannot satisfy a lower bound
                 content = str(entry.get("content", ""))
                 overlap = query_tokens & set(tokenize(content[:5000]))
                 if not overlap:
