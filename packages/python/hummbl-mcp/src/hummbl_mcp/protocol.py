@@ -30,6 +30,7 @@ INTERNAL_ERROR = -32603
 # MCP-specific error codes (application-level, in the -32000 to -32099 range)
 TOOL_NOT_FOUND = -32001
 TOOL_EXECUTION_ERROR = -32002
+TOOL_BLOCKED = -32003
 
 
 class ProtocolError(Exception):
