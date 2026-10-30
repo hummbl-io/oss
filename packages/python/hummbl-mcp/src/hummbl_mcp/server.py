@@ -16,10 +16,12 @@ import json
 import sys
 from typing import Any, Callable
 
+from hummbl_mcp.mcp_gateway import MCPCallRequest, MCPGateway
 from hummbl_mcp.protocol import (
     INTERNAL_ERROR,
     INVALID_PARAMS,
     METHOD_NOT_FOUND,
+    TOOL_BLOCKED,
     TOOL_NOT_FOUND,
     JsonRpcError,
     JsonRpcRequest,
@@ -54,6 +56,8 @@ class HummblMCPServer:
         receipt_identity: str = "hummbl-mcp",
         cost_tracker: CostTracker | None = None,
         enable_billing: bool = False,
+        gateway: MCPGateway | None = None,
+        kill_switch: Any = None,
     ) -> None:
         if tool_definitions is None:
             tool_definitions = gcp_tools.get_tool_definitions() + bridge_tools.get_tool_definitions()
@@ -66,6 +70,10 @@ class HummblMCPServer:
         self._initialized = False
         self.cost_tracker = cost_tracker
         self.enable_billing = enable_billing
+        self._gateway = gateway or MCPGateway(
+            kill_switch=kill_switch,
+            bus_poster=lambda *_args: None,
+        )
         
         # Add billing tools if enabled
         if enable_billing and cost_tracker is not None:
@@ -150,6 +158,16 @@ class HummblMCPServer:
 
         with ReceiptTimer(name, args, identity=self.receipt_identity) as timer:
             try:
+                decision = self._gateway.evaluate(
+                    MCPCallRequest(
+                        tool_name=name,
+                        adapter=SERVER_NAME,
+                        arguments=args,
+                        delegation_token=str(args.get("_delegation_token") or ""),
+                    )
+                )
+                if not decision.allowed:
+                    raise JsonRpcError(TOOL_BLOCKED, decision.summary())
                 result = handler(args)
             except JsonRpcError as err:
                 timer.error(err.message)
