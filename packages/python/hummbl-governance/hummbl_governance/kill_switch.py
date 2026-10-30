@@ -88,6 +88,14 @@ class KillSwitchTamperError(Exception):
         super().__init__(f"Kill switch tamper detected: {reason}")
 
 
+class KillSwitchConfigurationError(RuntimeError):
+    """Required signing credentials are unavailable."""
+
+
+class KillSwitchPersistenceError(RuntimeError):
+    """A state transition could not be committed to authoritative storage."""
+
+
 class KillSwitch:
     """Emergency halt system with graduated response.
 
@@ -145,17 +153,20 @@ class KillSwitch:
         self._signing_secret = signing_secret
         self._critical_tasks = critical_tasks or self.DEFAULT_CRITICAL_TASKS
         self._lock = threading.RLock()
+        self._authoritative_reads = False
+        self._persistence_failed = False
 
     @property
     def mode(self) -> KillSwitchMode:
         """Current kill switch mode (thread-safe read)."""
         with self._lock:
+            self._prepare_read()
             return self._mode
 
     @property
     def engaged(self) -> bool:
         """True if kill switch is engaged (not DISENGAGED)."""
-        return self._mode != KillSwitchMode.DISENGAGED
+        return self.mode != KillSwitchMode.DISENGAGED
 
     @property
     def critical_tasks(self) -> frozenset[str]:
@@ -171,6 +182,15 @@ class KillSwitch:
             if secret:
                 return secret.encode("utf-8")
         return None
+
+    def _require_signing_secret(self) -> bytes:
+        """Resolve credentials without generating, caching, or weakening them."""
+        secret = self._get_signing_secret()
+        if not secret:
+            raise KillSwitchConfigurationError(
+                "Signing secret required: configure HUMMBL_SIGNING_SECRET or DCT_SECRET"
+            )
+        return secret
 
     @staticmethod
     def _compute_signature(data: dict[str, Any], secret: bytes) -> str:
@@ -192,10 +212,14 @@ class KillSwitch:
         require_hmac: bool = True,
         signing_secret: bytes | None = None,
         critical_tasks: frozenset[str] | None = None,
+        *,
+        require_existing: bool = False,
     ) -> KillSwitch:
         """Load kill switch state from persistent storage.
 
-        Returns a fresh DISENGAGED instance if file is missing or corrupt.
+        Missing files return a fresh instance only when require_existing=False.
+        Strict readers use require_existing=True: absence cannot clear a halt.
+        Corrupt files raise when require_hmac=True.
 
         Raises:
             KillSwitchTamperError: If require_hmac=True and signature is invalid/missing.
@@ -208,15 +232,18 @@ class KillSwitch:
             critical_tasks=critical_tasks,
         )
 
-        if not state_file.exists():
-            return ks
-
         try:
             with open(state_file, encoding="utf-8") as f:
                 data = json.load(f)
 
+            if not isinstance(data, dict):
+                raise ValueError("State must be a JSON object")
+
             secret = ks._get_signing_secret()
             signature = data.pop("signature", None)
+
+            if signature is not None and not isinstance(signature, str):
+                raise ValueError("State signature must be a string")
 
             if secret and signature:
                 if not cls._verify_signature(data, signature, secret):
@@ -234,7 +261,7 @@ class KillSwitch:
             else:
                 logger.warning("Kill switch state has no signature (legacy mode)")
 
-            mode_str = data.get("mode", "DISENGAGED")
+            mode_str = data["mode"] if require_hmac else data.get("mode", "DISENGAGED")
             ks._mode = KillSwitchMode[mode_str]
 
             # Restore failure_class if present (Phase 1 — backward compatible)
@@ -246,7 +273,7 @@ class KillSwitch:
                 except KeyError:
                     logger.warning("Unknown failure_class in state file: %s", fc_str)
 
-            if ks._mode != KillSwitchMode.DISENGAGED:
+            if ks._mode != KillSwitchMode.DISENGAGED or data.get("engaged_at"):
                 event = KillSwitchEvent(
                     timestamp=data.get("engaged_at", datetime.now(timezone.utc).isoformat()),
                     mode=ks._mode,
@@ -256,12 +283,55 @@ class KillSwitch:
                     failure_class=failure_class,
                 )
                 ks._history.append(event)
-        except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
+        except FileNotFoundError as e:
+            if require_existing:
+                raise KillSwitchTamperError("Authoritative kill switch state is missing") from e
+        except (KeyError, TypeError, ValueError, OSError) as e:
             logger.error("Kill switch state file corrupt: %s", e)
             if require_hmac:
                 raise KillSwitchTamperError(f"Kill switch state file corrupt: {e}")
 
         return ks
+
+    def _check_write_failure(self) -> None:
+        """Keep a failed transition closed until an explicit emergency is saved."""
+        if self._persistence_failed:
+            raise KillSwitchPersistenceError(
+                "Previous state write failed; explicitly persist EMERGENCY before recovery"
+            )
+
+    def refresh(self) -> None:
+        """Read and verify authoritative state without writing or releasing it.
+
+        Preserve local history and append newly observed transitions. The state
+        file contains only the latest event, not a complete cross-process log.
+        Callers hold the same lock through refresh and their decision.
+        """
+        with self._lock:
+            self._check_write_failure()
+            if self._state_dir is None:
+                return
+            if self._require_hmac:
+                self._require_signing_secret()
+            restored = self.load_from_file(
+                self._state_dir, require_hmac=self._require_hmac,
+                signing_secret=self._signing_secret, critical_tasks=self._critical_tasks,
+                require_existing=True,
+            )
+            self._mode = restored._mode
+            if restored._history:
+                event = restored._history[-1]
+                last = self._history[-1] if self._history else None
+                # affected_tasks is not persisted; do not duplicate local events.
+                fields = ("timestamp", "mode", "reason", "triggered_by", "failure_class")
+                if last is None or any(getattr(last, f) != getattr(event, f) for f in fields):
+                    self._history.append(event)
+
+    def _prepare_read(self) -> None:
+        """Enforce the failure latch and refresh shared-core reads under the lock."""
+        self._check_write_failure()
+        if self._authoritative_reads:
+            self.refresh()
 
     def subscribe(self, callback: Callable[[KillSwitchEvent], None]) -> None:
         """Subscribe to kill switch state changes."""
@@ -278,13 +348,11 @@ class KillSwitch:
         }
         if last_event and last_event.failure_class is not None:
             data["failure_class"] = last_event.failure_class.name
-        secret = self._get_signing_secret()
+        secret = self._require_signing_secret() if self._require_hmac else self._get_signing_secret()
         if secret:
             data["signature"] = self._compute_signature(
                 {k: v for k, v in data.items() if k != "signature"}, secret
             )
-        elif self._require_hmac:
-            logger.error("Signing secret not available but require_hmac=True")
         return data
 
     def _persist(self) -> None:
@@ -292,15 +360,42 @@ class KillSwitch:
         if self._state_dir is None:
             return
 
+        # Build/sign before creating or truncating anything. Readers see either
+        # the previous complete state or the newly committed complete state.
+        data = self._build_state_data()
         state_file = self._state_dir / "kill_switch_state.json"
-        self._state_dir.mkdir(parents=True, exist_ok=True)
-
+        temporary = None
         try:
-            with open(state_file, "w", encoding="utf-8") as f:
-                json.dump(self._build_state_data(), f, indent=2)
-            state_file.chmod(0o600)
+            self._state_dir.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=self._state_dir,
+                prefix=".kill-switch-", delete=False,
+            ) as f:
+                temporary = Path(f.name)
+                json.dump(data, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temporary, state_file)
         except OSError as e:
-            logger.error("Failed to persist kill switch state: %s", e)
+            raise KillSwitchPersistenceError("Failed to persist kill switch state") from e
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+
+    def _commit_event(self, event: KillSwitchEvent) -> None:
+        """Publish a transition only after persistence succeeds; latch failures."""
+        previous_mode = self._mode
+        self._mode = event.mode
+        self._history.append(event)
+        try:
+            self._persist()
+        except Exception:
+            self._mode = previous_mode
+            self._history.pop()
+            self._persistence_failed = True
+            raise
+        self._persistence_failed = False
+        self._notify(event)
 
     def _notify(self, event: KillSwitchEvent) -> None:
         """Notify subscribers of state change."""
@@ -355,7 +450,8 @@ class KillSwitch:
             raise ValueError("Use disengage() to clear kill switch, not engage()")
 
         with self._lock:
-            self._mode = mode
+            if mode != KillSwitchMode.EMERGENCY:
+                self._prepare_read()
             event = KillSwitchEvent(
                 timestamp=datetime.now(timezone.utc).isoformat(),
                 mode=mode,
@@ -364,9 +460,7 @@ class KillSwitch:
                 affected_tasks=affected_tasks,
                 failure_class=failure_class,
             )
-            self._history.append(event)
-            self._notify(event)
-            self._persist()
+            self._commit_event(event)
             return event
 
     def disengage(self, triggered_by: str, reason: str | None = None) -> KillSwitchEvent:
@@ -385,8 +479,12 @@ class KillSwitch:
             <KillSwitchMode.DISENGAGED: 1>
         """
         with self._lock:
+            self._check_write_failure()
+            # A release must verify the existing halt, including after a key
+            # outage. Never overwrite an unverifiable file with DISENGAGED.
+            if self._state_dir is not None and self._require_hmac:
+                self.refresh()
             previous_mode = self._mode
-            self._mode = KillSwitchMode.DISENGAGED
 
             disengage_reason = reason or f"Disengaged from {previous_mode.name}"
             event = KillSwitchEvent(
@@ -396,9 +494,7 @@ class KillSwitch:
                 triggered_by=triggered_by,
                 affected_tasks=0,
             )
-            self._history.append(event)
-            self._notify(event)
-            self._persist()
+            self._commit_event(event)
             return event
 
     def check_task_allowed(self, task_type: str) -> dict[str, Any]:
@@ -409,6 +505,7 @@ class KillSwitch:
             'reason' or 'note'.
         """
         with self._lock:
+            self._prepare_read()
             is_critical = task_type in self._critical_tasks
             current_mode = self._mode
 
@@ -464,28 +561,30 @@ class KillSwitch:
             >>> status['engagement_count']
             0
         """
-        engagement_count = len([e for e in self._history if e.mode != KillSwitchMode.DISENGAGED])
+        with self._lock:
+            self._prepare_read()
+            engagement_count = len([e for e in self._history if e.mode != KillSwitchMode.DISENGAGED])
 
-        last_engagement = None
-        for event in reversed(self._history):
-            if event.mode != KillSwitchMode.DISENGAGED:
-                last_engagement = {
-                    "timestamp": event.timestamp,
-                    "mode": event.mode.name,
-                    "reason": event.reason,
-                    "triggered_by": event.triggered_by,
-                }
-                if event.failure_class is not None:
-                    last_engagement["failure_class"] = event.failure_class.name
-                break
+            last_engagement = None
+            for event in reversed(self._history):
+                if event.mode != KillSwitchMode.DISENGAGED:
+                    last_engagement = {
+                        "timestamp": event.timestamp,
+                        "mode": event.mode.name,
+                        "reason": event.reason,
+                        "triggered_by": event.triggered_by,
+                    }
+                    if event.failure_class is not None:
+                        last_engagement["failure_class"] = event.failure_class.name
+                    break
 
-        return {
-            "mode": self._mode.name,
-            "engaged": self.engaged,
-            "engagement_count": engagement_count,
-            "last_engagement": last_engagement,
-            "total_events": len(self._history),
-        }
+            return {
+                "mode": self._mode.name,
+                "engaged": self._mode != KillSwitchMode.DISENGAGED,
+                "engagement_count": engagement_count,
+                "last_engagement": last_engagement,
+                "total_events": len(self._history),
+            }
 
     def get_history(
         self,
@@ -493,12 +592,14 @@ class KillSwitch:
         engaged_only: bool = False,
     ) -> list[KillSwitchEvent]:
         """Get kill switch event history."""
-        events = self._history.copy()
-        if engaged_only:
-            events = [e for e in events if e.mode != KillSwitchMode.DISENGAGED]
-        if limit:
-            events = events[-limit:]
-        return events
+        with self._lock:
+            self._prepare_read()
+            events = self._history.copy()
+            if engaged_only:
+                events = [e for e in events if e.mode != KillSwitchMode.DISENGAGED]
+            if limit:
+                events = events[-limit:]
+            return events
 
 
 # ---------------------------------------------------------------------------
@@ -510,29 +611,30 @@ _core_lock = threading.Lock()
 
 
 def get_kill_switch_core() -> KillSwitch:
-    """Return the process-wide shared KillSwitch instance.
+    """Return the shared core after verifying authoritative persisted state.
 
-    The instance is created lazily on first call from persisted state,
-    mirroring the governance MCP server's wiring
-    (``hummbl_governance/mcp_server.py``): state is loaded with
-    :meth:`KillSwitch.load_from_file` from the directory named by the
-    ``GOVERNANCE_STATE_DIR`` environment variable, defaulting to
-    ``<tempdir>/governance``. Every caller in the process shares the one
-    instance, so an engagement made through any surface is visible to
-    all others.
+    Every status, history, mode and task read refreshes under the instance lock,
+    including reads through a retained reference. State must already exist and
+    verify with HUMMBL_SIGNING_SECRET or DCT_SECRET. Reads never initialize,
+    delete, re-sign, or release state. Missing credentials/state fail closed.
 
-    Raises:
-        KillSwitchTamperError: If persisted state exists but fails its
-            mandatory HMAC verification. The accessor fails closed
-            rather than fabricate a disengaged state.
+    An operator provisions signed state through an explicit EMERGENCY engagement
+    and separately authorizes release. Restoring credentials alone cannot clear
+    an emergency. The dedicated MCP server remains read-only.
     """
     global _core_instance
-    if _core_instance is None:
-        with _core_lock:
-            if _core_instance is None:
-                state_dir = Path(
-                    os.environ.get("GOVERNANCE_STATE_DIR")
-                    or Path(tempfile.gettempdir()) / "governance"
-                )
-                _core_instance = KillSwitch.load_from_file(state_dir)
-    return _core_instance
+    with _core_lock:
+        if _core_instance is None:
+            state_dir = Path(
+                os.environ.get("GOVERNANCE_STATE_DIR")
+                or Path(tempfile.gettempdir()) / "governance"
+            )
+            core = KillSwitch(state_dir=state_dir)
+            core._authoritative_reads = True
+            core.refresh()
+            _core_instance = core
+        core = _core_instance
+    # Do not hold the singleton lock while taking the instance lock: subscriber
+    # callbacks may themselves call this accessor while holding the latter.
+    core.refresh()
+    return core

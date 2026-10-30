@@ -26,6 +26,11 @@ from hummbl_mcp import mcp_kill_switch as server
 def _fresh_core(tmp_path, monkeypatch):
     """Give each test an isolated, disengaged shared core."""
     monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
+    monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
+    monkeypatch.delenv("DCT_SECRET", raising=False)
+    writer = ks_module.KillSwitch(state_dir=tmp_path)
+    writer.engage(ks_module.KillSwitchMode.EMERGENCY, "bootstrap", "test-operator")
+    writer.disengage("test-operator", "bootstrap approved")
     monkeypatch.setattr(ks_module, "_core_instance", None)
     yield
     monkeypatch.setattr(ks_module, "_core_instance", None)
