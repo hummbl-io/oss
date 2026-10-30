@@ -12,8 +12,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import stat
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -129,6 +130,46 @@ def _resolve_bibliography_path(override: str | Path | None = None) -> Path | Non
     return None
 
 
+def _resolve_pool_paths(env_var: str, defaults: list[Path]) -> list[Path]:
+    """Resolve the directories or files behind a memory pool.
+
+    An ``os.pathsep``-separated environment variable replaces the defaults.
+    Missing paths are kept; each pool search skips what does not exist.
+    """
+    configured = os.environ.get(env_var)
+    if configured:
+        return [Path(p.strip()) for p in configured.split(os.pathsep) if p.strip()]
+    return defaults
+
+
+def _to_utc(value: str) -> datetime:
+    """Parse an ISO timestamp as an aware UTC instant; naive or date-only means UTC.
+
+    Raises ValueError (or TypeError/OverflowError) when the value cannot be parsed.
+    """
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+_FILENAME_DATE = re.compile(r"(?<!\d)(\d{4})-?(\d{2})-?(\d{2})(?!\d)")
+
+
+def _filename_day(name: str) -> datetime | None:
+    """Return the UTC start of the first calendar date in a file name, if any.
+
+    Briefings, handoffs and AARs are named by date (``2026-09-22.md``,
+    ``AAR-20261029-...``); that date survives a checkout or copy, mtime does not.
+    """
+    for match in _FILENAME_DATE.finditer(name):
+        try:
+            return datetime(*(int(g) for g in match.groups()), tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
 class MemoryResult:
     """A single result from the Open Brain retriever."""
 
@@ -179,11 +220,16 @@ class OpenBrainRetriever:
     Memory pools:
       1. Cognitive Ledger (ledger.jsonl via BM25 index)
       2. Local bus cache (~/.cache/bus/messages.tsv; not live authority)
-      3. Briefings (<state-sibling>/state/briefings/*.md)
+      3. Briefings (<state-sibling>/state/briefings/*.md, ~/.agents/_state/briefings;
+         HUMMBL_BRIEFINGS_DIRS overrides)
       4. Autoresearch findings (_state/autoresearch/findings_*.json)
       5. MEMORY.md (Claude Code auto-memory)
       6. Bibliography (hummbl-bibliography unified index / dist)
       7. Session surfaces (cognition/session-claims/*, cognition/session-ledgers/*)
+      8. Closeouts (secondary CLP ledgers, default ~/.agents/state/cognition/ledger.jsonl;
+         HUMMBL_SECONDARY_LEDGERS overrides)
+      9. Handoffs (~/.agents/state/handoffs, ~/.agents/_state/handoff; HUMMBL_HANDOFF_DIRS)
+     10. AARs (~/.agents/docs/aar; HUMMBL_AAR_DIRS)
     """
 
     def __init__(
@@ -266,11 +312,14 @@ class OpenBrainRetriever:
         sources : list[str] | None
             Which memory pools to search. Default: all.
             Options: "ledger", "bus", "briefings", "findings", "memory_md",
-            "bibliography", "session"
+            "bibliography", "session", "closeouts", "handoffs", "aar"
         agent : str
             Agent making the query (for feedback tracking).
         limit : int
-            Maximum number of results before budget filtering.
+            Per-pool result cap before budget filtering: the ledger and bus
+            pools return up to ``limit`` each, every other pool up to
+            ``max(1, limit // 4)``. The merged list can exceed ``limit``;
+            ``token_budget`` bounds the final size.
         time_decay : bool | None
             Apply exponential time decay to ledger BM25 scores based on
             entry age. None = use module default (True unless
@@ -281,8 +330,8 @@ class OpenBrainRetriever:
             COGNITION_RETRIEVER_RETRIEVAL_DECAY=0).
         exclude_ids : set[str] | None
             Ledger entry ids to mask from results (blind rediscovery
-            evaluation). Applies to the ledger pool only; other pools are
-            unaffected.
+            evaluation). Applies to the ledger and closeouts pools; other
+            pools are unaffected.
 
         Returns:
         -------
@@ -302,10 +351,15 @@ class OpenBrainRetriever:
             "session",
             "memory_md",
             "bibliography",
+            "closeouts",
+            "handoffs",
+            "aar",
         ]
 
         self.source_diagnostics = {}
         results: list[MemoryResult] = []
+        # Secondary pools share a quarter of the limit, never less than one slot.
+        pool_limit = max(1, limit // 4)
 
         if "ledger" in all_sources:
             results.extend(
@@ -325,9 +379,14 @@ class OpenBrainRetriever:
             results.extend(self._search_bus_cache(query, since=since, limit=limit))
 
         if "briefings" in all_sources:
-            for s_dir in self.state_dirs:
-                # Also check siblings of state dirs if 'state' folder exists
-                brief_dir = s_dir.parent / "state" / "briefings"
+            # Sibling 'state' folders of each state dir, plus the fleet
+            # governance checkout, where the briefing jobs actually write.
+            brief_dirs = _resolve_pool_paths(
+                "HUMMBL_BRIEFINGS_DIRS",
+                [s_dir.parent / "state" / "briefings" for s_dir in self.state_dirs]
+                + [Path.home() / ".agents" / "_state" / "briefings"],
+            )
+            for brief_dir in brief_dirs:
                 results.extend(
                     self._search_text_pool(
                         query,
@@ -335,7 +394,8 @@ class OpenBrainRetriever:
                         search_dir=brief_dir,
                         glob_pattern="*.md",
                         since=since,
-                        limit=limit // 4,
+                        limit=pool_limit,
+                        newest_by_mtime=True,
                     )
                 )
 
@@ -346,20 +406,61 @@ class OpenBrainRetriever:
                         query,
                         search_dir=s_dir / "autoresearch",
                         since=since,
-                        limit=limit // 4,
+                        limit=pool_limit,
                     )
                 )
 
         if "session" in all_sources:
             results.extend(
-                self._search_session(query, since=since, limit=limit // 4)
+                self._search_session(query, since=since, limit=pool_limit)
             )
 
         if "memory_md" in all_sources:
-            results.extend(self._search_memory_md(query, limit=limit // 4))
+            results.extend(self._search_memory_md(query, limit=pool_limit))
 
         if "bibliography" in all_sources:
-            results.extend(self._search_bibliography(query, limit=limit // 4))
+            results.extend(self._search_bibliography(query, limit=pool_limit))
+
+        if "closeouts" in all_sources:
+            seen_ids = {r.entry_id for r in results if r.source == "ledger"}
+            seen_ids |= set(exclude_ids or ())
+            results.extend(
+                self._search_secondary_ledgers(
+                    query,
+                    scope=scope,
+                    entry_type=entry_type,
+                    since=since,
+                    limit=pool_limit,
+                    exclude_ids=seen_ids,
+                )
+            )
+
+        for pool_name, env_var, defaults in (
+            (
+                "handoffs",
+                "HUMMBL_HANDOFF_DIRS",
+                [
+                    Path.home() / ".agents" / "state" / "handoffs",
+                    Path.home() / ".agents" / "_state" / "handoff",
+                ],
+            ),
+            ("aar", "HUMMBL_AAR_DIRS", [Path.home() / ".agents" / "docs" / "aar"]),
+        ):
+            if pool_name not in all_sources:
+                continue
+            for search_dir in _resolve_pool_paths(env_var, defaults):
+                results.extend(
+                    self._search_text_pool(
+                        query,
+                        pool_name=pool_name,
+                        search_dir=search_dir,
+                        glob_pattern="*.md",
+                        since=since,
+                        limit=pool_limit,
+                        max_files=50,
+                        newest_by_mtime=True,
+                    )
+                )
 
         # Sort all results by score
         results.sort(key=lambda r: r.score, reverse=True)
@@ -676,11 +777,15 @@ class OpenBrainRetriever:
         glob_pattern: str,
         since: str | None = None,
         limit: int = 5,
+        max_files: int = 20,
+        newest_by_mtime: bool = False,
     ) -> list[MemoryResult]:
         """Search a directory of text files using simple term matching.
 
         For TSV files (bus), extracts the message column (col 5) for
         semantic matching rather than treating raw TSV as plain text.
+        ``newest_by_mtime`` scans the most recently modified files first,
+        for directories whose file names do not sort by date.
         """
         if not search_dir.exists():
             return []
@@ -689,14 +794,40 @@ class OpenBrainRetriever:
         if not query_tokens:
             return []
 
+        # TSV rows carry their own timestamps; other files are bounded by the
+        # date in their name, or by mtime when the name has none.
+        since_ts: float | None = None
+        if since:
+            try:
+                since_ts = _to_utc(since).timestamp()
+            except (AttributeError, TypeError, ValueError, OverflowError):
+                return []
+
         results = []
         try:
-            files = sorted(search_dir.glob(glob_pattern), reverse=True)
+            if newest_by_mtime:
+                stamped = []
+                for path in search_dir.glob(glob_pattern):
+                    try:
+                        stamped.append((path.stat().st_mtime, path))
+                    except OSError:
+                        continue
+                files = [p for _, p in sorted(stamped, key=lambda t: t[0], reverse=True)]
+            else:
+                files = sorted(search_dir.glob(glob_pattern), reverse=True)
         except OSError:
             return []
 
-        for filepath in files[:20]:  # Cap file scan
+        for filepath in files[:max_files]:  # Cap file scan
             try:
+                if since_ts is not None and filepath.suffix != ".tsv":
+                    # A dated name covers its whole day; otherwise use mtime.
+                    day = _filename_day(filepath.name)
+                    if day is not None:
+                        if (day + timedelta(days=1)).timestamp() <= since_ts:
+                            continue
+                    elif filepath.stat().st_mtime < since_ts:
+                        continue
                 text = filepath.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
@@ -728,6 +859,99 @@ class OpenBrainRetriever:
                     },
                 )
             )
+
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:limit]
+
+    def _search_secondary_ledgers(
+        self,
+        query: str,
+        *,
+        scope: str | None = None,
+        entry_type: str | None = None,
+        since: str | None = None,
+        limit: int = 5,
+        exclude_ids: set[str] | None = None,
+    ) -> list[MemoryResult]:
+        """Search CLP ledgers other than the indexed primary ledger.
+
+        Session closeouts append to the fleet governance ledger rather than
+        the primary one, so without this pool they are never retrievable.
+        Only the newest ``_BUS_CACHE_MAX_BYTES`` of each file are scanned.
+        """
+        query_tokens = set(tokenize(query))
+        if not query_tokens:
+            return []
+
+        since_utc: datetime | None = None
+        if since:
+            try:
+                since_utc = _to_utc(since)
+            except (AttributeError, TypeError, ValueError, OverflowError):
+                return []
+
+        ledgers = _resolve_pool_paths(
+            "HUMMBL_SECONDARY_LEDGERS",
+            [Path.home() / ".agents" / "state" / "cognition" / "ledger.jsonl"],
+        )
+        skip = set(exclude_ids or ())
+        results: list[MemoryResult] = []
+        for ledger in ledgers:
+            try:
+                with ledger.open("rb") as handle:
+                    size = handle.seek(0, os.SEEK_END)
+                    start = max(0, size - _BUS_CACHE_MAX_BYTES)
+                    # Read one byte early to learn whether start is a record start.
+                    handle.seek(max(0, start - 1))
+                    data = handle.read()
+            except OSError:
+                continue
+            if start > 0:
+                newline = data.find(b"\n")
+                # Drop through the first newline: the byte before start when the
+                # boundary is aligned, otherwise the tail of a partial record.
+                data = data[newline + 1 :] if newline >= 0 else b""
+            lines = data.decode("utf-8", errors="replace").splitlines()
+            for line in lines:
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(entry, dict):
+                    continue
+                entry_id = str(entry.get("id", ""))
+                timestamp = str(entry.get("timestamp", ""))
+                if entry_id in skip:
+                    continue
+                if scope and entry.get("scope") != scope:
+                    continue
+                if entry_type and entry.get("type") != entry_type:
+                    continue
+                if since_utc is not None:
+                    try:
+                        if _to_utc(timestamp) < since_utc:
+                            continue
+                    except (TypeError, ValueError, OverflowError):
+                        continue  # undatable entries cannot satisfy a lower bound
+                content = str(entry.get("content", ""))
+                overlap = query_tokens & set(tokenize(content[:5000]))
+                if not overlap:
+                    continue
+                skip.add(entry_id)
+                results.append(
+                    MemoryResult(
+                        source="closeouts",
+                        entry_id=entry_id,
+                        score=len(overlap) / len(query_tokens) * 0.7,
+                        content=_extract_snippet(content, query_tokens, max_chars=500),
+                        metadata={
+                            "agent": entry.get("agent"),
+                            "type": entry.get("type"),
+                            "timestamp": timestamp,
+                            "path": str(ledger),
+                        },
+                    )
+                )
 
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
