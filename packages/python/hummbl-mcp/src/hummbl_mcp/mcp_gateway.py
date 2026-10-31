@@ -12,7 +12,7 @@ Architecture::
           ↓
     MCPGateway.evaluate(MCPCallRequest)
           ↓
-    ┌─ kill switch HALT_ALL/EMERGENCY    → BLOCK (all tools)
+    ┌─ kill switch HALT_ALL/EMERGENCY/UNAVAILABLE → BLOCK (all tools)
     ├─ kill switch HALT_NONCRITICAL      → BLOCK (write tools only)
     ├─ missing delegation token          → WARN (soft) / BLOCK (strict)
     ├─ argument injection pattern        → BLOCK
@@ -31,15 +31,28 @@ Stdlib-only. No third-party dependencies.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
+import subprocess
+import sys
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
+
+try:
+    from hummbl_governance.kill_switch import get_kill_switch_core
+except ImportError:
+    get_kill_switch_core = None  # type: ignore[assignment]
+
+# Modes that halt every MCP tool, including reads. UNAVAILABLE is the
+# fail-closed result when the live kill-switch mode cannot be read.
+_HALT_ALL_MODES = frozenset({"HALT_ALL", "EMERGENCY", "UNAVAILABLE"})
+_HALT_WRITE_MODES = frozenset({"HALT_NONCRITICAL"})
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -222,7 +235,7 @@ class MCPGateway:
 
         # Guard 0: kill switch
         ks_state = self._kill_switch_state()
-        if ks_state in ("HALT_ALL", "EMERGENCY"):
+        if ks_state in _HALT_ALL_MODES:
             findings.append(
                 MCPFinding(
                     rule="KILL_SWITCH",
@@ -233,7 +246,7 @@ class MCPGateway:
             return self._decide(request, findings)
 
         # Guard 1: HALT_NONCRITICAL blocks write tools
-        if ks_state == "HALT_NONCRITICAL" and request.is_write_tool:
+        if ks_state in _HALT_WRITE_MODES and request.is_write_tool:
             findings.append(
                 MCPFinding(
                     rule="WRITE_TOOL_HALTED",
@@ -368,8 +381,6 @@ class MCPGateway:
     @staticmethod
     def _default_bus_poster(msg_type: str, message: str) -> None:
         """Post to coordination bus via bus_writer subprocess."""
-        import subprocess
-
         subprocess.run(
             [
                 "python3",
@@ -385,29 +396,32 @@ class MCPGateway:
         )
 
     def _kill_switch_state(self) -> str:
-        """Return the current kill switch state string."""
-        ks = self._kill_switch
-        if ks is not None:
+        """Return the current kill-switch mode, or UNAVAILABLE.
+
+        Reads ``KillSwitch.mode`` / ``get_status()['mode']``. Never calls
+        ``get_state()`` (that method does not exist on ``KillSwitch``).
+        A read, load, or import failure is UNAVAILABLE, which blocks every
+        tool. Env ``MCP_KILL_SWITCH_STATE`` is used only when no instance
+        and no core accessor are available.
+        """
+        if self._kill_switch is not None:
             try:
-                state = ks.get_state()
-                return state.name if hasattr(state, "name") else str(state)
+                return _mode_from_instance(self._kill_switch)
             except Exception:
-                return "DISENGAGED"
+                logger.exception("MCPGateway: kill switch instance unreadable")
+                return "UNAVAILABLE"
 
-        env_override = os.environ.get("MCP_KILL_SWITCH_STATE", "")
-        if env_override:
-            return env_override.upper()
-
-        try:
+        if get_kill_switch_core is not None:
             try:
-                from hummbl_governance.kill_switch import KillSwitchCore
-            except ImportError:
-                pass
+                return _mode_from_instance(get_kill_switch_core())
+            except Exception:
+                logger.exception("MCPGateway: kill switch core unreadable")
+                return "UNAVAILABLE"
 
-            ks = KillSwitchCore()
-            return ks.get_state().name
-        except Exception:
-            return "DISENGAGED"
+        env_override = os.environ.get("MCP_KILL_SWITCH_STATE", "").strip().upper()
+        if env_override:
+            return env_override
+        return "UNAVAILABLE"
 
     @staticmethod
     def _scan_injection(arguments: dict[str, Any]) -> list[str]:
@@ -431,11 +445,36 @@ class MCPGateway:
         return hits
 
 
+def _mode_from_instance(ks: Any) -> str:
+    """Extract a kill-switch mode name from a live instance.
+
+    Prefers ``mode`` (``KillSwitch`` API). Falls back to ``get_status()``.
+    Does not call ``get_state()``.
+    """
+    mode = getattr(ks, "mode", None)
+    if mode is not None:
+        name = getattr(mode, "name", None)
+        if isinstance(name, str) and name:
+            return name
+        if isinstance(mode, str) and mode:
+            return mode
+        if isinstance(mode, Enum):
+            return mode.name
+
+    status = getattr(ks, "get_status", None)
+    if callable(status):
+        result = status()
+        if isinstance(result, dict):
+            mode_str = result.get("mode")
+            if isinstance(mode_str, str) and mode_str:
+                return mode_str
+
+    raise RuntimeError("kill switch instance has no readable mode")
+
+
 # ---------------------------------------------------------------------------
 # MCP stdio server
 # ---------------------------------------------------------------------------
-
-import json
 
 _GATEWAY_SERVER_NAME = "mcp-gateway"
 _GATEWAY_SERVER_VERSION = "0.1.0"
@@ -583,7 +622,6 @@ def _gw_handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
 
 def serve_stdio() -> None:
     """Run the MCP gateway server over stdin/stdout (JSON-RPC 2.0)."""
-    import sys
     logging.basicConfig(level=logging.WARNING, stream=sys.stderr)
     logger.info("Starting %s v%s", _GATEWAY_SERVER_NAME, _GATEWAY_SERVER_VERSION)
     for line in sys.stdin:

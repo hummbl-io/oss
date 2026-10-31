@@ -18,11 +18,27 @@ import sys
 from typing import Any
 
 try:
-    from hummbl_governance.kill_switch import (
-        get_kill_switch_core,
-    )
-except ImportError:  # hummbl_governance is not installed in this environment
-    get_kill_switch_core = None  # type: ignore[assignment]
+    from hummbl_governance.kill_switch import get_kill_switch_core
+except ImportError:
+    try:
+        import os
+        import tempfile
+        from pathlib import Path
+
+        from hummbl_governance.kill_switch import KillSwitch
+
+        def get_kill_switch_core() -> KillSwitch:
+            state_dir = Path(
+                os.environ.get("GOVERNANCE_STATE_DIR")
+                or Path(tempfile.gettempdir()) / "governance"
+            )
+            try:
+                return KillSwitch.load_from_file(state_dir, require_existing=True)
+            except TypeError:
+                # Governance releases before require_existing lack the parameter.
+                return KillSwitch.load_from_file(state_dir)
+    except ImportError:  # hummbl_governance is not installed in this environment
+        get_kill_switch_core = None  # type: ignore[assignment]
 
 
 def _core():
