@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **47** Python packages under `packages/python/<name>/`, one
+Currently hosts **48** Python packages under `packages/python/<name>/`, one
 private Node technical canary under `packages/node/mcp-base120`, and one Lean
 tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
 under `packages/` yet.
@@ -61,6 +61,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.2.0 | In-tree | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
 | hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | Evidence-governed evaluation contracts for compositional Human-AI systems |
 | hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | Bidirectional multi-agent peer-review GitOps loop |
+| wags | `packages/python/wags/` | 0.2.0 | In-tree | Polyglot, air-gappable multi-agent peer review protocol |
 
 Published-version metadata checked on 2026-10-02 UTC: [governance 1.5.1](https://pypi.org/pypi/hummbl-governance/1.5.1/json), [base120 3.1.0](https://pypi.org/pypi/base120/3.1.0/json), [tuples 0.2.2](https://pypi.org/pypi/hummbl-tuples/0.2.2/json), [bus 0.2.1](https://pypi.org/pypi/hummbl-bus/0.2.1/json). Equal tree and published version strings do not certify identical source bytes.
 

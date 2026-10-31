@@ -24,7 +24,7 @@ provide dated primary sources, claim boundaries and a commercial measurement
 proposal. Company adoption and deployed public copy remain separate review steps.
 
 ## Packages
-47 Python packages under `packages/python/<name>/`. Versions are
+48 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
