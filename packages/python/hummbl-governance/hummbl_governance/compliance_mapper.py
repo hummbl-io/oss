@@ -17,33 +17,35 @@
 """Compliance Mapper -- Map governance traces to common security and AI controls.
 
 This module parses append-only governance bus JSONL files and extracts
-cryptographic evidence to satisfy specific regulatory controls.
+HMAC-SHA256 tamper-evident trace evidence (symmetric keyed MAC when a shared
+signing secret is configured; not asymmetric non-repudiation unless paired with
+an Ed25519 principal proof) mapped to regulatory control identifiers.
 
-SOC2 Controls Mapped:
-- CC6.1: Logical Access Security (mapped to DCT tuples)
-- CC7.2: Monitoring and Logging (mapped to governance bus integrity)
-- CC6.3: Identity & Authentication (mapped to subject/issuer in DCTs)
+SOC 2 (AICPA Trust Services Criteria) Controls Mapped:
+- CC6.1: Logical and Physical Access Controls (mapped to DCT tuples)
+- CC7.2: System Monitoring and Anomaly Detection (mapped to governance entries carrying a signature; presence-checked unless a shared HMAC secret is configured)
+- CC6.3: Role-Based Access Authorization (mapped to subject/issuer in DCTs)
 
 GDPR Articles Mapped:
 - Article 30: Records of Processing (mapped to DCTX/CONTRACT/ATTEST tuples)
-- Article 32: Security of Processing (mapped to signed entries)
+- Article 32: Security of Processing (mapped to HMAC-authenticated entries)
 
 OWASP Top 10 for Agentic Applications (ASI01-ASI10) Mapped:
 - ASI01: Agent Goal Hijack (mapped to INTENT tuples)
 - ASI03: Identity & Privilege Abuse (mapped to DCT tuples)
-- ASI04: Supply Chain Vulnerabilities (mapped to signed entries)
-- ASI07: Insecure Inter-Agent Communication (mapped to DCTX + signed entries)
+- ASI04: Supply Chain Vulnerabilities (mapped to HMAC-authenticated entries)
+- ASI07: Insecure Inter-Agent Communication (mapped to DCTX + HMAC-authenticated entries)
 - ASI08: Cascading Failures (mapped to CIRCUIT_BREAKER/KILLSWITCH tuples)
 
-NIST AI RMF (GOVERN/MAP/MEASURE/MANAGE) Mapped:
-- GOVERN 1.1: AI risk management policies (INTENT tuples prove stated objectives)
-- GOVERN 1.7: Processes for risk identification (CIRCUIT_BREAKER/KILLSWITCH events)
-- MAP 1.1: Organizational context (CONTRACT/DCTX tuples)
-- MAP 2.2: Scientific basis for risk assessment (ATTEST/EVIDENCE tuples)
-- MEASURE 2.5: Trustworthiness evaluations (signed governance entries)
-- MEASURE 2.8: Impact metrics logged (COST_GOVERNOR events)
-- MANAGE 1.3: Response plans executed (KILLSWITCH events)
-- MANAGE 2.4: Risk treatment applied (CIRCUIT_BREAKER state transitions)
+NIST AI RMF 1.0 (GOVERN/MAP/MEASURE/MANAGE, control IDs GOVERN-1.1..MANAGE-2.4) Mapped:
+- GOVERN-1.1: Legal and regulatory requirements involving AI are understood and documented (INTENT tuples)
+- GOVERN-1.7: Processes and procedures for safely decommissioning AI systems (CIRCUIT_BREAKER/KILLSWITCH events)
+- MAP-1.1: Intended purposes, context-specific laws, norms, and expectations documented (CONTRACT/DCTX/DCT tuples)
+- MAP-2.2: AI system knowledge limits and human oversight documented (ATTEST/EVIDENCE tuples)
+- MEASURE-2.5: Deployed AI system demonstrated to be valid and reliable (HMAC-authenticated entries)
+- MEASURE-2.8: Transparency and accountability risks examined and documented (COST_GOVERNOR events)
+- MANAGE-1.3: High-priority AI risk responses developed, planned, and documented (KILLSWITCH events)
+- MANAGE-2.4: Mechanisms applied to disengage or deactivate inconsistent AI systems (CIRCUIT_BREAKER transitions)
 
 EU AI Act Articles Mapped (High-Risk AI per Annex III):
 - Art.9: Risk management system (KILLSWITCH + CIRCUIT_BREAKER evidence)

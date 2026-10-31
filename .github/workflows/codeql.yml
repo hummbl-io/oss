@@ -31,7 +31,6 @@ jobs:
     runs-on: ubuntu-24.04
     # GHAS disabled 2026-09-16: SARIF upload requires Code Security on
     # private repos. Skipped until org/repo var HUMMBL_GHAS_ENABLED=true.
-    if: vars.HUMMBL_GHAS_ENABLED == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:

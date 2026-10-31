@@ -109,7 +109,7 @@ These must be configured outside the workflow file:
 
 - **PyPI trusted publisher**: for each package, configure on pypi.org with owner `hummbl-io`, repo `oss`, workflow `publish-pypi.yml`, environment `pypi`
 - **GitHub `pypi` environment**: retain the environment used by trusted publishing. Any wait timer follows the owner's explicit disposition; approval settings must not make the owner depend on another person, account, or agent to publish.
-- **Owner merge authority**: branch protections and rulesets are disabled by default. CI, signing, and review receipts remain evidence and agent verification obligations; do not configure a requirement for another person, account, or agent to approve the owner's decisions or merges.
+- **Owner merge authority**: `main` enforces `required_status_checks: ["ci-ok"]`, required commit signatures, and `enforce_admins: true`, while required pull-request reviewer counts remain 0 so the owner never depends on another person, account, or agent to approve decisions or merges.
 - **Tag protection**: prevent force-pushing or deleting tags
 - **No PyPI API tokens**: remove any legacy API tokens from PyPI account settings; trusted publishing replaces them
 
