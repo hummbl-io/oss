@@ -3,7 +3,7 @@
 **Status:** draft v0.1
 **Steward:** HUMMBL, LLC
 **Approving human:** Human Principal Agent
-**Source of record:** this file in `hummbl-io/hummbl-governance` (canonical); templates mirrored in `hummbl-io/.github`.
+**Source of record:** this file in `hummbl-io/oss` at `packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md` (canonical); templates mirrored in `hummbl-io/.github`. The copy in the archived `hummbl-io/hummbl-governance` repo is historical and read-only.
 
 ## 1. Purpose
 
@@ -204,4 +204,4 @@ Each repo's `scripts/validate.*` is its deterministic admission gate. The standa
 
 ## 13. Amendment
 
-Changes to this standard require: a PR to `hummbl-io/hummbl-governance`, an ADR under `docs/adr/`, a KRINEIA receipt, and human approval (Human Principal Agent). Breaking changes bump the standard version (SemVer) and trigger a fleet re-audit.
+Changes to this standard require: a PR to `hummbl-io/oss` against `packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md`, an ADR under `docs/adr/`, a KRINEIA receipt, and human approval (Human Principal Agent). Breaking changes bump the standard version (SemVer) and trigger a fleet re-audit.
