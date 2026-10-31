@@ -167,7 +167,7 @@ register_framework(FrameworkSpec(
     reference="AICPA SOC 2 Trust Service Criteria (CC6, CC7).",
     default_days=7,
     controls=(
-        ControlSpec("CC6.1", "Logical access security", (
+        ControlSpec("CC6.1", "Logical and physical access controls (TSC CC6.1)", (
             _rule("DCT", extract=(
                 ("issuer", "issuer"),
                 ("subject", "subject"),
@@ -175,10 +175,10 @@ register_framework(FrameworkSpec(
                 ("ops", "ops_allowed"),
             )),
         )),
-        ControlSpec("CC7.2", "Monitoring and logging", (
+        ControlSpec("CC7.2", "System monitoring for anomalies and security events (TSC CC7.2)", (
             _rule(signed=True),
         )),
-        ControlSpec("CC6.3", "Identity and authentication", (
+        ControlSpec("CC6.3", "Role-based access authorization and modification (TSC CC6.3)", (
             _rule("DCT", extract=(
                 ("subject", "subject"),
                 ("issuer", "issuer"),
@@ -285,35 +285,35 @@ register_framework(FrameworkSpec(
     reference="NIST AI 100-1 (2023), AI RMF Playbook.",
     default_days=30,
     controls=(
-        ControlSpec("GOVERN-1.1", "AI risk management policies", (
+        ControlSpec("GOVERN-1.1", "Legal and regulatory AI requirements understood and documented", (
             _rule("INTENT", extract=(
                 ("agent", "agent"),
                 ("objective", "objective"),
                 ("phase", "phase"),
             )),
         )),
-        ControlSpec("GOVERN-1.7", "Processes for risk identification", (
+        ControlSpec("GOVERN-1.7", "Processes and procedures for safely decommissioning and phasing out AI systems", (
             _rule("CIRCUIT_BREAKER", "KILLSWITCH", extract=(
                 ("state", "state"),
                 ("adapter", "adapter"),
             )),
         )),
-        ControlSpec("MAP-1.1", "Organisational context", (
+        ControlSpec("MAP-1.1", "Intended purposes, context-specific laws, norms, and expectations are documented", (
             _rule("CONTRACT", "DCTX", "DCT", fallback=(
                 ("delegator", ("delegator", "issuer")),
                 ("delegatee", ("delegatee", "subject")),
             )),
         )),
-        ControlSpec("MAP-2.2", "Scientific basis for risk assessment", (
+        ControlSpec("MAP-2.2", "Information about AI system knowledge limits and human oversight is documented", (
             _rule("ATTEST", "EVIDENCE", extract=(
                 ("claim", "claim"),
                 ("outcome", "outcome"),
             )),
         )),
-        ControlSpec("MEASURE-2.5", "Trustworthiness evaluations", (
+        ControlSpec("MEASURE-2.5", "The AI system to be deployed is demonstrated to be valid and reliable", (
             _rule(signed=True),
         )),
-        ControlSpec("MEASURE-2.8", "Impact metrics logged", (
+        ControlSpec("MEASURE-2.8", "Transparency and accountability risks examined and documented", (
             _rule("COST_GOVERNOR", extract=(
                 ("agent", "agent"),
                 ("decision", "decision"),
@@ -321,10 +321,10 @@ register_framework(FrameworkSpec(
                 ("budget", "budget"),
             )),
         )),
-        ControlSpec("MANAGE-1.3", "Response plans executed", (
+        ControlSpec("MANAGE-1.3", "Responses to high-priority AI risks are developed, planned, and documented", (
             _rule("KILLSWITCH", extract=(("state", "state"), ("adapter", "adapter"))),
         )),
-        ControlSpec("MANAGE-2.4", "Risk treatment applied", (
+        ControlSpec("MANAGE-2.4", "Mechanisms are applied to disengage or deactivate inconsistent AI systems", (
             _rule("CIRCUIT_BREAKER", extract=(("state", "state"), ("adapter", "adapter"))),
         )),
     ),

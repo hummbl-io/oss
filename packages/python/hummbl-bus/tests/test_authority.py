@@ -472,3 +472,12 @@ def test_principal_authorizes_checks_all_fields() -> None:
         message="test",
         request_id="req-1",
     )
+
+
+@pytest.mark.parametrize("mtype", ["DECISION", "DIRECTIVE", "VETO", "COMMAND", "APPROVE", "REJECT"])
+def test_mcp_bus_post_blocks_privileged_and_elevated_types(mtype: str) -> None:
+    from hummbl_bus.mcp_server import handle_tool
+
+    res = handle_tool("bus_post", {"type": mtype, "message": "test authority gate"})
+    assert res.get("posted") is False
+    assert "cannot issue privileged message types" in str(res.get("error", ""))
