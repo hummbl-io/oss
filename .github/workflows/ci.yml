@@ -295,6 +295,24 @@ jobs:
         # docs/artifacts/AUDIT_2026-09-11_public_claims_drift.md.
         run: python packages/python/hummbl-governance/scripts/check_public_count_claims.py
 
+  claim-integrity:
+    name: claim-integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Enforce stdlib-scope and runner-badge claim integrity
+        # Backs two public claims with repo state:
+        #  - "zero third-party runtime dependencies" (only allowlisted exceptions)
+        #  - README "Tested on" badges never claim an OS that no runner provides.
+        run: python .github/scripts/check_claim_integrity.py
+
   # ---------------------------------------------------------------------------
   # Docker-based test job for hummbl-governance.
   #
@@ -330,7 +348,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit, build-lock-check, package-parity, claim-drift-check, docker-test]
+    needs: [test, test-preview, pip-audit, build-lock-check, package-parity, claim-drift-check, claim-integrity, docker-test]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
@@ -341,6 +359,7 @@ jobs:
           echo "build-lock-check=${{ needs.build-lock-check.result }}"
           echo "package-parity=${{ needs.package-parity.result }}"
           echo "claim-drift-check=${{ needs.claim-drift-check.result }}"
+          echo "claim-integrity=${{ needs.claim-integrity.result }}"
           echo "docker-test=${{ needs.docker-test.result }}"
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
@@ -350,4 +369,5 @@ jobs:
           test "${{ needs.build-lock-check.result }}" = success
           test "${{ needs.package-parity.result }}" = success
           test "${{ needs.claim-drift-check.result }}" = success
+          test "${{ needs.claim-integrity.result }}" = success
           test "${{ needs.docker-test.result }}" = success

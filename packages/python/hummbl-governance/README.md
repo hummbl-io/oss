@@ -114,7 +114,7 @@ graph TD
     J --> K[SOC2 / GDPR / NIST Report]
 ```
 
-[![Tested on](https://img.shields.io/badge/Tested%20on-Ubuntu%2024.04%20%C2%B7%20macOS%20M--series%20%C2%B7%20Windows%2011%20%2B%20WSL2-blue)]()
+[![Tested on](https://img.shields.io/badge/Tested%20on-Ubuntu%2024.04-blue)]()
 [![Architecture](https://img.shields.io/badge/Architecture-x86__64%20%7C%20ARM64-brightgreen)]()
 
 ## Features
