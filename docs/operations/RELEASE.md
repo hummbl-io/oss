@@ -83,8 +83,8 @@ does not backfill the missing 0.2.0 tag.
 4. `main` is green (CI passing)
 5. Tag created on the merge commit: `git tag python/<package>/v<version>`
 6. Tag pushed: `git push origin python/<package>/v<version>`
-7. Workflow triggered and completed — both `build` and `publish` jobs pass
-8. Verify on PyPI: artifact exists, version matches, "Uploaded using Trusted Publishing? Yes"
+7. Workflow triggered and completed — `build`, `publish`, and `verify-publish` jobs pass
+8. Verify on PyPI: artifact exists, version matches, "Uploaded using Trusted Publishing? Yes", and PEP 740 provenance resolves (HTTP 200) at `https://pypi.org/integrity/<package>/<version>/<filename>/provenance`
 
 ## Workflow-enforced gates
 
@@ -102,6 +102,51 @@ The workflow also runs package tests, builds an SBOM, signs artifacts
 with Sigstore, attests provenance, and opens a GitHub Release for the
 tag. Those steps exist in YAML; they only run when the tag matches the
 filter.
+
+## Provenance and attestation (issue #345 A-10)
+
+Every real tag publish must satisfy three independent guarantees, checked by the
+`verify-publish` job after `publish`:
+
+1. **PyPI PEP 740 provenance** — the pypa publish action runs with
+   `attestations` enabled (default), so the uploaded wheel and sdist carry
+   PEP 740 attestations. Verified at
+   `https://pypi.org/integrity/<package>/<version>/<filename>/provenance`
+   (HTTP 200).
+2. **GitHub repo attestation** — `actions/attest-build-provenance` runs before
+   the PyPI upload and is verifiable with
+   `gh attestation verify <file> --repo hummbl-io/oss`.
+3. **GitHub Release** — created for the tag, carrying the wheel, sdist,
+   `checksums-sha256.txt`, and `sbom.json`.
+
+The publish job is ordered **fail-closed**: checksums, provenance attestation,
+and Sigstore signing run before the irreversible PyPI upload, so a failure
+before the upload publishes nothing. `verify-publish` then re-checks all three
+against live external state and fails the run if any is missing.
+
+**Provenance epoch:** GitHub-attestation and Release guarantees are enforced
+from 2026-10-31 (this workflow change). Historical artifacts published earlier
+may lack a GitHub repo attestation or Release: `hummbl-bus 0.2.1` (its
+attestation step failed on a multi-glob `subject-path`; PEP 740 is present) and
+`hummbl-cognition 0.1.0` (not produced by this workflow — no tag or run). Those
+versions are exempt until superseded by a patch release published through this
+workflow; PyPI forbids re-uploading an existing version.
+
+### TestPyPI rehearsal
+
+`workflow_dispatch` runs the same build and publish path against TestPyPI
+without consuming a real version or creating a Release:
+
+- Configure a TestPyPI Trusted Publisher for the package: owner `hummbl-io`,
+  repo `oss`, workflow `publish-pypi.yml`, environment `testpypi`.
+- Dispatch the workflow with `package`, `version` (must match
+  `pyproject.toml`), and the default `repository_url`
+  (`https://test.pypi.org/legacy/`).
+- Confirm the run reaches the PyPI publish step and that a TestPyPI PEP 740
+  provenance document exists at
+  `https://test.pypi.org/integrity/<package>/<version>/<filename>/provenance`.
+
+`verify-publish` and the GitHub Release step are tag-only and skip on dispatch.
 
 ## Repository configuration requirements
 
