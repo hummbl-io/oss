@@ -1,85 +1,16 @@
-"""Regression tests for oss#345: MCPGateway dispatch wiring and mcp_git_vault option-injection guards."""
+"""Regression tests for oss#345 git-vault option-injection guards (A-4/A-5).
 
-import json
+Server-dispatch / gateway-wiring coverage (A-2) is provided by
+tests/test_mcp_gateway_kill_switch.py, which landed on main via #362. The
+former server-level tests in this file were written against the pre-#362
+server API (`server.gateway`, older error shape) and were superseded when
+main's fail-closed gateway was adopted during the #358 merge.
+"""
+
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
-from hummbl_mcp.mcp_gateway import MCPGateway
 from hummbl_mcp.mcp_git_vault import handle_git_diff, handle_git_stage
-from hummbl_mcp.protocol import JsonRpcRequest, ToolDefinition
-from hummbl_mcp.server import HummblMCPServer
-
-
-def _make_server(blocked_tools=None, kill_switch_state=None, monkeypatch=None):
-    if monkeypatch and kill_switch_state:
-        monkeypatch.setenv("MCP_KILL_SWITCH_STATE", kill_switch_state)
-    tdef = ToolDefinition(
-        name="demo_write",
-        description="demo write tool",
-        input_schema={"type": "object", "properties": {"path": {"type": "string"}}},
-    )
-    server = HummblMCPServer(
-        tool_definitions=[tdef],
-        handlers={"demo_write": lambda args: {"ok": True, "args": args}},
-    )
-    if blocked_tools is not None:
-        server.gateway = MCPGateway(
-            bus_poster=lambda *a: None,
-            blocked_tools=blocked_tools,
-        )
-    return server
-
-
-def test_server_blocks_tool_on_gateway_blocked_list():
-    server = _make_server(blocked_tools=["demo_write"])
-    resp = server.handle(
-        JsonRpcRequest(
-            jsonrpc="2.0",
-            id=1,
-            method="tools/call",
-            params={"name": "demo_write", "arguments": {"path": "ok.txt"}},
-        )
-    )
-    assert resp is not None
-    assert resp["result"]["isError"] is True
-    payload = json.loads(resp["result"]["content"][0]["text"])
-    assert payload["verdict"] == "BLOCK"
-    assert "BLOCKED_TOOL" in payload["error"]
-
-
-def test_server_blocks_path_traversal_via_gateway():
-    server = _make_server()
-    resp = server.handle(
-        JsonRpcRequest(
-            jsonrpc="2.0",
-            id=2,
-            method="tools/call",
-            params={"name": "demo_write", "arguments": {"path": "../../etc/passwd"}},
-        )
-    )
-    assert resp is not None
-    assert resp["result"]["isError"] is True
-    payload = json.loads(resp["result"]["content"][0]["text"])
-    assert payload["verdict"] == "BLOCK"
-    assert "PATH_TRAVERSAL" in payload["error"]
-
-
-def test_server_allows_clean_tool_call():
-    server = _make_server()
-    resp = server.handle(
-        JsonRpcRequest(
-            jsonrpc="2.0",
-            id=3,
-            method="tools/call",
-            params={"name": "demo_write", "arguments": {"path": "safe/file.txt"}},
-        )
-    )
-    assert resp is not None
-    assert resp["result"]["isError"] is False
-    payload = json.loads(resp["result"]["content"][0]["text"])
-    assert payload["ok"] is True
 
 
 def test_vault_git_diff_rejects_option_shaped_path(tmp_path: Path):
@@ -103,56 +34,6 @@ def test_vault_git_stage_rejects_option_shaped_path(tmp_path: Path):
     assert "Option-shaped path" in res["content"][0]["text"]
 
 
-def test_engaged_kill_switch_state_file_blocks_tool_calls(
-    tmp_path: Path, monkeypatch
-):
-    pytest.importorskip("hummbl_governance")
-    (tmp_path / "kill_switch_state.json").write_text(
-        json.dumps({"mode": "HALT_ALL", "reason": "test halt"}),
-        encoding="utf-8",
-    )
-    monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
-    server = _make_server()
-    resp = server.handle(
-        JsonRpcRequest(
-            jsonrpc="2.0",
-            id=4,
-            method="tools/call",
-            params={"name": "demo_write", "arguments": {"path": "ok.txt"}},
-        )
-    )
-    assert resp is not None
-    assert resp["result"]["isError"] is True
-    payload = json.loads(resp["result"]["content"][0]["text"])
-    assert payload["verdict"] == "BLOCK"
-    assert "KILL_SWITCH" in payload["error"]
-
-
-def test_unverifiable_delegation_token_is_unsigned(monkeypatch):
-    monkeypatch.setenv("MCP_GATEWAY_STRICT", "true")
-    server = _make_server()
-    for spoofed in (None, "arbitrary-string", 1234):
-        resp = server.handle(
-            JsonRpcRequest(
-                jsonrpc="2.0",
-                id=5,
-                method="tools/call",
-                params={
-                    "name": "demo_write",
-                    "arguments": {
-                        "path": "ok.txt",
-                        "_delegation_token": spoofed,
-                    },
-                },
-            )
-        )
-        assert resp is not None
-        assert resp["result"]["isError"] is True
-        payload = json.loads(resp["result"]["content"][0]["text"])
-        assert payload["verdict"] == "BLOCK"
-        assert "MISSING_DELEGATION" in payload["error"]
-
-
 def test_vault_git_stage_uses_literal_pathspecs(tmp_path: Path):
     (tmp_path / "file[12].txt").write_text("x", encoding="utf-8")
     with patch("hummbl_mcp.mcp_git_vault.get_git_root", return_value=str(tmp_path)):
@@ -164,22 +45,3 @@ def test_vault_git_stage_uses_literal_pathspecs(tmp_path: Path):
     assert res["isError"] is False
     cmd = mock_run.call_args[0][0]
     assert "--literal-pathspecs" in cmd
-
-
-def test_gateway_denied_call_emits_receipt():
-    server = _make_server(blocked_tools=["demo_write"])
-    with patch("hummbl_mcp.receipts.post_receipt") as mock_post:
-        resp = server.handle(
-            JsonRpcRequest(
-                jsonrpc="2.0",
-                id=6,
-                method="tools/call",
-                params={"name": "demo_write", "arguments": {"path": "ok.txt"}},
-            )
-        )
-    assert resp is not None
-    assert resp["result"]["isError"] is True
-    mock_post.assert_called_once()
-    receipt = mock_post.call_args[0][0]
-    assert receipt.tool == "demo_write"
-    assert receipt.status == "error"

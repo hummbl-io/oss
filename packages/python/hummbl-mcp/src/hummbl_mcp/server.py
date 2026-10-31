@@ -16,10 +16,12 @@ import json
 import sys
 from typing import Any, Callable
 
+from hummbl_mcp.mcp_gateway import MCPCallRequest, MCPGateway
 from hummbl_mcp.protocol import (
     INTERNAL_ERROR,
     INVALID_PARAMS,
     METHOD_NOT_FOUND,
+    TOOL_BLOCKED,
     TOOL_NOT_FOUND,
     JsonRpcError,
     JsonRpcRequest,
@@ -29,8 +31,6 @@ from hummbl_mcp.protocol import (
     serialize_response,
     success_response,
 )
-from hummbl_mcp._auth import verify_token
-from hummbl_mcp.mcp_gateway import MCPCallRequest, MCPGateway
 from hummbl_mcp.receipts import ReceiptTimer
 from hummbl_mcp import gcp_tools, bridge_tools, billing_tools
 from hummbl_mcp.billing_middleware import BillingMiddleware, apply_billing_middleware
@@ -56,6 +56,8 @@ class HummblMCPServer:
         receipt_identity: str = "hummbl-mcp",
         cost_tracker: CostTracker | None = None,
         enable_billing: bool = False,
+        gateway: MCPGateway | None = None,
+        kill_switch: Any = None,
     ) -> None:
         if tool_definitions is None:
             tool_definitions = gcp_tools.get_tool_definitions() + bridge_tools.get_tool_definitions()
@@ -68,7 +70,10 @@ class HummblMCPServer:
         self._initialized = False
         self.cost_tracker = cost_tracker
         self.enable_billing = enable_billing
-        self.gateway = MCPGateway(bus_poster=lambda *a: None)
+        self._gateway = gateway or MCPGateway(
+            kill_switch=kill_switch,
+            bus_poster=lambda *_args: None,
+        )
         
         # Add billing tools if enabled
         if enable_billing and cost_tracker is not None:
@@ -151,33 +156,18 @@ class HummblMCPServer:
         if handler is None:
             raise JsonRpcError(TOOL_NOT_FOUND, f"tool not found: {name}")
 
-        raw_token = args.get("_delegation_token")
-        decision = self.gateway.evaluate(
-            MCPCallRequest(
-                tool_name=name,
-                adapter=self.receipt_identity,
-                arguments=args,
-                delegation_token=(
-                    raw_token
-                    if isinstance(raw_token, str) and verify_token(raw_token)
-                    else ""
-                ),
-            )
-        )
-        if not decision.allowed:
-            with ReceiptTimer(
-                name, args, identity=self.receipt_identity
-            ) as timer:
-                timer.error(
-                    f"gateway denied tool '{name}': {decision.verdict.value}"
-                )
-            return {
-                "content": [{"type": "text", "text": json.dumps({"error": decision.summary(), "verdict": decision.verdict.value})}],
-                "isError": True,
-            }
-
         with ReceiptTimer(name, args, identity=self.receipt_identity) as timer:
             try:
+                decision = self._gateway.evaluate(
+                    MCPCallRequest(
+                        tool_name=name,
+                        adapter=SERVER_NAME,
+                        arguments=args,
+                        delegation_token=str(args.get("_delegation_token") or ""),
+                    )
+                )
+                if not decision.allowed:
+                    raise JsonRpcError(TOOL_BLOCKED, decision.summary())
                 result = handler(args)
             except JsonRpcError as err:
                 timer.error(err.message)
