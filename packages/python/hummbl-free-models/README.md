@@ -33,13 +33,18 @@ prove that inference is currently available or free.
 
 ## Regenerate the registry
 
-```bash
-# 1. Generate entries from the curated family/provider definitions
-python -m hummbl_free_models.generate
+The shipped family definitions do not yet contain the complete `providers`,
+`sizes`, and `variants` lists that generation requires, so the preview currently
+produces zero entries. Populate those definitions before generating a replacement.
+In particular, `--no-merge` would overwrite the seed with an empty registry while
+these inputs are incomplete.
 
-# 2. Verify and extend them using configured provider model-list endpoints
-# (requires credentials where the provider requires authentication)
-python -m hummbl_free_models.crawl
+```bash
+# 1. Preview generation without changing the seed
+python -m hummbl_free_models.generate --dry-run
+
+# 2. Preview the complete NVIDIA provider configuration without fetching or saving
+python -m hummbl_free_models.crawl --provider nvidia-nim --dry-run --no-save
 
 # 3. Validate against the schema
 python -m hummbl_free_models.validate
@@ -48,6 +53,12 @@ python -m hummbl_free_models.validate
 Crawling reads provider credentials from the `api_key_env` named in
 `data/providers.yaml`. No keys are bundled, and the crawler only calls each
 provider's model-listing endpoint.
+
+To fetch and save NVIDIA model-list results, supply `NVIDIA_API_KEY` through your
+secret store and run `python -m hummbl_free_models.crawl --provider nvidia-nim`.
+The `openai-compatible` entry is an incomplete placeholder; complete or remove it
+before crawling all providers. An unfiltered crawl can fail on that placeholder
+before reaching a configured provider.
 
 ## Adding a provider
 
