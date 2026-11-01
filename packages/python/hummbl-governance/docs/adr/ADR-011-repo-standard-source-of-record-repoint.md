@@ -1,4 +1,4 @@
-# ADR-011 — Repo Standard Source of Record Repoint and §13 Amendment Route
+# ADR-011 â€” Repo Standard Source of Record Repoint and Â§13 Amendment Route
 
 - **Status:** proposed (pending human approval)
 - **Date:** 2026-10-29
@@ -18,17 +18,17 @@ In `packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md`:
 1. The **Source of record** header pointed to the archived `hummbl-io/hummbl-governance` repository.
 2. **Section 13 (Amendment)** routed changes as PRs to `hummbl-io/hummbl-governance`.
 
-Per §13:
+Per Â§13:
 > "Changes to this standard require: a PR to `hummbl-io/oss` against `packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md`, an ADR under `docs/adr/`, a KRINEIA receipt, and human approval (Human Principal Agent)."
 
-This ADR satisfies the ADR requirement for the §13 amendment.
+This ADR satisfies the ADR requirement for the Â§13 amendment.
 
 ## Decision
 
 1. **Repoint Source of Record:** The header in `HUMMBL_REPO_STANDARD.md` is updated to point to `packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md` in `hummbl-io/oss` as canonical. The historical copy in the archived `hummbl-io/hummbl-governance` repository is marked read-only.
-2. **Repoint Amendment Route:** §13 is amended to direct future PRs to `hummbl-io/oss` against this file.
+2. **Repoint Amendment Route:** Â§13 is amended to direct future PRs to `hummbl-io/oss` against this file.
 3. **Retain Public Redaction:** In accordance with the public-repository redaction policy (PRs #166, #209), personal names remain redacted in `hummbl-io/oss`. All approving human and exception authority fields retain the canonical title `Human Principal Agent`.
-4. **Stage §13 KRINEIA Receipt:** An amendment admission receipt is staged in `_receipts/krineia/pending/2026-10-29-repo-standard-s13-amendment.json` (and `docs/adr/receipts/ADR-011-receipt-staged.json`) with an explicit placeholder for Human Principal Agent signature.
+4. **Stage Â§13 KRINEIA Receipt:** An amendment admission receipt is staged in `_receipts/krineia/pending/2026-10-29-repo-standard-s13-amendment.json` with an explicit placeholder for Human Principal Agent signature.
 
 ## Alternatives Considered
 
@@ -39,4 +39,4 @@ This ADR satisfies the ADR requirement for the §13 amendment.
 
 - Authority over `HUMMBL_REPO_STANDARD.md` is canonically anchored in `hummbl-io/oss`.
 - Fleet tooling and downstream documentation citing the Standard are directed to the active tree.
-- The amendment is fully documented under §13 with companion ADR and staged receipt.
+- The amendment is fully documented under Â§13 with companion ADR and staged receipt.
