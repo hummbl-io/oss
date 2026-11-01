@@ -6,8 +6,10 @@ Shared ruff lint configuration for the HUMMBL fleet.
 
 ### As a package (recommended)
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-lint-config
+pip install -e packages/python/hummbl-lint-config
 ```
 
 In your repo's `ruff.toml`:

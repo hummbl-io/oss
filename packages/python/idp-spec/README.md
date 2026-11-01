@@ -122,8 +122,10 @@ IDP enforces six invariants derived from production multi-agent operations:
 
 ## Installation
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install idp-spec
+pip install -e packages/python/idp-spec
 ```
 
 **Requires Python 3.11+.** No external runtime dependencies.
