@@ -11,7 +11,9 @@ neighbour. When run from the review draft location it can find the checked-out
 repo or the WORKFLOW_VALIDATOR_PATH environment variable.
 """
 
+import contextlib
 import importlib.util
+import io
 import os
 import sys
 import tempfile
@@ -395,6 +397,109 @@ class TestValidateFile(unittest.TestCase):
         """).lstrip()
         issues = self._validate(content)
         self.assertEqual(self._fails(issues), [])
+
+
+class TestPythonPackageMatrix(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.wdir = self.root / ".github" / "workflows"
+        self.wdir.mkdir(parents=True)
+        self.package("alpha")
+        self.package("beta")
+        self.workflow()
+
+    def package(self, name, manifest=True, tests=True):
+        package = self.root / "packages" / "python" / name
+        package.mkdir(parents=True, exist_ok=True)
+        if manifest:
+            (package / "pyproject.toml").write_text('[project]\nname = "example"\n')
+        if tests:
+            (package / "tests").mkdir()
+
+    def workflow(self, packages="alpha, beta", extra=""):
+        text = (
+            '"on":\n  push:\njobs:\n'
+            '  test:\n    strategy:\n'
+            '      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}\n'
+            '  test-preview:\n    strategy:\n      fail-fast: false\n'
+            f'      matrix:\n        package: [{packages}]\n{extra}'
+            '  test-node:\n    strategy:\n      matrix:\n'
+            '        package: [node-only]\n'
+        )
+        (self.wdir / "ci.yml").write_bytes(text.encode())
+
+    def issues(self):
+        return validate_workflows.validate_python_package_matrix(self.wdir)
+
+    def test_manifest_directory_names_match_preview_and_discovery(self):
+        # Distribution names need not equal package directory names. Neither
+        # unrelated Node entries nor the dynamic main matrix is a preview list.
+        self.workflow("'alpha', \"beta\"")
+        self.assertEqual(self.issues(), [])
+
+    def test_inventory_is_relative_to_workflows_directory_not_cwd(self):
+        with contextlib.chdir(self.root.parent):
+            self.assertEqual(self.issues(), [])
+
+    def test_new_manifest_missing_from_preview_fails(self):
+        self.package("gamma")
+        self.assertIn("preview matrix drift: missing=gamma", self.issues()[0][1])
+
+    def test_removed_package_remaining_in_preview_fails(self):
+        self.workflow("alpha, beta, deleted")
+        self.assertIn("extra=deleted", self.issues()[0][1])
+
+    def test_manifest_without_tests_cannot_silently_escape_main_matrix(self):
+        self.package("gamma", tests=False)
+        self.workflow("alpha, beta, gamma")
+        self.assertIn("tests-directory discovery drift: missing=gamma", self.issues()[0][1])
+
+    def test_tests_directory_without_manifest_fails(self):
+        self.package("orphan", manifest=False)
+        self.assertIn("tests-directory discovery drift: extra=orphan", self.issues()[0][1])
+
+    def test_duplicate_preview_package_fails(self):
+        self.workflow("alpha, beta, alpha")
+        self.assertIn("Duplicate package", self.issues()[0][1])
+
+    def test_unsupported_or_malformed_preview_fails_closed(self):
+        for packages in ("", "alpha, beta,", "alpha, ${{ matrix.other }}", "'alpha, beta"):
+            with self.subTest(packages=packages):
+                self.workflow(packages)
+                self.assertTrue(self.issues())
+        for extra in ("        exclude: []\n", "        package: [alpha, beta]\n"):
+            with self.subTest(extra=extra):
+                self.workflow(extra=extra)
+                self.assertTrue(self.issues())
+
+    def test_missing_named_preview_is_not_satisfied_by_node_matrix(self):
+        path = self.wdir / "ci.yml"
+        path.write_text(path.read_text().replace("test-preview:", "other-preview:"))
+        self.assertTrue(self.issues())
+
+    def test_missing_ci_or_empty_inventory_fails(self):
+        (self.wdir / "ci.yml").unlink()
+        self.assertIn("CI workflow not found", self.issues()[0][1])
+        self.workflow()
+        for package in ("alpha", "beta"):
+            (self.root / "packages" / "python" / package / "pyproject.toml").unlink()
+        self.assertIn("No Python package manifests", self.issues()[0][1])
+
+    def test_cli_opt_in_turns_matrix_drift_into_failure(self):
+        self.package("gamma")
+        with patch.object(validate_workflows, "get_environments", return_value=([], None)):
+            with patch("sys.argv", ["validate_workflows.py", "--workflows-dir", str(self.wdir),
+                                    "--check-python-packages"]):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(validate_workflows.main(), 1)
+
+    def test_cli_opt_in_rejects_missing_workflows(self):
+        with patch("sys.argv", ["validate_workflows.py", "--workflows-dir",
+                                str(self.root / "missing"), "--check-python-packages"]):
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(validate_workflows.main(), 1)
 
 
 class TestGetEnvironments(unittest.TestCase):
