@@ -1,11 +1,11 @@
 """Synthetic operator authority for tests of successful transitions only."""
 
-import hashlib
-
 from hummbl_governance.kill_switch import KillSwitch, OperatorReleaseAuthority
 
 CREDENTIAL = "synthetic-independent-operator-credential-for-tests"
-AUTHORITY = OperatorReleaseAuthority("authenticated-test-operator", hashlib.sha256(CREDENTIAL.encode()).hexdigest())
+AUTHORITY = OperatorReleaseAuthority(
+    "authenticated-test-operator", OperatorReleaseAuthority.create_verifier(CREDENTIAL),
+)
 
 
 def operator_switch(*args, **kwargs):

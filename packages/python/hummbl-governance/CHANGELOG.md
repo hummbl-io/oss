@@ -16,7 +16,8 @@ not tagged or published from this PR.
 - **Breaking release authorization (#368):** kill-switch release is removed from
   both governance MCP tool lists and denied by their old handlers and the general
   REST API. Core release defaults to denied and requires a configured operator
-  credential verifier, literal confirmation, and the current halt's event ID.
+  salted PBKDF2-HMAC-SHA256 credential verifier, literal confirmation, and the
+  current halt's event ID.
   Authenticated identity is recorded separately from caller attribution.
   Engagement cannot downgrade an existing halt; persisted transitions share a
   process lock. A separately protected interactive operator command is provided;

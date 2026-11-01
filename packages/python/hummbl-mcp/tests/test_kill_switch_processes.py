@@ -80,12 +80,11 @@ def governance_transition(env, mode):
 import sys
 import mcp_server
 if sys.argv[1] == "DISENGAGED":
-    import hashlib
     import os
     from pathlib import Path
     from hummbl_governance.kill_switch import KillSwitch, OperatorReleaseAuthority
     credential = "synthetic-independent-operator-credential-for-tests"
-    authority = OperatorReleaseAuthority("authenticated-test-operator", hashlib.sha256(credential.encode()).hexdigest())
+    authority = OperatorReleaseAuthority("authenticated-test-operator", OperatorReleaseAuthority.create_verifier(credential))
     writer = KillSwitch.load_from_file(Path(os.environ["GOVERNANCE_STATE_DIR"]), release_authority=authority)
     writer.disengage(reason="operator approved recovery", credential=credential, confirm=True,
                      expected_event_id=writer.get_status()["event_id"])

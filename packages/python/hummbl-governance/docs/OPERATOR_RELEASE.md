@@ -55,14 +55,41 @@ Before running it, a trusted launcher under the operator account must supply:
 | Configuration | Meaning |
 | --- | --- |
 | `GOVERNANCE_OPERATOR_ID` | Fixed operator identity associated with the credential, set by the deployer |
-| `GOVERNANCE_OPERATOR_CREDENTIAL_SHA256` | Lowercase SHA-256 hex digest of a separate high-entropy operator credential |
+| `GOVERNANCE_OPERATOR_CREDENTIAL_VERIFIER` | Versioned salted PBKDF2 verifier of a separate high-entropy operator credential |
 | `HUMMBL_SIGNING_SECRET` (or `DCT_SECRET`) | Existing state integrity key, obtained from the protected secret store |
 
 Generate the operator credential with at least 32 cryptographically random bytes
-and keep it in the operator's secret store. This SHA-256 verifier is for random
-credentials, **not human-chosen passwords**. Use a different credential from any
-agent/API token and from the state-signing key. Provision the verifier and its
-identity through protected startup configuration, never request fields. Rotate
+and keep it in the operator's secret store. Use a different credential from any
+agent/API token and from the state-signing key. Provision its verifier with
+`OperatorReleaseAuthority.create_verifier(credential)` in the trusted operator
+process. This generates a fresh 16-byte random salt and derives a 32-byte verifier
+with PBKDF2-HMAC-SHA256 at 600,000 iterations. The expensive KDF also slows offline
+guessing if a weaker value is supplied; it does not replace the long random
+credential requirement. This work factor follows the
+[OWASP PBKDF2 guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2).
+The implementation uses [Python's standard-library KDF](https://docs.python.org/3/library/hashlib.html#hashlib.pbkdf2_hmac)
+with an OpenSSL-enabled Python build.
+
+The accepted format is exactly
+`pbkdf2-sha256-v1$600000$<32 lowercase salt hex characters>$<64 lowercase digest hex characters>`.
+Malformed, unsupported, or cheaper verifiers are rejected; plain SHA-256 verifiers
+are not accepted. Input credentials are bounded to 1,024 UTF-8 bytes. Keep the
+verifier and identity in protected startup configuration, never request fields.
+For example, a trusted provisioning process can obtain the secret without echo:
+
+```python
+from getpass import GetPassWarning, getpass
+import warnings
+from hummbl_governance.kill_switch import OperatorReleaseAuthority
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error", GetPassWarning)  # Never fall back to echoed input.
+    verifier = OperatorReleaseAuthority.create_verifier(getpass("Operator credential: "))
+# Transfer verifier to protected operator configuration through your secret store.
+# Never put the raw credential in command arguments, logs, or agent environments.
+```
+
+Rotate
 by replacing that protected verifier and retiring the old secret. This command
 does not provision credentials, initialize missing state, repair corrupt state,
 or release anything when configuration is absent.

@@ -37,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
             raise KillSwitchAuthorizationError("A release reason is required")
         authority = OperatorReleaseAuthority(
             operator_id=os.environ.get("GOVERNANCE_OPERATOR_ID", ""),
-            credential_sha256=os.environ.get("GOVERNANCE_OPERATOR_CREDENTIAL_SHA256", ""),
+            credential_verifier=os.environ.get("GOVERNANCE_OPERATOR_CREDENTIAL_VERIFIER", ""),
         )
         ks = KillSwitch.load_from_file(
             args.state_dir, require_existing=True, release_authority=authority,

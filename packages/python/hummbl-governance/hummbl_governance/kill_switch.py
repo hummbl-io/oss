@@ -53,7 +53,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, ClassVar
 from uuid import uuid4
 
 from hummbl_governance._file_lock import acquire_file_lock, release_file_lock
@@ -110,29 +110,68 @@ class KillSwitchAuthorizationError(PermissionError):
 class OperatorReleaseAuthority:
     """Trusted startup configuration for a separate operator control process.
 
-    ``credential_sha256`` is the digest of a high-entropy operator credential,
-    NOT the state-signing secret or the general API token. ``operator_id`` is
-    the authenticated identity associated with that credential by the deployer.
-    Never construct this authority from agent input or expose its credential to
-    agents. This is not a sandbox against code running in the same process.
+    ``credential_verifier`` is a salted, versioned PBKDF2 verifier for a separate
+    operator credential, NOT the state-signing secret or general API token.
+    ``operator_id`` is the identity associated with that credential by the
+    deployer. Never construct this authority from agent input or expose its
+    credential to agents. This is not a same-process sandbox.
     """
 
     operator_id: str
-    credential_sha256: str = field(repr=False)
+    credential_verifier: str = field(repr=False)
+    _FORMAT: ClassVar[str] = "pbkdf2-sha256-v1"
+    _ITERATIONS: ClassVar[int] = 600_000
+    _MAX_CREDENTIAL_BYTES: ClassVar[int] = 1024
 
     def __post_init__(self) -> None:
         if not isinstance(self.operator_id, str) or not self.operator_id.strip():
             raise ValueError("A configured operator identity is required")
-        digest = self.credential_sha256
-        if (not isinstance(digest, str) or len(digest) != 64
-                or any(c not in "0123456789abcdef" for c in digest)):
-            raise ValueError("An operator credential SHA-256 digest is required")
+        self._parse_verifier()
+
+    def _parse_verifier(self) -> tuple[bytes, bytes]:
+        verifier = self.credential_verifier
+        # Bound parsing before splitting; no caller-selected KDF or work factor.
+        if not isinstance(verifier, str) or len(verifier) != 121:
+            raise ValueError("A supported operator credential verifier is required")
+        parts = verifier.split("$")
+        if (len(parts) != 4 or parts[:2] != [self._FORMAT, str(self._ITERATIONS)]
+                or len(parts[2]) != 32 or len(parts[3]) != 64
+                or any(c not in "0123456789abcdef" for c in parts[2] + parts[3])):
+            raise ValueError("Invalid operator credential verifier")
+        return bytes.fromhex(parts[2]), bytes.fromhex(parts[3])
+
+    @classmethod
+    def _credential_bytes(cls, credential: str) -> bytes:
+        if not isinstance(credential, str) or not credential or len(credential) > cls._MAX_CREDENTIAL_BYTES:
+            raise ValueError("Operator credential must contain 1 to 1024 UTF-8 bytes")
+        try:
+            encoded = credential.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise ValueError("Invalid operator credential encoding") from exc
+        if len(encoded) > cls._MAX_CREDENTIAL_BYTES:
+            raise ValueError("Operator credential must contain 1 to 1024 UTF-8 bytes")
+        return encoded
+
+    @classmethod
+    def create_verifier(cls, credential: str) -> str:
+        """Provision in a trusted operator process; protect the returned config.
+
+        Use a long random credential from the operator's secret store. The
+        salted KDF additionally slows offline guessing of weaker supplied values.
+        """
+        encoded = cls._credential_bytes(credential)
+        salt = os.urandom(16)
+        digest = hashlib.pbkdf2_hmac("sha256", encoded, salt, cls._ITERATIONS, dklen=32)
+        return f"{cls._FORMAT}${cls._ITERATIONS}${salt.hex()}${digest.hex()}"
 
     def authenticate(self, credential: str | None) -> str:
-        if not isinstance(credential, str) or not credential:
-            raise KillSwitchAuthorizationError("Operator authentication required")
-        digest = hashlib.sha256(credential.encode("utf-8")).hexdigest()
-        if not hmac.compare_digest(digest, self.credential_sha256):
+        try:
+            encoded = self._credential_bytes(credential)
+        except ValueError as exc:
+            raise KillSwitchAuthorizationError("Operator authentication required") from exc
+        salt, expected = self._parse_verifier()
+        digest = hashlib.pbkdf2_hmac("sha256", encoded, salt, self._ITERATIONS, dklen=32)
+        if not hmac.compare_digest(digest, expected):
             raise KillSwitchAuthorizationError("Operator authentication failed")
         return self.operator_id
 

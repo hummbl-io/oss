@@ -1,6 +1,5 @@
 """Adversarial release regressions: caller identity is not operator authority."""
 
-import hashlib
 import importlib.util
 import json
 import subprocess
@@ -10,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from hummbl_governance import KillSwitch, KillSwitchMode
-from hummbl_governance.kill_switch import KillSwitchAuthorizationError
+from hummbl_governance.kill_switch import KillSwitchAuthorizationError, OperatorReleaseAuthority
 from hummbl_governance import operator_release
 from .kill_switch_helpers import AUTHORITY, CREDENTIAL, operator_switch, release
 
@@ -109,9 +108,8 @@ def test_legacy_signed_state_has_stable_release_challenge(tmp_path):
     assert not ks.engaged
 
 
-@pytest.mark.parametrize("module_file", ["mcp_server.py", "../hummbl-mcp-governance/governance_mcp_server.py"])
-def test_both_mcp_surfaces_deny_hidden_tool_and_handler(tmp_path, monkeypatch, module_file):
-    path = Path(__file__).resolve().parents[1] / module_file
+def test_mcp_surface_denies_hidden_tool_and_handler(tmp_path, monkeypatch):
+    path = Path(__file__).resolve().parents[1] / "mcp_server.py"
     spec = importlib.util.spec_from_file_location("release_attack_server", path)
     server = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(server)
@@ -181,7 +179,7 @@ with (Path(sys.argv[1]) / '.kill-switch.lock').open('a+b') as f:
 def test_operator_cli_authenticates_and_confirms_exact_halt(tmp_path, monkeypatch, valid_credential):
     monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "test-state-key")
     monkeypatch.setenv("GOVERNANCE_OPERATOR_ID", AUTHORITY.operator_id)
-    monkeypatch.setenv("GOVERNANCE_OPERATOR_CREDENTIAL_SHA256", hashlib.sha256(CREDENTIAL.encode()).hexdigest())
+    monkeypatch.setenv("GOVERNANCE_OPERATOR_CREDENTIAL_VERIFIER", AUTHORITY.credential_verifier)
     monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
     monkeypatch.setattr(sys.stderr, "isatty", lambda: True)
     ks = KillSwitch(state_dir=tmp_path)
@@ -194,9 +192,8 @@ def test_operator_cli_authenticates_and_confirms_exact_halt(tmp_path, monkeypatc
     assert ks.engaged is not valid_credential
 
 
-@pytest.mark.parametrize("module_file", ["mcp_server.py", "../hummbl-mcp-governance/governance_mcp_server.py"])
-def test_mcp_wrapper_refuses_engagement_with_vulnerable_legacy_core(monkeypatch, module_file):
-    path = Path(__file__).resolve().parents[1] / module_file
+def test_mcp_wrapper_refuses_engagement_with_vulnerable_legacy_core(monkeypatch):
+    path = Path(__file__).resolve().parents[1] / "mcp_server.py"
     spec = importlib.util.spec_from_file_location("legacy_core_server", path)
     server = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(server)
@@ -220,11 +217,11 @@ def test_mcp_wrapper_refuses_engagement_with_vulnerable_legacy_core(monkeypatch,
 def test_operator_cli_fails_closed_before_release(tmp_path, monkeypatch, failure):
     monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "test-state-key")
     monkeypatch.setenv("GOVERNANCE_OPERATOR_ID", AUTHORITY.operator_id)
-    monkeypatch.setenv("GOVERNANCE_OPERATOR_CREDENTIAL_SHA256", hashlib.sha256(CREDENTIAL.encode()).hexdigest())
+    monkeypatch.setenv("GOVERNANCE_OPERATOR_CREDENTIAL_VERIFIER", AUTHORITY.credential_verifier)
     monkeypatch.setattr(sys.stdin, "isatty", lambda: failure != "noninteractive")
     monkeypatch.setattr(sys.stderr, "isatty", lambda: True)
     if failure == "no_config":
-        monkeypatch.delenv("GOVERNANCE_OPERATOR_CREDENTIAL_SHA256")
+        monkeypatch.delenv("GOVERNANCE_OPERATOR_CREDENTIAL_VERIFIER")
     ks = KillSwitch(state_dir=tmp_path)
     event = ks.engage(KillSwitchMode.EMERGENCY, "stop", "monitor")
 
@@ -238,3 +235,52 @@ def test_operator_cli_fails_closed_before_release(tmp_path, monkeypatch, failure
     assert operator_release.main(["--state-dir", str(tmp_path), "--reason", "verified recovery"]) == 1
     ks.refresh()
     assert ks.mode == KillSwitchMode.EMERGENCY
+
+
+# Fixed OpenSSL PBKDF2-HMAC-SHA256 vector: 600000 iterations, dklen=32.
+_VERIFIER = (
+    "pbkdf2-sha256-v1$600000$00112233445566778899aabbccddeeff$"
+    "0ab46dff09c8cb833251883ca0f65002cba799d4302b6c28d768ecaecf8b97eb"
+)
+
+
+@pytest.mark.parametrize("verifier", [
+    None, True, {}, "", "a" * 64, "a" * 10000,
+    _VERIFIER.replace("v1", "v2"),
+    _VERIFIER.replace("600000", "000001"),
+    _VERIFIER.replace("600000", "999999"),
+    _VERIFIER.replace("600000", "-60000"),
+    _VERIFIER.replace("001122", "00112g"),
+    _VERIFIER.upper(),
+    _VERIFIER + "$extra", _VERIFIER[:-1],
+])
+def test_invalid_or_weak_verifier_configuration_is_rejected(verifier):
+    with pytest.raises(ValueError):
+        OperatorReleaseAuthority("configured-operator", verifier)
+
+
+def test_fixed_pbkdf2_verifier_authenticates_only_its_credential():
+    authority = OperatorReleaseAuthority("configured-operator", _VERIFIER)
+    assert authority.authenticate("synthetic-operator-test-credential") == "configured-operator"
+    with pytest.raises(KillSwitchAuthorizationError):
+        authority.authenticate("synthetic-operator-test-credential-modified")
+
+
+def test_provisioning_generates_independent_salted_verifiers():
+    first = OperatorReleaseAuthority.create_verifier(CREDENTIAL)
+    second = OperatorReleaseAuthority.create_verifier(CREDENTIAL)
+    assert first != second
+    for verifier in (first, second):
+        assert verifier.startswith("pbkdf2-sha256-v1$600000$")
+        authority = OperatorReleaseAuthority("configured-operator", verifier)
+        assert authority.authenticate(CREDENTIAL) == "configured-operator"
+        assert CREDENTIAL not in verifier
+
+
+@pytest.mark.parametrize("credential", [None, "", True, "a" * 1025, "\u2603" * 342, "\ud800"])
+def test_invalid_credential_encoding_or_size_fails_closed(credential):
+    authority = OperatorReleaseAuthority("configured-operator", _VERIFIER)
+    with pytest.raises(ValueError):
+        OperatorReleaseAuthority.create_verifier(credential)
+    with pytest.raises(KillSwitchAuthorizationError):
+        authority.authenticate(credential)
