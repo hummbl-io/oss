@@ -39,6 +39,22 @@ DCTX  →  CONTRACT  →  EVIDENCE  →  ATTEST  →  DCT  →  GOVERNANCE_BUS
 
 ## Quick Start
 
+From this repository, install the cognition integration before writing to the
+governance log:
+
+```sh
+cd packages/python/idp-spec
+python -m pip install ".[cognition]"
+```
+
+The base package remains dependency-free. Governance log appends raise
+`RuntimeError` if the scrubber cannot be imported, fails, or returns an invalid
+result; rejected entries are neither written nor buffered. Appends snapshot
+JSON-serializable `tuple_data` and pseudonymize recognized patterns in its
+string values, including nested arrays. Recognized PII in dictionary keys is
+rejected rather than renaming fields. Metadata identifiers are not scrubbed,
+and pattern matching does not guarantee that all personal data is removed.
+
 ```python
 import os
 from pathlib import Path

@@ -34,13 +34,35 @@ logger = logging.getLogger(__name__)
 # Governance bus tuple_data is scrubbed before append to prevent
 # PII from entering the hash-chained, effectively irremovable log.
 try:
-    from hummbl_governance.cognition.ledger_writer import scrub_pii_from_dict as _scrub_pii
+    from hummbl_cognition.ledger_writer import scrub_pii_from_dict as _scrub_pii
 except ImportError:
-    # Fallback: if cognition module unavailable, pass through unscrubbed
-    # but log a warning. This should only happen in isolated test envs.
-    def _scrub_pii(data: dict) -> dict:  # type: ignore[misc]
-        logger.warning("PII scrubber unavailable — tuple_data written unscrubbed")
-        return data
+    # Keep non-writing IDP APIs available without the optional integration.
+    # Appends must fail closed until the real scrubber is available.
+    _scrub_pii = None
+
+
+def _scrub_json_value(value: Any) -> Any:
+    """Scrub every JSON string, including strings inside nested arrays.
+
+    The canonical dict scrubber does not traverse nested arrays. Calling it
+    on each string also avoids retaining mutable aliases in buffered entries.
+    Recognized PII in keys is rejected: renaming keys could change tuple meaning.
+    """
+    if isinstance(value, str):
+        result = _scrub_pii({"value": value})
+        if not isinstance(result, dict) or not isinstance(result.get("value"), str):
+            raise TypeError("PII scrubber returned an invalid string result")
+        return result["value"]
+    if isinstance(value, list):
+        return [_scrub_json_value(item) for item in value]
+    if isinstance(value, dict):
+        result = {}
+        for key, item in value.items():
+            if _scrub_json_value(key) != key:
+                raise ValueError("PII in tuple_data keys is not supported")
+            result[key] = _scrub_json_value(item)
+        return result
+    return value
 
 
 def _is_idp_enabled() -> bool:
@@ -286,6 +308,10 @@ class GovernanceBus:
             - IDP_E_EVIDENCE_REQUIRED: ATTEST without verification_id (I1 violation)
             - IDP_E_LATERAL_AUTH: authority_class entry without capability_token_id
             - IDP_E_DECISION_AUTH: authority_class entry with invalid DCT reference
+
+        Raises:
+            RuntimeError: The PII scrubber is unavailable or fails. Nothing is
+                written or added to the async buffer for the rejected entry.
         """
         if not _is_idp_enabled():
             # ASI07: Even when IDP disabled, log attempt (but allow)
@@ -354,9 +380,25 @@ class GovernanceBus:
                 return False, IDP_E_DECISION_AUTH
 
         # PII scrub: sanitize tuple_data before it enters the hash-chained log.
-        # This replaces PII (emails, phones, SSNs, IPs) with SHA-256 pseudonyms,
-        # preserving data utility while ensuring GDPR Art. 17 compatibility.
-        scrubbed_data = _scrub_pii(tuple_data)
+        # The cognition scrubber replaces recognized string-value patterns
+        # with pseudonyms; it is not a general guarantee of anonymization.
+        if _scrub_pii is None:
+            raise RuntimeError(
+                "Governance append requires the PII scrubber; install the cognition extra "
+                "from the idp-spec source package. "
+                "The entry was not written."
+            )
+        try:
+            if not isinstance(tuple_data, dict):
+                raise TypeError("tuple_data must be a dictionary")
+            # Normalize serializable containers to detached JSON values before
+            # scrubbing, so caller mutations cannot change buffered entries.
+            snapshot = json.loads(json.dumps(tuple_data, ensure_ascii=False, allow_nan=False))
+            scrubbed_data = _scrub_json_value(snapshot)
+        except Exception:
+            # Scrubber exceptions may contain the input; do not echo them into
+            # logs or chain them into the public exception's printed traceback.
+            raise RuntimeError("PII scrubbing failed; governance entry was not written") from None
 
         # Hash-chaining: link to prior entry for tamper-evident audit trail
         with self._lock:
