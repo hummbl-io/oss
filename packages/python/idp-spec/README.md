@@ -55,6 +55,19 @@ string values, including nested arrays. Recognized PII in dictionary keys is
 rejected rather than renaming fields. Metadata identifiers are not scrubbed,
 and pattern matching does not guarantee that all personal data is removed.
 
+`append_audit_entry()` automatically signs the detached, scrubbed payload that
+it stores. Direct callers can request the same behavior with
+`GovernanceBus.append(..., auto_sign=True)`. Set a persistent `DCT_SECRET` for
+signatures that can be checked after the process exits.
+
+When supplying your own signature, first call
+`idp_spec.governance_bus.prepare_audit_tuple_data()`, sign that returned data,
+and append the same data and signature. Further redaction rejects the append
+with `IDP_E_AUDIT_IMMUTABLE`; caller signatures are never silently rewritten.
+Append checks signature presence and preserves the signed payload, but does
+not authenticate caller signatures. `verify_chain()` checks hash linkage,
+not HMAC signatures.
+
 ```python
 import os
 from pathlib import Path

@@ -19,10 +19,11 @@ from idp_spec import governance_bus
 @pytest.fixture(autouse=True)
 def enable_idp(monkeypatch):
     monkeypatch.setenv("ENABLE_IDP", "true")
+    monkeypatch.setenv("DCT_SECRET", "test-pii-governance-secret")
 
 
 def append(bus, data):
-    return bus.append("intent", "task", "SYSTEM", data, signature="test-signature")
+    return bus.append("intent", "task", "SYSTEM", data, auto_sign=True)
 
 
 def test_binds_real_cognition_scrubber():
