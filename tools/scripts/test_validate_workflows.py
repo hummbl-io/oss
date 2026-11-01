@@ -15,6 +15,7 @@ import contextlib
 import importlib.util
 import io
 import os
+import re
 import sys
 import tempfile
 import textwrap
@@ -419,15 +420,14 @@ class TestPythonPackageMatrix(unittest.TestCase):
             (package / "tests").mkdir()
 
     def workflow(self, packages="alpha, beta", extra=""):
-        text = (
-            '"on":\n  push:\njobs:\n'
-            '  test:\n    strategy:\n'
-            '      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}\n'
-            '  test-preview:\n    strategy:\n      fail-fast: false\n'
-            f'      matrix:\n        package: [{packages}]\n{extra}'
-            '  test-node:\n    strategy:\n      matrix:\n'
-            '        package: [node-only]\n'
-        )
+        # Use the real workflow as the supported-layout fixture, not a copy of
+        # the validator's expected program. Only the synthetic inventory varies.
+        source = Path(validate_workflows.__file__).resolve().parents[2]
+        text = (source / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        before, preview = text.split("  test-preview:\n", 1)
+        preview = re.sub(r"(?m)^        package: \[[^\n]*\]\n",
+                         lambda _: f"        package: [{packages}]\n{extra}", preview, count=1)
+        text = before + "  test-preview:\n" + preview
         (self.wdir / "ci.yml").write_bytes(text.encode())
 
     def issues(self):
@@ -438,6 +438,185 @@ class TestPythonPackageMatrix(unittest.TestCase):
         # unrelated Node entries nor the dynamic main matrix is a preview list.
         self.workflow("'alpha', \"beta\"")
         self.assertEqual(self.issues(), [])
+
+    def test_main_matrix_cannot_be_narrowed_even_with_complete_preview(self):
+        path = self.wdir / "ci.yml"
+        text = path.read_text().replace(
+            'matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}',
+            'matrix:\n        package: [alpha]\n        python-version: ["3.13"]',
+        )
+        path.write_text(text)
+        self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_discovery_output_and_consumer_cannot_be_disconnected(self):
+        mutations = [
+            ('matrix: ${{ steps.matrix.outputs.json }}', 'matrix: ${{ steps.decoy.outputs.json }}'),
+            ('needs: changes', 'needs: decoy'),
+            ('fromJSON(needs.changes.outputs.matrix)', 'fromJSON(needs.decoy.outputs.matrix)'),
+            ('      - id: matrix\n', '      - id: decoy\n'),
+            ('find packages/python -maxdepth', 'find packages/python/alpha -maxdepth'),
+            ('PKGS="$ALL"', 'PKGS="alpha"'),
+            ('PKGS="$ALL"', "PKGS='$ALL'"),  # Quoting changes expansion semantics.
+            ('echo "json=$MATRIX"', 'echo "json=[]"'),
+            ('>> "$GITHUB_OUTPUT"', '>> /tmp/unconsumed-output'),
+            ('working-directory: packages/python/${{ matrix.package }}',
+             'working-directory: packages/python/alpha'),
+            ('python-version: ${{ matrix.python-version }}', 'python-version: "3.13"'),
+            ('      - id: matrix\n', '      - id: matrix\n        if: false\n'),
+            ('  test:\n', '  test:\n    if: false\n'),
+        ]
+        for old, new in mutations:
+            with self.subTest(old=old, new=new):
+                self.workflow()
+                path = self.wdir / "ci.yml"
+                original = path.read_text()
+                self.assertIn(old, original)
+                path.write_text(original.replace(old, new))
+                self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_extra_output_override_is_not_hidden_by_valid_discovery(self):
+        path = self.wdir / "ci.yml"
+        text = path.read_text().replace(
+            '          echo "json=$MATRIX" >> "$GITHUB_OUTPUT"',
+            '          echo "json=$MATRIX" >> "$GITHUB_OUTPUT"\n'
+            '          echo \'json={"package":["alpha"]}\' >> "$GITHUB_OUTPUT"',
+        )
+        path.write_text(text)
+        self.assertTrue(any("producer commands changed" in issue[1] for issue in self.issues()))
+
+    def test_unused_valid_producer_does_not_satisfy_narrowed_real_producer(self):
+        path = self.wdir / "ci.yml"
+        text = path.read_text().replace('      - id: matrix\n', '      - id: decoy\n')
+        text = text.replace('\n  test:\n', (
+            '\n      - id: matrix\n'
+            '        env:\n'
+            '          EVENT_NAME: ${{ github.event_name }}\n'
+            '          BASE_REF: ${{ github.base_ref }}\n'
+            '        run: |\n'
+            '          echo \'json={"package":["alpha"]}\' >> "$GITHUB_OUTPUT"\n'
+            '  test:\n'
+        ))
+        path.write_text(text)
+        self.assertTrue(any("producer commands changed" in issue[1] for issue in self.issues()))
+
+    def test_main_producer_comments_and_outer_indentation_are_supported(self):
+        path = self.wdir / "ci.yml"
+        text = path.read_text().replace('          set -euo pipefail',
+                                        '          # Additional explanation.\n          set -euo pipefail')
+        text = text.replace('            git fetch -q origin', '              git fetch -q origin')
+        path.write_text(text)
+        self.assertEqual(self.issues(), [])
+
+    def test_shell_word_boundaries_cannot_be_erased_by_normalization(self):
+        mutations = [
+            ('MATRIX=$(jq -nc', 'MATRIX=$ (jq -nc'),
+            ('"$PKG_JSON" --argjson', '"$PKG_JSON"--argjson'),
+            ("printf '%s\\n' \"$PKGS\" | jq", "printf '%s\\n'\"$PKGS\" | jq"),
+        ]
+        for old, new in mutations:
+            with self.subTest(new=new):
+                self.workflow()
+                path = self.wdir / "ci.yml"
+                text = path.read_text()
+                self.assertIn(old, text)
+                path.write_text(text.replace(old, new))
+                self.assertTrue(any("producer commands changed" in issue[1] for issue in self.issues()))
+
+    def test_unsupported_shell_reformatting_fails_closed(self):
+        # This is a narrow physical-command check, not a Bash equivalence parser.
+        # Even harmless internal whitespace/continuation changes require review.
+        mutations = [
+            ('find packages/python', 'find   packages/python'),
+            (' \\\n            \'{"python-version"', ' \'{"python-version"'),
+            (' \\\n            \'{"python-version"', ' \\\n          # interrupts continuation\n            \'{"python-version"'),
+            (' \\\n            \'{"python-version"', ' \\\n\n            \'{"python-version"'),
+        ]
+        for old, new in mutations:
+            with self.subTest(new=new):
+                self.workflow()
+                path = self.wdir / "ci.yml"
+                text = path.read_text()
+                self.assertIn(old, text)
+                path.write_text(text.replace(old, new))
+                self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_yaml_identifiers_conditions_and_defaults_fail_closed(self):
+        mutations = [
+            ('    needs: changes\n', '    needs: ch anges\n'),
+            ('steps.matrix.outputs.json', 'steps.mat rix.outputs.json'),
+            ('matrix.package }}', 'matrix.pack age }}'),
+            ('  test:\n', '  test:\n    "if": false\n'),
+            ('  changes:\n', "  changes:\n    'if': false\n"),
+            ('  changes:\n', '  changes:\n    defaults:\n      run:\n        working-directory: packages/python\n'),
+            ('jobs:\n', 'defaults:\n  run:\n    working-directory: packages/python\njobs:\n'),
+        ]
+        for old, new in mutations:
+            with self.subTest(new=new):
+                self.workflow()
+                path = self.wdir / "ci.yml"
+                text = path.read_text()
+                self.assertIn(old, text)
+                path.write_text(text.replace(old, new))
+                self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_decoy_directories_cannot_replace_actual_install_and_test_bindings(self):
+        path = self.wdir / "ci.yml"
+        text = path.read_text().replace(
+            '        working-directory: packages/python/${{ matrix.package }}',
+            '        "working-directory": packages/python/hummbl-governance', 2,
+        )
+        decoy = ('      - name: Decoy directory selector\n'
+                 '        working-directory: packages/python/${{ matrix.package }}\n'
+                 '        run: echo no-tests\n')
+        text = text.replace('  test-preview:\n', decoy * 2 + '  test-preview:\n')
+        path.write_text(text)
+        self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_decoy_python_version_cannot_replace_actual_setup_binding(self):
+        path = self.wdir / "ci.yml"
+        before, test = path.read_text().split('  test:\n', 1)
+        test = test.replace('          python-version: ${{ matrix.python-version }}',
+                            '          "python-version": "3.13"', 1)
+        test = test.replace('          persist-credentials: false',
+                            '          persist-credentials: false\n'
+                            '          python-version: ${{ matrix.python-version }}', 1)
+        path.write_text(before + '  test:\n' + test)
+        self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_later_setup_cannot_override_matrix_version(self):
+        setup_sha = '5fda3b95a4ea91299a34e894583c3862153e4b97'
+        for key in ('uses', '"uses"', "'uses'"):
+            with self.subTest(key=key):
+                self.workflow()
+                path = self.wdir / "ci.yml"
+                text = path.read_text().replace('      - name: Install package and test dependencies\n', (
+                    '      - name: Actual setup after decoy\n'
+                    f'        {key}: actions/setup-python@{setup_sha}\n'
+                    '        with:\n'
+                    '          python-version: "3.13"\n'
+                    '      - name: Install package and test dependencies\n'
+                ), 1)
+                path.write_text(text)
+                self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
+
+    def test_consumer_binding_overrides_and_conditions_fail_closed(self):
+        mutations = [
+            ('        working-directory: packages/python/${{ matrix.package }}',
+             ('        working-directory: packages/python/${{ matrix.package }}\n'
+              '        "working-directory": packages/python/hummbl-governance')),
+            ('      - name: Run tests\n', '      - name: Run tests\n        "if": false\n'),
+            ('      - name: Run tests\n', '      - name: Run tests\n        <<: *overrides\n'),
+            ('          python-version: ${{ matrix.python-version }}',
+             '          python-version: ${{ matrix.python-version }}\n          "python-version": "3.13"'),
+        ]
+        for old, new in mutations:
+            with self.subTest(new=new):
+                self.workflow()
+                path = self.wdir / "ci.yml"
+                text = path.read_text()
+                self.assertIn(old, text)
+                path.write_text(text.replace(old, new))
+                self.assertTrue(any("main matrix wiring" in issue[1] for issue in self.issues()))
 
     def test_inventory_is_relative_to_workflows_directory_not_cwd(self):
         with contextlib.chdir(self.root.parent):
