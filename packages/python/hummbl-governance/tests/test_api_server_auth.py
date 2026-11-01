@@ -4,7 +4,7 @@ Covers:
 - Bearer token auth (fail-closed when GOVERNANCE_API_TOKEN not configured)
 - Constant-time comparison (hmac.compare_digest)
 - CORS origin is opt-in (no wildcard by default)
-- Kill switch disengage requires confirm=true (matches engage gate)
+- Kill switch disengage is forbidden through the general API
 - GOVERNANCE_API_ALLOW_NO_AUTH=1 bypass for tests/dev
 """
 
@@ -196,7 +196,7 @@ class TestCorsOptIn:
 
 
 class TestKillSwitchDisengageGate:
-    """P0 fix: disengage must require confirm=true (matches engage gate)."""
+    """General API credentials must never authorize operator release."""
 
     def test_disengage_without_confirm_rejected(self, monkeypatch):
         monkeypatch.setenv("GOVERNANCE_API_ALLOW_NO_AUTH", "1")
@@ -204,19 +204,23 @@ class TestKillSwitchDisengageGate:
         monkeypatch.setattr(api_server, "_ks", ks)
         handler = _make_handler("POST", "/api/v1/kill-switch/disengage", body={"reason": "test"})
         api_server.GovernanceHandler.do_POST(handler)
-        assert handler._response_code == 400
+        assert handler._response_code == 403
         body = _read_response(handler)
-        assert "confirm=true" in body["error"]
+        assert "Operator-only" in body["error"]
         ks.disengage.assert_not_called()
 
-    def test_disengage_with_confirm_proceeds(self, monkeypatch):
-        monkeypatch.setenv("GOVERNANCE_API_ALLOW_NO_AUTH", "1")
+    def test_disengage_with_confirm_rejected(self, monkeypatch):
+        monkeypatch.setenv("GOVERNANCE_API_TOKEN", "agent-api-token")
         ks = mock.MagicMock()
         monkeypatch.setattr(api_server, "_ks", ks)
-        handler = _make_handler("POST", "/api/v1/kill-switch/disengage", body={"confirm": True, "reason": "test"})
+        handler = _make_handler(
+            "POST", "/api/v1/kill-switch/disengage",
+            body={"confirm": True, "reason": "test", "triggered_by": "forged-operator"},
+            headers={"Authorization": "Bearer agent-api-token"},
+        )
         api_server.GovernanceHandler.do_POST(handler)
-        assert handler._response_code == 200
-        ks.disengage.assert_called_once()
+        assert handler._response_code == 403
+        ks.disengage.assert_not_called()
 
 
 if __name__ == "__main__":

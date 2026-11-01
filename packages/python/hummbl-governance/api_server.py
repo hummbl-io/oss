@@ -24,7 +24,7 @@ Endpoints:
     GET  /api/v1/status              - Governance overview
     GET  /api/v1/kill-switch         - Kill switch state
     POST /api/v1/kill-switch/engage  - Engage kill switch
-    POST /api/v1/kill-switch/disengage - Disengage
+    POST /api/v1/kill-switch/disengage - Forbidden (operator control process only)
     GET  /api/v1/circuit-breaker     - Circuit breaker state
     GET  /api/v1/cost/check          - Budget status
     POST /api/v1/cost/record         - Record usage
@@ -316,19 +316,18 @@ class GovernanceHandler(BaseHTTPRequestHandler):
             if not body.get("confirm"):
                 self._json_response({"error": "Must set confirm=true"}, 400)
                 return
-            _ks.engage(mode=mode, reason=body.get("reason", "API"), triggered_by=body.get("triggered_by", "api-client"))
+            try:
+                _ks.engage(mode=mode, reason=body.get("reason", "API"),
+                           triggered_by=body.get("triggered_by", "api-client"))
+            except PermissionError as exc:
+                self._json_response({"error": str(exc)}, 403)
+                return
             self._json_response({"engaged": True, "mode": mode_name})
 
         elif path == "/api/v1/kill-switch/disengage":
-            body = self._read_body()
-            if not body.get("confirm"):
-                self._json_response(
-                    {"error": "Must set confirm=true to disengage the kill switch"},
-                    400,
-                )
-                return
-            _ks.disengage(reason=body.get("reason", "API"), triggered_by=body.get("triggered_by", "api-client"))
-            self._json_response({"disengaged": True})
+            # The general API bearer token may be held by governed agents.
+            # Neither that token nor caller-supplied attribution is operator authority.
+            self._json_response({"error": "Operator-only release is unavailable over this API"}, 403)
 
         elif path == "/api/v1/cost/record":
             body = self._read_body()

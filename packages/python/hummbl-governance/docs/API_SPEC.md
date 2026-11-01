@@ -35,45 +35,50 @@ from hummbl_governance import KillSwitch, KillSwitchMode
 |------|----------|
 | `DISENGAGED` | Normal operation |
 | `HALT_NONCRITICAL` | Block non-critical tasks, allow critical |
-| `HALT_ALL` | Block all tasks |
+| `HALT_ALL` | Block regular tasks; configured critical tasks remain allowed |
 | `EMERGENCY` | Immediate halt, preserve state |
 
 ### Constructor
 
 ```python
 KillSwitch(
-    state_dir: Path | str,
+    state_dir: Path | None = None,
     require_hmac: bool = True,
-    signing_secret: str | None = None,
+    signing_secret: bytes | None = None,
     critical_tasks: frozenset[str] | None = None,
+    *,
+    release_authority: OperatorReleaseAuthority | None = None,
 )
 ```
 
 ### Methods
 
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `engage` | `(mode: KillSwitchMode, reason: str = "") -> bool` | Activate kill switch at specified mode |
-| `disengage` | `() -> bool` | Return to DISENGAGED mode |
-| `check_task_allowed` | `(task_name: str) -> bool` | Check if a task is permitted under current mode |
-| `check_or_raise` | `(task_name: str) -> None` | Raise `KillSwitchEngagedError` if task blocked |
-| `get_status` | `() -> KillSwitchMode` | Current mode |
-| `get_history` | `() -> list[KillSwitchEvent]` | Audit trail of mode changes |
-| `subscribe` | `(callback: Callable[[KillSwitchMode], None]) -> None` | Register mode-change callback |
-| `load_from_file` | `(state_dir: Path \| str) -> KillSwitch` | Classmethod: restore from persisted state |
+| Method | Return | Description |
+|--------|--------|-------------|
+| `engage(mode, reason, triggered_by)` | `KillSwitchEvent` | Repeat/escalate a halt; weaker modes are rejected |
+| `disengage(triggered_by=None, reason=None, *, credential=None, confirm=False, expected_event_id=None)` | `KillSwitchEvent` | Denied without separately configured operator authority, valid credential, literal confirmation and current halt ID |
+| `check_task_allowed(task_type)` | `dict` | Decision in `allowed`, with action/mode details |
+| `check_or_raise(task_type)` | `None` | Raise `KillSwitchEngagedError` if blocked |
+| `get_status()` | `dict` | Mode, current event ID and summary |
+| `get_history()` | `list[KillSwitchEvent]` | Local observed event history |
+| `subscribe(callback)` | `None` | Callback receives a `KillSwitchEvent` |
+| `load_from_file(state_dir, ..., release_authority=None)` | `KillSwitch` | Restore state; release authority is never inferred from state |
+
+See [operator release](OPERATOR_RELEASE.md) for the required separate control
+process/account, credential provisioning, CLI, and trust limitations. Caller
+attribution does not authenticate an operator. Agent-side objects keep
+`release_authority=None`.
 
 ### Example
 
 ```python
-ks = KillSwitch(state_dir="/tmp/ks", require_hmac=False)
-ks.engage(KillSwitchMode.HALT_NONCRITICAL, reason="High error rate")
+from hummbl_governance import KillSwitch, KillSwitchMode
 
-if ks.check_task_allowed("send_email"):
-    send_email()  # blocked — non-critical
-if ks.check_task_allowed("health_check"):
-    health_check()  # allowed — critical by default
-
-ks.disengage()
+ks = KillSwitch()  # In-memory demonstration, no release authority.
+ks.engage(KillSwitchMode.HALT_NONCRITICAL, "High error rate", "monitor")
+assert not ks.check_task_allowed("send_email")["allowed"]
+assert ks.check_task_allowed("safety_monitoring")["allowed"]
+# Remain halted until the trusted operator control path approves release.
 ```
 
 ---

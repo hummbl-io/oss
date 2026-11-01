@@ -149,7 +149,8 @@ def test_kill_switch_disengage():
         "reason": "all clear",
         "triggered_by": "pytest",
     })
-    assert result["disengaged"] is True
+    assert "error" in result
+    assert mcp_server.get_kill_switch().engaged
 
 
 # ---------------------------------------------------------------------------

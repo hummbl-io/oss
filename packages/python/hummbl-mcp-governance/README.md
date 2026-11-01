@@ -6,7 +6,7 @@ MCP servers exposing HUMMBL governance primitives — 7 servers, 32+ JSON-RPC to
 
 | Server | Entry point | Tools | Wraps |
 |--------|-------------|-------|-------|
-| **Governance** | `hummbl-governance-mcp` | 10 | KillSwitch, CircuitBreaker, CostGovernor, AuditLog, ComplianceMapper, HealthProbe |
+| **Governance** | `hummbl-governance-mcp` | 9 | KillSwitch, CircuitBreaker, CostGovernor, AuditLog, ComplianceMapper, HealthProbe |
 | **Compliance** | `hummbl-compliance-mcp` | 5 | NIST AI RMF, SOC2, ISO crosswalk, STRIDE, evidence export |
 | **Sandbox** | `hummbl-sandbox-mcp` | 5 | CapabilityFence, OutputValidator sandbox |
 | **Identity** | `hummbl-identity-mcp` | 10 | AgentRegistry, DelegationTokenManager, LamportClock |
@@ -47,3 +47,9 @@ hummbl-physical-mcp
 ## License
 
 Apache-2.0
+
+Kill-switch release is not an MCP tool. Former direct calls are rejected, and
+engagement cannot weaken an existing halt. Use the separately protected
+[governance operator release path](../hummbl-governance/docs/OPERATOR_RELEASE.md).
+Engagement also fails closed when an installed governance core lacks operator
+release authorization support. Adopt the fixed core and wrapper together.
