@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from compass import Compass, Repo
+from hummbl_compass import Compass, Repo
 
 # Path to topology relative to repo root
-_TOPOLOGY = Path(__file__).parent.parent / "hummbl-topology.json"
+_TOPOLOGY = Path(__file__).parent.parent / "hummbl_compass" / "hummbl-topology.json"
 
 
 @pytest.fixture
@@ -19,6 +19,14 @@ def compass() -> Compass:
 
 
 class TestLoad:
+    def test_default_topology_from_unrelated_directory(
+        self, compass: Compass, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        default = Compass()
+        assert default.version == compass.version
+        assert default.repos == compass.repos
+
     def test_version(self, compass: Compass) -> None:
         assert compass.version == "2.0.0"
 
