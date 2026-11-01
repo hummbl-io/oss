@@ -91,6 +91,9 @@ def test_new_package_requires_its_own_row(repo):
 def test_cli_returns_failure_for_table_version_drift(repo, monkeypatch, capsys):
     (repo / "README.md").write_text(HEADER + ROW.replace("1.2.3", "0.0.0"), encoding="utf-8")
     monkeypatch.setattr(claims, "build_checks", lambda root: [])
+    # A package-only container may place this script directly under /app/scripts.
+    # An explicit root must work without indexing nonexistent ancestor levels.
+    monkeypatch.setattr(claims, "__file__", str(Path(repo.anchor) / "check_public_count_claims.py"))
     monkeypatch.setattr("sys.argv", ["check_public_count_claims.py", "--repo-root", str(repo)])
     assert claims.main() == 1
     assert "table says '0.0.0'" in capsys.readouterr().out

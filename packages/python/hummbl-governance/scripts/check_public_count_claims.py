@@ -226,11 +226,20 @@ def main() -> int:
     parser.add_argument(
         "--repo-root",
         type=Path,
-        default=Path(__file__).resolve().parents[4],
+        default=None,
         help="Path to the oss monorepo root (default: inferred from this script's location)",
     )
     args = parser.parse_args()
-    oss_root = args.repo_root.resolve()
+    oss_root = args.repo_root
+    if oss_root is None:
+        oss_root = next(
+            (parent for parent in Path(__file__).resolve().parents
+             if (parent / "packages" / "python" / "hummbl-governance").is_dir()),
+            None,
+        )
+        if oss_root is None:
+            parser.error("cannot infer monorepo root; supply --repo-root")
+    oss_root = oss_root.resolve()
 
     checks = build_checks(oss_root)
     problems: list[str] = []
