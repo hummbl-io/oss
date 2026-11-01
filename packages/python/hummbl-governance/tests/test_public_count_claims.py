@@ -28,6 +28,31 @@ def test_project_version_used_and_registry_version_ignored(repo):
     assert claims.check_package_table_versions(repo) == []
 
 
+@pytest.mark.parametrize("leading,trailing", [(False, True), (True, False), (False, False)])
+def test_optional_outer_table_delimiters_are_supported(repo, leading, trailing):
+    lines = (HEADER + ROW).splitlines()
+    if not leading:
+        lines = [line.removeprefix("|") for line in lines]
+    if not trailing:
+        lines = [line.removesuffix("|") for line in lines]
+    (repo / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    assert claims.check_package_table_versions(repo) == []
+
+
+@pytest.mark.parametrize("row", ["|" + ROW, ROW.rstrip() + "|\n"])
+def test_extra_outer_delimiter_does_not_hide_an_empty_cell(repo, row):
+    (repo / "README.md").write_text(HEADER + row, encoding="utf-8")
+    assert any("malformed package row" in p for p in claims.check_package_table_versions(repo))
+
+
+def test_unprefixed_duplicate_row_still_checks_version(repo):
+    unprefixed = ROW.removeprefix("|").replace("1.2.3", "0.0.0")
+    (repo / "README.md").write_text(HEADER + ROW + unprefixed, encoding="utf-8")
+    problems = claims.check_package_table_versions(repo)
+    assert any("duplicate package row: example" in p for p in problems)
+    assert any("table says '0.0.0'" in p for p in problems)
+
+
 @pytest.mark.parametrize(
     ("table", "message"),
     [

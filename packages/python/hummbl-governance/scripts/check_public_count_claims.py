@@ -182,11 +182,14 @@ def check_package_table_versions(oss_root: Path) -> list[str]:
         return problems + [f"{prefix} cannot read {readme}: {exc}"]
 
     def cells(line: str) -> list[str]:
-        return [cell.strip() for cell in line.strip().strip("|").split("|")]
+        # Markdown permits either outer delimiter to be omitted. Remove at
+        # most one: extra delimiters represent empty cells, not decoration.
+        line = line.strip().removeprefix("|").removesuffix("|")
+        return [cell.strip() for cell in line.split("|")]
 
     headers = [
         index for index, line in enumerate(lines)
-        if line.strip().startswith("|") and cells(line) == ["Package", "Tree", "PyPI", "Status"]
+        if cells(line) == ["Package", "Tree", "PyPI", "Status"]
     ]
     if len(headers) != 1:
         return problems + [f"{prefix} {readme}: expected exactly one Python package table"]
@@ -199,7 +202,7 @@ def check_package_table_versions(oss_root: Path) -> list[str]:
     seen: set[str] = set()
     for index in range(header + 2, len(lines)):
         line = lines[index].strip()
-        if not line.startswith("|"):
+        if "|" not in line:
             break
         row = cells(line)
         if len(row) != 4:
