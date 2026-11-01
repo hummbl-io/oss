@@ -254,19 +254,26 @@ def handle_git_diff(arguments):
     staged = arguments.get("staged", False)
     paths = arguments.get("paths", [])
 
-    cmd = ["git", "diff"]
+    cmd = ["git", "--literal-pathspecs", "diff"]
     if staged:
         cmd.append("--staged")
 
+    git_root = get_git_root()
     for p in paths:
+        if str(p).startswith("-"):
+            return {"content": [{"type": "text", "text": f"Option-shaped path '{p}' is blocked."}], "isError": True}
         if "*" in p or "?" in p:
             return {"content": [{"type": "text", "text": "Wildcard characters are blocked in file paths."}], "isError": True}
-        cmd.append(p)
+        if resolve_inside(git_root, p) is None:
+            return {"content": [{"type": "text", "text": f"Path '{p}' resolves outside the workspace."}], "isError": True}
+
+    if paths:
+        cmd.append("--")
+        cmd.extend(paths)
 
     if check_safety_guards(cmd):
         return {"content": [{"type": "text", "text": "Destructive or bypass flags are blocked."}], "isError": True}
 
-    git_root = get_git_root()
     res = subprocess.run(cmd, capture_output=True, text=True, cwd=git_root)
     if res.returncode != 0:
         return {"content": [{"type": "text", "text": f"Error running git diff: {res.stderr.strip()}"}], "isError": True}
@@ -280,12 +287,14 @@ def handle_git_stage(arguments):
 
     git_root = get_git_root()
     for p in paths:
+        if str(p).startswith("-"):
+            return {"content": [{"type": "text", "text": f"Option-shaped path '{p}' is blocked."}], "isError": True}
         if "*" in p or "?" in p:
             return {"content": [{"type": "text", "text": f"Wildcard '{p}' is banned. Specify paths explicitly."}], "isError": True}
         if resolve_inside(git_root, p) is None:
             return {"content": [{"type": "text", "text": f"Path '{p}' resolves outside the workspace."}], "isError": True}
 
-    cmd = ["git", "add"] + paths
+    cmd = ["git", "--literal-pathspecs", "add", "--"] + list(paths)
     res = subprocess.run(cmd, capture_output=True, text=True, cwd=git_root)
     if res.returncode != 0:
         return {"content": [{"type": "text", "text": f"Error running git add: {res.stderr.strip()}"}], "isError": True}
