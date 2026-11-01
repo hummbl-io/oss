@@ -28,7 +28,7 @@ hard_gates:
     severity: "critical"
 
   framework_compliance:
-    fail_condition: "Godot engine headless run fails, crashes, produces syntax/runtime script errors, or exits non-zero (godot_console --path . --headless fails)"
+    fail_condition: "Project-provided headless smoke/test runner is missing, exceeds the declared wall-clock timeout (default 60 seconds), exits non-zero, or reports syntax/runtime script errors"
     max_score_if_failed: 35
     severity: "critical"
 
@@ -137,6 +137,7 @@ required_outputs:
 usage_notes:
   - "Weights and score caps are illustrative design choices, not an empirically calibrated scale."
   - "This example assumes a Godot project with a 42-call generation budget, asset receipts, and a project-provided gen_receipt.py verifier; these tools are not bundled with this template."
+  - "Provide a headless smoke/test runner that explicitly exits with success or failure after checking project behavior; a bare headless game launch is not a completed test. For example, run godot_console --headless --path . --script res://tests/headless_smoke.gd with an external process supervisor enforcing a 60-second wall-clock timeout. The runner and supervisor are project-provided, not bundled here. Record the command, timeout, exit status, and logs; a timeout or forced termination fails the gate."
   - "Adapt budgets, required artifacts, engine commands, and scoring anchors to the project before evaluation; record adaptations with the result."
   - "Weights prioritize playable engine integrity (25%), asset coherence (20%), and gameplay feel (20%) over pure aesthetics"
   - "Evaluators must apply the stated score caps when a gate fails; the package validator does not execute gates or compute scores."
