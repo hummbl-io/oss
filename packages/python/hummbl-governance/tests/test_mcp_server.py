@@ -24,7 +24,6 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -36,6 +35,8 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
 import mcp_server  # noqa: E402
+from hummbl_governance import KillSwitchMode  # noqa: E402
+from .kill_switch_helpers import operator_switch, release  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -51,7 +52,10 @@ def _fresh_instances(tmp_path, monkeypatch):
     monkeypatch.setattr(mcp_server, "STATE_DIR", str(tmp_path / "state"))
     monkeypatch.setattr(mcp_server, "DB_PATH", str(tmp_path / "state" / "costs.db"))
     monkeypatch.setattr(mcp_server, "AUDIT_DIR", str(tmp_path / "state" / "audit"))
-    yield
+    writer = operator_switch(state_dir=tmp_path / "state")
+    writer.engage(KillSwitchMode.EMERGENCY, "bootstrap", "test-operator")
+    release(writer)
+    yield writer
     mcp_server._instances.clear()
 
 
@@ -269,7 +273,7 @@ def _rpc(messages):
     """Send JSON-RPC messages to mcp_server via subprocess and return parsed responses."""
     server_path = str(_REPO_ROOT / "mcp_server.py")
     env = os.environ.copy()
-    env["GOVERNANCE_STATE_DIR"] = str(Path(tempfile.mkdtemp()) / "state")
+    env["GOVERNANCE_STATE_DIR"] = mcp_server.STATE_DIR
 
     proc = subprocess.Popen(
         [sys.executable, server_path],
@@ -350,3 +354,47 @@ def test_protocol_unknown_method():
     ])
     err_resp = next(r for r in responses if r["id"] == 2)
     assert "error" in err_resp
+
+
+def test_cached_mcp_reader_observes_external_halt_and_release(_fresh_instances):
+    writer = _fresh_instances
+    retained = mcp_server.get_kill_switch()
+    assert retained.check_task_allowed("work")["allowed"]
+    for mode in (KillSwitchMode.EMERGENCY, KillSwitchMode.DISENGAGED):
+        if mode == KillSwitchMode.EMERGENCY:
+            writer.engage(mode, "external incident", "monitor")
+        else:
+            release(writer)
+        assert mcp_server.get_kill_switch() is retained
+        expected = mode == KillSwitchMode.DISENGAGED
+        assert retained.check_task_allowed("work")["allowed"] is expected
+        assert mcp_server.handle_tool("kill_switch_status", {})["status"]["mode"] == mode.name
+        assert mcp_server.handle_tool("governance_status", {})["kill_switch"]["mode"] == mode.name
+        health = mcp_server.handle_tool("health_check", {})
+        probe = next(p for p in health["probes"] if p["name"] == "kill_switch")
+        assert probe["healthy"] is expected
+
+
+@pytest.mark.parametrize("damage", ["deleted", "tampered", "missing_key", "wrong_key"])
+def test_mcp_cached_disengaged_is_not_used_when_state_unverifiable(_fresh_instances, monkeypatch, damage):
+    from hummbl_governance.kill_switch import KillSwitchConfigurationError, KillSwitchTamperError
+
+    retained = mcp_server.get_kill_switch()
+    assert retained.check_task_allowed("work")["allowed"]
+    state = Path(mcp_server.STATE_DIR) / "kill_switch_state.json"
+    if damage == "deleted":
+        state.unlink()
+    elif damage == "tampered":
+        state.write_text("{}", encoding="utf-8")
+    elif damage == "missing_key":
+        monkeypatch.delenv("HUMMBL_SIGNING_SECRET")
+    else:
+        monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "wrong-synthetic-state-key")
+    before = state.read_bytes() if state.exists() else None
+    for read in (retained.get_status, lambda: retained.check_task_allowed("work"),
+                 lambda: mcp_server.handle_tool("kill_switch_status", {})):
+        with pytest.raises((KillSwitchConfigurationError, KillSwitchTamperError)):
+            read()
+    health = mcp_server.handle_tool("health_check", {})
+    assert health["overall_healthy"] is False
+    assert (state.read_bytes() if state.exists() else None) == before

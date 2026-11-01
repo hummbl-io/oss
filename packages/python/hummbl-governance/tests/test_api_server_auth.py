@@ -225,3 +225,74 @@ class TestKillSwitchDisengageGate:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+@pytest.fixture
+def persistent_api(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from hummbl_governance import KillSwitchMode
+    from .kill_switch_helpers import operator_switch, release
+
+    monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "synthetic-api-state-key")
+    monkeypatch.delenv("DCT_SECRET", raising=False)
+    monkeypatch.setenv("GOVERNANCE_API_TOKEN", "synthetic-agent-api-token")
+    monkeypatch.delenv("GOVERNANCE_API_TOKEN_FILE", raising=False)
+    monkeypatch.setattr(api_server, "STATE_DIR", tmp_path)
+    monkeypatch.setattr(api_server, "DB_PATH", tmp_path / "costs.db")
+    model = SimpleNamespace(code="P1", name="model", transformation="perspect", definition="test")
+    engine = SimpleNamespace(get_model=lambda _: model, generate_system_prompt=mock.Mock(return_value="prompt"))
+    monkeypatch.setattr(api_server, "ReasoningEngine", lambda: engine)
+    writer = operator_switch(state_dir=tmp_path)
+    writer.engage(KillSwitchMode.EMERGENCY, "bootstrap", "test-operator")
+    release(writer)
+    api_server.init_services()
+    return writer, engine
+
+
+def _authenticated_request(method, path, body=None):
+    handler = _make_handler(method, path, body,
+                            {"Authorization": "Bearer synthetic-agent-api-token"})
+    getattr(api_server.GovernanceHandler, "do_" + method)(handler)
+    return handler._response_code, _read_response(handler)
+
+
+def test_rest_reads_and_enforcement_follow_external_halt_and_release(persistent_api):
+    from hummbl_governance import KillSwitchMode
+    from .kill_switch_helpers import release
+
+    writer, engine = persistent_api
+    cached = api_server._ks
+    assert _authenticated_request("POST", "/api/v1/apply", {"model": "P1"})[0] == 200
+    for mode in (KillSwitchMode.EMERGENCY, KillSwitchMode.DISENGAGED):
+        if mode == KillSwitchMode.EMERGENCY:
+            writer.engage(mode, "external incident", "monitor")
+        else:
+            release(writer)
+        assert api_server._ks is cached
+        assert _authenticated_request("GET", "/api/v1/kill-switch")[1]["mode"] == mode.name
+        assert _authenticated_request("GET", "/api/v1/status")[1]["kill_switch"]["mode"] == mode.name
+        assert _authenticated_request("GET", "/api/v1/health")[1]["healthy"] is (mode == KillSwitchMode.DISENGAGED)
+        engine.generate_system_prompt.reset_mock()
+        code, _ = _authenticated_request("POST", "/api/v1/apply", {"model": "P1"})
+        assert code == (200 if mode == KillSwitchMode.DISENGAGED else 503)
+        assert engine.generate_system_prompt.called is (mode == KillSwitchMode.DISENGAGED)
+
+
+@pytest.mark.parametrize("damage", ["deleted", "tampered", "missing_key", "wrong_key"])
+def test_rest_fails_closed_when_cached_disengaged_state_becomes_unverifiable(persistent_api, monkeypatch, damage):
+    _, engine = persistent_api
+    state = api_server.STATE_DIR / "kill_switch_state.json"
+    if damage == "deleted":
+        state.unlink()
+    elif damage == "tampered":
+        state.write_text("{}", encoding="utf-8")
+    elif damage == "missing_key":
+        monkeypatch.delenv("HUMMBL_SIGNING_SECRET")
+    else:
+        monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "wrong-synthetic-state-key")
+    before = state.read_bytes() if state.exists() else None
+    for path in ("status", "kill-switch", "health", "score"):
+        assert _authenticated_request("GET", "/api/v1/" + path)[0] == 503
+    assert _authenticated_request("POST", "/api/v1/apply", {"model": "P1"})[0] == 503
+    engine.generate_system_prompt.assert_not_called()
+    assert (state.read_bytes() if state.exists() else None) == before

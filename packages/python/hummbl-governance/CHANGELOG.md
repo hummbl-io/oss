@@ -13,6 +13,11 @@ Proposed next release: **1.6.0**. This change is a breaking default and is
 not tagged or published from this PR.
 
 ### Security
+- Cached governance MCP and REST kill-switch instances now re-verify existing
+  signed state on every read, including external halts and operator releases.
+  Missing or corrupt state fails closed; first startup requires explicit signed
+  EMERGENCY provisioning. Failed lock setup during engagement now latches task
+  decisions closed until an emergency is successfully persisted.
 - **Breaking release authorization (#368):** kill-switch release is removed from
   both governance MCP tool lists and denied by their old handlers and the general
   REST API. Core release defaults to denied and requires a configured operator

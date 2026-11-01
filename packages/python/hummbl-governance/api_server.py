@@ -57,6 +57,10 @@ from hummbl_governance import (
     ReasoningEngine,
 )
 
+from hummbl_governance.kill_switch import (
+    KillSwitchConfigurationError, KillSwitchPersistenceError, KillSwitchTamperError,
+)
+
 STATE_DIR = Path(os.environ.get("GOVERNANCE_STATE_DIR", ".governance"))
 DB_PATH = STATE_DIR / "costs.db"
 
@@ -108,9 +112,8 @@ _re = None
 
 def init_services():
     global _ks, _cb, _cg, _al, _re
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    _ks = KillSwitch.load_from_file(STATE_DIR, authoritative_reads=True)
     (STATE_DIR / "audit").mkdir(exist_ok=True)
-    _ks = KillSwitch.load_from_file(STATE_DIR)
     _cb = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
     _cg = CostGovernor(db_path=str(DB_PATH))
     _al = AuditLog(base_dir=str(STATE_DIR / "audit"))
@@ -200,10 +203,11 @@ class GovernanceHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _get_status(self, params):
+        status = _ks.get_status()
         budget = _cg.check_budget_status()
         self._json_response(
             {
-                "kill_switch": {"mode": _ks.mode.name, "engaged": _ks.engaged},
+                "kill_switch": {"mode": status["mode"], "engaged": status["engaged"]},
                 "circuit_breaker": {"state": _cb.state.name, "failure_count": _cb.failure_count},
                 "cost_governor": {
                     "daily_spend": getattr(budget, "current_spend", 0),
@@ -258,10 +262,11 @@ class GovernanceHandler(BaseHTTPRequestHandler):
         )
 
     def _get_health(self, params):
+        status = _ks.get_status()
         self._json_response(
             {
-                "healthy": not _ks.engaged and _cb.state.name == "CLOSED",
-                "kill_switch": _ks.mode.name,
+                "healthy": not status["engaged"] and _cb.state.name == "CLOSED",
+                "kill_switch": status["mode"],
                 "circuit_breaker": _cb.state.name,
             }
         )
@@ -291,7 +296,10 @@ class GovernanceHandler(BaseHTTPRequestHandler):
 
         handler = self._GET_ROUTES.get(path)
         if handler:
-            handler(self, params)
+            try:
+                handler(self, params)
+            except (KillSwitchConfigurationError, KillSwitchPersistenceError, KillSwitchTamperError):
+                self._json_response({"error": "Kill switch state unavailable"}, 503)
         else:
             self._json_response({"error": f"Not found: {path}"}, 404)
 
@@ -322,6 +330,9 @@ class GovernanceHandler(BaseHTTPRequestHandler):
             except PermissionError as exc:
                 self._json_response({"error": str(exc)}, 403)
                 return
+            except (KillSwitchConfigurationError, KillSwitchPersistenceError, KillSwitchTamperError):
+                self._json_response({"error": "Kill switch state unavailable"}, 503)
+                return
             self._json_response({"engaged": True, "mode": mode_name})
 
         elif path == "/api/v1/kill-switch/disengage":
@@ -351,9 +362,14 @@ class GovernanceHandler(BaseHTTPRequestHandler):
                 self._json_response({"error": f"Unknown model code: {model_code}"}, 404)
                 return
 
-            # Check Kill Switch
-            if _ks.engaged:
-                self._json_response({"error": "Governance Kill Switch ACTIVE", "mode": _ks.mode.name}, 503)
+            # Refresh verified state at the enforcement decision, not just startup.
+            try:
+                status = _ks.get_status()
+            except (KillSwitchConfigurationError, KillSwitchPersistenceError, KillSwitchTamperError):
+                self._json_response({"error": "Kill switch state unavailable"}, 503)
+                return
+            if status["engaged"]:
+                self._json_response({"error": "Governance Kill Switch ACTIVE", "mode": status["mode"]}, 503)
                 return
 
             # Generate Prompt

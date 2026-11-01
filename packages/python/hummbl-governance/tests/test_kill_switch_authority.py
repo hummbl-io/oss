@@ -234,3 +234,60 @@ def test_refresh_preserves_local_subscribers_and_history(tmp_path, monkeypatch):
     assert len(notifications) == 1
     release(core, "test-operator", "approved release")
     assert len(notifications) == 2
+
+
+@pytest.mark.parametrize("operation", ["mkdir", "open", "acquire"])
+def test_lock_setup_failure_latches_shared_core_until_emergency_recovery(tmp_path, monkeypatch, operation):
+    provision(tmp_path, monkeypatch)
+    core = module.get_kill_switch_core()
+    state = tmp_path / "kill_switch_state.json"
+    before = state.read_bytes()
+    history = core.get_history()
+    notifications = []
+    core.subscribe(notifications.append)
+
+    def fail(*args, **kwargs):
+        raise OSError("injected lock setup failure")
+
+    with monkeypatch.context() as patch:
+        if operation == "mkdir":
+            patch.setattr(module.Path, "mkdir", fail)
+        elif operation == "open":
+            patch.setattr(module.Path, "open", fail)
+        else:
+            patch.setattr(module, "acquire_file_lock", fail)
+        with pytest.raises(KillSwitchPersistenceError, match="state lock"):
+            core.engage(KillSwitchMode.EMERGENCY, "stop", "monitor")
+    assert state.read_bytes() == before
+    assert core._history == history
+    assert not notifications
+    for read in (core.get_status, core.get_history, lambda: core.mode,
+                 lambda: core.engaged, lambda: core.check_task_allowed("work")):
+        with pytest.raises(KillSwitchPersistenceError):
+            read()
+    core.engage(KillSwitchMode.EMERGENCY, "storage repaired", "monitor")
+    assert not core.check_task_allowed("work")["allowed"]
+    assert len(notifications) == 1
+
+
+def test_authoritative_loader_tracks_external_transitions_through_retained_reference(tmp_path, monkeypatch):
+    writer = provision(tmp_path, monkeypatch)
+    reader = KillSwitch.load_from_file(tmp_path, authoritative_reads=True)
+    assert reader.mode == KillSwitchMode.DISENGAGED
+    writer.engage(KillSwitchMode.EMERGENCY, "external incident", "monitor")
+    assert reader.engaged
+    assert reader.get_status()["mode"] == "EMERGENCY"
+    assert reader.get_history()[-1].mode == KillSwitchMode.EMERGENCY
+    assert not reader.check_task_allowed("work")["allowed"]
+    release(writer)
+    assert reader.mode == KillSwitchMode.DISENGAGED
+    assert reader.check_task_allowed("work")["allowed"]
+
+
+def test_authoritative_loader_never_initializes_missing_or_unsigned_state(tmp_path, monkeypatch):
+    monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
+    with pytest.raises(KillSwitchTamperError, match="missing"):
+        KillSwitch.load_from_file(tmp_path, authoritative_reads=True)
+    assert not list(tmp_path.iterdir())
+    with pytest.raises(ValueError, match="HMAC"):
+        KillSwitch.load_from_file(tmp_path, authoritative_reads=True, require_hmac=False)

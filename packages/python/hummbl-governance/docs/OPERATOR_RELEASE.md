@@ -12,7 +12,13 @@ increase the current halt level; it cannot weaken it. Reducing restrictions
 requires a separate operator release. Both MCP wrappers refuse engagement when
 loaded with an older core lacking the release-authorization capability. Adopt
 the fixed governance core and wrapper together; updating only a wrapper cannot
-repair direct library calls in an older installed core.
+repair direct library calls in an older installed core. Cached MCP and REST
+instances use verified authoritative reads at every mode, status, history and
+task decision. They observe both external stops and operator releases without a
+restart. Missing credentials, missing/corrupt state, and failed engagement lock
+setup fail closed. After a failed engagement write or lock setup, the affected
+instance refuses decisions until it successfully persists an explicit EMERGENCY.
+MCP wrappers also reject older cores without authoritative-read support.
 
 ## Required deployment boundary
 
@@ -40,6 +46,19 @@ that file while writers are active. Older writers or direct file writes bypass
 this coordination. The persisted file contains the latest event, not a complete
 cross-process audit log; retain release events in your protected audit service
 when a full history is required.
+
+## Initial state and server startup
+
+The REST and MCP servers require existing signed state at their explicitly
+configured state directory. An empty directory is not evidence of DISENGAGED
+state, and a server read never initializes or repairs it. Before first startup,
+a trusted provisioning process can construct `KillSwitch(state_dir=...)` with
+the protected state-signing key and deliberately call
+`engage(KillSwitchMode.EMERGENCY, reason, triggered_by)`. This creates a signed
+halt, not permission to work. Review the deployment and use the authenticated
+operator release path below before resuming normal work. The release command
+itself does not perform initialization. Restoring a missing file or signing key
+alone must not be treated as release approval.
 
 ## Local operator command
 

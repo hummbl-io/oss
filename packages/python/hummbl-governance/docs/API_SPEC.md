@@ -62,7 +62,7 @@ KillSwitch(
 | `get_status()` | `dict` | Mode, current event ID and summary |
 | `get_history()` | `list[KillSwitchEvent]` | Local observed event history |
 | `subscribe(callback)` | `None` | Callback receives a `KillSwitchEvent` |
-| `load_from_file(state_dir, ..., release_authority=None)` | `KillSwitch` | Restore state; release authority is never inferred from state |
+| `load_from_file(state_dir, ..., authoritative_reads=False, release_authority=None)` | `KillSwitch` | Restore state; authoritative reads require existing signed state and re-verify each decision; release authority is never inferred from state |
 
 See [operator release](OPERATOR_RELEASE.md) for the required separate control
 process/account, credential provisioning, CLI, and trust limitations. Caller

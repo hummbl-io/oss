@@ -91,9 +91,10 @@ def _ensure_dirs():
 
 
 def get_kill_switch():
+    if getattr(KillSwitch, "AUTHORITATIVE_READS_VERSION", 0) != 1:
+        raise RuntimeError("A governance core with authoritative state reads is required")
     if "ks" not in _instances:
-        _ensure_dirs()
-        _instances["ks"] = KillSwitch.load_from_file(Path(STATE_DIR))
+        _instances["ks"] = KillSwitch.load_from_file(Path(STATE_DIR), authoritative_reads=True)
     return _instances["ks"]
 
 

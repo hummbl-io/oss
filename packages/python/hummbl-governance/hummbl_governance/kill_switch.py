@@ -214,6 +214,7 @@ class KillSwitch:
 
     # Facades use this capability to reject unsafe installed legacy cores.
     RELEASE_AUTHORIZATION_VERSION = 1
+    AUTHORITATIVE_READS_VERSION = 1
 
     DEFAULT_CRITICAL_TASKS: frozenset[str] = frozenset([
         "safety_monitoring",
@@ -302,17 +303,22 @@ class KillSwitch:
         critical_tasks: frozenset[str] | None = None,
         *,
         require_existing: bool = False,
+        authoritative_reads: bool = False,
         release_authority: OperatorReleaseAuthority | None = None,
     ) -> KillSwitch:
         """Load kill switch state from persistent storage.
 
         Missing files return a fresh instance only when require_existing=False.
         Strict readers use require_existing=True: absence cannot clear a halt.
-        Corrupt files raise when require_hmac=True.
+        Corrupt files raise when require_hmac=True. ``authoritative_reads=True``
+        requires HMAC and existing state, then re-verifies before every mode,
+        status, history and task decision, including through retained references.
 
         Raises:
             KillSwitchTamperError: If require_hmac=True and signature is invalid/missing.
         """
+        if authoritative_reads and not require_hmac:
+            raise ValueError("Authoritative reads require HMAC verification")
         state_file = state_dir / "kill_switch_state.json"
         ks = cls(
             state_dir=state_dir,
@@ -321,6 +327,9 @@ class KillSwitch:
             critical_tasks=critical_tasks,
             release_authority=release_authority,
         )
+        ks._authoritative_reads = authoritative_reads
+        if authoritative_reads:
+            ks._require_signing_secret()
 
         try:
             with open(state_file, encoding="utf-8") as f:
@@ -378,7 +387,7 @@ class KillSwitch:
                 )
                 ks._history.append(event)
         except FileNotFoundError as e:
-            if require_existing:
+            if require_existing or authoritative_reads:
                 raise KillSwitchTamperError("Authoritative kill switch state is missing") from e
         except (KeyError, TypeError, ValueError, OSError) as e:
             logger.error("Kill switch state file corrupt: %s", e)
@@ -511,9 +520,23 @@ class KillSwitch:
                 if latch_failure:
                     self._persistence_failed = True
                 raise
-        self._state_dir.mkdir(parents=True, exist_ok=True)
-        with (self._state_dir / ".kill-switch.lock").open("a+b") as lock_file:
+        lock_file = None
+        try:
+            self._state_dir.mkdir(parents=True, exist_ok=True)
+            lock_file = (self._state_dir / ".kill-switch.lock").open("a+b")
             acquire_file_lock(lock_file)
+        except OSError as exc:
+            if latch_failure:
+                self._persistence_failed = True
+            if lock_file is not None:
+                try:
+                    lock_file.close()
+                except OSError:
+                    pass  # Preserve the original setup failure and its latch.
+            raise KillSwitchPersistenceError("Failed to prepare kill switch state lock") from exc
+        # Do not catch errors from the yielded authorization/refresh/commit body
+        # as setup failures: those paths preserve their own exception semantics.
+        with lock_file:
             try:
                 yield
             finally:
