@@ -162,8 +162,8 @@ cd packages/node/mcp-base120 && npm ci && npm test
 
 - Python 3.11+ required (kernel `requires-python` is `>=3.10`; treat 3.11 as the fleet floor)
 - Node.js 22+ required for Node packages.
-- Zero third-party runtime dependencies (stdlib only in production code)
-  - **Exception**: `governed-compression` requires `numpy>=1.26` for array operations (documented in its `pyproject.toml`)
+- Zero third-party runtime dependencies (stdlib only in production code) -- enforced by `.github/scripts/check_claim_integrity.py`
+  - **Documented exceptions** (the only packages with third-party runtime deps, each declared in its `pyproject.toml`): `governed-compression` (`numpy`), `hummbl-free-models` (`pyyaml`), `hummbl-rubric-templates` (`pyyaml`). Intra-repo first-party dependencies (`hummbl-*`, `base120`) do not count as third-party.
 - Test dependencies in `[test]` extras only
 - Repo license: MIT OR Apache-2.0. Packages: Apache-2.0 or `MIT OR Apache-2.0` (see each `pyproject.toml`)
 - **pyproject.toml template**: `.github/PYPROJECT_TEMPLATE.toml` — copy this when creating a new package to get correct license/author/classifiers/URLs
