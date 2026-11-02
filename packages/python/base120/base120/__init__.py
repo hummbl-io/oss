@@ -1,4 +1,4 @@
-# Copyright 2024-2026 HUMMBL, LLC
+# Copyright 2024-2026 HUMMBL
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ Glyph::
     png = glyph.to_png()                 # 6x20 grid + order strip + payload
     assert decode_glyph(png).entries == glyph.entries
 
-Apache 2.0. Copyright 2026 HUMMBL, LLC.
+Apache 2.0. Copyright 2026 HUMMBL.
 """
 
 from __future__ import annotations

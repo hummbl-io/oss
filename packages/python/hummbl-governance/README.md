@@ -506,7 +506,7 @@ This package is part of the [HUMMBL](https://hummbl.io) cognitive AI architectur
 
 ## License
 
-Apache 2.0. Copyright 2026 HUMMBL, LLC.
+Apache 2.0. Copyright 2026 HUMMBL.
 
 
 ---

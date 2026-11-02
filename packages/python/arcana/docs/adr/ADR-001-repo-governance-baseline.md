@@ -3,7 +3,7 @@
 - **Status:** accepted
 - **Date:** 2026-06-22
 - **Decision owner:** Reuben Bowlby
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** none
 - **Superseded by:** none
 

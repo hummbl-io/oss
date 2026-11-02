@@ -3,7 +3,7 @@
 - **Status:** revised — ARCANA review findings addressed (issue #128)
 - **Date:** 2026-09-04
 - **Decision owner:** Operator
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** none
 - **Superseded by:** none
 - **Verify-pass:** YELLOW (2026-09-04, conditions in Appendix B of research artifact)

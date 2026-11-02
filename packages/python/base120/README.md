@@ -785,7 +785,7 @@ If Base120 helps you make better decisions, give it a star — it helps others d
 
 ---
 
-Built by [HUMMBL LLC](https://hummbl.io). Base120 powers the cognitive layer behind multi-agent coordination at scale.
+Built by [HUMMBL](https://hummbl.io). Base120 powers the cognitive layer behind multi-agent coordination at scale.
 
 
 ---
