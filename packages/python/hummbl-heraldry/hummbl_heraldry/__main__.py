@@ -188,7 +188,7 @@ def main(argv: list[str] | None = None) -> int:
     p_all.set_defaults(func=cmd_generate_all)
 
     # fleet-arms
-    p_fleet = sub.add_parser("fleet-arms", help="Show HUMMBL LLC fleet arms")
+    p_fleet = sub.add_parser("fleet-arms", help="Show HUMMBL fleet arms")
     p_fleet.add_argument("--outdir", help="Output directory for SVG")
     p_fleet.set_defaults(func=cmd_fleet_arms)
 

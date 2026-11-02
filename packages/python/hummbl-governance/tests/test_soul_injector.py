@@ -1,4 +1,4 @@
-# Copyright 2024-2026 HUMMBL, LLC
+# Copyright 2024-2026 HUMMBL
 # SPDX-License-Identifier: Apache-2.0
 """Tests for hummbl_governance.soul_injector.
 

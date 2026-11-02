@@ -401,4 +401,4 @@ assert len(errors) > 0  # missing "version", empty "name"
 
 ---
 
-*Copyright 2026 HUMMBL, LLC. Licensed under Apache 2.0.*
+*Copyright 2026 HUMMBL. Licensed under Apache 2.0.*

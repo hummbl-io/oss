@@ -3,7 +3,7 @@
 - **Status:** accepted
 - **Date:** 2026-08-14
 - **Decision owner:** Human Principal Agent
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** none
 - **Superseded by:** none
 - **Related:** historical ADR-TS-002 review artifact

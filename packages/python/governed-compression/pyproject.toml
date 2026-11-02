@@ -9,7 +9,7 @@ description = "Governed compression experiments — quantization and approximati
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+authors = [{ name = "HUMMBL", email = "dev@hummbl.io" }]
 keywords = ["compression", "quantization", "governance", "numpy", "hummbl", "ai", "research"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
