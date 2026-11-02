@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2026 HUMMBL, LLC
+# Copyright 2026 HUMMBL
 # SPDX-License-Identifier: Apache-2.0
 """Cursor beforeShellExecution harness hook (CONTRACT × DCT × EVIDENCE).
 

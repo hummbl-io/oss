@@ -1,4 +1,4 @@
-# Copyright 2026 HUMMBL, LLC
+# Copyright 2026 HUMMBL
 # SPDX-License-Identifier: MIT OR Apache-2.0
 
 """Explicit local snapshots and read handlers for Domain120 inspection.

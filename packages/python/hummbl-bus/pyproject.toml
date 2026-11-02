@@ -9,7 +9,7 @@ description = "Secure append-only TSV coordination bus for multi-agent systems"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
-authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+authors = [{ name = "HUMMBL", email = "dev@hummbl.io" }]
 keywords = ["bus", "coordination", "multi-agent", "append-only", "tsv", "hummbl", "governance"]
 classifiers = [
     "Development Status :: 3 - Alpha",

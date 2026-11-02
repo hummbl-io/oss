@@ -142,8 +142,8 @@ CycloneDX SBOM and SHA-256 checksums to the GitHub release.
 To check a wheel you downloaded, verify its provenance attestation against this
 repository with the GitHub CLI:
 ```bash
-pip download --no-deps hummbl-governance==1.4.2 -d ./dl
-gh attestation verify ./dl/hummbl_governance-1.4.2-py3-none-any.whl --repo hummbl-io/oss
+pip download --no-deps hummbl-governance==1.5.1 -d ./dl
+gh attestation verify ./dl/hummbl_governance-1.5.1-py3-none-any.whl --repo hummbl-io/oss
 ```
 A successful result means GitHub's Sigstore instance attests that this exact
 file was produced by the `publish-pypi.yml` workflow in `hummbl-io/oss`. Then

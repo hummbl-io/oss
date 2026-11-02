@@ -2,10 +2,10 @@
 NOTICE file for base120
 ==============================================================================
 
-This product includes software developed by HUMMBL, LLC
+This product includes software developed by HUMMBL
 (https://hummbl.io).
 
-Copyright 2024-2026 HUMMBL, LLC. All rights reserved.
+Copyright 2024-2026 HUMMBL. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ hummbl-io/oss tree are part of the Apache-2.0 Work. That includes:
 Those files are published. They are not a trade secret. They are on
 public GitHub (hummbl-io/oss) and on PyPI as base120==3.0.0.
 
-Copyright in those files remains with HUMMBL, LLC and is licensed under
+Copyright in those files remains with HUMMBL and is licensed under
 the Apache License 2.0, same as the rest of this package. Apache-2.0
 already permits use of the Work, including commercial use, subject to
 the License. No separate commercial license is required to use the
@@ -76,6 +76,6 @@ Trademarks
 ------------------------------------------------------------------------------
 
 HUMMBL™, BASE120™, KRINEIA™, VERUM™, BKI™, GOVERNANCE TUPLE™
-are trademarks of HUMMBL, LLC.
+are trademarks of HUMMBL.
 
 This NOTICE file does not grant any trademark rights.

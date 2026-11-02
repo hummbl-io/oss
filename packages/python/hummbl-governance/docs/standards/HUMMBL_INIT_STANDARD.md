@@ -1,7 +1,7 @@
 # HUMMBL Init Standard v0.1
 
 **Status:** v0.1
-**Steward:** HUMMBL, LLC
+**Steward:** HUMMBL
 **Approving human:** Human Principal Agent
 **Source of record:** git
 **Depends on:** HUMMBL Repo Standard v0.1
@@ -318,7 +318,7 @@ docs/adr/ADR-<number>-<kebab-title>.md
 - **Status:** proposed | accepted | superseded | deprecated
 - **Date:** YYYY-MM-DD
 - **Decision owner:** <name>
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** <ADR-number or none>
 
 ## Context

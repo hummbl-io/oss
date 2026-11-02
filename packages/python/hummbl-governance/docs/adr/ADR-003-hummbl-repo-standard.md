@@ -3,7 +3,7 @@
 - **Status:** proposed
 - **Date:** 2026-06-22
 - **Decision owner:** Human Principal Agent
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** none
 - **Superseded by:** none
 

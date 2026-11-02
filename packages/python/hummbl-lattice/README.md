@@ -23,8 +23,10 @@ Each Domain120 lattice consists of 20–40 reasoning operators organized into si
 
 ## Quick Start
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-lattice
+pip install -e packages/python/hummbl-lattice
 ```
 
 ```python
