@@ -20,7 +20,7 @@ _DATA_DIR = Path(__file__).parent / "data"
 
 
 def _load_data() -> dict[str, Any]:
-    with open(_DATA_DIR / "garage.json") as f:
+    with open(_DATA_DIR / "garage.json", encoding="utf-8") as f:
         return json.load(f)
 
 
