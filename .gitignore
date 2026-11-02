@@ -90,3 +90,7 @@ tmp_test/
 
 # Claude Code per-user overrides (never commit)
 .claude/settings.local.json
+
+# Internal Claude hooks and audit notes
+.claude/hooks/
+docs/audits/

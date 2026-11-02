@@ -13,6 +13,7 @@ until they are covered here — that is the contract enforcement.
 
 | Script | Class | Owner | Invocation | Test / smoke | Purpose | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
+| `.github/scripts/check_claim_integrity.py` | maintain | oss-maintainers | `python .github/scripts/check_claim_integrity.py` | executed by .github/workflows on every PR | Claim-integrity checks for the public surface |  |
 | `.github/scripts/check_license_consistency.py` | maintain | oss-maintainers | `python .github/scripts/check_license_consistency.py` | executed by .github/workflows on every PR | Check LICENSE file content against pyproject.toml license field |  |
 | `.github/scripts/check_package_parity.py` | maintain | oss-maintainers | `python .github/scripts/check_package_parity.py` | executed by .github/workflows on every PR | Package inventory and requirements.lock parity check (oss#264) |  |
 | `.github/scripts/lock_build_env.py` | maintain | oss-maintainers | `python .github/scripts/lock_build_env.py` | executed by .github/workflows on every PR | Generate and check hash-locked build environments for packages/python/* |  |
