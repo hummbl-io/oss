@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:b7656856-1d7a-4547-847f-0a57ec33b623",
+  "serialNumber": "urn:uuid:86c392bb-0343-44ea-b327-ba6b27a000d9",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-27T14:13:18Z",
+    "timestamp": "2026-11-02T18:36:30Z",
     "tools": [
       {
         "vendor": "HUMMBL",
@@ -33,7 +33,7 @@
         },
         {
           "name": "hummbl:pkg_sha256",
-          "value": "17e80955678fbfad9ef02d52afaf4957d943fdbe7296b69dfce396decfdc46f8"
+          "value": "ef5e9d72394b701cbac12c41d1da0b138f31973504882e0fc3c4a4f349879f8d"
         },
         {
           "name": "hummbl:license_files",
@@ -64,7 +64,7 @@
         },
         {
           "name": "hummbl:pkg_sha256",
-          "value": "17e80955678fbfad9ef02d52afaf4957d943fdbe7296b69dfce396decfdc46f8"
+          "value": "ef5e9d72394b701cbac12c41d1da0b138f31973504882e0fc3c4a4f349879f8d"
         },
         {
           "name": "hummbl:license_files",
