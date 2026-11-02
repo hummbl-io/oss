@@ -91,9 +91,10 @@ def _ensure_dirs():
 
 
 def get_kill_switch():
+    if getattr(KillSwitch, "AUTHORITATIVE_READS_VERSION", 0) != 1:
+        raise RuntimeError("A governance core with authoritative state reads is required")
     if "ks" not in _instances:
-        _ensure_dirs()
-        _instances["ks"] = KillSwitch.load_from_file(Path(STATE_DIR))
+        _instances["ks"] = KillSwitch.load_from_file(Path(STATE_DIR), authoritative_reads=True)
     return _instances["ks"]
 
 
@@ -160,18 +161,6 @@ TOOLS = [
                 "confirm": {"type": "boolean", "description": "Must be true to engage"},
             },
             "required": ["mode", "reason", "confirm"],
-        },
-    },
-    {
-        "name": "kill_switch_disengage",
-        "description": "Disengage the kill switch and return to normal operations.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "reason": {"type": "string", "description": "Reason for disengagement"},
-                "triggered_by": {"type": "string", "description": "Who triggered this"},
-            },
-            "required": ["reason"],
         },
     },
     {
@@ -288,6 +277,8 @@ def _handle_kill_switch_status(arguments):
 
 
 def _handle_kill_switch_engage(arguments):
+    if getattr(KillSwitch, "RELEASE_AUTHORIZATION_VERSION", 0) != 1:
+        return {"error": "A governance core with operator release authorization is required"}
     if not arguments.get("confirm"):
         return {"error": "Must set confirm=true to engage kill switch"}
     ks = get_kill_switch()
@@ -313,16 +304,8 @@ def _handle_kill_switch_engage(arguments):
 
 
 def _handle_kill_switch_disengage(arguments):
-    ks = get_kill_switch()
-    event = ks.disengage(
-        triggered_by=arguments.get("triggered_by", "mcp-client"),
-        reason=arguments["reason"],
-    )
-    return {
-        "disengaged": True,
-        "reason": arguments["reason"],
-        "timestamp": str(getattr(event, "timestamp", datetime.now(timezone.utc))),
-    }
+    # Keep a fail-closed response for callers using the former private handler.
+    return {"error": "Operator-only release is unavailable over MCP"}
 
 
 def _handle_circuit_breaker_status(arguments):
@@ -454,7 +437,10 @@ def handle_tool(name, arguments):
     handler = _TOOL_HANDLERS.get(name)
     if handler is None:
         return {"error": f"Unknown tool: {name}"}
-    return handler(arguments)
+    try:
+        return handler(arguments)
+    except PermissionError as exc:
+        return {"error": str(exc)}
 
 
 # ---------------------------------------------------------------------------

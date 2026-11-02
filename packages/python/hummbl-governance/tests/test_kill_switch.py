@@ -22,11 +22,14 @@ from pathlib import Path
 
 import pytest
 
+from .kill_switch_helpers import operator_switch, release
+
 from hummbl_governance.kill_switch import (
     KillSwitch,
     KillSwitchMode,
     KillSwitchReason,
     KillSwitchEngagedError,
+    KillSwitchAuthorizationError,
     KillSwitchTamperError,
 )
 
@@ -55,9 +58,9 @@ class TestKillSwitchModes:
         assert ks.mode == KillSwitchMode.EMERGENCY
 
     def test_disengage(self):
-        ks = KillSwitch()
+        ks = operator_switch()
         ks.engage(KillSwitchMode.HALT_ALL, "test", "tester")
-        event = ks.disengage("tester")
+        event = release(ks, "tester")
         assert ks.mode == KillSwitchMode.DISENGAGED
         assert not ks.engaged
         assert event.mode == KillSwitchMode.DISENGAGED
@@ -68,9 +71,9 @@ class TestKillSwitchModes:
             ks.engage(KillSwitchMode.DISENGAGED, "test", "tester")
 
     def test_disengage_custom_reason(self):
-        ks = KillSwitch()
+        ks = operator_switch()
         ks.engage(KillSwitchMode.HALT_ALL, "test", "tester")
-        event = ks.disengage("admin", reason="Manual override")
+        event = release(ks, "admin", reason="Manual override")
         assert "Manual override" in event.reason
 
 
@@ -132,24 +135,24 @@ class TestTaskChecking:
 
 class TestHistory:
     def test_history_records_events(self):
-        ks = KillSwitch()
+        ks = operator_switch()
         ks.engage(KillSwitchMode.HALT_ALL, "test", "tester")
-        ks.disengage("tester")
+        release(ks, "tester")
         assert len(ks.get_history()) == 2
 
     def test_history_engaged_only(self):
-        ks = KillSwitch()
+        ks = operator_switch()
         ks.engage(KillSwitchMode.HALT_ALL, "test", "tester")
-        ks.disengage("tester")
+        release(ks, "tester")
         engaged = ks.get_history(engaged_only=True)
         assert len(engaged) == 1
         assert engaged[0].mode == KillSwitchMode.HALT_ALL
 
     def test_history_limit(self):
-        ks = KillSwitch()
+        ks = operator_switch()
         for i in range(5):
             ks.engage(KillSwitchMode.HALT_ALL, f"test-{i}", "tester")
-            ks.disengage("tester")
+            release(ks, "tester")
         assert len(ks.get_history(limit=3)) == 3
 
     def test_get_status(self):
@@ -215,9 +218,9 @@ class TestPersistence:
     def test_persist_disengaged(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             state_dir = Path(tmpdir)
-            ks = KillSwitch(state_dir=state_dir, require_hmac=False)
+            ks = operator_switch(state_dir=state_dir, require_hmac=False)
             ks.engage(KillSwitchMode.HALT_ALL, "test", "tester")
-            ks.disengage("tester")
+            release(ks, "tester")
             loaded = KillSwitch.load_from_file(state_dir, require_hmac=False)
             assert loaded.mode == KillSwitchMode.DISENGAGED
 
@@ -247,7 +250,7 @@ class TestConcurrencyToctou:
         """
         import threading
 
-        ks = KillSwitch()
+        ks = operator_switch()
         critical_task = next(iter(ks.DEFAULT_CRITICAL_TASKS))
         non_critical_task = "definitely_not_critical_xyz"
         stop = threading.Event()
@@ -256,7 +259,10 @@ class TestConcurrencyToctou:
         def mutator():
             while not stop.is_set():
                 ks.engage(KillSwitchMode.HALT_ALL, "concurrent test", "mutator")
-                ks.disengage("mutator")
+                try:
+                    release(ks, "mutator")
+                except KillSwitchAuthorizationError:
+                    pass  # Another writer changed/released the observed halt.
 
         def checker():
             while not stop.is_set():
@@ -454,9 +460,9 @@ class TestGetKillSwitchCore:
         monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
         monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
         monkeypatch.delenv("DCT_SECRET", raising=False)
-        writer = ks_module.KillSwitch(state_dir=tmp_path)
+        writer = operator_switch(state_dir=tmp_path)
         writer.engage(ks_module.KillSwitchMode.EMERGENCY, "bootstrap", "test-operator")
-        writer.disengage("test-operator", "bootstrap approved")
+        release(writer, "test-operator", "bootstrap approved")
         monkeypatch.setattr(ks_module, "_core_instance", None)
         yield
         monkeypatch.setattr(ks_module, "_core_instance", None)
