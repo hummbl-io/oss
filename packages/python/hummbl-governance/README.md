@@ -418,7 +418,13 @@ hummbl-governance ships three [Model Context Protocol](https://modelcontextproto
 }
 ```
 
-**10 tools:** `governance_status`, `kill_switch_status`, `kill_switch_engage`, `kill_switch_disengage`, `circuit_breaker_status`, `cost_budget_check`, `cost_record_usage`, `audit_query`, `compliance_report`, `health_check`
+**9 tools:** `governance_status`, `kill_switch_status`, `kill_switch_engage`, `circuit_breaker_status`, `cost_budget_check`, `cost_record_usage`, `audit_query`, `compliance_report`, `health_check`
+
+Kill-switch release is unavailable over MCP or the general REST API. Core
+release defaults to denied and requires a separately protected operator control
+process with verified credentials and explicit confirmation. Engagement cannot
+weaken an existing halt. See [operator release and migration](docs/OPERATOR_RELEASE.md).
+
 
 ### hummbl-compliance
 
