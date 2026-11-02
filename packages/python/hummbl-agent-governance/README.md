@@ -13,8 +13,10 @@ Stdlib-only, Apache-2.0/MIT dual-licensed.
 
 ## Installation
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-agent-governance
+pip install -e packages/python/hummbl-agent-governance
 ```
 
 ## Development

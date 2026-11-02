@@ -12,7 +12,7 @@ license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 authors = [
     { name = "Reuben Bowlby", email = "reuben@hummbl.io" },
-    { name = "HUMMBL, LLC" },
+    { name = "HUMMBL" },
 ]
 keywords = ["orchestration", "kernel", "agent", "compliance", "fleet", "workflow"]
 classifiers = [

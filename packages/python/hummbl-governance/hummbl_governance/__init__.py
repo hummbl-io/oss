@@ -26,7 +26,7 @@ Standalone, stdlib-only Python package providing:
 
 All modules use only Python stdlib. Zero third-party runtime dependencies.
 
-Copyright 2026 HUMMBL, LLC. Licensed under Apache 2.0.
+Copyright 2026 HUMMBL. Licensed under Apache 2.0.
 """
 
 import threading

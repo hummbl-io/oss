@@ -34,13 +34,63 @@ logger = logging.getLogger(__name__)
 # Governance bus tuple_data is scrubbed before append to prevent
 # PII from entering the hash-chained, effectively irremovable log.
 try:
-    from hummbl_governance.cognition.ledger_writer import scrub_pii_from_dict as _scrub_pii
+    from hummbl_cognition.ledger_writer import scrub_pii_from_dict as _scrub_pii
 except ImportError:
-    # Fallback: if cognition module unavailable, pass through unscrubbed
-    # but log a warning. This should only happen in isolated test envs.
-    def _scrub_pii(data: dict) -> dict:  # type: ignore[misc]
-        logger.warning("PII scrubber unavailable — tuple_data written unscrubbed")
-        return data
+    # Keep non-writing IDP APIs available without the optional integration.
+    # Appends must fail closed until the real scrubber is available.
+    _scrub_pii = None
+
+
+def _scrub_json_value(value: Any) -> Any:
+    """Scrub every JSON string, including strings inside nested arrays.
+
+    The canonical dict scrubber does not traverse nested arrays. Calling it
+    on each string also avoids retaining mutable aliases in buffered entries.
+    Recognized PII in keys is rejected: renaming keys could change tuple meaning.
+    """
+    if isinstance(value, str):
+        result = _scrub_pii({"value": value})
+        if not isinstance(result, dict) or not isinstance(result.get("value"), str):
+            raise TypeError("PII scrubber returned an invalid string result")
+        return result["value"]
+    if isinstance(value, list):
+        return [_scrub_json_value(item) for item in value]
+    if isinstance(value, dict):
+        result = {}
+        for key, item in value.items():
+            if _scrub_json_value(key) != key:
+                raise ValueError("PII in tuple_data keys is not supported")
+            result[key] = _scrub_json_value(item)
+        return result
+    return value
+
+
+def _prepare_audit_tuple_data(tuple_data: dict[str, Any]) -> tuple[dict, dict]:
+    """Return detached JSON snapshots before and after PII scrubbing."""
+    if _scrub_pii is None:
+        raise RuntimeError(
+            "Governance append requires the PII scrubber; install the cognition extra "
+            "from the idp-spec source package. "
+            "The entry was not written."
+        )
+    try:
+        if not isinstance(tuple_data, dict):
+            raise TypeError("tuple_data must be a dictionary")
+        snapshot = json.loads(json.dumps(tuple_data, ensure_ascii=False, allow_nan=False))
+        return snapshot, _scrub_json_value(snapshot)
+    except Exception:
+        # Scrubber errors may contain input; suppress their traceback context.
+        raise RuntimeError("PII scrubbing failed; governance entry was not written") from None
+
+
+def prepare_audit_tuple_data(tuple_data: dict[str, Any]) -> dict[str, Any]:
+    """Return detached, scrubbed JSON data for a caller to sign and append.
+
+    Pass this returned data, unchanged, together with its signature to append.
+    Appending checks it again and rejects a signed payload that needs further
+    redaction. This function neither signs nor writes an entry.
+    """
+    return _prepare_audit_tuple_data(tuple_data)[1]
 
 
 def _is_idp_enabled() -> bool:
@@ -257,6 +307,8 @@ class GovernanceBus:
         verification_id: str | None = None,
         amendment_of: str | None = None,
         authority_class: bool = False,  # ADR-FM-011: authority-class entry requires DCT linkage
+        *,
+        auto_sign: bool = False,
     ) -> tuple[bool, str | None]:
         """Append entry to governance log.
 
@@ -267,7 +319,9 @@ class GovernanceBus:
             task_id: Task identifier
             tuple_type: Type of IDP tuple
             tuple_data: The tuple data
-            signature: HMAC signature (required unless require_signature=False)
+            signature: Caller signature over the prepared tuple data. Use
+                prepare_audit_tuple_data before signing; data needing further
+                redaction is rejected. Signature authenticity is not checked here.
             require_signature: If True (default), rejects entries without signatures
             state: KRINEIA state ("ok", "blocked", "error")
             drift: KRINEIA drift (0.0 to 1.0)
@@ -277,15 +331,23 @@ class GovernanceBus:
             amendment_of: entry_id of the entry being amended (append-only correction)
             authority_class: If True, requires capability_token_id referencing a valid DCT
                 (ADR-FM-011 lateral authority enforcement).
+            auto_sign: Sign the detached, scrubbed entry payload using DCT_SECRET.
+                Mutually exclusive with a caller-supplied signature.
 
         Returns:
             Tuple of (success, error_code). Error codes:
             - IDP_E_AUDIT_INCOMPLETE: Write failed
-            - IDP_E_AUDIT_IMMUTABLE: Signature required but missing
+            - IDP_E_AUDIT_IMMUTABLE: Signature required but missing, or redaction
+              would change caller-signed data
             - IDP_E_AMENDMENT_TARGET_MISSING: amendment_of references nonexistent entry
             - IDP_E_EVIDENCE_REQUIRED: ATTEST without verification_id (I1 violation)
             - IDP_E_LATERAL_AUTH: authority_class entry without capability_token_id
             - IDP_E_DECISION_AUTH: authority_class entry with invalid DCT reference
+
+        Raises:
+            ValueError: Both auto_sign and a caller signature are supplied.
+            RuntimeError: The PII scrubber is unavailable or fails. Nothing is
+                written or added to the async buffer for the rejected entry.
         """
         if not _is_idp_enabled():
             # ASI07: Even when IDP disabled, log attempt (but allow)
@@ -294,8 +356,11 @@ class GovernanceBus:
             )
             return True, None
 
-        # ASI07: Mandatory signature check
-        if require_signature and not signature:
+        if auto_sign and signature is not None:
+            raise ValueError("auto_sign and a caller signature are mutually exclusive")
+
+        # ASI07: Mandatory signature check; automatic signing follows scrubbing.
+        if require_signature and not signature and not auto_sign:
             logger.error(
                 "Governance entry rejected: signature required but not provided. "
                 "Set require_signature=False only for emergency recovery."
@@ -354,9 +419,19 @@ class GovernanceBus:
                 return False, IDP_E_DECISION_AUTH
 
         # PII scrub: sanitize tuple_data before it enters the hash-chained log.
-        # This replaces PII (emails, phones, SSNs, IPs) with SHA-256 pseudonyms,
-        # preserving data utility while ensuring GDPR Art. 17 compatibility.
-        scrubbed_data = _scrub_pii(tuple_data)
+        # The cognition scrubber replaces recognized string-value patterns
+        # with pseudonyms; it is not a general guarantee of anonymization.
+        snapshot, scrubbed_data = _prepare_audit_tuple_data(tuple_data)
+        if signature is not None and scrubbed_data != snapshot:
+            logger.error(
+                "Governance entry rejected: PII redaction would change caller-signed data. "
+                "Prepare the tuple data before signing, or request automatic signing."
+            )
+            return False, IDP_E_AUDIT_IMMUTABLE
+        if auto_sign:
+            signature = _compute_entry_signature(
+                intent_id, task_id, tuple_type, scrubbed_data, state, drift
+            )
 
         # Hash-chaining: link to prior entry for tamper-evident audit trail
         with self._lock:
@@ -857,16 +932,11 @@ def append_audit_entry(
     verification_id: str | None = None,
     amendment_of: str | None = None,
 ) -> tuple[bool, str | None]:
-    """Convenience function to append via default bus."""
-    if signature is None:
-        signature = _compute_entry_signature(
-            intent_id=intent_id,
-            task_id=task_id,
-            tuple_type=tuple_type,
-            tuple_data=tuple_data,
-            state=state,
-            drift=drift,
-        )
+    """Append via the default bus, signing after redaction when omitted.
+
+    A caller-supplied signature must cover data returned by
+    prepare_audit_tuple_data; append rejects any further redaction.
+    """
     return get_governance_bus().append(
         intent_id=intent_id,
         task_id=task_id,
@@ -879,6 +949,7 @@ def append_audit_entry(
         capability_token_id=capability_token_id,
         verification_id=verification_id,
         amendment_of=amendment_of,
+        auto_sign=signature is None,
     )
 
 

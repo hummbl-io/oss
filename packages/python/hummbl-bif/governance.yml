@@ -12,7 +12,7 @@ package:
   name: hummbl-bif
   version: 1.0.0
   license: Apache-2.0
-  publisher: HUMMBL, LLC
+  publisher: HUMMBL
   description: Batch Ingestion Framework for structured technical knowledge acquisition
 
 safety:

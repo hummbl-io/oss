@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify hard-coded primitive/package counts in public copy against ground truth.
+"""Verify public primitive/package counts and tree versions against ground truth.
 
 ``claim_drift.py`` catches risky *wording* (superlatives, uncited compliance
 claims) via regex heuristics. It does not — and by design cannot — verify that
@@ -18,6 +18,8 @@ occurrence of the same bug class — "25 Modules" on the old homepage):
   - Python package count: computed by counting directories under
     ``packages/python/`` that contain a ``pyproject.toml`` (the same
     definition the root README already uses in prose).
+  - README Python package tree versions: compared with ``[project].version``
+    in each package's ``pyproject.toml``; every package must have a table row.
 
 It does NOT verify test-pass counts or PyPI-live counts. Those require an
 external receipt (a CI run, a PyPI API call) rather than a local, deterministic
@@ -30,7 +32,7 @@ Usage::
     python scripts/check_public_count_claims.py
     python scripts/check_public_count_claims.py --repo-root /path/to/oss
 
-Exit code 0 = every checked file's stated count matches ground truth.
+Exit code 0 = every checked count and tree version matches ground truth.
 Exit code 1 = at least one mismatch found (printed with expected vs. found).
 """
 
@@ -39,6 +41,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -141,22 +144,114 @@ def build_checks(oss_root: Path) -> list[CountCheck]:
     ]
 
 
+def check_package_table_versions(oss_root: Path) -> list[str]:
+    """Require one README Python package row per manifest, with its tree version.
+
+    The Python table is identified by its Package/Tree/PyPI/Status header.
+    Registry versions are not consulted; only [project].version is compared.
+    Missing, duplicate or malformed rows fail closed instead of being skipped.
+    """
+    prefix = "[package_table_versions]"
+    readme = oss_root / "README.md"
+    python_dir = oss_root / "packages" / "python"
+    problems: list[str] = []
+    if not python_dir.is_dir():
+        return [f"{prefix} expected directory not found: {python_dir}"]
+    manifests = sorted(python_dir.glob("*/pyproject.toml"))
+    if not manifests:
+        return [f"{prefix} no Python package manifests found: {python_dir}"]
+
+    versions: dict[str, str] = {}
+    names = {path.parent.name for path in manifests}
+    for path in manifests:
+        try:
+            with path.open("rb") as stream:
+                data = tomllib.load(stream)
+            project = data.get("project", {})
+            version = project.get("version") if isinstance(project, dict) else None
+            if not isinstance(version, str) or not version.strip():
+                problems.append(f"{prefix} {path}: missing or invalid [project].version")
+            else:
+                versions[path.parent.name] = version
+        except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+            problems.append(f"{prefix} cannot read {path}: {exc}")
+
+    try:
+        lines = readme.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as exc:
+        return problems + [f"{prefix} cannot read {readme}: {exc}"]
+
+    def cells(line: str) -> list[str]:
+        # Markdown permits either outer delimiter to be omitted. Remove at
+        # most one: extra delimiters represent empty cells, not decoration.
+        line = line.strip().removeprefix("|").removesuffix("|")
+        return [cell.strip() for cell in line.split("|")]
+
+    headers = [
+        index for index, line in enumerate(lines)
+        if cells(line) == ["Package", "Tree", "PyPI", "Status"]
+    ]
+    if len(headers) != 1:
+        return problems + [f"{prefix} {readme}: expected exactly one Python package table"]
+    header = headers[0]
+    if header + 1 >= len(lines) or len(cells(lines[header + 1])) != 4 or not all(
+        re.fullmatch(r":?-{3,}:?", cell) for cell in cells(lines[header + 1])
+    ):
+        return problems + [f"{prefix} {readme}:{header + 2}: malformed table separator"]
+
+    seen: set[str] = set()
+    for index in range(header + 2, len(lines)):
+        line = lines[index].strip()
+        if "|" not in line:
+            break
+        row = cells(line)
+        if len(row) != 4:
+            problems.append(f"{prefix} {readme}:{index + 1}: malformed package row")
+            continue
+        name = row[0].strip("`")
+        if name in seen:
+            problems.append(f"{prefix} {readme}:{index + 1}: duplicate package row: {name}")
+        seen.add(name)
+        if name not in names:
+            problems.append(f"{prefix} {readme}:{index + 1}: unknown Python package: {name}")
+        elif name in versions and row[1] != versions[name]:
+            problems.append(
+                f"{prefix} {readme}:{index + 1}: {name} table says {row[1]!r}, "
+                f"pyproject.toml says {versions[name]!r} (source of truth)"
+            )
+    for name in sorted(names - seen):
+        problems.append(f"{prefix} {readme}: missing package row: {name}")
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--repo-root",
         type=Path,
-        default=Path(__file__).resolve().parents[4],
+        default=None,
         help="Path to the oss monorepo root (default: inferred from this script's location)",
     )
     args = parser.parse_args()
-    oss_root = args.repo_root.resolve()
+    oss_root = args.repo_root
+    if oss_root is None:
+        oss_root = next(
+            (parent for parent in Path(__file__).resolve().parents
+             if (parent / "packages" / "python" / "hummbl-governance").is_dir()),
+            None,
+        )
+        if oss_root is None:
+            parser.error("cannot infer monorepo root; supply --repo-root")
+    oss_root = oss_root.resolve()
 
     checks = build_checks(oss_root)
     problems: list[str] = []
     for check in checks:
         problems.extend(find_mismatches(check))
         print(f"{check.name}: ground truth = {check.expected}")
+
+    problems.extend(check_package_table_versions(oss_root))
+    print("package_table_versions: ground truth = packages/python/*/pyproject.toml")
 
     if problems:
         print("\nMismatches found:")
@@ -170,7 +265,7 @@ def main() -> int:
         )
         return 1
 
-    print("\nAll checked public counts match ground truth.")
+    print("\nAll checked public counts and tree versions match ground truth.")
     return 0
 
 

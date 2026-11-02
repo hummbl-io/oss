@@ -75,7 +75,7 @@ svg = render_arms_svg(arms)
 
 ## Fleet Arms
 
-**HUMMBL LLC blazon:** *Sable, a pall reversed between in chief two mullets
+**HUMMBL blazon:** *Sable, a pall reversed between in chief two mullets
 Argent and in base a cogwheel Or*
 
 - Sable (black) field — the void

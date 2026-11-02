@@ -60,7 +60,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
     if args.svg:
         svg_path = Path(args.svg)
         svg_path.parent.mkdir(parents=True, exist_ok=True)
-        svg_path.write_text(render_arms_svg(arms))
+        svg_path.write_text(render_arms_svg(arms), encoding="utf-8")
         print(f"\nSVG written to {svg_path}")
 
     return 0
@@ -81,12 +81,12 @@ def cmd_generate_all(args: argparse.Namespace) -> int:
 
         if outdir:
             svg_path = outdir / f"{name}.svg"
-            svg_path.write_text(render_arms_svg(arms))
+            svg_path.write_text(render_arms_svg(arms), encoding="utf-8")
 
     if outdir:
         # Write JSON manifest
         manifest = {name: arms.to_dict() for name, arms in sorted(all_arms.items())}
-        (outdir / "manifest.json").write_text(json.dumps(manifest, indent=2))
+        (outdir / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         print(f"\n{len(all_arms)} arms + manifest written to {outdir}")
 
     return 0
@@ -103,7 +103,7 @@ def cmd_fleet_arms(args: argparse.Namespace) -> int:
         outdir = Path(args.outdir)
         outdir.mkdir(parents=True, exist_ok=True)
         svg_path = outdir / "fleet-arms.svg"
-        svg_path.write_text(render_fleet_arms_svg())
+        svg_path.write_text(render_fleet_arms_svg(), encoding="utf-8")
         print(f"\nSVG written to {svg_path}")
 
     return 0
@@ -119,7 +119,7 @@ def cmd_ics_flags(args: argparse.Namespace) -> int:
         for flag in flags:
             svg = render_ics_flag_svg(flag.bus_type, flag.color_scheme)
             fname = f"{flag.bus_type.lower()}.svg"
-            (outdir / fname).write_text(svg)
+            (outdir / fname).write_text(svg, encoding="utf-8")
             ics_info = f" ({flag.ics_letter} — {flag.ics_name})" if flag.ics_letter else ""
             print(f"  {flag.bus_type:15s}  {flag.color_scheme}{ics_info}  → {fname}")
         print(f"\n{len(flags)} ICS flags written to {outdir}")
@@ -188,7 +188,7 @@ def main(argv: list[str] | None = None) -> int:
     p_all.set_defaults(func=cmd_generate_all)
 
     # fleet-arms
-    p_fleet = sub.add_parser("fleet-arms", help="Show HUMMBL LLC fleet arms")
+    p_fleet = sub.add_parser("fleet-arms", help="Show HUMMBL fleet arms")
     p_fleet.add_argument("--outdir", help="Output directory for SVG")
     p_fleet.set_defaults(func=cmd_fleet_arms)
 

@@ -12,7 +12,7 @@ license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11"
 authors = [
     {name = "Reuben Bowlby", email = "reuben@hummbl.io"},
-    {name = "HUMMBL, LLC"},
+    {name = "HUMMBL"},
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
