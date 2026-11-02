@@ -15,10 +15,12 @@ Apache-2.0/MIT dual-licensed.
 
 ## Installation
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-gitops
+pip install -e packages/python/hummbl-gitops
 # with governance receipt verification:
-pip install "hummbl-gitops[governance]"
+pip install -e "packages/python/hummbl-gitops[governance]"
 ```
 
 ## Development

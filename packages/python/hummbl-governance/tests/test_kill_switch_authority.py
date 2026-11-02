@@ -4,6 +4,8 @@ import json
 
 import pytest
 
+from .kill_switch_helpers import AUTHORITY, operator_switch, release
+
 import hummbl_governance.kill_switch as module
 from hummbl_governance.kill_switch import (
     KillSwitch, KillSwitchMode, KillSwitchTamperError,
@@ -23,9 +25,9 @@ def isolated_core(tmp_path, monkeypatch):
 def provision(tmp_path, monkeypatch):
     """Create a signed emergency and explicitly approve its release."""
     monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
-    writer = KillSwitch(state_dir=tmp_path)
+    writer = operator_switch(state_dir=tmp_path)
     writer.engage(KillSwitchMode.EMERGENCY, "bootstrap", "test-operator")
-    writer.disengage("test-operator", "bootstrap approved")
+    release(writer, "test-operator", "bootstrap approved")
     return writer
 
 
@@ -109,10 +111,10 @@ def test_empty_directory_requires_explicit_signed_initialization(tmp_path, monke
     with pytest.raises(KillSwitchTamperError, match="missing"):
         module.get_kill_switch_core()
     assert not list(tmp_path.iterdir())
-    writer = KillSwitch(state_dir=tmp_path)
+    writer = operator_switch(state_dir=tmp_path)
     writer.engage(KillSwitchMode.EMERGENCY, "operator initialization", "test-operator")
     assert module.get_kill_switch_core().check_task_allowed("work")["allowed"] is False
-    writer.disengage("test-operator", "separately approved release")
+    release(writer, "test-operator", "separately approved release")
     assert module.get_kill_switch_core().check_task_allowed("work")["allowed"] is True
 
 
@@ -129,13 +131,13 @@ def test_key_restoration_preserves_emergency_and_does_not_rewrite_state(tmp_path
         with pytest.raises(KillSwitchConfigurationError):
             read()
     with pytest.raises(KillSwitchConfigurationError):
-        writer.disengage("test-operator")
+        release(writer, "test-operator")
     assert state.read_bytes() == original
     monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
     assert core.get_status()["mode"] == "EMERGENCY"
     assert core.check_task_allowed("work")["allowed"] is False
     assert state.read_bytes() == original
-    writer.disengage("test-operator", "approved release")
+    release(writer, "test-operator", "approved release")
     assert core.check_task_allowed("work")["allowed"] is True
 
 
@@ -156,6 +158,7 @@ def test_failed_atomic_replace_preserves_state_and_requires_emergency_recovery(
     """Failed persistence cannot announce success or enable local decisions."""
     provision(tmp_path, monkeypatch)
     core = module.get_kill_switch_core()
+    monkeypatch.setattr(core, "_release_authority", AUTHORITY)
     if transition == "disengage":
         core.engage(KillSwitchMode.EMERGENCY, "stop", "test-operator")
     state = tmp_path / "kill_switch_state.json"
@@ -172,18 +175,18 @@ def test_failed_atomic_replace_preserves_state_and_requires_emergency_recovery(
             if transition == "engage":
                 core.engage(KillSwitchMode.EMERGENCY, "stop", "test-operator")
             else:
-                core.disengage("test-operator")
+                release(core, "test-operator")
     assert state.read_bytes() == before
     assert not notifications
     assert not list(tmp_path.glob(".kill-switch-*"))
     for read in (core.get_status, module.get_kill_switch_core,
                  lambda: core.check_task_allowed("work"),
-                 lambda: core.disengage("test-operator")):
+                 lambda: release(core, "test-operator")):
         with pytest.raises(KillSwitchPersistenceError):
             read()
     core.engage(KillSwitchMode.EMERGENCY, "storage restored", "test-operator")
     assert core.check_task_allowed("work")["allowed"] is False
-    core.disengage("test-operator", "approved release")
+    release(core, "test-operator", "approved release")
     assert core.check_task_allowed("work")["allowed"] is True
 
 
@@ -209,7 +212,7 @@ def test_disengage_cannot_resign_tampered_state(tmp_path, monkeypatch):
     state.write_text(json.dumps(data), encoding="utf-8")
     before = state.read_bytes()
     with pytest.raises(KillSwitchTamperError):
-        writer.disengage("test-operator")
+        release(writer, "test-operator")
     assert state.read_bytes() == before
 
 
@@ -217,6 +220,7 @@ def test_refresh_preserves_local_subscribers_and_history(tmp_path, monkeypatch):
     """Reloading does not replace the singleton or fabricate notifications."""
     writer = provision(tmp_path, monkeypatch)
     core = module.get_kill_switch_core()
+    monkeypatch.setattr(core, "_release_authority", AUTHORITY)
     notifications = []
     core.subscribe(notifications.append)
     core.engage(KillSwitchMode.HALT_ALL, "local stop", "test-operator", affected_tasks=7)
@@ -228,5 +232,62 @@ def test_refresh_preserves_local_subscribers_and_history(tmp_path, monkeypatch):
     writer.engage(KillSwitchMode.EMERGENCY, "external stop", "test-operator")
     assert core.get_history()[-1].mode == KillSwitchMode.EMERGENCY
     assert len(notifications) == 1
-    core.disengage("test-operator", "approved release")
+    release(core, "test-operator", "approved release")
     assert len(notifications) == 2
+
+
+@pytest.mark.parametrize("operation", ["mkdir", "open", "acquire"])
+def test_lock_setup_failure_latches_shared_core_until_emergency_recovery(tmp_path, monkeypatch, operation):
+    provision(tmp_path, monkeypatch)
+    core = module.get_kill_switch_core()
+    state = tmp_path / "kill_switch_state.json"
+    before = state.read_bytes()
+    history = core.get_history()
+    notifications = []
+    core.subscribe(notifications.append)
+
+    def fail(*args, **kwargs):
+        raise OSError("injected lock setup failure")
+
+    with monkeypatch.context() as patch:
+        if operation == "mkdir":
+            patch.setattr(module.Path, "mkdir", fail)
+        elif operation == "open":
+            patch.setattr(module.Path, "open", fail)
+        else:
+            patch.setattr(module, "acquire_file_lock", fail)
+        with pytest.raises(KillSwitchPersistenceError, match="state lock"):
+            core.engage(KillSwitchMode.EMERGENCY, "stop", "monitor")
+    assert state.read_bytes() == before
+    assert core._history == history
+    assert not notifications
+    for read in (core.get_status, core.get_history, lambda: core.mode,
+                 lambda: core.engaged, lambda: core.check_task_allowed("work")):
+        with pytest.raises(KillSwitchPersistenceError):
+            read()
+    core.engage(KillSwitchMode.EMERGENCY, "storage repaired", "monitor")
+    assert not core.check_task_allowed("work")["allowed"]
+    assert len(notifications) == 1
+
+
+def test_authoritative_loader_tracks_external_transitions_through_retained_reference(tmp_path, monkeypatch):
+    writer = provision(tmp_path, monkeypatch)
+    reader = KillSwitch.load_from_file(tmp_path, authoritative_reads=True)
+    assert reader.mode == KillSwitchMode.DISENGAGED
+    writer.engage(KillSwitchMode.EMERGENCY, "external incident", "monitor")
+    assert reader.engaged
+    assert reader.get_status()["mode"] == "EMERGENCY"
+    assert reader.get_history()[-1].mode == KillSwitchMode.EMERGENCY
+    assert not reader.check_task_allowed("work")["allowed"]
+    release(writer)
+    assert reader.mode == KillSwitchMode.DISENGAGED
+    assert reader.check_task_allowed("work")["allowed"]
+
+
+def test_authoritative_loader_never_initializes_missing_or_unsigned_state(tmp_path, monkeypatch):
+    monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
+    with pytest.raises(KillSwitchTamperError, match="missing"):
+        KillSwitch.load_from_file(tmp_path, authoritative_reads=True)
+    assert not list(tmp_path.iterdir())
+    with pytest.raises(ValueError, match="HMAC"):
+        KillSwitch.load_from_file(tmp_path, authoritative_reads=True, require_hmac=False)
