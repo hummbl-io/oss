@@ -322,7 +322,7 @@ def render_arms_svg(arms: AgentArms, width: int = 200, height: int = 240) -> str
 
 
 def render_fleet_arms_svg(width: int = 200, height: int = 240) -> str:
-    """Render the HUMMBL LLC fleet arms.
+    """Render the HUMMBL fleet arms.
 
     Blazon: "Sable, a pall reversed between in chief two mullets Argent
     and in base a cogwheel Or"
@@ -353,7 +353,7 @@ def render_fleet_arms_svg(width: int = 200, height: int = 240) -> str:
     parts.append(_charge_svg("cogwheel", cx, cy + sh * 0.25, sh * 0.12, "#E6B800"))
 
     # Label
-    parts.append(f'<text x="{cx}" y="{height - 5}" text-anchor="middle" font-family="monospace" font-size="11" fill="#E5E7EB">HUMMBL LLC</text>')
+    parts.append(f'<text x="{cx}" y="{height - 5}" text-anchor="middle" font-family="monospace" font-size="11" fill="#E5E7EB">HUMMBL</text>')
 
     parts.append("</svg>")
     return "\n".join(parts)

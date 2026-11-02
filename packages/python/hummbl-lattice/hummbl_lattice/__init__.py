@@ -1,4 +1,4 @@
-# Copyright 2024-2026 HUMMBL, LLC
+# Copyright 2024-2026 HUMMBL
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ Quick start::
         base120_ancestor="IN3",
     )
 
-Apache 2.0. Copyright 2026 HUMMBL, LLC.
+Apache 2.0. Copyright 2026 HUMMBL.
 """
 
 from __future__ import annotations

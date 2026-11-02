@@ -356,13 +356,17 @@ Yes. Every runtime module uses only Python stdlib (3.11+). There are zero entrie
 
 ### How do I generate compliance evidence for SOC2 or GDPR from my AI system?
 
-Use `ComplianceMapper` to map governance audit log entries to compliance framework controls. Pass your `AuditLog` entries through the mapper to produce a `ComplianceReport` that links each governance event to the relevant SOC2, GDPR, or OWASP control. Use `StrideMapper` for threat-level analysis of agent interactions.
+Use `ComplianceMapper` to map governance audit log entries to compliance framework controls. It reads the `governance-*.jsonl` audit files written to your governance directory and produces a `ComplianceReport` linking each governance event to the relevant SOC2, GDPR, or OWASP control. Use `StrideMapper` for threat-level analysis of agent interactions.
 
 ```python
-from hummbl_governance import ComplianceMapper, AuditLog
+from hummbl_governance import ComplianceMapper
 
-mapper = ComplianceMapper()
-report = mapper.map_events(audit_entries)  # Returns ComplianceReport with control mappings
+mapper = ComplianceMapper(governance_dir="governance")
+report = mapper.generate_soc2_report(days=7)   # ComplianceReport
+
+# Also available: generate_gdpr_report, generate_owasp_report,
+# generate_nist_rmf_report, generate_eu_ai_act_report,
+# generate_iso27001_report, generate_iso42001_report, generate_nist_csf_report
 ```
 
 ## Multi-Agent Example
@@ -414,7 +418,13 @@ hummbl-governance ships three [Model Context Protocol](https://modelcontextproto
 }
 ```
 
-**10 tools:** `governance_status`, `kill_switch_status`, `kill_switch_engage`, `kill_switch_disengage`, `circuit_breaker_status`, `cost_budget_check`, `cost_record_usage`, `audit_query`, `compliance_report`, `health_check`
+**9 tools:** `governance_status`, `kill_switch_status`, `kill_switch_engage`, `circuit_breaker_status`, `cost_budget_check`, `cost_record_usage`, `audit_query`, `compliance_report`, `health_check`
+
+Kill-switch release is unavailable over MCP or the general REST API. Core
+release defaults to denied and requires a separately protected operator control
+process with verified credentials and explicit confirmation. Engagement cannot
+weaken an existing halt. See [operator release and migration](docs/OPERATOR_RELEASE.md).
+
 
 ### hummbl-compliance
 
@@ -496,7 +506,7 @@ This package is part of the [HUMMBL](https://hummbl.io) cognitive AI architectur
 
 ## License
 
-Apache 2.0. Copyright 2026 HUMMBL, LLC.
+Apache 2.0. Copyright 2026 HUMMBL.
 
 
 ---

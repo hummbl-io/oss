@@ -1,4 +1,4 @@
-# Copyright 2024-2026 HUMMBL, LLC
+# Copyright 2024-2026 HUMMBL
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ def system_identity() -> dict[str, Any]:
     return {
         "system_name": "hummbl-governance",
         "system_version": "1.4.1",
-        "provider_name": "HUMMBL, LLC",
+        "provider_name": "HUMMBL",
         "intended_purpose": "AI agent governance",
         "risk_classification": "high-risk",
     }

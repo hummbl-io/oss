@@ -9,7 +9,7 @@ description = "Batch Ingestion Framework - systematic methodology for technical 
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
-authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+authors = [{ name = "HUMMBL", email = "dev@hummbl.io" }]
 keywords = ["bif", "batch-ingestion", "knowledge-acquisition", "ai", "agents", "hummbl", "mcp", "methodology"]
 classifiers = [
     "Development Status :: 4 - Beta",

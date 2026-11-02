@@ -404,25 +404,43 @@ class MissionModeKernel:
 
     async def execute_workflow(self, workflow_yaml: str, inputs: Dict[str, Any]) -> MissionReceipt:
         """
-        Execute a Conductor-style YAML workflow
+        Simulate a JSON workflow without executing agents or capabilities.
+
+        The historical method name is retained for compatibility. Receipts have
+        final_status="simulated" and contain no verified execution evidence.
 
         Args:
-            workflow_yaml: YAML workflow definition
+            workflow_yaml: JSON workflow definition (YAML is not supported)
             inputs: Workflow inputs
 
         Returns:
             Mission receipt with audit trail reference
         """
-        # Parse YAML/JSON workflow
+        # Validate before producing any audit events or receipts.
         try:
-            workflow = json.loads(workflow_yaml) if workflow_yaml.startswith("{") else {}
-        except (json.JSONDecodeError, ValueError, TypeError):
-            workflow = {}
+            workflow = json.loads(workflow_yaml)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("workflow must be a JSON object") from exc
+        if not isinstance(workflow, dict):
+            raise ValueError("workflow must be a JSON object")
+        if not isinstance(workflow.get("workflow_id"), str) or not workflow["workflow_id"].strip():
+            raise ValueError("workflow_id must be a nonempty string")
+        steps = workflow.get("workflow")
+        if not isinstance(steps, list) or not steps:
+            raise ValueError("workflow must contain a nonempty list of steps")
+        if not isinstance(inputs, dict) or not isinstance(workflow.get("mission", {}), dict):
+            raise ValueError("inputs and mission must be objects")
+        for step in steps:
+            if not isinstance(step, dict) or any(
+                not isinstance(step.get(key), str) or not step[key].strip()
+                for key in ("step", "agent")
+            ):
+                raise ValueError("each step requires nonempty step and agent strings")
 
         workflow_id = workflow.get("workflow_id", "unknown")
         mission_id = self._generate_id("mission")
 
-        logger.info(f"Executing workflow {workflow_id} as mission {mission_id}")
+        logger.info(f"Simulating workflow {workflow_id} as mission {mission_id}")
 
         # Create audit trail
         compliance_framework = ComplianceFramework(workflow.get("compliance_framework", "SOC_2"))
@@ -444,7 +462,7 @@ class MissionModeKernel:
             step_id="step_000",
             timestamp=datetime.now(timezone.utc).isoformat(),
             agent="mission_mode_kernel",
-            event_type="mission.initialized",
+            event_type="simulation.initialized",
             actor="system",
             payload={
                 "mission_intent": workflow.get("mission", {}).get("intent", ""),
@@ -461,14 +479,10 @@ class MissionModeKernel:
         )
         self.append_audit_event(audit_trail_id, init_event)
 
-        # Execute workflow steps (simplified for MVP)
-        # In production, this would be a full Conductor-style executor
-        evidence_refs = []
-
-        # Simulate workflow execution
-        for step in workflow.get("workflow", []):
-            step_id = step.get("step", "unknown")
-            agent = step.get("agent", "unknown")
+        # Record simulated steps; no agent or capability is invoked.
+        for step in steps:
+            step_id = step["step"]
+            agent = step["agent"]
 
             # Determine optimal compute for this step
             task_type = self._infer_task_type(step)
@@ -483,7 +497,7 @@ class MissionModeKernel:
                 step_id=step_id,
                 timestamp=datetime.now(timezone.utc).isoformat(),
                 agent=agent,
-                event_type="step.started",
+                event_type="step.simulated",
                 actor="mission_mode_kernel",
                 payload={"step": step, "compute_node": compute_node},
                 compliance_metadata={
@@ -497,11 +511,7 @@ class MissionModeKernel:
             )
             self.append_audit_event(audit_trail_id, step_event)
 
-            # Simulate step completion
-            # In production, this would call the actual agent
-            if "outputs" in step:
-                if "evidence_refs" in step["outputs"]:
-                    evidence_refs.extend(step["outputs"]["evidence_refs"])
+            # Supplied output references are scenario inputs, not execution evidence.
 
         # Finalize audit trail
         self.finalize_audit_trail(audit_trail_id)
@@ -510,10 +520,10 @@ class MissionModeKernel:
         receipt = self.generate_receipt(
             mission_id=mission_id,
             workflow_id=workflow_id,
-            final_status="completed",
+            final_status="simulated",
             agent="mission_mode_kernel",
             audit_trail_id=audit_trail_id,
-            evidence_refs=evidence_refs,
+            evidence_refs=[],
         )
 
         return receipt

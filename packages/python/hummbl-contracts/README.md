@@ -48,8 +48,10 @@ schemas/
 
 ## Installation
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-contracts
+pip install -e packages/python/hummbl-contracts
 ```
 
 ## Usage

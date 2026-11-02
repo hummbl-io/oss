@@ -3,7 +3,7 @@
 - **Status:** accepted
 - **Date:** 2026-06-25
 - **Decision owner:** Human Principal Agent
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** none
 - **Superseded by:** none
 - **Related:** [ADR-001](ADR-001-coverage-matrix-not-self-grade.md), `hummbl-io/hummbl-governance#128`

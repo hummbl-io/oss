@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
     { name = "Reuben Bowlby", email = "reuben@hummbl.io" },
-    { name = "HUMMBL, LLC" },
+    { name = "HUMMBL" },
 ]
 keywords = ["reasoning", "ai", "agents", "plans", "hypotheses", "evaluations", "scientific-method", "artifacts", "hummbl"]
 classifiers = [

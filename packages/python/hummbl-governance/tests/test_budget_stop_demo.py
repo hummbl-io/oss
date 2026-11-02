@@ -1,4 +1,4 @@
-# Copyright 2026 HUMMBL, LLC
+# Copyright 2026 HUMMBL
 # SPDX-License-Identifier: Apache-2.0
 """Behavioral checks for the public budget-stop example."""
 

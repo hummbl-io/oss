@@ -9,7 +9,7 @@ description = "Cognitive Ledger Protocol (CLP) and Open Brain server for HUMMBL 
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
-authors = [{ name = "HUMMBL, LLC", email = "dev@hummbl.io" }]
+authors = [{ name = "HUMMBL", email = "dev@hummbl.io" }]
 keywords = ["cognition", "ledger", "clp", "open-brain", "reasoning", "hummbl", "ai", "agents"]
 classifiers = [
     "Development Status :: 3 - Alpha",

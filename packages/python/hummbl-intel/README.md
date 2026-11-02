@@ -20,8 +20,10 @@ Stdlib-only. Zero third-party runtime dependencies.
 
 ## Installation
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-intel
+pip install -e packages/python/hummbl-intel
 ```
 
 ## Usage
