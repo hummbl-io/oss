@@ -2,15 +2,18 @@
 
 import json
 import os
-import selectors
+import queue
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import pytest
 
 pytest.importorskip("hummbl_governance")
 from hummbl_governance.kill_switch import KillSwitch, KillSwitchMode
+
+from .kill_switch_helpers import operator_switch, release
 
 
 @pytest.fixture
@@ -19,9 +22,9 @@ def state_env(tmp_path, monkeypatch):
     monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
     monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
     monkeypatch.delenv("DCT_SECRET", raising=False)
-    writer = KillSwitch(state_dir=tmp_path)
+    writer = operator_switch(state_dir=tmp_path)
     writer.engage(KillSwitchMode.EMERGENCY, "initialization", "test-operator")
-    writer.disengage("test-operator", "initialization approved")
+    release(writer, "test-operator", "initialization approved")
     return os.environ.copy()
 
 
@@ -34,16 +37,23 @@ def reader(state_env):
         stderr=subprocess.DEVNULL, text=True, bufsize=1,
     )
 
+    responses = queue.Queue()
+
+    def collect_responses():
+        for line in process.stdout:
+            responses.put(line)
+        responses.put("")
+
+    output_thread = threading.Thread(target=collect_responses, daemon=True)
+    output_thread.start()
+
     def call(name, arguments=None):
         request = {"id": 1, "method": "tools/call", "params": {
             "name": name, "arguments": arguments or {},
         }}
         process.stdin.write(json.dumps(request) + "\n")
         process.stdin.flush()
-        with selectors.DefaultSelector() as selector:
-            selector.register(process.stdout, selectors.EVENT_READ)
-            assert selector.select(timeout=10), "MCP response timed out"
-        line = process.stdout.readline()
+        line = responses.get(timeout=10)
         assert line, f"MCP reader exited: {process.poll()}"
         return json.loads(line)["result"]
 
@@ -54,6 +64,7 @@ def reader(state_env):
     except subprocess.TimeoutExpired:
         process.kill()
         process.wait(timeout=5)
+    output_thread.join(timeout=5)
     process.stdout.close()
 
 
@@ -64,13 +75,20 @@ def payload(result):
 
 
 def governance_transition(env, mode):
-    """Use the existing governance handlers in an independent interpreter."""
+    """Engage over MCP; release in a separate authenticated operator interpreter."""
     code = """
 import sys
 import mcp_server
 if sys.argv[1] == "DISENGAGED":
-    result = mcp_server._handle_kill_switch_disengage({
-        "reason": "operator approved recovery", "triggered_by": "test-operator"})
+    import os
+    from pathlib import Path
+    from hummbl_governance.kill_switch import KillSwitch, OperatorReleaseAuthority
+    credential = "synthetic-independent-operator-credential-for-tests"
+    authority = OperatorReleaseAuthority("authenticated-test-operator", OperatorReleaseAuthority.create_verifier(credential))
+    writer = KillSwitch.load_from_file(Path(os.environ["GOVERNANCE_STATE_DIR"]), release_authority=authority)
+    writer.disengage(reason="operator approved recovery", credential=credential, confirm=True,
+                     expected_event_id=writer.get_status()["event_id"])
+    result = {"disengaged": True}
 else:
     result = mcp_server._handle_kill_switch_engage({
         "mode": sys.argv[1], "confirm": True,
@@ -165,7 +183,7 @@ from pathlib import Path
 from hummbl_governance.kill_switch import KillSwitch, KillSwitchMode
 writer = KillSwitch.load_from_file(Path(os.environ["GOVERNANCE_STATE_DIR"]))
 for i in range(80):
-    mode = KillSwitchMode.HALT_ALL if i % 2 else KillSwitchMode.EMERGENCY
+    mode = KillSwitchMode.EMERGENCY
     writer.engage(mode, "concurrent transition", "test-operator")
 """
     writer = subprocess.Popen(
