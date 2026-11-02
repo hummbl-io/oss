@@ -10,12 +10,14 @@ Canonical tag shape, parsed by `.github/workflows/publish-pypi.yml`:
 python/<package>/v<version>
 ```
 
-Example:
+For a new, approved version (replace both placeholders):
 
+```bash
+git tag python/<package>/v<new-version>
+git push origin python/<package>/v<new-version>
 ```
-git tag python/hummbl-governance/v1.4.2
-git push origin python/hummbl-governance/v1.4.2
-```
+
+Do not recreate or push an existing release tag.
 
 The workflow extracts `package` and `version` by stripping the `python/`
 prefix and splitting on `/v`. A tag that does not match
@@ -54,7 +56,9 @@ known-bad 1.5.0 tag.
 version until that provenance gap is documented in the package changelog
 or backfilled from the matching commit. The current [0.2.1 artifacts](https://pypi.org/pypi/hummbl-bus/0.2.1/json)
 have a separate canonical `python/hummbl-bus/v0.2.1` tag; their availability
-does not backfill the missing 0.2.0 tag.
+does not backfill the missing 0.2.0 tag. As of 2026-11-01, the package
+`CHANGELOG.md` also lacks version sections for 0.2.0 and 0.2.1; document
+both releases and the provenance gap before the next bus release.
 
 ## Rules
 
