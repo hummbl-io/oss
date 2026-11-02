@@ -13,7 +13,7 @@ package:
   name: governed-compression
   version: 0.1.0
   license: Apache-2.0
-  publisher: HUMMBL, LLC
+  publisher: HUMMBL
   description: Governed vector and KV-cache compression experiments
 
 safety:

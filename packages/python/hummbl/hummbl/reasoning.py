@@ -9,6 +9,7 @@ a reasoning process for inspection, replay, and learning.
 from __future__ import annotations
 
 import json
+import math
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -86,8 +87,22 @@ class ReasoningStep:
     timestamp: float = field(default_factory=time.time)
     confidence: Optional[float] = None
 
+    def __post_init__(self) -> None:
+        self._validate_confidence()
+
+    def _validate_confidence(self) -> None:
+        value = self.confidence
+        if value is not None and (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not 0.0 <= value <= 1.0
+            or not math.isfinite(value)
+        ):
+            raise ValueError("confidence must be None or a finite number in [0.0, 1.0]")
+
     def to_dict(self) -> dict:
         """Serialize to a plain dictionary."""
+        self._validate_confidence()
         return {
             "id": self.id,
             "type": self.type.value,

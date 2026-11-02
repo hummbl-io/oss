@@ -3,7 +3,7 @@
 - **Status:** accepted
 - **Date:** 2026-06-23
 - **Decision owner:** Operator
-- **Steward:** HUMMBL, LLC
+- **Steward:** HUMMBL
 - **Supersedes:** none
 - **Superseded by:** none
 

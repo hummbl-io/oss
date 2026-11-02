@@ -79,7 +79,7 @@ Learn more at [hummbl.io](https://www.hummbl.io).
 
 ## Author
 
-**HUMMBL, LLC** — [hummbl.io](https://www.hummbl.io)
+**HUMMBL** — [hummbl.io](https://www.hummbl.io)
 
 - GitHub: [@hummbl-io](https://github.com/hummbl-io)
 - Website: [hummbl.io](https://www.hummbl.io)

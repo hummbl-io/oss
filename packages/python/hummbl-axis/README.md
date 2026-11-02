@@ -19,8 +19,10 @@ Axis is not a platform. It is a script that:
 
 ## Install
 
+Not on PyPI as of 2026-11-01. From the monorepo root, install the source:
+
 ```bash
-pip install hummbl-axis
+pip install -e packages/python/hummbl-axis
 ```
 
 ## Usage

@@ -3,14 +3,15 @@
 Run: pytest tests/test_compass.py -v
 """
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
-
-from compass import Compass, Repo
+from hummbl_compass import Compass
 
 # Path to topology relative to repo root
-_TOPOLOGY = Path(__file__).parent.parent / "hummbl-topology.json"
+_TOPOLOGY = Path(__file__).parent.parent / "hummbl_compass" / "hummbl-topology.json"
 
 
 @pytest.fixture
@@ -19,6 +20,26 @@ def compass() -> Compass:
 
 
 class TestLoad:
+    @pytest.mark.parametrize("args", [
+        ["-c", "from compass import Compass; c = Compass(); assert c.repos; print(c.version)"],
+        ["-m", "compass", "--stats"],
+        ["-m", "compass", "benchmark a kernel on Metal"],
+    ])
+    def test_source_tree_entry_points(self, args: list[str]) -> None:
+        result = subprocess.run(
+            [sys.executable, *args], cwd=Path(__file__).parent.parent,
+            capture_output=True, text=True, check=True,
+        )
+        assert result.stdout.strip()
+
+    def test_default_topology_from_unrelated_directory(
+        self, compass: Compass, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        default = Compass()
+        assert default.version == compass.version
+        assert default.repos == compass.repos
+
     def test_version(self, compass: Compass) -> None:
         assert compass.version == "2.0.0"
 

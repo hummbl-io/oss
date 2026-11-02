@@ -1,7 +1,7 @@
 # HUMMBL Repo Standard
 
 **Status:** draft v0.1
-**Steward:** HUMMBL, LLC
+**Steward:** HUMMBL
 **Approving human:** Human Principal Agent
 **Source of record:** this file in `hummbl-io/oss` at `packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md` (canonical); templates mirrored in `hummbl-io/.github`. The copy in the archived `hummbl-io/hummbl-governance` repo is historical and read-only.
 
