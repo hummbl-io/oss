@@ -1,7 +1,7 @@
 # HUMMBL Repo Standard
 
 **Status:** draft v0.1
-**Steward:** HUMMBL, LLC
+**Steward:** HUMMBL
 **Approving human:** Human Principal Agent
 **Source of record:** this file in `hummbl-io/hummbl-governance` (canonical); templates mirrored in `hummbl-io/.github`.
 

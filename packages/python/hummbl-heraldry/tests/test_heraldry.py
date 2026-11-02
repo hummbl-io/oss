@@ -73,7 +73,7 @@ class TestGrammar:
     def test_fleet_arms(self):
         g = Grammar()
         fleet = g.fleet_arms()
-        assert fleet["name"] == "HUMMBL LLC"
+        assert fleet["name"] == "HUMMBL"
         assert "pall reversed" in fleet["blazon"]
         assert "cogwheel" in fleet["blazon"]
 
@@ -230,7 +230,7 @@ class TestSVG:
         svg = render_fleet_arms_svg()
         assert svg.startswith("<svg")
         assert svg.endswith("</svg>")
-        assert "HUMMBL LLC" in svg
+        assert "HUMMBL" in svg
 
     def test_render_ics_flags(self):
         g = Grammar()

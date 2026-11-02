@@ -2,7 +2,7 @@
 
 **Status:** draft v0.1
 **Owner:** Operator
-**Steward:** HUMMBL, LLC
+**Steward:** HUMMBL
 **Date:** 2026-06-23
 **Tracking:** hummbl-io/hummbl-production#410
 

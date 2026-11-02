@@ -1,4 +1,4 @@
-# Copyright 2026 HUMMBL, LLC
+# Copyright 2026 HUMMBL
 # SPDX-License-Identifier: Apache-2.0
 """Offline example: a cooperative runner obeys CostGovernor's DENY decision.
 

@@ -1,4 +1,4 @@
-# Copyright 2026 HUMMBL, LLC
+# Copyright 2026 HUMMBL
 # SPDX-License-Identifier: Apache-2.0
 """Render a captioned playback of a real offline demo run (Pillow + ffmpeg).
 

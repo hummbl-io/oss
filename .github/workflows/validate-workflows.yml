@@ -5,10 +5,16 @@ name: Validate workflows
     paths:
       - ".github/workflows/**"
       - "tools/scripts/validate_workflows.py"
+      - "tools/scripts/test_validate_workflows.py"
+      - "packages/python/**/pyproject.toml"
+      - "packages/python/**/tests/**"
   push:
     paths:
       - ".github/workflows/**"
       - "tools/scripts/validate_workflows.py"
+      - "tools/scripts/test_validate_workflows.py"
+      - "packages/python/**/pyproject.toml"
+      - "packages/python/**/tests/**"
   workflow_dispatch:
 
 
@@ -28,7 +34,9 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
           python-version: "3.13"
+      - name: Test workflow validator
+        run: python tools/scripts/test_validate_workflows.py
       - name: Validate
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python tools/scripts/validate_workflows.py
+        run: python tools/scripts/validate_workflows.py --check-python-packages

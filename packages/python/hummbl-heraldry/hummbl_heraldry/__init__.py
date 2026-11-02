@@ -27,7 +27,7 @@ _DATA_DIR = Path(__file__).parent / "data"
 
 def _load_grammar() -> dict[str, Any]:
     """Load the heraldic grammar vocabulary."""
-    with open(_DATA_DIR / "grammar.json") as f:
+    with open(_DATA_DIR / "grammar.json", encoding="utf-8") as f:
         return json.load(f)
 
 

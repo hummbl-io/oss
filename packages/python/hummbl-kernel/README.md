@@ -49,6 +49,12 @@ The Mission Mode Kernel is a lightweight orchestration layer that combines Condu
 
 ## Quick Start
 
+`execute_workflow` currently simulates steps and returns a simulation receipt.
+Declared outputs are not proof that evidence was collected or work completed.
+Before running the example, load `MISSION_MODE_SIGNING_KEY` into the process
+environment from your secret store. Audit-event signing requires this key;
+do not hardcode it in the example or put it in command arguments.
+
 ```python
 import asyncio
 import json
@@ -59,6 +65,7 @@ kernel = MissionModeKernel()
 
 # Define workflow
 example_workflow = {
+    "workflow_id": "example_workflow",
     "name": "example_workflow",
     "intent": "Collect and assess compliance evidence",
     "success_criteria": ["All controls documented"],
@@ -72,7 +79,7 @@ example_workflow = {
 }
 
 
-# Execute workflow
+# Simulate workflow
 async def main():
     receipt = await kernel.execute_workflow(
         workflow_yaml=json.dumps(example_workflow),
@@ -82,7 +89,7 @@ async def main():
             "organization_id": "org_001",
         },
     )
-    print(f"Mission completed: {receipt.receipt_id}")
+    print(f"Simulation receipt: {receipt.receipt_id}")
     print(f"Audit trail: {receipt.audit_trail_ref}")
 
 

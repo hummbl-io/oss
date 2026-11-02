@@ -1,4 +1,4 @@
-# Copyright 2024-2026 HUMMBL, LLC
+# Copyright 2024-2026 HUMMBL
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ Example
         system_identity={
             "system_name": "hummbl-governance",
             "system_version": "1.4.1",
-            "provider_name": "HUMMBL, LLC",
+            "provider_name": "HUMMBL",
             "intended_purpose": "AI agent governance",
             "risk_classification": "high-risk",
         },

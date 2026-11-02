@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2024-2026 HUMMBL, LLC
+# Copyright 2024-2026 HUMMBL
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ Four modes from least to most restrictive:
 """
 
 from hummbl_governance import KillSwitch, KillSwitchMode
+from hummbl_governance.kill_switch import KillSwitchAuthorizationError
 
 ks = KillSwitch()
 print(f"Mode: {ks.mode.name} (engaged={ks.engaged})")
@@ -55,14 +56,18 @@ ks.engage(
 )
 print(f"\nMode: {ks.mode.name}")
 
-# Even critical tasks blocked in EMERGENCY (except kill_switch_itself)
+# EMERGENCY blocks all task categories, including kill_switch_itself
 allowed = ks.check_task_allowed("safety_monitoring")
 print(f"  safety_monitoring allowed: {allowed}")
 allowed = ks.check_task_allowed("kill_switch_itself")
 print(f"  kill_switch_itself allowed: {allowed}")
 
-# Disengage
-ks.disengage(reason="Budget replenished", triggered_by="operator")
+# A caller claiming to be an operator cannot release an agent-side switch.
+# Real release uses the separate control path in docs/OPERATOR_RELEASE.md.
+try:
+    ks.disengage(reason="Budget replenished", triggered_by="operator")
+except KillSwitchAuthorizationError:
+    print("\nRelease denied: authenticated operator control path required")
 print(f"\nMode: {ks.mode.name} (engaged={ks.engaged})")
 
 # Show history

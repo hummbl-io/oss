@@ -59,7 +59,7 @@ class TestMCPInitialize:
             assert response["id"] == 1
             result = response["result"]
             assert result["serverInfo"]["name"] == "hummbl-gitops"
-            assert result["serverInfo"]["version"] == "0.0.1"
+            assert result["serverInfo"]["version"] == "0.1.0"
             assert "tools" in result["capabilities"]
         finally:
             proc.stdin.close()

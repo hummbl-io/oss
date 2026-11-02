@@ -21,6 +21,8 @@ from hummbl_governance.kill_switch import KillSwitchMode
 
 from hummbl_mcp import mcp_kill_switch as server
 
+from .kill_switch_helpers import operator_switch, release
+
 
 @pytest.fixture(autouse=True)
 def _fresh_core(tmp_path, monkeypatch):
@@ -28,11 +30,11 @@ def _fresh_core(tmp_path, monkeypatch):
     monkeypatch.setenv("GOVERNANCE_STATE_DIR", str(tmp_path))
     monkeypatch.setenv("HUMMBL_SIGNING_SECRET", "regression-test-only-key")
     monkeypatch.delenv("DCT_SECRET", raising=False)
-    writer = ks_module.KillSwitch(state_dir=tmp_path)
+    writer = operator_switch(state_dir=tmp_path)
     writer.engage(ks_module.KillSwitchMode.EMERGENCY, "bootstrap", "test-operator")
-    writer.disengage("test-operator", "bootstrap approved")
+    release(writer, "test-operator", "bootstrap approved")
     monkeypatch.setattr(ks_module, "_core_instance", None)
-    yield
+    yield writer
     monkeypatch.setattr(ks_module, "_core_instance", None)
 
 
@@ -65,7 +67,7 @@ def test_check_task_allowed_when_disengaged():
     assert payload["action"] == "allow"
 
 
-def test_check_task_reflects_engagement_and_release():
+def test_check_task_reflects_engagement_and_release(_fresh_core):
     core = ks_module.get_kill_switch_core()
     core.engage(
         KillSwitchMode.EMERGENCY,
@@ -81,20 +83,22 @@ def test_check_task_reflects_engagement_and_release():
         assert status["mode"] == "EMERGENCY"
         assert status["engaged"] is True
     finally:
-        core.disengage(triggered_by="test")
+        _fresh_core.refresh()
+        release(_fresh_core)
 
     payload = _call_tool("ks_check_task", {"task_name": "briefing_generation"})
     assert payload["allowed"] is True
 
 
-def test_history_tool_reports_transitions():
+def test_history_tool_reports_transitions(_fresh_core):
     core = ks_module.get_kill_switch_core()
     core.engage(
         KillSwitchMode.HALT_NONCRITICAL,
         reason="test engagement",
         triggered_by="test",
     )
-    core.disengage(triggered_by="test")
+    _fresh_core.refresh()
+    release(_fresh_core)
 
     payload = _call_tool("ks_history", {"limit": 10})
     assert payload["count"] >= 2
