@@ -1,7 +1,7 @@
 # hummbl-cognition
 
 [![CI](https://github.com/hummbl-io/hummbl-cognition/actions/workflows/ci.yml/badge.svg)](https://github.com/hummbl-io/hummbl-cognition/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 
 *Cognitive Ledger Protocol (CLP) and Open Brain server for HUMMBL agent reasoning.*
 
@@ -148,4 +148,4 @@ Learn more at [hummbl.io](https://hummbl.io).
 
 ## License
 
-MIT.
+Apache-2.0 — see [LICENSE](LICENSE).
