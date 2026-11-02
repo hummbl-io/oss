@@ -21,8 +21,9 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Any, Optional
+from typing import Any
 
+from . import __version__
 
 # --- Tool definitions ---
 
@@ -272,7 +273,7 @@ def serve_stdio() -> None:
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {}},
-                    "serverInfo": {"name": "hummbl-gitops", "version": "0.0.1"},
+                    "serverInfo": {"name": "hummbl-gitops", "version": __version__},
                 },
             }
         elif method == "tools/list":

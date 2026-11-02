@@ -36,7 +36,7 @@ from typing import Any
 # Constants
 # ---------------------------------------------------------------------------
 
-_TOPOLOGY_PATH = Path(__file__).parent / "hummbl-topology.json"
+_TOPOLOGY_PATH = Path(__file__).parent / "hummbl_compass" / "hummbl-topology.json"
 
 DOMAIN_KEYWORDS: dict[str, list[str]] = {
     "P": [
