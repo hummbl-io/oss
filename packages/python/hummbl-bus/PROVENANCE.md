@@ -4,4 +4,4 @@
 - **Maintainer:** Reuben Bowlby
 - **Version:** 0.2.0
 - **Description:** Secure append-only TSV coordination bus for multi-agent systems
-- **License:** MIT OR Apache-2.0 (dual-license, see LICENSE files)
+- **License:** Apache-2.0 (see LICENSE)

@@ -112,14 +112,7 @@ def main() -> int:
 
     # Packages with known pre-existing license issues — these are tracked
     # for follow-up but do not block CI. Remove from this set once fixed.
-    known_issues = {
-        "hummbl-bus",           # Apache-2.0 in pyproject, LICENSE text mismatch
-        "hummbl-compass",       # MIT OR Apache-2.0, LICENSE file missing
-        "hummbl-free-models",   # MIT OR Apache-2.0, LICENSE file missing
-        "hummbl-rubric-templates",  # MIT OR Apache-2.0, LICENSE file missing
-        "hummbl-taxonomy",      # MIT OR Apache-2.0, LICENSE file missing
-        "hummbl-validation",    # MIT OR Apache-2.0, LICENSE file missing
-    }
+    known_issues: set[str] = set()
 
     for pkg_dir in packages:
         pyproject = pkg_dir / "pyproject.toml"
