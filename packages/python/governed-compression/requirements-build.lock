@@ -3,13 +3,13 @@
 # Target: CPython 3.13 on linux (the publish workflow runner).
 # Install with: pip install --require-hashes -r requirements-build.lock
 # Do not edit by hand; regenerate when pyproject.toml changes.
-# inputs-sha256: cb229fefc60a9d704b49820cf53de47214134f52ed5d029b5c34c332d523e94d
+# inputs-sha256: 79fa7fcddf59c1781fc6547fc256fba7a89a79700e1d23548fccc1402b499228
 # inputs:
 #   build>=1.0
 #   cyclonedx-bom>=5.0
 #   hummbl-governance>=1.5.1
 #   numpy>=2.4.6
-#   pytest>=9.1.1
+#   pytest>=9.2.0
 #   ruff>=0.17.3
 #   setuptools>=84.2.1
 #   wheel
