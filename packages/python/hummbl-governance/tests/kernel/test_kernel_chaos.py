@@ -187,9 +187,15 @@ class TestChaosIdentityEngine:
 
             claims_file = engine.role_claims_file
             lines = claims_file.read_text().strip().split("\n")
+            # Corrupt every line. Sampling with an unseeded random.random()
+            # made this test non-deterministic: if the corrupted subset
+            # happened to exclude a claim the boot path reads, a correctly
+            # fail-closed engine still booted and the assertion failed at
+            # random (observed 2026-11-02, blocking five PRs in oss). The
+            # docstring promises "any corrupted role claim must raise", so
+            # corrupt all of them and test that property deterministically.
             for i in range(len(lines)):
-                if random.random() < 0.30:
-                    lines[i] = "truncated..."
+                lines[i] = "truncated..."
             claims_file.write_text("\n".join(lines) + "\n")
 
             # Fail-closed (K7): any corrupted role claim must raise
