@@ -3,15 +3,15 @@ import json
 import os
 import sys
 import traceback
-import urllib.request
 import urllib.error
+import urllib.request
 
 SERVER_NAME = "discord"
 SERVER_VERSION = "0.1.0"
 PROTOCOL_VERSION = "2024-11-05"
 
 
-def discord_api_request(endpoint: str, method: str = "GET", data: dict = None) -> dict:
+def discord_api_request(endpoint: str, method: str = "GET", data: dict | None = None) -> dict:
     token = os.environ.get("DISCORD_BOT_TOKEN")
     if not token:
         raise ValueError("DISCORD_BOT_TOKEN environment variable is required.")
@@ -26,13 +26,13 @@ def discord_api_request(endpoint: str, method: str = "GET", data: dict = None) -
         req.data = json.dumps(data).encode("utf-8")
 
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req) as response:  # nosec B310 - URL is hardcoded to https://discord.com/api/v10
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
         raise RuntimeError(f"Discord API Error {e.code}: {error_body}")
-    except Exception as e:
-        raise RuntimeError(f"Request failed: {str(e)}")
+    except Exception as e:  # noqa: BLE001 - tool boundary: re-raised as RuntimeError
+        raise RuntimeError(f"Request failed: {e}")
 
 
 def tool_discord_channel_summarize(args: dict) -> dict:
@@ -169,7 +169,7 @@ def handle_request(request: dict) -> dict:
                         "message": f"Tool not found: {tool_name}",
                     },
                 }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: serialize error into MCP error content
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
@@ -199,11 +199,14 @@ def main():
             continue
         try:
             req = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        try:
             res = handle_request(req)
-            sys.stdout.write(json.dumps(res) + "\\n")
+            sys.stdout.write(json.dumps(res) + "\n")
             sys.stdout.flush()
-        except Exception:
-            pass
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report and continue
+            print(f"discord-mcp: request handling failed: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

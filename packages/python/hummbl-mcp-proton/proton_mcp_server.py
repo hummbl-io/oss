@@ -85,6 +85,32 @@ def get_smtp_client():
 # ---------------------------------------------------------------------------
 # Tool Implementations
 # ---------------------------------------------------------------------------
+def _extract_plain_body(msg) -> str:
+    """Return the plain-text body of a parsed email message."""
+    if not msg.is_multipart():
+        return msg.get_content()
+    parts = []
+    for part in msg.walk():
+        if part.get_content_type() == "text/plain":
+            content = part.get_content()
+            if content:
+                parts.append(content)
+    return "".join(parts)
+
+
+def _parse_rfc822(num, raw) -> dict:
+    """Parse a raw RFC822 fetch response into a result record."""
+    msg = BytesParser(policy=policy.default).parsebytes(raw)
+    body = _extract_plain_body(msg)
+    return {
+        "id": num.decode(),
+        "subject": msg.get("subject", ""),
+        "from": msg.get("from", ""),
+        "date": msg.get("date", ""),
+        "body_snippet": body[:500] + ("..." if len(body) > 500 else ""),
+    }
+
+
 def tool_proton_mail_search(arguments):
     """Search Proton Mail via IMAP (Proton Bridge)."""
     query = arguments.get("query", "ALL")
@@ -109,34 +135,7 @@ def tool_proton_mail_search(arguments):
 
             for response_part in msg_data:
                 if isinstance(response_part, tuple):
-                    msg = BytesParser(policy=policy.default).parsebytes(
-                        response_part[1]
-                    )
-                    subject = msg.get("subject", "")
-                    from_ = msg.get("from", "")
-                    date = msg.get("date", "")
-
-                    # Extract plain text body
-                    body = ""
-                    if msg.is_multipart():
-                        for part in msg.walk():
-                            if part.get_content_type() == "text/plain":
-                                content = part.get_content()
-                                if content:
-                                    body += content
-                    else:
-                        body = msg.get_content()
-
-                    results.append(
-                        {
-                            "id": num.decode(),
-                            "subject": subject,
-                            "from": from_,
-                            "date": date,
-                            "body_snippet": body[:500]
-                            + ("..." if len(body) > 500 else ""),
-                        }
-                    )
+                    results.append(_parse_rfc822(num, response_part[1]))
 
         client.logout()
         return {"messages": results, "count": len(results)}
@@ -300,7 +299,7 @@ def send_response(msg_id, result):
     """Send a JSON-RPC response to stdout."""
     response = {"jsonrpc": "2.0", "id": msg_id, "result": result}
     out = json.dumps(response)
-    sys.stdout.write(out + "\\n")
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 
@@ -312,7 +311,7 @@ def send_error(msg_id, code, message):
         "error": {"code": code, "message": message},
     }
     out = json.dumps(response)
-    sys.stdout.write(out + "\\n")
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 
