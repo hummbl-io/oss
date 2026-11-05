@@ -24,7 +24,7 @@ provide dated primary sources, claim boundaries and a commercial measurement
 proposal. Company adoption and deployed public copy remain separate review steps.
 
 ## Packages
-47 Python packages under `packages/python/<name>/`. Versions are
+48 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
@@ -68,6 +68,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | `hummbl-mcp-onepassword` | 0.1.0 | — | In-tree — MCP server exposing 1Password CLI as tools |
 | `hummbl-mcp-proton` | 0.1.0 | — | In-tree — local MCP server for Proton Mail, Drive, Calendar |
 | `hummbl-mcp-signal` | 0.1.0 | — | In-tree — local stdio MCP server for Signal Messenger |
+| `hummbl-mcp-stdio` | 0.1.0 | — | In-tree — shared JSON-RPC stdio dispatcher for MCP shim servers |
 | `hummbl-mcp-utf` | 0.1.0 | — | In-tree — MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | — | In-tree — omnichannel governance gate MCP server (stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | — | In-tree — MCP server for vendor-neutral voice interactions (Vapi adapter) |
