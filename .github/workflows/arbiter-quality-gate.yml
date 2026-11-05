@@ -30,7 +30,12 @@ jobs:
         # in #218, unreleased). Lint/complexity signals are unaffected.
         # Upgrade to `arbiter-score[analyzers] @ git+https://github.com/
         # hummbl-io/arbiter.git@<sha>` once v1.2.0 ships or a read token exists.
-        run: pip install "arbiter-score[analyzers]==1.1.0"
+        # Analyzer versions are pinned: unpinned ruff/radon/vulture/bandit
+        # drift changes findings and makes the gate non-reproducible
+        # (arbiter #230 now reports tool_versions in JSON output).
+        run: >
+          pip install "arbiter-score[analyzers]==1.1.0"
+          "ruff==0.16.8" "radon==6.0.1" "vulture==2.16" "bandit==1.9.4"
 
       - name: Arbiter diff gate (oss profile)
         env:
