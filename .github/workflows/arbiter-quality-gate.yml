@@ -1,0 +1,58 @@
+# Inline variant -- use this if the anvil-ci self-hosted runner is NOT
+# available to hummbl-io/oss. Runs on ubuntu-latest like the rest of CI.
+# SHA-pinned actions per oss validate-workflows.yml.
+name: Code Quality (Arbiter)
+
+"on":
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # full history needed for diff scoring
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+
+      - name: Install Arbiter
+        # PyPI 1.1.0 for now: the git-SHA install path is blocked because
+        # hummbl-io/arbiter is private and GITHUB_TOKEN cannot read it.
+        # CAVEAT: 1.1.0's bandit parser silently zeroes security findings
+        # when bandit's progress preamble precedes the JSON (fixed upstream
+        # in #218, unreleased). Lint/complexity signals are unaffected.
+        # Upgrade to `arbiter-score[analyzers] @ git+https://github.com/
+        # hummbl-io/arbiter.git@<sha>` once v1.2.0 ships or a read token exists.
+        run: pip install "arbiter-score[analyzers]==1.1.0"
+
+      - name: Arbiter diff gate (oss profile)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          arbiter diff . \
+            --base "origin/${BASE_REF}" \
+            --profile oss \
+            --fail-under 70 \
+            --noise-threshold 50 \
+            --json > arbiter-diff.json || true
+          python3 - <<'PY'
+          import json, os, sys
+          d = json.load(open("arbiter-diff.json"))
+          score, grade = d.get("overall"), d.get("grade")
+          print(f"Arbiter diff score: {score} ({grade})")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(f"## Arbiter diff gate\n\nScore: **{score}** ({grade}) -- threshold 70\n")
+          # Pass when there is nothing scorable (e.g. docs-only PRs);
+          # fail closed only when a real score lands below threshold.
+          if not d.get("is_scorable") or not d.get("files_changed"):
+              print("Nothing scorable in this diff -- pass.")
+              sys.exit(0)
+          sys.exit(0 if (score is not None and score >= 70) else 1)
+          PY
