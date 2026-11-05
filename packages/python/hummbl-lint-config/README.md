@@ -28,11 +28,12 @@ extend = "../hummbl-lint-config/ruff.toml"
 
 | Rule | Purpose |
 |------|---------|
-| `PLW1514` | Missing `encoding` on `open()` calls |
 | `B904` | `raise ... from err` in except blocks |
 | `SIM` | Code simplifications |
 | `I` | Import ordering (isort) |
 | `UP` | Pyupgrade — deprecated Python patterns |
+
+`PLW1514` (missing `encoding=` on `open()`) was removed: it is preview-gated in ruff and silently unenforced without `preview = true`, which would activate unrelated preview rules. Revisit per-package if the rule stabilizes.
 
 ## License
 

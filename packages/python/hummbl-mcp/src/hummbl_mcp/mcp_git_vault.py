@@ -1,9 +1,9 @@
-import sys
-import os
 import json
 import ntpath
-import subprocess
+import os
 import re
+import subprocess
+import sys
 import traceback
 from pathlib import Path
 
@@ -144,7 +144,7 @@ def get_git_root():
     try:
         res = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True)
         return os.path.abspath(res.stdout.strip())
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - degraded fallback: fall back to cwd
         log(f"Error getting git root: {e}")
         return os.path.abspath(os.getcwd())
 
@@ -191,7 +191,7 @@ def git_config_value(name):
         res = subprocess.run(["git", "config", "--get", name], capture_output=True, text=True)
         if res.returncode == 0:
             return res.stdout.strip() or None
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe boundary: log and treat as unset
         log(f"git config lookup skipped for {name}: {e}")
     return None
 
@@ -202,7 +202,7 @@ def check_windows_headless_locks():
         res = subprocess.run(["ssh-add", "-l"], capture_output=True, text=True)
         if res.returncode != 0:
             return "SSH_AGENT_LOCKED", "SSH keys are locked or agent is not running. Please run 'ssh-add' in your Git Bash terminal."
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe boundary: log and continue checks
         log(f"ssh-add check skipped: {e}")
 
     # Pre-flight GPG check
@@ -213,7 +213,7 @@ def check_windows_headless_locks():
             return "GPG_KEYS_LOCKED", f"GPG key is locked or passphrase is required. Error: {err.strip()}"
     except subprocess.TimeoutExpired:
         return "GPG_KEYS_LOCKED", "GPG signature check timed out. Keyring is locked or prompting for passphrase."
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe boundary: log and continue checks
         log(f"GPG check skipped: {e}")
 
     return None, None
@@ -498,7 +498,7 @@ def main():
                             "code": -32601,
                             "message": f"Method not found: {tool_name}"
                         }
-                except Exception as ex:
+                except Exception as ex:  # noqa: BLE001 - tool boundary: convert handler crashes to error results
                     tb = traceback.format_exc()
                     log(f"Error executing tool {tool_name}: {ex}\n{tb}")
                     response["result"] = {"content": [{"type": "text", "text": f"Internal tool execution failure: {ex}"}], "isError": True}
@@ -512,7 +512,7 @@ def main():
             original_stdout.write(json.dumps(response) + "\n")
             original_stdout.flush()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: log and exit on unrecoverable error
             tb = traceback.format_exc()
             log(f"Global loop error: {e}\n{tb}")
             break

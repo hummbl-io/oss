@@ -345,7 +345,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                     for r in results
                 ],
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Search failed: {e}. Try running reindex first."}
 
     elif name == "ledger_query":
@@ -379,7 +379,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                     for e in entries
                 ],
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Query failed: {e}"}
 
     elif name == "ledger_post":
@@ -433,7 +433,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 "title": title,
                 "type": written.type,
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Post failed: {e}"}
 
     elif name == "ledger_stats":
@@ -476,7 +476,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 if LEDGER_FILE.exists()
                 else "n/a",
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Stats failed: {e}"}
 
     elif name == "boot_context":
@@ -518,7 +518,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                     for e in recent
                 ],
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Boot context failed: {e}"}
 
     elif name == "memory_search":
@@ -565,7 +565,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 "results": [r.to_dict() for r in results],
                 "source_diagnostics": retriever.source_diagnostics,
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Memory search failed: {e}"}
 
     elif name == "reindex":
@@ -600,7 +600,7 @@ def handle_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 "entries_indexed": len(entries),
                 "index_file": str(INDEX_FILE),
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
             return {"error": f"Reindex failed: {e}"}
 
     else:
@@ -675,7 +675,7 @@ def main() -> None:
                 send_response(msg_id, {})
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report as JSON-RPC internal error
             send_error(msg_id, -32603, f"Internal error: {e}\n{traceback.format_exc()}")
 
 
