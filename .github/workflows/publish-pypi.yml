@@ -41,7 +41,10 @@ name: Publish to PyPI
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Tag releases must never be cancelled mid-flight: an interrupted run can
+  # leave PyPI published while signing/attestation/release steps never ran
+  # (issue #376 / SW-GREEN-2). Queue re-runs instead.
+  cancel-in-progress: false
 permissions:
   contents: read
 
