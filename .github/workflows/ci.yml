@@ -102,10 +102,18 @@ jobs:
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
         run: |
+          # Hash-locked parity with publish-pypi.yml (SW-GREEN-3): the lock
+          # covers runtime deps, the [test] extra, and the build backend, so
+          # CI tests the same dependency set the publish job builds and tests.
+          pip install --require-hashes -r requirements-build.lock
           if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
-            pip install -e ../hummbl-governance
+            # The lock resolves hummbl-governance from PyPI; this --no-deps
+            # editable install overlays the local checkout without touching
+            # the locked dependency set. Local-only governance deps newer
+            # than the locked PyPI release will surface as test failures.
+            pip install --no-deps --no-build-isolation -e ../hummbl-governance
           fi
-          pip install -e ".[test]"
+          pip install --no-deps --no-build-isolation -e .
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
@@ -149,10 +157,14 @@ jobs:
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
         run: |
+          # Same hash-locked install as the main test job. The lock targets
+          # CPython 3.13/linux; python-version-specific wheels for 3.15-dev
+          # may be absent, which is acceptable for this informational lane.
+          pip install --require-hashes -r requirements-build.lock
           if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
-            pip install -e ../hummbl-governance
+            pip install --no-deps --no-build-isolation -e ../hummbl-governance
           fi
-          pip install -e ".[test]"
+          pip install --no-deps --no-build-isolation -e .
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
@@ -214,7 +226,9 @@ jobs:
         run: python .github/scripts/check_license_consistency.py
 
       - name: Install pip-audit
-        run: pip install pip-audit
+        # Hash-locked tool env (SW-GREEN-3): same --require-hashes discipline
+        # as the package build locks.
+        run: pip install --require-hashes -r .github/requirements-pip-audit.lock
 
       - name: Audit packages with dependencies
         run: |
@@ -231,7 +245,10 @@ jobs:
               echo "::group::Auditing $(basename $pkg_dir)"
               audit_env="$audit_root/$(basename "$pkg_dir")"
               python -m venv "$audit_env"
-              "$audit_env/bin/python" -m pip install -e "$pkg_dir" -q
+              # Audit the same hash-locked dependency set CI tests and
+              # publish builds, not a fresh unpinned resolution.
+              "$audit_env/bin/python" -m pip install --require-hashes -r "$pkg_dir/requirements-build.lock" -q
+              "$audit_env/bin/python" -m pip install --no-deps --no-build-isolation -e "$pkg_dir" -q
               "$audit_env/bin/python" -m pip freeze --exclude-editable > "$audit_env/dependencies.txt"
               pip-audit --strict --no-deps --disable-pip -r "$audit_env/dependencies.txt"
               echo "::endgroup::"
