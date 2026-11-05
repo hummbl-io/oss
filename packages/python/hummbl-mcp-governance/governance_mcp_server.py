@@ -54,13 +54,13 @@ from pathlib import Path
 # Governance imports
 # ---------------------------------------------------------------------------
 from hummbl_governance import (
+    AuditLog,
+    CircuitBreaker,
+    ComplianceMapper,
+    CostGovernor,
+    HealthCollector,
     KillSwitch,
     KillSwitchMode,
-    CircuitBreaker,
-    CostGovernor,
-    AuditLog,
-    ComplianceMapper,
-    HealthCollector,
 )
 
 # ---------------------------------------------------------------------------
@@ -397,7 +397,7 @@ def _handle_compliance_report(arguments):
             else {"status": "mapper initialized", "audit_dir": AUDIT_DIR}
         )
         return {"report": str(report)}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: report error to caller
         return {"error": f"Compliance report generation failed: {e}"}
 
 
@@ -509,9 +509,15 @@ def main():
         except json.JSONDecodeError:
             continue
 
+        if not isinstance(msg, dict):
+            send_error(None, -32600, "Invalid Request")
+            continue
+
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             if method == "initialize":
@@ -556,7 +562,7 @@ def main():
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report and continue
             send_error(
                 msg_id,
                 -32603,
