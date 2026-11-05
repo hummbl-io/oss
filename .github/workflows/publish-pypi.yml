@@ -217,6 +217,13 @@ jobs:
           inputs: dist/*.whl dist/*.tar.gz
           upload-signing-artifacts: true
 
+      # checksums-sha256.txt lives in dist/ so it is covered by the provenance
+      # attestation (subject-path: dist/*), but twine rejects it as an unknown
+      # distribution format. Move it out before upload; the release step picks
+      # it up from the workspace root.
+      - name: Move checksums out of dist before upload
+        run: mv dist/checksums-sha256.txt checksums-sha256.txt
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
         with:
@@ -234,7 +241,7 @@ jobs:
           files: |
             dist/*.whl
             dist/*.tar.gz
-            dist/checksums-sha256.txt
+            checksums-sha256.txt
             sbom.json
 
   # Post-publish guarantee: nothing above proves that PyPI actually received
