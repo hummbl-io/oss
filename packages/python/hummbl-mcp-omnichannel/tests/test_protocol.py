@@ -38,6 +38,19 @@ def test_tools_list_declares_three_tools():
     ]
 
 
+def test_non_dict_request_returns_invalid_request():
+    res = srv.handle_request([1, 2, 3])
+    assert res["error"]["code"] == -32600
+    assert res["error"]["message"] == "Invalid Request"
+
+
+def test_non_dict_params_normalized():
+    res = srv.handle_request(
+        {"jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": [1, 2]}
+    )
+    assert res["error"]["code"] == -32601
+
+
 def test_unknown_method_returns_method_not_found():
     res = _call("bogus/method")
     assert res["error"]["code"] == -32601

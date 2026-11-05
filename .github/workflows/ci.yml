@@ -371,12 +371,13 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit, build-lock-check, package-parity, claim-drift-check, claim-integrity, docker-test]
+    needs: [test, test-node, test-preview, pip-audit, build-lock-check, package-parity, claim-drift-check, claim-integrity, docker-test]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
         run: |
           echo "test=${{ needs.test.result }}"
+          echo "test-node=${{ needs.test-node.result }}"
           echo "test-preview=${{ needs.test-preview.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           echo "build-lock-check=${{ needs.build-lock-check.result }}"
@@ -387,6 +388,7 @@ jobs:
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
+          test "${{ needs.test-node.result }}" = success
 
           test "${{ needs.pip-audit.result }}" = success
           test "${{ needs.build-lock-check.result }}" = success
