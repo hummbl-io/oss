@@ -2,7 +2,7 @@
 
 ## Project
 
-**hummbl-lint-config** — Shared ruff lint configuration for the HUMMBL fleet. Configures PLW1514, B904, SIM, I, UP rule sets.
+**hummbl-lint-config** — Shared ruff lint configuration for the HUMMBL fleet. Configures B904, SIM, I, UP rule sets.
 
 ## Scope
 
