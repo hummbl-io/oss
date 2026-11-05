@@ -1,28 +1,25 @@
-import sys
-import os
+import hashlib
 import json
+import os
 import subprocess
+import sys
 import threading
 import time
-import urllib.request
-import urllib.error
 import traceback
-import hashlib
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from hummbl_mcp._config import SUBPROCESS_TIMEOUT_NORMAL
 from hummbl_mcp._constants import (
-    REMOTE_OLLAMA_URL,
     CONTENT_TYPE_JSON,
     MCP_PROTOCOL_VERSION,
+    REMOTE_OLLAMA_URL,
 )
 
 # Import DelegationTokenManager for agent identity verification
 try:
-    try:
-        from hummbl_governance.delegation import DelegationTokenManager, DelegationTokenCapabilityToken
-    except ImportError:
-        pass
+    from hummbl_governance.delegation import DelegationTokenCapabilityToken, DelegationTokenManager
     _IDP_AVAILABLE = True
 except ImportError:
     _IDP_AVAILABLE = False
@@ -269,7 +266,7 @@ def query_gpu_stats():
 def check_endpoint_health(url):
     try:
         req = urllib.request.Request(f"{url}/api/tags")
-        with urllib.request.urlopen(req, timeout=1.5) as resp:
+        with urllib.request.urlopen(req, timeout=1.5) as resp:  # nosec B310 - endpoint URL is operator-configured
             data = json.loads(resp.read().decode("utf-8"))
             models = [m.get("name") for m in data.get("models", [])]
             return True, models
@@ -334,7 +331,7 @@ def handle_route_ollama_request(arguments):
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": CONTENT_TYPE_JSON}
         )
-        with urllib.request.urlopen(req, timeout=30.0) as resp:
+        with urllib.request.urlopen(req, timeout=30.0) as resp:  # nosec B310 - endpoint URL is operator-configured
             resp_data = json.loads(resp.read().decode("utf-8"))
             response_text = resp_data.get("response", "")
             return {
@@ -359,7 +356,7 @@ def handle_route_ollama_request(arguments):
                 data=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": CONTENT_TYPE_JSON}
             )
-            with urllib.request.urlopen(req, timeout=30.0) as resp:
+            with urllib.request.urlopen(req, timeout=30.0) as resp:  # nosec B310 - endpoint URL is operator-configured
                 resp_data = json.loads(resp.read().decode("utf-8"))
                 response_text = resp_data.get("response", "")
                 return {
