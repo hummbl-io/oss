@@ -1,0 +1,56 @@
+# Inline variant -- use this if the anvil-ci self-hosted runner is NOT
+# available to hummbl-io/oss. Runs on ubuntu-latest like the rest of CI.
+# SHA-pinned actions per oss validate-workflows.yml.
+name: Code Quality (Arbiter)
+
+"on":
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # full history needed for diff scoring
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install Arbiter
+        # Pinned to arbiter main d8c0031 -- NOT the 1.1.0 release. Verified
+        # 2026-11-05: `arbiter diff` DOES run bandit on changed Python files,
+        # and 1.1.0's parser silently zeroes bandit findings whenever bandit's
+        # progress preamble precedes the JSON (reproduced on this repo's own
+        # 2-file diff). d8c0031 includes upstream fix #218. Re-pin to a release
+        # once one ships containing #218 + the report-templates fix.
+        run: pip install "arbiter-score[analyzers] @ git+https://github.com/hummbl-io/arbiter.git@d8c0031966c4abd799696e2295cf4cc9f1393254"
+
+      - name: Arbiter diff gate (oss profile)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          arbiter diff . \
+            --base "origin/${BASE_REF}" \
+            --profile oss \
+            --fail-under 70 \
+            --noise-threshold 50 \
+            --json > arbiter-diff.json || true
+          python3 - <<'PY'
+          import json, os, sys
+          d = json.load(open("arbiter-diff.json"))
+          score, grade = d.get("overall"), d.get("grade")
+          print(f"Arbiter diff score: {score} ({grade})")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(f"## Arbiter diff gate\n\nScore: **{score}** ({grade}) -- threshold 70\n")
+          # Pass when there is nothing scorable (e.g. docs-only PRs);
+          # fail closed only when a real score lands below threshold.
+          if not d.get("is_scorable"):
+              sys.exit(0)
+          sys.exit(0 if (score is not None and score >= 70) else 1)
+          PY

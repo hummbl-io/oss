@@ -1,0 +1,21 @@
+# Proposed .arbiter.yml for hummbl-io/oss root.
+# Arbiter loads .arbiter.json > .arbiter.yml > defaults (src/arbiter/config.py).
+#
+# NOTE on semantics (verified in src/arbiter/analyzers/*): non-ruff analyzers
+# match exclude entries as exact path PARTS, not globs — so use bare directory
+# names, not "docs/" or "**/x". Ruff receives them as --exclude globs where
+# bare names still work. "node"/"lean" also exclude any same-named dir.
+exclude_paths:
+  - docs
+  - _state
+  - node
+  - lean
+  - build
+  - dist
+  - .venv
+
+# Deliberately NOT set here:
+#   noise_threshold: the CI gate passes --noise-threshold 50 via --profile oss;
+#     keeping it out of repo config preserves uncapped scores for audits.
+#   fail_under: gate threshold belongs to the workflow invocation, not the
+#     repo's permanent config.
