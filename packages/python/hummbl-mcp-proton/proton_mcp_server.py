@@ -18,15 +18,15 @@ Configure in Antigravity or Gemini config (`mcp_config.json`):
     }
 """
 
-import json
-import sys
-import traceback
-import os
 import imaplib
+import json
+import os
 import smtplib
 import subprocess
-from email.message import EmailMessage
+import sys
+import traceback
 from email import policy
+from email.message import EmailMessage
 from email.parser import BytesParser
 
 # ---------------------------------------------------------------------------
@@ -140,7 +140,7 @@ def tool_proton_mail_search(arguments):
 
         client.logout()
         return {"messages": results, "count": len(results)}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -165,7 +165,7 @@ def tool_proton_mail_send(arguments):
         client.quit()
 
         return {"status": "success", "message": f"Email sent to {to_addr}"}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -191,7 +191,7 @@ def tool_proton_drive_list(arguments):
             "error": "Failed to parse JSON from proton-drive CLI",
             "stdout": result.stdout,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -217,7 +217,7 @@ def tool_proton_calendar_events(arguments):
             "error": "Failed to parse JSON from proton-calendar-cli",
             "stdout": result.stdout,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -376,7 +376,7 @@ def main():
                 handler(msg_id, params)
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report as JSON-RPC internal error
             send_error(
                 msg_id,
                 -32603,

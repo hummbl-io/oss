@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import json
-import sys
 import os
-import urllib.request
-import urllib.error
+import sys
 import traceback
+import urllib.error
+import urllib.request
 
 SERVER_NAME = "hummbl-mcp-voice"
 SERVER_VERSION = "0.1.0"
@@ -40,7 +40,7 @@ def tool_voice_dispatch_call(args: dict) -> dict:
     req.add_header("Content-Type", "application/json")
 
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req) as response:  # nosec B310 - URL is a hardcoded https endpoint
             response_data = json.loads(response.read().decode("utf-8"))
             return {
                 "content": [
@@ -53,8 +53,8 @@ def tool_voice_dispatch_call(args: dict) -> dict:
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
         raise RuntimeError(f"Voice dispatch failed ({e.code}): {error_body}")
-    except Exception as e:
-        raise RuntimeError(f"Voice dispatch request failed: {str(e)}")
+    except (OSError, ValueError) as e:
+        raise RuntimeError(f"Voice dispatch request failed: {e}") from e
 
 
 def tool_voice_retrieve_call_logs(args: dict) -> dict:
@@ -75,7 +75,7 @@ def tool_voice_retrieve_call_logs(args: dict) -> dict:
 
     try:
         # urllib follows 302 redirects by default
-        with urllib.request.urlopen(req) as response, open(output_path, "wb") as f_out:
+        with urllib.request.urlopen(req) as response, open(output_path, "wb") as f_out:  # nosec B310 - URL is a hardcoded https endpoint
             while True:
                 chunk = response.read(8192)
                 if not chunk:
@@ -102,8 +102,8 @@ def tool_voice_retrieve_call_logs(args: dict) -> dict:
             }
         error_body = e.read().decode("utf-8")
         raise RuntimeError(f"Failed to fetch call logs ({e.code}): {error_body}")
-    except Exception as e:
-        raise RuntimeError(f"Log retrieval failed: {str(e)}")
+    except (OSError, ValueError) as e:
+        raise RuntimeError(f"Log retrieval failed: {e}") from e
 
 
 def tool_voice_download_recording(args: dict) -> dict:
@@ -133,7 +133,7 @@ def tool_voice_download_recording(args: dict) -> dict:
     req.add_header("Authorization", f"Bearer {api_key}")
 
     try:
-        with urllib.request.urlopen(req) as response, open(output_path, "wb") as f_out:
+        with urllib.request.urlopen(req) as response, open(output_path, "wb") as f_out:  # nosec B310 - URL is a hardcoded https endpoint
             while True:
                 chunk = response.read(8192)
                 if not chunk:
@@ -160,11 +160,17 @@ def tool_voice_download_recording(args: dict) -> dict:
             }
         error_body = e.read().decode("utf-8")
         raise RuntimeError(f"Failed to fetch recording ({e.code}): {error_body}")
-    except Exception as e:
-        raise RuntimeError(f"Recording retrieval failed: {str(e)}")
+    except (OSError, ValueError) as e:
+        raise RuntimeError(f"Recording retrieval failed: {e}") from e
 
 
 def handle_request(request: dict) -> dict:
+    if not isinstance(request, dict):
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {"code": -32600, "message": "Invalid Request"},
+        }
     req_id = request.get("id")
     method = request.get("method")
 
@@ -252,9 +258,13 @@ def handle_request(request: dict) -> dict:
             },
         }
     elif method == "tools/call":
-        params = request.get("params", {})
+        params = request.get("params")
+        if not isinstance(params, dict):
+            params = {}
         tool_name = params.get("name")
-        args = params.get("arguments", {})
+        args = params.get("arguments")
+        if not isinstance(args, dict):
+            args = {}
 
         try:
             if tool_name == "voice_dispatch_call":
@@ -284,7 +294,7 @@ def handle_request(request: dict) -> dict:
                         "message": f"Tool not found: {tool_name}",
                     },
                 }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - MCP protocol boundary: report handler crashes, don't kill the loop
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
@@ -315,10 +325,10 @@ def main():
         try:
             req = json.loads(line)
             res = handle_request(req)
-            sys.stdout.write(json.dumps(res) + "\\n")
+            sys.stdout.write(json.dumps(res) + "\n")
             sys.stdout.flush()
-        except Exception:
-            pass
+        except (json.JSONDecodeError, OSError):
+            continue
 
 
 if __name__ == "__main__":
