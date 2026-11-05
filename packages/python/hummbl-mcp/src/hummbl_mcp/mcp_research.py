@@ -577,10 +577,14 @@ class ResearchMCPServer:
 
     def handle_message(self, message: dict[str, Any]) -> dict[str, Any] | None:
         """Process a single JSON-RPC 2.0 message and return a response."""
+        if not isinstance(message, dict):
+            return self._rpc_error(None, -32600, "Invalid Request")
         jsonrpc = message.get("jsonrpc", "")
         method = message.get("method", "")
         msg_id = message.get("id")
         params = message.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         # Notifications (no id) -- no response required
         if msg_id is None and method == "notifications/initialized":
