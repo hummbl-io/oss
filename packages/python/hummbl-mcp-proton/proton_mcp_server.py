@@ -300,7 +300,7 @@ def send_response(msg_id, result):
     """Send a JSON-RPC response to stdout."""
     response = {"jsonrpc": "2.0", "id": msg_id, "result": result}
     out = json.dumps(response)
-    sys.stdout.write(out + "\\n")
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 
@@ -312,7 +312,7 @@ def send_error(msg_id, code, message):
         "error": {"code": code, "message": message},
     }
     out = json.dumps(response)
-    sys.stdout.write(out + "\\n")
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 

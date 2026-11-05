@@ -200,7 +200,7 @@ def main():
         try:
             req = json.loads(line)
             res = handle_request(req)
-            sys.stdout.write(json.dumps(res) + "\\n")
+            sys.stdout.write(json.dumps(res) + "\n")
             sys.stdout.flush()
         except Exception:
             pass
