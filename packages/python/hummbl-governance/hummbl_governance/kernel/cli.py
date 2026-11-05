@@ -65,7 +65,7 @@ def cmd_boot(args: argparse.Namespace) -> int:
         print(json.dumps(health, indent=2, default=str))
         print(f"\nKernel booted successfully. Boot receipt: {kernel.boot_receipt_id}")
         return 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary: report failure and exit non-zero
         print(f"Kernel boot failed: {e}", file=sys.stderr)
         return 1
 
@@ -77,7 +77,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         health = kernel.health()
         print(json.dumps(health, indent=2, default=str))
         return 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary: report failure and exit non-zero
         print(f"Kernel status check failed: {e}", file=sys.stderr)
         return 1
 
@@ -104,7 +104,7 @@ def cmd_health(args: argparse.Namespace) -> int:
 
         print(json.dumps(health, indent=2, default=str))
         return 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary: report failure and exit non-zero
         print(f"Kernel health check failed: {e}", file=sys.stderr)
         return 1
 
@@ -134,7 +134,7 @@ def cmd_inspect(args: argparse.Namespace) -> int:
                 print(f"  {role['role_id']}: {role['state']} (score: {role.get('metric_score', 0):.2f})")
 
         return 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary: report failure and exit non-zero
         print(f"Inspection failed: {e}", file=sys.stderr)
         return 1
 
@@ -149,7 +149,7 @@ def cmd_laws(args: argparse.Namespace) -> int:
             status_icon = "✓" if law.status == "empirically.tested" else "○"
             print(f"  {status_icon} {law.law_id}: {law.name} [{law.status}]")
         return 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary: report failure and exit non-zero
         print(f"Law listing failed: {e}", file=sys.stderr)
         return 1
 
@@ -177,7 +177,7 @@ def cmd_roles(args: argparse.Namespace) -> int:
             print(f"  {role_id}: {', '.join(claimants)}")
 
         return 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary: report failure and exit non-zero
         print(f"Role listing failed: {e}", file=sys.stderr)
         return 1
 
