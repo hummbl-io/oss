@@ -217,6 +217,23 @@ jobs:
           inputs: dist/*.whl dist/*.tar.gz
           upload-signing-artifacts: true
 
+      # checksums-sha256.txt is covered by the provenance attestation
+      # (subject-path: dist/*); the sigstore .sigstore.json bundles are
+      # created after attestation, so they are NOT provenance subjects.
+      # Both must leave dist/ before upload: twine rejects them as unknown
+      # distribution formats. Fail closed if any expected artifact is
+      # missing rather than masking mv errors with || true.
+      - name: Move non-package artifacts out of dist before upload
+        run: |
+          shopt -s nullglob
+          packages=(dist/*.whl dist/*.tar.gz)
+          bundles=(dist/*.sigstore.json)
+          if [ ! -f dist/checksums-sha256.txt ] || [ "${#packages[@]}" -eq 0 ] || [ "${#bundles[@]}" -ne "${#packages[@]}" ]; then
+            echo "ERROR: expected checksums plus one .sigstore.json per package artifact"
+            exit 1
+          fi
+          mv dist/checksums-sha256.txt "${bundles[@]}" ./
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
         with:
@@ -234,7 +251,8 @@ jobs:
           files: |
             dist/*.whl
             dist/*.tar.gz
-            dist/checksums-sha256.txt
+            checksums-sha256.txt
+            *.sigstore.json
             sbom.json
 
   # Post-publish guarantee: nothing above proves that PyPI actually received

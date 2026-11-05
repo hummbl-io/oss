@@ -100,7 +100,7 @@ def handle_gov_query(intent: str | None = None, limit: int = 20) -> dict[str, An
             "count": len(entries),
             "filter": intent,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"entries": [], "count": 0, "error": str(e)}
 
 
@@ -117,7 +117,7 @@ def handle_gov_stats() -> dict[str, Any]:
             "tuple_types": types,
             "enabled": _is_idp_enabled(),
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"total_entries": 0, "error": str(e)}
 
 
@@ -133,7 +133,7 @@ def handle_gov_recent(limit: int = 10) -> dict[str, Any]:
         entries.sort(key=lambda e: _get_field(e, "timestamp") or "", reverse=True)
         recent = entries[:limit]
         return {"entries": [_entry_to_dict(e) for e in recent], "count": len(recent)}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"entries": [], "count": 0, "error": str(e)}
 
 
@@ -152,7 +152,7 @@ def handle_gov_trace_contract(contract_id: str) -> dict[str, Any]:
             "missing_tuple_types": missing,
             "complete": len(missing) == 0 and len(chain) > 0,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"contract_id": contract_id, "chain_length": 0, "error": str(e)}
 
 
@@ -212,7 +212,7 @@ def handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
             return _rpc_result(id_, {
                 "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}],
             })
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: convert handler crashes to error results
             logger.exception("Tool call failed: %s", tool_name)
             return _rpc_result(id_, {
                 "content": [{"type": "text", "text": json.dumps({"error": str(e)})}],
