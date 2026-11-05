@@ -7,7 +7,8 @@ line-length = 120
 
 [lint]
 select = [
-    "PLW1514",  # missing encoding on open()
+    # PLW1514 (missing encoding on open()) is preview-gated in ruff; enabling
+    # preview activates unrelated preview rules fleet-wide, so it stays off.
     "B904",     # raise ... from err in except blocks
     "SIM",      # simplifications
     "I",        # isort import ordering
