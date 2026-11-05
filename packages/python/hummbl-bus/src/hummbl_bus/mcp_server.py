@@ -24,7 +24,6 @@ import traceback
 import urllib.error
 import urllib.request
 from collections import Counter
-from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -227,8 +226,7 @@ def read_bus(
     Primary path: HTTP bridge /bus/tail endpoint.
     Fallback: local TSV file (if BUS_FILE is set and exists).
     """
-    if limit < 0:
-        limit = 0
+    limit = max(limit, 0)
 
     # Primary path: bridge
     fetch_n = max(limit, 50)  # fetch more than needed to allow client-side filtering
@@ -297,8 +295,7 @@ def search_bus(query: str, limit: int = 20) -> list[dict[str, str]]:
     Primary path: HTTP bridge /bus/search endpoint.
     Fallback: local TSV file (if BUS_FILE is set and exists).
     """
-    if limit < 0:
-        limit = 0
+    limit = max(limit, 0)
     query_lower = query.lower()
 
     # Primary path: bridge
@@ -429,10 +426,8 @@ def bus_agents_list() -> dict[str, object]:
                     "types": Counter(),
                 }
             agent_data[frm]["count"] += 1
-            if ts < agent_data[frm]["first_seen"]:
-                agent_data[frm]["first_seen"] = ts
-            if ts > agent_data[frm]["last_seen"]:
-                agent_data[frm]["last_seen"] = ts
+            agent_data[frm]["first_seen"] = min(agent_data[frm]["first_seen"], ts)
+            agent_data[frm]["last_seen"] = max(agent_data[frm]["last_seen"], ts)
             agent_data[frm]["types"][row.get("type", "")] += 1
         return {
             "agents": [
@@ -723,9 +718,15 @@ def main() -> None:
         except json.JSONDecodeError:
             continue
 
+        if not isinstance(msg, dict):
+            send_error(None, -32600, "Invalid Request")
+            continue
+
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             if method == "initialize":

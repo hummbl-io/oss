@@ -251,11 +251,7 @@ def _parse_template_batches(content):
     """Parse batch table rows from a BIF template."""
     batches = []
     for line in content.splitlines():
-        if (
-            not line.startswith("|")
-            or line.startswith("| Batch")
-            or line.startswith("|---")
-        ):
+        if not line.startswith("|") or line.startswith(("| Batch", "|---")):
             continue
         parts = [p.strip() for p in line.split("|")[1:-1]]
         if len(parts) >= 4:
@@ -716,7 +712,7 @@ def tool_bif_list_templates(arguments):
 
     # Also include the generic BIF phases as a "generic" template
     generic_batches = []
-    for phase_num, phase in PHASES.items():
+    for phase in PHASES.values():
         for batch_num, batch in phase["batches"].items():
             generic_batches.append(
                 {
@@ -914,9 +910,15 @@ def main():
         except json.JSONDecodeError:
             continue
 
+        if not isinstance(msg, dict):
+            send_error(None, -32600, "Invalid Request")
+            continue
+
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             handler = _METHOD_HANDLERS.get(method)
@@ -924,7 +926,7 @@ def main():
                 handler(msg_id, params)
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report and continue
             send_error(
                 msg_id,
                 -32603,
