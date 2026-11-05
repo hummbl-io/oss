@@ -48,6 +48,8 @@ def handle_request(
     handlers: dict[str, Handler],
 ) -> dict:
     """Dispatch one JSON-RPC request against the declared tool surface."""
+    if not isinstance(request, dict):
+        return _error(None, -32600, "Invalid Request")
     req_id = request.get("id")
     method = request.get("method")
 
@@ -63,9 +65,13 @@ def handle_request(
     if method == "tools/list":
         return _result(req_id, {"tools": tools})
     if method == "tools/call":
-        params = request.get("params", {})
+        params = request.get("params")
+        if not isinstance(params, dict):
+            params = {}
         tool_name = params.get("name")
-        args = params.get("arguments", {})
+        args = params.get("arguments")
+        if not isinstance(args, dict):
+            args = {}
         handler = handlers.get(tool_name)
         if handler is None:
             return _error(req_id, -32601, f"Tool not found: {tool_name}")
@@ -107,5 +113,5 @@ def serve_stdio(
             )
             stdout.write(json.dumps(res) + "\n")
             stdout.flush()
-        except Exception:  # noqa: BLE001 - protocol boundary
-            pass
+        except (json.JSONDecodeError, OSError):
+            continue

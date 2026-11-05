@@ -23,7 +23,7 @@ def _boom(args: dict) -> dict:
 
 
 HANDLERS = {"echo": _echo, "boom": _boom}
-KW = dict(server_name="test-server", server_version="0.0.1", tools=TOOLS, handlers=HANDLERS)
+KW = {"server_name": "test-server", "server_version": "0.0.1", "tools": TOOLS, "handlers": HANDLERS}
 
 
 def _req(method, params=None, req_id=1):
