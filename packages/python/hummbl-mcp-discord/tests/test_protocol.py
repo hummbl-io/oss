@@ -42,7 +42,6 @@ def test_non_dict_request_returns_invalid_request():
 
 
 def test_non_dict_params_normalized():
-    res = _call("tools/call", params=None)
     res = srv.handle_request(
         {"jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": [1, 2]}
     )
