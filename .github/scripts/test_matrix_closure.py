@@ -13,6 +13,7 @@ The graph is computed live from pyproject ``dependencies`` and
 """
 
 import pathlib
+import re
 import sys
 
 import tomllib
@@ -20,8 +21,14 @@ import tomllib
 ROOT = pathlib.Path("packages/python")
 
 
+_REQ_NAME_RE = re.compile(r"[<>=!~;\[\s]")
+
+
 def _dep_name(requirement: str) -> str:
-    return requirement.split(">")[0].split("=")[0].split("<")[0].split("[")[0].strip()
+    # PEP 508: name ends at the first version specifier, extra, marker, or
+    # whitespace. Forms like ~=, @ direct references, and ; markers are all
+    # cut here so an unrecognized spec can never leak into the graph.
+    return _REQ_NAME_RE.split(requirement, 1)[0].strip()
 
 
 def _requirements(manifest: dict) -> list[str]:
