@@ -1329,6 +1329,8 @@ def main():
             msg = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if not isinstance(msg, dict):
+            continue
 
         msg_id = msg.get("id")
         method = msg.get("method", "")
