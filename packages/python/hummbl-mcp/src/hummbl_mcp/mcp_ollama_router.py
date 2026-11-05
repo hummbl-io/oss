@@ -56,11 +56,13 @@ def _load_model_hashes() -> dict[str, str]:
                 if not line.strip():
                     continue
                 entry = json.loads(line)
+                if not isinstance(entry, dict):
+                    continue
                 model = entry.get("model")
                 sha256 = entry.get("sha256")
                 if model and sha256 and sha256 != "PLACEHOLDER_HASH":
                     hashes[model] = sha256
-        except Exception as e:
+        except (OSError, ValueError) as e:
             log(f"Failed to load model hashes: {e}")
     return hashes
 
@@ -143,7 +145,7 @@ def _verify_agent_identity_token(token_str: str, expected_subject: str) -> bool:
             return False
         
         return True
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - auth boundary: any verification error must fail closed
         log(f"Agent identity token verification error: {e}")
         return False
 
@@ -250,7 +252,7 @@ def query_gpu_stats():
             gpu_cache.data = data
             gpu_cache.last_query = now
             return data
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - degraded-mode boundary: any probe failure yields unknown telemetry
             log(f"nvidia-smi lookup failed: {e}. Returning degraded unknown telemetry.")
             return {
                 "telemetry_available": False,
@@ -271,7 +273,7 @@ def check_endpoint_health(url):
             data = json.loads(resp.read().decode("utf-8"))
             models = [m.get("name") for m in data.get("models", [])]
             return True, models
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe boundary: any failure means endpoint is offline
         log(f"Ollama endpoint offline check: {url} ({e})")
         return False, []
 
@@ -347,7 +349,7 @@ def handle_route_ollama_request(arguments):
                 }],
                 "isError": False
             }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - fallback boundary: any local failure must attempt remote
         # Fallback to remote endpoint if local failed to connect
         log(f"Local endpoint failed: {e}. Attempting fallback to remote.")
         try:
@@ -372,7 +374,7 @@ def handle_route_ollama_request(arguments):
                     }],
                     "isError": False
                 }
-        except Exception as fe:
+        except Exception as fe:  # noqa: BLE001 - terminal boundary: both endpoints failed, report error result
             return {"content": [{"type": "text", "text": f"Ollama execution failed on both local and remote endpoints: {fe}"}], "isError": True}
 
         return {"content": [{"type": "text", "text": f"Ollama routing failed: {e}"}], "isError": True}
@@ -483,7 +485,7 @@ def main():
                             "code": -32601,
                             "message": f"Method not found: {tool_name}"
                         }
-                except Exception as ex:
+                except Exception as ex:  # noqa: BLE001 - tool boundary: convert handler crashes to error results
                     tb = traceback.format_exc()
                     log(f"Error executing tool {tool_name}: {ex}\n{tb}")
                     response["result"] = {"content": [{"type": "text", "text": f"Internal tool execution failure: {ex}"}], "isError": True}
@@ -496,7 +498,7 @@ def main():
             original_stdout.write(json.dumps(response) + "\n")
             original_stdout.flush()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: log and exit on unrecoverable error
             tb = traceback.format_exc()
             log(f"Global loop error: {e}\n{tb}")
             break
