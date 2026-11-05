@@ -102,18 +102,26 @@ jobs:
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
         run: |
-          # Hash-locked parity with publish-pypi.yml (SW-GREEN-3): the lock
-          # covers runtime deps, the [test] extra, and the build backend, so
-          # CI tests the same dependency set the publish job builds and tests.
-          pip install --require-hashes -r requirements-build.lock
-          if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
-            # The lock resolves hummbl-governance from PyPI; this --no-deps
-            # editable install overlays the local checkout without touching
-            # the locked dependency set. Local-only governance deps newer
-            # than the locked PyPI release will surface as test failures.
-            pip install --no-deps --no-build-isolation -e ../hummbl-governance
+          if [ "${{ matrix.python-version }}" = "3.13" ]; then
+            # Hash-locked parity with publish-pypi.yml (SW-GREEN-3): the lock
+            # covers runtime deps, the [test] extra, and the build backend,
+            # so the 3.13 leg tests the same dependency set the publish job
+            # builds and tests. Locks are resolved for CPython 3.13/linux;
+            # other matrix legs keep live resolution until locks go universal.
+            pip install --require-hashes -r requirements-build.lock
+            if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
+              # The lock resolves hummbl-governance from PyPI; this --no-deps
+              # editable install overlays the local checkout without touching
+              # the locked dependency set.
+              pip install --no-deps --no-build-isolation -e ../hummbl-governance
+            fi
+            pip install --no-deps --no-build-isolation -e .
+          else
+            if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
+              pip install -e ../hummbl-governance
+            fi
+            pip install -e ".[test]"
           fi
-          pip install --no-deps --no-build-isolation -e .
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
@@ -157,14 +165,12 @@ jobs:
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
         run: |
-          # Same hash-locked install as the main test job. The lock targets
-          # CPython 3.13/linux; python-version-specific wheels for 3.15-dev
-          # may be absent, which is acceptable for this informational lane.
-          pip install --require-hashes -r requirements-build.lock
+          # Informational 3.15-dev lane: locks target CPython 3.13/linux and
+          # cannot cover this interpreter, so keep live resolution here.
           if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
-            pip install --no-deps --no-build-isolation -e ../hummbl-governance
+            pip install -e ../hummbl-governance
           fi
-          pip install --no-deps --no-build-isolation -e .
+          pip install -e ".[test]"
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
