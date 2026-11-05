@@ -290,9 +290,13 @@ def _err(request_id, code, message):
 
 
 def handle_request(req: dict) -> dict:
+    if not isinstance(req, dict):
+        return _err(None, -32600, "Invalid Request")
     method = req.get("method", "")
     req_id = req.get("id")
     params = req.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     if method == "initialize":
         return _ok(
