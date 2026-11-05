@@ -21,6 +21,7 @@ def test_initialize_returns_server_info():
     assert res["jsonrpc"] == "2.0"
     assert res["id"] == 1
     result = res["result"]
+    assert result["protocolVersion"] == "2024-11-05"
     assert result["serverInfo"] == {"name": "onepassword-mcp", "version": "1.0.0"}
     assert result["capabilities"] == {"tools": {}}
 
