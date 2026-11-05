@@ -47,6 +47,17 @@ def test_unknown_method_returns_method_not_found():
     assert "Method not found" in out[0]["error"]["message"]
 
 
+def test_non_dict_json_lines_are_skipped():
+    out = _roundtrip(
+        [
+            "123",
+            "[1, 2]",
+            json.dumps({"jsonrpc": "2.0", "id": 6, "method": "ping"}),
+        ]
+    )
+    assert [r["id"] for r in out] == [6]
+
+
 def test_bad_lines_do_not_crash_or_emit():
     out = _roundtrip(
         [

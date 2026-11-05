@@ -364,10 +364,14 @@ def main():
             msg = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if not isinstance(msg, dict):
+            continue
 
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             handler = _METHOD_HANDLERS.get(method)
@@ -379,7 +383,7 @@ def main():
             send_error(
                 msg_id,
                 -32603,
-                f"Internal error: {e}\\n{traceback.format_exc()}",
+                f"Internal error: {e}\n{traceback.format_exc()}",
             )
 
 
