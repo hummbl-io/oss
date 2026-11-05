@@ -2,7 +2,7 @@
 **Scope:** Packages in this monorepo and their public release state.
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
-**Tree inventory updated:** 2026-09-27, `packages/python/` = 47 packages.
+**Tree inventory updated:** 2026-09-27, `packages/python/` = 48 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
@@ -84,6 +84,7 @@ Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Mat
 | `hummbl-agent-governance` | 0.2.0 | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
 | `hummbl-eval` | 0.1.0 | Evidence-governed evaluation contracts for compositional Human-AI systems |
 | `hummbl-gitops` | 0.1.0 | Bidirectional multi-agent peer-review GitOps loop |
+| `wags` | 0.2.0 | Polyglot, air-gappable multi-agent peer review protocol |
 ### Excluded (not HUMMBL's)
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|
