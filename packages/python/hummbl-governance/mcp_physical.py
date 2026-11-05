@@ -313,7 +313,11 @@ def handle_request(req: dict) -> dict:
 
     if method == "tools/call":
         tool_name = params.get("name", "")
+        if not isinstance(tool_name, str):
+            tool_name = ""
         tool_args = params.get("arguments", {})
+        if not isinstance(tool_args, dict):
+            tool_args = {}
         handler = _TOOLS.get(tool_name)
         if handler is None:
             return _err(req_id, -32601, f"Unknown tool: {tool_name}")
@@ -332,7 +336,7 @@ def handle_request(req: dict) -> dict:
 
 def handle_tool(tool_name: str, args: dict) -> dict:
     """Direct tool dispatch (used by tests)."""
-    handler = _TOOLS.get(tool_name)
+    handler = _TOOLS.get(tool_name if isinstance(tool_name, str) else "")
     if handler is None:
         return {"error": f"Unknown tool: {tool_name}"}
     return handler(args)
