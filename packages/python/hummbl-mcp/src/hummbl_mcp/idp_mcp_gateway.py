@@ -17,29 +17,26 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import sys
 import uuid
+from contextlib import suppress
 from typing import Any
 
-try:
+with suppress(ImportError):
     from hummbl_governance.delegation_context import (
         DelegationBudget,
         DelegationContextManager,
     )
-except ImportError:
-    pass
-try:
+with suppress(ImportError):
     from hummbl_governance.delegation import (
         DelegationTokenManager,
         TokenBinding,
         get_token_manager,
     )
-except ImportError:
-    pass
 from hummbl_mcp._governance_bus import (
     GovernanceBus,
-    _compute_entry_signature,
     append_audit_entry,
-    get_governance_bus,
 )
 
 logger = logging.getLogger(__name__)
@@ -510,9 +507,6 @@ def _error_result(message: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # MCP stdio server
 # ---------------------------------------------------------------------------
-
-import os
-import sys
 
 _IDP_SERVER_NAME = "idp-mcp-gateway"
 _IDP_SERVER_VERSION = "0.1.0"
