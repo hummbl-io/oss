@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
+import uuid
 from typing import Any
 
 try:
@@ -37,6 +38,7 @@ except ImportError:
 from hummbl_mcp._governance_bus import (
     GovernanceBus,
     _compute_entry_signature,
+    append_audit_entry,
     get_governance_bus,
 )
 
