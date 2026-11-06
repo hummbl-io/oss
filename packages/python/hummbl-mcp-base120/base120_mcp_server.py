@@ -368,6 +368,8 @@ class Base120Server:
         """
         req_id = request.get("id")
         method = request.get("method", "")
+        if not isinstance(method, str):
+            method = ""
 
         # Notifications have no id — no response
         if req_id is None and not method.startswith("initialize"):
@@ -375,6 +377,8 @@ class Base120Server:
 
         try:
             params = request.get("params") or {}
+            if not isinstance(params, dict):
+                params = {}
             if method == "initialize":
                 result = self.handle_initialize(params)
             elif method == "notifications/initialized":
@@ -426,6 +430,15 @@ class Base120Server:
                     "jsonrpc": "2.0",
                     "id": None,
                     "error": {"code": -32700, "message": "Parse error"},
+                }
+                out.write(json.dumps(response) + "\n")
+                out.flush()
+                continue
+            if not isinstance(request, dict):
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32600, "message": "Invalid Request"},
                 }
                 out.write(json.dumps(response) + "\n")
                 out.flush()
