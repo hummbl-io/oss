@@ -1,0 +1,29 @@
+{
+  "schema_version": "2.1.0",
+  "id": "7f8b91c4-4d8e-4a1b-9f0e-3652c7810b42",
+  "session_id": "2026-10-29-repo-standard-s13-amendment",
+  "actor_identity": "hummbl-dev",
+  "time": "2026-10-29T13:20:00Z",
+  "state": {
+    "event": "standard.amendment_admitted",
+    "payload": {
+      "action": "amend_repo_standard",
+      "standard": "packages/python/hummbl-governance/docs/standards/HUMMBL_REPO_STANDARD.md",
+      "amendment_clause": "Section 13 (Amendment)",
+      "adr": "packages/python/hummbl-governance/docs/adr/ADR-011-repo-standard-source-of-record-repoint.md",
+      "approving_human": "Human Principal Agent",
+      "authorizer": "PLACEHOLDER_FOR_HUMAN_PRINCIPAL_AGENT_SIGNATURE",
+      "summary": "Repointed Repo Standard Source of Record and §13 Amendment route to hummbl-io/oss; marked standalone hummbl-governance copy historical and read-only; retained Human Principal Agent public redaction.",
+      "pr": "hummbl-io/oss#360"
+    }
+  },
+  "drift": null,
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "signature_envelope": {
+    "algorithm": "Ed25519",
+    "key_id": "PLACEHOLDER_KEY_ID_HUMAN_PRINCIPAL_AGENT",
+    "signature": "PLACEHOLDER_128_HEX_ED25519_SIGNATURE",
+    "signer_identity": "Human Principal Agent"
+  },
+  "hash": "PLACEHOLDER_SHA256_HASH_COMPUTED_POST_SIGNING"
+}
