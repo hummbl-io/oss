@@ -17,27 +17,26 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import sys
+import uuid
+from contextlib import suppress
 from typing import Any
 
-try:
+with suppress(ImportError):
     from hummbl_governance.delegation_context import (
         DelegationBudget,
         DelegationContextManager,
     )
-except ImportError:
-    pass
-try:
+with suppress(ImportError):
     from hummbl_governance.delegation import (
         DelegationTokenManager,
         TokenBinding,
         get_token_manager,
     )
-except ImportError:
-    pass
 from hummbl_mcp._governance_bus import (
     GovernanceBus,
-    _compute_entry_signature,
-    get_governance_bus,
+    append_audit_entry,
 )
 
 logger = logging.getLogger(__name__)
@@ -509,9 +508,6 @@ def _error_result(message: str) -> dict[str, Any]:
 # MCP stdio server
 # ---------------------------------------------------------------------------
 
-import os
-import sys
-
 _IDP_SERVER_NAME = "idp-mcp-gateway"
 _IDP_SERVER_VERSION = "0.1.0"
 _IDP_PROTOCOL_VERSION = "2024-11-05"
@@ -530,9 +526,13 @@ def _idp_handle_request(
     gateway: IDPMCPGateway,
     idp_enabled: bool,
 ) -> dict[str, Any] | None:
+    if not isinstance(request, dict):
+        return _idp_rpc_error(None, -32600, "Invalid Request")
     method = request.get("method", "")
     id_ = request.get("id")
     params = request.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     if method == "initialize":
         return _idp_rpc_result(id_, {

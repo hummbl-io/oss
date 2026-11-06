@@ -149,8 +149,9 @@ TOOLS = [
 def handle_tool_call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     """Handle a single tool call and return the result."""
     if name == "pre_push_check":
-        from hummbl_gitops.forward.local_ci import run_local_ci
         from pathlib import Path
+
+        from hummbl_gitops.forward.local_ci import run_local_ci
 
         result = run_local_ci(
             Path(arguments.get("repo", ".")),
@@ -177,8 +178,9 @@ def handle_tool_call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {"content": [{"type": "text", "text": "\n".join(lines)}]}
 
     elif name == "check_main_moved":
-        from hummbl_gitops.return_.main_moved import check_main_moved
         from pathlib import Path
+
+        from hummbl_gitops.return_.main_moved import check_main_moved
 
         result = check_main_moved(Path(arguments.get("repo", ".")))
         if result is None:
@@ -186,8 +188,9 @@ def handle_tool_call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {"content": [{"type": "text", "text": result.to_bus_message()}]}
 
     elif name == "auto_rebase":
-        from hummbl_gitops.return_.auto_rebase import check_stale_branches
         from pathlib import Path
+
+        from hummbl_gitops.return_.auto_rebase import check_stale_branches
 
         stale = check_stale_branches(Path(arguments.get("repo", ".")))
         if not stale:
@@ -226,8 +229,9 @@ def handle_tool_call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {"content": [{"type": "text", "text": coverage.summary()}]}
 
     elif name == "sync_receipts":
-        from hummbl_gitops.return_.receipt_sync import sync_receipts
         from pathlib import Path
+
+        from hummbl_gitops.return_.receipt_sync import sync_receipts
 
         result = sync_receipts(
             Path(arguments.get("repo", ".")),
@@ -262,9 +266,21 @@ def serve_stdio() -> None:
             sys.stdout.flush()
             continue
 
+        if not isinstance(request, dict):
+            response = {
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32600, "message": "Invalid Request"},
+            }
+            sys.stdout.write(json.dumps(response) + "\n")
+            sys.stdout.flush()
+            continue
+
         method = request.get("method", "")
         req_id = request.get("id")
         params = request.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         if method == "initialize":
             response = {
@@ -288,7 +304,7 @@ def serve_stdio() -> None:
             try:
                 result = handle_tool_call(tool_name, tool_args)
                 response = {"jsonrpc": "2.0", "id": req_id, "result": result}
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - tool-call boundary: convert to JSON-RPC error
                 response = {
                     "jsonrpc": "2.0",
                     "id": req_id,

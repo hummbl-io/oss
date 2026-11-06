@@ -101,6 +101,7 @@ def _run_op(args: list[str], timeout: int = 30) -> tuple[int, str, str]:
             text=True,
             timeout=timeout,
             env=env,
+            check=False,
         )
         return result.returncode, result.stdout, result.stderr
     except FileNotFoundError:
@@ -413,10 +414,14 @@ class OnePasswordServer:
     def dispatch(self, request: dict[str, Any]) -> dict[str, Any] | None:
         req_id = request.get("id")
         method = request.get("method", "")
+        if not isinstance(method, str):
+            method = ""
         if req_id is None and not method.startswith("initialize"):
             return None
         try:
             params = request.get("params") or {}
+            if not isinstance(params, dict):
+                params = {}
             if method == "initialize":
                 result = self.handle_initialize(params)
             elif method == "notifications/initialized":
@@ -462,6 +467,15 @@ class OnePasswordServer:
                     "jsonrpc": "2.0",
                     "id": None,
                     "error": {"code": -32700, "message": "Parse error"},
+                }
+                out.write(json.dumps(response) + "\n")
+                out.flush()
+                continue
+            if not isinstance(request, dict):
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32600, "message": "Invalid Request"},
                 }
                 out.write(json.dumps(response) + "\n")
                 out.flush()

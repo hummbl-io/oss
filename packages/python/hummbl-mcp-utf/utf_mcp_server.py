@@ -1335,6 +1335,8 @@ def main():
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             if method == "initialize":

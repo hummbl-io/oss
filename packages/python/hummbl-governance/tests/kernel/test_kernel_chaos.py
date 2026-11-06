@@ -41,7 +41,6 @@ from hummbl_governance.kernel import (
     Kernel,
     KernelPanic,
     Receipt,
-    ReceiptEngine,
     SequenceEngine,
 )
 from _helpers import make_receipt_engine
@@ -53,7 +52,10 @@ class TestChaosReceiptEngine:
     def test_random_line_corruption(self) -> None:
         """Corrupt lines in a receipt file; verify fail-closed panic (K1)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = make_receipt_engine(Path(tmpdir), agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'))
+            engine = make_receipt_engine(
+                Path(tmpdir),
+                agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'),
+            )
             # Create 100 receipts
             for i in range(100):
                 receipt = engine.create(agent_id="chaos", action_type=f"STEP-{i}")
@@ -75,7 +77,10 @@ class TestChaosReceiptEngine:
     def test_random_byte_corruption(self) -> None:
         """Randomly flip bytes in receipt file; verify fail-closed panic (K1)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = make_receipt_engine(Path(tmpdir), agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'))
+            engine = make_receipt_engine(
+                Path(tmpdir),
+                agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'),
+            )
             for i in range(50):
                 receipt = engine.create(agent_id="byte-chaos", action_type=f"STEP-{i}")
                 engine.store(receipt)
@@ -96,7 +101,10 @@ class TestChaosReceiptEngine:
     def test_truncate_mid_file(self) -> None:
         """Truncate file to 50%; verify fail-closed panic (K1)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = make_receipt_engine(Path(tmpdir), agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'))
+            engine = make_receipt_engine(
+                Path(tmpdir),
+                agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'),
+            )
             for i in range(50):
                 receipt = engine.create(agent_id="trunc", action_type=f"STEP-{i}")
                 engine.store(receipt)
@@ -113,7 +121,10 @@ class TestChaosReceiptEngine:
     def test_delete_receipt_file_mid_run(self) -> None:
         """Delete receipt file after creation; verify clean empty list."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = make_receipt_engine(Path(tmpdir), agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'))
+            engine = make_receipt_engine(
+                Path(tmpdir),
+                agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'),
+            )
             for i in range(10):
                 receipt = engine.create(agent_id="deleted", action_type=f"STEP-{i}")
                 engine.store(receipt)
@@ -127,7 +138,10 @@ class TestChaosReceiptEngine:
     def test_chain_breaks_after_corruption(self) -> None:
         """Replace a middle receipt with one that has a wrong hash; verify chain detects break."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            engine = make_receipt_engine(Path(tmpdir), agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'))
+            engine = make_receipt_engine(
+                Path(tmpdir),
+                agent_ids=('byte-chaos', 'chain-break', 'chaos', 'deleted', 'trunc'),
+            )
             receipts = []
             for i in range(20):
                 receipt = engine.create(agent_id="chain-break", action_type=f"STEP-{i}")
@@ -187,9 +201,15 @@ class TestChaosIdentityEngine:
 
             claims_file = engine.role_claims_file
             lines = claims_file.read_text().strip().split("\n")
+            # Corrupt every line. Sampling with an unseeded random.random()
+            # made this test non-deterministic: if the corrupted subset
+            # happened to exclude a claim the boot path reads, a correctly
+            # fail-closed engine still booted and the assertion failed at
+            # random (observed 2026-11-02, blocking five PRs in oss). The
+            # docstring promises "any corrupted role claim must raise", so
+            # corrupt all of them and test that property deterministically.
             for i in range(len(lines)):
-                if random.random() < 0.30:
-                    lines[i] = "truncated..."
+                lines[i] = "truncated..."
             claims_file.write_text("\n".join(lines) + "\n")
 
             # Fail-closed (K7): any corrupted role claim must raise

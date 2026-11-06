@@ -1,8 +1,9 @@
 """Governance bus stub — provides minimal interface for MCP modules."""
 from __future__ import annotations
-from typing import Any
+
 import hashlib
 import json
+from typing import Any
 
 
 class GovernanceBus:
@@ -28,3 +29,10 @@ def get_governance_bus(*args: Any, **kwargs: Any) -> GovernanceBus:
 def _is_idp_enabled() -> bool:
     import os
     return os.environ.get("ENABLE_IDP", "").lower() in ("1", "true", "yes")
+
+
+try:
+    from idp_spec.governance_bus import append_audit_entry
+except ImportError:
+    def append_audit_entry(*args: Any, **kwargs: Any) -> tuple[bool, str | None]:
+        return False, "idp-spec not installed"

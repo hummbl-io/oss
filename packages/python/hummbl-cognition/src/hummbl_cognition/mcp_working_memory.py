@@ -15,10 +15,10 @@ import sys
 import traceback
 from typing import Any
 
+from hummbl_cognition.working_memory import WorkingMemoryStore
+
 SERVER_NAME = "working-memory"
 SERVER_VERSION = "0.1.0"
-
-from hummbl_cognition.working_memory import WorkingMemoryStore
 
 store = WorkingMemoryStore()
 
@@ -220,9 +220,25 @@ def serve_stdio() -> None:
             sys.stdout.flush()
             continue
 
+        if not isinstance(req, dict):
+            sys.stdout.write(
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {"code": -32600, "message": "Invalid Request"},
+                    }
+                )
+                + "\n"
+            )
+            sys.stdout.flush()
+            continue
+
         rid = req.get("id")
         method = req.get("method", "")
         params = req.get("params") or {}
+        if not isinstance(params, dict):
+            params = {}
 
         if method == "initialize":
             result = {

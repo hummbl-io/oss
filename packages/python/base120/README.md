@@ -104,13 +104,13 @@ Base120 organizes mental models into 6 families based on the type of cognitive t
 Most mental-models resources present a flat list of 50-100 models with no structure. Base120's 6-family taxonomy gives you:
 
 - **A navigation map**: Know which family to reach for based on the type of thinking you need.
-- **A completeness check**: Each family has 18-20 models, so you can tell when you've exhausted a mode of thinking.
+- **A completeness check**: Each family has 20 models, so you can tell when you've exhausted a mode of thinking.
 - **A composition grammar**: Families chain naturally — Perspective → Inversion → Decomposition → Composition → Recursion → Systems is a common decision-making arc.
 
 ### Family deep dives
 
-- [Perspective (P)](#domain-p--perspective-p1p18) — 18 operators for viewpoints, framing, and empathy
-- [Inversion (IN)](#domain-in--inversion-in1in18) — 18 operators for counterfactuals, negation, and contradiction
+- [Perspective (P)](#domain-p--perspective-p1p20) — 20 operators for viewpoints, framing, and empathy
+- [Inversion (IN)](#domain-in--inversion-in1in20) — 20 operators for counterfactuals, negation, and contradiction
 - [Composition (CO)](#domain-co--composition-co1co20) — 20 operators for building, combining, and layering
 - [Decomposition (DE)](#domain-de--decomposition-de1de20) — 20 operators for breaking down, isolating, and factoring
 - [Recursion (RE)](#domain-re--recursion-re1re20) — 20 operators for self-reference, iteration, and meta-reasoning

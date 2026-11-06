@@ -454,10 +454,22 @@ def main():
                 log(f"Invalid JSON input: {line}")
                 continue
 
+            if not isinstance(request, dict):
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32600, "message": "Invalid Request"},
+                }
+                original_stdout.write(json.dumps(response) + "\n")
+                original_stdout.flush()
+                continue
+
             # Parse JSON-RPC fields
             req_id = request.get("id")
             method = request.get("method")
             params = request.get("params", {})
+            if not isinstance(params, dict):
+                params = {}
 
             response = {"jsonrpc": "2.0"}
             if req_id is not None:
