@@ -2,8 +2,9 @@
 import json
 import sys
 import traceback
-from state import GovernanceState
 from dataclasses import asdict
+
+from state import GovernanceState
 
 SERVER_NAME = "omnichannel-governance-gate"
 SERVER_VERSION = "0.1.0"
@@ -60,6 +61,12 @@ def tool_list_pending_drafts(args: dict) -> dict:
 
 
 def handle_request(request: dict) -> dict:
+    if not isinstance(request, dict):
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {"code": -32600, "message": "Invalid Request"},
+        }
     req_id = request.get("id")
     method = request.get("method")
 
@@ -129,9 +136,13 @@ def handle_request(request: dict) -> dict:
             },
         }
     elif method == "tools/call":
-        params = request.get("params", {})
+        params = request.get("params")
+        if not isinstance(params, dict):
+            params = {}
         tool_name = params.get("name")
-        args = params.get("arguments", {})
+        args = params.get("arguments")
+        if not isinstance(args, dict):
+            args = {}
 
         try:
             if tool_name == "omni_draft_message":
@@ -161,7 +172,7 @@ def handle_request(request: dict) -> dict:
                         "message": f"Tool not found: {tool_name}",
                     },
                 }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: serialize error into MCP error content
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
@@ -191,11 +202,14 @@ def main():
             continue
         try:
             req = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        try:
             res = handle_request(req)
-            sys.stdout.write(json.dumps(res) + "\\n")
+            sys.stdout.write(json.dumps(res) + "\n")
             sys.stdout.flush()
-        except Exception:
-            pass
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report and continue
+            print(f"omnichannel-mcp: request handling failed: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

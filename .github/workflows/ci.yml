@@ -102,10 +102,133 @@ jobs:
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
         run: |
-          if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
-            pip install -e ../hummbl-governance
+          if [ "${{ matrix.python-version }}" = "3.13" ]; then
+            # Hash-locked parity with publish-pypi.yml (SW-GREEN-3): the lock
+            # covers runtime deps, the [test] extra, and the build backend,
+            # so the 3.13 leg tests the same dependency set the publish job
+            # builds and tests. Locks are resolved for CPython 3.13/linux;
+            # other matrix legs keep live resolution until locks go universal.
+            pip install --require-hashes -r requirements-build.lock
+            if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
+              # The lock resolves hummbl-governance from PyPI; this --no-deps
+              # editable install overlays the local checkout without touching
+              # the locked dependency set.
+              pip install --no-deps --no-build-isolation -e ../hummbl-governance
+            fi
+            pip install --no-deps --no-build-isolation -e .
+          else
+            if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
+              pip install -e ../hummbl-governance
+            fi
+            pip install -e ".[test]"
           fi
-          pip install -e ".[test]"
+
+      - name: Run tests
+        working-directory: packages/python/${{ matrix.package }}
+        timeout-minutes: 15
+        env:
+          PIP_NO_BUILD_ISOLATION: "1"
+        run: |
+          if [ "${{ matrix.package }}" = "hummbl-governance" ]; then
+            python -m pytest tests/ -q --cov=hummbl_governance --cov-report=term
+          else
+            python -m pytest tests/ -q
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Reverse-dependency coverage (SW-GREEN-4): the `changes` matrix tests only
+  # touched packages. These jobs additionally test every package that
+  # transitively depends on a touched package, so a breaking change to a
+  # foundation package cannot merge green and break main post-merge.
+  #
+  # The `changes` producer program is pinned by tools/scripts/
+  # validate_workflows.py, so the closure runs in a dedicated job that
+  # re-derives the touched set from git (same pipeline, minus the smoke
+  # floor) rather than touching the pinned producer.
+  # test_matrix_closure.py builds the reverse dependency graph live from
+  # packages/python/*/pyproject.toml.
+  # ---------------------------------------------------------------------------
+  revdeps:
+    name: revdeps
+    runs-on: ubuntu-latest
+    needs: changes
+    if: github.event_name == 'pull_request'
+    outputs:
+      matrix: ${{ steps.revdeps.outputs.json }}
+      count: ${{ steps.revdeps.outputs.count }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - id: revdeps
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch -q origin "$BASE_REF"
+          # Derive the touched set from git directly (same pipeline as the
+          # `changes` producer) rather than needs.changes.outputs.matrix:
+          # the producer's smoke floor emits hummbl-governance for docs-only
+          # PRs, which would falsely trigger ~24 revdep legs here.
+          CHANGED=$(git diff --name-only "origin/$BASE_REF...HEAD")
+          TOUCHED=$(printf '%s\n' "$CHANGED" | sed -n 's|^packages/python/\([^/]*\)/.*|\1|p' | sort -u)
+          ALL=$(find packages/python -maxdepth 2 -type d -name tests -printf '%h\n' | xargs -n1 basename | sort)
+          # Full reverse-dependency closure minus the touched set itself,
+          # which the main matrix already covers.
+          REV=$(printf '%s\n' "$TOUCHED" | python3 .github/scripts/test_matrix_closure.py "$ALL" | comm -23 - <(printf '%s\n' "$TOUCHED"))
+          if [ -z "$REV" ]; then
+            echo "json={\"package\":[],\"python-version\":[]}" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+          else
+            PKG_JSON=$(printf '%s\n' "$REV" | jq -R . | jq -cs .)
+            INC=[]
+            if printf '%s\n' "$REV" | grep -qx hummbl; then
+              INC=$(printf '%s' "$INC" | jq '. += [{"package":"hummbl","python-version":"3.10"}]')
+            fi
+            if printf '%s\n' "$REV" | grep -qx hummbl-kernel; then
+              INC=$(printf '%s' "$INC" | jq '. += [{"package":"hummbl-kernel","python-version":"3.10"}]')
+            fi
+            MATRIX=$(jq -nc --argjson pkgs "$PKG_JSON" --argjson inc "$INC" \
+              '{"python-version":["3.11","3.12","3.13","3.14"],"package":$pkgs,"include":$inc}')
+            echo "json=$MATRIX" >> "$GITHUB_OUTPUT"
+            echo "count=$(printf '%s\n' "$REV" | wc -l)" >> "$GITHUB_OUTPUT"
+          fi
+
+  test-revdeps:
+    name: test-revdeps (${{ matrix.package }}, ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: revdeps
+    if: github.event_name == 'pull_request' && needs.revdeps.outputs.count != '0'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.revdeps.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package and test dependencies
+        working-directory: packages/python/${{ matrix.package }}
+        run: |
+          if [ "${{ matrix.python-version }}" = "3.13" ]; then
+            # Same hash-locked install as the main matrix (SW-GREEN-3).
+            pip install --require-hashes -r requirements-build.lock
+            if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
+              pip install --no-deps --no-build-isolation -e ../hummbl-governance
+            fi
+            pip install --no-deps --no-build-isolation -e .
+          else
+            if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
+              pip install -e ../hummbl-governance
+            fi
+            pip install -e ".[test]"
+          fi
 
       - name: Run tests
         working-directory: packages/python/${{ matrix.package }}
@@ -149,6 +272,8 @@ jobs:
       - name: Install package and test dependencies
         working-directory: packages/python/${{ matrix.package }}
         run: |
+          # Informational 3.15-dev lane: locks target CPython 3.13/linux and
+          # cannot cover this interpreter, so keep live resolution here.
           if [ "${{ matrix.package }}" = "hummbl-mcp-governance" ] || [ "${{ matrix.package }}" = "hummbl-mcp" ]; then
             pip install -e ../hummbl-governance
           fi
@@ -214,7 +339,9 @@ jobs:
         run: python .github/scripts/check_license_consistency.py
 
       - name: Install pip-audit
-        run: pip install pip-audit
+        # Hash-locked tool env (SW-GREEN-3): same --require-hashes discipline
+        # as the package build locks.
+        run: pip install --require-hashes -r .github/requirements-pip-audit.lock
 
       - name: Audit packages with dependencies
         run: |
@@ -231,7 +358,10 @@ jobs:
               echo "::group::Auditing $(basename $pkg_dir)"
               audit_env="$audit_root/$(basename "$pkg_dir")"
               python -m venv "$audit_env"
-              "$audit_env/bin/python" -m pip install -e "$pkg_dir" -q
+              # Audit the same hash-locked dependency set CI tests and
+              # publish builds, not a fresh unpinned resolution.
+              "$audit_env/bin/python" -m pip install --require-hashes -r "$pkg_dir/requirements-build.lock" -q
+              "$audit_env/bin/python" -m pip install --no-deps --no-build-isolation -e "$pkg_dir" -q
               "$audit_env/bin/python" -m pip freeze --exclude-editable > "$audit_env/dependencies.txt"
               pip-audit --strict --no-deps --disable-pip -r "$audit_env/dependencies.txt"
               echo "::endgroup::"
@@ -348,13 +478,16 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [test, test-preview, pip-audit, build-lock-check, package-parity, claim-drift-check, claim-integrity, docker-test]
+    needs: [test, test-node, test-preview, revdeps, test-revdeps, pip-audit, build-lock-check, package-parity, claim-drift-check, claim-integrity, docker-test]
     runs-on: ubuntu-latest
     steps:
       - name: Require upstream jobs to succeed
         run: |
           echo "test=${{ needs.test.result }}"
+          echo "test-node=${{ needs.test-node.result }}"
           echo "test-preview=${{ needs.test-preview.result }}"
+          echo "revdeps=${{ needs.revdeps.result }}"
+          echo "test-revdeps=${{ needs.test-revdeps.result }}"
           echo "pip-audit=${{ needs.pip-audit.result }}"
           echo "build-lock-check=${{ needs.build-lock-check.result }}"
           echo "package-parity=${{ needs.package-parity.result }}"
@@ -364,6 +497,13 @@ jobs:
           # test-preview has continue-on-error so its result is always
           # success -- it is informational only and does not gate merges.
           test "${{ needs.test.result }}" = success
+          test "${{ needs.test-node.result }}" = success
+          # revdeps/test-revdeps skip on non-PR events and when the closure
+          # adds nothing; skipped is acceptable, failure is not.
+          test "${{ needs.revdeps.result }}" != failure
+          test "${{ needs.revdeps.result }}" != cancelled
+          test "${{ needs.test-revdeps.result }}" != failure
+          test "${{ needs.test-revdeps.result }}" != cancelled
 
           test "${{ needs.pip-audit.result }}" = success
           test "${{ needs.build-lock-check.result }}" = success
