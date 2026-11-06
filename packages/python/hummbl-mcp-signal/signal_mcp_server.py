@@ -60,6 +60,12 @@ def tool_signal_receive_messages(args: dict) -> dict:
 
 
 def handle_request(request: dict) -> dict:
+    if not isinstance(request, dict):
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {"code": -32600, "message": "Invalid Request"},
+        }
     req_id = request.get("id")
     method = request.get("method")
 
@@ -111,6 +117,8 @@ def handle_request(request: dict) -> dict:
         }
     elif method == "tools/call":
         params = request.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
         tool_name = params.get("name")
         args = params.get("arguments", {})
 

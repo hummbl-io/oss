@@ -173,6 +173,8 @@ VALID_VENDORS = frozenset(
         "local",
         "human",
         "zai",
+        "minimax",
+        "xai",
     }
 )
 

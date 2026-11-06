@@ -526,9 +526,13 @@ def _idp_handle_request(
     gateway: IDPMCPGateway,
     idp_enabled: bool,
 ) -> dict[str, Any] | None:
+    if not isinstance(request, dict):
+        return _idp_rpc_error(None, -32600, "Invalid Request")
     method = request.get("method", "")
     id_ = request.get("id")
     params = request.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     if method == "initialize":
         return _idp_rpc_result(id_, {
