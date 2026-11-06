@@ -642,9 +642,13 @@ INTERNAL_ERROR = -32603
 
 def handle_request(request: dict[str, Any], scorer: TrustScorer) -> dict[str, Any] | None:
     """Handle a single JSON-RPC 2.0 request."""
+    if not isinstance(request, dict):
+        return _make_error(None, INVALID_REQUEST, "Invalid Request")
     req_id = request.get("id")
     method = request.get("method", "")
     params = request.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     # --- MCP lifecycle ---
     if method == "initialize":
