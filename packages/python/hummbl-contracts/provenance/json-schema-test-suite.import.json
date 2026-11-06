@@ -1,0 +1,225 @@
+{
+  "$schema": "https://raw.githubusercontent.com/hummbl-io/oss/main/schemas/public/external-import-record-v1.schema.json",
+  "schema_version": "hummbl.external-import.v1",
+  "record_id": "json-schema-test-suite-draft2020-12",
+  "identity_and_selection": {
+    "upstream_repository": "https://github.com/json-schema-org/JSON-Schema-Test-Suite",
+    "immutable_source_revision": "f6fd52a0a95472e079cbfc6ef7f089702b80e045",
+    "specification_dialect": "draft2020-12",
+    "selected_source_paths": [
+      "tests/draft2020-12/additionalProperties.json",
+      "tests/draft2020-12/anyOf.json",
+      "tests/draft2020-12/const.json",
+      "tests/draft2020-12/enum.json",
+      "tests/draft2020-12/items.json",
+      "LICENSE",
+      "tests/draft2020-12/maximum.json",
+      "tests/draft2020-12/maxItems.json",
+      "tests/draft2020-12/maxLength.json",
+      "tests/draft2020-12/minimum.json",
+      "tests/draft2020-12/minItems.json",
+      "tests/draft2020-12/minLength.json",
+      "tests/draft2020-12/oneOf.json",
+      "tests/draft2020-12/pattern.json",
+      "tests/draft2020-12/properties.json",
+      "tests/draft2020-12/required.json",
+      "tests/draft2020-12/type.json"
+    ],
+    "destination_package": "packages/python/hummbl-contracts",
+    "destination_paths": [
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/additionalProperties.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/anyOf.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/const.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/enum.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/items.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/LICENSE",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/maximum.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/maxItems.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/maxLength.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/minimum.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/minItems.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/minLength.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/oneOf.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/pattern.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/properties.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/required.json",
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/type.json"
+    ]
+  },
+  "integrity": {
+    "file_count": 17,
+    "inventory": [
+      {
+        "filename": "additionalProperties.json",
+        "source_path": "tests/draft2020-12/additionalProperties.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/additionalProperties.json",
+        "bytes": 7711,
+        "sha256": "b96bd533416386ac6421737b48c5c072870ab5dbea910585e9e8fa6305c7ca91",
+        "git_blob_sha": "9618575e20859e478f42f91ab6f599cff5eb0d5b"
+      },
+      {
+        "filename": "anyOf.json",
+        "source_path": "tests/draft2020-12/anyOf.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/anyOf.json",
+        "bytes": 5461,
+        "sha256": "7a6fe41602496c256334ffa3e6fb457b26ac23b97ca03cb16b724ad21a7d216d",
+        "git_blob_sha": "89b192dbd0a6e75ed6376935233ec7a9f20c4f20"
+      },
+      {
+        "filename": "const.json",
+        "source_path": "tests/draft2020-12/const.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/const.json",
+        "bytes": 12413,
+        "sha256": "83a148d2589cbd211e7e64b31763290f8869d763f513de4658e8d25f0fcc025e",
+        "git_blob_sha": "72ea3f042b663d8f6703f1bffd09f8b5295d721b"
+      },
+      {
+        "filename": "enum.json",
+        "source_path": "tests/draft2020-12/enum.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/enum.json",
+        "bytes": 11831,
+        "sha256": "1abe7eb883bde4a78c62f08e484e16f32b72ca5c1be725aa54d85cc4546b5031",
+        "git_blob_sha": "dbc5e0d3184a022d656f7c68f9c9d32b044204b9"
+      },
+      {
+        "filename": "items.json",
+        "source_path": "tests/draft2020-12/items.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/items.json",
+        "bytes": 9209,
+        "sha256": "d924a8171f1f1d04ff026a4e3491d1376297145563158543005b7073b69ab913",
+        "git_blob_sha": "6a3e1cf26e0d8221e9b55ddbf5c9f28d93ad5ece"
+      },
+      {
+        "filename": "LICENSE",
+        "source_path": "LICENSE",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/LICENSE",
+        "bytes": 1057,
+        "sha256": "837402bd25fad9b704265801ca3f92566a98157c1f9a7acd6f446299ba1c305a",
+        "git_blob_sha": "c28adbadd9114a30a302fef37c3d14f490645c1c"
+      },
+      {
+        "filename": "maximum.json",
+        "source_path": "tests/draft2020-12/maximum.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/maximum.json",
+        "bytes": 1660,
+        "sha256": "dfbc88ef4ede2966250fb2ad44076856d51481ea01ce679cca70efe47606ee90",
+        "git_blob_sha": "7eeab28771252e92efb29c3655cd2519034c7d74"
+      },
+      {
+        "filename": "maxItems.json",
+        "source_path": "tests/draft2020-12/maxItems.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/maxItems.json",
+        "bytes": 1319,
+        "sha256": "59fa6236c0766aaac5fb7c9ef82e205c230efa94271485f614218291be7cbc5c",
+        "git_blob_sha": "f6a6b7c9af485e4e22e44b964f0f2010a304ada9"
+      },
+      {
+        "filename": "maxLength.json",
+        "source_path": "tests/draft2020-12/maxLength.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/maxLength.json",
+        "bytes": 1483,
+        "sha256": "ac43a3991586f2d2d1e7e37cad01bb1a7b1c5d9ad7b558d6029d24b41a04d1a9",
+        "git_blob_sha": "7462726d7608de83cd3d9b3533a17cd756d0be65"
+      },
+      {
+        "filename": "minimum.json",
+        "source_path": "tests/draft2020-12/minimum.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/minimum.json",
+        "bytes": 2116,
+        "sha256": "f6a29cb574b76621da23636a636cf12cb31b01646b89543e6ce1a813376439a3",
+        "git_blob_sha": "dc44052784c26a4abdbe32eec406de083e933da4"
+      },
+      {
+        "filename": "minItems.json",
+        "source_path": "tests/draft2020-12/minItems.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/minItems.json",
+        "bytes": 1302,
+        "sha256": "9792cedc446be654836b42d0312eca12051e9e2f24cd5d95dcd3f3fc9adccd0a",
+        "git_blob_sha": "9d6a8b6d2fc2eb465206ddacddd35f0ea2ca8c58"
+      },
+      {
+        "filename": "minLength.json",
+        "source_path": "tests/draft2020-12/minLength.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/minLength.json",
+        "bytes": 1473,
+        "sha256": "999e9731c57a1296e06e8b9b36b0531614ab7a6ac3c20db6fed50badbf3850ab",
+        "git_blob_sha": "5076c5a928f71ac0bab733130c1edc49a39561ac"
+      },
+      {
+        "filename": "oneOf.json",
+        "source_path": "tests/draft2020-12/oneOf.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/oneOf.json",
+        "bytes": 8123,
+        "sha256": "a8d80a786d07769cb9b8b9a8903ca4f7aa564446ae6b781c7f7f6ffea11ed363",
+        "git_blob_sha": "7a7c7ffe34b09955ef29b4591f5a160286813d38"
+      },
+      {
+        "filename": "pattern.json",
+        "source_path": "tests/draft2020-12/pattern.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/pattern.json",
+        "bytes": 2461,
+        "sha256": "60713a3b01957fad54f00ab30b378463b3e07b35242c945a9325f8d6ae7080fc",
+        "git_blob_sha": "ed41f79a7195f2fd08e918ffed174180961375b8"
+      },
+      {
+        "filename": "properties.json",
+        "source_path": "tests/draft2020-12/properties.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/properties.json",
+        "bytes": 7731,
+        "sha256": "58f01566cfe3e1fc4fb851d3b2eab13768d65ba5dbc4e9f9387ceaf4244a0522",
+        "git_blob_sha": "eb66fa8bd0b894eef9de333b35c746dc7036ca4c"
+      },
+      {
+        "filename": "required.json",
+        "source_path": "tests/draft2020-12/required.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/required.json",
+        "bytes": 4902,
+        "sha256": "3e3900dd0e546c1cb4aaab6b24ea0e06a8f7f8c05b272dcc87e85332501ed42e",
+        "git_blob_sha": "17db8939e75837bc0c7b913300fbe9c8f357961c"
+      },
+      {
+        "filename": "type.json",
+        "source_path": "tests/draft2020-12/type.json",
+        "destination_path": "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/type.json",
+        "bytes": 14365,
+        "sha256": "4c5cbe6cbcd28af73761091367b20e07d0403847e236c06c31fc27061bd81192",
+        "git_blob_sha": "2123c408d9a516739378c5b2d35ac92079083d3d"
+      }
+    ],
+    "transformations": "none; exact byte-for-byte copy from upstream tree at immutable source revision"
+  },
+  "rights": {
+    "declared_licenses": [
+      "MIT"
+    ],
+    "license_files": [
+      "packages/python/hummbl-contracts/tests/fixtures/json-schema-test-suite/LICENSE"
+    ],
+    "attributions": [
+      "Copyright (c) 2012 Julian Berman"
+    ],
+    "review_status": "approved",
+    "unresolved_questions": []
+  },
+  "reuse_mode": {
+    "mode": "test_fixtures",
+    "rationale": "Validation and conformance testing of hummbl-contracts stdlib-only JSON Schema Draft 2020-12 subset."
+  },
+  "dependency_treatment": {
+    "runtime_dependency_category": "zero_runtime",
+    "vendored_third_party_code": false,
+    "isolation_notes": "Test fixtures only. Located under tests/fixtures/json-schema-test-suite/ and excluded from package distribution wheel/sdist."
+  },
+  "ownership_and_decision": {
+    "owners_ref": "packages/python/hummbl-contracts/OWNERS",
+    "decision_ref": "https://github.com/hummbl-io/oss/issues/218",
+    "approved_scope": "16 Draft 2020-12 keyword test fixture files + upstream LICENSE file for offline conformance accounting.",
+    "review_state": "approved",
+    "exceptions": []
+  },
+  "maintenance": {
+    "update_triggers": "Explicit pull request following upstream Draft updates; never updated automatically or during runtime test runs.",
+    "local_delta_policy": "Zero local modifications allowed; files must match upstream git blob SHA exactly.",
+    "removal_conditions": "Deprecation of hummbl-contracts package or replacement by another verified test corpus."
+  }
+}
