@@ -41,12 +41,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from hummbl_governance.identity import AgentRegistry
 from hummbl_governance.delegation import (
-    DelegationTokenManager,
     DelegationToken,
+    DelegationTokenManager,
     TokenBinding,
 )
+from hummbl_governance.identity import AgentRegistry
 from hummbl_governance.lamport_clock import LamportClock, LamportTimestamp
 
 SERVER_NAME = "hummbl-identity"
@@ -83,7 +83,7 @@ def _identity_register(args: dict) -> dict:
             "aliases": aliases,
             "registered": True,
         }
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - tool boundary: report error to caller
         return {"error": str(exc)}
 
 
@@ -442,9 +442,13 @@ def _err(request_id, code, message):
 
 
 def handle_request(req: dict) -> dict:
+    if not isinstance(req, dict):
+        return _err(None, -32600, "Invalid Request")
     method = req.get("method", "")
     req_id = req.get("id")
     params = req.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     if method == "initialize":
         return _ok(
@@ -475,7 +479,7 @@ def handle_request(req: dict) -> dict:
                     ]
                 },
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 - protocol loop boundary: report and continue
             tb = traceback.format_exc()
             return _err(req_id, -32000, tb)
 

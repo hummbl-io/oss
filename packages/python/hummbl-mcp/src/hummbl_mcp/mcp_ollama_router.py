@@ -109,17 +109,26 @@ def _verify_agent_identity_token(token_str: str, expected_subject: str) -> bool:
     Returns:
         True if token is valid and subject matches, False otherwise.
     """
+    # Secret presence is evaluated before verifier availability: a configured
+    # secret with no working verifier must fail closed, not open.
+    dct_secret = os.environ.get("DCT_SECRET")
+    secret_present = dct_secret is not None
+
     if not _IDP_AVAILABLE:
-        log("IDP module not available. Skipping agent identity token verification.")
-        return True  # Fail-open if IDP is not available
-    
+        if secret_present:
+            log("DCT_SECRET is set but the IDP verifier is unavailable. Failing closed.")
+            return False
+        log("IDP module not available and DCT_SECRET not set. Skipping agent identity token verification.")
+        return True  # Fail-open only when no secret is configured
+
+    if not secret_present:
+        log("DCT_SECRET not set. Skipping agent identity token verification.")
+        return True  # Fail-open if secret is not configured
+    if not dct_secret.strip():
+        log("DCT_SECRET is set but empty/whitespace (malformed configuration). Rejecting token.")
+        return False
+
     try:
-        # Get DCT_SECRET from environment
-        dct_secret = os.environ.get("DCT_SECRET")
-        if not dct_secret:
-            log("DCT_SECRET not set. Skipping agent identity token verification.")
-            return True  # Fail-open if secret is not configured
-        
         # Initialize token manager
         manager = DelegationTokenManager(secret=dct_secret.encode("utf-8"))
         
@@ -446,9 +455,21 @@ def main():
                 log(f"Invalid JSON input: {line}")
                 continue
 
+            if not isinstance(request, dict):
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32600, "message": "Invalid Request"},
+                }
+                original_stdout.write(json.dumps(response) + "\n")
+                original_stdout.flush()
+                continue
+
             req_id = request.get("id")
             method = request.get("method")
             params = request.get("params", {})
+            if not isinstance(params, dict):
+                params = {}
 
             response = {"jsonrpc": "2.0"}
             if req_id is not None:

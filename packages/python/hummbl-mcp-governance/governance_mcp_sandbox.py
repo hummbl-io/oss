@@ -41,8 +41,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hummbl_governance import (
-    KillSwitch,
     CircuitBreaker,
+    KillSwitch,
 )
 
 try:
@@ -403,9 +403,15 @@ def main():
         except json.JSONDecodeError:
             continue
 
+        if not isinstance(msg, dict):
+            send_error(None, -32600, "Invalid Request")
+            continue
+
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             if method == "initialize":
@@ -440,7 +446,7 @@ def main():
                 send_response(msg_id, {})
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report and continue
             send_error(msg_id, -32603, f"Internal error: {e}\n{traceback.format_exc()}")
 
 

@@ -151,42 +151,55 @@ Prescribed enforcement:
 - Tier 2/Tier 3 IP-sensitive repos should use signed human commits, protected branches, human CODEOWNER approval, and private invention/disclosure notes.
 - AI vendors and agent tools must be classified in `docs/standards/AI_VENDOR_IP_RISK_REGISTER.md` before use on Tier 2/Tier 3 work. Unreviewed vendors default to RED for sensitive work.
 
-## 10. Naming convention and exceptions
+## 10. Repository naming
 
-Default rule: HUMBL repositories must use the `hummbl-` prefix unless they are explicit exceptions.
+*Restated and adopted 2026-11-05; amendment recorded in `docs/adr/ADR-013-repo-naming-section-10-restatement.md`. The former text of this section (universal `hummbl-` default with per-repo exception classes) is superseded.*
 
-Allowed non-prefixed exceptions are constrained to these classes:
+**Force (labelled honestly).** This section is a **guideline with census detection**, plus one practice rule for agents at creation time (§10.4). It is not a gate: no validator exists, and none is claimed. Detection is by periodic census against the central registry (§10.3); a census finding is a report to the operator, not an automatic violation process.
 
-- `authored_artifact` — authored artifacts and public concepts whose repo is itself the object
-- `protocol` — protocol/reference objects and standards
-- `reference_archive` — historical, imported, or archive/reference repos
-- `research_object` — bounded research artifacts where the repo name is the governed object
+**Beneficiary (named).** The `hummbl-` prefix exists for two readers: (1) a stranger meeting HUMMBL's public product/framework family on GitHub or PyPI, for whom the shared prefix makes the family recognisable as one body of work; (2) the fleet's own retrieval across a several-hundred-repo org. Where neither reader is served — internal codenames, infrastructure, platform names — the prefix is not required and may be affirmatively wrong (a coined name carries its own identity; see §10.2, population P3).
 
-Exception records must be declared in `hummbl.repo.yaml` under `repo.naming`:
+**Scope.** This section governs repositories in the **`hummbl-io`** organisation. The `hummbl-dev` personal account is **out of scope**; its repositories are named at the account owner's discretion (the registry notes cross-account rows where they exist, e.g. idp-spec, for findability only). GitHub platform names (`.github`, `.repo-template`, and the bare name `hummbl`) are **out of scope by construction**: they cannot take a prefix and need no exception.
 
-```yaml
-repo:
-  naming:
-    hummbl_prefix_exception: true
-    exception_class: authored_artifact | protocol | reference_archive | research_object
-    exception_reason: "<short rationale>"
-    approved_by: "Human Principal Agent"
-    approved_at: "YYYY-MM-DD"
-    owning_standard: "HUMMBL Repo Standard"
-    allowed_scope: "<explicitly allowed scope>"
-    forbidden_scope: "<explicitly forbidden scope>"
-    rename_or_archive_trigger: "<condition that removes the exception>"
-```
+### 10.1 The prospective family rule
 
-Current approved non-`hummbl-` repo exceptions:
+A **new** repository created in `hummbl-io` after the ruling date of this section takes the `hummbl-` prefix **if** it is a public product or framework repository — a repo whose primary reader is the stranger in the beneficiary clause. All other new repositories are named under §10.2's populations. Repositories existing at the ruling date are **grandfathered as they stand**: the census at the ruling date is annotated once, centrally (§10.3); no renames and no per-repo approvals are required or implied by this section.
 
-| Repo | Class | Approved by | Approved on |
-|------|-------|-------------|-------------|
-| `whether-book` | `research_object` | Human Principal Agent | 2026-06-25 |
-| `base120` | `protocol` | Human Principal Agent | 2026-06-24 |
-| `idp-spec` | `protocol` | Human Principal Agent | 2026-06-24 |
+### 10.2 Populations (in place of exception classes)
 
-Agents must not create additional non-prefixed repositories without an operator-approved `repo.naming` exception block.
+Bare (non-prefixed) names are governed by **population**, decided once per population by operator ruling and recorded in the registry — never per-repo. A repo belongs to a population by its observable kind, not by a semantic class judgement:
+
+- **P1 — Prefixed family.** Public product/framework repos under §10.1. (The existing 188 prefixed repos are this family's current membership.)
+- **P2 — Flagships and canon.** Named bare repositories that are the estate's public roots: e.g. `oss`, `agents`, `docs`. Membership is by named list in the registry.
+- **P3 — Coined names.** Venture and product names coined as names (e.g. `krineia`, `tagmeia`, `base120`, `gyre`, and the -eia family): bare by design, because the coined name *is* the identity the prefix would obscure.
+- **P4 — Infrastructure and operations.** Fleet infrastructure, runners, and operations repos: bare or prefixed as they stand; new ones default bare unless they are public product-facing, in which case §10.1 applies.
+- **P5 — Platform and reserved.** `.github`, `.repo-template`, bare `hummbl`: out by construction (§10, Scope).
+- **P6 — Archives, imports, and forks.** Repositories preserving an upstream or historical name keep it (`reference_archive`'s honest residue); archived repos are never renamed for naming compliance.
+
+A new bare name that fits no population requires **one registry row added by operator ruling** — a ruling may cover a named set of repos at once. This replaces the former per-repo 9-field exception block in full.
+
+### 10.3 The central registry
+
+The naming record is **one central registry table** maintained with this standard (and annotated alongside the Repo Consolidation census): one row per bare-named repo or named population — name, population, ruling date, one-line reason. **The registry wins on divergence.** A `hummbl.repo.yaml` naming block in an individual repo is an optional mirror for local convenience; it is never authoritative, and its absence is not a defect. The three exceptions approved under the former text (`whether-book`, `base120`, `idp-spec`) migrate into the registry as rows, carrying their original approval dates; no re-approval is required.
+
+### 10.4 Creation-time practice rule for agents
+
+An agent creating a repository in `hummbl-io` checks the registry first: public product/framework → prefixed (§10.1); a population fit → named per §10.2; no fit → the agent asks the operator, whose ruling adds the registry row in the same motion. Agents do not create bare names outside the populations on their own judgement. (This is the former closing line, restated at its true scope: creation, prospectively.)
+
+### 10.5 Grammar (the part after the decision to prefix)
+
+- Names are **lowercase kebab-case** (`a-z`, `0-9`, hyphens). Existing case anomalies are grandfathered; new names conform.
+- The post-prefix stem is the product stem, stated once: `hummbl-<stem>`. No double prefixes (`hummbl-hummbl-…` is a defect on sight).
+- Before creation, the stem is checked against **PyPI distribution names** and the registry for collision — a repo stem and a package stem that differ silently are a known confusion source in this org.
+- Bare coined names (P3) follow the same case and collision rules; coinage itself follows the house practice (a name coined on a true root, ruled by the operator).
+
+### 10.6 Brand fence
+
+The prefix marks the public product/framework family only. It is not a stamp for internal codenames, experiments, or personal-account work, and this section takes no position on the operator's open brand-direction question: **if the brand direction is re-ruled, §10.1's family scope is revisited in the same motion** — the convention follows the brand ruling, never precedes it.
+
+### 10.7 What this section no longer claims
+
+No universal default over existing repos; no per-repo exception machinery; no gate. The former text's first sentence is corrected in passing: the brand is spelled **HUMMBL**.
 
 ## 11. RepoLM / RepoBit (forward reference)
 
