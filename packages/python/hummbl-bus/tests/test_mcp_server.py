@@ -91,6 +91,13 @@ def test_mcp_stdio_preserves_non_ascii_round_trip(tmp_path: Path) -> None:
         )
         if name in os.environ
     }
+    pkg_src = str(Path(__file__).resolve().parent.parent / "src")
+    existing_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        f"{pkg_src}{os.pathsep}{existing_pythonpath}"
+        if existing_pythonpath
+        else pkg_src
+    )
     env.update(
         HOME=str(tmp_path),
         USERPROFILE=str(tmp_path),
