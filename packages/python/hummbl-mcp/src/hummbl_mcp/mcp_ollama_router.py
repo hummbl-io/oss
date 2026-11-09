@@ -1,28 +1,25 @@
-import sys
-import os
+import hashlib
 import json
+import os
 import subprocess
+import sys
 import threading
 import time
-import urllib.request
-import urllib.error
 import traceback
-import hashlib
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from hummbl_mcp._config import SUBPROCESS_TIMEOUT_NORMAL
 from hummbl_mcp._constants import (
-    REMOTE_OLLAMA_URL,
     CONTENT_TYPE_JSON,
     MCP_PROTOCOL_VERSION,
+    REMOTE_OLLAMA_URL,
 )
 
 # Import DelegationTokenManager for agent identity verification
 try:
-    try:
-        from hummbl_governance.delegation import DelegationTokenManager, DelegationTokenCapabilityToken
-    except ImportError:
-        pass
+    from hummbl_governance.delegation import DelegationTokenCapabilityToken, DelegationTokenManager
     _IDP_AVAILABLE = True
 except ImportError:
     _IDP_AVAILABLE = False
@@ -56,11 +53,13 @@ def _load_model_hashes() -> dict[str, str]:
                 if not line.strip():
                     continue
                 entry = json.loads(line)
+                if not isinstance(entry, dict):
+                    continue
                 model = entry.get("model")
                 sha256 = entry.get("sha256")
                 if model and sha256 and sha256 != "PLACEHOLDER_HASH":
                     hashes[model] = sha256
-        except Exception as e:
+        except (OSError, ValueError) as e:
             log(f"Failed to load model hashes: {e}")
     return hashes
 
@@ -110,17 +109,26 @@ def _verify_agent_identity_token(token_str: str, expected_subject: str) -> bool:
     Returns:
         True if token is valid and subject matches, False otherwise.
     """
+    # Secret presence is evaluated before verifier availability: a configured
+    # secret with no working verifier must fail closed, not open.
+    dct_secret = os.environ.get("DCT_SECRET")
+    secret_present = dct_secret is not None
+
     if not _IDP_AVAILABLE:
-        log("IDP module not available. Skipping agent identity token verification.")
-        return True  # Fail-open if IDP is not available
-    
+        if secret_present:
+            log("DCT_SECRET is set but the IDP verifier is unavailable. Failing closed.")
+            return False
+        log("IDP module not available and DCT_SECRET not set. Skipping agent identity token verification.")
+        return True  # Fail-open only when no secret is configured
+
+    if not secret_present:
+        log("DCT_SECRET not set. Skipping agent identity token verification.")
+        return True  # Fail-open if secret is not configured
+    if not dct_secret.strip():
+        log("DCT_SECRET is set but empty/whitespace (malformed configuration). Rejecting token.")
+        return False
+
     try:
-        # Get DCT_SECRET from environment
-        dct_secret = os.environ.get("DCT_SECRET")
-        if not dct_secret:
-            log("DCT_SECRET not set. Skipping agent identity token verification.")
-            return True  # Fail-open if secret is not configured
-        
         # Initialize token manager
         manager = DelegationTokenManager(secret=dct_secret.encode("utf-8"))
         
@@ -143,7 +151,7 @@ def _verify_agent_identity_token(token_str: str, expected_subject: str) -> bool:
             return False
         
         return True
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - auth boundary: any verification error must fail closed
         log(f"Agent identity token verification error: {e}")
         return False
 
@@ -250,7 +258,7 @@ def query_gpu_stats():
             gpu_cache.data = data
             gpu_cache.last_query = now
             return data
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - degraded-mode boundary: any probe failure yields unknown telemetry
             log(f"nvidia-smi lookup failed: {e}. Returning degraded unknown telemetry.")
             return {
                 "telemetry_available": False,
@@ -267,11 +275,11 @@ def query_gpu_stats():
 def check_endpoint_health(url):
     try:
         req = urllib.request.Request(f"{url}/api/tags")
-        with urllib.request.urlopen(req, timeout=1.5) as resp:
+        with urllib.request.urlopen(req, timeout=1.5) as resp:  # nosec B310 - endpoint URL is operator-configured
             data = json.loads(resp.read().decode("utf-8"))
             models = [m.get("name") for m in data.get("models", [])]
             return True, models
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe boundary: any failure means endpoint is offline
         log(f"Ollama endpoint offline check: {url} ({e})")
         return False, []
 
@@ -332,7 +340,7 @@ def handle_route_ollama_request(arguments):
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": CONTENT_TYPE_JSON}
         )
-        with urllib.request.urlopen(req, timeout=30.0) as resp:
+        with urllib.request.urlopen(req, timeout=30.0) as resp:  # nosec B310 - endpoint URL is operator-configured
             resp_data = json.loads(resp.read().decode("utf-8"))
             response_text = resp_data.get("response", "")
             return {
@@ -347,7 +355,7 @@ def handle_route_ollama_request(arguments):
                 }],
                 "isError": False
             }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - fallback boundary: any local failure must attempt remote
         # Fallback to remote endpoint if local failed to connect
         log(f"Local endpoint failed: {e}. Attempting fallback to remote.")
         try:
@@ -357,7 +365,7 @@ def handle_route_ollama_request(arguments):
                 data=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": CONTENT_TYPE_JSON}
             )
-            with urllib.request.urlopen(req, timeout=30.0) as resp:
+            with urllib.request.urlopen(req, timeout=30.0) as resp:  # nosec B310 - endpoint URL is operator-configured
                 resp_data = json.loads(resp.read().decode("utf-8"))
                 response_text = resp_data.get("response", "")
                 return {
@@ -372,7 +380,7 @@ def handle_route_ollama_request(arguments):
                     }],
                     "isError": False
                 }
-        except Exception as fe:
+        except Exception as fe:  # noqa: BLE001 - terminal boundary: both endpoints failed, report error result
             return {"content": [{"type": "text", "text": f"Ollama execution failed on both local and remote endpoints: {fe}"}], "isError": True}
 
         return {"content": [{"type": "text", "text": f"Ollama routing failed: {e}"}], "isError": True}
@@ -447,9 +455,21 @@ def main():
                 log(f"Invalid JSON input: {line}")
                 continue
 
+            if not isinstance(request, dict):
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32600, "message": "Invalid Request"},
+                }
+                original_stdout.write(json.dumps(response) + "\n")
+                original_stdout.flush()
+                continue
+
             req_id = request.get("id")
             method = request.get("method")
             params = request.get("params", {})
+            if not isinstance(params, dict):
+                params = {}
 
             response = {"jsonrpc": "2.0"}
             if req_id is not None:
@@ -483,7 +503,7 @@ def main():
                             "code": -32601,
                             "message": f"Method not found: {tool_name}"
                         }
-                except Exception as ex:
+                except Exception as ex:  # noqa: BLE001 - tool boundary: convert handler crashes to error results
                     tb = traceback.format_exc()
                     log(f"Error executing tool {tool_name}: {ex}\n{tb}")
                     response["result"] = {"content": [{"type": "text", "text": f"Internal tool execution failure: {ex}"}], "isError": True}
@@ -496,7 +516,7 @@ def main():
             original_stdout.write(json.dumps(response) + "\n")
             original_stdout.flush()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: log and exit on unrecoverable error
             tb = traceback.format_exc()
             log(f"Global loop error: {e}\n{tb}")
             break

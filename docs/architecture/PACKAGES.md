@@ -77,6 +77,7 @@ Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Mat
 | `hummbl-mcp-onepassword` | 0.1.0 | MCP server exposing 1Password CLI as tools for agents |
 | `hummbl-mcp-proton` | 0.1.0 | Local MCP server for Proton Mail, Drive, Calendar |
 | `hummbl-mcp-signal` | 0.1.0 | Local stdio MCP server for Signal Messenger |
+| `hummbl-mcp-stdio` | 0.1.0 | Shared JSON-RPC stdio dispatcher for HUMMBL MCP shim servers |
 | `hummbl-mcp-utf` | 0.1.0 | MCP server exposing HUMMBL Unified Tier Framework |
 | `hummbl-mcp-omnichannel` | 0.1.0 | Omnichannel governance gate MCP server (refactored from FastAPI to stdlib http.server) |
 | `hummbl-mcp-voice` | 0.1.0 | MCP server for vendor-neutral voice interactions (Vapi adapter) |

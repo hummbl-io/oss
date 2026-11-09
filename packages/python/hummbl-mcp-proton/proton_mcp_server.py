@@ -18,15 +18,15 @@ Configure in Antigravity or Gemini config (`mcp_config.json`):
     }
 """
 
-import json
-import sys
-import traceback
-import os
 import imaplib
+import json
+import os
 import smtplib
 import subprocess
-from email.message import EmailMessage
+import sys
+import traceback
 from email import policy
+from email.message import EmailMessage
 from email.parser import BytesParser
 
 # ---------------------------------------------------------------------------
@@ -85,6 +85,32 @@ def get_smtp_client():
 # ---------------------------------------------------------------------------
 # Tool Implementations
 # ---------------------------------------------------------------------------
+def _extract_plain_body(msg) -> str:
+    """Return the plain-text body of a parsed email message."""
+    if not msg.is_multipart():
+        return msg.get_content()
+    parts = []
+    for part in msg.walk():
+        if part.get_content_type() == "text/plain":
+            content = part.get_content()
+            if content:
+                parts.append(content)
+    return "".join(parts)
+
+
+def _parse_rfc822(num, raw) -> dict:
+    """Parse a raw RFC822 fetch response into a result record."""
+    msg = BytesParser(policy=policy.default).parsebytes(raw)
+    body = _extract_plain_body(msg)
+    return {
+        "id": num.decode(),
+        "subject": msg.get("subject", ""),
+        "from": msg.get("from", ""),
+        "date": msg.get("date", ""),
+        "body_snippet": body[:500] + ("..." if len(body) > 500 else ""),
+    }
+
+
 def tool_proton_mail_search(arguments):
     """Search Proton Mail via IMAP (Proton Bridge)."""
     query = arguments.get("query", "ALL")
@@ -109,38 +135,11 @@ def tool_proton_mail_search(arguments):
 
             for response_part in msg_data:
                 if isinstance(response_part, tuple):
-                    msg = BytesParser(policy=policy.default).parsebytes(
-                        response_part[1]
-                    )
-                    subject = msg.get("subject", "")
-                    from_ = msg.get("from", "")
-                    date = msg.get("date", "")
-
-                    # Extract plain text body
-                    body = ""
-                    if msg.is_multipart():
-                        for part in msg.walk():
-                            if part.get_content_type() == "text/plain":
-                                content = part.get_content()
-                                if content:
-                                    body += content
-                    else:
-                        body = msg.get_content()
-
-                    results.append(
-                        {
-                            "id": num.decode(),
-                            "subject": subject,
-                            "from": from_,
-                            "date": date,
-                            "body_snippet": body[:500]
-                            + ("..." if len(body) > 500 else ""),
-                        }
-                    )
+                    results.append(_parse_rfc822(num, response_part[1]))
 
         client.logout()
         return {"messages": results, "count": len(results)}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -165,7 +164,7 @@ def tool_proton_mail_send(arguments):
         client.quit()
 
         return {"status": "success", "message": f"Email sent to {to_addr}"}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -191,7 +190,7 @@ def tool_proton_drive_list(arguments):
             "error": "Failed to parse JSON from proton-drive CLI",
             "stdout": result.stdout,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -217,7 +216,7 @@ def tool_proton_calendar_events(arguments):
             "error": "Failed to parse JSON from proton-calendar-cli",
             "stdout": result.stdout,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - tool boundary: surface handler failure as error result
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
@@ -300,7 +299,7 @@ def send_response(msg_id, result):
     """Send a JSON-RPC response to stdout."""
     response = {"jsonrpc": "2.0", "id": msg_id, "result": result}
     out = json.dumps(response)
-    sys.stdout.write(out + "\\n")
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 
@@ -312,7 +311,7 @@ def send_error(msg_id, code, message):
         "error": {"code": code, "message": message},
     }
     out = json.dumps(response)
-    sys.stdout.write(out + "\\n")
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 
@@ -365,10 +364,14 @@ def main():
             msg = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if not isinstance(msg, dict):
+            continue
 
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             handler = _METHOD_HANDLERS.get(method)
@@ -376,11 +379,11 @@ def main():
                 handler(msg_id, params)
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report as JSON-RPC internal error
             send_error(
                 msg_id,
                 -32603,
-                f"Internal error: {e}\\n{traceback.format_exc()}",
+                f"Internal error: {e}\n{traceback.format_exc()}",
             )
 
 

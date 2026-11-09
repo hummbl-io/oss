@@ -75,6 +75,7 @@ Tracked for downloads: 9 packages. In-tree but untracked:
 | `hummbl-mcp-onepassword` | P3 | in-tree only; no release to maintain |
 | `hummbl-mcp-proton` | P3 | in-tree only; no release to maintain |
 | `hummbl-mcp-signal` | P3 | in-tree only; no release to maintain |
+| `hummbl-mcp-stdio` | P3 | in-tree only; no release to maintain |
 | `hummbl-mcp-utf` | P3 | in-tree only; no release to maintain |
 | `hummbl-mcp-voice` | P3 | in-tree only; no release to maintain |
 | `hummbl-rubric-templates` | P3 | in-tree only; no release to maintain |

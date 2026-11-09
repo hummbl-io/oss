@@ -51,8 +51,8 @@ from pathlib import Path
 
 from hummbl_governance import ComplianceMapper
 from hummbl_governance.stride_mapper import (
-    StrideMapper,
     Interaction,
+    StrideMapper,
 )
 
 # ---------------------------------------------------------------------------
@@ -347,7 +347,7 @@ def _read_governance_entries(governance_dir: str) -> list[dict]:
                         entries.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
-        except (IOError, OSError):
+        except OSError:
             continue
     return entries
 
@@ -843,9 +843,15 @@ def main():
         except json.JSONDecodeError:
             continue
 
+        if not isinstance(msg, dict):
+            send_error(None, -32600, "Invalid Request")
+            continue
+
         msg_id = msg.get("id")
         method = msg.get("method", "")
         params = msg.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
 
         try:
             if method == "initialize":
@@ -889,7 +895,7 @@ def main():
             else:
                 send_error(msg_id, -32601, f"Method not found: {method}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - protocol loop boundary: report and continue
             send_error(
                 msg_id,
                 -32603,

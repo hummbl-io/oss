@@ -182,9 +182,13 @@ def _rpc_error(id_: Any, code: int, message: str) -> dict:
 
 
 def handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
+    if not isinstance(request, dict):
+        return _rpc_error(None, -32600, "Invalid Request")
     method = request.get("method", "")
     id_ = request.get("id")
     params = request.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     if method == "initialize":
         return _rpc_result(id_, {

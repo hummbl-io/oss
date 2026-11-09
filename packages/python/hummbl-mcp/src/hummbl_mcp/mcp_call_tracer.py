@@ -34,7 +34,8 @@ import logging
 import os
 import time
 import uuid
-from typing import Any, AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ class MCPCallTracer:
                 tuple_type="SYSTEM",
                 tuple_data=tuple_data,
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 - telemetry boundary: tracing must never break the traced call
             logger.debug("MCPCallTracer: failed to post %s for %s", event, tool_name, exc_info=True)
 
     @contextlib.asynccontextmanager
@@ -154,7 +155,7 @@ class MCPCallTracer:
             if ctx.result_count is not None:
                 extra["result_count"] = ctx.result_count
             self._post("MCP_CALL_END", tool_name, ctx.call_id, extra)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - telemetry boundary: record failure outcome, never propagate
             elapsed_ms = (time.monotonic_ns() - start_ns) // 1_000_000
             ctx.error = type(exc).__name__
             self._post(
@@ -282,7 +283,7 @@ def _read_recent_traces(limit: int = 20) -> list[dict[str, Any]]:
                 })
                 if len(results) >= limit:
                     break
-    except Exception:
+    except Exception:  # noqa: BLE001 - degraded read: return partial/empty stats on log failure
         logger.debug("Failed to read governance audit log", exc_info=True)
     return results
 
@@ -321,7 +322,7 @@ def _compute_trace_stats() -> dict[str, Any]:
             if outcome == "FAILURE":
                 by_adapter[adapter]["errors"] += 1
             by_adapter[adapter]["total_latency_ms"] += (elapsed or 0)
-    except Exception:
+    except Exception:  # noqa: BLE001 - degraded read: return partial stats on failure
         logger.debug("Failed to compute trace stats", exc_info=True)
 
     # Compute averages
@@ -353,9 +354,13 @@ def _tr_rpc_error(id_: Any, code: int, message: str) -> dict:
 
 
 def _tr_handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
+    if not isinstance(request, dict):
+        return _tr_rpc_error(None, -32600, "Invalid Request")
     method = request.get("method", "")
     id_ = request.get("id")
     params = request.get("params", {})
+    if not isinstance(params, dict):
+        params = {}
 
     if method == "initialize":
         return _tr_rpc_result(id_, {
@@ -373,7 +378,7 @@ def _tr_handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
             return _tr_rpc_result(id_, {
                 "content": [{"type": "text", "text": json.dumps(result, indent=2)}],
             })
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - tool boundary: convert handler crashes to error results
             logger.exception("Tool call failed: %s", tool_name)
             return _tr_rpc_result(id_, {
                 "content": [{"type": "text", "text": json.dumps({"error": str(e)})}],

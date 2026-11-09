@@ -7,7 +7,14 @@ line-length = 120
 
 [lint]
 select = [
-    "PLW1514",  # missing encoding on open()
+    # F/E4/E7/E9 preserve ruff default checks when this config is
+    # consumed via extend (a child select replaces defaults entirely).
+    "F",
+    "E4",
+    "E7",
+    "E9",
+    # PLW1514 (missing encoding on open()) is preview-gated in ruff; enabling
+    # preview activates unrelated preview rules fleet-wide, so it stays off.
     "B904",     # raise ... from err in except blocks
     "SIM",      # simplifications
     "I",        # isort import ordering
