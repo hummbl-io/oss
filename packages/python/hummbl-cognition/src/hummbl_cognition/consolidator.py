@@ -139,21 +139,40 @@ def _compute_pairwise_similarity(
         if tokens:
             doc_tokens[entry.id] = tokens
 
-    # Pairwise Jaccard similarity
+    # Pairwise Jaccard similarity with early-exit pruning. For sim >= t we
+    # need intersection/union >= t; since union >= max(|a|, |b|), a pair can
+    # only qualify if intersection >= t * max(|a|, |b|). While scanning the
+    # smaller token set we bail as soon as even a perfect remainder cannot
+    # reach that bound — exact same output, far fewer set operations on the
+    # majority of below-threshold pairs.
     similarity: dict[str, dict[str, float]] = defaultdict(dict)
     ids = list(doc_tokens.keys())
 
     for i, id_a in enumerate(ids):
+        tokens_a = doc_tokens[id_a]
         for id_b in ids[i + 1 :]:
-            tokens_a = doc_tokens[id_a]
             tokens_b = doc_tokens[id_b]
-            intersection = len(tokens_a & tokens_b)
-            union = len(tokens_a | tokens_b)
-            if union > 0:
-                sim = intersection / union
-                if sim >= SIMILARITY_THRESHOLD:
-                    similarity[id_a][id_b] = sim
-                    similarity[id_b][id_a] = sim
+            small, large = (
+                (tokens_a, tokens_b)
+                if len(tokens_a) <= len(tokens_b)
+                else (tokens_b, tokens_a)
+            )
+            need = SIMILARITY_THRESHOLD * len(large)
+            intersection = 0
+            remaining = len(small)
+            for tok in small:
+                if tok in large:
+                    intersection += 1
+                remaining -= 1
+                if intersection + remaining < need:
+                    break
+            else:
+                union = len(tokens_a) + len(tokens_b) - intersection
+                if union > 0:
+                    sim = intersection / union
+                    if sim >= SIMILARITY_THRESHOLD:
+                        similarity[id_a][id_b] = sim
+                        similarity[id_b][id_a] = sim
 
     return similarity
 
