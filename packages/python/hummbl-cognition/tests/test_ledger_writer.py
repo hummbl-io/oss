@@ -146,6 +146,15 @@ class TestReadEntries:
         entries = read_entries(ledger_path=tmp_ledger_path, limit=3)
         assert len(entries) == 3
 
+    def test_read_default_returns_all_entries(self, tmp_ledger_path: Path) -> None:
+        # Regression: default limit was 100, silently truncating larger ledgers
+        # (e.g. Open Brain lineage lookups for older entries).
+        for i in range(120):
+            entry = _make_entry(content=f"Lesson {i}")
+            post_entry(entry, ledger_path=tmp_ledger_path)
+        entries = read_entries(ledger_path=tmp_ledger_path)
+        assert len(entries) == 120
+
     def test_read_filter_by_type(self, tmp_ledger_path: Path) -> None:
         post_entry(
             _make_entry(entry_type=LedgerEntryType.LESSON, content="lesson"),

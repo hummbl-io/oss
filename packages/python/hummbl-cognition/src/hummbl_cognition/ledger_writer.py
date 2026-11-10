@@ -763,7 +763,7 @@ def read_entries(
     scope: str | LedgerScope | None = None,
     agent: str | None = None,
     tags: list[str] | None = None,
-    limit: int = 100,
+    limit: int | None = None,
     verify_signatures: bool = False,
     signing_key: bytes | None = None,
     delegation_token: object | None = None,
@@ -784,8 +784,9 @@ def read_entries(
         Filter by agent identifier (substring match).
     tags : list[str] | None
         Filter by tags (entries must contain ALL specified tags).
-    limit : int
+    limit : int | None
         Maximum number of entries to return (most recent first).
+        ``None`` (default) returns all matching entries; pass an int to cap.
     verify_signatures : bool
         When True, entries with a ``signature`` field are verified against
         the HMAC key (``signing_key`` or ``BUS_SIGNING_SECRET`` env var).
@@ -916,7 +917,7 @@ def read_entries(
 
     # Most recent first, limited
     entries.reverse()
-    return entries[:limit]
+    return entries if limit is None else entries[:limit]
 
 
 def validate_integrity(
