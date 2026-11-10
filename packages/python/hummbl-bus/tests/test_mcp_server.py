@@ -22,11 +22,17 @@ from pathlib import Path
 
 
 def _rpc(msg_id: int | str, method: str, params: dict | None = None) -> bytes:
-    """Build a JSON-RPC request as UTF-8 bytes."""
+    """Build a JSON-RPC request as UTF-8 bytes.
+
+    ensure_ascii=False is load-bearing: the default True would escape
+    non-ASCII characters as \\uXXXX sequences, sending pure-ASCII bytes
+    that decode identically under CP1252 and UTF-8 — the test would pass
+    even without the stdio reconfigure fix.
+    """
     msg = {"jsonrpc": "2.0", "id": msg_id, "method": method}
     if params is not None:
         msg["params"] = params
-    return (json.dumps(msg) + "\n").encode("utf-8")
+    return (json.dumps(msg, ensure_ascii=False) + "\n").encode("utf-8")
 
 
 def _parse_responses(stdout_bytes: bytes) -> list[dict]:
@@ -91,6 +97,13 @@ def test_mcp_stdio_preserves_non_ascii_round_trip(tmp_path: Path) -> None:
         )
         if name in os.environ
     }
+    pkg_src = str(Path(__file__).resolve().parent.parent / "src")
+    existing_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        f"{pkg_src}{os.pathsep}{existing_pythonpath}"
+        if existing_pythonpath
+        else pkg_src
+    )
     env.update(
         HOME=str(tmp_path),
         USERPROFILE=str(tmp_path),

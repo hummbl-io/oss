@@ -17,6 +17,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   where stdin/stdout are already UTF-8. Added `tests/test_mcp_server.py` with
   a subprocess regression test that round-trips an em-dash through the MCP
   server and verifies no CP1252 mojibake in the bus file or read response.
+  (Restored at HEAD after server rewrite; closes #475).
 
 ### Changed
 - `lane_classifier`: triadic LLL routing (`classify_triadic` returns -1 LOOP,
