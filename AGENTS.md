@@ -3,7 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **47** Python packages under `packages/python/<name>/`, one
+Currently hosts **49** Python packages under `packages/python/<name>/`, one
 private Node technical canary under `packages/node/mcp-base120`, and one Lean
 tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
 under `packages/` yet.
@@ -54,6 +54,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-mcp-onepassword | `packages/python/hummbl-mcp-onepassword/` | 0.1.0 | In-tree | MCP server exposing 1Password CLI as tools for agents |
 | hummbl-mcp-proton | `packages/python/hummbl-mcp-proton/` | 0.1.0 | In-tree | Local MCP server for Proton Mail, Drive, Calendar |
 | hummbl-mcp-signal | `packages/python/hummbl-mcp-signal/` | 0.1.0 | In-tree | Local stdio MCP server for Signal Messenger |
+| hummbl-mcp-stdio | `packages/python/hummbl-mcp-stdio/` | 0.1.0 | In-tree | Shared JSON-RPC stdio dispatcher for MCP shim servers |
 | hummbl-mcp-utf | `packages/python/hummbl-mcp-utf/` | 0.1.0 | In-tree | MCP server exposing HUMMBL Unified Tier Framework |
 | hummbl-mcp-omnichannel | `packages/python/hummbl-mcp-omnichannel/` | 0.1.0 | In-tree | Omnichannel governance gate MCP server (stdlib http.server) |
 | hummbl-mcp-voice | `packages/python/hummbl-mcp-voice/` | 0.1.0 | In-tree | MCP server for vendor-neutral voice interactions (Vapi adapter) |
@@ -61,6 +62,7 @@ Tree version = `pyproject.toml`. "Live" = a wheel exists on PyPI.
 | hummbl-agent-governance | `packages/python/hummbl-agent-governance/` | 0.2.0 | In-tree | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
 | hummbl-eval | `packages/python/hummbl-eval/` | 0.1.0 | In-tree | Evidence-governed evaluation contracts for compositional Human-AI systems |
 | hummbl-gitops | `packages/python/hummbl-gitops/` | 0.1.0 | In-tree | Bidirectional multi-agent peer-review GitOps loop |
+| wags | `packages/python/wags/` | 0.2.0 | In-tree | Polyglot, air-gappable multi-agent peer review protocol |
 
 Published-version metadata checked on 2026-10-02 UTC: [governance 1.5.1](https://pypi.org/pypi/hummbl-governance/1.5.1/json), [base120 3.1.0](https://pypi.org/pypi/base120/3.1.0/json), [tuples 0.2.2](https://pypi.org/pypi/hummbl-tuples/0.2.2/json), [bus 0.2.1](https://pypi.org/pypi/hummbl-bus/0.2.1/json). Equal tree and published version strings do not certify identical source bytes.
 
