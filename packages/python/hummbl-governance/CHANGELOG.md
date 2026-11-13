@@ -46,6 +46,15 @@ not tagged or published from this PR.
   `AgentRegistry`. This path does not set `allow_unregistered_agents`.
 
 ### Changed
+- **ADR-025 O2 one-release shim:** `hummbl_governance.cognition` writes are
+  deprecated. `append_entry` emits `DeprecationWarning` and, when
+  `hummbl_cognition` is importable, delegates to
+  `hummbl_cognition.ledger_writer.post_entry` with an explicit `ledger_path`.
+  Fallback is the local JSONL writer on `ImportError` or when the vendor is
+  outside `VALID_VENDORS`. No hard `hummbl-cognition` dependency (package
+  stays stdlib-only). The shim is removed in a subsequent
+  `hummbl-governance` release; callers should use `python -m hummbl_cognition
+  post`.
 - Renamed the P49 primitive module `sovereign_cryptosystem` to
   `envelope_cryptosystem` and the class `SovereignCryptosystem` to
   `EnvelopeCryptosystem`, per the retired-vocabulary rule and the rename
