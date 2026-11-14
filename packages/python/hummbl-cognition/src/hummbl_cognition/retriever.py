@@ -226,8 +226,9 @@ class OpenBrainRetriever:
       5. MEMORY.md (Claude Code auto-memory)
       6. Bibliography (hummbl-bibliography unified index / dist)
       7. Session surfaces (cognition/session-claims/*, cognition/session-ledgers/*)
-      8. Closeouts (secondary CLP ledgers, default ~/.agents/state/cognition/ledger.jsonl;
-         HUMMBL_SECONDARY_LEDGERS overrides)
+      8. Closeouts (secondary CLP ledgers, default the archived
+         ~/.agents/state/cognition/ledger.jsonl.archived-20261104 — the live
+         mirror was retired 2026-11-04; HUMMBL_SECONDARY_LEDGERS overrides)
       9. Handoffs (~/.agents/state/handoffs, ~/.agents/_state/handoff; HUMMBL_HANDOFF_DIRS)
      10. AARs (~/.agents/docs/aar; HUMMBL_AAR_DIRS)
     """
@@ -892,7 +893,13 @@ class OpenBrainRetriever:
 
         ledgers = _resolve_pool_paths(
             "HUMMBL_SECONDARY_LEDGERS",
-            [Path.home() / ".agents" / "state" / "cognition" / "ledger.jsonl"],
+            [
+                Path.home()
+                / ".agents"
+                / "state"
+                / "cognition"
+                / "ledger.jsonl.archived-20261104"
+            ],
         )
         skip = set(exclude_ids or ())
         results: list[MemoryResult] = []
@@ -1017,7 +1024,9 @@ class OpenBrainRetriever:
 
         Session surfaces live under each cognition dir as
         ``session-claims/`` and ``session-ledgers/`` (``.md`` and
-        ``.jsonl`` files). A cognition dir is resolved relative to each
+        ``.jsonl`` files). These surfaces are frozen archives — no live
+        writer since 2026-09-25 — so hits are historical, not current.
+        A cognition dir is resolved relative to each
         state dir as ``<state>/cognition`` or the state dir itself when
         it already is one; the sibling ``state/cognition`` layout and
         the conventional ``~/.agents/state/cognition`` location are
