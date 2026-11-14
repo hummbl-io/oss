@@ -1,38 +1,32 @@
-# Repository Health Contract
+# Repository Health Contract — IN-TREE COPY (origin record)
+
+This copy of governed-compression lives in `hummbl-io/oss` as the package's
+**origin record**. It is not the source of truth.
 
 ## Identity
 
-- **Repository**: `HUMMBL/governed-compression`
-- **Canonical host**: `https://<FLEET_HOST_1>.<TAILSCALE_TAILNET>.<TAILSCALE_TAILNET>/HUMMBL/governed-compression`
-- **Public mirror**: `https://github.com/hummbl-io/governed-compression`
+- **Repository**: `hummbl-io/oss` → `packages/python/governed-compression/` (in-tree copy)
+- **Canonical host**: `https://github.com/hummbl-io/governed-compression` (standalone repo, ruled canonical 2026-11-14, C1)
 - **Default branch**: `main`
-- **Visibility**: Public
+- **Visibility**: The canonical repo is not public; its visibility is stated in its own REPO_HEALTH
 - **Owner**: HUMMBL Team
-
-## Lifecycle
-
-- **Status**: Active experimental implementation surface
-- **Purpose**: Reference implementation for governed vector/KV compression methods and benchmarks.
 
 ## Canonical Relationship
 
-- **Source of truth**: This Gitea repo.
-- **Audience**: Internal HUMMBL experimentation and benchmark sharing.
+- **Source of truth**: The standalone repo, `hummbl-io/governed-compression`.
+  See `../POINTER-CANONICAL-HOME.md` in this package directory.
+- An earlier version of this file named a Gitea host as source of truth and
+  this copy's visibility as Public — both were unfilled template artefacts
+  and are struck (corrected 2026-11-14 under ruling C1 / Red Team attack
+  1711).
+- **Audience**: Origin record only. Do not develop against this copy.
 
 ## Validation Contract
 
-From repository root:
+Validation runs in the canonical repo:
 
 ```bash
 python -m pip install -e .
 pytest
-```
-
-```bash
 ruff check .
 ```
-
-## Branch Protection Expectation
-
-- `main` should be PR-protected.
-- Required checks for change-heavy PRs should include test/validation and benchmark sanity checks where added in CI.
