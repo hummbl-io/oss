@@ -56,6 +56,11 @@ class TestOpenBrainServer:
         from hummbl_cognition.server import OpenBrainState, _make_handler
 
         monkeypatch.setenv("OPEN_BRAIN_TOKEN", OPEN_BRAIN_TEST_TOKEN)
+        # Keep home-relative memory pools (bus cache, ~/.agents, ~/.claude,
+        # etc.) hermetic: without this, live machine state can produce hits
+        # for queries the test expects to return nothing.
+        monkeypatch.setenv("USERPROFILE", str(tmp_path))
+        monkeypatch.setenv("HOME", str(tmp_path))
 
         # Create test data
         cog_dir = tmp_path / "cognition"
