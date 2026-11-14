@@ -8,7 +8,7 @@ This copy of governed-compression lives in `hummbl-io/oss` as the package's
 - **Repository**: `hummbl-io/oss` → `packages/python/governed-compression/` (in-tree copy)
 - **Canonical host**: `https://github.com/hummbl-io/governed-compression` (standalone repo, ruled canonical 2026-11-14, C1)
 - **Default branch**: `main`
-- **Visibility**: This copy sits in the oss repo; the canonical repo is Private
+- **Visibility**: The canonical repo is not public; its visibility is stated in its own REPO_HEALTH
 - **Owner**: HUMMBL Team
 
 ## Canonical Relationship
