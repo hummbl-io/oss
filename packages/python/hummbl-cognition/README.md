@@ -82,6 +82,16 @@ python -m hummbl_cognition scitt-export --id <clp-id>   # SCITT-shaped statement
 - `_state/cognition/state.json` — current cognitive state
 - `_state/cognition/intent.md` — current sprint intent
 
+Note on fleet layouts: `state/` (repo-relative, partially tracked, legacy)
+and `_state/` (machine-local runtime, gitignored) are different surfaces.
+The live cognition ledger on fleet hosts is `~/PROJECTS/_state/cognition/
+ledger.jsonl`; `~/.agents/state/cognition/ledger.jsonl` was retired and
+frozen as `ledger.jsonl.archived-20261104` on 2026-11-04. The retriever's
+closeouts pool defaults to that archive; `HUMMBL_SECONDARY_LEDGERS`
+overrides it. `session-claims/` and `session-ledgers/` under
+`~/.agents/state/cognition/` are frozen archives (no writer since
+2026-09-25) — hits from the session pool are historical.
+
 ## Local bus cache retrieval
 
 The `bus` pool in `OpenBrainRetriever` and the MCP `memory_search` tool reads
