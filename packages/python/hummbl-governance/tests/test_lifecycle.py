@@ -90,6 +90,20 @@ class TestAuthorize:
         assert decision.reason == "agent:retired"
         assert decision.checks["agent_registered"] is True
 
+    def test_probation_agent_denied(self):
+        """Registered but non-active status fails closed (allowlist, #430)."""
+        self.reg.register_agent("probation-agent", trust="low", status="probation")
+        decision = self.lifecycle.authorize("probation-agent", "db", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:probation"
+        assert decision.checks["agent_registered"] is True
+
+    def test_deprecated_agent_denied(self):
+        self.reg.register_agent("old-agent-2", trust="low", status="deprecated")
+        decision = self.lifecycle.authorize("old-agent-2", "db", "read")
+        assert not decision.allowed
+        assert decision.reason == "agent:deprecated"
+
     def test_unknown_agent_denied(self):
         decision = self.lifecycle.authorize("ghost-agent", "db", "read")
         assert not decision.allowed
