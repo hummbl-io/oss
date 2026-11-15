@@ -41,16 +41,28 @@ def test_unknown_agent_denied():
     assert m._lifecycle._allow_unregistered_agents is False
 
 
-def test_registered_active_agent_allowed():
+def test_registered_active_agent_allowed(monkeypatch):
+    monkeypatch.setenv("MONITOR_REGISTRATION_TOKEN", "test-token")
     m = fresh_module()
     registered = m.handle_tool(
         "lifecycle_register_agent",
-        {"agent": "worker-1", "trust": "medium", "status": "active"},
+        {"agent": "worker-1", "trust": "medium", "status": "active", "token": "test-token"},
     )
     assert registered["registered"] is True
     result = m.handle_tool("lifecycle_authorize", {"agent": "worker-1", "action": "read"})
     assert result["allowed"] is True
     assert result["checks"]["agent_registered"] is True
+
+
+def test_register_agent_denied_without_token_env(monkeypatch):
+    monkeypatch.delenv("MONITOR_REGISTRATION_TOKEN", raising=False)
+    m = fresh_module()
+    result = m.handle_tool(
+        "lifecycle_register_agent",
+        {"agent": "worker-1", "status": "active", "token": "anything"},
+    )
+    assert "error" in result
+    assert "MONITOR_REGISTRATION_TOKEN" in result["error"]
 
 
 def test_import_has_handle_tool():

@@ -183,9 +183,12 @@ class GovernanceLifecycle:
     def _check_agent_identity(self, agent, checks, allow_unregistered_agents):
         """Check agent identity. Returns denial or None.
 
-        Fail-closed when a registry is wired: unknown/unregistered agents
-        are denied unless ``allow_unregistered_agents`` is true.
-        Suspended and retired agents are always denied.
+        Fail-closed when a registry is wired: only agents whose status is
+        exactly ``"active"`` are authorized; ``"unknown"`` agents are denied
+        unless ``allow_unregistered_agents`` is true. Every other status
+        (``suspended``, ``retired``, ``deprecated``, ``probation``, or any
+        unrecognized value) is denied — the registry stores status verbatim,
+        so this is an allowlist, not a denylist.
         """
         if self._reg is None:
             return None
@@ -195,10 +198,11 @@ class GovernanceLifecycle:
         checks["agent_status"] = status
         checks["agent_trust"] = trust
         checks["agent_registered"] = registered
-        if status in ("suspended", "retired"):
+        if status == "unknown":
+            if not allow_unregistered_agents:
+                return AuthorizationDecision(False, "agent:unknown", checks)
+        elif status != "active":
             return AuthorizationDecision(False, f"agent:{status}", checks)
-        if not registered and not allow_unregistered_agents:
-            return AuthorizationDecision(False, "agent:unknown", checks)
         return None
 
     def _check_circuit_breaker(self, checks):
