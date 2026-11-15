@@ -17,6 +17,7 @@
 """Tests for hummbl_governance._receipt_key (issue #458 key resolution)."""
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -53,6 +54,23 @@ def test_persisted_key_generated_and_reused(tmp_path, monkeypatch):
     assert key_path.read_bytes() == key1
     resolve_receipt_key.cache_clear()
     assert resolve_receipt_key() == key1
+
+
+def test_lost_first_run_race_reads_winning_key(tmp_path, monkeypatch):
+    """If another process persists the key between our read and create,
+    O_EXCL raises FileExistsError and we must return the winner's key,
+    not our own generated secret (TOCTOU regression test)."""
+    monkeypatch.setenv("HUMMBL_GOVERNANCE_KEY_DIR", str(tmp_path))
+    real_open = os.open
+
+    def fake_open(path, flags, mode=0o777, *, dir_fd=None):
+        if flags & os.O_EXCL:
+            Path(path).write_bytes(b"racer-won-key")
+            raise FileExistsError(17, "File exists", str(path))
+        return real_open(path, flags, mode, dir_fd=dir_fd)
+
+    monkeypatch.setattr(os, "open", fake_open)
+    assert resolve_receipt_key() == b"racer-won-key"
 
 
 def test_fail_closed_when_key_cannot_persist(tmp_path, monkeypatch):

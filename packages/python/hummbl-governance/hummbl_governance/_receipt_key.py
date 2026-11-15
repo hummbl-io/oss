@@ -98,10 +98,17 @@ def resolve_receipt_key() -> bytes:
     secret = secrets.token_bytes(32)
     try:
         key_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            # O_EXCL makes first-run creation atomic: a concurrent process
+            # either wins (we re-read its key) or loses (we keep ours).
+            fd = os.open(key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        except FileExistsError:
+            return key_path.read_bytes()
         # A local HMAC key file is cleartext by design; access is restricted
         # by platform ACL (chmod 0600 / icacls owner-only), same as kernel
         # .kernel_secret and ~/.ssh keys.
-        key_path.write_bytes(secret)  # codeql[py/clear-text-storage-sensitive-data]
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(secret)  # codeql[py/clear-text-storage-sensitive-data]
         _secure_secret_file(key_path)
     except OSError as exc:
         raise RuntimeError(
