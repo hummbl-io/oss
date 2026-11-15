@@ -33,6 +33,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import ContestationRecord
 # Try to import CapabilityFence if it exists; tests might not have it loaded identically,
 # but it's part of hummbl_governance.
@@ -43,12 +44,10 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-_RECEIPT_KEY = b"hummbl-governance-receipt-key-v1"
-
 
 def _sign_contestation(contestation_id: str, status: str, timestamp_submitted: str) -> str:
     msg = f"{contestation_id}:{status}:{timestamp_submitted}".encode()
-    return hmac.new(_RECEIPT_KEY, msg, hashlib.sha256).hexdigest()
+    return hmac.new(resolve_receipt_key(), msg, hashlib.sha256).hexdigest()
 
 
 class ContestationHandler:
@@ -111,6 +110,8 @@ class ContestationHandler:
         return record
 
     def begin_review(self, contestation_id: str, reviewer_id: str) -> ContestationRecord:
+        # Resolve the signing key before mutating the record.
+        resolve_receipt_key()
         with self._lock:
             record = self.get(contestation_id)
             if record.status in ("resolved", "withdrawn"):
@@ -134,6 +135,7 @@ class ContestationHandler:
         if outcome not in ("upheld", "overturned", "withdrawn"):
             raise ValueError(f"Invalid outcome: {outcome}")
 
+        resolve_receipt_key()
         with self._lock:
             record = self.get(contestation_id)
             if record.status in ("resolved", "withdrawn"):

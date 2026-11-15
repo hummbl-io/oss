@@ -6,7 +6,6 @@ for the MCP server billing layer.
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from hummbl_mcp.protocol import ToolDefinition

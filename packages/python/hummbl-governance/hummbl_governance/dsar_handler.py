@@ -32,16 +32,15 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import DSARRecord
 
 logger = logging.getLogger(__name__)
 
-_RECEIPT_KEY = b"hummbl-governance-receipt-key-v1"
-
 
 def _sign_dsar(dsar_id: str, status: str, timestamp_received: str) -> str:
     msg = f"{dsar_id}:{status}:{timestamp_received}".encode()
-    return hmac.new(_RECEIPT_KEY, msg, hashlib.sha256).hexdigest()
+    return hmac.new(resolve_receipt_key(), msg, hashlib.sha256).hexdigest()
 
 
 class DSARHandler:
@@ -104,6 +103,9 @@ class DSARHandler:
         return record
 
     def extend(self, dsar_id: str, reason: str) -> DSARRecord:
+        # Resolve the signing key before mutating the record: fail before
+        # changing state, not after.
+        resolve_receipt_key()
         with self._lock:
             record = self.get(dsar_id)
             if record.extended:
@@ -130,6 +132,8 @@ class DSARHandler:
         output_path: Path,
         format: str = "json",
     ) -> DSARRecord:
+        # Resolve the signing key before writing the response artifact.
+        resolve_receipt_key()
         with self._lock:
             record = self.get(dsar_id)
             if record.status in ("complete", "refused"):
@@ -181,6 +185,7 @@ class DSARHandler:
         if outcome not in ("complete", "refused"):
             raise ValueError(f"outcome must be 'complete' or 'refused', got {outcome}")
 
+        resolve_receipt_key()
         with self._lock:
             record = self.get(dsar_id)
             if record.status in ("complete", "refused"):
