@@ -7,10 +7,11 @@ a specific number in a README matches the actual codebase, because it never
 computes a ground-truth value to compare against.
 
 This script closes that specific gap for the two counts most prone to silent
-drift in this repo (see docs/artifacts/AUDIT_2026-09-11_public_claims_drift.md
-for the incident this was written to prevent, and
-docs/artifacts/CASE_STUDY_claims_remediation.md for a prior, independent
-occurrence of the same bug class — "25 Modules" on the old homepage):
+drift in this repo (written after the 2026-09-11 "34 primitives" public-claims
+drift incident — the audit narrative is retained in the internal archive, not
+published here — and docs/artifacts/CASE_STUDY_claims_remediation.md documents
+a prior, independent occurrence of the same bug class — "25 Modules" on the
+old homepage):
 
   - Implemented primitive count: computed from
     ``hummbl_governance.primitive_registry.PrimitiveRegistry``, the repo's own
