@@ -676,8 +676,11 @@ _HOST_EXEMPT_SENDERS = frozenset({
 _AGENT_REGISTRY_ENV = "BUS_AGENT_REGISTRY"
 
 # Privileged bus write types that require Ed25519 principal proof.
-# Mirrors authority.PRIVILEGED_TYPES — defined locally to avoid circular import.
-_PRIVILEGED_TYPES = frozenset({"DECISION", "DIRECTIVE"})
+# Canonical definition lives in authority.py.
+try:
+    from .authority import PRIVILEGED_TYPES as _PRIVILEGED_TYPES
+except ImportError:  # pragma: no cover - direct script execution
+    from hummbl_bus.authority import PRIVILEGED_TYPES as _PRIVILEGED_TYPES
 
 _KIMI_APPROVED_IDENTITIES: set[str] = set()  # RETIRED 2026-04-05 — all kimi-* rejected
 _KIMI_APPROVED_MESSAGE_TYPES = {
