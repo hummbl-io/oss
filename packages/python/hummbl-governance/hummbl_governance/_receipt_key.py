@@ -34,6 +34,7 @@ This module is not part of the public API.
 from __future__ import annotations
 
 import os
+import secrets
 import subprocess
 from functools import lru_cache
 from pathlib import Path
@@ -94,7 +95,7 @@ def resolve_receipt_key() -> bytes:
     except OSError:
         pass
 
-    secret = os.urandom(32)
+    secret = secrets.token_bytes(32)
     try:
         key_path.parent.mkdir(parents=True, exist_ok=True)
         key_path.write_bytes(secret)
