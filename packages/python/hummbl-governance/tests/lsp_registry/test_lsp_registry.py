@@ -357,6 +357,80 @@ class TestSafeExtraction:
             except (ValueError, tarfile.OutsideDestinationError) as exc:
                 assert "outside" in str(exc).lower()
 
+    def test_validate_tar_members_manual_rejects_escaping_symlink(self, tmp_path: str) -> None:
+        """Pre-3.12 path must reject symlink members whose targets escape dest."""
+        import tarfile
+
+        from hummbl_governance.lsp_registry.install import _validate_tar_members_manual
+
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+            link = tarfile.TarInfo(name="escape")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "../../outside"
+            tf.addfile(link)
+            info = tarfile.TarInfo(name="escape/evil.txt")
+            info.size = 9
+            tf.addfile(info, io.BytesIO(b"malicious"))
+
+        buf.seek(0)
+        with tarfile.open(fileobj=buf, mode="r:gz") as tf:
+            with pytest.raises(ValueError, match="outside destination"):
+                _validate_tar_members_manual(tf, str(tmp_path))
+
+    def test_validate_tar_members_manual_rejects_absolute_symlink(self, tmp_path: str) -> None:
+        import tarfile
+
+        from hummbl_governance.lsp_registry.install import _validate_tar_members_manual
+
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+            link = tarfile.TarInfo(name="escape")
+            link.type = tarfile.SYMTYPE
+            link.linkname = str(tmp_path / ".." / "abs-escape-target")
+            tf.addfile(link)
+
+        buf.seek(0)
+        with tarfile.open(fileobj=buf, mode="r:gz") as tf:
+            with pytest.raises(ValueError, match="outside destination"):
+                _validate_tar_members_manual(tf, str(tmp_path))
+
+    def test_validate_tar_members_manual_allows_internal_symlink(self, tmp_path: str) -> None:
+        import tarfile
+
+        from hummbl_governance.lsp_registry.install import _validate_tar_members_manual
+
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+            link = tarfile.TarInfo(name="sub/link")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "../real.txt"
+            tf.addfile(link)
+            info = tarfile.TarInfo(name="real.txt")
+            info.size = 4
+            tf.addfile(info, io.BytesIO(b"safe"))
+
+        buf.seek(0)
+        with tarfile.open(fileobj=buf, mode="r:gz") as tf:
+            _validate_tar_members_manual(tf, str(tmp_path))  # must not raise
+
+    def test_validate_tar_members_manual_rejects_escaping_hardlink(self, tmp_path: str) -> None:
+        import tarfile
+
+        from hummbl_governance.lsp_registry.install import _validate_tar_members_manual
+
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+            link = tarfile.TarInfo(name="hard")
+            link.type = tarfile.LNKTYPE
+            link.linkname = "../../outside/target"
+            tf.addfile(link)
+
+        buf.seek(0)
+        with tarfile.open(fileobj=buf, mode="r:gz") as tf:
+            with pytest.raises(ValueError, match="outside destination"):
+                _validate_tar_members_manual(tf, str(tmp_path))
+
     def test_safe_extract_zip_allows_normal_files(self, tmp_path: str) -> None:
         """_safe_extract_zip should extract normal files without error."""
         import zipfile

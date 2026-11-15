@@ -35,12 +35,36 @@ def _safe_extract_tar(tf: tarfile.TarFile, dest: str) -> None:
     if sys.version_info >= (3, 12):
         tf.extractall(dest, filter="data")
         return
+    _validate_tar_members_manual(tf, dest)
+    tf.extractall(dest)
+
+
+def _validate_tar_members_manual(tf: tarfile.TarFile, dest: str) -> None:
+    """Pre-3.12 fallback validation for ``_safe_extract_tar``.
+
+    Rejects members whose resolved path — or whose link target's resolved
+    path — escapes the destination directory. Link members are checked
+    because a symlink pointing outside ``dest`` lets a later file member
+    write through it; the pre-extraction ``realpath`` check cannot see
+    links that do not exist on disk yet.
+    """
     dest_path = os.path.realpath(dest)
     for member in tf.getmembers():
         member_path = os.path.realpath(os.path.join(dest, member.name))
         if not member_path.startswith(dest_path + os.sep) and member_path != dest_path:
             raise ValueError(f"Refusing to extract path outside destination: {member.name}")
-    tf.extractall(dest)
+        if member.issym() or member.islnk():
+            if member.islnk():
+                # Hardlink targets are archive member names (archive-root relative).
+                link_path = os.path.join(dest, member.linkname)
+            else:
+                # Symlink targets resolve relative to the link's directory.
+                link_path = os.path.join(os.path.dirname(member_path), member.linkname)
+            link_target = os.path.realpath(link_path)
+            if not link_target.startswith(dest_path + os.sep) and link_target != dest_path:
+                raise ValueError(
+                    f"Refusing to extract link outside destination: {member.name} -> {member.linkname}"
+                )
 
 
 def _safe_extract_zip(zf: zipfile.ZipFile, dest: str) -> None:
