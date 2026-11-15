@@ -14,3 +14,10 @@ body:
       label: What is wrong or missing
       description: Quote the text and say what it should say. Link the source that shows the correct value.
     validations: {required: true}
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Public-safety check
+      options:
+        - label: This report contains no secrets, credentials, personal data, or unfixed security detail.
+          required: true
