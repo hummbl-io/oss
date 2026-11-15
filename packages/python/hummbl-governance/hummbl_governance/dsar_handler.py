@@ -32,16 +32,15 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import DSARRecord
 
 logger = logging.getLogger(__name__)
 
-_RECEIPT_KEY = b"hummbl-governance-receipt-key-v1"
-
 
 def _sign_dsar(dsar_id: str, status: str, timestamp_received: str) -> str:
     msg = f"{dsar_id}:{status}:{timestamp_received}".encode()
-    return hmac.new(_RECEIPT_KEY, msg, hashlib.sha256).hexdigest()
+    return hmac.new(resolve_receipt_key(), msg, hashlib.sha256).hexdigest()
 
 
 class DSARHandler:

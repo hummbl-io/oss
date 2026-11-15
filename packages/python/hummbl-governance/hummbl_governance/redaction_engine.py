@@ -33,11 +33,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import RedactionReceipt
 
 logger = logging.getLogger(__name__)
-
-_RECEIPT_KEY = b"hummbl-governance-receipt-key-v1"
 
 
 class RedactionError(Exception):
@@ -46,7 +45,7 @@ class RedactionError(Exception):
 
 def _sign_redaction(redaction_id: str, operator_id: str, timestamp: str) -> str:
     msg = f"{redaction_id}:{operator_id}:{timestamp}".encode()
-    return hmac.new(_RECEIPT_KEY, msg, hashlib.sha256).hexdigest()
+    return hmac.new(resolve_receipt_key(), msg, hashlib.sha256).hexdigest()
 
 
 class RedactionEngine:
