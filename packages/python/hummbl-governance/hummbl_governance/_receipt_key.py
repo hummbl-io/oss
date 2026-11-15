@@ -98,10 +98,10 @@ def resolve_receipt_key() -> bytes:
     secret = secrets.token_bytes(32)
     try:
         key_path.parent.mkdir(parents=True, exist_ok=True)
-        # codeql[py/clear-text-storage-sensitive-data]: a local HMAC key file
-        # is cleartext by design; access is restricted by platform ACL
-        # (chmod 0600 / icacls owner-only), same as kernel .kernel_secret.
-        key_path.write_bytes(secret)
+        # A local HMAC key file is cleartext by design; access is restricted
+        # by platform ACL (chmod 0600 / icacls owner-only), same as kernel
+        # .kernel_secret and ~/.ssh keys.
+        key_path.write_bytes(secret)  # codeql[py/clear-text-storage-sensitive-data]
         _secure_secret_file(key_path)
     except OSError as exc:
         raise RuntimeError(
