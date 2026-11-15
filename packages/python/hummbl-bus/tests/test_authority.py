@@ -13,6 +13,8 @@ from hummbl_bus.authority import (
     _CONSTRUCTOR_GUARD,
     CANONICAL_BUS_ID,
     DEFAULT_AUDIENCE,
+    ELEVATED_TYPES,
+    PRIVILEGED_OR_ELEVATED_TYPES,
     PRIVILEGED_TYPES,
     PRIVILEGED_MESSAGE_SCHEMA,
     VERIFIED_PRINCIPAL_SCHEMA,
@@ -89,6 +91,14 @@ def _signed_proof(
 
 def test_privileged_types_are_decision_and_directive() -> None:
     assert PRIVILEGED_TYPES == frozenset({"DECISION", "DIRECTIVE"})
+
+
+def test_elevated_and_combined_type_sets() -> None:
+    assert ELEVATED_TYPES == frozenset({"VETO", "COMMAND", "APPROVE", "REJECT"})
+    assert PRIVILEGED_OR_ELEVATED_TYPES == PRIVILEGED_TYPES | ELEVATED_TYPES
+    assert PRIVILEGED_OR_ELEVATED_TYPES == frozenset(
+        {"DECISION", "DIRECTIVE", "VETO", "COMMAND", "APPROVE", "REJECT"}
+    )
 
 
 def test_identity_strings_updated_to_hummbl_bus() -> None:
