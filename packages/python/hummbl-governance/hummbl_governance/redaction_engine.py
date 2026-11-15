@@ -79,7 +79,11 @@ class RedactionEngine:
         
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         redaction_id = str(uuid.uuid4())
-        
+
+        # Resolve the signing key before any target file is modified: if no
+        # key is available we must fail before redacting, not after.
+        resolve_receipt_key()
+
         with self._lock:
             # Gather all files to process
             files_to_process = [self.audit_log_path] + self.additional_stores

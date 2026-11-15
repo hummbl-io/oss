@@ -73,6 +73,47 @@ def test_lost_first_run_race_reads_winning_key(tmp_path, monkeypatch):
     assert resolve_receipt_key() == b"racer-won-key"
 
 
+def test_empty_persisted_key_regenerates(tmp_path, monkeypatch):
+    """An empty receipt.key (interrupted first-run write) must not be
+    returned — hmac accepts b"" silently. Regenerate instead."""
+    monkeypatch.setenv("HUMMBL_GOVERNANCE_KEY_DIR", str(tmp_path))
+    key_path = tmp_path / "receipt.key"
+    key_path.write_bytes(b"")
+    key = resolve_receipt_key()
+    assert len(key) == 32
+    assert key_path.read_bytes() == key
+
+
+def test_lost_race_with_empty_winner_fails_closed(tmp_path, monkeypatch):
+    """If the race winner's key file is empty, fail closed rather than
+    adopt a weak key."""
+    monkeypatch.setenv("HUMMBL_GOVERNANCE_KEY_DIR", str(tmp_path))
+    real_open = os.open
+
+    def fake_open(path, flags, mode=0o777, *, dir_fd=None):
+        if flags & os.O_EXCL:
+            Path(path).write_bytes(b"")
+            raise FileExistsError(17, "File exists", str(path))
+        return real_open(path, flags, mode, dir_fd=dir_fd)
+
+    monkeypatch.setattr(os, "open", fake_open)
+    with pytest.raises(RuntimeError, match="empty"):
+        resolve_receipt_key()
+
+
+def test_secure_failure_fails_closed_and_cleans_up(tmp_path, monkeypatch):
+    """If the key file cannot be ACL-restricted, raise and leave no file."""
+    monkeypatch.setenv("HUMMBL_GOVERNANCE_KEY_DIR", str(tmp_path))
+
+    def boom(_path):
+        raise RuntimeError("cannot secure")
+
+    monkeypatch.setattr(_receipt_key, "_secure_secret_file", boom)
+    with pytest.raises(RuntimeError, match="cannot secure"):
+        resolve_receipt_key()
+    assert not (tmp_path / "receipt.key").exists()
+
+
 def test_fail_closed_when_key_cannot_persist(tmp_path, monkeypatch):
     blocker = tmp_path / "blocker"
     blocker.write_text("not a directory")

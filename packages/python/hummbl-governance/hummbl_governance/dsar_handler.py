@@ -103,6 +103,9 @@ class DSARHandler:
         return record
 
     def extend(self, dsar_id: str, reason: str) -> DSARRecord:
+        # Resolve the signing key before mutating the record: fail before
+        # changing state, not after.
+        resolve_receipt_key()
         with self._lock:
             record = self.get(dsar_id)
             if record.extended:
@@ -129,6 +132,8 @@ class DSARHandler:
         output_path: Path,
         format: str = "json",
     ) -> DSARRecord:
+        # Resolve the signing key before writing the response artifact.
+        resolve_receipt_key()
         with self._lock:
             record = self.get(dsar_id)
             if record.status in ("complete", "refused"):
@@ -180,6 +185,7 @@ class DSARHandler:
         if outcome not in ("complete", "refused"):
             raise ValueError(f"outcome must be 'complete' or 'refused', got {outcome}")
 
+        resolve_receipt_key()
         with self._lock:
             record = self.get(dsar_id)
             if record.status in ("complete", "refused"):

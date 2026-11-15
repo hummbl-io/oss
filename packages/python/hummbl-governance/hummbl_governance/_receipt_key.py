@@ -52,11 +52,17 @@ def _key_dir() -> Path:
 
 
 def _secure_secret_file(path: Path) -> None:
-    """Restrict key-file access: POSIX chmod 0600, Windows icacls owner-only."""
+    """Restrict key-file access: POSIX chmod 0600, Windows icacls owner-only.
+
+    Raises RuntimeError if the file cannot be restricted — an unsecured key
+    file is worse than failing closed (issue #458 follow-up).
+    """
     if os.name == "nt":
         username = os.environ.get("USERNAME") or os.environ.get("USER", "")
         if not username:
-            return
+            raise RuntimeError(
+                "Cannot determine current user to ACL the receipt key file"
+            )
         try:
             subprocess.run(  # nosec B603 — icacls is a trusted Windows system utility; args are not user input
                 [
@@ -69,13 +75,17 @@ def _secure_secret_file(path: Path) -> None:
                 check=True,
                 capture_output=True,
             )
-        except (OSError, subprocess.CalledProcessError):
-            pass
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise RuntimeError(
+                f"Failed to restrict receipt key file ACL: {exc}"
+            ) from exc
     else:
         try:
             os.chmod(path, 0o600)
-        except OSError:
-            pass
+        except OSError as exc:
+            raise RuntimeError(
+                f"Failed to chmod 0600 receipt key file: {exc}"
+            ) from exc
 
 
 @lru_cache(maxsize=1)
@@ -83,7 +93,8 @@ def resolve_receipt_key() -> bytes:
     """Return the HMAC key for GDPR receipt signing.
 
     Raises RuntimeError if no env var is set and the per-user key file cannot
-    be created (fail-closed: never fall back to an ephemeral or published key).
+    be created or secured (fail-closed: never fall back to an ephemeral or
+    published key).
     """
     env_key = os.environ.get(_ENV_VAR) or os.environ.get(_FLEET_ENV_VAR)
     if env_key:
@@ -91,9 +102,18 @@ def resolve_receipt_key() -> bytes:
 
     key_path = _key_dir() / _KEY_FILENAME
     try:
-        return key_path.read_bytes()
+        existing = key_path.read_bytes()
     except OSError:
-        pass
+        existing = b""
+    if existing:
+        return existing
+    if key_path.exists():
+        # Empty file: an interrupted first-run write left a useless key.
+        # hmac accepts b"" silently, so regenerate rather than sign weakly.
+        try:
+            key_path.unlink()
+        except OSError:
+            pass
 
     secret = secrets.token_bytes(32)
     try:
@@ -103,13 +123,32 @@ def resolve_receipt_key() -> bytes:
             # either wins (we re-read its key) or loses (we keep ours).
             fd = os.open(key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         except FileExistsError:
-            return key_path.read_bytes()
-        # A local HMAC key file is cleartext by design; access is restricted
-        # by platform ACL (chmod 0600 / icacls owner-only), same as kernel
+            # Lost a first-run race: adopt the winner's key, but fail closed
+            # if it is empty rather than sign with a weak key.
+            try:
+                winner = key_path.read_bytes()
+            except OSError as exc:
+                raise RuntimeError(
+                    f"Receipt key file appeared but cannot be read: {exc}"
+                ) from exc
+            if not winner:
+                raise RuntimeError(
+                    f"Receipt key file {key_path} is empty; remove it or set "
+                    f"{_ENV_VAR}/{_FLEET_ENV_VAR}."
+                )
+            return winner
+        # Restrict access before secret material touches disk. A local HMAC
+        # key file is cleartext by design; access is restricted by platform
+        # ACL (chmod 0600 / icacls owner-only), same as kernel
         # .kernel_secret and ~/.ssh keys.
+        try:
+            _secure_secret_file(key_path)
+        except Exception:
+            os.close(fd)
+            key_path.unlink(missing_ok=True)
+            raise
         with os.fdopen(fd, "wb") as fh:
             fh.write(secret)  # codeql[py/clear-text-storage-sensitive-data]
-        _secure_secret_file(key_path)
     except OSError as exc:
         raise RuntimeError(
             "Cannot persist GDPR receipt HMAC key and neither "

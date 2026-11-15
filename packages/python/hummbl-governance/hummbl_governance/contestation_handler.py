@@ -110,6 +110,8 @@ class ContestationHandler:
         return record
 
     def begin_review(self, contestation_id: str, reviewer_id: str) -> ContestationRecord:
+        # Resolve the signing key before mutating the record.
+        resolve_receipt_key()
         with self._lock:
             record = self.get(contestation_id)
             if record.status in ("resolved", "withdrawn"):
@@ -133,6 +135,7 @@ class ContestationHandler:
         if outcome not in ("upheld", "overturned", "withdrawn"):
             raise ValueError(f"Invalid outcome: {outcome}")
 
+        resolve_receipt_key()
         with self._lock:
             record = self.get(contestation_id)
             if record.status in ("resolved", "withdrawn"):
