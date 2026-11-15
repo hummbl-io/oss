@@ -212,7 +212,8 @@ class TestLifecycleAuthorize:
         assert result["checks"]["agent_status"] == "unknown"
         assert m._lifecycle._allow_unregistered_agents is False
 
-    def test_registered_active_agent_allowed(self):
+    def test_registered_active_agent_allowed(self, monkeypatch):
+        monkeypatch.setenv("MONITOR_REGISTRATION_TOKEN", "test-token")
         m = fresh_module()
         registered = m.handle_tool(
             "lifecycle_register_agent",
@@ -220,6 +221,7 @@ class TestLifecycleAuthorize:
                 "agent": "worker-1",
                 "trust": "medium",
                 "status": "active",
+                "token": "test-token",
             },
         )
         assert registered["registered"] is True
@@ -259,6 +261,34 @@ class TestLifecycleAuthorize:
         assert unknown["allowed"] is False
         assert unknown["reason"] == "agent:unknown"
 
+    def test_register_agent_denied_without_token_env(self, monkeypatch):
+        monkeypatch.delenv("MONITOR_REGISTRATION_TOKEN", raising=False)
+        m = fresh_module()
+        result = m.handle_tool(
+            "lifecycle_register_agent",
+            {"agent": "worker-1", "status": "active", "token": "anything"},
+        )
+        assert "error" in result
+        assert "MONITOR_REGISTRATION_TOKEN" in result["error"]
+
+    def test_register_agent_denied_with_wrong_token(self, monkeypatch):
+        monkeypatch.setenv("MONITOR_REGISTRATION_TOKEN", "right-token")
+        m = fresh_module()
+        result = m.handle_tool(
+            "lifecycle_register_agent",
+            {"agent": "worker-1", "status": "active", "token": "wrong-token"},
+        )
+        assert "error" in result
+
+    def test_register_agent_denied_without_token_arg(self, monkeypatch):
+        monkeypatch.setenv("MONITOR_REGISTRATION_TOKEN", "right-token")
+        m = fresh_module()
+        result = m.handle_tool(
+            "lifecycle_register_agent",
+            {"agent": "worker-1", "status": "active"},
+        )
+        assert "error" in result
+
     def test_register_agent_missing_name(self):
         m = fresh_module()
         result = m.handle_tool("lifecycle_register_agent", {})
@@ -274,11 +304,12 @@ class TestLifecycleAuthorize:
         else:
             raise AssertionError("expected MONITOR_REGISTRY missing-file error")
 
-    def test_suspended_denied(self):
+    def test_suspended_denied(self, monkeypatch):
+        monkeypatch.setenv("MONITOR_REGISTRATION_TOKEN", "test-token")
         m = fresh_module()
         m.handle_tool(
             "lifecycle_register_agent",
-            {"agent": "bad", "trust": "low", "status": "suspended"},
+            {"agent": "bad", "trust": "low", "status": "suspended", "token": "test-token"},
         )
         result = m.handle_tool(
             "lifecycle_authorize",
@@ -290,11 +321,12 @@ class TestLifecycleAuthorize:
         assert result["allowed"] is False
         assert result["reason"] == "agent:suspended"
 
-    def test_retired_denied(self):
+    def test_retired_denied(self, monkeypatch):
+        monkeypatch.setenv("MONITOR_REGISTRATION_TOKEN", "test-token")
         m = fresh_module()
         m.handle_tool(
             "lifecycle_register_agent",
-            {"agent": "old", "trust": "low", "status": "retired"},
+            {"agent": "old", "trust": "low", "status": "retired", "token": "test-token"},
         )
         result = m.handle_tool(
             "lifecycle_authorize",
