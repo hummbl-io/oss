@@ -16,19 +16,9 @@ Or via uv:
 
 from __future__ import annotations
 
-import sys
 from typing import Any
 
 from hummbl_mcp.graph_tools import get_handlers, get_tool_definitions
-from hummbl_mcp.protocol import (
-    INTERNAL_ERROR,
-    METHOD_NOT_FOUND,
-    JsonRpcError,
-    JsonRpcRequest,
-    error_response,
-    parse_request_line,
-    success_response,
-)
 from hummbl_mcp.server import HummblMCPServer
 
 

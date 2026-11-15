@@ -43,6 +43,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import Art30Record
 
 logger = logging.getLogger(__name__)
@@ -50,8 +51,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-
-_HMAC_KEY = b"hummbl-governance-receipt-key-v1"
 
 _SECURITY_MEASURES_SUMMARY = (
     "HMAC-SHA256 signed receipts, append-only audit log, "
@@ -87,7 +86,7 @@ _SPECIAL_CATEGORY_KEYWORDS = {
 def _compute_hmac(record_id: str, generated_at: str, role: str, controller_name: str) -> str:
     """Compute HMAC-SHA256 over canonical record fields."""
     msg = f"{record_id}:{generated_at}:{role}:{controller_name}"
-    return hmac.new(_HMAC_KEY, msg.encode("utf-8"), hashlib.sha256).hexdigest()
+    return hmac.new(resolve_receipt_key(), msg.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 # ---------------------------------------------------------------------------

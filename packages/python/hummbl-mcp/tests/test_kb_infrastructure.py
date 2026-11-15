@@ -4,10 +4,7 @@
 Validates memory schemas, storage, queries, and context management.
 """
 
-import json
-import os
 import tempfile
-from pathlib import Path
 from hummbl_mcp.kb_tools import MemoryStore, ContextManager
 
 
