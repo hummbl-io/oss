@@ -36,7 +36,7 @@ def _safe_extract_tar(tf: tarfile.TarFile, dest: str) -> None:
         tf.extractall(dest, filter="data")
         return
     _validate_tar_members_manual(tf, dest)
-    tf.extractall(dest)
+    tf.extractall(dest)  # nosec B202 -- members pre-validated by _validate_tar_members_manual
 
 
 def _validate_tar_members_manual(tf: tarfile.TarFile, dest: str) -> None:
@@ -77,7 +77,7 @@ def _safe_extract_zip(zf: zipfile.ZipFile, dest: str) -> None:
         member_path = os.path.realpath(os.path.join(dest, name))
         if not member_path.startswith(dest_path + os.sep) and member_path != dest_path:
             raise ValueError(f"Refusing to extract path outside destination: {name}")
-    zf.extractall(dest)
+    zf.extractall(dest)  # nosec B202 -- member paths pre-validated above
 
 # ---------------------------------------------------------------------------
 # Installation recipes
@@ -267,47 +267,10 @@ def _install_binary(recipe: InstallRecipe) -> bool:
             archive_path = tmpdir / "download"
 
             # Download
-            urllib.request.urlretrieve(url, archive_path)
+            urllib.request.urlretrieve(url, archive_path)  # nosec B310 -- scheme allowlist enforced above
 
-            # Extract
-            if recipe.archive_type == "zip":
-                with zipfile.ZipFile(archive_path, "r") as zf:
-                    _safe_extract_zip(zf, str(tmpdir))
-            elif recipe.archive_type in ("tar.gz", "tgz"):
-                with tarfile.open(archive_path, "r:gz") as tf:
-                    _safe_extract_tar(tf, str(tmpdir))
-            elif recipe.archive_type == "tar.xz":
-                with tarfile.open(archive_path, "r:xz") as tf:
-                    _safe_extract_tar(tf, str(tmpdir))
-            elif recipe.archive_type == "gz":
-                import gzip
-                import shutil
-
-                out_path = tmpdir / recipe.binary
-                with gzip.open(archive_path, "rb") as f_in:
-                    with open(out_path, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                out_path.chmod(0o755)
-            elif recipe.archive_type == "raw":
-                out_path = tmpdir / recipe.binary
-                shutil.move(archive_path, out_path)
-                out_path.chmod(0o755)
-            else:
-                logger.error("Unknown archive type: %s", recipe.archive_type)
-                return False
-
-            # Find the binary
-            bin_path = None
-            for root, _dirs, files in os.walk(tmpdir):
-                for f in files:
-                    if f == recipe.binary or f.startswith(recipe.binary):
-                        bin_path = Path(root) / f
-                        break
-                if bin_path:
-                    break
-
+            bin_path = _extract_and_locate(recipe, archive_path, tmpdir)
             if not bin_path:
-                logger.error("Binary not found in archive: %s", recipe.binary)
                 return False
 
             # Install to user bin directory
@@ -323,6 +286,42 @@ def _install_binary(recipe: InstallRecipe) -> bool:
     except Exception as e:
         logger.error("Binary install failed: %s", e)
         return False
+
+
+def _extract_and_locate(recipe: InstallRecipe, archive_path: Path, tmpdir: Path) -> Optional[Path]:
+    """Extract a downloaded archive into ``tmpdir`` and locate the binary."""
+    if recipe.archive_type == "zip":
+        with zipfile.ZipFile(archive_path, "r") as zf:
+            _safe_extract_zip(zf, str(tmpdir))
+    elif recipe.archive_type in ("tar.gz", "tgz"):
+        with tarfile.open(archive_path, "r:gz") as tf:
+            _safe_extract_tar(tf, str(tmpdir))
+    elif recipe.archive_type == "tar.xz":
+        with tarfile.open(archive_path, "r:xz") as tf:
+            _safe_extract_tar(tf, str(tmpdir))
+    elif recipe.archive_type == "gz":
+        import gzip
+
+        out_path = tmpdir / recipe.binary
+        with gzip.open(archive_path, "rb") as f_in:
+            with open(out_path, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        out_path.chmod(0o755)
+    elif recipe.archive_type == "raw":
+        out_path = tmpdir / recipe.binary
+        shutil.move(archive_path, out_path)
+        out_path.chmod(0o755)
+    else:
+        logger.error("Unknown archive type: %s", recipe.archive_type)
+        return None
+
+    for root, _dirs, files in os.walk(tmpdir):
+        for f in files:
+            if f == recipe.binary or f.startswith(recipe.binary):
+                return Path(root) / f
+
+    logger.error("Binary not found in archive: %s", recipe.binary)
+    return None
 
 
 # Manager dispatch

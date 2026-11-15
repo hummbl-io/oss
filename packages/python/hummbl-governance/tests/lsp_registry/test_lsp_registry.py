@@ -277,7 +277,7 @@ class TestRegistryExtensibility:
             server_id="custom-test",
             extensions=(".cust",),
             language_ids=("custom",),
-            resolve_root=lambda fp, ws: ws,
+            resolve_root=lambda _fp, ws: ws,
             build_spawn=lambda root, ctx: SpawnSpec(
                 command=["custom-ls"],
                 workspace_root=root,
@@ -304,7 +304,7 @@ class TestRegistryExtensibility:
         custom = ServerDef(
             server_id="custom-test-2",
             extensions=(".cust2",),
-            resolve_root=lambda fp, ws: ws,
+            resolve_root=lambda _fp, ws: ws,
             build_spawn=lambda root, ctx: None,
             description="Test",
         )
