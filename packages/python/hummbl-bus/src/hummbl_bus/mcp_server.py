@@ -598,12 +598,11 @@ def handle_tool(name: str, arguments: dict[str, object]) -> dict[str, object]:
         if not message:
             return {"error": "missing required argument: message"}
         try:
-            from .authority import PRIVILEGED_TYPES
+            from .authority import PRIVILEGED_OR_ELEVATED_TYPES
         except ImportError:
-            from hummbl_bus.authority import PRIVILEGED_TYPES
+            from hummbl_bus.authority import PRIVILEGED_OR_ELEVATED_TYPES
 
-        PRIVILEGED_OR_ELEVATED = PRIVILEGED_TYPES | {"VETO", "COMMAND", "APPROVE", "REJECT"}
-        if str(mtype).strip().upper() in PRIVILEGED_OR_ELEVATED:
+        if str(mtype).strip().upper() in PRIVILEGED_OR_ELEVATED_TYPES:
             return {
                 "posted": False,
                 "type": mtype,
