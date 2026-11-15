@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import subprocess
@@ -17,9 +16,9 @@ from hummbl_mcp._constants import (
     REMOTE_OLLAMA_URL,
 )
 
-# Import DelegationTokenManager for agent identity verification
+# Import delegation token types for agent identity verification
 try:
-    from hummbl_governance.delegation import DelegationTokenCapabilityToken, DelegationTokenManager
+    from hummbl_governance.delegation import DelegationTokenCapabilityToken
     _IDP_AVAILABLE = True
 except ImportError:
     _IDP_AVAILABLE = False
@@ -97,7 +96,7 @@ def _verify_tailscale_identity(origin_host: str) -> bool:
 
 def _verify_agent_identity_token(token_str: str, expected_subject: str) -> bool:
     """
-    Verify agent identity token using DelegationTokenManager.
+    Verify agent identity token signature, subject, and expiry.
     
     This validates that the request is from an authorized agent with a valid
     delegation capability token signed by the shared secret.
@@ -129,9 +128,6 @@ def _verify_agent_identity_token(token_str: str, expected_subject: str) -> bool:
         return False
 
     try:
-        # Initialize token manager
-        manager = DelegationTokenManager(secret=dct_secret.encode("utf-8"))
-        
         # Deserialize token
         token = DelegationTokenCapabilityToken.from_env_string(token_str)
         

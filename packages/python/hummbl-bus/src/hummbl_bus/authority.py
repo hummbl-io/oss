@@ -27,6 +27,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 PRIVILEGED_TYPES = frozenset({"DECISION", "DIRECTIVE"})
+ELEVATED_TYPES = frozenset({"VETO", "COMMAND", "APPROVE", "REJECT"})
+PRIVILEGED_OR_ELEVATED_TYPES = PRIVILEGED_TYPES | ELEVATED_TYPES
 DEFAULT_AUDIENCE = "hummbl-bus:coordination-bus:privileged-write"
 CANONICAL_BUS_ID = "hummbl-bus:canonical-coordination-bus"
 PRIVILEGED_MESSAGE_SCHEMA = "hummbl_bus.privileged_message.v1"

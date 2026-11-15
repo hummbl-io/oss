@@ -16,6 +16,8 @@
 
 """Tests for hummbl_governance.human_review_gate (P53 HumanReviewGate)."""
 
+import hashlib
+import hmac
 import json
 import tempfile
 import time
@@ -114,6 +116,18 @@ class TestRequestReview:
         receipt = _open_gate(gate)
         assert receipt.receipt_hmac
         assert len(receipt.receipt_hmac) == 64  # SHA-256 hex
+
+    def test_custom_hmac_key_override_honored(self, mgr, tmp_dir):
+        """Caller-supplied hmac_key signs both PENDING and decided receipts."""
+        key = b"test-override-key"
+        store = tmp_dir / "gate_receipts.jsonl"
+        custom_gate = HumanReviewGate(
+            approval_manager=mgr, store_path=store, hmac_key=key
+        )
+        receipt = _open_gate(custom_gate)
+        msg = f"{receipt.gate_id}:PENDING:{receipt.timestamp_requested}".encode()
+        expected = hmac.new(key, msg, hashlib.sha256).hexdigest()
+        assert receipt.receipt_hmac == expected
 
     def test_none_mode_raises_before_creating_gate(self, gate):
         with pytest.raises(Art22ModeError):
