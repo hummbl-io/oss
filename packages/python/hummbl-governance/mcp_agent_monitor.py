@@ -29,19 +29,22 @@ Tools:
     convergence_check       - Check an agent for convergent behavior
     convergence_scores      - Get per-goal scores for an agent
     lifecycle_register_agent - Register an agent on the in-process registry
+                              (host-gated by MONITOR_REGISTRATION_TOKEN)
     lifecycle_authorize     - Run full NIST RMF authorization check.
-                              Fail-closed: unknown agents are denied
-                              (agent:unknown). Register via
-                              lifecycle_register_agent or preload
-                              MONITOR_REGISTRY JSON. Suspended/retired
-                              stay denied. allow_unregistered_agents is
-                              off by default and is not set here.
+                              Fail-closed: only status 'active' is
+                              authorized; unknown agents are denied
+                              (agent:unknown) unless the host opts in.
+                              Register via lifecycle_register_agent
+                              (token required) or preload MONITOR_REGISTRY
+                              JSON. allow_unregistered_agents is off by
+                              default and is not set here.
     lifecycle_status        - Get full governance lifecycle status snapshot
     lineage_record_variant  - Register a new variant in the lineage graph
     lineage_get             - Get variant details and ancestry
     lineage_drift           - Detect parent-to-child fitness drift
 """
 
+import hmac
 import json
 import os
 import sys
@@ -218,6 +221,22 @@ def _lifecycle_register_agent(args: dict) -> dict:
     agent = args.get("agent") or args.get("agent_id") or ""
     if not agent:
         return {"error": "agent required"}
+    # Registration mints an "active" identity, so it is host-gated: the
+    # MONITOR_REGISTRATION_TOKEN env var must be set on the server and the
+    # caller must present the same value as "token". Hosts that do not need
+    # dynamic registration should preload a roster via MONITOR_REGISTRY.
+    expected = os.environ.get("MONITOR_REGISTRATION_TOKEN", "")
+    provided = str(args.get("token", ""))
+    if not expected or not hmac.compare_digest(
+        provided.encode("utf-8", "replace"), expected.encode("utf-8", "replace")
+    ):
+        return {
+            "error": (
+                "registration requires MONITOR_REGISTRATION_TOKEN to be set "
+                "on the server and a matching 'token' argument; alternatively "
+                "preload the roster via MONITOR_REGISTRY"
+            )
+        }
     trust = args.get("trust", "medium")
     status = args.get("status", "active")
     display = args.get("display")
@@ -423,7 +442,9 @@ _TOOL_SCHEMAS = [
         "name": "lifecycle_register_agent",
         "description": (
             "Register an agent on this server's in-process registry so "
-            "lifecycle_authorize can allow it. Unknown agents are denied by "
+            "lifecycle_authorize can allow it. Host-gated: requires the "
+            "MONITOR_REGISTRATION_TOKEN env var on the server plus a matching "
+            "'token' argument. Unknown agents are denied by "
             "default. Hosts may also preload a JSON roster via MONITOR_REGISTRY "
             "or construct GovernanceLifecycle with their own AgentRegistry. "
             "This does not enable allow_unregistered_agents."
@@ -432,6 +453,10 @@ _TOOL_SCHEMAS = [
             "type": "object",
             "properties": {
                 "agent": {"type": "string"},
+                "token": {
+                    "type": "string",
+                    "description": "Must match the server's MONITOR_REGISTRATION_TOKEN",
+                },
                 "trust": {"type": "string", "description": "Trust tier (default medium)"},
                 "status": {"type": "string", "description": "Registry status (default active)"},
                 "display": {"type": "string"},
@@ -445,7 +470,9 @@ _TOOL_SCHEMAS = [
             "Run full NIST AI RMF governance check (kill switch + identity + "
             "circuit breaker + cost). Fail-closed: unknown agents are denied "
             "(agent:unknown). Register agents with lifecycle_register_agent "
-            "or MONITOR_REGISTRY JSON. Suspended/retired stay denied. "
+            "(requires MONITOR_REGISTRATION_TOKEN) or MONITOR_REGISTRY JSON. "
+            "Only status 'active' is authorized; suspended/retired/deprecated/"
+            "probation and unrecognized statuses are denied. "
             "allow_unregistered_agents is not enabled on this path."
         ),
         "inputSchema": {
