@@ -28,7 +28,6 @@ from hummbl_mcp.protocol import (
     ToolDefinition,
     error_response,
     parse_request_line,
-    serialize_response,
     success_response,
 )
 from hummbl_mcp.receipts import ReceiptTimer

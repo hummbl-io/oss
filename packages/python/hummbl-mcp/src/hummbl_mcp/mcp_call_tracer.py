@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import contextlib
 import functools
+import json
 import logging
 import os
 import time
@@ -198,8 +199,6 @@ class MCPCallTracer:
 # ---------------------------------------------------------------------------
 # MCP stdio server
 # ---------------------------------------------------------------------------
-
-import json
 
 _TRACER_SERVER_NAME = "mcp-call-tracer"
 _TRACER_SERVER_VERSION = "0.1.0"

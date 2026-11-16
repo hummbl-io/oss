@@ -37,11 +37,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import DPIADocument, DPIASection
 
 logger = logging.getLogger(__name__)
-
-_HMAC_KEY = b"hummbl-governance-receipt-key-v1"
 
 _ART35_SECTION_TITLES = [
     "Systematic Description of Processing",
@@ -74,7 +73,7 @@ _FRIA_RIGHTS = [
 
 def _compute_hmac(dpia_id: str, generated_at: str, system_name: str) -> str:
     msg = f"{dpia_id}:{generated_at}:{system_name}"
-    return hmac.new(_HMAC_KEY, msg.encode(), hashlib.sha256).hexdigest()
+    return hmac.new(resolve_receipt_key(), msg.encode(), hashlib.sha256).hexdigest()
 
 
 def _now_iso() -> str:
