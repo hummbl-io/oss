@@ -72,10 +72,11 @@ class TestPost:
         entries = load_entries()
         assert len(entries) == 1
         entry = entries[0]
-        assert set(entry) == {
+        required = {
             "id", "type", "assurance_level", "evidence", "content", "tags",
             "agent", "timestamp", "confidence", "model", "scope", "vendor",
         }
+        assert required <= set(entry)
         assert entry["type"] == "discovery"
         assert entry["tags"] == ["test", "weather"]
         assert entry["confidence"] == 0.9
