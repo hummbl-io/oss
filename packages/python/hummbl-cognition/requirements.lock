@@ -3,7 +3,6 @@
 hummbl-bus==0.1.0
     # via hummbl-cognition (pyproject.toml)
 hummbl-governance==1.4.2
-    # via
-    #   hummbl-cognition (pyproject.toml)
-    #   hummbl-bus
+    # via hummbl-cognition (pyproject.toml)
+    # via hummbl-bus
 # inputs-sha256: 404fd76338a137caacda6db1e62ef5d7456275b67fd48f7490af8abeb7519f4a
