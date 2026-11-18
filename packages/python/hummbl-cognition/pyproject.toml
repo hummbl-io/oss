@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "hummbl-bus>=0.1.0",
+    "hummbl-governance>=1.2.2",
 ]
 
 [project.urls]
