@@ -18,6 +18,7 @@ reports/*.json
 .coverage
 .kernel/
 _state/
+_worktrees/
 
 # Credentials and secrets
 .env
