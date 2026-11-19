@@ -98,6 +98,7 @@ Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Mat
 | Package | Tree | Status |
 |---------|------|--------|
 | `@hummbl/mcp-base120` | 0.1.0-canary.0 | Private, no-egress Base120 catalog canary. New public corpus redistribution is on hold; rights reconciliation, distributable-package architecture, release provenance, hosted parity, and privacy gates remain open. |
+| `@hummbl/mcp-server` | 1.3.0 | Base120 mental-models MCP server (stdio) prepared for MCP Registry publishing. Scrubbed public copy of the private `hummbl-io/mcp-server` source; `@hummbl/mcp-server@1.2.1` is live on npm from the private repo — this tree prepares the next minor. npm publish + registry publish remain manual owner steps. |
 Previously published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
 - `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
@@ -114,7 +115,7 @@ public-launch, package-license, content-rights, and admission states.
 | Tree | Status |
 |------|--------|
 | `packages/lean/hummbl-formalization` | Present. Not in Python CI. Not a PyPI package. Do not call runtime packages "formally verified". |
-| `packages/node/` | Present with one private technical canary. No live npm package. |
+| `packages/node/` | Present with one private technical canary and one publish-pending package. `@hummbl/mcp-server@1.2.1` is live on npm (published from the private source repo); no package has been published from this tree yet. |
 | `packages/rust/`, `packages/go/`, `packages/jvm/` | **Absent.** |
 ---
 ## Monorepo consolidation status
