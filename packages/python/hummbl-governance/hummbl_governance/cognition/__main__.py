@@ -32,6 +32,7 @@ import sys
 
 from hummbl_governance.cognition.boot_context import build_boot_context
 from hummbl_governance.cognition.indexer import (
+    detect_index_schema,
     load_index,
     reindex,
     search_index,
@@ -96,7 +97,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("terms", help="search terms")
     s.add_argument("--limit", type=int, default=10)
 
-    sub.add_parser("reindex", help="rebuild the BM25 index over all entries")
+    rp = sub.add_parser("reindex", help="rebuild the BM25 index over all entries")
+    rp.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite an index.json owned by another writer (e.g. hummbl_cognition)",
+    )
     sub.add_parser("boot", help="print the session boot context")
     sub.add_parser("state", help="ledger stats (counts, index freshness, last write)")
     return parser
@@ -159,6 +165,15 @@ def _cmd_search(args: argparse.Namespace) -> int:
     if index is None:
         print("error: no index found; run 'reindex' first", file=sys.stderr)
         return 1
+    schema = detect_index_schema(index)
+    if schema == "hummbl_cognition":
+        print(
+            "error: index.json is in hummbl_cognition (Open Brain) format; "
+            "this BM25 search cannot read it. Use "
+            "`python -m hummbl_cognition search` instead.",
+            file=sys.stderr,
+        )
+        return 1
     results = search_index(args.terms, entries, index, top_k=args.limit)
     for entry, score in results:
         print(f"{score:7.3f}  {render(entry)}")
@@ -168,6 +183,22 @@ def _cmd_search(args: argparse.Namespace) -> int:
 
 def _cmd_reindex(args: argparse.Namespace) -> int:
     entries = load_entries()
+    existing = load_index()
+    if existing is not None and detect_index_schema(existing) == "hummbl_cognition":
+        if not args.force:
+            print(
+                "error: index.json is owned by hummbl_cognition (Open Brain); "
+                "reindexing here would clobber its format and break Open Brain "
+                "retrieval. Use `python -m hummbl_cognition reindex`, or pass "
+                "--force to overwrite anyway.",
+                file=sys.stderr,
+            )
+            return 1
+        print(
+            "warning: --force overwriting a hummbl_cognition-format index.json; "
+            "Open Brain retrieval will degrade until its next reindex",
+            file=sys.stderr,
+        )
     # Don't pass root explicitly so $COGNITION_LEDGER can override the index path.
     path = reindex(entries)
     print(json.dumps({"indexed": len(entries), "path": str(path)}))

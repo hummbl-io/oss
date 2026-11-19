@@ -33,7 +33,13 @@ from pathlib import Path
 
 from hummbl_governance.cognition.ledger_writer import ledger_path, resolve_root
 
-__all__ = ["build_index", "index_path", "load_index", "search_index"]
+__all__ = [
+    "build_index",
+    "detect_index_schema",
+    "index_path",
+    "load_index",
+    "search_index",
+]
 
 _K1 = 1.5
 _B = 0.75
@@ -109,6 +115,26 @@ def load_index(root: Path | None = None) -> dict | None:
         return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return None
+
+
+def detect_index_schema(index: dict | None) -> str:
+    """Classify an on-disk ``index.json`` document by writer.
+
+    Returns ``"governance"`` for this module's ``docs``/``df`` BM25 schema,
+    ``"hummbl_cognition"`` for the Open Brain ``inverted_index``/``stats``
+    schema, or ``"unknown"`` for anything else (including ``None``).
+
+    Both packages share ``<ledger-dir>/index.json``; whichever writer ran
+    last owns the file. Reading the wrong schema silently yields zero hits,
+    so callers must check before searching or reindexing.
+    """
+    if not isinstance(index, dict):
+        return "unknown"
+    if "docs" in index or "df" in index:
+        return "governance"
+    if "inverted_index" in index or "stats" in index:
+        return "hummbl_cognition"
+    return "unknown"
 
 
 def search_index(
