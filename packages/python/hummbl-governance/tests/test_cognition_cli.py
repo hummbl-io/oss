@@ -324,6 +324,17 @@ class TestSearchAndBoot:
         index = load_index()
         assert index is not None and index["n_docs"] == 1
 
+    def test_reindex_repairs_undecodable_index(self, ledger_root):
+        """Invalid UTF-8 in index.json is corrupt state, not a schema --
+        reindex must rebuild rather than crash on UnicodeDecodeError."""
+        main(POST_ARGS)
+        path = ledger_root / "_state" / "cognition" / "index.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b'{"docs": {"x": \xff\xfe}}')
+        assert main(["reindex"]) == 0
+        index = load_index()
+        assert index is not None and index["n_docs"] == 1
+
     def test_boot_context(self, ledger_root, capsys):
         main(POST_ARGS)
         assert main(["boot"]) == 0

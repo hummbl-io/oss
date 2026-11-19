@@ -113,7 +113,10 @@ def load_index(root: Path | None = None) -> dict | None:
         return None
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
+    except ValueError:
+        # JSONDecodeError and UnicodeDecodeError are both ValueErrors;
+        # undecodable bytes are corrupt state, same as bad JSON -- treat
+        # as absent so reindex can rebuild rather than aborting.
         return None
 
 
