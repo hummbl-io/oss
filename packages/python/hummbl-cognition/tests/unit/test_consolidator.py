@@ -212,6 +212,7 @@ class TestRunConsolidation:
         assert len(consolidated) >= 1
         assert consolidated[0].agent == "consolidator"
         assert consolidated[0].links  # Should link to source entries
+        assert "synthesis-fallback" not in consolidated[0].tags
 
     @patch("hummbl_cognition.consolidator._ollama_generate")
     def test_fallback_when_ollama_down(self, mock_ollama, tmp_path):
@@ -235,6 +236,8 @@ class TestRunConsolidation:
         consolidated = [e for e in final_entries if "consolidated" in e.tags]
         assert len(consolidated) >= 1
         assert "Consolidated from related entries" in consolidated[0].content
+        # Fallback output must be distinguishable from LLM syntheses
+        assert "synthesis-fallback" in consolidated[0].tags
 
     def test_skips_already_consolidated(self, tmp_path):
         from hummbl_cognition.consolidator import run_consolidation
