@@ -7,23 +7,23 @@ Stdlib-only: zero third-party runtime dependencies.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
-from dataclasses import asdict, dataclass, field
 import datetime
 import hashlib
 import hmac
 import json
 import os
-from pathlib import Path
 import sys
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from contextlib import contextmanager
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any
 
 PROTOCOL_VERSION = "0.2.0"
 MAX_MIN_QUORUM = 1_000_000  # same bound in Go; larger values are rejected, not DEFERred
 
 
-def validate_min_quorum(value: Any) -> Optional[int]:
+def validate_min_quorum(value: Any) -> int | None:
     """None (default: all registered reviewers) or an int in 1..MAX_MIN_QUORUM. Rejects
     bools, floats, strings, 0, negatives and oversized values. Identical rule in Go."""
     if value is None:
@@ -56,7 +56,6 @@ def _canonical_json(data: Any) -> str:
 
 def _fsync_dir(directory: Path) -> None:
     """fsync a directory so a rename is durable (POSIX). No-op where unsupported (Windows)."""
-    import os
     flags = getattr(os, "O_DIRECTORY", None)
     if flags is None:
         return
@@ -74,7 +73,6 @@ def _fsync_dir(directory: Path) -> None:
 
 def _atomic_write_json(path: Path, data: Any) -> None:
     """Write JSON via temp file + os.replace so concurrent readers never see a partial file."""
-    import os
     import tempfile
     path = Path(path)
     import time
@@ -112,7 +110,6 @@ def _read_json(path: Path) -> Any:
     ``PermissionError`` while the replace is in flight. Mirror the write-side
     retry so parallel converges don't spuriously fail on the read.
     """
-    import os
     import time
     path = Path(path)
     for attempt in range(20):
@@ -165,7 +162,7 @@ class Finding:
     evidence: str
     recommendation: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -177,10 +174,10 @@ class StreamEntry:
     reviewer: str
     phase: str  # review, rebuttal, meta-review, convergence
     prev_hash: str
-    findings: List[Dict[str, Any]]
-    verdict: Optional[str]  # approve, request_changes, block, defer
-    rebuttal_to: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    findings: list[dict[str, Any]]
+    verdict: str | None  # approve, request_changes, block, defer
+    rebuttal_to: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     entry_hash: str = ""
     signature: str = ""
 
@@ -214,7 +211,7 @@ class StreamEntry:
             text = text.replace(raw, esc)
         return _compute_sha256(text.encode("utf-8"))
 
-    def sign(self, secret_key: Optional[str]) -> None:
+    def sign(self, secret_key: str | None) -> None:
         self.entry_hash = self.compute_hash()
         if secret_key:
             sig = hmac.new(
@@ -234,7 +231,7 @@ class StreamEntry:
             return "legacy"
         return "none"
 
-    def verify_entry(self, secret_key: Optional[str] = None, allow_legacy: bool = False) -> Tuple[bool, str]:
+    def verify_entry(self, secret_key: str | None = None, allow_legacy: bool = False) -> tuple[bool, str]:
         expected_hash = self.compute_hash()
         if allow_legacy and self.entry_hash != expected_hash and self.compute_legacy_go_hash() == self.entry_hash:
             expected_hash = self.entry_hash  # accepted: wags-go 0.1.0 legacy encoding (0.1.0 targets only)
@@ -252,14 +249,14 @@ class StreamEntry:
                 return False, "HMAC signature verification failed"
         return True, "OK"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
 class WagsWorkspace:
     """Air-gapped filesystem workspace managing wags peer reviews."""
 
-    def __init__(self, workspace_root: Optional[Path | str] = None):
+    def __init__(self, workspace_root: Path | str | None = None):
         if workspace_root is None:
             workspace_root = Path.cwd() / ".wags"
         self.root = Path(workspace_root).resolve()
@@ -273,14 +270,14 @@ class WagsWorkspace:
         if not self.index_file.exists():
             self._write_index({"protocol_version": PROTOCOL_VERSION, "reviews": {}})
 
-    def _read_index(self) -> Dict[str, Any]:
+    def _read_index(self) -> dict[str, Any]:
         try:
             with open(self.index_file, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception:
             return {"protocol_version": PROTOCOL_VERSION, "reviews": {}}
 
-    def _write_index(self, data: Dict[str, Any]) -> None:
+    def _write_index(self, data: dict[str, Any]) -> None:
         _atomic_write_json(self.index_file, data)
 
     def init_review(
@@ -289,8 +286,8 @@ class WagsWorkspace:
         target_type: str = "code",
         description: str = "",
         initiator: str = "gemini",
-        review_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        review_id: str | None = None,
+    ) -> dict[str, Any]:
         target_p = Path(target_path).resolve()
         if not target_p.exists():
             raise FileNotFoundError(f"Target path does not exist: {target_p}")
@@ -345,9 +342,9 @@ class WagsWorkspace:
         self,
         review_id: str,
         reviewer_name: str,
-        secret_key: Optional[str] = None,
+        secret_key: str | None = None,
         role: str = "reviewer",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         rev_dir = self.reviews_dir / review_id
         if not rev_dir.exists():
             raise ValueError(f"Review {review_id} not found")
@@ -370,7 +367,7 @@ class WagsWorkspace:
 
             return data[reviewer_name]
 
-    def _get_reviewer_last_entry(self, review_id: str, reviewer_name: str) -> Tuple[int, str]:
+    def _get_reviewer_last_entry(self, review_id: str, reviewer_name: str) -> tuple[int, str]:
         stream_path = self.reviews_dir / review_id / f"{reviewer_name}.jsonl"
         if not stream_path.exists():
             return 0, GENESIS_HASH
@@ -395,13 +392,13 @@ class WagsWorkspace:
         review_id: str,
         reviewer_name: str,
         phase: str = "review",
-        findings: Optional[List[Dict[str, Any] | Finding]] = None,
-        verdict: Optional[str] = None,
-        rebuttal_to: Optional[str] = None,
-        secret_key: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        resolves: Optional[List[str]] = None,
-        supersedes: Optional[List[str]] = None,
+        findings: list[dict[str, Any] | Finding] | None = None,
+        verdict: str | None = None,
+        rebuttal_to: str | None = None,
+        secret_key: str | None = None,
+        metadata: dict[str, Any] | None = None,
+        resolves: list[str] | None = None,
+        supersedes: list[str] | None = None,
     ) -> StreamEntry:
         rev_dir = self.reviews_dir / review_id
         if not rev_dir.exists():
@@ -416,7 +413,7 @@ class WagsWorkspace:
             if supersedes is not None:
                 metadata["supersedes"] = list(supersedes)
 
-        findings_dicts: List[Dict[str, Any]] = []
+        findings_dicts: list[dict[str, Any]] = []
         if findings:
             for item in findings:
                 if isinstance(item, Finding):
@@ -468,14 +465,13 @@ class WagsWorkspace:
 
         return entry
 
-    def tail_review(self, review_id: str) -> List[StreamEntry]:
+    def tail_review(self, review_id: str) -> list[StreamEntry]:
         rev_dir = self.reviews_dir / review_id
         if not rev_dir.exists():
             raise ValueError(f"Review {review_id} not found")
 
-        all_entries: List[StreamEntry] = []
+        all_entries: list[StreamEntry] = []
         for path in rev_dir.glob("*.jsonl"):
-            reviewer_name = path.stem
             with open(path, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
@@ -506,13 +502,13 @@ class WagsWorkspace:
         all_entries.sort(key=lambda e: (e.timestamp, e.sequence))
         return all_entries
 
-    def verify_review(self, review_id: str, keys: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    def verify_review(self, review_id: str, keys: dict[str, str] | None = None) -> dict[str, Any]:
         rev_dir = self.reviews_dir / review_id
         if not rev_dir.exists():
             raise ValueError(f"Review {review_id} not found")
 
         keys = keys or {}
-        results: Dict[str, Any] = {"review_id": review_id, "streams": {}, "valid": True}
+        results: dict[str, Any] = {"review_id": review_id, "streams": {}, "valid": True}
         target_proto = self._target_protocol(rev_dir)
         # Legacy Go hash form only for genuine 0.1.0 reviews (no 0.2.0 markers).
         legacy_target = target_proto == "0.1.0" and not self._uses_020_features(rev_dir)
@@ -525,7 +521,7 @@ class WagsWorkspace:
             stream_valid = True
             errors = []
             expected_prev = GENESIS_HASH
-            prior_dicts: List[Dict[str, Any]] = []
+            prior_dicts: list[dict[str, Any]] = []
             seen_canonical = False
 
             with open(path, "r", encoding="utf-8") as f:
@@ -606,7 +602,7 @@ class WagsWorkspace:
     # Finding resolution (protocol 0.2.0)
     # ------------------------------------------------------------------
     @staticmethod
-    def _load_prev_convergence(rev_dir: Path) -> Tuple[str, Dict[str, Any]]:
+    def _load_prev_convergence(rev_dir: Path) -> tuple[str, dict[str, Any]]:
         """Return (anchor_status, data): 'absent' | 'unparseable' | 'present'."""
         conv_file = rev_dir / "converged.json"
         if not conv_file.exists():
@@ -620,9 +616,9 @@ class WagsWorkspace:
         return "present", data
 
     @classmethod
-    def _uses_020_features(cls, rev_dir: Path) -> List[str]:
+    def _uses_020_features(cls, rev_dir: Path) -> list[str]:
         """0.2.0-only features found in a review (entries or converged.json)."""
-        found: List[str] = []
+        found: list[str] = []
         for path in sorted(rev_dir.glob("*.jsonl")):
             for d in cls._read_stream_dicts(path):
                 md = d.get("metadata")
@@ -677,9 +673,9 @@ class WagsWorkspace:
             return set()
 
     @staticmethod
-    def _read_stream_dicts(path: Path) -> List[Dict[str, Any]]:
+    def _read_stream_dicts(path: Path) -> list[dict[str, Any]]:
         """Read a reviewer stream in file (append) order."""
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -692,7 +688,7 @@ class WagsWorkspace:
         return out
 
     @staticmethod
-    def _resolution_refs(d: Dict[str, Any]) -> Tuple[Any, Any]:
+    def _resolution_refs(d: dict[str, Any]) -> tuple[Any, Any]:
         md = d.get("metadata") or {}
         if not isinstance(md, dict):
             return [], []
@@ -700,10 +696,10 @@ class WagsWorkspace:
 
     @staticmethod
     def _check_resolution_refs(
-        prior: List[Dict[str, Any]], resolves: Any, supersedes: Any, present: Optional[Any] = None
-    ) -> List[str]:
+        prior: list[dict[str, Any]], resolves: Any, supersedes: Any, present: Any | None = None
+    ) -> list[str]:
         """Validate resolves/supersedes against the reviewer's OWN earlier entries."""
-        errors: List[str] = []
+        errors: list[str] = []
         prior_ids = {f.get("id") for e in prior for f in e.get("findings", []) if isinstance(f, dict)}
         prior_hashes = {e.get("entry_hash") for e in prior}
         if not isinstance(resolves, list) or not all(isinstance(x, str) for x in resolves):
@@ -725,7 +721,7 @@ class WagsWorkspace:
         return errors
 
     @classmethod
-    def _stream_state(cls, entries: List[Dict[str, Any]]) -> Tuple[Optional[str], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def _stream_state(cls, entries: list[dict[str, Any]]) -> tuple[str | None, list[dict[str, Any]], list[dict[str, Any]]]:
         """Return (latest_verdict, open_findings, resolved_findings) for one stream.
 
         Entries are processed in ``sequence`` order. A resolving entry at
@@ -736,8 +732,8 @@ class WagsWorkspace:
         (verify_review reports them).
         """
         entries = sorted(entries, key=lambda e: e.get("sequence", 0))
-        latest_verdict: Optional[str] = None
-        instances: List[Dict[str, Any]] = []  # {"pos", "hash", "finding", "resolved"}
+        latest_verdict: str | None = None
+        instances: list[dict[str, Any]] = []  # {"pos", "hash", "finding", "resolved"}
         for idx, d in enumerate(entries):
             resolves, supersedes = cls._resolution_refs(d)
             md_d = d.get("metadata") if isinstance(d.get("metadata"), dict) else {}
@@ -754,8 +750,8 @@ class WagsWorkspace:
         resolved_f = [i["finding"] for i in instances if i["resolved"]]
         return latest_verdict, open_f, resolved_f
 
-    def converge_review(self, review_id: str, keys: Optional[Dict[str, str]] = None,
-                        min_quorum: Optional[int] = None) -> Dict[str, Any]:
+    def converge_review(self, review_id: str, keys: dict[str, str] | None = None,
+                        min_quorum: int | None = None) -> dict[str, Any]:
         """Compute consensus using each reviewer's latest verdict and open findings.
 
         - Verdict per reviewer = verdict of their latest entry that has one.
@@ -780,15 +776,15 @@ class WagsWorkspace:
         # targets an unregistered stream with entries fails verify -> BLOCK.
         legacy_all = verification.get("registry_mode") == "legacy_all_streams"
         registry_mode = "legacy_all_streams" if legacy_all else "registered"
-        invalid_streams: List[Dict[str, Any]] = []
-        unregistered_streams: List[str] = []
+        invalid_streams: list[dict[str, Any]] = []
+        unregistered_streams: list[str] = []
 
         # Anchors from the previous convergence (truncation / deletion / downgrade detection).
         anchor_status, prev = self._load_prev_convergence(rev_dir)
-        prev_anchors: Dict[str, Any] = prev.get("anchors", {}) or {}
-        prev_ctx: Dict[str, Any] = prev.get("anchor_context") or {} if isinstance(prev.get("anchor_context"), dict) else {}
+        prev_anchors: dict[str, Any] = prev.get("anchors", {}) or {}
+        prev_ctx: dict[str, Any] = prev.get("anchor_context") or {} if isinstance(prev.get("anchor_context"), dict) else {}
         target_proto = self._target_protocol(rev_dir)
-        anchor_problems: List[str] = []
+        anchor_problems: list[str] = []
         if anchor_status == "unparseable":
             anchor_problems.append("converged.json is unparseable; previous anchors lost")
         if prev.get("anchor_lost"):
@@ -812,7 +808,7 @@ class WagsWorkspace:
             elif any("resolves/supersedes" in x for x in feats):
                 anchor_problems.append("target.json says 0.1.0 but entries use resolves/supersedes (0.2.0): "
                                        + "; ".join(x for x in feats if "resolves/supersedes" in x))
-        regressed_streams: List[Dict[str, Any]] = []
+        regressed_streams: list[dict[str, Any]] = []
         for anchored, a in sorted(prev_anchors.items()):
             ap = rev_dir / f"{anchored}.jsonl"
             cur = self._read_stream_dicts(ap) if ap.exists() else []
@@ -830,14 +826,14 @@ class WagsWorkspace:
                 continue
             regressed_streams.append({"reviewer": anchored, "anchor": {"sequence": seq, "entry_hash": h}, "reason": reason})
 
-        reviewer_latest_verdicts: Dict[str, str] = {}
-        all_findings: List[Dict[str, Any]] = []
+        reviewer_latest_verdicts: dict[str, str] = {}
+        all_findings: list[dict[str, Any]] = []
         all_severity_counts = {"P0": 0, "P1": 0, "P2": 0, "P3": 0, "N": 0}
-        unknown_severity_findings: List[Dict[str, Any]] = []
-        open_findings: List[Dict[str, Any]] = []
-        resolved_findings: List[Dict[str, Any]] = []
+        unknown_severity_findings: list[dict[str, Any]] = []
+        open_findings: list[dict[str, Any]] = []
+        resolved_findings: list[dict[str, Any]] = []
         severity_counts = {"P0": 0, "P1": 0, "P2": 0, "P3": 0, "N": 0}
-        blocking_findings: List[Dict[str, Any]] = []
+        blocking_findings: list[dict[str, Any]] = []
 
         for path in sorted(rev_dir.glob("*.jsonl")):
             reviewer = path.stem
@@ -926,7 +922,7 @@ class WagsWorkspace:
         # intervenes. Anchors only help if converged.json is kept somewhere
         # tamper-resistant (committed to git or published) -- see spec 4.6.
         regressed_names = {x["reviewer"] for x in regressed_streams}
-        anchors: Dict[str, Any] = {n: a for n, a in prev_anchors.items() if n in regressed_names}
+        anchors: dict[str, Any] = {n: a for n, a in prev_anchors.items() if n in regressed_names}
         for path in sorted(rev_dir.glob("*.jsonl")):
             name = path.stem
             if name in regressed_names or (not legacy_all and name not in registered):

@@ -1,13 +1,12 @@
 """Regression tests for authenticated review identity and registry updates."""
 
-from concurrent.futures import ThreadPoolExecutor
 import json
-from pathlib import Path
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 import pytest
-
 import wags
 from wags import WagsWorkspace
 

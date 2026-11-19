@@ -4,12 +4,12 @@
 """
 
 import json
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
-from wags import Finding, PROTOCOL_VERSION, StreamEntry, WagsWorkspace
+from wags import PROTOCOL_VERSION, Finding, WagsWorkspace
 
 
 class TestWagsEngine(unittest.TestCase):

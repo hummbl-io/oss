@@ -9,11 +9,11 @@ Tests that Go can verify Python-written entries and vice versa, including:
 
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 
 from wags import Finding, WagsWorkspace
 
@@ -36,6 +36,7 @@ def _go_verify(review_id: str, workspace: str) -> subprocess.CompletedProcess:
         capture_output=True,
         text=True,
         timeout=60,
+        check=False,
     )
 
 
@@ -48,6 +49,7 @@ def _go_converge(review_id: str, workspace: str) -> subprocess.CompletedProcess:
         capture_output=True,
         text=True,
         timeout=60,
+        check=False,
     )
 
 

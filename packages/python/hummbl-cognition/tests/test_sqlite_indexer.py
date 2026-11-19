@@ -1,10 +1,17 @@
 """Unit tests for Tier 1 SQLite WAL indexer (relational + FTS5 + recursive graph traversal)."""
 import tempfile
 from pathlib import Path
+
 import pytest
+
 from hummbl_cognition.ledger_writer import read_entries
 from hummbl_cognition.models import LedgerEntry, compute_content_hash
-from hummbl_cognition.sqlite_indexer import build_sqlite_index, index_single_entry, search_entries, traverse_graph
+from hummbl_cognition.sqlite_indexer import (
+    build_sqlite_index,
+    index_single_entry,
+    search_entries,
+    traverse_graph,
+)
 
 
 @pytest.mark.parametrize("entry_type", ["MILESTONE", "HULE"])

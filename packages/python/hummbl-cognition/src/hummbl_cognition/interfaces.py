@@ -8,10 +8,7 @@ be decoupled from fleet-specific paths and models.
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from hummbl_cognition.models import LedgerEntry
+from typing import Any
 
 
 class MemoryResult:

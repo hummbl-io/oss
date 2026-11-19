@@ -1,11 +1,11 @@
 """Tests for latest-entry convergence and finding resolution (protocol 0.2.0)."""
 
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 
 from wags import Finding, WagsWorkspace
 
@@ -38,7 +38,7 @@ class TestResolution(unittest.TestCase):
         e2 = self.ws.submit_entry(self.rid, "rev-a", findings=[_f("a-r2-P1-01", "P1")], verdict="request_changes")
         kw = {}
         if use_refs:
-            kw = dict(resolves=["a-P1-01", "a-P1-02", "a-r2-P1-01"], supersedes=[e1.entry_hash, e2.entry_hash])
+            kw = {"resolves": ["a-P1-01", "a-P1-02", "a-r2-P1-01"], "supersedes": [e1.entry_hash, e2.entry_hash]}
         self.ws.submit_entry(self.rid, "rev-a", findings=[_f("a-r3-N-01", "N")], verdict="approve", **kw)
         self.ws.submit_entry(self.rid, "rev-b", findings=[_f("b-P2-01", "P2")], verdict="approve")
 
@@ -100,7 +100,7 @@ class TestResolution(unittest.TestCase):
 
     def test_forged_cross_stream_resolve_fails_verify_and_is_ignored(self):
         """A hand-written (hash-valid) entry resolving someone else's finding is rejected."""
-        from wags import StreamEntry, GENESIS_HASH, _canonical_json
+        from wags import GENESIS_HASH, StreamEntry, _canonical_json
         self.ws.submit_entry(self.rid, "rev-a", findings=[_f("a-P0-01", "P0")], verdict="block")
         e = StreamEntry(1, "2026-01-01T00:00:00Z", self.rid, "rev-b", "review", GENESIS_HASH, [],
                         "approve", metadata={"resolves": ["a-P0-01"]})
@@ -151,7 +151,7 @@ class TestGovbenchFixture(unittest.TestCase):
         env = dict(os.environ, WAGS_WORKSPACE=self.tmp)
         for cmd, want in (("verify", "VERIFIED"), ("converge", "Converged: APPROVE")):
             r = subprocess.run(["go", "run", "wags.go", cmd, self.rid], cwd=GO_DIR, env=env,
-                               capture_output=True, text=True, timeout=120)
+                               capture_output=True, text=True, timeout=12, check=False)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
             self.assertIn(want, r.stdout)
 
@@ -182,7 +182,7 @@ class TestReviewRound2(unittest.TestCase):
         import os
         return subprocess.run(["go", "run", "wags.go", cmd, self.rid], cwd=GO_DIR,
                               env=dict(os.environ, WAGS_WORKSPACE=self.tmp),
-                              capture_output=True, text=True, timeout=120)
+                              capture_output=True, text=True, timeout=12, check=False)
 
     # P0-01 / quilter P1-01: positional resolution
     def test_reraised_p0_after_resolve_vetoes(self):
@@ -233,7 +233,7 @@ class TestReviewRound2(unittest.TestCase):
     def test_unknown_severity_rejected_and_conservative(self):
         with self.assertRaises(ValueError):
             self.ws.submit_entry(self.rid, "a", findings=[{"id": "x", "severity": "critical"}], verdict="approve")
-        from wags import StreamEntry, GENESIS_HASH, _canonical_json
+        from wags import GENESIS_HASH, StreamEntry, _canonical_json
         e = StreamEntry(1, "2026-01-01T00:00:00Z", self.rid, "a", "review", GENESIS_HASH,
                         [{"id": "x", "severity": "critical"}], "approve")
         e.sign(None)
@@ -296,7 +296,7 @@ class TestLegacyGoFixture(unittest.TestCase):
         env = dict(os.environ, WAGS_WORKSPACE=self.tmp)
         for cmd, want in (("verify", "VERIFIED"), ("converge", "Converged: APPROVE")):
             r = subprocess.run(["go", "run", "wags.go", cmd, self.rid], cwd=GO_DIR, env=env,
-                               capture_output=True, text=True, timeout=120)
+                               capture_output=True, text=True, timeout=12, check=False)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
             self.assertIn(want, r.stdout)
 
@@ -323,7 +323,7 @@ class TestReviewRound3(unittest.TestCase):
         import os
         return subprocess.run(["go", "run", "wags.go", cmd, self.rid], cwd=GO_DIR,
                               env=dict(os.environ, WAGS_WORKSPACE=self.tmp),
-                              capture_output=True, text=True, timeout=120).stdout
+                              capture_output=True, text=True, timeout=12, check=False).stdout
 
     def _veto_then_converge(self):
         self.ws.submit_entry(self.rid, "a", verdict="approve")
@@ -445,7 +445,7 @@ class TestReviewRound3(unittest.TestCase):
     # MTSMU P2: empty refs
     def test_empty_resolves_supersedes_rejected(self):
         self.ws.submit_entry(self.rid, "a", findings=[_f("X", "P1")], verdict="request_changes")
-        for kw in (dict(resolves=[]), dict(supersedes=[])):
+        for kw in ({"resolves": []}, {"supersedes": []}):
             with self.assertRaises(ValueError):
                 self.ws.submit_entry(self.rid, "a", verdict="approve", **kw)
 
@@ -472,7 +472,7 @@ class TestReviewRound4(unittest.TestCase):
         import os
         return subprocess.run(["go", "run", "wags.go", "converge", self.rid, *args], cwd=GO_DIR,
                               env=dict(os.environ, WAGS_WORKSPACE=self.tmp),
-                              capture_output=True, text=True, timeout=120).stdout
+                              capture_output=True, text=True, timeout=12, check=False).stdout
 
     def _downgrade(self):
         t = json.loads((self.dir / "target.json").read_text())
@@ -601,13 +601,13 @@ class TestReviewRound5(unittest.TestCase):
         import os
         return subprocess.run(["go", "run", "wags.go", "converge", rid or self.rid, *args], cwd=GO_DIR,
                               env=dict(os.environ, WAGS_WORKSPACE=self.tmp),
-                              capture_output=True, text=True, timeout=120)
+                              capture_output=True, text=True, timeout=12, check=False)
 
     def _pycli(self, *args):
         import sys
         return subprocess.run([sys.executable, "-c", "import sys,wags; sys.exit(wags.main())",
                                "--workspace", self.tmp, "converge", self.rid, *args],
-                              capture_output=True, text=True, timeout=60)
+                              capture_output=True, text=True, timeout=6, check=False)
 
     def test_min_quorum_python_cli_rejects_bad_values(self):
         self._two_approve()
@@ -773,12 +773,12 @@ class TestReviewRound6(unittest.TestCase):
         import sys
         py = subprocess.run([sys.executable, "-c", "import sys,wags; sys.exit(wags.main())",
                              "--workspace", self.tmp, "converge", self.rid, *args],
-                            capture_output=True, text=True, timeout=60)
+                            capture_output=True, text=True, timeout=6, check=False)
         if shutil.which("go") is None:
             return py, None
         import os
         go = subprocess.run(["go", "run", "wags.go", "converge", self.rid, *args], cwd=GO_DIR,
-                            env=dict(os.environ, WAGS_WORKSPACE=self.tmp), capture_output=True, text=True, timeout=120)
+                            env=dict(os.environ, WAGS_WORKSPACE=self.tmp), capture_output=True, text=True, timeout=12, check=False)
         return py, go
 
     def test_empty_and_huge_min_quorum_rejected_same_message(self):
@@ -791,7 +791,7 @@ class TestReviewRound6(unittest.TestCase):
             if go is not None:
                 go = subprocess.run(["go", "run", "wags.go", "converge", self.rid, "-min-quorum", bad], cwd=GO_DIR,
                                     env=dict(__import__("os").environ, WAGS_WORKSPACE=self.tmp),
-                                    capture_output=True, text=True, timeout=120)
+                                    capture_output=True, text=True, timeout=12, check=False)
                 self.assertNotEqual(go.returncode, 0, bad)
                 self.assertIn(want, go.stderr)
         with self.assertRaises(ValueError):
@@ -812,6 +812,7 @@ class TestReviewRound6(unittest.TestCase):
 
     def test_atomic_write_fsyncs_and_retries_on_permission_error(self):
         import os
+
         import wags as W
         calls = {"fsync": 0, "replace": 0}
         real_fsync, real_replace = os.fsync, os.replace
@@ -835,8 +836,7 @@ class TestReviewRound6(unittest.TestCase):
 
         def always_fail(a, b):
             raise PermissionError("held open forever")
-        with mock.patch.object(os, "replace", always_fail), mock.patch("time.sleep", lambda s: None):
-            with self.assertRaises(PermissionError):
-                W._atomic_write_json(target, {"ok": 2})
+        with mock.patch.object(os, "replace", always_fail), mock.patch("time.sleep", lambda s: None), self.assertRaises(PermissionError):
+            W._atomic_write_json(target, {"ok": 2})
         self.assertEqual(json.loads(target.read_text()), {"ok": 1})
         self.assertEqual([p.name for p in Path(self.tmp).iterdir() if p.name.endswith(".tmp")], [])
