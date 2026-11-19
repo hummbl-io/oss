@@ -836,7 +836,7 @@ class TestReviewRound6(unittest.TestCase):
 
         def always_fail(a, b):
             raise PermissionError("held open forever")
-        with mock.patch.object(os, "replace", always_fail), mock.patch("time.sleep", lambda s: None), self.assertRaises(PermissionError):
+        with mock.patch.object(os, "replace", always_fail), mock.patch("time.sleep"), self.assertRaises(PermissionError):
             W._atomic_write_json(target, {"ok": 2})
         self.assertEqual(json.loads(target.read_text()), {"ok": 1})
         self.assertEqual([p.name for p in Path(self.tmp).iterdir() if p.name.endswith(".tmp")], [])

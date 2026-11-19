@@ -274,7 +274,7 @@ class WagsWorkspace:
         try:
             with open(self.index_file, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except (OSError, ValueError):
             return {"protocol_version": PROTOCOL_VERSION, "reviews": {}}
 
     def _write_index(self, data: dict[str, Any]) -> None:
@@ -383,7 +383,7 @@ class WagsWorkspace:
                     entry = json.loads(line)
                     last_seq = entry.get("sequence", last_seq)
                     last_hash = entry.get("entry_hash", last_hash)
-                except Exception:
+                except (ValueError, AttributeError):
                     pass
         return last_seq, last_hash
 
@@ -495,7 +495,7 @@ class WagsWorkspace:
                                 signature=d.get("signature", ""),
                             )
                         )
-                    except Exception:
+                    except (ValueError, KeyError, TypeError):
                         pass
 
         # Sort chronologically by timestamp and sequence
@@ -582,7 +582,7 @@ class WagsWorkspace:
                         prior_dicts.append(d)
 
                         expected_prev = entry.entry_hash
-                    except Exception as ex:
+                    except (ValueError, KeyError, TypeError, AttributeError) as ex:
                         stream_valid = False
                         errors.append(f"Line {idx} parse error: {ex}")
 
@@ -609,7 +609,7 @@ class WagsWorkspace:
             return "absent", {}
         try:
             data = _read_json(conv_file)
-        except Exception:
+        except (OSError, ValueError):
             return "unparseable", {}
         if not isinstance(data, dict) or not isinstance(data.get("anchors", {}), dict):
             return "unparseable", {}
@@ -635,7 +635,7 @@ class WagsWorkspace:
                 found.append(f"index.json workspace protocol_version {wpv}")
             if rpv not in ("", "0.1.0"):
                 found.append(f"index.json review protocol_version {rpv}")
-        except Exception:
+        except (OSError, ValueError, AttributeError):
             pass
         status, prev = cls._load_prev_convergence(rev_dir)
         ctx = prev.get("anchor_context") if status == "present" else None
@@ -660,7 +660,7 @@ class WagsWorkspace:
     def _target_protocol(rev_dir: Path) -> str:
         try:
             return str(_read_json(rev_dir / "target.json").get("protocol_version", ""))
-        except Exception:
+        except (OSError, ValueError, AttributeError):
             return ""
 
     @staticmethod
@@ -669,7 +669,7 @@ class WagsWorkspace:
             with open(rev_dir / "reviewers.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             return set(data.keys()) if isinstance(data, dict) else set()
-        except Exception:
+        except (OSError, ValueError):
             return set()
 
     @staticmethod
@@ -683,7 +683,7 @@ class WagsWorkspace:
                     continue
                 try:
                     out.append(json.loads(line))
-                except Exception:
+                except ValueError:
                     pass
         return out
 
