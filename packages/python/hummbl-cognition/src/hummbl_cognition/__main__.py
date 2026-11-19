@@ -536,7 +536,9 @@ def cmd_novelty_proof(args: argparse.Namespace) -> int:
     internal: dict | None = None
     if args.internal_report:
         try:
-            internal = json.loads(Path(args.internal_report).read_text(encoding="utf-8"))
+            internal = json.loads(
+                Path(args.internal_report).read_text(encoding="utf-8")
+            )
         except (OSError, json.JSONDecodeError) as e:
             print(f"ERROR: cannot read --internal-report: {e}", file=sys.stderr)
             return 1
@@ -779,7 +781,9 @@ def cmd_reindex(args: argparse.Namespace) -> int:
         path = index.save(allow_shrink=args.force)
     except RuntimeError as e:
         print(f"ERROR: {e}", file=sys.stderr)
-        print("re-run with --force to overwrite a larger existing index", file=sys.stderr)
+        print(
+            "re-run with --force to overwrite a larger existing index", file=sys.stderr
+        )
         return 1
     print(f"Indexed {count} entries -> {path}")
     return 0
@@ -1111,8 +1115,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_proof.add_argument(
         "--post",
         action="store_true",
-        help="Append the receipt to the ledger (discovery/project + "
-        "novelty-proof tag)",
+        help="Append the receipt to the ledger (discovery/project + novelty-proof tag)",
     )
     p_proof.add_argument("--agent", help="Agent identifier or COGNITION_AGENT")
     p_proof.add_argument(
@@ -1311,6 +1314,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
+    # Ledger content may contain non-cp1252 characters (e.g. arrows); on
+    # Windows consoles the default encoding crashes mid-print. Force UTF-8
+    # with replacement so output degrades instead of dying.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except (ValueError, OSError):
+                pass
     parser = build_parser()
     args, _ = parser.parse_known_args(argv)
 

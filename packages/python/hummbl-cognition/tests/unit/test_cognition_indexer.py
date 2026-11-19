@@ -537,6 +537,77 @@ class TestSaveShrinkGuard:
             assert idx2.load(path)
             assert idx2.entry_count == 2
 
+    def test_foreign_schema_refused(self):
+        """A governance-format index (docs/df/n_docs, no inverted_index)
+        must never be silently clobbered by hummbl_cognition."""
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps({"docs": {}, "df": {}, "n_docs": 42}),
+                encoding="utf-8",
+            )
+            with pytest.raises(RuntimeError, match="unrecognized schema"):
+                self._build_index(1).save(path)
+            # File untouched
+            assert json.loads(path.read_text(encoding="utf-8"))["n_docs"] == 42
+
+    def test_foreign_schema_allowed_with_flag(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps({"docs": {}, "df": {}, "n_docs": 42}),
+                encoding="utf-8",
+            )
+            self._build_index(2).save(path, allow_shrink=True)
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 2
+
+    def test_load_foreign_schema_returns_false(self):
+        """load() must not silently succeed on a foreign-schema file --
+        that produced zero-hit searches indistinguishable from 'no matches'."""
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps({"docs": {}, "df": {}, "n_docs": 42}),
+                encoding="utf-8",
+            )
+            idx = BM25Index()
+            assert idx.load(path) is False
+            assert idx.total_docs == 0
+            assert idx.inverted_index == {}
+
+    def test_non_dict_json_refused(self):
+        """A parseable non-object file (e.g. a JSON list from another tool)
+        is foreign state, not a corrupt index -- refuse to clobber it."""
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps([{"id": "foreign-1", "text": "retain this"}]),
+                encoding="utf-8",
+            )
+            with pytest.raises(RuntimeError, match="unrecognized schema"):
+                self._build_index(1).save(path)
+            assert "foreign-1" in path.read_text(encoding="utf-8")
+
+    def test_broken_entry_count_treated_as_absent(self):
+        """Our schema with a corrupt entry_count is repairable, not foreign."""
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "stats": {"entry_count": "broken"},
+                        "inverted_index": {},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self._build_index(2).save(path)
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 2
+
 
 # ---------------------------------------------------------------------------
 # BM25 scoring correctness
