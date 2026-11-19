@@ -422,17 +422,36 @@ class BM25Index:
         unless allow_shrink=True -- a silent shrink is how a healthy index
         gets stomped by a build from the wrong ledger (observed 2026-09-25:
         2549 -> 3 docs). A corrupt/unparseable existing file counts as
-        absent, so repair writes always proceed.
+        absent, so repair writes always proceed. An existing file with a
+        foreign schema (no 'inverted_index' -- e.g. hummbl_governance's
+        docs/df/n_docs format) is likewise refused: hummbl_cognition owns
+        this file and must never silently clobber another tool's index.
         """
         index_path = _resolve_index_path(path or self.index_path)
 
         if not allow_shrink and index_path.exists():
             try:
                 existing = json.loads(index_path.read_text(encoding="utf-8"))
-                existing_count = int(
-                    existing.get("stats", {}).get("entry_count", 0)
-                )
             except (OSError, json.JSONDecodeError, ValueError):
+                existing = None
+            if existing is not None and (
+                not isinstance(existing, dict)
+                or not isinstance(existing.get("inverted_index"), dict)
+            ):
+                raise RuntimeError(
+                    f"refusing to overwrite index at {index_path}: file has "
+                    "an unrecognized schema (no 'inverted_index'), likely "
+                    "written by another tool; pass allow_shrink=True to "
+                    "force the replacement"
+                )
+            if isinstance(existing, dict):
+                try:
+                    existing_count = int(
+                        existing.get("stats", {}).get("entry_count", 0)
+                    )
+                except (TypeError, ValueError):
+                    existing_count = 0
+            else:
                 existing_count = 0
             if existing_count > self.entry_count:
                 raise RuntimeError(
@@ -487,6 +506,17 @@ class BM25Index:
             data = json.loads(index_path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError) as e:
             logger.warning("Failed to load index: %s", e)
+            return False
+
+        if not isinstance(data, dict) or not isinstance(
+            data.get("inverted_index"), dict
+        ):
+            logger.error(
+                "Index at %s has an unrecognized schema (no 'inverted_index'); "
+                "likely written by another tool. hummbl_cognition owns this "
+                "file -- run 'reindex --force' to replace it",
+                index_path,
+            )
             return False
 
         stats = data.get("stats", {})
