@@ -434,15 +434,23 @@ class BM25Index:
                 existing = json.loads(index_path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError, ValueError):
                 existing = None
+            if existing is not None and (
+                not isinstance(existing, dict)
+                or not isinstance(existing.get("inverted_index"), dict)
+            ):
+                raise RuntimeError(
+                    f"refusing to overwrite index at {index_path}: file has "
+                    "an unrecognized schema (no 'inverted_index'), likely "
+                    "written by another tool; pass allow_shrink=True to "
+                    "force the replacement"
+                )
             if isinstance(existing, dict):
-                if not isinstance(existing.get("inverted_index"), dict):
-                    raise RuntimeError(
-                        f"refusing to overwrite index at {index_path}: file has "
-                        "an unrecognized schema (no 'inverted_index'), likely "
-                        "written by another tool; pass allow_shrink=True to "
-                        "force the replacement"
+                try:
+                    existing_count = int(
+                        existing.get("stats", {}).get("entry_count", 0)
                     )
-                existing_count = int(existing.get("stats", {}).get("entry_count", 0))
+                except (TypeError, ValueError):
+                    existing_count = 0
             else:
                 existing_count = 0
             if existing_count > self.entry_count:

@@ -577,6 +577,37 @@ class TestSaveShrinkGuard:
             assert idx.total_docs == 0
             assert idx.inverted_index == {}
 
+    def test_non_dict_json_refused(self):
+        """A parseable non-object file (e.g. a JSON list from another tool)
+        is foreign state, not a corrupt index -- refuse to clobber it."""
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps([{"id": "foreign-1", "text": "retain this"}]),
+                encoding="utf-8",
+            )
+            with pytest.raises(RuntimeError, match="unrecognized schema"):
+                self._build_index(1).save(path)
+            assert "foreign-1" in path.read_text(encoding="utf-8")
+
+    def test_broken_entry_count_treated_as_absent(self):
+        """Our schema with a corrupt entry_count is repairable, not foreign."""
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "index.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "stats": {"entry_count": "broken"},
+                        "inverted_index": {},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self._build_index(2).save(path)
+            idx2 = BM25Index()
+            assert idx2.load(path)
+            assert idx2.entry_count == 2
+
 
 # ---------------------------------------------------------------------------
 # BM25 scoring correctness
