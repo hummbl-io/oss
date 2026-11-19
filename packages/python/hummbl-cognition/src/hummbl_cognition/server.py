@@ -31,7 +31,7 @@ import os
 import sys
 import threading
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +47,7 @@ except ImportError:  # pragma: no cover - POSIX
 
 from hummbl_cognition.consolidator import run_consolidation
 from hummbl_cognition.indexer import BM25Index
+from hummbl_cognition.ledger_writer import _resolve_ledger_path
 from hummbl_cognition.retriever import OpenBrainRetriever
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,16 @@ DEFAULT_HOST = "127.0.0.1"  # Localhost only — Tailscale handles remote access
 
 # Max request body size (1 MB) to prevent abuse
 MAX_REQUEST_BODY = 1_048_576
+
+
+class OpenBrainHTTPServer(ThreadingHTTPServer):
+    """Threaded HTTP server.
+
+    Long-running endpoints (/reindex, /consolidate) must not starve
+    /status and /search; daemon threads die with the process.
+    """
+
+    daemon_threads = True
 
 
 class OpenBrainState:
@@ -80,19 +91,41 @@ class OpenBrainState:
         self.started_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         self.request_count = 0
         self.lock = threading.Lock()
+        self._ledger_sig: tuple[int, int] | None = None
 
         # Build index on startup
         self._reindex()
 
+    def _ledger_signature(self) -> tuple[int, int] | None:
+        """(mtime_ns, size) of the resolved ledger file, or None if unreadable."""
+        try:
+            st = _resolve_ledger_path(self.ledger_path).stat()
+        except OSError:
+            return None
+        return (st.st_mtime_ns, st.st_size)
+
     def _reindex(self) -> int:
-        """Rebuild index from ledger."""
-        count = self.index.build(ledger_path=self.ledger_path)
-        self.retriever._index_loaded = True
+        """Rebuild the index from the ledger and swap it in atomically.
+
+        Builds a replacement BM25Index off to the side so in-flight searches
+        keep serving the previous index until the swap completes.
+        """
+        new_index = BM25Index()
+        count = new_index.build(ledger_path=self.ledger_path)
+        # build() does not clear stigmergic counters; carry them over so a
+        # replacement index does not reset retrieval history.
+        new_index.retrieval_counts = dict(self.index.retrieval_counts)
+        new_index.retrieval_last_at = dict(self.index.retrieval_last_at)
         # Try to save index
         try:
-            self.index.save()
+            new_index.save()
         except (OSError, RuntimeError) as e:
             logger.warning("Could not save index: %s", e)
+        with self.lock:
+            self.index = new_index
+            self.retriever.index = new_index
+            self.retriever._index_loaded = True
+            self._ledger_sig = self._ledger_signature()
         return count
 
     def search(self, params: dict[str, Any]) -> list[dict[str, Any]]:
@@ -114,6 +147,12 @@ class OpenBrainState:
 
     def status(self) -> dict[str, Any]:
         """Return server status."""
+        sig = self._ledger_signature()
+        ledger_last_write = None
+        if sig is not None:
+            ledger_last_write = datetime.fromtimestamp(
+                sig[0] / 1e9, tz=timezone.utc
+            ).strftime("%Y-%m-%dT%H:%M:%SZ")
         return {
             "service": "open-brain",
             "version": "0.1.0",
@@ -124,6 +163,8 @@ class OpenBrainState:
                 "term_count": len(self.index.inverted_index),
                 "avg_doc_length": round(self.index.avg_doc_length, 1),
                 "built_at": self.index.built_at,
+                "ledger_fresh": sig is not None and sig == self._ledger_sig,
+                "ledger_last_write_utc": ledger_last_write,
             },
         }
 
@@ -471,7 +512,7 @@ def run_server(
     )
 
     handler = _make_handler(brain_state, auth_token=token)
-    server = HTTPServer((host, port), handler)
+    server = OpenBrainHTTPServer((host, port), handler)
     logger.info("Open Brain listening on %s:%d", host, port)
 
     try:
