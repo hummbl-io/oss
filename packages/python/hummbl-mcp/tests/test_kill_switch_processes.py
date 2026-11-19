@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 pytest.importorskip("hummbl_governance")
-from hummbl_governance.kill_switch import KillSwitch, KillSwitchMode
+from hummbl_governance.kill_switch import KillSwitchMode
 
 from .kill_switch_helpers import operator_switch, release
 

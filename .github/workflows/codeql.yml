@@ -29,8 +29,11 @@ jobs:
     # GitHub-hosted compute unavailable for private org; fleet policy
     # is self-hosted Linux.
     runs-on: ubuntu-24.04
-    # GHAS disabled 2026-09-16: SARIF upload requires Code Security on
-    # private repos. Skipped until org/repo var HUMMBL_GHAS_ENABLED=true.
+    # This job runs unconditionally. The 2026-09-16 note about GHAS gating
+    # was never implemented as an `if:` condition and is stale: this repo is
+    # public, where code scanning/SARIF upload does not require a GHAS
+    # license, and runs on main and PRs conclude success. If the repo ever
+    # goes private, gate this job on vars.HUMMBL_GHAS_ENABLED at that time.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:

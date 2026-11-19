@@ -421,8 +421,8 @@ jobs:
 
       - name: Check hummbl-governance public count claims against PrimitiveRegistry
         # Catches the class of drift from the 2026-09-11 "34 primitives" incident:
-        # a doc/README count silently diverging from the actual registry. See
-        # docs/artifacts/AUDIT_2026-09-11_public_claims_drift.md.
+        # a doc/README count silently diverging from the actual registry. The
+        # audit narrative is retained in the internal archive, not published.
         run: python packages/python/hummbl-governance/scripts/check_public_count_claims.py
 
   claim-integrity:

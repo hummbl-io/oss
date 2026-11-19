@@ -67,7 +67,8 @@ class TestCloseoutsPool:
     def _ledger(self, home: Path, rows: list) -> Path:
         lines = [r if isinstance(r, str) else json.dumps(r) for r in rows]
         return _write(
-            home / ".agents" / "state" / "cognition" / "ledger.jsonl",
+            home / ".agents" / "state" / "cognition"
+            / "ledger.jsonl.archived-20261104",
             "\n".join(lines) + "\n",
         )
 

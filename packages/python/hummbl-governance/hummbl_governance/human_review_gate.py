@@ -91,13 +91,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Literal
 
+from hummbl_governance._receipt_key import resolve_receipt_key
 from hummbl_governance._types import RiskLevel
 from hummbl_governance.approval import ApprovalManager, ApprovalStatus
 
 logger = logging.getLogger(__name__)
-
-# HMAC key for receipt signing — same convention as other primitives.
-_RECEIPT_KEY = b"hummbl-governance-receipt-key-v1"
 
 # Default gate timeout: 24 hours.
 _DEFAULT_TIMEOUT_SECONDS = 86_400
@@ -254,16 +252,6 @@ class HumanReviewGateReceipt:
 
 
 # ---------------------------------------------------------------------------
-# HMAC helper
-# ---------------------------------------------------------------------------
-
-def _sign_gate(gate_id: str, outcome: str, timestamp: str) -> str:
-    """Compute HMAC-SHA256 over canonical gate fields."""
-    msg = f"{gate_id}:{outcome}:{timestamp}".encode()
-    return hmac.new(_RECEIPT_KEY, msg, hashlib.sha256).hexdigest()
-
-
-# ---------------------------------------------------------------------------
 # HumanReviewGate
 # ---------------------------------------------------------------------------
 
@@ -282,7 +270,9 @@ class HumanReviewGate:
         store_path: Path to JSONL file for gate receipts.  Created if absent.
             DSARHandler (P55) reads this file to compile Art. 15 responses.
         audit_log: Optional AuditLog for governance event emission.
-        hmac_key: Override HMAC key (bytes).  Defaults to package key.
+        hmac_key: Override HMAC key (bytes).  Defaults to the resolved
+            receipt key (env var or per-installation key file; see
+            ``hummbl_governance._receipt_key``).
     """
 
     def __init__(
@@ -290,12 +280,12 @@ class HumanReviewGate:
         approval_manager: ApprovalManager,
         store_path: Path | None = None,
         audit_log: Any | None = None,
-        hmac_key: bytes = _RECEIPT_KEY,
+        hmac_key: bytes | None = None,
     ) -> None:
         self._mgr = approval_manager
         self._store_path = store_path
         self._audit_log = audit_log
-        self._hmac_key = hmac_key
+        self._hmac_key = hmac_key if hmac_key is not None else resolve_receipt_key()
         self._lock = threading.RLock()
         self._in_memory: dict[str, HumanReviewGateReceipt] = {}
 
@@ -379,7 +369,7 @@ class HumanReviewGate:
             reviewer_notes=reviewer_notes,
             timestamp_requested=now,
             timestamp_decided=None,
-            receipt_hmac=_sign_gate(gate_id, "PENDING", now),
+            receipt_hmac=self._sign(gate_id, "PENDING", now),
         )
 
         with self._lock:

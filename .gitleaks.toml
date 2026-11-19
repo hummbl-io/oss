@@ -14,7 +14,12 @@ useDefault = true
 description = "Allow test fixtures and documentation with dummy secrets"
 paths = [
     '''packages/python/.*/tests/.*''',
-    '''packages/python/.*/docs/.*''',
+    # docs/ is NOT broadly allowlisted: only the two files below contain
+    # verified dummy-secret false positives (base64 example key in cli docs,
+    # generic-api-key prose match in OPERATOR_RELEASE.md). All other docs are
+    # scanned so a real secret pasted into documentation is still caught.
+    '''packages/python/hummbl-bus/docs/cli/index\.md$''',
+    '''packages/python/hummbl-governance/docs/OPERATOR_RELEASE\.md$''',
     '''packages/python/.*/examples/.*''',
     '''packages/python/.*/hummbl_.*/data/.*\.schema\.json$''',
 ]

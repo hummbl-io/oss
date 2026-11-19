@@ -31,16 +31,16 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/hummbl-io/oss"
-Documentation = "https://github.com/hummbl-io/oss/tree/main/packages/python/governed-compression/README.md"
-Repository = "https://github.com/hummbl-io/oss"
-Issues = "https://github.com/hummbl-io/oss/issues"
+Homepage = "https://github.com/hummbl-io/governed-compression"
+Documentation = "https://github.com/hummbl-io/governed-compression/blob/main/README.md"
+Repository = "https://github.com/hummbl-io/governed-compression"
+Issues = "https://github.com/hummbl-io/governed-compression/issues"
 PyPI = "https://pypi.org/project/governed-compression/"
 
 [project.optional-dependencies]
 test = [
   "pytest>=9.2.0",
-  "ruff>=0.17.4",
+  "ruff>=0.17.5",
 ]
 
 [project.scripts]
