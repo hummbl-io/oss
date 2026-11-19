@@ -80,6 +80,7 @@ Node packages:
 | Package | Tree | npm | Status |
 |---------|------|-----|--------|
 | `@hummbl/mcp-base120` | 0.1.0-canary.0 | — | Private technical canary — read-only Base120 MCP catalog; not publishable while admission blockers remain |
+| `@hummbl/mcp-server` | 1.3.0 | — | Base120 mental-models MCP server (stdio); publish pending |
 Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
 Explore the [formal reasoning exhibits](packages/lean/hummbl-formalization/README.md#exhibit-gallery):

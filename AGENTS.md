@@ -3,8 +3,7 @@
 ## Project
 
 **hummbl-io/oss** — monorepo consolidating public-publishable HUMMBL packages.
-Currently hosts **47** Python packages under `packages/python/<name>/`, one
-private Node technical canary under `packages/node/mcp-base120`, and one Lean
+Currently hosts **47** Python packages under `packages/python/<name>/`, two Node packages under `packages/node/` (`mcp-base120` canary, `mcp-server`), and one Lean
 tree under `packages/lean/hummbl-formalization`. There is no Rust package tree
 under `packages/` yet.
 
@@ -69,6 +68,7 @@ Node packages:
 | Package | Path | Tree | npm | Description |
 |---------|------|------|-----|-------------|
 | @hummbl/mcp-base120 | `packages/node/mcp-base120/` | 0.1.0-canary.0 | Private canary | Read-only, no-egress Base120 MCP catalog |
+| @hummbl/mcp-server | `packages/node/mcp-server/` | 1.3.0 | Publish pending | Base120 mental-models MCP server (stdio); registry-ready |
 
 If you add a directory under `packages/python/`, update this table, the
 README package table, `docs/architecture/PACKAGES.md`, `.github/workflows/ci.yml`,
@@ -140,6 +140,7 @@ cd packages/python/hummbl-mcp-voice && python -m pytest tests/ -v
 
 # Node technical canaries
 cd packages/node/mcp-base120 && npm ci && npm test
+cd packages/node/mcp-server && npm ci && npm test
 ```
 
 ## CI
