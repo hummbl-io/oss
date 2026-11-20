@@ -379,11 +379,13 @@ def run_consolidation(
 
         # Try LLM synthesis, fall back to simple concatenation
         summary = _synthesize_group(group, model=model, base_url=base_url)
+        used_fallback = False
         if not summary:
             # Fallback: just list the entries
             summary = "Consolidated from related entries:\n" + "\n".join(
                 f"- {e.content[:150]}" for e in group
             )
+            used_fallback = True
             logger.info("Using fallback consolidation (Ollama unavailable)")
 
         try:
@@ -394,7 +396,8 @@ def run_consolidation(
                 model=model,
                 entry_type="convention",
                 scope="project",
-                tags=["consolidated", f"group-size-{len(group)}"],
+                tags=["consolidated", f"group-size-{len(group)}"]
+                + (["synthesis-fallback"] if used_fallback else []),
                 links=source_ids,
             )
             post_entry(consolidated_entry, ledger_path=ledger_path)

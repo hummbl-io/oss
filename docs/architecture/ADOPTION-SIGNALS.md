@@ -95,8 +95,9 @@ documented offering:
 | Product | Source package | Lifecycle | Admission | Blockers |
 |---------|---------------|-----------|-----------|----------|
 | `mcp-base120` | `packages/node/mcp-base120` | technical-canary | hold | corpus-rights-reconciliation, redistributable-package-architecture, public-release-provenance, hosted-contract-parity, privacy-review |
+| `mcp-server` | `packages/node/mcp-server` | public-preview | hold | npm-publish-authorization, registry-publish-authorization |
 
-**1 of 49 packages have product manifests.** Every other package↔offering mapping is an assumption with no
+**2 of 49 packages have product manifests.** Every other package↔offering mapping is an assumption with no
 demand evidence behind it and is intentionally not asserted here.
 
 ## Evidence vs assumptions

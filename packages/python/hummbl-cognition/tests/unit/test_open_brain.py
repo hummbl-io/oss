@@ -882,11 +882,18 @@ class TestErrorResilience:
         assert "clp-000000000001" in counts
         assert "clp-000000000002" in counts
 
-    def test_retriever_missing_dirs_graceful(self, tmp_path):
+    def test_retriever_missing_dirs_graceful(self, tmp_path, monkeypatch):
         """Retriever handles missing pool directories without crashing."""
         from hummbl_cognition.retriever import OpenBrainRetriever
 
-        r = OpenBrainRetriever(state_dir=tmp_path)
+        # Isolate from real machine state: the bus cache and briefings pools
+        # default to ~/.cache/bus and ~/.agents/_state, which exist on dev
+        # hosts and would leak real hits into this empty-pool assertion.
+        monkeypatch.setenv("HUMMBL_BRIEFINGS_DIRS", str(tmp_path / "no-briefings"))
+        r = OpenBrainRetriever(
+            state_dir=tmp_path,
+            bus_cache_path=tmp_path / "no-bus-cache.tsv",
+        )
         r._index_loaded = True
         # All pools should gracefully return empty
         results = r.search(
