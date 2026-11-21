@@ -1,7 +1,11 @@
 # Package Test-Count Authority Model
 
-Status: draft authority model for issue #166.
+Status: historical draft for issue #166.
 Last verified: 2026-08-23.
+
+The table below records observations from that date. Current public wording is
+[public-claims.md](public-claims.md), updated 2026-11-21. Do not promote
+`1.4.2`, 34 primitives, or 2,314 collected tests as the current package claim.
 
 ## Purpose
 
