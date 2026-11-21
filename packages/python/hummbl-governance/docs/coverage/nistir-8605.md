@@ -5,7 +5,7 @@
 **Status on this review (2026-08-31)**: **watch only**. The series is targeted to **finalize in 2027** (Jan 2026 annotated outline, “Proposed Deliverables and Timeline”). **No overlay control IDs yet.**
 **Last reviewed**: 2026-08-31
 **Reviewer**: documentation pass per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md) and LANDING-013
-**HUMMBL version mapped against**: hummbl-governance v1.4.2 (`pyproject.toml` on this tree)
+**HUMMBL version mapped against**: hummbl-governance v1.4.2 on 2026-08-31. Not re-mapped to 1.5.1. `pyproject.toml` on this tree is 1.5.1.
 
 ## Boundary disclaimer (watch, not a mapping)
 

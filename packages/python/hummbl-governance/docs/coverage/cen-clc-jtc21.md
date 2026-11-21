@@ -5,7 +5,7 @@
 **Secondary status check**: CEN-CENELEC deliverable designations confirmed against public OJ-citation trackers that read the CEN-CENELEC standards database (1BusinessWorld AI Center tracker, last verified 2026-08-01). Digital Strategy / Commission AI Act standardisation page was not independently fetched this session.
 **Last reviewed**: 2026-08-31
 **Reviewer**: documentation pass per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md) and LANDING-013
-**HUMMBL version mapped against**: hummbl-governance v1.4.2 (`pyproject.toml` on this tree)
+**HUMMBL version mapped against**: hummbl-governance v1.4.2 on 2026-08-31. Not re-mapped to 1.5.1. `pyproject.toml` on this tree is 1.5.1.
 
 ## Boundary disclaimer (statutory)
 

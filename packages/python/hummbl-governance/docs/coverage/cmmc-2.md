@@ -6,7 +6,7 @@
 **Source**: https://www.ecfr.gov/current/title-32/subtitle-A/chapter-I/subchapter-G/part-170 ; https://dodcio.defense.gov/Portals/0/Documents/CMMC/ModelOverviewv2.pdf
 **Last reviewed**: 2026-08-31
 **Reviewer**: documentation pass per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md) and LANDING-013
-**HUMMBL version mapped against**: hummbl-governance v1.4.2 (`pyproject.toml` on this tree)
+**HUMMBL version mapped against**: hummbl-governance v1.4.2 on 2026-08-31. Not re-mapped to 1.5.1. `pyproject.toml` on this tree is 1.5.1.
 
 ## Boundary disclaimer (statutory / assessment)
 

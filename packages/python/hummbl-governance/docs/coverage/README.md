@@ -3,7 +3,7 @@
 Every applicable control across every named framework, row-by-row.
 Per [ADR-001](../adr/ADR-001-coverage-matrix-not-self-grade.md): **completeness, not score**.
 
-**HUMMBL version**: hummbl-governance v0.8.0 (existing matrices last reviewed 2026-05-14; seven 2026-08-31 first-touch files mapped against v1.4.2)
+**HUMMBL version**: hummbl-governance v0.8.0 (existing matrices last reviewed 2026-05-14; seven 2026-08-31 first-touch files mapped against v1.4.2). Those mappings were not re-mapped to 1.5.1.
 **Last index update**: 2026-08-31
 **Coverage state legend**: ✅ Fulfilled · 🟡 Partial · ⚪ Boundary · ⛔ Out of scope
 
