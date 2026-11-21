@@ -656,7 +656,7 @@ class DelegationTokenManager:
             - IDP_E_DCT_VIOLATION: Operation not in ops_allowed or violates constraints
         """
         if not _is_idp_enabled():
-            return True, None
+            return False, IDP_E_DCT_VIOLATION
 
         # Check if op is in token's allowed ops
         if requested_op not in token.ops_allowed:
