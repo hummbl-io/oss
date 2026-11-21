@@ -24,7 +24,7 @@ provide dated primary sources, claim boundaries and a commercial measurement
 proposal. Company adoption and deployed public copy remain separate review steps.
 
 ## Packages
-48 Python packages under `packages/python/<name>/`. Versions are
+49 Python packages under `packages/python/<name>/`. Versions are
 `pyproject.toml` on this branch.
 | Package | Tree | PyPI | Status |
 |---------|------|------|--------|
@@ -76,6 +76,7 @@ proposal. Company adoption and deployed public copy remain separate review steps
 | `hummbl-agent-governance` | 0.2.0 | — | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
 | `hummbl-eval` | 0.1.0 | — | Evidence-governed evaluation contracts for compositional Human-AI systems |
 | `hummbl-gitops` | 0.1.0 | — | Bidirectional multi-agent peer-review GitOps loop |
+| `wags` | 0.2.0 | — | In-tree — polyglot, air-gappable multi-agent peer review protocol |
 Node packages:
 | Package | Tree | npm | Status |
 |---------|------|-----|--------|
