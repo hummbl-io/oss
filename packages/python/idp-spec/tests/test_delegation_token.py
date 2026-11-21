@@ -425,7 +425,7 @@ class TestLeastPrivilege(unittest.TestCase):
         self.assertEqual(error, IDP_E_DCT_VIOLATION)
 
     def test_feature_flag_disabled_privilege(self):
-        """When ENABLE_IDP=false, all operations allowed."""
+        """When ENABLE_IDP=false, least privilege checks fail closed."""
         os.environ["ENABLE_IDP"] = "false"
         try:
             token = DelegationCapabilityToken(
@@ -438,7 +438,8 @@ class TestLeastPrivilege(unittest.TestCase):
             is_allowed, error = self.manager.check_least_privilege(
                 token, "write"
             )
-            self.assertTrue(is_allowed)  # Bypassed when disabled
+            self.assertFalse(is_allowed)
+            self.assertEqual(error, IDP_E_DCT_VIOLATION)
         finally:
             os.environ["ENABLE_IDP"] = "true"
 
