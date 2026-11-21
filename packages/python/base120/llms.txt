@@ -1,12 +1,12 @@
 # Base120 — llms.txt
 # AI-readable index of the Base120 mental model library.
-# 120 named mental models for structured reasoning across 6 cognitive domains. Last updated: 2026-08-19.
+# 120 named mental models for structured reasoning across 6 cognitive domains. Last updated: 2026-11-21.
 #
 # Query API: LLMs can parse this file to understand reasoning operators
 # Package identity: base120
-# PyPI status: unpublished
-# Installation: source install only; clone https://github.com/hummbl-io/oss/tree/main/packages/base120 and run python -m pip install -e .
-# Documentation: https://github.com/hummbl-io/oss/tree/main/packages/base120
+# PyPI status: 3.1.0, not yanked, fetched 2026-11-21
+# Installation: pip install base120. Source checkout: git clone https://github.com/hummbl-io/oss.git && cd oss/packages/python/base120 && python -m pip install -e .
+# Documentation: https://github.com/hummbl-io/oss/tree/main/packages/python/base120
 #
 # Base120 categories:
 #   BASE120:PERSPECTIVE Viewpoints, framing, empathy (P1–P20)
@@ -258,12 +258,16 @@ Step 5 — SY13 (Incentive Architecture):
 ## Installation
 
 ```bash
-git clone https://github.com/hummbl-io/oss/tree/main/packages/base120.git
-cd base120
+pip install base120
+```
+
+```bash
+git clone https://github.com/hummbl-io/oss.git
+cd oss/packages/python/base120
 python -m pip install -e .
 ```
 
-No PyPI package is currently published for `base120` or `hummbl-base120`.
+PyPI project `base120` is version 3.1.0, fetched 2026-11-21, and it is not yanked.
 
 ## License
 
@@ -271,7 +275,7 @@ Apache 2.0
 
 ## Links
 
-- GitHub: https://github.com/hummbl-io/oss/tree/main/packages/base120
-- Package identity receipt: https://github.com/hummbl-io/oss/tree/main/packages/base120/blob/main/docs/PACKAGE_IDENTITY_RECEIPT.md
-- Documentation: https://github.com/hummbl-io/oss/tree/main/packages/base120/blob/main/README.md
-- Issues: https://github.com/hummbl-io/oss/tree/main/packages/base120/issues
+- GitHub: https://github.com/hummbl-io/oss/tree/main/packages/python/base120
+- PyPI: https://pypi.org/project/base120/
+- Documentation: https://github.com/hummbl-io/oss/blob/main/packages/python/base120/README.md
+- Issues: https://github.com/hummbl-io/oss/issues

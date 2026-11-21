@@ -276,7 +276,7 @@ pip install base120
 ### From source
 
 ```bash
-git clone https://github.com/hummbl-io/oss.git && cd oss/packages/base120
+git clone https://github.com/hummbl-io/oss.git && cd oss/packages/python/base120
 pip install -e ".[test]"
 ```
 
@@ -681,7 +681,7 @@ SY1 Leverage Points | SY2 System Boundaries | SY3 Stocks & Flows | SY4 Requisite
 
 
 ```bash
-git clone https://github.com/hummbl-io/oss.git && cd oss/packages/base120
+git clone https://github.com/hummbl-io/oss.git && cd oss/packages/python/base120
 pip install -e ".[test]"
 python -m pytest tests/ -v
 ```
@@ -759,7 +759,7 @@ those models in governance, coordination, and operational infrastructure:
 
 Base120 is part of the [HUMMBL](https://hummbl.io) architecture:
 
-- [hummbl-governance](https://github.com/hummbl-io/oss/tree/main/packages/hummbl-governance) — Governance runtime (kill switch, circuit breaker, cost governor)
+- [hummbl-governance](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-governance) — Governance runtime (kill switch, circuit breaker, cost governor)
 - [arbiter](https://github.com/hummbl-io/arbiter) — Agent-aware code quality scoring and attribution
 - [hummbl-bibliography](https://github.com/hummbl-io/hummbl-bibliography) — Bibliography for the HUMMBL cognitive framework
 
