@@ -1,11 +1,11 @@
 # Public Claims
 
 Status: public claim ledger
-Last updated: 2026-09-27
-Current package metadata: `pyproject.toml` version `1.5.1` (tree, Alpha) — latest published release is `1.5.1` on PyPI. Fail-closed `authorize` is proposed for **1.6.0** and is not tagged; see `docs/operations/RELEASE.md`
+Last updated: 2026-11-21
+Current package metadata: `pyproject.toml` version `1.5.1` (tree, Alpha). PyPI metadata fetched 2026-11-21 reports `info.version` `1.5.1`, not yanked, with the release list ending at `1.5.1`. Fail-closed `authorize` is proposed for **1.6.0** and is not tagged; see `docs/operations/RELEASE.md`
 
 Canonical public promotion source: the [landing claims ledger](https://hummbl.io/manifest/landing-claims.json)
-(`as_of` 2026-08-31T21:56:55Z). Honesty over completeness. A number that is not
+(`as_of` 2026-11-05T22:05:00Z, fetched 2026-11-21). Honesty over completeness. A number that is not
 backed by a public receipt is dropped or scoped, not promoted.
 
 This ledger keeps public claims evidence-backed. A claim should be promoted
@@ -23,8 +23,8 @@ stale — see the Closed evidence gaps table). GAP-002 remains **open**.
 
 | Claim | Status | Receipt | Promotion rule |
 | ----- | ------ | ------- | -------------- |
-| Published package version is `1.4.2` and classified Alpha | verified-with-scope | PyPI-live `pyproject.toml` at tag `hummbl-governance/v1.4.2`, commit `b1b0581`, declares `version = "1.4.2"` and `Development Status :: 3 - Alpha`. Landing claim LANDING-002. The current tree has since moved to `1.5.1` (also Alpha; `1.5.x` tree verified in-tree 2026-09-11 at `1.5.0`) but has not been released; see `docs/operations/RELEASE.md`. | May be stated as the current published package metadata. State tree work as unreleased when describing `1.5.x`-tree features. Alpha is maturity, not production suitability. |
-| Runtime Core dependencies are zero | verified-with-scope | `pyproject.toml` has `dependencies = []` at tag `hummbl-governance/v1.4.2` (PyPI-live) and confirmed still `dependencies = []` in the current `1.5.1` tree (verified in-tree 2026-09-11 at `1.5.0`). Landing claim LANDING-005. | May be stated as zero third-party Core runtime dependencies. Optional, test, build, and integration extras are out of scope. |
+| Published package version is `1.5.1` and classified Alpha | verified-with-scope | PyPI project metadata fetched 2026-11-21: `info.version` is `1.5.1`, the release is not yanked, and the release list ends at `1.5.1`. Classifiers include `Development Status :: 3 - Alpha` and Python 3.11, 3.12, and 3.13. Live landing claim LANDING-002 states the same published version. Tag `hummbl-governance/v1.4.2` is an earlier publish. | May be stated as the current published package metadata. Alpha is maturity, not production suitability. Do not describe `1.5.1` as unreleased. |
+| Runtime Core dependencies are zero | verified-with-scope | `pyproject.toml` had `dependencies = []` at tag `hummbl-governance/v1.4.2`. Live landing claim LANDING-005 states the same empty `project.dependencies` array at tag `python/hummbl-governance/v1.5.1` (commit `a8ad4c3`). An in-tree check on 2026-09-11 also found `dependencies = []`. | May be stated as zero third-party Core runtime dependencies for those cited pins. Optional, test, build, and integration extras are out of scope. |
 | Public oss CI reported 3,479 passed and 16 skipped on Python 3.13 | verified-with-scope | GitHub Actions [run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) at commit `77854dd` on oss main (the PR #222 merge commit). Supersedes the prior 2,463/3 receipt (run 32904924444, commit `7546c4e`), which predated P44-P58/K12-K14. | May be stated as public oss repository CI on Python 3.13. This is not a production-use receipt. |
 | Public oss CI tests Python 3.11, 3.12, 3.13, and 3.14 | verified (GAP-003 closed 2026-09-11) | Same run 34610754121: `test (hummbl-governance, 3.11)`, `3.12`, `3.13`, `3.14` all `success`. `.github/workflows/ci.yml` matrix is `["3.11","3.12","3.13","3.14"]`, not 3.13-only — this row and GAP-003 were themselves stale; corrected 2026-09-11. | May be stated as public CI-tested on 3.11 through 3.14. |
 | Public oss CI collects coverage for hummbl-governance | verified (GAP-003 closed 2026-09-11) | `ci.yml` runs `pytest tests/ -q --cov=hummbl_governance --cov-report=term` for this package specifically; confirmed in run 34610754121's logs. | May state that public CI collects coverage for this package. Do not publish a specific coverage percentage (not extracted/verified here) — that remains a separate, unverified claim. |
@@ -72,9 +72,14 @@ GAP-002 stays open.
 
 ## Wording Rules
 
-- Use the public oss CI receipt for current test counts: 3,479 passed and 16
-  skipped on Python 3.13 ([run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121)).
-  Scope the sentence as public oss repository CI, not production use.
+- Do not cite 3,479 as the current published-release count. That figure is
+  public oss CI [run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121)
+  at commit `77854dd` (2026-09-11): 3,479 passed and 16 skipped. Scope it as
+  that repository CI receipt, not production use.
+- The live landing ledger cites a different receipt for tag
+  `python/hummbl-governance/v1.5.1`: 3,497 passed and 16 skipped on
+  [run 36335061489](https://github.com/hummbl-io/oss/actions/runs/36335061489),
+  Python 3.11 job 108664253949. This file does not recount that job log.
 - "CI-tested on Python 3.11 through 3.14" is now accurate (GAP-003 closed
   2026-09-11) — public oss CI runs the full matrix, not 3.13 only.
 - Coverage is collected in public CI for this package, but do not publish a
@@ -104,17 +109,19 @@ eligible for current promotion.
 
 | Surface | Version | Tests | Primitives | Scope |
 | ------- | ------- | ----- | ---------- | ----- |
-| `pyproject.toml` / tree (source) | 1.5.1 (tree); 1.4.2 (PyPI live) | 3,495 collected locally (2026-09-11, not a public CI receipt) | 51 | Package metadata and `PrimitiveRegistry` — source of truth for primitive count. Tree version has moved past the last PyPI release; see `docs/operations/RELEASE.md`. |
-| README.md (repo) | 1.4.2 | 3,479 passed / 16 skipped (current — matches run 34610754121) | 51 | Public docs — primitive count and test-count badge both corrected 2026-09-11. |
-| Public oss CI | — | 3,479 passed / 16 skipped | — | [Run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) at commit `77854dd` (the PR #222 merge) on oss main. Full 3.11-3.14 matrix, coverage collected (no percentage published). Repository CI evidence, not a production-use receipt. |
-| Landing claims ledger | 1.4.2 | 2,463 passed / 3 skipped | 34 (stale) | Canonical public promotion source (`as_of` 2026-08-31T21:56:55Z) — has not yet been refreshed to 51 or to the fresh test-count receipt; landing-claims.json update is a follow-up outside this repo (needs a real hummbl-governance PyPI release + a new landing-release-receipt, not a hand-edit — see `scripts/emit_landing_release_receipt.py` in hummbl-production). |
+| `pyproject.toml` / tree (source) | 1.5.1 | 3,495 collected locally (2026-09-11, not a public CI receipt) | 51 | Package metadata and `PrimitiveRegistry`. PyPI live matches 1.5.1 as fetched 2026-11-21. |
+| README.md (repo) | 1.5.1 in the governance sample | 3,479 passed / 16 skipped is the 2026-09-11 receipt (run 34610754121), not the v1.5.1 tag receipt | 51 | Public docs. The v1.5.1 tag receipt in the live ledger is 3,497 passed / 16 skipped on run 36335061489. |
+| Public oss CI | — | 3,479 / 16 at commit `77854dd`; 3,497 / 16 on the v1.5.1 tag job | — | [Run 34610754121](https://github.com/hummbl-io/oss/actions/runs/34610754121) is the 2026-09-11 main receipt. [Run 36335061489](https://github.com/hummbl-io/oss/actions/runs/36335061489) is the tag receipt cited by the live ledger. Neither is a production-use receipt. This file does not recount the logs. |
+| Landing claims ledger | 1.5.1 | 3,497 passed / 16 skipped | 51 | Live file fetched 2026-11-21, `as_of` 2026-11-05T22:05:00Z, source tag `python/hummbl-governance/v1.5.1`. LANDING-018 on that live file still cites oss #404 as an open issue. GitHub shows #404 is a merged pull request about the ollama router, merged 2026-11-05T14:11:51Z. |
 | Historical local collection | — | 2314 collected | — | Former local receipt (2026-08-17). Not current public evidence. |
 | Private-repo CI matrix + coverage | — | — | — | The 84.45% coverage *percentage* remains private-repo-only evidence (public CI now collects coverage but doesn't publish a percentage). |
 
 **Key distinction:** The package has 51 implemented primitives (58 tracked:
 51 implemented, 4 proposed, 3 candidate), regenerable from `PrimitiveRegistry`.
-Public oss CI now proves the full 3.11-3.14 matrix with coverage collection
-(run 34610754121, 2026-09-11) — GAP-003 is closed. Only a specific coverage
-*percentage* remains unpublished. The `hummbl.io` landing claims ledger is a
-separate, out-of-repo surface still showing the stale figures; fixing it
-needs a real PyPI release and receipt regeneration, not a text edit here.
+Public oss CI on the 2026-09-11 receipt proves the full 3.11-3.14 matrix with
+coverage collection (run 34610754121) — GAP-003 is closed. Only a specific
+coverage *percentage* remains unpublished. The live `hummbl.io` landing claims
+ledger, fetched 2026-11-21, is `as_of` 2026-11-05T22:05:00Z and records
+published version 1.5.1, 51 primitives, and the v1.5.1 tag CI receipt of 3,497
+passed and 16 skipped. That live file still contains the LANDING-018 citation
+of oss #404.
