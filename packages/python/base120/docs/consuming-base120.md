@@ -1,7 +1,7 @@
 # Consuming Base120 v1.0.0
 
 **Status**: Canonical, Frozen, Audit-Clean
-**Trust Anchor**: Sealed seed with SHA-256 + MRCC binding
+**Trust Anchor**: Sealed seed with the SHA-256 file in `artifacts/`
 
 ---
 
@@ -19,7 +19,6 @@ The following artifacts constitute the complete trust surface:
 |----------|------|--------|
 | Seed JSON | `artifacts/base120.v1.0.0.seed.json` | Canonical 120-model corpus |
 | SHA-256 Hash | `artifacts/base120.v1.0.0.seed.sha256` | Integrity verification |
-| MRCC Binding | `compliance/base120.v1.0.0.seed.mrcc.json` | Governance claims and provenance |
 
 ---
 
@@ -29,7 +28,6 @@ Before consuming Base120, downstream systems MUST verify integrity:
 
 ### Python
 ```python
-import json
 import hashlib
 from pathlib import Path
 
@@ -38,22 +36,13 @@ def verify_base120_seed(base120_path: Path) -> bool:
     """Verify Base120 seed integrity. Returns True if valid."""
     seed_path = base120_path / "artifacts" / "base120.v1.0.0.seed.json"
     hash_path = base120_path / "artifacts" / "base120.v1.0.0.seed.sha256"
-    mrcc_path = base120_path / "compliance" / "base120.v1.0.0.seed.mrcc.json"
 
-    # Compute hash
     with open(seed_path, "rb") as f:
         computed = hashlib.sha256(f.read()).hexdigest()
 
-    # Read declared hash
     declared = hash_path.read_text().strip()
-
-    # Read MRCC hash
-    with open(mrcc_path) as f:
-        mrcc = json.load(f)["sha256"]
-
-    # Verify all match
-    if computed != declared or computed != mrcc:
-        raise ValueError(f"Hash mismatch: computed={computed}, declared={declared}, mrcc={mrcc}")
+    if computed != declared:
+        raise ValueError(f"Hash mismatch: computed={computed}, declared={declared}")
 
     return True
 ```
@@ -65,9 +54,8 @@ set -e
 
 COMPUTED=$(sha256sum artifacts/base120.v1.0.0.seed.json | cut -d' ' -f1)
 DECLARED=$(cat artifacts/base120.v1.0.0.seed.sha256)
-MRCC=$(jq -r '.sha256' compliance/base120.v1.0.0.seed.mrcc.json)
 
-if [ "$COMPUTED" != "$DECLARED" ] || [ "$COMPUTED" != "$MRCC" ]; then
+if [ "$COMPUTED" != "$DECLARED" ]; then
     echo "FAIL: Hash mismatch"
     exit 1
 fi
@@ -85,6 +73,7 @@ Clone or fetch the seed directly from this repository:
 
 ```bash
 git clone https://github.com/hummbl-io/oss.git
+cd oss/packages/python/base120
 # Verify integrity before use
 ```
 
@@ -98,7 +87,7 @@ from datetime import datetime, timezone
 
 # After verification
 provenance = {
-    "source": "hummbl-io/base120",
+    "source": "hummbl-io/oss/packages/python/base120",
     "version": "v1.0.0",
     "sha256": "74c51092b218dcf7b430569fffb36a23ae42aa07f7f1b900479b1721e585656d",  # pragma: allowlist secret -- public sha256 of base120 v1.0.0 seed artifact
     "acquired_at": datetime.now(timezone.utc).isoformat(),
@@ -112,10 +101,10 @@ provenance = {
 import requests
 
 SEED_URL = (
-    "https://raw.githubusercontent.com/hummbl-io/base120/main/artifacts/base120.v1.0.0.seed.json"
+    "https://raw.githubusercontent.com/hummbl-io/oss/main/packages/python/base120/artifacts/base120.v1.0.0.seed.json"
 )
 HASH_URL = (
-    "https://raw.githubusercontent.com/hummbl-io/base120/main/artifacts/base120.v1.0.0.seed.sha256"
+    "https://raw.githubusercontent.com/hummbl-io/oss/main/packages/python/base120/artifacts/base120.v1.0.0.seed.sha256"
 )
 
 # Fetch and verify before use
@@ -200,7 +189,7 @@ Downstream systems MUST NOT:
 
 ## Integration Template
 
-For comprehensive integration guidance, see the [90-Day Downstream Integration Template](https://github.com/hummbl-io/oss/tree/main/packages/base120-corpus-validator/blob/main/docs/downstream-integration-template.md) in System B.
+This repository does not contain `packages/base120-corpus-validator` or a 90-day downstream integration template. Scope for the frozen v1.0.0 seed is in [spec-v1.0.0.md](spec-v1.0.0.md).
 
 ---
 
@@ -209,4 +198,4 @@ For comprehensive integration guidance, see the [90-Day Downstream Integration T
 Base120 v1.0.0 is frozen and governance-complete. For questions:
 
 - Review [spec-v1.0.0.md](spec-v1.0.0.md) for scope clarification
-- System B: [base120-corpus-validator](https://github.com/hummbl-io/oss/tree/main/packages/base120-corpus-validator) for consumption governance
+- The seed and its SHA-256 file are in `artifacts/` in this package
