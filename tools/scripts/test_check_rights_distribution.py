@@ -33,7 +33,8 @@ class RightsDistributionTests(unittest.TestCase):
     def add_and_commit(self, *names):
         for name in names:
             self.git("add", name)
-        self.git("commit", "-q", "-m", "test")
+        self.git("commit", "-q", "-m", "chore(test): fixture commit", "--no-verify")
+
 
     def manifest(self, content_id, policy, authority_path=None):
         m = {
