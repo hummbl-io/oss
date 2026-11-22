@@ -101,7 +101,9 @@ class GuardedAutomaton:
 
     def __init__(self, name: str, release_key: Optional[bytes] = None) -> None:
         self.name = name
-        self._release_key = release_key or b"hummbl-sovereign-operator-seed"
+        if not isinstance(release_key, bytes) or not release_key:
+            raise ValueError("release_key must be non-empty bytes")
+        self._release_key = release_key
         self._state = AutomatonState(
             name="NORMAL",
             severity=SeverityLevel.DISENGAGED,
@@ -380,12 +382,14 @@ class ProjectionFunctor:
     def redact_pseudonymize(
         payload: Dict[str, Any],
         pii_fields: Set[str],
-        salt: str = "hummbl-sovereign-salt",
+        salt: Optional[str] = None,
     ) -> Dict[str, Any]:
         """GDPR Art. 17 right-to-erasure via deterministic keyed hash substitution.
         
         Preserves structural integrity and repeatability without leaking plaintext.
         """
+        if not isinstance(salt, str) or not salt:
+            raise ValueError("salt must be a non-empty string")
         redacted = dict(payload)
         for field in pii_fields:
             if field in redacted:

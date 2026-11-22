@@ -61,6 +61,14 @@ class TestBase120MicroKernel(unittest.TestCase):
         auto.transition("NORMAL", SeverityLevel.DISENGAGED, "Operator resolved", release_token=token)
         self.assertEqual(auto.state.severity, SeverityLevel.DISENGAGED)
 
+    def test_security_secrets_fail_closed(self) -> None:
+        with self.assertRaises(ValueError):
+            GuardedAutomaton("ROOT_GOVERNOR")
+        with self.assertRaises(ValueError):
+            GuardedAutomaton("ROOT_GOVERNOR", release_key=b"")
+        with self.assertRaises(ValueError):
+            ProjectionFunctor.redact_pseudonymize({"email": "a@example.com"}, {"email"})
+
     def test_re_causal_ledger_integrity(self) -> None:
         ledger = self.kernel.ledger
         r1 = ledger.append("agent_01", "write_file", {"path": "a.txt"})
@@ -123,7 +131,7 @@ class TestBase120MicroKernel(unittest.TestCase):
     def test_de_projection_functors(self) -> None:
         proj = self.kernel.projections
         payload = {"user_id": "usr_123", "email": "john@example.com", "action": "login"}
-        redacted = proj.redact_pseudonymize(payload, pii_fields={"email"})
+        redacted = proj.redact_pseudonymize(payload, pii_fields={"email"}, salt="test-redaction-salt")
 
         self.assertEqual(redacted["user_id"], "usr_123")
         self.assertTrue(redacted["email"].startswith("[PSEUDO_"))
