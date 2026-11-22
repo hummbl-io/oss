@@ -93,7 +93,7 @@ Base120 organizes mental models into 6 families based on the type of cognitive t
 | Family | Code | Focus | Question it answers | Example Models |
 |--------|------|-------|---------------------|----------------|
 | **Perspective** | P | Viewpoints, framing, empathy | "How else can I see this?" | P1 First Principles, P5 Empathy Mapping, P10 Context Windowing |
-| **Inversion** | IN | Counterfactuals, negation, contradiction | "What if the opposite is true?" | IN1 Reductio ad Absurdum, IN2 Premortem Analysis, IN6 Inverse/Proof by Contradiction |
+| **Inversion** | IN | Counterfactuals, negation, contradiction | "What if the opposite is true?" | IN1 Subtractive Thinking, IN2 Premortem Analysis, IN6 Inverse/Proof by Contradiction |
 | **Composition** | CO | Building, combining, layering | "How do I assemble this from parts?" | CO1 Modularity, CO5 Interface Design, CO10 Protocol Layering |
 | **Decomposition** | DE | Breaking down, isolating, factoring | "What are the pieces?" | DE1 Root Cause Analysis, DE5 Separation of Concerns, DE8 Dimensional Reduction |
 | **Recursion** | RE | Self-reference, iteration, meta-reasoning | "How does this feed back on itself?" | RE1 Feedback Loop, RE5 Recursion, RE8 Self-Reference |
@@ -510,9 +510,9 @@ engine = Engine()
 print(engine.prompt("P1", "Should we migrate from REST to GraphQL?"))
 # → "What are the irreducible requirements? Latency, cacheability, client flexibility."
 
-# Step 2 — IN5 (Worst-Case Analysis): What if the migration takes 6 months?
+# Step 2 — IN5 (Negative Space Framing): What has the migration plan not examined?
 print(engine.prompt("IN5", "Should we migrate from REST to GraphQL?"))
-# → "What if the migration takes 6 months and breaks mobile clients?"
+# → "Which consumers, query patterns, and failure modes are absent from the analysis?"
 
 # Step 3 — DE5 (Separation of Concerns): Which parts need flexibility?
 print(engine.prompt("DE5", "Should we migrate from REST to GraphQL?"))
