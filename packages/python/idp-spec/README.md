@@ -169,7 +169,7 @@ pip install "idp-spec[governance]"
 
 ## Feature Flag
 
-The token-validation helpers currently default to `ENABLE_IDP=true` when the variable is unset. Setting it to `false` (or an unrecognized value) **rejects token creation, token validation, and least-privilege checks**; it is not an authorization bypass:
+The token helpers (`idp_spec/delegation_token.py`) currently default to `ENABLE_IDP=true` when the variable is unset. Setting it to `false` (or an unrecognized value) **rejects token creation, token validation, and least-privilege checks**; for the token helpers, it is not an authorization bypass (note: `idp_spec/delegation_context.py` methods `transition`, `can_subdelegate`, and `create_child` still pass through when `ENABLE_IDP=false` and are tracked for a separate fail-closed follow-up):
 
 ```bash
 # Token helpers enabled by default
