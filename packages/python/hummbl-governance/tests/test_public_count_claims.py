@@ -156,3 +156,37 @@ def test_nomenclature_ignores_non_governance_primitive_counts(repo):
     pkg_readme = repo / "packages/python/example/README.md"
     pkg_readme.write_text("Base120 provides 120 reasoning primitives.\n", encoding="utf-8")
     assert claims.check_cross_package_nomenclature(repo, expected_primitives=51) == []
+
+
+def _nomenclature_repo(tmp_path, governance_readme, root_readme="# root\n"):
+    gov = tmp_path / "packages/python/hummbl-governance"
+    gov.mkdir(parents=True)
+    (gov / "pyproject.toml").write_text('[project]\nname = "hummbl-governance"\nversion = "1.5.1"\n', encoding="utf-8")
+    (gov / "README.md").write_text(governance_readme, encoding="utf-8")
+    (tmp_path / "README.md").write_text(root_readme, encoding="utf-8")
+    return tmp_path
+
+
+def test_governance_readme_stale_count_without_package_name_is_flagged(tmp_path):
+    repo = _nomenclature_repo(tmp_path, "Ships 48 implemented primitives today.\n")
+    problems = claims.check_cross_package_nomenclature(repo, expected_primitives=51)
+    assert len(problems) == 1 and "says 48" in problems[0]
+
+
+def test_versioned_historical_count_is_not_flagged(tmp_path):
+    repo = _nomenclature_repo(
+        tmp_path,
+        "Current: 51 implemented primitives.\n",
+        root_readme="hummbl-governance v1.4.0 shipped 34 primitives (superseded).\n",
+    )
+    assert claims.check_cross_package_nomenclature(repo, expected_primitives=51) == []
+
+
+def test_current_version_line_with_stale_count_is_flagged(tmp_path):
+    repo = _nomenclature_repo(
+        tmp_path,
+        "Current: 51 implemented primitives.\n",
+        root_readme="hummbl-governance 1.5.1 ships 34 primitives.\n",
+    )
+    problems = claims.check_cross_package_nomenclature(repo, expected_primitives=51)
+    assert len(problems) == 1 and "says 34" in problems[0]

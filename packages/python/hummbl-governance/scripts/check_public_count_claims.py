@@ -228,6 +228,20 @@ def check_package_table_versions(oss_root: Path) -> list[str]:
     return problems
 
 
+def _current_governance_version(oss_root: Path) -> str | None:
+    """[project].version of hummbl-governance in this tree, or None if unreadable."""
+    manifest = oss_root / "packages" / "python" / "hummbl-governance" / "pyproject.toml"
+    try:
+        text = manifest.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r'(?m)^\[project\][^\[]*?^version\s*=\s*"([^"]+)"', text)
+    return m.group(1) if m else None
+
+
+_VERSION_TOKEN = re.compile(r"(?<![\w.])v?(\d+\.\d+(?:\.\d+)?)(?![\w.])")
+
+
 def check_cross_package_nomenclature(
     oss_root: Path,
     expected_primitives: int | None = None,
@@ -236,6 +250,13 @@ def check_cross_package_nomenclature(
 
     Bounded to root README.md and packages/python/*/README.md (excluding dated
     research archives and historical authority snapshots).
+
+    Count scope (review on #525):
+    - In packages/python/hummbl-governance/README.md every count line is checked,
+      because its lines rarely repeat the package name.
+    - Elsewhere only lines that name hummbl-governance are checked.
+    - A line that pins a version other than the current hummbl-governance
+      version is a historical statement and is not compared to today's count.
     """
     prefix = "[nomenclature]"
     problems: list[str] = []
@@ -246,6 +267,8 @@ def check_cross_package_nomenclature(
     python_dir = oss_root / "packages" / "python"
     if python_dir.is_dir():
         targets.extend(sorted(python_dir.glob("*/README.md")))
+    governance_readme = python_dir / "hummbl-governance" / "README.md"
+    current_version = _current_governance_version(oss_root)
 
     drifted_dct = re.compile(r"\bDelegation\s+Context\s+Token\b", re.IGNORECASE)
     gov_prim_count = re.compile(r"(\d+)\s+(?:implemented\s+)?(?:governance\s+)?primitives\b", re.IGNORECASE)
@@ -256,6 +279,7 @@ def check_cross_package_nomenclature(
         except OSError as exc:
             problems.append(f"{prefix} cannot read {path}: {exc}")
             continue
+        in_governance_readme = path.resolve() == governance_readme.resolve()
         for line_no, line in enumerate(lines, start=1):
             if drifted_dct.search(line):
                 problems.append(
@@ -264,15 +288,21 @@ def check_cross_package_nomenclature(
                     "for DCT and 'Delegation Context' for DCTX "
                     "(see docs/architecture/NOMENCLATURE.md)"
                 )
-            if expected_primitives is not None and "hummbl-governance" in line.lower():
-                for match in gov_prim_count.finditer(line):
-                    found = int(match.group(1))
-                    if found != expected_primitives:
-                        problems.append(
-                            f"{prefix} {path}:{line_no}: hummbl-governance primitive count "
-                            f"says {found}, expected {expected_primitives} "
-                            f"(or link to PRIMITIVES.md / docs/public-claims.md) -- '{match.group(0)}'"
-                        )
+            if expected_primitives is None:
+                continue
+            if not in_governance_readme and "hummbl-governance" not in line.lower():
+                continue
+            versions = {m.group(1) for m in _VERSION_TOKEN.finditer(line)}
+            if current_version and versions and current_version not in versions:
+                continue  # historical, versioned statement
+            for match in gov_prim_count.finditer(line):
+                found = int(match.group(1))
+                if found != expected_primitives:
+                    problems.append(
+                        f"{prefix} {path}:{line_no}: hummbl-governance primitive count "
+                        f"says {found}, expected {expected_primitives} "
+                        f"(or link to PRIMITIVES.md / docs/public-claims.md) -- '{match.group(0)}'"
+                    )
     return problems
 
 
