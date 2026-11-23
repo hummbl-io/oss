@@ -11,6 +11,7 @@ IDP References:
 
 from __future__ import annotations
 
+import logging
 import math
 import os
 import uuid
@@ -18,11 +19,23 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal
 
+logger = logging.getLogger(__name__)
+
 
 # Feature flag
 def _is_idp_enabled() -> bool:
-    """Check if IDP feature flag is enabled (runtime check)."""
-    return os.environ.get("ENABLE_IDP", "true").lower() == "true"
+    """Check if IDP feature flag is enabled (runtime check).
+
+    Defaults to enabled when ENABLE_IDP is unset. Any value other than "true"
+    (case-insensitive) disables IDP and causes guarded delegation context
+    operations to fail closed.
+    """
+    enabled = os.environ.get("ENABLE_IDP", "true").lower() == "true"
+    if not enabled:
+        logger.warning(
+            "ENABLE_IDP is disabled: delegation context operations fail closed."
+        )
+    return enabled
 
 
 # Error codes per IDP_FAILURE_CODES.md
@@ -33,6 +46,8 @@ IDP_E_CAPABILITY_ESCALATION = "IDP_E_CAPABILITY_ESCALATION"
 IDP_E_BUDGET_ESCALATION = "IDP_E_BUDGET_ESCALATION"
 # G3: Dynamic trust-decay depth exceeded
 IDP_E_TRUST_DEPTH_EXCEEDED = "IDP_E_TRUST_DEPTH_EXCEEDED"
+# Fail-closed rejection when ENABLE_IDP is false or unrecognized
+IDP_E_DISABLED = "IDP_E_DISABLED"
 
 # Default constants
 DEFAULT_MAX_CHAIN_DEPTH = 3
@@ -274,8 +289,7 @@ class DelegationContext:
             Tuple of (success, error_code)
         """
         if not _is_idp_enabled():
-            self.status = new_status
-            return True, None
+            return False, IDP_E_DISABLED
 
         valid_transitions: dict[DCTXStatus, list[DCTXStatus]] = {
             "PROPOSED": ["ISSUED"],
@@ -315,7 +329,7 @@ class DelegationContext:
             Tuple of (can_subdelegate, error_code)
         """
         if not _is_idp_enabled():
-            return True, None
+            return False, IDP_E_DISABLED
 
         if self.chain_depth + 1 > max_depth:
             return False, IDP_E_DEPTH_EXCEEDED
@@ -347,12 +361,13 @@ class DelegationContext:
 
         Returns:
             Tuple of (child_context, error_code). Error codes:
+            - IDP_E_DISABLED: IDP feature flag is disabled (fail-closed)
             - IDP_E_DEPTH_EXCEEDED: Would exceed static max chain depth
             - IDP_E_TRUST_DEPTH_EXCEEDED: Would exceed dynamic trust-decay depth
             - IDP_E_CAPABILITY_ESCALATION: Child ops not subset of parent ops
         """
         if not _is_idp_enabled():
-            return None, None
+            return None, IDP_E_DISABLED
 
         # G3: Dynamic trust-decay depth (supersedes static bound when trust_score provided)
         resolved_risk = risk_tier or self.risk_tier
