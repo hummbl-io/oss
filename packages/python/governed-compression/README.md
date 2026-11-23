@@ -1,7 +1,6 @@
 # governed-compression
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/hummbl-io/governed-compression/main)](https://github.com/hummbl-io/governed-compression/commits/main)
 
 Public research implementation surface for governed vector and KV-cache compression.
 
@@ -62,18 +61,18 @@ Stage 1 scaffold only.
 
 ## HUMMBL Ecosystem
 
-This repo is part of the [HUMMBL](https://github.com/hummbl-io) AI governance architecture.
+This package is part of the [HUMMBL](https://github.com/hummbl-io/oss) open-source AI governance architecture.
 
-| Repo | Purpose |
-|------|---------|
-| [hummbl-governance](https://github.com/hummbl-io/hummbl-governance) | Governance runtime — kill switch, circuit breaker, cost governor, 34 primitives |
-| [mcp-server](https://github.com/hummbl-io/mcp-server) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
-| [base120](https://github.com/hummbl-io/base120) | 120 mental models for structured reasoning — stdlib-only Python library |
-| [crab](https://github.com/hummbl-io/crab) | CRAB protocol — Check, Reason, Act, Bus for multi-agent turn execution |
-| [docs](https://github.com/hummbl-io/docs) | Canonical public documentation — Mintlify-powered |
-| [hummbl-toolkit](https://github.com/hummbl-io/hummbl-toolkit) | HUMMBL utility toolkit |
+| Package / Surface | Purpose |
+|---|---|
+| [hummbl-governance](https://pypi.org/project/hummbl-governance/) | Governance runtime — kill switch, circuit breaker, cost governor, 51 implemented primitives |
+| [hummbl-mcp-base120](../hummbl-mcp-base120) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
+| [base120](https://pypi.org/project/base120/) | 120 mental models for structured reasoning — stdlib-only Python library |
+| [hummbl-tuples](../hummbl-tuples) | Governed typed-tuples and experiment logging |
+| [hummbl-bus](../hummbl-bus) | Append-only TSV coordination bus for multi-agent systems |
+| [Documentation](https://hummbl.io) | Canonical public documentation |
 
-Learn more at [hummbl.io](https://www.hummbl.io).
+Learn more at [hummbl.io](https://hummbl.io).
 
 ---
 

@@ -1,0 +1,150 @@
+# Public Surface Daily Evaluation Template
+# Version: 1.0 (operating weights; not an empirically calibrated study)
+# Context: One live public website surface, scored each day against its own last receipt
+
+template_metadata:
+  template_name: "Public Surface Daily Evaluation"
+  template_version: "1.0"
+  template_type: "site_surface_daily"
+  base_schema: "hummbl-rubric-master.yaml"
+  created_date: "2026-11-20"
+  last_updated: "2026-11-20"
+  author: "HUMMBL Open Source"
+
+parameters:
+  context_name: "site_surface_daily"
+  framework_reference: "HUMMBL public-surface daily rubric v1"
+  evaluation_scope: "single_document"
+  artifact_types: ["evidence_pack", "compliance_report"]
+  governance_level: "fleet"
+  stakeholder_type: "operator"
+  risk_profile: "high"
+  compliance_criticality: "required"
+
+# Any failed gate caps numeric_score at 40 and preempts the weekday deep cell.
+# Identity has no dimension of its own. An Identity failure opens the Arrival cell.
+hard_gates:
+  arrival:
+    fail_condition: "The hostname does not resolve, TLS is invalid, or the response is not the intended site. An access-gated host fails when the gate is not the intended response. A login wall does not pass as if it were the public page."
+    max_score_if_failed: 40
+    severity: "critical"
+  identity:
+    fail_condition: "The apex, www, or a stated redirect serves a different property than the one this surface claims to be."
+    max_score_if_failed: 40
+    severity: "critical"
+  truth:
+    fail_condition: "A specific public claim is contradicted, undated, or unsourced. Numbers and external facts count. A marketing summary that is not labeled as such fails this gate."
+    max_score_if_failed: 40
+    severity: "critical"
+  care:
+    fail_condition: "A form or account collects personal data with no privacy notice, or a secret, private path, or staging host is exposed."
+    max_score_if_failed: 40
+    severity: "critical"
+
+weighted_dimensions:
+  # Shared anchor scale, applied to each dimension:
+  # 0 missing or broken
+  # 1 present and wrong, stale, or unusable
+  # 2 correct for the stated purpose
+  # 3 correct, and a stranger can check the evidence
+  # 4 is a 3, and the evidence is better than the last receipt for this cell
+  # Anchor 4 is unavailable on the first receipt for a cell. That receipt is a baseline.
+  arrival:
+    weight: 12
+    description: "DNS, certificate, status, redirects, canonical host, and the repo plus commit that produced this response. Checks: dns-check, ssl-check, uptime-check, deployed-claim-verify. An access-gated host passes at 2 or above only when the gate itself is the intended response."
+    scoring_anchors:
+      "0": "The hostname does not resolve, TLS fails, or the response is not the intended site."
+      "1": "The site answers, but DNS, the certificate, status, a redirect, or the canonical host is wrong or stale."
+      "2": "DNS, the certificate, status, redirects, and the canonical host match the stated site, and the repo and commit are identified."
+      "3": "A stranger can re-run dns-check, ssl-check, uptime-check, and deployed-claim-verify and get the same result."
+      "4": "Anchor 3, and the evidence is better than the last Arrival receipt for this surface."
+  purpose:
+    weight: 10
+    description: "What the surface is, who it is for, and one next action. The first screen matches that statement. No probe replaces reading the live page."
+    scoring_anchors:
+      "0": "The page does not say what it is."
+      "1": "The purpose, audience, or next action is present and wrong, stale, or in conflict with the first screen."
+      "2": "What it is, who it is for, and one next action are correct, and the first screen matches."
+      "3": "A stranger can check that match by reading the live page."
+      "4": "Anchor 3, and the evidence is better than the last Purpose receipt for this surface."
+  truth:
+    weight: 16
+    description: "Public claims, dates, versions, testimonials, and metrics match a ledger. A stale receipt is not cited as current. Marketing summaries are labeled. Heaviest weight because this is where the estate drifts. Checks: the claims ledger and claim-verify."
+    scoring_anchors:
+      "0": "A public claim is contradicted, undated, or unsourced, or no claim on the page can be checked."
+      "1": "Claims, dates, versions, testimonials, or metrics are present and wrong, stale, or cited from an old receipt as if they were current."
+      "2": "Those statements match a ledger, and every marketing summary is labeled as one."
+      "3": "A stranger can check the claims ledger or the claim-verify result."
+      "4": "Anchor 3, and the evidence is better than the last Truth receipt for this surface."
+  content:
+    weight: 12
+    description: "Information architecture, headings, internal links, and freshness. No dead sections and no broken destinations. Checks: seo-check heading and link signals."
+    scoring_anchors:
+      "0": "The information architecture is missing, or headings and internal links are broken."
+      "1": "The structure is present and wrong, stale, or leads to a dead section or a broken destination."
+      "2": "Headings, internal links, and freshness are correct for the stated purpose."
+      "3": "A stranger can check the heading and link signals, including seo-check."
+      "4": "Anchor 3, and the evidence is better than the last Content receipt for this surface."
+  use:
+    weight: 14
+    description: "The primary task can be finished on a phone and on a desktop, including empty, error, and loading states. A form submits or says why it does not. The check is one real task, not a screenshot."
+    scoring_anchors:
+      "0": "The primary task cannot be started."
+      "1": "The task is present and fails on a phone or a desktop, or an empty, error, or loading state is unusable, or a form fails without saying why."
+      "2": "The primary task finishes on a phone and on a desktop, including empty, error, and loading states, and forms submit or say why they do not."
+      "3": "A stranger can finish that one real task and check the result."
+      "4": "Anchor 3, and the evidence is better than the last Use receipt for this surface."
+  presentation:
+    weight: 10
+    description: "Hierarchy, brand, contrast, keyboard access, control names, and motion that can be stopped. Checks: a11y-audit, color-contrast, and the brand guidelines."
+    scoring_anchors:
+      "0": "Hierarchy, brand, contrast, keyboard access, or control names are missing or broken, or motion cannot be stopped."
+      "1": "Those qualities are present and wrong, stale, or unusable."
+      "2": "Hierarchy, brand, contrast, keyboard access, and control names are correct for the stated purpose, and motion can be stopped."
+      "3": "A stranger can check them with a11y-audit, color-contrast, and the brand guidelines."
+      "4": "Anchor 3, and the evidence is better than the last Presentation receipt for this surface."
+  findability:
+    weight: 14
+    description: "Title, description, canonical URL, sitemap, robots.txt, structured data, and llms.txt where the surface is meant to be cited. Also LCP, INP, CLS, and page weight. Checks: seo-check, web-perf, and scripts/aeo_probe.py. A conformance probe is not evidence that anyone cites the page."
+    scoring_anchors:
+      "0": "Title, description, canonical URL, sitemap, or robots.txt is missing or blocks the intended audience, or llms.txt is missing where the surface is meant to be cited."
+      "1": "Those signals are present and wrong or stale, or LCP, INP, CLS, or page weight makes the page unusable."
+      "2": "Title, description, canonical URL, sitemap, robots.txt, and structured data are correct for the stated purpose. llms.txt is present where the surface is meant to be cited. LCP, INP, CLS, and page weight fit that purpose."
+      "3": "A stranger can check them with seo-check, web-perf, and scripts/aeo_probe.py."
+      "4": "Anchor 3, and the evidence is better than the last Findability receipt for this surface."
+  care:
+    weight: 12
+    description: "A privacy notice where personal data is collected, security headers, no mixed content, a known rollback, and one measurement that shows whether today's change helped. Checks: privacy-audit and the deploy workflow. This dimension is the deep cell only when the Care gate fails. It is not in the weekday rotation."
+    scoring_anchors:
+      "0": "A form or account collects personal data with no privacy notice, or a secret, private path, or staging host is exposed."
+      "1": "A privacy notice, security headers, or rollback is present and wrong, stale, or unusable, or mixed content is present, or no measurement shows whether today's change helped."
+      "2": "A privacy notice exists where data is collected, security headers are set, there is no mixed content, a known rollback exists, and one measurement shows whether today's change helped."
+      "3": "A stranger can check that with privacy-audit and the deploy workflow."
+      "4": "Anchor 3, and the evidence is better than the last Care receipt for this surface."
+
+required_outputs:
+  numeric_score: 0
+  hard_gate_status: ""
+  weighted_breakdown: {}
+  top_3_strengths: []
+  top_3_weaknesses: []
+  score_caps_triggered: []
+  next_validation_test: "Re-run the worst failed hard gate on the live surface, or repeat the deep cell and show the new evidence beats the last receipt for that cell."
+  limitations: "One receipt scores one public surface. It does not average the estate, certify WCAG, certify privacy law, or certify search ranking. A green rescore with no evidence change is maintenance. The first receipt for a cell is a baseline, so anchor 4 is unavailable until a prior receipt exists. Redirect-only names are hard-gate checks on the destination. A repository that only has a Pages workflow and no live inventory row is not a surface. Access-gated hosts are scored against the intended gate."
+
+usage_notes:
+  - "The scored unit is one public surface: a hostname a person can open. A git repository is Arrival evidence for the deployed commit. It is not the unit."
+  - "evaluation_scope stays single_document so each receipt stays on one surface. The estate schedule below is the calendar. Do not average surfaces into one number."
+  - "Each day, spend about 15 minutes on the four hard gates for every live surface, then about 25 minutes on one cell. A cell is one surface plus one dimension."
+  - "A day is an improvement only when that cell's evidence beats its last receipt, or a failing hard gate now passes. Rescoring a green cell with no change is maintenance. Anchor 3 is correct and checkable. Anchor 4 additionally beats the last receipt. Anchor 4 does not exist on a first receipt."
+  - "Any hard-gate failure caps numeric_score at 40 and preempts the weekday cell. Publish the worst failed gate and the cell that moved."
+  - "Each dimension anchor is an integer from 0 to 4. The uncapped numeric_score is the nearest integer to the sum of (anchor / 4) times weight. Weights sum to 100. A failed hard gate then caps that integer at 40."
+  - "weighted_breakdown records an anchor for every dimension. Dimensions not opened today keep the last receipt's anchor and are marked carried. Only the deep cell, or a hard gate that changed, is new evidence. A carried 3 is not a 4. A dimension with no prior receipt scores 0 until it is observed."
+  - "Weekday deep dimension, when every hard gate passes: Monday Arrival, Tuesday Purpose, Wednesday Truth, Thursday Content, Friday Use, Saturday Presentation, Sunday Findability. Care is not in this rotation."
+  - "If a gate fails, the deep cell is the failed subject: Arrival for an Arrival or Identity failure, Truth for a Truth failure, Care for a Care failure. When more than one gate fails, open the first of Arrival, Identity, Truth, Care."
+  - "Among surfaces due for that dimension, pick the worst last anchor, then the oldest receipt, then the queue order below."
+  - "Starting queue as of 2026-11-20, public apexes, then property sites, then single-purpose hosts: hummbl.io, hummbl.dev, hummbl.house, reubenbowlby.com, kernelclothing.com, krineia.com, rpbx.net, content.hummbl.app, pricing.hummbl.app, app.hummbl.app, gyre.hummbl.io, m.hummbl.app, dashboard.hummbl.io, map.hummbl.house, feeds.hummbl.house, atlas.hummbl.house, intel.hummbl.house, hummbl-media.pages.dev, the-bridge-method.pages.dev. A hostname joins or leaves when the live inventory changes. This file does not re-probe them."
+  - "dashboard.hummbl.io is access-gated. Arrival passes when that gate is the intended response."
+  - "Redirect-only names stay in the hard-gate pass and do not get their own deep day. Recorded on the 2026-11-20 inventory read, from operations.json observed_at 2026-11-01: www.hummbl.io points at hummbl.io; hummbl.app and www.hummbl.app point at hummbl.dev; krineia.org and www.krineia.org point at krineia.com; thebridgemethod.net and www.thebridgemethod.net point at reubenbowlby.com. Re-check the live redirect before treating it as current. thebridgemethod.net is an Arrival check on reubenbowlby.com."
+  - "Do not score a repository that only has a Pages workflow and no row in the live inventory."
+  - "Weights are operating choices. Truth is 16 because public claims drift. They are not the result of a calibration study. The package validator checks structure only. It does not run the gates or compute a score."

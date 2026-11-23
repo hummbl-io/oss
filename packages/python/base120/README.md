@@ -759,9 +759,9 @@ those models in governance, coordination, and operational infrastructure:
 
 Base120 is part of the [HUMMBL](https://hummbl.io) architecture:
 
-- [hummbl-governance](https://github.com/hummbl-io/oss/tree/main/packages/hummbl-governance) — Governance runtime (kill switch, circuit breaker, cost governor)
-- [arbiter](https://github.com/hummbl-io/arbiter) — Agent-aware code quality scoring and attribution
-- [hummbl-bibliography](https://github.com/hummbl-io/hummbl-bibliography) — Bibliography for the HUMMBL cognitive framework
+- [hummbl-governance](https://pypi.org/project/hummbl-governance/) — Governance runtime (kill switch, circuit breaker, cost governor, 51 implemented primitives)
+- [hummbl-bus](../hummbl-bus) — Coordination bus for multi-agent turn execution
+- [hummbl-cognition](../hummbl-cognition) — Cognitive Ledger Protocol (CLP) and Open Brain server
 
 ---
 

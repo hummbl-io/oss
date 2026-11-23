@@ -28,8 +28,11 @@ pip install -e packages/python/hummbl-rubric-templates
 | `nist-ai-rmf-compliance.yaml` | Coverage against NIST AI RMF v1.0 |
 | `global-org-ranking.yaml` | Comparative organization ranking |
 | `game-build-pipeline.yaml` | Illustrative Godot game build evaluation |
+| `site-surface-daily.yaml` | One live public website surface, scored daily |
 
 The game-build template uses illustrative weights, not empirical calibration.
+The site-surface template scores one hostname a person can open. Its weights
+are operating choices, with Truth heaviest, not a calibrated study.
 An evaluator must assess its gates and apply score caps; the validator only
 checks structure and supported values.
 

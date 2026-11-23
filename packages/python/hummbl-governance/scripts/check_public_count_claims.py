@@ -127,6 +127,13 @@ def build_checks(oss_root: Path) -> list[CountCheck]:
         primitive_targets.append((governance_root / "PRIMITIVES.md", pattern))
         primitive_targets.append((governance_root / "docs" / "public-claims.md", pattern))
 
+    python_packages_dir = oss_root / "packages" / "python"
+    if python_packages_dir.is_dir():
+        for pkg_dir in sorted(python_packages_dir.iterdir()):
+            if pkg_dir.is_dir() and pkg_dir != governance_root and (pkg_dir / "README.md").is_file():
+                for pattern in primitive_patterns:
+                    primitive_targets.append((pkg_dir / "README.md", pattern))
+
     package_targets: list[tuple[Path, re.Pattern[str]]] = [
         (oss_root / "README.md", pattern) for pattern in package_patterns
     ]

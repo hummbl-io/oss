@@ -45,7 +45,7 @@ python cognitive_ledger_mcp_server.py
 ## Source of truth
 
 The actual implementation lives in the
-[hummbl-cognition](https://github.com/hummbl-io/hummbl-cognition) repo. This
+[hummbl-cognition](../hummbl-cognition) package in this monorepo. This
 package is a thin entry point for the monorepo's MCP server catalog.
 
 ## License
