@@ -102,6 +102,16 @@ def find_mismatches(check: CountCheck) -> list[str]:
     return problems
 
 
+def _governance_scoped(pattern: re.Pattern[str]) -> re.Pattern[str]:
+    """Restrict a count pattern to lines that name hummbl-governance.
+
+    Other package READMEs describe their own primitives (base120's reasoning
+    primitives, a package's own capability count); only a statement about
+    hummbl-governance may be compared to the governance total (review on #527).
+    """
+    return re.compile(r"(?m)^(?=[^\n]*hummbl-governance)[^\n]*?" + pattern.pattern, pattern.flags)
+
+
 def build_checks(oss_root: Path) -> list[CountCheck]:
     governance_root = oss_root / "packages" / "python" / "hummbl-governance"
     implemented = compute_implemented_primitive_count(governance_root)
@@ -132,7 +142,7 @@ def build_checks(oss_root: Path) -> list[CountCheck]:
         for pkg_dir in sorted(python_packages_dir.iterdir()):
             if pkg_dir.is_dir() and pkg_dir != governance_root and (pkg_dir / "README.md").is_file():
                 for pattern in primitive_patterns:
-                    primitive_targets.append((pkg_dir / "README.md", pattern))
+                    primitive_targets.append((pkg_dir / "README.md", _governance_scoped(pattern)))
 
     package_targets: list[tuple[Path, re.Pattern[str]]] = [
         (oss_root / "README.md", pattern) for pattern in package_patterns

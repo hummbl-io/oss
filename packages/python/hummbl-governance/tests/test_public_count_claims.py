@@ -122,3 +122,27 @@ def test_cli_returns_failure_for_table_version_drift(repo, monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["check_public_count_claims.py", "--repo-root", str(repo)])
     assert claims.main() == 1
     assert "table says '0.0.0'" in capsys.readouterr().out
+
+
+def test_other_package_readme_compares_only_hummbl_governance_statements(tmp_path):
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        "This package ships 4 implemented primitives of its own.\n"
+        "- [hummbl-governance](https://pypi.org/project/hummbl-governance/) - 51 implemented primitives\n",
+        encoding="utf-8",
+    )
+    pattern = claims._governance_scoped(claims.re.compile(r"(\d+)\s+implemented primitives"))
+    check = claims.CountCheck(name="implemented_primitives", expected=51, targets=((readme, pattern),))
+    assert claims.find_mismatches(check) == []
+
+
+def test_other_package_readme_still_flags_stale_governance_count(tmp_path):
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        "- [hummbl-governance](https://pypi.org/project/hummbl-governance/) - 48 implemented primitives\n",
+        encoding="utf-8",
+    )
+    pattern = claims._governance_scoped(claims.re.compile(r"(\d+)\s+implemented primitives"))
+    check = claims.CountCheck(name="implemented_primitives", expected=51, targets=((readme, pattern),))
+    problems = claims.find_mismatches(check)
+    assert len(problems) == 1 and "found 48" in problems[0]
