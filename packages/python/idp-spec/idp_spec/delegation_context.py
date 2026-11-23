@@ -306,9 +306,12 @@ class DelegationContext:
             return False, IDP_E_INVALID_STATE_TRANSITION
 
         # I5: Check replan limit for REPLANNED → PROPOSED
-        if self.status == "EVIDENCE_READY" and new_status == "REPLANNED":
-            if self.replan_count >= DEFAULT_MAX_REPLANS:
-                return False, IDP_E_REPLAN_LIMIT
+        if (
+            self.status == "EVIDENCE_READY"
+            and new_status == "REPLANNED"
+            and self.replan_count >= DEFAULT_MAX_REPLANS
+        ):
+            return False, IDP_E_REPLAN_LIMIT
 
         # Update replan count when transitioning to REPLANNED
         if new_status == "REPLANNED":
@@ -394,19 +397,29 @@ class DelegationContext:
         if budget is not None:
             # Escalation check: Child cannot ask for unlimited when parent is bounded,
             # nor exceed parent's remaining pool.
-            if self.budget.max_tokens > 0:
-                if budget.max_tokens <= 0 or budget.max_tokens > self.budget.remaining_tokens:
-                    return None, IDP_E_BUDGET_ESCALATION
-            if self.budget.max_cost_usd > 0.0:
-                # W2: Account for IEEE 754 precision drift
-                if budget.max_cost_usd <= 0.0 or (
+            if self.budget.max_tokens > 0 and (
+                budget.max_tokens <= 0 or budget.max_tokens > self.budget.remaining_tokens
+            ):
+                return None, IDP_E_BUDGET_ESCALATION
+            # W2: Account for IEEE 754 precision drift
+            if self.budget.max_cost_usd > 0.0 and (
+                budget.max_cost_usd <= 0.0
+                or (
                     budget.max_cost_usd > self.budget.remaining_cost_usd
-                    and not math.isclose(budget.max_cost_usd, self.budget.remaining_cost_usd, rel_tol=1e-9, abs_tol=1e-9)
-                ):
-                    return None, IDP_E_BUDGET_ESCALATION
-            if self.budget.max_wall_time_seconds > 0:
-                if budget.max_wall_time_seconds <= 0 or budget.max_wall_time_seconds > self.budget.remaining_wall_time_seconds:
-                    return None, IDP_E_BUDGET_ESCALATION
+                    and not math.isclose(
+                        budget.max_cost_usd,
+                        self.budget.remaining_cost_usd,
+                        rel_tol=1e-9,
+                        abs_tol=1e-9,
+                    )
+                )
+            ):
+                return None, IDP_E_BUDGET_ESCALATION
+            if self.budget.max_wall_time_seconds > 0 and (
+                budget.max_wall_time_seconds <= 0
+                or budget.max_wall_time_seconds > self.budget.remaining_wall_time_seconds
+            ):
+                return None, IDP_E_BUDGET_ESCALATION
             child_budget = DelegationBudget(
                 max_tokens=budget.max_tokens,
                 max_cost_usd=budget.max_cost_usd,
