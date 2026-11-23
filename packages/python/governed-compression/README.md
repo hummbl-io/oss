@@ -66,10 +66,10 @@ This repo is part of the [HUMMBL](https://github.com/hummbl-io) AI governance ar
 
 | Repo | Purpose |
 |------|---------|
-| [hummbl-governance](https://github.com/hummbl-io/hummbl-governance) | Governance runtime — kill switch, circuit breaker, cost governor, 34 primitives |
+| [hummbl-governance](../hummbl-governance/README.md) | Governance runtime — kill switch, circuit breaker, cost governor (see [PRIMITIVES.md](../hummbl-governance/PRIMITIVES.md) and [public-claims.md](../hummbl-governance/docs/public-claims.md) for the versioned primitive inventory) |
 | [mcp-server](https://github.com/hummbl-io/mcp-server) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
-| [base120](https://github.com/hummbl-io/base120) | 120 mental models for structured reasoning — stdlib-only Python library |
-| [crab](https://github.com/hummbl-io/crab) | CRAB protocol — Check, Reason, Act, Bus for multi-agent turn execution |
+| [base120](../base120/README.md) | 120 mental models for structured reasoning — stdlib-only Python library |
+| [CRAB protocol](../../../docs/architecture/NOMENCLATURE.md#2-crab--scoped-conventions-do-not-silently-merge) | CRAB turn-execution protocol (Check, Reason, Act, Bus) for multi-agent turn execution |
 | [docs](https://github.com/hummbl-io/docs) | Canonical public documentation — Mintlify-powered |
 | [hummbl-toolkit](https://github.com/hummbl-io/hummbl-toolkit) | HUMMBL utility toolkit |
 

@@ -122,3 +122,37 @@ def test_cli_returns_failure_for_table_version_drift(repo, monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["check_public_count_claims.py", "--repo-root", str(repo)])
     assert claims.main() == 1
     assert "table says '0.0.0'" in capsys.readouterr().out
+
+
+def test_nomenclature_flags_drifted_dct_expansion(repo):
+    pkg_readme = repo / "packages/python/example/README.md"
+    pkg_readme.write_text("Uses a Delegation Context Token (DCT).\n", encoding="utf-8")
+    problems = claims.check_cross_package_nomenclature(repo, expected_primitives=51)
+    assert len(problems) == 1
+    assert "Delegation Capability Token" in problems[0]
+
+
+def test_nomenclature_allows_canonical_dct_and_dctx(repo):
+    pkg_readme = repo / "packages/python/example/README.md"
+    pkg_readme.write_text(
+        "Uses a Delegation Capability Token (DCT) and Delegation Context (DCTX).\n",
+        encoding="utf-8",
+    )
+    assert claims.check_cross_package_nomenclature(repo, expected_primitives=51) == []
+
+
+def test_nomenclature_flags_stale_governance_primitive_count_in_ecosystem_table(repo):
+    pkg_readme = repo / "packages/python/example/README.md"
+    pkg_readme.write_text(
+        "| [hummbl-governance](../hummbl-governance/README.md) | 34 primitives |\n",
+        encoding="utf-8",
+    )
+    problems = claims.check_cross_package_nomenclature(repo, expected_primitives=51)
+    assert len(problems) == 1
+    assert "says 34, expected 51" in problems[0]
+
+
+def test_nomenclature_ignores_non_governance_primitive_counts(repo):
+    pkg_readme = repo / "packages/python/example/README.md"
+    pkg_readme.write_text("Base120 provides 120 reasoning primitives.\n", encoding="utf-8")
+    assert claims.check_cross_package_nomenclature(repo, expected_primitives=51) == []

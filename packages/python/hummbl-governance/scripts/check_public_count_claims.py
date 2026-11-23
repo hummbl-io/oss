@@ -125,7 +125,10 @@ def build_checks(oss_root: Path) -> list[CountCheck]:
     for pattern in primitive_patterns:
         primitive_targets.append((governance_root / "README.md", pattern))
         primitive_targets.append((governance_root / "PRIMITIVES.md", pattern))
+        primitive_targets.append((governance_root / "ROADMAP.md", pattern))
         primitive_targets.append((governance_root / "docs" / "public-claims.md", pattern))
+        primitive_targets.append((oss_root / "docs" / "architecture" / "NOMENCLATURE.md", pattern))
+    primitive_targets.append((governance_root / "docs" / "hero.svg", re.compile(r"(\d+)\s+(?:implemented\s+)?primitives\b")))
 
     package_targets: list[tuple[Path, re.Pattern[str]]] = [
         (oss_root / "README.md", pattern) for pattern in package_patterns
@@ -225,6 +228,54 @@ def check_package_table_versions(oss_root: Path) -> list[str]:
     return problems
 
 
+def check_cross_package_nomenclature(
+    oss_root: Path,
+    expected_primitives: int | None = None,
+) -> list[str]:
+    """Check active monorepo READMEs for drifted DCT expansion and stale governance counts.
+
+    Bounded to root README.md and packages/python/*/README.md (excluding dated
+    research archives and historical authority snapshots).
+    """
+    prefix = "[nomenclature]"
+    problems: list[str] = []
+    targets: list[Path] = []
+    root_readme = oss_root / "README.md"
+    if root_readme.is_file():
+        targets.append(root_readme)
+    python_dir = oss_root / "packages" / "python"
+    if python_dir.is_dir():
+        targets.extend(sorted(python_dir.glob("*/README.md")))
+
+    drifted_dct = re.compile(r"\bDelegation\s+Context\s+Token\b", re.IGNORECASE)
+    gov_prim_count = re.compile(r"(\d+)\s+(?:implemented\s+)?(?:governance\s+)?primitives\b", re.IGNORECASE)
+
+    for path in targets:
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError as exc:
+            problems.append(f"{prefix} cannot read {path}: {exc}")
+            continue
+        for line_no, line in enumerate(lines, start=1):
+            if drifted_dct.search(line):
+                problems.append(
+                    f"{prefix} {path}:{line_no}: drifted DCT expansion "
+                    "'Delegation Context Token' — use 'Delegation Capability Token' "
+                    "for DCT and 'Delegation Context' for DCTX "
+                    "(see docs/architecture/NOMENCLATURE.md)"
+                )
+            if expected_primitives is not None and "hummbl-governance" in line.lower():
+                for match in gov_prim_count.finditer(line):
+                    found = int(match.group(1))
+                    if found != expected_primitives:
+                        problems.append(
+                            f"{prefix} {path}:{line_no}: hummbl-governance primitive count "
+                            f"says {found}, expected {expected_primitives} "
+                            f"(or link to PRIMITIVES.md / docs/public-claims.md) -- '{match.group(0)}'"
+                        )
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -247,12 +298,18 @@ def main() -> int:
 
     checks = build_checks(oss_root)
     problems: list[str] = []
+    expected_primitives: int | None = None
     for check in checks:
+        if check.name == "implemented_primitives":
+            expected_primitives = check.expected
         problems.extend(find_mismatches(check))
         print(f"{check.name}: ground truth = {check.expected}")
 
     problems.extend(check_package_table_versions(oss_root))
     print("package_table_versions: ground truth = packages/python/*/pyproject.toml")
+
+    problems.extend(check_cross_package_nomenclature(oss_root, expected_primitives))
+    print("nomenclature: checked root and package READMEs for DCT drift and governance primitive counts")
 
     if problems:
         print("\nMismatches found:")
