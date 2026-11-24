@@ -86,20 +86,22 @@ def find_mismatches(check: CountCheck) -> list[str]:
             problems.append(f"[{check.name}] file not found, cannot verify: {path}")
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
-        matches = list(pattern.finditer(text))
+        matches = _iter_count_matches(pattern, text)
         if not matches:
             # Not an error: the file may not currently state this count.
             continue
-        for m in matches:
+        for line_no, m in matches:
             found = int(m.group(1))
             if found != check.expected:
-                line_no = text.count("\n", 0, m.start()) + 1
                 problems.append(
                     f"[{check.name}] {path}:{line_no}: found {found}, "
                     f"expected {check.expected} (source of truth) -- "
                     f"'{m.group(0)}'"
                 )
     return problems
+
+
+_SCOPE_PREFIX = r"(?m)^(?=[^\n]*hummbl-governance)[^\n]*?"
 
 
 def _governance_scoped(pattern: re.Pattern[str]) -> re.Pattern[str]:
@@ -109,7 +111,30 @@ def _governance_scoped(pattern: re.Pattern[str]) -> re.Pattern[str]:
     primitives, a package's own capability count); only a statement about
     hummbl-governance may be compared to the governance total (review on #527).
     """
-    return re.compile(r"(?m)^(?=[^\n]*hummbl-governance)[^\n]*?" + pattern.pattern, pattern.flags)
+    return re.compile(_SCOPE_PREFIX + pattern.pattern, pattern.flags)
+
+
+def _iter_count_matches(
+    pattern: re.Pattern[str], text: str
+) -> list[tuple[int, re.Match[str]]]:
+    """Every count occurrence, as (1-based line number, match).
+
+    The scoped line-start prefix consumes text, so applying it to the whole
+    document with ``finditer`` finds only the first count on a line: after the
+    first match ends, ``^`` cannot match mid-line again. Scanning line by line
+    with the prefix stripped yields every count on a qualifying line (review
+    on #527).
+    """
+    src = pattern.pattern
+    scoped = src.startswith(_SCOPE_PREFIX)
+    body = src[len(_SCOPE_PREFIX):] if scoped else src
+    body_re = re.compile(body, pattern.flags & ~re.MULTILINE)
+    found: list[tuple[int, re.Match[str]]] = []
+    for line_no, line in enumerate(text.splitlines(), 1):
+        if scoped and "hummbl-governance" not in line:
+            continue
+        found.extend((line_no, m) for m in body_re.finditer(line))
+    return found
 
 
 def build_checks(oss_root: Path) -> list[CountCheck]:

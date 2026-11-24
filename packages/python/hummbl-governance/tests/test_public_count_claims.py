@@ -146,3 +146,15 @@ def test_other_package_readme_still_flags_stale_governance_count(tmp_path):
     check = claims.CountCheck(name="implemented_primitives", expected=51, targets=((readme, pattern),))
     problems = claims.find_mismatches(check)
     assert len(problems) == 1 and "found 48" in problems[0]
+
+
+def test_two_counts_on_one_qualifying_line_are_both_checked(tmp_path):
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        "hummbl-governance: 51 implemented primitives; hummbl-governance API: 48 implemented primitives.\n",
+        encoding="utf-8",
+    )
+    pattern = claims._governance_scoped(claims.re.compile(r"(\d+)\s+implemented primitives"))
+    check = claims.CountCheck(name="implemented_primitives", expected=51, targets=((readme, pattern),))
+    problems = claims.find_mismatches(check)
+    assert len(problems) == 1 and "found 48" in problems[0]

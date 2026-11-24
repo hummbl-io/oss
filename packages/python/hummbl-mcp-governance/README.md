@@ -50,6 +50,6 @@ Apache-2.0
 
 Kill-switch release is not an MCP tool. Former direct calls are rejected, and
 engagement cannot weaken an existing halt. Use the separately protected
-[governance operator release path](../hummbl-governance/docs/OPERATOR_RELEASE.md).
+[governance operator release path](https://github.com/hummbl-io/oss/blob/main/packages/python/hummbl-governance/docs/OPERATOR_RELEASE.md).
 Engagement also fails closed when an installed governance core lacks operator
 release authorization support. Adopt the fixed core and wrapper together.

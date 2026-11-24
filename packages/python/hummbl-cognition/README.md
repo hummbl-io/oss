@@ -148,10 +148,10 @@ scan does not establish complete bus history or verify the cache's provenance.
 
 ## Related
 
-- [hummbl-bus](../hummbl-bus) — coordination bus
+- [hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) — coordination bus
 - [hummbl-governance](https://pypi.org/project/hummbl-governance/) — governance primitives (51 implemented primitives)
-- [hummbl-contracts](../hummbl-contracts) — versioned contract schemas
-- [hummbl-tuples](../hummbl-tuples) — typed governance tuples
+- [hummbl-contracts](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-contracts) — versioned contract schemas
+- [hummbl-tuples](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples) — typed governance tuples
 
 Learn more at [hummbl.io](https://hummbl.io).
 

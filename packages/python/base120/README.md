@@ -759,9 +759,9 @@ those models in governance, coordination, and operational infrastructure:
 
 Base120 is part of the [HUMMBL](https://hummbl.io) architecture:
 
-- [hummbl-governance](https://pypi.org/project/hummbl-governance/) — Governance runtime (kill switch, circuit breaker, cost governor, 51 implemented primitives)
-- [hummbl-bus](../hummbl-bus) — Coordination bus for multi-agent turn execution
-- [hummbl-cognition](../hummbl-cognition) — Cognitive Ledger Protocol (CLP) and Open Brain server
+- [hummbl-governance](https://pypi.org/project/hummbl-governance/) — Governance runtime (kill switch, circuit breaker, cost governor, [51 implemented primitives](https://github.com/hummbl-io/oss/blob/main/packages/python/hummbl-governance/PRIMITIVES.md) as of 2026-11-24)
+- [hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) — Coordination bus for multi-agent turn execution
+- [hummbl-cognition](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-cognition) — Cognitive Ledger Protocol (CLP) and Open Brain server
 
 ---
 
@@ -772,7 +772,7 @@ Apache 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 The published Base120 corpus files in this package (`base120/data/operators.json`
 and the in-tree YAML registry) are part of that Apache-2.0 Work. They are not a
 trade secret. Trademarks listed in NOTICE are not licensed. See
-[docs/product/base120-corpus-distribution-decision.md](../../../docs/product/base120-corpus-distribution-decision.md)
+[docs/product/base120-corpus-distribution-decision.md](https://github.com/hummbl-io/oss/blob/main/docs/product/base120-corpus-distribution-decision.md)
 (issue #141).
 
 ---

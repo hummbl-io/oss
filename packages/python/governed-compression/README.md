@@ -66,10 +66,10 @@ This package is part of the [HUMMBL](https://github.com/hummbl-io/oss) open-sour
 | Package / Surface | Purpose |
 |---|---|
 | [hummbl-governance](https://pypi.org/project/hummbl-governance/) | Governance runtime — kill switch, circuit breaker, cost governor, 51 implemented primitives |
-| [hummbl-mcp-base120](../hummbl-mcp-base120) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
+| [hummbl-mcp-base120](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-mcp-base120) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
 | [base120](https://pypi.org/project/base120/) | 120 mental models for structured reasoning — stdlib-only Python library |
-| [hummbl-tuples](../hummbl-tuples) | Governed typed-tuples and experiment logging |
-| [hummbl-bus](../hummbl-bus) | Append-only TSV coordination bus for multi-agent systems |
+| [hummbl-tuples](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples) | Governed typed-tuples and experiment logging |
+| [hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) | Append-only TSV coordination bus for multi-agent systems |
 | [Documentation](https://hummbl.io) | Canonical public documentation |
 
 Learn more at [hummbl.io](https://hummbl.io).
