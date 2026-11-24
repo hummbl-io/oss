@@ -30,6 +30,6 @@ python -m pytest tests/ -v
 - Zero third-party runtime dependencies (stdlib only)
 - Optional `hummbl-governance` integration via `[governance]` extra
 - Governance log appends require the `hummbl-cognition` scrubber via `[cognition]`; missing or failing scrubbing rejects writes
-- Feature flag: `ENABLE_IDP=true` enables enforcement, `false` is no-op pass-through
+- Feature flag: `ENABLE_IDP=true` enables enforcement; `false` fails closed and rejects token creation, token validation, and least-privilege checks
 - Six invariants: I1 (No Unverifiable Delegation), I2 (Least Privilege), I3 (Bounded Chain Depth ≤3), I4 (Evidence Before Verify), I5 (Explicit Replan), I6 (Audit Completeness)
 - MIT OR Apache-2.0 license
