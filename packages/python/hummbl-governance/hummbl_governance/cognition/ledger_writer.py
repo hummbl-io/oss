@@ -30,7 +30,8 @@ reads the coordination bus TSV and rejects the entry unless a
 the documented protocol ("emit SKILL_INVOKE before any stateful action") and
 the write path, which previously did not check.
 
-stdlib-only.
+stdlib-only at import time. Writes optionally delegate to
+``hummbl_cognition`` when that package is importable (ADR-025 O2 shim).
 """
 
 from __future__ import annotations
@@ -39,6 +40,7 @@ import json
 import os
 import time
 import uuid
+import warnings
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -306,6 +308,32 @@ def append_entry(
             "--no-skill-invoke-check to bypass"
         )
 
+    warnings.warn(
+        "hummbl_governance.cognition writes are deprecated (ADR-025 D2). "
+        "This release shims to hummbl_cognition when importable; the shim "
+        "will be removed in a subsequent hummbl-governance release. Use "
+        "python -m hummbl_cognition post.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+    path = ledger_path(root)
+    delegated = _delegate_to_cognition(
+        content=content,
+        entry_type=entry_type,
+        scope=scope,
+        tags=list(tags),
+        agent=agent,
+        vendor=vendor,
+        model=model,
+        confidence=confidence,
+        evidence=evidence,
+        assurance_level=assurance_level,
+        path=path,
+    )
+    if delegated is not None:
+        return delegated
+
     record = {
         "id": str(uuid.uuid4()),
         "type": entry_type,
@@ -320,11 +348,76 @@ def append_entry(
         "scope": scope,
         "vendor": vendor,
     }
-    path = ledger_path(root)
     with _exclusive_lock(path.with_suffix(".lock")):
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return record
+
+
+def _delegate_to_cognition(
+    *,
+    content: str,
+    entry_type: str,
+    scope: str,
+    tags: list[str],
+    agent: str,
+    vendor: str,
+    model: str,
+    confidence: float,
+    evidence: str,
+    assurance_level: str,
+    path: Path,
+) -> dict | None:
+    """Write via hummbl_cognition when that package is importable.
+
+    Returns the persisted record, or None when hummbl_cognition is absent
+    or the vendor is outside its closed enum, so the caller can fall back
+    to the local JSONL writer. Other exceptions (scan failure, I/O) propagate.
+    """
+    try:
+        from hummbl_cognition.ledger_writer import post_entry
+        from hummbl_cognition.models import (
+            VALID_VENDORS,
+            LedgerEntry,
+            compute_content_hash,
+        )
+    except ImportError:
+        return None
+
+    if vendor not in VALID_VENDORS:
+        return None
+
+    entry_id = f"clp-{uuid.uuid4().hex[:12]}"
+    timestamp = _timestamp()
+    content_hash = compute_content_hash(
+        agent=agent,
+        vendor=vendor,
+        model=model,
+        entry_type=entry_type,
+        scope=scope,
+        content=content,
+    )
+    entry = LedgerEntry(
+        id=entry_id,
+        timestamp=timestamp,
+        agent=agent,
+        vendor=vendor,
+        model=model,
+        type=entry_type,
+        scope=scope,
+        content=content,
+        content_hash=content_hash,
+        evidence=evidence or None,
+        confidence=confidence,
+        tags=tuple(tags),
+        assurance_level=assurance_level or None,
+    )
+    written = post_entry(entry, ledger_path=path)
+    record = written.to_dict()
+    record.setdefault("tags", list(tags))
+    record.setdefault("evidence", evidence)
+    record.setdefault("assurance_level", assurance_level)
     return record
 
 

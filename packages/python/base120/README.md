@@ -93,7 +93,7 @@ Base120 organizes mental models into 6 families based on the type of cognitive t
 | Family | Code | Focus | Question it answers | Example Models |
 |--------|------|-------|---------------------|----------------|
 | **Perspective** | P | Viewpoints, framing, empathy | "How else can I see this?" | P1 First Principles, P5 Empathy Mapping, P10 Context Windowing |
-| **Inversion** | IN | Counterfactuals, negation, contradiction | "What if the opposite is true?" | IN1 Reductio ad Absurdum, IN2 Premortem Analysis, IN6 Inverse/Proof by Contradiction |
+| **Inversion** | IN | Counterfactuals, negation, contradiction | "What if the opposite is true?" | IN1 Subtractive Thinking, IN2 Premortem Analysis, IN6 Inverse/Proof by Contradiction |
 | **Composition** | CO | Building, combining, layering | "How do I assemble this from parts?" | CO1 Modularity, CO5 Interface Design, CO10 Protocol Layering |
 | **Decomposition** | DE | Breaking down, isolating, factoring | "What are the pieces?" | DE1 Root Cause Analysis, DE5 Separation of Concerns, DE8 Dimensional Reduction |
 | **Recursion** | RE | Self-reference, iteration, meta-reasoning | "How does this feed back on itself?" | RE1 Feedback Loop, RE5 Recursion, RE8 Self-Reference |
@@ -276,7 +276,7 @@ pip install base120
 ### From source
 
 ```bash
-git clone https://github.com/hummbl-io/oss.git && cd oss/packages/base120
+git clone https://github.com/hummbl-io/oss.git && cd oss/packages/python/base120
 pip install -e ".[test]"
 ```
 
@@ -510,9 +510,9 @@ engine = Engine()
 print(engine.prompt("P1", "Should we migrate from REST to GraphQL?"))
 # → "What are the irreducible requirements? Latency, cacheability, client flexibility."
 
-# Step 2 — IN5 (Worst-Case Analysis): What if the migration takes 6 months?
+# Step 2 — IN5 (Negative Space Framing): What has the migration plan not examined?
 print(engine.prompt("IN5", "Should we migrate from REST to GraphQL?"))
-# → "What if the migration takes 6 months and breaks mobile clients?"
+# → "Which consumers, query patterns, and failure modes are absent from the analysis?"
 
 # Step 3 — DE5 (Separation of Concerns): Which parts need flexibility?
 print(engine.prompt("DE5", "Should we migrate from REST to GraphQL?"))
@@ -681,7 +681,7 @@ SY1 Leverage Points | SY2 System Boundaries | SY3 Stocks & Flows | SY4 Requisite
 
 
 ```bash
-git clone https://github.com/hummbl-io/oss.git && cd oss/packages/base120
+git clone https://github.com/hummbl-io/oss.git && cd oss/packages/python/base120
 pip install -e ".[test]"
 python -m pytest tests/ -v
 ```
@@ -759,9 +759,9 @@ those models in governance, coordination, and operational infrastructure:
 
 Base120 is part of the [HUMMBL](https://hummbl.io) architecture:
 
-- [hummbl-governance](https://github.com/hummbl-io/oss/tree/main/packages/hummbl-governance) — Governance runtime (kill switch, circuit breaker, cost governor)
-- [arbiter](https://github.com/hummbl-io/arbiter) — Agent-aware code quality scoring and attribution
-- [hummbl-bibliography](https://github.com/hummbl-io/hummbl-bibliography) — Bibliography for the HUMMBL cognitive framework
+- [hummbl-governance](https://pypi.org/project/hummbl-governance/) — Governance runtime (kill switch, circuit breaker, cost governor, [51 implemented primitives](https://github.com/hummbl-io/oss/blob/main/packages/python/hummbl-governance/PRIMITIVES.md) as of 2026-11-24)
+- [hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) — Coordination bus for multi-agent turn execution
+- [hummbl-cognition](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-cognition) — Cognitive Ledger Protocol (CLP) and Open Brain server
 
 ---
 
@@ -772,7 +772,7 @@ Apache 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 The published Base120 corpus files in this package (`base120/data/operators.json`
 and the in-tree YAML registry) are part of that Apache-2.0 Work. They are not a
 trade secret. Trademarks listed in NOTICE are not licensed. See
-[docs/product/base120-corpus-distribution-decision.md](../../../docs/product/base120-corpus-distribution-decision.md)
+[docs/product/base120-corpus-distribution-decision.md](https://github.com/hummbl-io/oss/blob/main/docs/product/base120-corpus-distribution-decision.md)
 (issue #141).
 
 ---

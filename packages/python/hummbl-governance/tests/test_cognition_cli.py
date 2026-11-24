@@ -72,10 +72,11 @@ class TestPost:
         entries = load_entries()
         assert len(entries) == 1
         entry = entries[0]
-        assert set(entry) == {
+        required = {
             "id", "type", "assurance_level", "evidence", "content", "tags",
             "agent", "timestamp", "confidence", "model", "scope", "vendor",
         }
+        assert required <= set(entry)
         assert entry["type"] == "discovery"
         assert entry["tags"] == ["test", "weather"]
         assert entry["confidence"] == 0.9
@@ -294,6 +295,45 @@ class TestSearchAndBoot:
     def test_search_without_index_fails(self, ledger_root, capsys):
         assert main(["search", "anything"]) == 1
         assert "reindex" in capsys.readouterr().err
+
+    def _write_foreign_index(self, ledger_root):
+        path = ledger_root / "_state" / "cognition" / "index.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(
+                {
+                    "stats": {"total_docs": 1, "entry_count": 1},
+                    "inverted_index": {"rulesets": [["clp-000000000000", 1]]},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def test_search_rejects_foreign_index_schema(self, ledger_root, capsys):
+        main(POST_ARGS)
+        self._write_foreign_index(ledger_root)
+        assert main(["search", "anything"]) == 1
+        assert "hummbl_cognition" in capsys.readouterr().err
+
+    def test_reindex_refuses_to_clobber_foreign_index(self, ledger_root, capsys):
+        main(POST_ARGS)
+        self._write_foreign_index(ledger_root)
+        assert main(["reindex"]) == 1
+        assert "hummbl_cognition" in capsys.readouterr().err
+        assert main(["reindex", "--force"]) == 0
+        index = load_index()
+        assert index is not None and index["n_docs"] == 1
+
+    def test_reindex_repairs_undecodable_index(self, ledger_root):
+        """Invalid UTF-8 in index.json is corrupt state, not a schema --
+        reindex must rebuild rather than crash on UnicodeDecodeError."""
+        main(POST_ARGS)
+        path = ledger_root / "_state" / "cognition" / "index.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b'{"docs": {"x": \xff\xfe}}')
+        assert main(["reindex"]) == 0
+        index = load_index()
+        assert index is not None and index["n_docs"] == 1
 
     def test_boot_context(self, ledger_root, capsys):
         main(POST_ARGS)

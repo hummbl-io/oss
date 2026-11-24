@@ -22,15 +22,17 @@ jobs:
   dependency-review:
     name: dependency-review
     runs-on: ubuntu-latest
-    # GHAS disabled 2026-09-16: dependency-review requires GHAS on private repos
-    # and fails every PR otherwise. Skipped until the org/repo variable
-    # HUMMBL_GHAS_ENABLED=true is set after GHAS is re-enabled.
+    # This job runs unconditionally. The 2026-09-16 note about GHAS gating
+    # was never implemented as an `if:` condition and is stale: this repo is
+    # public, where dependency review does not require a GHAS license, and
+    # runs conclude success. If the repo ever goes private, gate this job on
+    # vars.HUMMBL_GHAS_ENABLED at that time.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
       - name: Dependency review
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+        uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec
         with:
           fail-on-severity: moderate

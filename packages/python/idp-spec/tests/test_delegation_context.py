@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from unittest.mock import patch
 
 # Ensure ENABLE_IDP for tests
 os.environ["ENABLE_IDP"] = "true"
@@ -18,6 +19,7 @@ os.environ["ENABLE_IDP"] = "true"
 from idp_spec.delegation_context import (
     IDP_E_CAPABILITY_ESCALATION,
     IDP_E_DEPTH_EXCEEDED,
+    IDP_E_DISABLED,
     IDP_E_INVALID_STATE_TRANSITION,
     IDP_E_REPLAN_LIMIT,
     DelegationBudget,
@@ -159,14 +161,14 @@ class TestStateMachineTransitions(unittest.TestCase):
 
     def test_proposed_to_issued(self):
         """PROPOSED → ISSUED is valid."""
-        success, error = self.ctx.transition("ISSUED")
+        success, _ = self.ctx.transition("ISSUED")
         self.assertTrue(success)
         self.assertEqual(self.ctx.status, "ISSUED")
 
     def test_issued_to_running(self):
         """ISSUED → RUNNING is valid."""
         self.ctx.transition("ISSUED")
-        success, error = self.ctx.transition("RUNNING")
+        success, _ = self.ctx.transition("RUNNING")
         self.assertTrue(success)
         self.assertEqual(self.ctx.status, "RUNNING")
 
@@ -174,7 +176,7 @@ class TestStateMachineTransitions(unittest.TestCase):
         """RUNNING → EVIDENCE_READY is valid."""
         self.ctx.transition("ISSUED")
         self.ctx.transition("RUNNING")
-        success, error = self.ctx.transition("EVIDENCE_READY")
+        success, _ = self.ctx.transition("EVIDENCE_READY")
         self.assertTrue(success)
         self.assertEqual(self.ctx.status, "EVIDENCE_READY")
 
@@ -183,7 +185,7 @@ class TestStateMachineTransitions(unittest.TestCase):
         self.ctx.transition("ISSUED")
         self.ctx.transition("RUNNING")
         self.ctx.transition("EVIDENCE_READY")
-        success, error = self.ctx.transition("VERIFIED")
+        success, _ = self.ctx.transition("VERIFIED")
         self.assertTrue(success)
         self.assertEqual(self.ctx.status, "VERIFIED")
 
@@ -192,7 +194,7 @@ class TestStateMachineTransitions(unittest.TestCase):
         self.ctx.transition("ISSUED")
         self.ctx.transition("RUNNING")
         self.ctx.transition("EVIDENCE_READY")
-        success, error = self.ctx.transition("REPLANNED")
+        success, _ = self.ctx.transition("REPLANNED")
         self.assertTrue(success)
         self.assertEqual(self.ctx.status, "REPLANNED")
         self.assertEqual(self.ctx.replan_count, 1)
@@ -203,7 +205,7 @@ class TestStateMachineTransitions(unittest.TestCase):
         self.ctx.transition("RUNNING")
         self.ctx.transition("EVIDENCE_READY")
         self.ctx.transition("REPLANNED")
-        success, error = self.ctx.transition("PROPOSED")
+        success, _ = self.ctx.transition("PROPOSED")
         self.assertTrue(success)
         self.assertEqual(self.ctx.status, "PROPOSED")
 
@@ -242,7 +244,7 @@ class TestStateMachineTransitions(unittest.TestCase):
         self.ctx.transition("EVIDENCE_READY")
         self.ctx.transition("VERIFIED")
 
-        success, error = self.ctx.transition("ISSUED")
+        success, _ = self.ctx.transition("ISSUED")
         self.assertFalse(success)  # Can't leave terminal state
 
     def test_is_terminal(self):
@@ -276,7 +278,7 @@ class TestSubdelegation(unittest.TestCase):
 
     def test_create_child(self):
         """Child created with incremented depth."""
-        child, error = self.parent.create_child(
+        child, _ = self.parent.create_child(
             delegatee_id="agent-c",
             contract_id="contract-2"
         )
@@ -439,7 +441,7 @@ class TestConvenienceFunctions(unittest.TestCase):
     def test_create_child_context(self):
         """create_child_context creates child."""
         parent = create_root_context("i1", "a", "b", "c1")
-        child, error = create_child_context(
+        child, _ = create_child_context(
             parent=parent,
             delegatee_id="agent-c",
             contract_id="c2"
@@ -496,7 +498,7 @@ class TestI2CapabilityAttenuation(unittest.TestCase):
     def test_child_inherits_parent_ops_by_default(self):
         """Child without explicit ops should inherit parent's ops."""
         parent = self._root(ops=("read", "execute"))
-        child, error = parent.create_child("carol", "c-2")
+        child, _ = parent.create_child("carol", "c-2")
         self.assertIsNotNone(child)
         self.assertEqual(set(child.ops_allowed), {"read", "execute"})
 
@@ -671,6 +673,81 @@ class TestSubtreeBudgetContainment(unittest.TestCase):
         self.assertEqual(restored.budget.allocated_cost_usd, 4.0)
         self.assertEqual(restored.budget.remaining_tokens, 600)
         self.assertEqual(restored.budget.remaining_cost_usd, 6.0)
+
+
+class TestFeatureFlagFailClosed(unittest.TestCase):
+    """Test DelegationContext operations fail closed when ENABLE_IDP is disabled."""
+
+    def _make_context(self) -> DelegationContext:
+        return DelegationContext(
+            intent_id="intent-fc",
+            task_id="task-fc",
+            delegator_id="agent-a",
+            delegatee_id="agent-b",
+            contract_id="contract-fc",
+            chain_depth=0,
+            budget=DelegationBudget(max_tokens=1000, max_cost_usd=10.0),
+        )
+
+    def test_transition_fails_closed_when_disabled(self):
+        """transition() rejects state changes without mutating status when ENABLE_IDP=false."""
+        ctx = self._make_context()
+        with patch.dict(os.environ, {"ENABLE_IDP": "false"}):
+            success, error = ctx.transition("ISSUED")
+        self.assertFalse(success)
+        self.assertEqual(error, IDP_E_DISABLED)
+        self.assertEqual(ctx.status, "PROPOSED")
+        self.assertEqual(ctx.replan_count, 0)
+
+    def test_can_subdelegate_fails_closed_when_disabled(self):
+        """can_subdelegate() returns (False, IDP_E_DISABLED) when ENABLE_IDP=false."""
+        ctx = self._make_context()
+        with patch.dict(os.environ, {"ENABLE_IDP": "false"}):
+            allowed, error = ctx.can_subdelegate()
+        self.assertFalse(allowed)
+        self.assertEqual(error, IDP_E_DISABLED)
+
+    def test_create_child_fails_closed_when_disabled(self):
+        """create_child() returns (None, IDP_E_DISABLED) without consuming budget when ENABLE_IDP=false."""
+        parent = self._make_context()
+        with patch.dict(os.environ, {"ENABLE_IDP": "false"}):
+            child, error = parent.create_child(
+                delegatee_id="agent-c",
+                contract_id="contract-child",
+                budget=DelegationBudget(max_tokens=200, max_cost_usd=2.0),
+            )
+        self.assertIsNone(child)
+        self.assertEqual(error, IDP_E_DISABLED)
+        self.assertEqual(parent.budget.allocated_tokens, 0)
+        self.assertEqual(parent.budget.allocated_cost_usd, 0.0)
+        self.assertEqual(parent.budget.remaining_tokens, 1000)
+
+    def test_create_child_context_convenience_fails_closed_when_disabled(self):
+        """create_child_context() propagates (None, IDP_E_DISABLED) when ENABLE_IDP=false."""
+        parent = self._make_context()
+        with patch.dict(os.environ, {"ENABLE_IDP": "false"}):
+            child, error = create_child_context(
+                parent=parent,
+                delegatee_id="agent-c",
+                contract_id="contract-child",
+            )
+        self.assertIsNone(child)
+        self.assertEqual(error, IDP_E_DISABLED)
+
+    def test_unrecognized_feature_flag_value_fails_closed(self):
+        """Unrecognized ENABLE_IDP values fail closed across all three methods."""
+        ctx = self._make_context()
+        with patch.dict(os.environ, {"ENABLE_IDP": "invalid"}):
+            t_ok, t_err = ctx.transition("ISSUED")
+            s_ok, s_err = ctx.can_subdelegate()
+            c_ctx, c_err = ctx.create_child("agent-c", "contract-child")
+        self.assertFalse(t_ok)
+        self.assertEqual(t_err, IDP_E_DISABLED)
+        self.assertEqual(ctx.status, "PROPOSED")
+        self.assertFalse(s_ok)
+        self.assertEqual(s_err, IDP_E_DISABLED)
+        self.assertIsNone(c_ctx)
+        self.assertEqual(c_err, IDP_E_DISABLED)
 
 
 if __name__ == "__main__":

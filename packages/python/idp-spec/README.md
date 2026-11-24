@@ -35,6 +35,8 @@ DCTX  →  CONTRACT  →  EVIDENCE  →  ATTEST  →  DCT  →  GOVERNANCE_BUS
 | **DCT** (Delegation Capability Token) | HMAC-SHA256 signed, time-bounded, scope-limited authorization token |
 | **GOVERNANCE BUS** | Append-only, hash-chained audit log of all delegation events |
 
+> **Terminology note:** `DCT` stands for **Delegation Capability Token**, distinct from `DCTX` (**Delegation Context**). See [`docs/architecture/NOMENCLATURE.md`](../../../docs/architecture/NOMENCLATURE.md) for canonical definitions and scope boundaries.
+
 ---
 
 ## Quick Start
@@ -169,17 +171,17 @@ pip install "idp-spec[governance]"
 
 ## Feature Flag
 
-IDP is designed for zero-overhead adoption:
+The IDP helpers default to `ENABLE_IDP=true` when the variable is unset. Setting it to `false` (or an unrecognized value) **fails closed**: token creation, token validation, least-privilege checks, and the `delegation_context` lifecycle methods (`transition`, `can_subdelegate`, `create_child`) all reject. It is not an authorization bypass:
 
 ```bash
-# Default: disabled (backward compatible pass-through)
-ENABLE_IDP=false python my_script.py
-
-# Full enforcement
+# IDP helpers enabled by default
 ENABLE_IDP=true python my_script.py
+
+# IDP helpers reject requests (fail closed)
+ENABLE_IDP=false python my_script.py
 ```
 
-When disabled, all IDP operations are no-ops — existing code paths are unchanged.
+These settings describe the IDP token library. They do **not** establish that every host tool, file write, or agent message is intercepted. Enforcement at a side-effect boundary requires explicit integration and verification of that integration path. Evidence/attestation and some lateral authority components remain incomplete as noted in Project Status.
 
 ---
 
