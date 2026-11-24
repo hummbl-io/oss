@@ -75,6 +75,13 @@ def global_org_ranking_template():
     return load_yaml_file(template_path)
 
 
+@pytest.fixture
+def site_surface_daily_template():
+    """Load the site surface daily evaluation template for testing."""
+    template_path = Path(__file__).parent.parent / 'templates' / 'site-surface-daily.yaml'
+    return load_yaml_file(template_path)
+
+
 
 def test_master_schema_parameters(master_schema):
     """Master schema is a type definition, not a template instance — skip."""
@@ -139,6 +146,17 @@ def test_global_org_ranking_template_validation(global_org_ranking_template):
     errors.extend(validate_required_outputs(global_org_ranking_template))
     
     assert len(errors) == 0, f"Global organization ranking template validation failed: {errors}"
+
+
+def test_site_surface_daily_template_validation(site_surface_daily_template):
+    """Test that site surface daily template validates correctly against schema."""
+    errors = []
+    errors.extend(validate_parameters(site_surface_daily_template))
+    errors.extend(validate_hard_gates(site_surface_daily_template))
+    errors.extend(validate_weighted_dimensions(site_surface_daily_template))
+    errors.extend(validate_required_outputs(site_surface_daily_template))
+
+    assert len(errors) == 0, f"Site surface daily template validation failed: {errors}"
 
 
 def test_all_templates_in_directory():
