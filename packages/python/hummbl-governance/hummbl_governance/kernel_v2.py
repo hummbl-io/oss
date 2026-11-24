@@ -39,7 +39,7 @@ import hashlib
 import hmac
 import json
 import time
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 # ===========================================================================
@@ -251,7 +251,10 @@ class CausalLedger:
             if r.prev_hash != expected_prev:
                 return False
             # Verify self-hash
-            envelope = f"{r.sequence_id}:{r.actor}:{r.action}:{r.payload_hash}:{r.prev_hash}:{r.timestamp}".encode("utf-8")
+            envelope = (
+                f"{r.sequence_id}:{r.actor}:{r.action}:"
+                f"{r.payload_hash}:{r.prev_hash}:{r.timestamp}"
+            ).encode("utf-8")
             computed = hashlib.sha256(envelope).hexdigest()
             if r.receipt_hash != computed:
                 return False
@@ -368,6 +371,7 @@ class ConstraintPredicate:
     @staticmethod
     def assert_non_collusion(agent_a: str, agent_b: str, shared_context: Dict[str, Any]) -> bool:
         """Prevent self-attestation or cyclical peer approval."""
+        _ = shared_context
         return agent_a != agent_b
 
 

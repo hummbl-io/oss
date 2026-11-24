@@ -24,8 +24,6 @@ from hummbl_governance.kernel_v2 import (
     Base120Family,
     Base120MicroKernel,
     CapabilityToken,
-    CausalLedger,
-    ConstraintPredicate,
     GuardedAutomaton,
     ProjectionFunctor,
     QuorumBarrier,
