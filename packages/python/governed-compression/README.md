@@ -63,14 +63,14 @@ Stage 1 scaffold only.
 
 This package is part of the [HUMMBL](https://github.com/hummbl-io/oss) open-source AI governance architecture.
 
-| Package / Surface | Purpose |
-|---|---|
-| [hummbl-governance](https://pypi.org/project/hummbl-governance/) | Governance runtime — kill switch, circuit breaker, cost governor, 51 implemented primitives |
-| [hummbl-mcp-base120](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-mcp-base120) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
-| [base120](https://pypi.org/project/base120/) | 120 mental models for structured reasoning — stdlib-only Python library |
-| [hummbl-tuples](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples) | Governed typed-tuples and experiment logging |
-| [hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) | Append-only TSV coordination bus for multi-agent systems |
-| [Documentation](https://hummbl.io) | Canonical public documentation |
+| Repo | Purpose |
+|------|---------|
+| [hummbl-governance](https://github.com/hummbl-io/oss/blob/main/packages/python/hummbl-governance/README.md) | Governance runtime — kill switch, circuit breaker, cost governor (see [PRIMITIVES.md](https://github.com/hummbl-io/oss/blob/main/packages/python/hummbl-governance/PRIMITIVES.md) and [public-claims.md](https://github.com/hummbl-io/oss/blob/main/packages/python/hummbl-governance/docs/public-claims.md) for the versioned primitive inventory) |
+| [mcp-server](https://github.com/hummbl-io/mcp-server) | MCP server for Base120 mental models — 120 reasoning operators for Claude/Cursor |
+| [base120](https://github.com/hummbl-io/oss/blob/main/packages/python/base120/README.md) | 120 mental models for structured reasoning — stdlib-only Python library |
+| [CRAB protocol](https://github.com/hummbl-io/oss/blob/main/docs/architecture/NOMENCLATURE.md#2-crab--scoped-conventions-do-not-silently-merge) | CRAB turn-execution protocol (Check, Reason, Act, Bus) for multi-agent turn execution |
+| [docs](https://github.com/hummbl-io/docs) | Canonical public documentation — Mintlify-powered |
+| [hummbl-toolkit](https://github.com/hummbl-io/hummbl-toolkit) | HUMMBL utility toolkit |
 
 Learn more at [hummbl.io](https://hummbl.io).
 
