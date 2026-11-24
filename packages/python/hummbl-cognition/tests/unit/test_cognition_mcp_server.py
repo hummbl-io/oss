@@ -75,13 +75,16 @@ def test_default_state_paths_share_one_package_relative_root(monkeypatch, caplog
     monkeypatch.delenv("COGNITION_LEDGER", raising=False)
     monkeypatch.delenv("COGNITION_INDEX", raising=False)
     monkeypatch.delenv("CLP_STATE_DIR", raising=False)
+    monkeypatch.setattr(ledger_writer, "_WARNED_DEFAULT_LEDGER", False)
 
     expected_dir = (
         Path(ledger_writer.__file__).resolve().parent.parent / "_state" / "cognition"
     )
     with caplog.at_level(logging.WARNING, logger="hummbl_cognition.ledger_writer"):
         assert ledger_writer._resolve_ledger_path() == expected_dir / "ledger.jsonl"
-    assert any("DEFAULT_LEDGER_PATH" in rec.message for rec in caplog.records)
+        assert ledger_writer._resolve_ledger_path() == expected_dir / "ledger.jsonl"
+    warnings = [rec for rec in caplog.records if "DEFAULT_LEDGER_PATH" in rec.message]
+    assert len(warnings) == 1
     assert indexer._resolve_index_path() == expected_dir / "index.json"
     # mcp_server.LEDGER_DIR is bound at import time from CLP_STATE_DIR;
     # its documented fallback is the shared default constant.
