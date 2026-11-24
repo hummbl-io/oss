@@ -31,7 +31,7 @@ offering fit are **assumptions** and are labeled as such.
 | `hummbl-kernel` | 102 | 2 | 1 | 0.1.0 | 0.1.0 | live |
 
 Tracked for downloads: 9 packages. In-tree but untracked:
-39 (see `pypi_download_tracker.py` PACKAGES list).
+40 (see `pypi_download_tracker.py` PACKAGES list).
 
 ## Maintenance priority (ASSUMPTION — transparent heuristic, not demand)
 
@@ -85,6 +85,7 @@ Tracked for downloads: 9 packages. In-tree but untracked:
 | `hummbl-validation` | P3 | in-tree only; no release to maintain |
 | `hummbl-validation-framework` | P3 | in-tree only; no release to maintain |
 | `idp-spec` | P3 | in-tree only; no release to maintain |
+| `wags` | P3 | in-tree only; no release to maintain |
 
 ## Offering map
 
@@ -94,8 +95,9 @@ documented offering:
 | Product | Source package | Lifecycle | Admission | Blockers |
 |---------|---------------|-----------|-----------|----------|
 | `mcp-base120` | `packages/node/mcp-base120` | technical-canary | hold | corpus-rights-reconciliation, redistributable-package-architecture, public-release-provenance, hosted-contract-parity, privacy-review |
+| `mcp-server` | `packages/node/mcp-server` | public-preview | hold | npm-publish-authorization, registry-publish-authorization |
 
-**1 of 48 packages have product manifests.** Every other package↔offering mapping is an assumption with no
+**2 of 49 packages have product manifests.** Every other package↔offering mapping is an assumption with no
 demand evidence behind it and is intentionally not asserted here.
 
 ## Evidence vs assumptions

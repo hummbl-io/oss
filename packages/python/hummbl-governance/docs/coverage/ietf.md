@@ -60,7 +60,7 @@ Draft coverage intent (not public claim): every named artifact has a row. Load-b
 
 ## Code facts used in the rows (not a claim of IETF alignment)
 
-Investigated on this tree (hummbl-governance v1.4.2):
+Investigated against hummbl-governance v1.4.2 on 2026-08-31. Not re-mapped to 1.5.1:
 
 1. **`DelegationTokenManager.authenticate_token`** (`hummbl_governance/delegation.py`) verifies HMAC-SHA256, expiry, and optional binding. It does **not** evaluate `caveats`.
 2. **Caveats evaluate in `CapabilityFence._resolve`** (`hummbl_governance/capability_fence.py`) via a caller-supplied `caveat_validator`. A token with caveats cannot construct a fence without that validator.

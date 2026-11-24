@@ -2,7 +2,7 @@
 **Scope:** Packages in this monorepo and their public release state.
 Internal migration planning, unpublished-repo inventories, and org-wide
 scan results stay private.
-**Tree inventory updated:** 2026-09-27, `packages/python/` = 47 packages.
+**Tree inventory updated:** 2026-11-09, `packages/python/` = 49 packages.
 Release verification dates are recorded separately below. The two new
 imports are source-only entries and do not authorize a PyPI release.
 Versions below are `pyproject.toml` on `main`.
@@ -85,6 +85,7 @@ Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Mat
 | `hummbl-agent-governance` | 0.2.0 | Deterministic Runtime Safety Primitives for Multi-Agent AI Fleets |
 | `hummbl-eval` | 0.1.0 | Evidence-governed evaluation contracts for compositional Human-AI systems |
 | `hummbl-gitops` | 0.1.0 | Bidirectional multi-agent peer-review GitOps loop |
+| `wags` | 0.2.0 | Polyglot, air-gappable multi-agent peer review protocol |
 ### Excluded (not HUMMBL's)
 | Package | Version | Owner | Notes |
 |---------|---------|-------|-------|
@@ -98,6 +99,7 @@ Tree versions and the nine listed live PyPI versions checked 2026-10-02 UTC. Mat
 | Package | Tree | Status |
 |---------|------|--------|
 | `@hummbl/mcp-base120` | 0.1.0-canary.0 | Private, no-egress Base120 catalog canary. New public corpus redistribution is on hold; rights reconciliation, distributable-package architecture, release provenance, hosted parity, and privacy gates remain open. |
+| `@hummbl/mcp-server` | 1.3.0 | Base120 mental-models MCP server (stdio) prepared for MCP Registry publishing. Scrubbed public copy of the private `hummbl-io/mcp-server` source; `@hummbl/mcp-server@1.2.1` is live on npm from the private repo — this tree prepares the next minor. npm publish + registry publish remain manual owner steps. |
 Previously published HUMMBL npm packages were **deprecated by the
 operator on 2026-08-21**:
 - `@hummbl/mcp-server` v1.2.0 — deprecated ("Package no longer supported")
@@ -114,7 +116,7 @@ public-launch, package-license, content-rights, and admission states.
 | Tree | Status |
 |------|--------|
 | `packages/lean/hummbl-formalization` | Present. Not in Python CI. Not a PyPI package. Do not call runtime packages "formally verified". |
-| `packages/node/` | Present with one private technical canary. No live npm package. |
+| `packages/node/` | Present with one private technical canary and one publish-pending package. `@hummbl/mcp-server@1.2.1` is live on npm (published from the private source repo); no package has been published from this tree yet. |
 | `packages/rust/`, `packages/go/`, `packages/jvm/` | **Absent.** |
 ---
 ## Monorepo consolidation status
