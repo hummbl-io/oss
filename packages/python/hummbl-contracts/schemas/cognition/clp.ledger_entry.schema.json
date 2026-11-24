@@ -33,7 +33,23 @@
     },
     "vendor": {
       "type": "string",
-      "enum": ["anthropic", "openai", "google", "moonshot", "local", "human", "meta", "mistral", "cohere"],
+      "enum": [
+        "anthropic",
+        "cognition",
+        "cohere",
+        "deepseek",
+        "google",
+        "human",
+        "local",
+        "meta",
+        "minimax",
+        "mistral",
+        "moonshot",
+        "openai",
+        "openrouter",
+        "xai",
+        "zai"
+      ],
       "description": "Vendor identifier"
     },
     "model": {
