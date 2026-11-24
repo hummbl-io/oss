@@ -34,7 +34,19 @@ jobs:
           if git fetch origin data/pypi-downloads:data/pypi-downloads; then
             git checkout -- .
             git switch data/pypi-downloads
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" merge --no-edit origin/main
+            if ! git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" merge --no-edit origin/main; then
+              conflicts=$(git diff --name-only --diff-filter=U)
+              if [ "$conflicts" = "tools/data/pypi-downloads.csv" ]; then
+                # Keep the data branch's full download history when main diverges on the seed CSV.
+                git checkout --ours -- tools/data/pypi-downloads.csv
+                git add tools/data/pypi-downloads.csv
+                git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit --no-edit
+              else
+                echo "ERROR: unexpected merge conflicts outside tools/data/pypi-downloads.csv:" >&2
+                echo "$conflicts" >&2
+                exit 1
+              fi
+            fi
           else
             git switch -c data/pypi-downloads
           fi
