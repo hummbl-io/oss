@@ -226,6 +226,49 @@ class TestBase120MicroKernel(unittest.TestCase):
             )
         self.assertEqual(self.kernel.ledger.height, 2)  # Still 2, fail-closed preserved
 
+    def test_security_round2_nan_lifetime_cross_kernel_and_quorum_hardening(self) -> None:
+        # 1. NaN / inf / non-positive lifetime rejected; NaN expiry fails closed
+        for bad_lt in (float("nan"), float("inf"), 0.0, -10.0):
+            with self.assertRaises(ValueError):
+                self.kernel.issue_token("op", "worker", ("s",), lifetime_seconds=bad_lt)
+        nan_tok = CapabilityToken(
+            token_id="tok_nan",
+            issuer="op",
+            subject="w",
+            depth=1,
+            max_depth=1,
+            allowed_scopes=("s",),
+            expiry=float("nan"),
+        )
+        self.assertFalse(nan_tok.is_valid_for("s"))
+
+        # 2. Cross-kernel token replay blocked even with identical release_key
+        other = Base120MicroKernel(release_key=b"test-operator-secret")
+        tok = self.kernel.issue_token("op", "worker", ("saas:deploy",))
+        with self.assertRaises(PermissionError):
+            other.execute_governed_action(tok, "deploy", "saas:deploy", {})
+
+        # 3. QuorumBarrier hides signer_keys from repr and ignores unverified pre-populated entries
+        op_key = b"op-secret-key"
+        sec_key = b"sec-secret-key"
+        barrier = QuorumBarrier(
+            barrier_id="bar_002",
+            action_intent="deploy",
+            required_signers={"operator", "security_officer"},
+            signer_keys={"operator": op_key, "security_officer": sec_key},
+            collected_signatures={"security_officer": "forged_prepopulated"},
+        )
+        self.assertNotIn("op-secret-key", repr(barrier))
+        op_proof = barrier.sign_approval("operator", op_key)
+        self.assertTrue(barrier.submit_signature("operator", op_proof))
+        self.assertEqual(barrier.status.value, "PENDING")
+
+        # 4. CausalLedger.verify_integrity catches _latest_hash divergence
+        self.kernel.ledger.append("a", "act", {})
+        self.assertTrue(self.kernel.ledger.verify_integrity())
+        self.kernel.ledger._latest_hash = "f" * 64
+        self.assertFalse(self.kernel.ledger.verify_integrity())
+
 
 if __name__ == "__main__":
     unittest.main()

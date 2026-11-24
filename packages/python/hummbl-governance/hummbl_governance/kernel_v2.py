@@ -38,6 +38,8 @@ import enum
 import hashlib
 import hmac
 import json
+import math
+import secrets
 import threading
 import time
 from typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple
@@ -312,7 +314,7 @@ class CausalLedger:
                 if not hmac.compare_digest(r.receipt_hash, computed):
                     return False
                 expected_prev = r.receipt_hash
-            return True
+            return hmac.compare_digest(expected_prev, self._latest_hash)
 
 
 # ===========================================================================
@@ -366,6 +368,13 @@ class CapabilityToken:
         signing_key: Optional[bytes] = None,
     ) -> CapabilityToken:
         """Contraction mapping: depth decreases, scope subset, expiry strictly earlier."""
+        if (
+            not isinstance(lifetime_seconds, (int, float))
+            or isinstance(lifetime_seconds, bool)
+            or not math.isfinite(lifetime_seconds)
+            or lifetime_seconds <= 0
+        ):
+            raise ValueError("lifetime_seconds must be a finite positive number")
         if signing_key is not None and not self.verify_signature(signing_key):
             raise PermissionError("Invariant P-Auth: Cannot attenuate an unauthenticated token.")
         now = time.time()
@@ -400,6 +409,8 @@ class CapabilityToken:
         return child
 
     def is_valid_for(self, scope: str) -> bool:
+        if not isinstance(self.expiry, (int, float)) or not math.isfinite(self.expiry):
+            return False
         if time.time() > self.expiry:
             return False
         return scope in self.allowed_scopes
@@ -422,11 +433,14 @@ class QuorumBarrier:
     barrier_id: str
     action_intent: str
     required_signers: Set[str]
-    signer_keys: Dict[str, bytes] = dataclasses.field(default_factory=dict)
+    signer_keys: Dict[str, bytes] = dataclasses.field(default_factory=dict, repr=False)
     collected_signatures: Dict[str, str] = dataclasses.field(default_factory=dict)
     status: BarrierStatus = BarrierStatus.PENDING
     created_at: float = dataclasses.field(default_factory=time.time)
     timeout_seconds: float = 3600.0
+    _lock: threading.RLock = dataclasses.field(
+        default_factory=threading.RLock, init=False, repr=False, compare=False
+    )
 
     def sign_approval(self, signer: str, signer_key: bytes) -> str:
         """Compute HMAC-SHA256 approval proof bound to barrier_id, action_intent, and signer."""
@@ -444,28 +458,41 @@ class QuorumBarrier:
         ).encode("utf-8")
         return hmac.new(signer_key, payload, hashlib.sha256).hexdigest()
 
-    def submit_signature(self, signer: str, proof_token: str) -> bool:
-        if self.status != BarrierStatus.PENDING:
-            return False
-        if time.time() > (self.created_at + self.timeout_seconds):
-            self.status = BarrierStatus.REJECTED
-            return False
-        if signer not in self.required_signers or not proof_token:
+    def _is_valid_proof(self, signer: str, proof_token: Any) -> bool:
+        if (
+            not isinstance(proof_token, str)
+            or len(proof_token) != 64
+            or any(ch not in "0123456789abcdefABCDEF" for ch in proof_token)
+        ):
             return False
         key = self.signer_keys.get(signer)
         if not isinstance(key, bytes) or not key:
             return False
         expected = self.sign_approval(signer, key)
-        if not hmac.compare_digest(expected, proof_token):
-            return False
-        self.collected_signatures[signer] = proof_token
-        if set(self.collected_signatures.keys()).issuperset(self.required_signers):
-            self.status = BarrierStatus.APPROVED
-        return True
+        return hmac.compare_digest(expected, proof_token.lower())
+
+    def submit_signature(self, signer: str, proof_token: str) -> bool:
+        with self._lock:
+            if self.status != BarrierStatus.PENDING:
+                return False
+            if time.time() > (self.created_at + self.timeout_seconds):
+                self.status = BarrierStatus.REJECTED
+                return False
+            if signer not in self.required_signers or not self._is_valid_proof(signer, proof_token):
+                return False
+            self.collected_signatures[signer] = proof_token.lower()
+            if all(
+                self._is_valid_proof(req, self.collected_signatures.get(req))
+                for req in self.required_signers
+            ):
+                self.status = BarrierStatus.APPROVED
+            return True
 
     def suspend(self, reason: str) -> None:
         """Emergency suspension when preempted by an automaton halt."""
-        self.status = BarrierStatus.SUSPENDED
+        with self._lock:
+            _ = reason
+            self.status = BarrierStatus.SUSPENDED
 
 
 # ===========================================================================
@@ -542,10 +569,17 @@ class ProjectionFunctor:
 class Base120MicroKernel:
     """The unified sovereign micro-kernel orchestrating the 6 Base120 generators."""
 
-    def __init__(self, release_key: Optional[bytes] = None) -> None:
+    def __init__(
+        self,
+        release_key: Optional[bytes] = None,
+        kernel_id: Optional[str] = None,
+    ) -> None:
         self.automaton = GuardedAutomaton("ROOT_GOVERNOR", release_key)
         assert isinstance(release_key, bytes)
-        self._token_key = hashlib.sha256(b"hummbl-kernel-v2-token:" + release_key).digest()
+        self.kernel_id = kernel_id if kernel_id else secrets.token_hex(16)
+        self._token_key = hashlib.sha256(
+            b"hummbl-kernel-v2-token:" + self.kernel_id.encode("utf-8") + b":" + release_key
+        ).digest()
         self._lock = threading.RLock()
         self.ledger = CausalLedger()
         self.active_barriers: Dict[str, QuorumBarrier] = {}
@@ -561,6 +595,13 @@ class Base120MicroKernel:
         lifetime_seconds: float = 3600.0,
     ) -> CapabilityToken:
         """Mint an HMAC-authenticated root capability token bound to this kernel."""
+        if (
+            not isinstance(lifetime_seconds, (int, float))
+            or isinstance(lifetime_seconds, bool)
+            or not math.isfinite(lifetime_seconds)
+            or lifetime_seconds <= 0
+        ):
+            raise ValueError("lifetime_seconds must be a finite positive number")
         now = time.time()
         tok_id = "tok_" + hashlib.sha256(
             f"{issuer}:{subject}:{now}:{','.join(sorted(allowed_scopes))}".encode("utf-8")
