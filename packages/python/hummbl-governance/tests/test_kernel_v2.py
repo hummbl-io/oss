@@ -16,6 +16,7 @@
 
 """Unit tests for the Base120 Micro-Kernel (v2.0) and Commutation Invariants."""
 
+import dataclasses
 import time
 import unittest
 
@@ -25,6 +26,7 @@ from hummbl_governance.kernel_v2 import (
     Base120MicroKernel,
     CapabilityToken,
     GuardedAutomaton,
+    LedgerReceipt,
     ProjectionFunctor,
     QuorumBarrier,
     SeverityLevel,
@@ -77,19 +79,25 @@ class TestBase120MicroKernel(unittest.TestCase):
         self.assertEqual(r2.prev_hash, r1.receipt_hash)
         self.assertTrue(ledger.verify_integrity())
 
+        # Canonical JSON prevents delimiter collisions and binds coordinate
+        h_a = LedgerReceipt.compute_receipt_hash(1, "agent:admin", "deploy", "p", "0" * 64, 1.0, "RE1")
+        h_b = LedgerReceipt.compute_receipt_hash(1, "agent", "admin:deploy", "p", "0" * 64, 1.0, "RE1")
+        h_c = LedgerReceipt.compute_receipt_hash(1, "agent:admin", "deploy", "p", "0" * 64, 1.0, "SY1")
+        self.assertNotEqual(h_a, h_b)
+        self.assertNotEqual(h_a, h_c)
+
     def test_p_capability_token_attenuation(self) -> None:
-        root_token = CapabilityToken(
-            token_id="tok_root",
+        root_token = self.kernel.issue_token(
             issuer="operator",
             subject="orchestrator",
             depth=3,
-            max_depth=3,
             allowed_scopes=("saas:create", "saas:deploy", "db:write"),
-            expiry=time.time() + 3600,
+            lifetime_seconds=3600,
         )
 
         # Child token must attenuate depth and scope
-        child_token = root_token.attenuate(
+        child_token = self.kernel.attenuate_token(
+            root_token,
             new_subject="worker_agent",
             sub_scopes={"saas:create", "db:write"},
             lifetime_seconds=600,
@@ -102,20 +110,47 @@ class TestBase120MicroKernel(unittest.TestCase):
 
         # Cannot expand scope
         with self.assertRaises(PermissionError):
-            child_token.attenuate("sub_worker", {"admin:root"}, 300)
+            self.kernel.attenuate_token(child_token, "sub_worker", {"admin:root"}, 300)
+
+        # Tampered token via dataclasses.replace is rejected
+        tampered = dataclasses.replace(child_token, allowed_scopes=("admin:root",))
+        with self.assertRaises(PermissionError):
+            self.kernel.execute_governed_action(tampered, "deploy", "admin:root", {})
+
+        # Forged unsigned token is rejected
+        forged = CapabilityToken(
+            token_id="tok_forged",
+            issuer="operator",
+            subject="attacker",
+            depth=1,
+            max_depth=1,
+            allowed_scopes=("saas:deploy",),
+            expiry=time.time() + 300,
+        )
+        with self.assertRaises(PermissionError):
+            self.kernel.execute_governed_action(forged, "deploy", "saas:deploy", {})
 
     def test_co_quorum_barrier(self) -> None:
+        op_key = b"operator-hmac-key"
+        sec_key = b"security-officer-hmac-key"
         barrier = QuorumBarrier(
             barrier_id="bar_001",
             action_intent="production_fleet_promotion",
             required_signers={"operator", "security_officer"},
+            signer_keys={"operator": op_key, "security_officer": sec_key},
         )
 
+        # Unauthorized, empty, and forged proofs must all fail
         self.assertFalse(barrier.submit_signature("unauthorized_agent", "sig_123"))
-        self.assertTrue(barrier.submit_signature("operator", "sig_op"))
+        self.assertFalse(barrier.submit_signature("operator", ""))
+        self.assertFalse(barrier.submit_signature("operator", "forged_sig"))
+
+        op_proof = barrier.sign_approval("operator", op_key)
+        sec_proof = barrier.sign_approval("security_officer", sec_key)
+        self.assertTrue(barrier.submit_signature("operator", op_proof))
         self.assertEqual(barrier.status.value, "PENDING")
 
-        self.assertTrue(barrier.submit_signature("security_officer", "sig_sec"))
+        self.assertTrue(barrier.submit_signature("security_officer", sec_proof))
         self.assertEqual(barrier.status.value, "APPROVED")
 
     def test_in_constraint_predicates(self) -> None:
@@ -136,14 +171,12 @@ class TestBase120MicroKernel(unittest.TestCase):
 
     def test_cross_generator_commutation_tensor(self) -> None:
         """Test commutation between Automaton (SY), Filter (P), and Ledger (RE)."""
-        token = CapabilityToken(
-            token_id="tok_01",
+        token = self.kernel.issue_token(
             issuer="operator",
             subject="worker_01",
             depth=1,
-            max_depth=1,
-            allowed_scopes=("saas:deploy",),
-            expiry=time.time() + 300,
+            allowed_scopes=("saas:deploy", "ops:audit"),
+            lifetime_seconds=300,
         )
 
         # 1. Healthy execution succeeds and emits receipt
@@ -165,8 +198,8 @@ class TestBase120MicroKernel(unittest.TestCase):
             )
         self.assertEqual(self.kernel.ledger.height, 1)  # No receipt emitted
 
-        # 3. Automaton preemption blocks all actions regardless of capability
-        self.kernel.automaton.transition("EMERGENCY_HALT", SeverityLevel.EMERGENCY, "Intrusion alert")
+        # 3. HALT_NONCRITICAL blocks noncritical actions but permits critical actions
+        self.kernel.automaton.transition("DEGRADED", SeverityLevel.HALT_NONCRITICAL, "Budget warning")
         with self.assertRaises(RuntimeError):
             self.kernel.execute_governed_action(
                 token=token,
@@ -174,7 +207,24 @@ class TestBase120MicroKernel(unittest.TestCase):
                 scope="saas:deploy",
                 payload={"cluster": "us-east-1"},
             )
-        self.assertEqual(self.kernel.ledger.height, 1)  # Still 1, fail-closed preserved
+        crit_receipt = self.kernel.execute_governed_action(
+            token=token,
+            action="audit_logging",
+            scope="ops:audit",
+            payload={"event": "degraded_audit"},
+        )
+        self.assertEqual(crit_receipt.sequence_id, 2)
+
+        # 4. Automaton preemption (EMERGENCY) blocks all actions regardless of capability
+        self.kernel.automaton.transition("EMERGENCY_HALT", SeverityLevel.EMERGENCY, "Intrusion alert")
+        with self.assertRaises(RuntimeError):
+            self.kernel.execute_governed_action(
+                token=token,
+                action="audit_logging",
+                scope="ops:audit",
+                payload={},
+            )
+        self.assertEqual(self.kernel.ledger.height, 2)  # Still 2, fail-closed preserved
 
 
 if __name__ == "__main__":

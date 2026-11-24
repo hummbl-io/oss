@@ -38,8 +38,19 @@ import enum
 import hashlib
 import hmac
 import json
+import threading
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple
+
+CRITICAL_ACTIONS: FrozenSet[str] = frozenset(
+    {
+        "safety_monitoring",
+        "data_persistence",
+        "audit_logging",
+        "cost_tracking",
+        "kill_switch_itself",
+    }
+)
 
 
 # ===========================================================================
@@ -104,6 +115,7 @@ class GuardedAutomaton:
         if not isinstance(release_key, bytes) or not release_key:
             raise ValueError("release_key must be non-empty bytes")
         self._release_key = release_key
+        self._lock = threading.RLock()
         self._state = AutomatonState(
             name="NORMAL",
             severity=SeverityLevel.DISENGAGED,
@@ -113,7 +125,8 @@ class GuardedAutomaton:
 
     @property
     def state(self) -> AutomatonState:
-        return self._state
+        with self._lock:
+            return self._state
 
     def transition(
         self,
@@ -124,25 +137,26 @@ class GuardedAutomaton:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> AutomatonState:
         """Evaluate state transition adhering to monotonicity."""
-        current = self._state
-        
-        # Downgrade check (K10 / Reversibility / Operator Quorum)
-        if target_severity < current.severity:
-            if not self._verify_release(current, release_token):
-                raise PermissionError(
-                    f"Invariant SY-Monotonicity: Cannot downgrade from {current.severity.name} "
-                    f"to {target_severity.name} without valid operator release token."
-                )
+        with self._lock:
+            current = self._state
 
-        new_state = AutomatonState(
-            name=target_name,
-            severity=target_severity,
-            reason=reason,
-            timestamp=time.time(),
-            metadata=metadata or {},
-        )
-        self._state = new_state
-        return new_state
+            # Downgrade check (K10 / Reversibility / Operator Quorum)
+            if target_severity < current.severity:
+                if not self._verify_release(current, release_token):
+                    raise PermissionError(
+                        f"Invariant SY-Monotonicity: Cannot downgrade from {current.severity.name} "
+                        f"to {target_severity.name} without valid operator release token."
+                    )
+
+            new_state = AutomatonState(
+                name=target_name,
+                severity=target_severity,
+                reason=reason,
+                timestamp=time.time(),
+                metadata=metadata or {},
+            )
+            self._state = new_state
+            return new_state
 
     def generate_release_token(self, state: AutomatonState) -> str:
         """Generate valid operator release token for current state."""
@@ -172,6 +186,32 @@ class LedgerReceipt:
     receipt_hash: str
     coordinate: str = "RE1"
 
+    @staticmethod
+    def compute_receipt_hash(
+        sequence_id: int,
+        actor: str,
+        action: str,
+        payload_hash: str,
+        prev_hash: str,
+        timestamp: float,
+        coordinate: str,
+    ) -> str:
+        """Compute unambiguous SHA-256 hash over canonical JSON of all receipt fields."""
+        envelope = json.dumps(
+            {
+                "sequence_id": sequence_id,
+                "actor": actor,
+                "action": action,
+                "payload_hash": payload_hash,
+                "prev_hash": prev_hash,
+                "timestamp": timestamp,
+                "coordinate": coordinate,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(envelope).hexdigest()
+
     @classmethod
     def create(
         cls,
@@ -183,12 +223,17 @@ class LedgerReceipt:
         coordinate: str = "RE1",
     ) -> LedgerReceipt:
         ts = time.time()
-        payload_bytes = json.dumps(payload, sort_keys=True).encode("utf-8")
+        payload_bytes = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
         payload_hash = hashlib.sha256(payload_bytes).hexdigest()
-        
-        envelope = f"{sequence_id}:{actor}:{action}:{payload_hash}:{prev_hash}:{ts}".encode("utf-8")
-        receipt_hash = hashlib.sha256(envelope).hexdigest()
-        
+        receipt_hash = cls.compute_receipt_hash(
+            sequence_id=sequence_id,
+            actor=actor,
+            action=action,
+            payload_hash=payload_hash,
+            prev_hash=prev_hash,
+            timestamp=ts,
+            coordinate=coordinate,
+        )
         return cls(
             sequence_id=sequence_id,
             actor=actor,
@@ -203,23 +248,26 @@ class LedgerReceipt:
 
 class CausalLedger:
     """Generator RE: Append-only event sink with cryptographic Merkle/SHA-256 chaining.
-    
+
     Enforces Invariants K1 (Receipt), K4 (Temporal sequence), K11 (Integrity).
     """
 
     GENESIS_HASH = "0" * 64
 
     def __init__(self) -> None:
+        self._lock = threading.RLock()
         self._entries: List[LedgerReceipt] = []
         self._latest_hash: str = self.GENESIS_HASH
 
     @property
     def height(self) -> int:
-        return len(self._entries)
+        with self._lock:
+            return len(self._entries)
 
     @property
     def latest_hash(self) -> str:
-        return self._latest_hash
+        with self._lock:
+            return self._latest_hash
 
     def append(
         self,
@@ -229,37 +277,42 @@ class CausalLedger:
         coordinate: str = "RE1",
     ) -> LedgerReceipt:
         """Append receipt to chain with strictly monotonic sequence."""
-        seq = len(self._entries) + 1
-        receipt = LedgerReceipt.create(
-            sequence_id=seq,
-            actor=actor,
-            action=action,
-            payload=payload,
-            prev_hash=self._latest_hash,
-            coordinate=coordinate,
-        )
-        self._entries.append(receipt)
-        self._latest_hash = receipt.receipt_hash
-        return receipt
+        with self._lock:
+            seq = len(self._entries) + 1
+            receipt = LedgerReceipt.create(
+                sequence_id=seq,
+                actor=actor,
+                action=action,
+                payload=payload,
+                prev_hash=self._latest_hash,
+                coordinate=coordinate,
+            )
+            self._entries.append(receipt)
+            self._latest_hash = receipt.receipt_hash
+            return receipt
 
     def verify_integrity(self) -> bool:
         """Formally verify total causal sequence and unbroken hash chain (K11)."""
-        expected_prev = self.GENESIS_HASH
-        for idx, r in enumerate(self._entries):
-            if r.sequence_id != idx + 1:
-                return False
-            if r.prev_hash != expected_prev:
-                return False
-            # Verify self-hash
-            envelope = (
-                f"{r.sequence_id}:{r.actor}:{r.action}:"
-                f"{r.payload_hash}:{r.prev_hash}:{r.timestamp}"
-            ).encode("utf-8")
-            computed = hashlib.sha256(envelope).hexdigest()
-            if r.receipt_hash != computed:
-                return False
-            expected_prev = r.receipt_hash
-        return True
+        with self._lock:
+            expected_prev = self.GENESIS_HASH
+            for idx, r in enumerate(self._entries):
+                if r.sequence_id != idx + 1:
+                    return False
+                if r.prev_hash != expected_prev:
+                    return False
+                computed = LedgerReceipt.compute_receipt_hash(
+                    sequence_id=r.sequence_id,
+                    actor=r.actor,
+                    action=r.action,
+                    payload_hash=r.payload_hash,
+                    prev_hash=r.prev_hash,
+                    timestamp=r.timestamp,
+                    coordinate=r.coordinate,
+                )
+                if not hmac.compare_digest(r.receipt_hash, computed):
+                    return False
+                expected_prev = r.receipt_hash
+            return True
 
 
 # ===========================================================================
@@ -268,7 +321,7 @@ class CausalLedger:
 
 @dataclasses.dataclass(frozen=True)
 class CapabilityToken:
-    """Immutable delegation token bounded by strict poset contraction."""
+    """Immutable delegation token bounded by strict poset contraction and HMAC auth."""
     token_id: str
     issuer: str
     subject: str
@@ -276,24 +329,64 @@ class CapabilityToken:
     max_depth: int
     allowed_scopes: Tuple[str, ...]
     expiry: float
+    signature: str = ""
 
-    def attenuate(self, new_subject: str, sub_scopes: Set[str], lifetime_seconds: float) -> CapabilityToken:
+    def _canonical_bytes(self) -> bytes:
+        return json.dumps(
+            {
+                "domain": "cap-token-v2",
+                "token_id": self.token_id,
+                "issuer": self.issuer,
+                "subject": self.subject,
+                "depth": self.depth,
+                "max_depth": self.max_depth,
+                "allowed_scopes": list(self.allowed_scopes),
+                "expiry": self.expiry,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+
+    def compute_signature(self, signing_key: bytes) -> str:
+        if not isinstance(signing_key, bytes) or not signing_key:
+            raise ValueError("signing_key must be non-empty bytes")
+        return hmac.new(signing_key, self._canonical_bytes(), hashlib.sha256).hexdigest()
+
+    def verify_signature(self, signing_key: bytes) -> bool:
+        if not self.signature or not isinstance(signing_key, bytes) or not signing_key:
+            return False
+        expected = self.compute_signature(signing_key)
+        return hmac.compare_digest(expected, self.signature)
+
+    def attenuate(
+        self,
+        new_subject: str,
+        sub_scopes: Set[str],
+        lifetime_seconds: float,
+        signing_key: Optional[bytes] = None,
+    ) -> CapabilityToken:
         """Contraction mapping: depth decreases, scope subset, expiry strictly earlier."""
+        if signing_key is not None and not self.verify_signature(signing_key):
+            raise PermissionError("Invariant P-Auth: Cannot attenuate an unauthenticated token.")
         now = time.time()
         new_expiry = min(self.expiry, now + lifetime_seconds)
         parent_scopes = set(self.allowed_scopes)
-        
+
         # Invariant P-Scope: Child cannot exceed parent scope
         if not sub_scopes.issubset(parent_scopes):
             illegal = sub_scopes - parent_scopes
-            raise PermissionError(f"Invariant P-Scope: Sub-scope {illegal} exceeds parent scope {parent_scopes}")
-            
+            raise PermissionError(
+                f"Invariant P-Scope: Sub-scope {illegal} exceeds parent scope {parent_scopes}"
+            )
+
         # Invariant P-Depth: Depth must monotonically decrease
         if self.depth <= 0:
             raise PermissionError("Invariant P-Depth: Maximum delegation depth exhausted (depth = 0)")
-            
-        token_hash = hashlib.sha256(f"{self.token_id}:{new_subject}:{now}".encode("utf-8")).hexdigest()[:16]
-        return CapabilityToken(
+
+        token_hash = hashlib.sha256(
+            f"{self.token_id}:{new_subject}:{now}".encode("utf-8")
+        ).hexdigest()[:16]
+        child = CapabilityToken(
             token_id=f"tok_{token_hash}",
             issuer=self.subject,
             subject=new_subject,
@@ -302,6 +395,9 @@ class CapabilityToken:
             allowed_scopes=tuple(sorted(sub_scopes)),
             expiry=new_expiry,
         )
+        if signing_key is not None:
+            return dataclasses.replace(child, signature=child.compute_signature(signing_key))
+        return child
 
     def is_valid_for(self, scope: str) -> bool:
         if time.time() > self.expiry:
@@ -326,10 +422,27 @@ class QuorumBarrier:
     barrier_id: str
     action_intent: str
     required_signers: Set[str]
+    signer_keys: Dict[str, bytes] = dataclasses.field(default_factory=dict)
     collected_signatures: Dict[str, str] = dataclasses.field(default_factory=dict)
     status: BarrierStatus = BarrierStatus.PENDING
     created_at: float = dataclasses.field(default_factory=time.time)
     timeout_seconds: float = 3600.0
+
+    def sign_approval(self, signer: str, signer_key: bytes) -> str:
+        """Compute HMAC-SHA256 approval proof bound to barrier_id, action_intent, and signer."""
+        if not isinstance(signer_key, bytes) or not signer_key:
+            raise ValueError("signer_key must be non-empty bytes")
+        payload = json.dumps(
+            {
+                "domain": "quorum-v2",
+                "barrier_id": self.barrier_id,
+                "action_intent": self.action_intent,
+                "signer": signer,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hmac.new(signer_key, payload, hashlib.sha256).hexdigest()
 
     def submit_signature(self, signer: str, proof_token: str) -> bool:
         if self.status != BarrierStatus.PENDING:
@@ -337,12 +450,18 @@ class QuorumBarrier:
         if time.time() > (self.created_at + self.timeout_seconds):
             self.status = BarrierStatus.REJECTED
             return False
-        if signer in self.required_signers:
-            self.collected_signatures[signer] = proof_token
-            if set(self.collected_signatures.keys()).issuperset(self.required_signers):
-                self.status = BarrierStatus.APPROVED
-            return True
-        return False
+        if signer not in self.required_signers or not proof_token:
+            return False
+        key = self.signer_keys.get(signer)
+        if not isinstance(key, bytes) or not key:
+            return False
+        expected = self.sign_approval(signer, key)
+        if not hmac.compare_digest(expected, proof_token):
+            return False
+        self.collected_signatures[signer] = proof_token
+        if set(self.collected_signatures.keys()).issuperset(self.required_signers):
+            self.status = BarrierStatus.APPROVED
+        return True
 
     def suspend(self, reason: str) -> None:
         """Emergency suspension when preempted by an automaton halt."""
@@ -425,10 +544,52 @@ class Base120MicroKernel:
 
     def __init__(self, release_key: Optional[bytes] = None) -> None:
         self.automaton = GuardedAutomaton("ROOT_GOVERNOR", release_key)
+        assert isinstance(release_key, bytes)
+        self._token_key = hashlib.sha256(b"hummbl-kernel-v2-token:" + release_key).digest()
+        self._lock = threading.RLock()
         self.ledger = CausalLedger()
         self.active_barriers: Dict[str, QuorumBarrier] = {}
         self.predicates = ConstraintPredicate()
         self.projections = ProjectionFunctor()
+
+    def issue_token(
+        self,
+        issuer: str,
+        subject: str,
+        allowed_scopes: Tuple[str, ...],
+        depth: int = 3,
+        lifetime_seconds: float = 3600.0,
+    ) -> CapabilityToken:
+        """Mint an HMAC-authenticated root capability token bound to this kernel."""
+        now = time.time()
+        tok_id = "tok_" + hashlib.sha256(
+            f"{issuer}:{subject}:{now}:{','.join(sorted(allowed_scopes))}".encode("utf-8")
+        ).hexdigest()[:16]
+        unsigned = CapabilityToken(
+            token_id=tok_id,
+            issuer=issuer,
+            subject=subject,
+            depth=depth,
+            max_depth=depth,
+            allowed_scopes=tuple(sorted(allowed_scopes)),
+            expiry=now + lifetime_seconds,
+        )
+        return dataclasses.replace(unsigned, signature=unsigned.compute_signature(self._token_key))
+
+    def attenuate_token(
+        self,
+        parent: CapabilityToken,
+        new_subject: str,
+        sub_scopes: Set[str],
+        lifetime_seconds: float,
+    ) -> CapabilityToken:
+        """Attenuate a kernel-issued token and sign the contracted child token."""
+        return parent.attenuate(
+            new_subject=new_subject,
+            sub_scopes=sub_scopes,
+            lifetime_seconds=lifetime_seconds,
+            signing_key=self._token_key,
+        )
 
     def execute_governed_action(
         self,
@@ -438,30 +599,39 @@ class Base120MicroKernel:
         payload: Dict[str, Any],
     ) -> LedgerReceipt:
         """Execute a governed transition verifying all cross-generator invariants.
-        
+
         Commutation checks:
-          SY x P: Is automaton healthy before checking capability?
-          P x RE: Does token allow scope before emitting receipt?
-          IN x RE: Does payload satisfy constraint predicate before append?
+          SY x P: Is automaton healthy (or critical-only under HALT_NONCRITICAL)?
+          P x RE: Is token kernel-authenticated and authorized for scope?
         """
-        # 1. SY Preemption check: If Automaton is in HALT or EMERGENCY, fail-closed
-        if self.automaton.state.severity >= SeverityLevel.HALT_ALL:
-            raise RuntimeError(
-                f"Invariant SY-Preempt: Action '{action}' blocked by active halt: "
-                f"{self.automaton.state.name} ({self.automaton.state.reason})"
-            )
+        with self._lock:
+            state = self.automaton.state
+            # 1. SY Preemption check: fail-closed on HALT_ALL/EMERGENCY and noncritical on HALT_NONCRITICAL
+            if state.severity >= SeverityLevel.HALT_ALL:
+                raise RuntimeError(
+                    f"Invariant SY-Preempt: Action '{action}' blocked by active halt: "
+                    f"{state.name} ({state.reason})"
+                )
+            if state.severity == SeverityLevel.HALT_NONCRITICAL and action not in CRITICAL_ACTIONS:
+                raise RuntimeError(
+                    f"Invariant SY-Preempt: Noncritical action '{action}' blocked during "
+                    f"HALT_NONCRITICAL: {state.name} ({state.reason})"
+                )
 
-        # 2. P Poset Contraction check: Does token allow scope?
-        if not token.is_valid_for(scope):
-            raise PermissionError(
-                f"Invariant P-Scope: Subject '{token.subject}' unauthorized for scope '{scope}'"
-            )
+            # 2. P Poset Contraction & Authentication check
+            if not token.verify_signature(self._token_key):
+                raise PermissionError(
+                    f"Invariant P-Auth: CapabilityToken '{token.token_id}' signature invalid or missing"
+                )
+            if not token.is_valid_for(scope):
+                raise PermissionError(
+                    f"Invariant P-Scope: Subject '{token.subject}' unauthorized for scope '{scope}'"
+                )
 
-        # 3. Append to Ledger and return signed receipt
-        receipt = self.ledger.append(
-            actor=token.subject,
-            action=action,
-            payload=payload,
-            coordinate="CO1.RE1",
-        )
-        return receipt
+            # 3. Append to Ledger and return signed receipt
+            return self.ledger.append(
+                actor=token.subject,
+                action=action,
+                payload=payload,
+                coordinate="CO1.RE1",
+            )
