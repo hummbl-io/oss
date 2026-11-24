@@ -440,6 +440,13 @@ class TestLeastPrivilege(unittest.TestCase):
             )
             self.assertFalse(is_allowed)
             self.assertEqual(error, IDP_E_DCT_VIOLATION)
+            # A permitted op must also be denied by the disabled-mode guard;
+            # otherwise this test passes even if the guard is removed.
+            is_allowed, error = self.manager.check_least_privilege(
+                token, "read"
+            )
+            self.assertFalse(is_allowed)
+            self.assertEqual(error, IDP_E_DCT_VIOLATION)
         finally:
             os.environ["ENABLE_IDP"] = "true"
 
