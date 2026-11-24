@@ -44,7 +44,7 @@ python coordination_bus_mcp_server.py
 ## Source of truth
 
 The actual implementation lives in the
-[hummbl-bus](https://github.com/hummbl-io/hummbl-bus) repo. This package is a
+[hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) package in this monorepo. This package is a
 thin entry point for the monorepo's MCP server catalog.
 
 ## License

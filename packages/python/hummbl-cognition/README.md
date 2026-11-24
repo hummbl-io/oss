@@ -1,6 +1,5 @@
 # hummbl-cognition
 
-[![CI](https://github.com/hummbl-io/hummbl-cognition/actions/workflows/ci.yml/badge.svg)](https://github.com/hummbl-io/hummbl-cognition/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 
 *Cognitive Ledger Protocol (CLP) and Open Brain server for HUMMBL agent reasoning.*
@@ -149,10 +148,10 @@ scan does not establish complete bus history or verify the cache's provenance.
 
 ## Related
 
-- [hummbl-bus](https://github.com/hummbl-io/hummbl-bus) — coordination bus
-- [hummbl-governance](https://github.com/hummbl-io/hummbl-governance) — governance primitives
-- [hummbl-skills](https://github.com/hummbl-io/hummbl-skills) — agent skills registry
-- [hummbl-agent](https://github.com/hummbl-io/hummbl-agent) — governed control plane
+- [hummbl-bus](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-bus) — coordination bus
+- [hummbl-governance](https://pypi.org/project/hummbl-governance/) — governance primitives (51 implemented primitives)
+- [hummbl-contracts](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-contracts) — versioned contract schemas
+- [hummbl-tuples](https://github.com/hummbl-io/oss/tree/main/packages/python/hummbl-tuples) — typed governance tuples
 
 Learn more at [hummbl.io](https://hummbl.io).
 
