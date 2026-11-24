@@ -171,17 +171,17 @@ pip install "idp-spec[governance]"
 
 ## Feature Flag
 
-IDP is designed for zero-overhead adoption:
+The token helpers (`idp_spec/delegation_token.py`) currently default to `ENABLE_IDP=true` when the variable is unset. Setting it to `false` (or an unrecognized value) **rejects token creation, token validation, and least-privilege checks**; for the token helpers, it is not an authorization bypass (note: `idp_spec/delegation_context.py` methods `transition`, `can_subdelegate`, and `create_child` still pass through when `ENABLE_IDP=false` and are tracked for a separate fail-closed follow-up):
 
 ```bash
-# Default: disabled (backward compatible pass-through)
-ENABLE_IDP=false python my_script.py
-
-# Full enforcement
+# Token helpers enabled by default
 ENABLE_IDP=true python my_script.py
+
+# Token helpers reject requests (fail closed)
+ENABLE_IDP=false python my_script.py
 ```
 
-When disabled, all IDP operations are no-ops — existing code paths are unchanged.
+These settings describe the IDP token library. They do **not** establish that every host tool, file write, or agent message is intercepted. Enforcement at a side-effect boundary requires explicit integration and verification of that integration path. Evidence/attestation and some lateral authority components remain incomplete as noted in Project Status.
 
 ---
 
