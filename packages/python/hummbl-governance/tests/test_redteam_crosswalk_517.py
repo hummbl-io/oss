@@ -18,7 +18,7 @@
 
 Each test class pins the current observable code-level behavior for one of the
 seven historical red-team findings from PRIMITIVE_CRITICAL_ANALYSIS_2026-08-27.md
-(documented in docs/PRIMITIVE_REDTEAM_CROSSWALK_2026-11-23.md).
+(crosswalk maintained in the private hummbl-io/hummbl-dev repo at docs/audits/PRIMITIVE_REDTEAM_CROSSWALK_2026-11-23.md).
 
 When a finding is later remediated in code, the corresponding bypass test in
 this file is expected to fail and be updated alongside the crosswalk status.
