@@ -35,6 +35,8 @@ DCTX  →  CONTRACT  →  EVIDENCE  →  ATTEST  →  DCT  →  GOVERNANCE_BUS
 | **DCT** (Delegation Capability Token) | HMAC-SHA256 signed, time-bounded, scope-limited authorization token |
 | **GOVERNANCE BUS** | Append-only, hash-chained audit log of all delegation events |
 
+> **Terminology note:** `DCT` stands for **Delegation Capability Token**, distinct from `DCTX` (**Delegation Context**). See [`docs/architecture/NOMENCLATURE.md`](../../../docs/architecture/NOMENCLATURE.md) for canonical definitions and scope boundaries.
+
 ---
 
 ## Quick Start
