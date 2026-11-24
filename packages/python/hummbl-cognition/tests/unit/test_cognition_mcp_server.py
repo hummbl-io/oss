@@ -65,8 +65,9 @@ def _write_ledger(path, entries):
             f.write(json.dumps(e) + "\n")
 
 
-def test_default_state_paths_share_one_package_relative_root(monkeypatch):
+def test_default_state_paths_share_one_package_relative_root(monkeypatch, caplog):
     """Writer, indexer, and MCP must use one default cognition directory."""
+    import logging
     import hummbl_cognition.indexer as indexer
     import hummbl_cognition.ledger_writer as ledger_writer
     import hummbl_cognition.mcp_server as mcp_server
@@ -78,7 +79,9 @@ def test_default_state_paths_share_one_package_relative_root(monkeypatch):
     expected_dir = (
         Path(ledger_writer.__file__).resolve().parent.parent / "_state" / "cognition"
     )
-    assert ledger_writer._resolve_ledger_path() == expected_dir / "ledger.jsonl"
+    with caplog.at_level(logging.WARNING, logger="hummbl_cognition.ledger_writer"):
+        assert ledger_writer._resolve_ledger_path() == expected_dir / "ledger.jsonl"
+    assert any("DEFAULT_LEDGER_PATH" in rec.message for rec in caplog.records)
     assert indexer._resolve_index_path() == expected_dir / "index.json"
     # mcp_server.LEDGER_DIR is bound at import time from CLP_STATE_DIR;
     # its documented fallback is the shared default constant.

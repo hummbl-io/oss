@@ -397,6 +397,10 @@ def _resolve_ledger_path(override: str | Path | None = None) -> Path:
     if env_path:
         return Path(env_path)
 
+    logger.warning(
+        "COGNITION_LEDGER unset and no override supplied; falling back to package-relative DEFAULT_LEDGER_PATH=%s",
+        DEFAULT_LEDGER_PATH,
+    )
     return DEFAULT_LEDGER_PATH
 
 
