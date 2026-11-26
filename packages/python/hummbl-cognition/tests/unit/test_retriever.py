@@ -605,6 +605,20 @@ class TestSearchMemoryMd:
         with patch.object(Path, "home", return_value=tmp_path):
             assert r._search_memory_md("archived surface", limit=10) == []
 
+    def test_agy_curated_knowledge_store_is_searched(self, tmp_path):
+        curated = tmp_path / ".gemini" / "antigravity" / "knowledge"
+        curated.mkdir(parents=True)
+        (curated / "MEMORY.md").write_text("archived surface agy decision")
+        brain = tmp_path / ".gemini" / "antigravity" / "brain" / "sess"
+        brain.mkdir(parents=True)
+        (brain / "chunk.md").write_text("archived surface raw chunk")
+        r = OpenBrainRetriever(state_dir=tmp_path, index=MagicMock())
+        with patch.object(Path, "home", return_value=tmp_path):
+            results = r._search_memory_md("archived surface", limit=10)
+        assert {res.entry_id: res.metadata["runtime"] for res in results} == {
+            "memory:agy:MEMORY.md": "agy",
+        }
+
 
 # ---------------------------------------------------------------------------
 # OpenBrainRetriever._search_bibliography

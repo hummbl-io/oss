@@ -31,8 +31,8 @@ _CHARS_PER_TOKEN = 4
 # every runtime store. Only stores of agent-written notes are indexed here: pi's
 # notes are ~/.pi/agent/memories (the rest of ~/.pi/agent is package docs and
 # skills), codex's curated notes are ~/.codex/MEMORY.md (its memories_1.sqlite
-# was empty on Anvil, 2026-11-26), and agy has no curated store to index (its
-# brain holds raw transcript chunks; knowledge/ held only lock files). grok's
+# was empty on Anvil, 2026-11-26), and agy's curated notes live
+# in ~/.gemini/antigravity/knowledge/*.md (brain/ stays raw transcript chunks). grok's
 # memory-v2 is read only at its
 # curated layer (MEMORY.md and topics/ per scope); observations/_inbox and the
 # archive/batch_dream_* folders are raw, high-volume intermediates (about 2,000
@@ -47,6 +47,7 @@ MEMORY_MD_STORES: tuple[tuple[str, str, str], ...] = (
     ("grok", ".grok/memory", "*.md"),
     ("pi", ".pi/agent/memories", "**/*.md"),
     ("codex", ".codex", "MEMORY.md"),
+    ("agy", ".gemini/antigravity/knowledge", "*.md"),
 )
 
 # The bus pool is a bounded view of cached evidence, never a live bus query.
