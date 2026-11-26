@@ -584,6 +584,19 @@ class TestSearchMemoryMd:
             files = {res.metadata["file"] for res in r._search_memory_md("archived surface", limit=10)}
         assert files == {str(ws / "topics" / "n.md")}
 
+    def test_pi_memories_and_codex_memory_md_are_searched(self, tmp_path):
+        pi = tmp_path / ".pi" / "agent" / "memories"
+        pi.mkdir(parents=True)
+        (pi / "p.md").write_text("archived surface lesson")
+        codex = tmp_path / ".codex"
+        codex.mkdir()
+        (codex / "MEMORY.md").write_text("archived surface note")
+        (codex / "other.md").write_text("archived surface ignored")
+        r = OpenBrainRetriever(state_dir=tmp_path, index=MagicMock())
+        with patch.object(Path, "home", return_value=tmp_path):
+            ids = {res.entry_id for res in r._search_memory_md("archived surface", limit=10)}
+        assert ids == {"memory:pi:p.md", "memory:codex:MEMORY.md"}
+
     def test_pi_package_docs_are_not_indexed(self, tmp_path):
         docs = tmp_path / ".pi" / "agent" / "install" / "docs"
         docs.mkdir(parents=True)

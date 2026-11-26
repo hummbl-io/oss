@@ -29,9 +29,11 @@ _CHARS_PER_TOKEN = 4
 # Agent memory stores searched by the memory_md pool: (runtime, path relative to
 # the home directory, glob). hummbl-io/agents memory/pointer-manifest.yaml lists
 # every runtime store. Only stores of agent-written notes are indexed here: pi's
-# .md files under ~/.pi/agent are package docs and skills, agy's brain holds raw
-# transcript chunks, and codex keeps memories in SQLite; each needs its own
-# adapter rather than a markdown glob. grok's memory-v2 is read only at its
+# notes are ~/.pi/agent/memories (the rest of ~/.pi/agent is package docs and
+# skills), codex's curated notes are ~/.codex/MEMORY.md (its memories_1.sqlite
+# was empty on Anvil, 2026-11-26), and agy has no curated store to index (its
+# brain holds raw transcript chunks; knowledge/ held only lock files). grok's
+# memory-v2 is read only at its
 # curated layer (MEMORY.md and topics/ per scope); observations/_inbox and the
 # archive/batch_dream_* folders are raw, high-volume intermediates (about 2,000
 # files on Anvil, 2026-11-26) that drowned the pool and made it ~20 s slow.
@@ -43,6 +45,8 @@ MEMORY_MD_STORES: tuple[tuple[str, str, str], ...] = (
     ("grok", ".grok/memory-v2/workspaces", "*/*.md"),
     ("grok", ".grok/memory-v2/workspaces", "*/topics/*.md"),
     ("grok", ".grok/memory", "*.md"),
+    ("pi", ".pi/agent/memories", "**/*.md"),
+    ("codex", ".codex", "MEMORY.md"),
 )
 
 # The bus pool is a bounded view of cached evidence, never a live bus query.
@@ -1105,7 +1109,10 @@ class OpenBrainRetriever:
             return []
 
         home = Path.home()
-        results = []
+        # Score every file, but build snippets only for the results returned:
+        # with ~850 notes across runtimes, snippets for every hit cost more than
+        # reading the files.
+        scored: list[tuple[float, str, Path, str]] = []
         for runtime, rel_root, pattern in MEMORY_MD_STORES:
             root = home / rel_root
             if not root.is_dir():
@@ -1126,24 +1133,23 @@ class OpenBrainRetriever:
                 overlap = query_tokens & file_tokens
                 if not overlap:
                     continue
+                scored.append((len(overlap) / len(query_tokens) * 0.6, runtime, memory_file, text))
 
-                score = len(overlap) / len(query_tokens) * 0.6
-                snippet = _extract_snippet(text, query_tokens, max_chars=300)
-                entry_id = (f"memory:{memory_file.name}" if runtime == "claude-code"
-                            else f"memory:{runtime}:{memory_file.name}")
-
-                results.append(
-                    MemoryResult(
-                        source="memory_md",
-                        entry_id=entry_id,
-                        score=score,
-                        content=snippet,
-                        metadata={"file": str(memory_file), "runtime": runtime},
-                    )
+        scored.sort(key=lambda item: item[0], reverse=True)
+        results = []
+        for score, runtime, memory_file, text in scored[:limit]:
+            entry_id = (f"memory:{memory_file.name}" if runtime == "claude-code"
+                        else f"memory:{runtime}:{memory_file.name}")
+            results.append(
+                MemoryResult(
+                    source="memory_md",
+                    entry_id=entry_id,
+                    score=score,
+                    content=_extract_snippet(text, query_tokens, max_chars=300),
+                    metadata={"file": str(memory_file), "runtime": runtime},
                 )
-
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:limit]
+            )
+        return results
 
     def _load_bibliography_entries(self) -> list[dict[str, Any]]:
         """Load bibliography entries with cached in-memory representation."""
