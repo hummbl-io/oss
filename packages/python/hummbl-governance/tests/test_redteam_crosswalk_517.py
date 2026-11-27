@@ -211,31 +211,37 @@ class TestFinding2UninvokedAdmissionAndAuthority:
 
 
 class TestFinding3EvidenceEngineHeuristic:
-    """Pins string-matching grading and unreachable all-C rejection in EvidenceEngine."""
+    """Verifies Finding 3 remediation: no keyword-only Grade A and all-C empty-claim rejection."""
 
-    def test_fabricated_source_url_with_experiment_keyword_gets_grade_a(self) -> None:
+    def test_fabricated_source_url_with_experiment_keyword_cannot_get_grade_a(self) -> None:
         engine = EvidenceEngine()
         grade = engine.grade(
             claim="Fabricated performance claim with sufficient length",
             sources=["https://example.com/experiment-fake"],
             methodology="",
         )
-        assert grade.credibility == "A"
+        assert grade.credibility == "B"
         assert grade.recency == "C"
 
-    def test_empty_claim_without_sources_is_still_accepted(self) -> None:
+        # Verifiable primary source + methodology still earns Grade A.
+        verified_grade = engine.grade(
+            claim="Verified benchmark measurement with reproducible harness",
+            sources=["doi:10.1000/xyz123"],
+            methodology="reproducible benchmark suite",
+        )
+        assert verified_grade.credibility == "A"
+
+    def test_empty_claim_without_sources_is_rejected_as_all_c(self) -> None:
         engine = EvidenceEngine()
-        # Even an empty claim with no sources and no methodology receives
-        # relevance="B", making is_acceptable() always True.
         grade = engine.grade(claim="", sources=[], methodology="")
-        assert grade.relevance == "B"
-        assert grade.is_acceptable() is True
+        assert grade.relevance == "C"
+        assert grade.is_acceptable() is False
 
         acceptable, reasons = engine.validate_receipt_claims(
             {"claims": [{"text": "", "sources": [], "methodology": ""}]}
         )
-        assert acceptable is True
-        assert reasons == []
+        assert acceptable is False
+        assert len(reasons) == 1
 
 
 # ---------------------------------------------------------------------------

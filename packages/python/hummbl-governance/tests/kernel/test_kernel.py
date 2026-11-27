@@ -141,10 +141,10 @@ class TestEvidenceEngine:
         engine = EvidenceEngine()
         grade = engine.grade(
             claim="Delegation depth affects reliability",
-            sources=["experiment-sl-07-12345"],
+            sources=["receipt:experiment-sl-07-12345"],
             methodology="Monte Carlo simulation, 4500 trials",
         )
-        assert grade.credibility == "A"  # Contains "experiment"
+        assert grade.credibility == "A"  # Verifiable primary source + methodology
         assert grade.methodology == "A"  # Contains "Monte Carlo"
         assert grade.is_acceptable() is True
 
@@ -160,13 +160,9 @@ class TestEvidenceEngine:
         assert grade.recency == "C"
         assert grade.methodology == "C"
         assert grade.reproducibility == "C"
-        # relevance is "B" even for short claims (baseline)
-        assert grade.relevance == "B"
-        # With 4 C's and 1 B, average = (1+1+1+1+2)/5 = 1.2 -> "C"
+        assert grade.relevance == "C"
         assert grade.average() == "C"
-        # But is_acceptable returns True because not all dimensions are C
-        # To truly test unacceptable, check average instead
-        assert grade.average() == "C"
+        assert grade.is_acceptable() is False
 
     def test_canonicalize(self) -> None:
         engine = EvidenceEngine()
