@@ -337,6 +337,36 @@ class Kernel:
 
         return receipt_id
 
+    def admit_proposal(
+        self,
+        proposal: dict[str, Any],
+        *,
+        agent_id: str,
+        is_proposer: bool = False,
+    ) -> Receipt:
+        """Validate a state-transition proposal via admission_control and record receipt.
+
+        Wires ``validate_admission`` directly into the Kernel syscall surface
+        (remediating the Kernel half of hummbl-io/oss#517 Finding 2).
+        Raises ValidationError or ValueError on fail-closed rejection before
+        any receipt is minted.
+        """
+        from .admission_control import validate_admission
+
+        if not self.booted:
+            raise KernelPanic(
+                KernelInvariant.RECEIPT,
+                "Kernel not booted; cannot admit proposals",
+            )
+        validate_admission(proposal, is_proposer=is_proposer)
+        receipt = self.create_receipt(
+            agent_id=agent_id,
+            action_type="ADMISSION_GRANTED",
+            payload={"proposal": proposal, "is_proposer": is_proposer},
+        )
+        self.store_receipt(receipt)
+        return receipt
+
     def check_authority(
         self,
         agent_id: str,
