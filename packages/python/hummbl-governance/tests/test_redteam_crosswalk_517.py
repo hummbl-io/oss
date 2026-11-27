@@ -280,7 +280,7 @@ class TestFinding4LawEngineDegradedMode:
 class TestFinding5ConvergenceDetectorBypass:
     """Pins substring evasion, ignored metadata, and substring false positives."""
 
-    def test_renamed_actions_and_malicious_metadata_evade_detection(self) -> None:
+    def test_renamed_actions_with_malicious_metadata_are_detected(self) -> None:
         detector = ConvergenceDetector(threshold=0.3)
         for _ in range(10):
             goal = detector.record(
@@ -288,8 +288,11 @@ class TestFinding5ConvergenceDetectorBypass:
                 "save_state",
                 metadata={"actual_behavior": "disable_kill_switch", "replicate": True},
             )
-            assert goal is None
-        assert detector.check("evasive-agent") is None
+            assert goal == ConvergentGoal.SHUTDOWN_RESISTANCE
+        alert = detector.check("evasive-agent")
+        assert alert is not None
+        assert alert.dominant_goal == ConvergentGoal.SHUTDOWN_RESISTANCE
+        assert alert.recommended_action == "halt"
 
     def test_benign_action_with_rule_substring_triggers_false_positive(self) -> None:
         detector = ConvergenceDetector(threshold=0.3)
