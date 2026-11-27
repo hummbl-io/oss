@@ -188,6 +188,47 @@ class AuthorityEngine:
                 return class_name
         return None
 
+    @staticmethod
+    def _normalize_key(phrase: str) -> str:
+        """Normalize a natural-language prerequisite phrase to a snake_case key."""
+        import re
+        cleaned = re.sub(r"[^a-z0-9]+", "_", phrase.strip().lower()).strip("_")
+        return cleaned
+
+    @staticmethod
+    def _is_affirmative_value(val: Any) -> bool:
+        """Return True only for an explicit, non-negated truthy context value."""
+        if val is True:
+            return True
+        if val is False or val is None:
+            return False
+        if isinstance(val, dict):
+            return bool(val)
+        if isinstance(val, str):
+            s = val.strip().lower()
+            if not s or s in {"false", "no", "none", "null", "0", "denied"}:
+                return False
+            if s.startswith(("no ", "not ", "without ", "never ")):
+                return False
+            return True
+        return bool(val)
+
+    def _has_structured_requirement(self, context: dict[str, Any], required: str) -> bool:
+        """Check whether context carries an explicit affirmative key for `required`."""
+        req_key = self._normalize_key(required)
+        if not req_key:
+            return False
+        candidate_keys = (
+            req_key,
+            f"{req_key}_receipt",
+            f"{req_key}_granted",
+            f"{req_key}_verified",
+        )
+        for k in candidate_keys:
+            if k in context and self._is_affirmative_value(context[k]):
+                return True
+        return False
+
     def _check_structured_limit(
         self, limit: str, authority_class: str, context: dict[str, Any]
     ) -> str | None:
@@ -195,27 +236,40 @@ class AuthorityEngine:
 
         Returns violation description or None if no violation.
 
-        Limits are only checked when they reference the current authority_class.
-        For example, "cannot authorize HIGH without operator DECISION" only
-        fires when authority_class is HIGH.
+        Enforces:
+        - Class-agnostic numeric caps ("must not exceed <N> <metric>").
+        - Class-scoped "cannot authorize <CLASS> without <requirement>" rules,
+          including operator DECISION receipts, two-person receipts, and any
+          arbitrary named prerequisite (fail-closed if missing from context).
         """
+        import re
+
         limit_lower = limit.lower()
-        # Only check limits that reference the current authority class
-        # e.g. "cannot authorize HIGH without..." only applies to HIGH mutations
-        # e.g. "cannot authorize CRITICAL without..." only applies to CRITICAL mutations
+
+        # 1. Class-agnostic numeric ceiling: "must not exceed <N> <metric>"
+        m_cap = re.search(r"must not exceed\s+(\d+(?:\.\d+)?)\s+([a-z0-9_ ]+)", limit_lower)
+        if m_cap:
+            cap_val = float(m_cap.group(1))
+            metric_key = self._normalize_key(m_cap.group(2))
+            if metric_key in context and isinstance(context[metric_key], (int, float)):
+                if float(context[metric_key]) > cap_val:
+                    return f"Numeric limit exceeded: {metric_key}={context[metric_key]} > {cap_val:g}"
+
+        # 2. Class-scoped prerequisite rules: "cannot authorize <CLASS> without <Y>"
         class_lower = authority_class.lower()
         if class_lower not in limit_lower:
-            # This limit doesn't reference the current class — skip it
             return None
-        # "cannot authorize X without Y"
         if "without" in limit_lower:
             required = limit.split("without")[-1].strip().rstrip(".")
-            # Check if the required condition is met
-            if "operator decision" in required.lower():
-                if not context.get("operator_decision_receipt"):
+            req_lower = required.lower()
+            if "operator decision" in req_lower:
+                if not self._is_affirmative_value(context.get("operator_decision_receipt")):
                     return f"Missing required condition: {required}"
-            if "two-person" in required.lower():
-                if not context.get("second_approver_receipt"):
+            elif "two-person" in req_lower:
+                if not self._is_affirmative_value(context.get("second_approver_receipt")):
+                    return f"Missing required condition: {required}"
+            else:
+                if not self._has_structured_requirement(context, required):
                     return f"Missing required condition: {required}"
         return None
 
@@ -281,16 +335,17 @@ class AuthorityEngine:
         return {}
 
     def _check_limit(self, context: dict[str, Any], limit: str) -> str | None:
-        """Check if context violates limit. Returns violation description or None."""
+        """Check if context violates a legacy charter limit (fail-closed structured lookup).
+
+        Rejects substring matching over ``str(context)`` so negated prose like
+        ``{"note": "no approval needed"}`` cannot satisfy ``without approval``.
+        """
         if not limit:
             return None
-        # Simple limit checks
-        if "cannot" in limit.lower():
-            # Parse "cannot X without Y"
-            if "without" in limit.lower():
-                required = limit.split("without")[-1].strip()
-                if required.lower() not in str(context).lower():
-                    return f"Missing required condition: {required}"
+        if "cannot" in limit.lower() and "without" in limit.lower():
+            required = limit.split("without")[-1].strip().rstrip(".")
+            if not self._has_structured_requirement(context, required):
+                return f"Missing required condition: {required}"
         return None
 
     def log_exercise(
