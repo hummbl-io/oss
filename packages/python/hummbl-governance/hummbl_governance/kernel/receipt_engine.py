@@ -89,6 +89,9 @@ class ReceiptEngine:
         signing_secret: bytes | None = None,
         corpus_adapter: Any = None,
         identity_engine: Any = None,
+        agent_keys: dict[str, bytes] | None = None,
+        *,
+        require_agent_key: bool = False,
     ) -> None:
         self.state_dir = state_dir
         self.receipts_dir = state_dir / "receipts"
@@ -96,12 +99,33 @@ class ReceiptEngine:
         self.signing_secret = signing_secret or self._resolve_signing_secret()
         self.corpus_adapter = corpus_adapter
         self._identity_engine = identity_engine
+        self._agent_keys: dict[str, bytes] = dict(agent_keys or {})
+        self._require_agent_key = require_agent_key
         self._io_lock = threading.RLock()
         # In-memory cache of the last receipt hash per agent_id, keyed by
         # agent_id. Avoids O(n²) full-file reads in last_for_agent() when
         # creating chained receipts. Updated on store() and invalidated on
         # any write that could change the last receipt.
         self._last_hash_cache: dict[str, str] = {}
+
+    def register_agent_key(self, agent_id: str, key: bytes) -> None:
+        """Bind a dedicated signing key to a specific agent_id (non-shared attribution)."""
+        if not agent_id or not key:
+            raise ValueError("agent_id and non-empty key bytes are required")
+        self._agent_keys[agent_id] = key
+
+    def _key_for_agent(self, agent_id: str) -> bytes:
+        """Return the per-agent key when registered, else shared fallback unless strict."""
+        if agent_id in self._agent_keys:
+            return self._agent_keys[agent_id]
+        if self._require_agent_key:
+            raise KernelPanic(
+                KernelInvariant.IDENTITY,
+                f"No dedicated signing key registered for agent '{agent_id}' "
+                f"(require_agent_key=True)",
+                agent_id=agent_id,
+            )
+        return self.signing_secret
 
     def _resolve_signing_secret(self) -> bytes:
         """Resolve the HMAC signing secret with platform-appropriate protection.
@@ -246,9 +270,10 @@ class ReceiptEngine:
         return receipt
 
     def _sign(self, receipt: Receipt) -> str:
-        """Sign a receipt with HMAC-SHA256."""
+        """Sign a receipt with HMAC-SHA256 using the agent's bound key (or shared fallback)."""
+        key = self._key_for_agent(receipt.agent_id)
         return hmac.new(
-            self.signing_secret,
+            key,
             receipt.canonical_json().encode("utf-8"),
             hashlib.sha256,
         ).hexdigest()
@@ -309,11 +334,15 @@ class ReceiptEngine:
         return receipt
 
     def validate(self, receipt: Receipt) -> bool:
-        """Validate a receipt's signature and structure.
+        """Validate a receipt's signature against the agent's bound key (or shared fallback).
 
-        Returns True if valid, False if signature mismatch.
+        Returns True if valid, False if signature mismatch or missing required key.
         """
-        return receipt.verify_signature(self.signing_secret)
+        try:
+            key = self._key_for_agent(receipt.agent_id)
+        except KernelPanic:
+            return False
+        return receipt.verify_signature(key)
 
     def list_for_agent(self, agent_id: str) -> list[Receipt]:
         """List all receipts for an agent.
