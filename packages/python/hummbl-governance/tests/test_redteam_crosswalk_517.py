@@ -252,24 +252,31 @@ class TestFinding4LawEngineDegradedMode:
         assert len(engine.laws) >= 19
         assert "SL-07" in engine.laws
 
-    def test_missing_atlas_degrades_silently_and_kernel_reports_healthy(
+    def test_missing_atlas_surfaces_degraded_health_and_strict_fails_closed(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         missing_dir = tmp_path / "nonexistent_atlas"
         monkeypatch.setenv("HUMMBL_KERNEL_ATLAS_DIR", str(missing_dir))
         monkeypatch.setenv("RECEIPTENGINE_HMAC_KEY", "test-secret-key-for-crosswalk-517")
 
-        # LawEngine silently loads 0 laws and reports 0 violations even for SL-07 breach.
+        # Non-strict LawEngine flags degraded state explicitly instead of silent healthy.
         law_engine = LawEngine()
         assert len(law_engine.laws) == 0
-        assert law_engine.evaluate({"agent_id": "a", "payload": {"msg": "depth=99"}}) == []
+        assert law_engine.degraded is True
+        assert law_engine.degraded_reason is not None
 
-        # Kernel boots without KernelPanic and reports healthy=True with 0 laws loaded.
+        # Strict mode fails closed immediately.
+        with pytest.raises(RuntimeError, match="LawEngine failed closed"):
+            LawEngine(strict=True)
+
+        # Kernel reports DEGRADED and healthy=False when 0 laws are loaded.
         kernel = Kernel.boot(state_dir=tmp_path)
         health = kernel.health()
         assert health["laws_loaded"] == 0
-        assert health["engines"]["law_engine"] is True
-        assert health["healthy"] is True
+        assert health["engines"]["law_engine"] is False
+        assert health["healthy"] is False
+        assert health["status"] == "DEGRADED"
+        assert any("law_engine:" in r for r in health["degraded_reasons"])
 
 
 # ---------------------------------------------------------------------------

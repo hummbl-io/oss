@@ -310,7 +310,9 @@ class TestChaosKernelIntegration:
             assert kernel.booted is True
             assert len(kernel.law.laws) == 0  # No atlas loaded
             health = kernel.health()
-            assert health["healthy"] is True  # Degraded mode still healthy
+            assert health["healthy"] is False  # Degraded mode surfaces explicitly
+            assert health["status"] == "DEGRADED"
+            assert health["engines"]["law_engine"] is False
 
     def test_random_corruption_mid_session(self) -> None:
         """Create receipts, corrupt some, verify fail-closed panic (K1)."""
