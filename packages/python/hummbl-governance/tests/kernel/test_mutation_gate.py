@@ -438,3 +438,70 @@ class TestIntegrationScenario:
         decisions = gate.list_decisions(permitted=False)
         assert len(decisions) == 1
         assert decisions[0]["mutation_type"] == "archive_repo"
+
+
+class TestReceiptVerification:
+    """Test tightened receipt verification and custom receipt_verifier hook."""
+
+    def test_whitespace_only_or_embedded_whitespace_receipt_rejected(
+        self, tmp_kernel: Kernel
+    ) -> None:
+        """Default verifier must reject whitespace-padded short strings and embedded spaces."""
+        with patch.object(tmp_kernel, "exercise_authority") as mock_exercise:
+            mock_exercise.return_value = AuthorityCheck(
+                permitted=True,
+                reason="Within scope",
+            )
+            gate = tmp_kernel.mutation_gate
+            for bad_receipt in ("        ", "   abc   ", "bus:2026 08 31"):
+                result = gate.check(
+                    MutationRequest(
+                        mutation_type="archive_repo",
+                        agent_id="devin",
+                        role_id="primary_agent",
+                        target="hummbl-governance",
+                        operator_decision_receipt=bad_receipt,
+                    )
+                )
+                assert result.permitted is False
+                assert "not verified" in result.reason
+
+    def test_custom_receipt_verifier_enforced(self, tmp_kernel: Kernel) -> None:
+        """Custom receipt_verifier callback overrides structural-only check."""
+        seen: list[str] = []
+
+        def verify(receipt: str) -> bool:
+            seen.append(receipt)
+            return receipt.startswith("sig:")
+
+        gate = MutationGate(
+            kernel=tmp_kernel,
+            receipt_verifier=verify,
+        )
+        with patch.object(tmp_kernel, "exercise_authority") as mock_exercise:
+            mock_exercise.return_value = AuthorityCheck(
+                permitted=True,
+                reason="Within scope",
+            )
+            blocked = gate.check(
+                MutationRequest(
+                    mutation_type="archive_repo",
+                    agent_id="devin",
+                    role_id="primary_agent",
+                    target="hummbl-governance",
+                    operator_decision_receipt="bus:2026-08-31T23:00:00Z",
+                )
+            )
+            allowed = gate.check(
+                MutationRequest(
+                    mutation_type="archive_repo",
+                    agent_id="devin",
+                    role_id="primary_agent",
+                    target="hummbl-governance",
+                    operator_decision_receipt="sig:ed25519-valid-token",
+                )
+            )
+
+        assert blocked.permitted is False
+        assert allowed.permitted is True
+        assert seen == ["bus:2026-08-31T23:00:00Z", "sig:ed25519-valid-token"]

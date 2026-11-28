@@ -43,7 +43,7 @@ from enum import Enum, auto
 from typing import Any, Dict, List, Optional
 
 from hummbl_governance.statistical_framework import (
-    bootstrap_confidence_interval,
+    bootstrap_ci,
     calculate_effect_size,
     ks_test,
     population_stability_index,
@@ -120,6 +120,7 @@ class _BenchmarkMetrics:
     errors: int = 0
     start_time: float = 0.0
     setup_start: float = 0.0
+    setup_end: float = 0.0
     teardown_start: float = 0.0
 
 
@@ -144,7 +145,7 @@ class BaseBenchmark(ABC):
         self._config = config or BenchmarkConfig()
         self._state = BenchmarkState.INIT
         self._metrics = _BenchmarkMetrics()
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
     # -- Properties ----------------------------------------------------------
 
@@ -171,6 +172,7 @@ class BaseBenchmark(ABC):
             try:
                 self.validate_config()
                 self.on_setup()
+                self._metrics.setup_end = time.monotonic()
                 self._state = BenchmarkState.SETUP
                 logger.info("Benchmark %s setup complete", self.name)
             except Exception as exc:
@@ -238,7 +240,7 @@ class BaseBenchmark(ABC):
 
                 # Calculate total duration
                 total_duration = time.monotonic() - self._metrics.start_time
-                setup_duration = self._metrics.setup_start - self._metrics.setup_start
+                setup_duration = max(0.0, self._metrics.setup_end - self._metrics.setup_start)
                 teardown_duration = time.monotonic() - self._metrics.teardown_start
 
                 # Build result with statistical analysis
@@ -343,12 +345,12 @@ class BaseBenchmark(ABC):
         ci = None
         if len(values) >= 2:
             try:
-                ci = bootstrap_confidence_interval(
+                uq = bootstrap_ci(
                     values=values,
                     confidence_level=self._config.confidence_level,
                     n_bootstrap=self._config.bootstrap_samples,
-                    random_seed=self._config.random_seed,
                 )
+                ci = uq.to_dict()
             except Exception as exc:
                 logger.warning("Bootstrap CI failed for %s: %s", name, exc)
 

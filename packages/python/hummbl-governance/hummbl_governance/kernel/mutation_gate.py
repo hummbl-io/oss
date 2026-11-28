@@ -42,16 +42,11 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import auto
 from typing import Any, Callable, TypeVar
 
 from hummbl_governance.kernel.authority_engine import AuthorityCheck
 
 T = TypeVar("T")
-
-
-class MutationRisk(auto):
-    """Risk classification for mutations."""
 
 
 class MutationLevel:
@@ -136,15 +131,23 @@ class MutationGate:
         # proceed with mutation
     """
 
-    def __init__(self, kernel: Any) -> None:
+    def __init__(
+        self,
+        kernel: Any,
+        *,
+        receipt_verifier: Callable[[str], bool] | None = None,
+    ) -> None:
         """Initialize the gate with a Kernel instance.
 
         Args:
             kernel: A booted Kernel instance with authority and receipt engines.
+            receipt_verifier: Optional callable(receipt_id) -> bool for external
+                receipt verification (e.g. against the coordination bus).
         """
         self.kernel = kernel
         self.authority = kernel.authority
         self.gate_log = kernel.state_dir / "mutation_gate.jsonl"
+        self._receipt_verifier = receipt_verifier
 
     def classify(self, mutation_type: str) -> str:
         """Classify a mutation type by risk level.
@@ -307,23 +310,20 @@ class MutationGate:
         return mutation_type
 
     def _verify_decision_receipt(self, receipt_id: str) -> bool:
-        """Verify that a DECISION receipt exists.
+        """Verify that a DECISION receipt is structurally valid (and externally verified if wired).
 
-        In production, this checks the coordination bus for a DECISION message
-        with the given receipt ID. For now, we check that the ID is non-empty
-        and follows the expected format.
-
-        Args:
-            receipt_id: The bus receipt ID to verify.
-
-        Returns:
-            True if the receipt appears valid.
+        If a ``receipt_verifier`` callback was supplied to ``MutationGate``, it
+        is authoritative. Otherwise falls back to strict format checks (no
+        whitespace-only/embedded-whitespace tokens, stripped length >= 8).
         """
-        if not receipt_id or not receipt_id.strip():
+        if not isinstance(receipt_id, str):
             return False
-        # Accept bus: prefix or any non-empty string >= 8 chars
-        # Full implementation would query the bus bridge
-        return len(receipt_id) >= 8
+        stripped = receipt_id.strip()
+        if len(stripped) < 8 or any(ch.isspace() for ch in stripped):
+            return False
+        if self._receipt_verifier is not None:
+            return bool(self._receipt_verifier(stripped))
+        return True
 
     def _log(self, request: MutationRequest, result: GateResult) -> None:
         """Log a gate decision to the append-only log."""
