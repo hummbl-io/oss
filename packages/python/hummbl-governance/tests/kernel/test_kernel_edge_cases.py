@@ -126,7 +126,8 @@ class TestEdgeCaseEvidence:
     def test_single_char_claim(self) -> None:
         engine = EvidenceEngine()
         grade = engine.grade(claim="x", sources=[], methodology="")
-        assert grade.relevance == "B"
+        assert grade.relevance == "C"
+        assert grade.is_acceptable() is False
 
     def test_huge_sources_list(self) -> None:
         engine = EvidenceEngine()
