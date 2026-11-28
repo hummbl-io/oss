@@ -26,6 +26,29 @@ logger = logging.getLogger(__name__)
 # Approximate tokens per character (conservative estimate for English)
 _CHARS_PER_TOKEN = 4
 
+# Agent memory stores searched by the memory_md pool: (runtime, path relative to
+# the home directory, glob). hummbl-io/agents memory/pointer-manifest.yaml lists
+# every runtime store. Only stores of agent-written notes are indexed here: pi's
+# notes are ~/.pi/agent/memories (the rest of ~/.pi/agent is package docs and
+# skills), codex's curated notes are ~/.codex/MEMORY.md (its memories_1.sqlite
+# was empty on Anvil, 2026-11-26), and agy has no curated store to index (its
+# brain holds raw transcript chunks; knowledge/ held only lock files). grok's
+# memory-v2 is read only at its
+# curated layer (MEMORY.md and topics/ per scope); observations/_inbox and the
+# archive/batch_dream_* folders are raw, high-volume intermediates (about 2,000
+# files on Anvil, 2026-11-26) that drowned the pool and made it ~20 s slow.
+MEMORY_MD_STORES: tuple[tuple[str, str, str], ...] = (
+    ("claude-code", ".claude/projects", "**/memory/*.md"),
+    ("devin", ".devin/memories", "*.md"),
+    ("grok", ".grok/memory-v2/global", "*.md"),
+    ("grok", ".grok/memory-v2/global/topics", "*.md"),
+    ("grok", ".grok/memory-v2/workspaces", "*/*.md"),
+    ("grok", ".grok/memory-v2/workspaces", "*/topics/*.md"),
+    ("grok", ".grok/memory", "*.md"),
+    ("pi", ".pi/agent/memories", "**/*.md"),
+    ("codex", ".codex", "MEMORY.md"),
+)
+
 # The bus pool is a bounded view of cached evidence, never a live bus query.
 _BUS_CACHE_MAX_BYTES = 1024 * 1024
 _BUS_CACHE_MAX_LINES = 200
@@ -1073,19 +1096,34 @@ class OpenBrainRetriever:
         *,
         limit: int = 3,
     ) -> list[MemoryResult]:
-        """Search Claude Code MEMORY.md files."""
-        memory_dir = Path.home() / ".claude" / "projects"
-        if not memory_dir.exists():
-            return []
+        """Search agent memory notes from every runtime store in MEMORY_MD_STORES.
 
+        Until 2026-11-26 this read only Claude Code memory, so a lesson or owner
+        decision another runtime recorded was invisible to every other agent.
+        Claude Code entry ids keep their original ``memory:<name>`` form; other
+        runtimes use ``memory:<runtime>:<name>``, and every result carries
+        ``metadata["runtime"]``.
+        """
         query_tokens = set(tokenize(query))
         if not query_tokens:
             return []
 
-        results = []
-        # Search memory files in project memory directories
-        try:
-            for memory_file in memory_dir.rglob("memory/*.md"):
+        home = Path.home()
+        # Score every file, but build snippets only for the results returned:
+        # with ~850 notes across runtimes, snippets for every hit cost more than
+        # reading the files.
+        scored: list[tuple[float, str, Path, str]] = []
+        for runtime, rel_root, pattern in MEMORY_MD_STORES:
+            root = home / rel_root
+            if not root.is_dir():
+                continue
+            try:
+                files = sorted(root.glob(pattern))
+            except OSError:
+                continue
+            for memory_file in files:
+                if not memory_file.is_file():
+                    continue
                 try:
                     text = memory_file.read_text(encoding="utf-8", errors="replace")
                 except OSError:
@@ -1095,24 +1133,23 @@ class OpenBrainRetriever:
                 overlap = query_tokens & file_tokens
                 if not overlap:
                     continue
+                scored.append((len(overlap) / len(query_tokens) * 0.6, runtime, memory_file, text))
 
-                score = len(overlap) / len(query_tokens) * 0.6
-                snippet = _extract_snippet(text, query_tokens, max_chars=300)
-
-                results.append(
-                    MemoryResult(
-                        source="memory_md",
-                        entry_id=f"memory:{memory_file.name}",
-                        score=score,
-                        content=snippet,
-                        metadata={"file": str(memory_file)},
-                    )
+        scored.sort(key=lambda item: item[0], reverse=True)
+        results = []
+        for score, runtime, memory_file, text in scored[:limit]:
+            entry_id = (f"memory:{memory_file.name}" if runtime == "claude-code"
+                        else f"memory:{runtime}:{memory_file.name}")
+            results.append(
+                MemoryResult(
+                    source="memory_md",
+                    entry_id=entry_id,
+                    score=score,
+                    content=_extract_snippet(text, query_tokens, max_chars=300),
+                    metadata={"file": str(memory_file), "runtime": runtime},
                 )
-        except OSError:
-            pass
-
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:limit]
+            )
+        return results
 
     def _load_bibliography_entries(self) -> list[dict[str, Any]]:
         """Load bibliography entries with cached in-memory representation."""

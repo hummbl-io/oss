@@ -552,6 +552,59 @@ class TestSearchMemoryMd:
         assert len(results) == 1
         assert results[0].score == pytest.approx(0.6, abs=0.1)
 
+    def test_other_runtime_stores_are_searched(self, tmp_path):
+        """devin and grok notes are found and tagged; claude ids keep their form."""
+        claude = tmp_path / ".claude" / "projects" / "proj" / "memory"
+        claude.mkdir(parents=True)
+        (claude / "c.md").write_text("archived surface scavenge")
+        devin = tmp_path / ".devin" / "memories"
+        devin.mkdir(parents=True)
+        (devin / "d.md").write_text("archived surface scavenge only")
+        grok = tmp_path / ".grok" / "memory-v2" / "workspaces" / "w"
+        grok.mkdir(parents=True)
+        (grok / "g.md").write_text("archived surface noted")
+
+        r = OpenBrainRetriever(state_dir=tmp_path, index=MagicMock())
+        with patch.object(Path, "home", return_value=tmp_path):
+            results = r._search_memory_md("archived surface", limit=10)
+        by_runtime = {res.metadata["runtime"]: res.entry_id for res in results}
+        assert by_runtime == {
+            "claude-code": "memory:c.md",
+            "devin": "memory:devin:d.md",
+            "grok": "memory:grok:g.md",
+        }
+
+    def test_grok_raw_observations_and_archive_are_not_indexed(self, tmp_path):
+        ws = tmp_path / ".grok" / "memory-v2" / "workspaces" / "w"
+        for sub in ("observations/_inbox", "archive/batch_dream_1", "topics"):
+            (ws / sub).mkdir(parents=True)
+            (ws / sub / "n.md").write_text("archived surface")
+        r = OpenBrainRetriever(state_dir=tmp_path, index=MagicMock())
+        with patch.object(Path, "home", return_value=tmp_path):
+            files = {res.metadata["file"] for res in r._search_memory_md("archived surface", limit=10)}
+        assert files == {str(ws / "topics" / "n.md")}
+
+    def test_pi_memories_and_codex_memory_md_are_searched(self, tmp_path):
+        pi = tmp_path / ".pi" / "agent" / "memories"
+        pi.mkdir(parents=True)
+        (pi / "p.md").write_text("archived surface lesson")
+        codex = tmp_path / ".codex"
+        codex.mkdir()
+        (codex / "MEMORY.md").write_text("archived surface note")
+        (codex / "other.md").write_text("archived surface ignored")
+        r = OpenBrainRetriever(state_dir=tmp_path, index=MagicMock())
+        with patch.object(Path, "home", return_value=tmp_path):
+            ids = {res.entry_id for res in r._search_memory_md("archived surface", limit=10)}
+        assert ids == {"memory:pi:p.md", "memory:codex:MEMORY.md"}
+
+    def test_pi_package_docs_are_not_indexed(self, tmp_path):
+        docs = tmp_path / ".pi" / "agent" / "install" / "docs"
+        docs.mkdir(parents=True)
+        (docs / "readme.md").write_text("archived surface")
+        r = OpenBrainRetriever(state_dir=tmp_path, index=MagicMock())
+        with patch.object(Path, "home", return_value=tmp_path):
+            assert r._search_memory_md("archived surface", limit=10) == []
+
 
 # ---------------------------------------------------------------------------
 # OpenBrainRetriever._search_bibliography
