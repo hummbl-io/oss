@@ -10,7 +10,7 @@
 
 ## What is IDP?
 
-The **Intelligent Delegation Profile (IDP)** is a specification and reference implementation for safe, verifiable delegation between autonomous AI agents. It treats the LLM as a non-privileged user-space process and enforces governance at the **kernel level** — before any tool call, file write, or inter-agent message is executed.
+The **Intelligent Delegation Profile (IDP)** is a specification and Python library reference implementation for verifiable delegation between autonomous AI agents. It models the LLM as a non-privileged user-space process and provides deterministic token, delegation-context, and audit-log primitives that host gateways can invoke before executing tool calls, file writes, or inter-agent messages.
 
 IDP is the missing "authorization layer" between:
 - **MCP** (agent → tool interface)
@@ -147,7 +147,7 @@ IDP enforces six invariants derived from production multi-agent operations:
 | **Replan after failure** | Explicit human approval required | Auto-retry loops |
 | **Audit** | Append-only JSONL with hash chaining | Ephemeral logs or none |
 | **Dependencies** | **Zero third-party runtime dependencies** | Often depends on crypto libs, DBs |
-| **Side-effect interception** | Deterministic policy at sink boundaries | Prompt-level filtering (bypassable) |
+| **Side-effect interception** | Deterministic policy primitives for sink-boundary integration | Prompt-level filtering (bypassable) |
 
 ---
 
@@ -171,7 +171,12 @@ pip install "idp-spec[governance]"
 
 ## Feature Flag
 
-The IDP helpers default to `ENABLE_IDP=true` when the variable is unset. Setting it to `false` (or an unrecognized value) **fails closed**: token creation, token validation, least-privilege checks, and the `delegation_context` lifecycle methods (`transition`, `can_subdelegate`, `create_child`) all reject. It is not an authorization bypass:
+The IDP helpers default to `ENABLE_IDP=true` when the variable is unset. Setting it to `false` (or any unrecognized value) **fails closed** across all three core modules — token creation/validation/least-privilege checks (`delegation_token`), lifecycle methods (`delegation_context`), and audit log writes (`GovernanceBus.append()` returns `(False, IDP_E_AUDIT_INCOMPLETE)` without writing). There is no silent authorization or audit bypass:
+
+| `ENABLE_IDP` value | `delegation_token` | `delegation_context` | `GovernanceBus.append()` |
+|---|---|---|---|
+| unset / `"true"` (case-insensitive) | Enabled (normal validation) | Enabled (normal transitions) | Enabled (scrubs & writes entry) |
+| `"false"` / empty / unrecognized | Fails closed (`RuntimeError` on create; `False` on validate/check) | Lifecycle methods (`transition`, `can_subdelegate`, `create_child`) fail closed (`IDP_E_DISABLED`); root creation (`create_root`, `create_root_context`) is not gated | Fails closed (`(False, IDP_E_AUDIT_INCOMPLETE)`, nothing written) |
 
 ```bash
 # IDP helpers enabled by default
@@ -190,7 +195,7 @@ These settings describe the IDP token library. They do **not** establish that ev
 | Component | Status |
 |---|---|
 | DCT (DelegationCapabilityToken) | Production — HMAC-SHA256, expiry, scope binding |
-| Governance Bus | Production — append-only JSONL, daily rotation, 90-day retention |
+| Governance Bus | Production — append-only JSONL, daily rotation, 180-day default retention |
 | Delegation Context | Production — 7-state state machine, depth bounds, replan limits |
 | Lateral Authority (bus-level) | Phase 1 logging complete, Phase 2 enforcement in development |
 | Taint Propagation | Experimental — feature-flagged, instruction-level tracking |

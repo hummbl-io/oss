@@ -31,14 +31,14 @@ logger = logging.getLogger(__name__)
 def _is_idp_enabled() -> bool:
     """Check if IDP feature flag is enabled (runtime check).
 
-    ASI07: Changed from fail-open to fail-closed.
-    IDP is now mandatory - tokens always validated.
-    Set ENABLE_IDP=false ONLY for emergency bypass (logs warning).
+    Defaults to enabled when ENABLE_IDP is unset. Any value other than "true"
+    (case-insensitive) disables IDP and causes token creation, validation, and
+    least-privilege checks to fail closed.
     """
     enabled = os.environ.get("ENABLE_IDP", "true").lower() == "true"
     if not enabled:
         logger.warning(
-            "ENABLE_IDP=false: IDP token validation rejects all tokens (fail-closed)."
+            "ENABLE_IDP is disabled: IDP token validation rejects all tokens (fail-closed)."
         )
     return enabled
 

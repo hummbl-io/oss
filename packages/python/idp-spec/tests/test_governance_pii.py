@@ -138,7 +138,10 @@ def test_disabled_idp_does_not_write_even_without_scrubber(tmp_path, monkeypatch
     monkeypatch.setenv("ENABLE_IDP", "false")
     monkeypatch.setattr(governance_bus, "_scrub_pii", None)
     with governance_bus.GovernanceBus(tmp_path) as bus:
-        assert append(bus, {"email": "alice@example.com"}) == (True, None)
+        assert append(bus, {"email": "alice@example.com"}) == (
+            False,
+            governance_bus.IDP_E_AUDIT_INCOMPLETE,
+        )
         assert not list(tmp_path.glob("*.jsonl"))
         assert not bus._buffer
 

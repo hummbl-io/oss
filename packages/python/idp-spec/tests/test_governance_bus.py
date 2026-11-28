@@ -17,6 +17,7 @@ from unittest.mock import patch
 from idp_spec.governance_bus import (
     DEFAULT_RETENTION_DAYS,
     IDP_E_AMENDMENT_TARGET_MISSING,
+    IDP_E_AUDIT_INCOMPLETE,
     IDP_E_EVIDENCE_REQUIRED,
     IDP_E_VERIFICATION_REF_INVALID,
     GovernanceBus,
@@ -247,19 +248,21 @@ class TestGovernanceBusAppend:
             assert error is None
 
     def test_append_when_disabled(self, tmp_path: Path):
-        """Should silently succeed when IDP disabled."""
-        with patch.dict(os.environ, {"ENABLE_IDP": "false"}):
-            bus = GovernanceBus(base_dir=tmp_path / "gov")
+        """Should fail closed with IDP_E_AUDIT_INCOMPLETE and write nothing when IDP disabled."""
+        for bad_val in ("false", "", "maybe"):
+            with patch.dict(os.environ, {"ENABLE_IDP": bad_val}):
+                bus = GovernanceBus(base_dir=tmp_path / f"gov-{bad_val or 'empty'}")
 
-            success, error = bus.append(
-                intent_id="intent-123",
-                task_id="task-456",
-                tuple_type="DCT",
-                tuple_data={"test": "data"},
-            )
+                success, error = bus.append(
+                    intent_id="intent-123",
+                    task_id="task-456",
+                    tuple_type="DCT",
+                    tuple_data={"test": "data"},
+                )
 
-            assert success is True
-            assert error is None
+                assert success is False
+                assert error == IDP_E_AUDIT_INCOMPLETE
+                assert not list(bus._base_dir.glob("*.jsonl"))
 
     def test_append_creates_file(self, tmp_path: Path):
         """Should create log file with entry."""

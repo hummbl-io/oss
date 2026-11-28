@@ -96,15 +96,15 @@ def prepare_audit_tuple_data(tuple_data: dict[str, Any]) -> dict[str, Any]:
 def _is_idp_enabled() -> bool:
     """Check if IDP feature flag is enabled (runtime check).
 
-    ASI07: Changed from fail-open to fail-closed.
-    Governance audit is now mandatory.
-    Set ENABLE_IDP=false ONLY for emergency bypass (logs warning).
+    Defaults to enabled when ENABLE_IDP is unset. Any value other than "true"
+    (case-insensitive) disables IDP and causes GovernanceBus.append() to fail
+    closed with IDP_E_AUDIT_INCOMPLETE without writing an entry.
     """
     enabled = os.environ.get("ENABLE_IDP", "true").lower() == "true"
     if not enabled:
         logger.warning(
-            "ENABLE_IDP=false: Governance audit BYPASSED. "
-            "This is an emergency-only setting and creates compliance risk."
+            "ENABLE_IDP is disabled: GovernanceBus.append() fails closed "
+            "(IDP_E_AUDIT_INCOMPLETE)."
         )
     return enabled
 
@@ -350,11 +350,10 @@ class GovernanceBus:
                 written or added to the async buffer for the rejected entry.
         """
         if not _is_idp_enabled():
-            # ASI07: Even when IDP disabled, log attempt (but allow)
             logger.warning(
-                "Governance append while IDP disabled - entry not audited"
+                "Governance append rejected while IDP is disabled (fail-closed)."
             )
-            return True, None
+            return False, IDP_E_AUDIT_INCOMPLETE
 
         if auto_sign and signature is not None:
             raise ValueError("auto_sign and a caller signature are mutually exclusive")
