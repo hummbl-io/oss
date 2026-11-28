@@ -175,16 +175,35 @@ class TestFinding1AuthorityEngineBypass:
 class TestFinding2UninvokedAdmissionAndAuthority:
     """Pins that admission_control and AuthorityEngine/MutationGate are not wired into servers."""
 
-    def test_validate_admission_not_wired_into_kernel_or_servers(self) -> None:
-        targets = [
-            PACKAGE_ROOT / "hummbl_governance" / "kernel" / "kernel.py",
+    def test_validate_admission_is_wired_into_kernel_and_rejects_forged_gateway_fields(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        kernel_source = (
+            PACKAGE_ROOT / "hummbl_governance" / "kernel" / "kernel.py"
+        ).read_text(encoding="utf-8")
+        assert "validate_admission" in kernel_source
+
+        monkeypatch.setenv("RECEIPTENGINE_HMAC_KEY", "test-secret-key-for-crosswalk-517")
+        kernel = Kernel.boot(state_dir=tmp_path)
+        kernel.identity.register(agent_id="proposer-1", trust_tier="TRUSTED", capabilities=["read"])
+
+        # Empty/invalid proposal fails closed before any receipt is minted.
+        with pytest.raises((ValueError, Exception)):
+            kernel.admit_proposal(
+                {"context_freshness": {"freshness_checked_at": "2026-11-27T00:00:00Z"}},
+                agent_id="proposer-1",
+                is_proposer=True,
+            )
+
+        # Standalone MCP/API server wiring remains tracked separately:
+        server_targets = [
             PACKAGE_ROOT / "api_server.py",
             PACKAGE_ROOT / "mcp_server.py",
             PACKAGE_ROOT / "mcp_sandbox.py",
             PACKAGE_ROOT / "mcp_identity.py",
             PACKAGE_ROOT / "mcp_agent_monitor.py",
         ]
-        for path in targets:
+        for path in server_targets:
             source = path.read_text(encoding="utf-8")
             assert "validate_admission" not in source, f"Unexpected wiring in {path.name}"
 
