@@ -1,0 +1,44 @@
+name: Stale PR sweeper
+
+# Labels pull requests with no activity for 21 days, then closes them 7 days
+# later unless someone comments, pushes, or adds an exempt label. Issues are
+# left alone. Closing a PR does not delete its branch; the remote branch
+# sweep in hummbl-io/agents handles that separately.
+
+"on":
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  stale:
+    name: stale
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
+        with:
+          days-before-issue-stale: -1
+          days-before-issue-close: -1
+          days-before-pr-stale: 21
+          days-before-pr-close: 7
+          stale-pr-label: stale
+          exempt-pr-labels: keep,pinned,security
+          exempt-draft-pr: false
+          remove-pr-stale-when-updated: true
+          operations-per-run: 60
+          stale-pr-message: >
+            This pull request has had no activity for 21 days. It will close in
+            7 days unless it is updated or labelled `keep`.
+          close-pr-message: >
+            Closed after 28 days without activity. Reopen it, or push to the
+            branch and open a new PR, to resume.
