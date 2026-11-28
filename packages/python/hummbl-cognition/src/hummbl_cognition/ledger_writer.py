@@ -548,6 +548,7 @@ def post_entry(
     *,
     ledger_path: str | Path | None = None,
     secret: bytes | None = None,
+    deduplicate: bool | None = None,
 ) -> LedgerEntry:
     """Append a ledger entry to the JSONL file under exclusive lock.
 
@@ -559,6 +560,11 @@ def post_entry(
         Override ledger file path. Defaults to auto-resolve.
     secret : bytes | None
         HMAC-SHA256 key for signing. Falls back to BUS_SIGNING_SECRET env.
+    deduplicate : bool | None
+        When True (or when ``CLP_DEDUPLICATE_CONTENT_HASH=1`` and ``deduplicate``
+        is None), checks existing ledger rows for a matching ``content_hash``
+        under the exclusive write lock and returns the existing entry without
+        appending a duplicate row.
 
     Returns:
     -------
@@ -574,6 +580,12 @@ def post_entry(
     """
     path = _resolve_ledger_path(ledger_path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if deduplicate is None:
+        deduplicate = os.environ.get("CLP_DEDUPLICATE_CONTENT_HASH", "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
 
     # Scan content for injection, credentials, exfiltration, invisible chars.
     # This runs BEFORE hash verification to reject poisoned content early.
@@ -617,6 +629,32 @@ def post_entry(
                 f.seek(0, 2)
                 file_size = f.tell()
                 is_new_file = file_size == 0
+
+                if deduplicate and not is_new_file:
+                    f.seek(0)
+                    for raw_line in f:
+                        raw_line = raw_line.strip()
+                        if not raw_line:
+                            continue
+                        try:
+                            existing_data = json.loads(raw_line)
+                        except json.JSONDecodeError:
+                            continue
+                        if (
+                            isinstance(existing_data, dict)
+                            and existing_data.get("content_hash") == entry.content_hash
+                        ):
+                            try:
+                                existing_entry = LedgerEntry.from_dict(existing_data)
+                                logger.info(
+                                    "Skipping duplicate ledger content_hash=%s (existing id=%s)",
+                                    entry.content_hash[:12],
+                                    existing_entry.id,
+                                )
+                                return existing_entry
+                            except (KeyError, ValueError):
+                                continue
+                    f.seek(0, 2)
 
                 # CLP v1.1 hash-chaining: compute or verify previous_hash from preceding line
                 if not is_new_file:

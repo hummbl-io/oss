@@ -121,6 +121,37 @@ class TestPostEntry:
         with pytest.raises(Exception):
             post_entry(entry, ledger_path=tmp_ledger_path)
 
+    def test_post_deduplicate_skips_identical_content_hash(
+        self, tmp_ledger_path: Path
+    ) -> None:
+        e1 = _make_entry(content="Idempotent watchdog snapshot payload")
+        r1 = post_entry(e1, ledger_path=tmp_ledger_path, deduplicate=True)
+        e2 = _make_entry(content="Idempotent watchdog snapshot payload")
+        r2 = post_entry(e2, ledger_path=tmp_ledger_path, deduplicate=True)
+        assert r2.id == r1.id
+        lines = tmp_ledger_path.read_text(encoding="utf-8").strip().split("\n")
+        assert len(lines) == 1
+
+    def test_hrsi_checkin_quarantines_production_ledger_in_pytest(
+        self, tmp_path: Path
+    ) -> None:
+        from hummbl_cognition.hrsi_checkin import record_cycle
+
+        # When cycles_path is redirected to tmp_path, ledger_path automatically redirects to tmp_path/ledger.jsonl
+        cycle = record_cycle(
+            cogstate="AVAILABLE",
+            safety=4,
+            mattering=4,
+            connection=4,
+            hule="Test observation quarantined from production ledger",
+            baseline_path=tmp_path / "baseline.jsonl",
+            cycles_path=tmp_path / "cycles.jsonl",
+            force=True,
+        )
+        assert (tmp_path / "ledger.jsonl").exists()
+        assert cycle["ledger_id"].startswith("clp-")
+
+
 
 # ---------------------------------------------------------------------------
 # read_entries
