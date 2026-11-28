@@ -149,16 +149,60 @@ class ConvergenceDetector:
         self._actions: dict[str, list[tuple[str, ConvergentGoal | None]]] = defaultdict(list)
         self._lock = threading.Lock()
 
-    def classify(self, action_type: str) -> ConvergentGoal | None:
-        """Classify an action type against convergent goal patterns.
+    # Priority order when multiple convergent signals appear in metadata:
+    # SHUTDOWN_RESISTANCE takes highest precedence.
+    _GOAL_PRIORITY: dict[ConvergentGoal, int] = {
+        ConvergentGoal.SHUTDOWN_RESISTANCE: 5,
+        ConvergentGoal.GOAL_INTEGRITY: 4,
+        ConvergentGoal.SELF_PRESERVATION: 3,
+        ConvergentGoal.COGNITIVE_ENHANCEMENT: 2,
+        ConvergentGoal.RESOURCE_ACQUISITION: 1,
+    }
 
-        Returns the matching ConvergentGoal, or None if the action
-        does not match any convergent pattern.
+    @classmethod
+    def _extract_metadata_tokens(cls, metadata: Any, _depth: int = 0) -> list[str]:
+        """Extract bounded string values and truthy boolean flag keys from metadata."""
+        if metadata is None or _depth > 4:
+            return []
+        tokens: list[str] = []
+        if isinstance(metadata, dict):
+            for k, v in metadata.items():
+                if isinstance(v, bool):
+                    if v and isinstance(k, str):
+                        tokens.append(k.lower())
+                elif isinstance(v, str):
+                    tokens.append(v.lower())
+                elif isinstance(v, (dict, list, tuple)):
+                    tokens.extend(cls._extract_metadata_tokens(v, _depth + 1))
+        elif isinstance(metadata, (list, tuple)):
+            for item in metadata[:32]:
+                tokens.extend(cls._extract_metadata_tokens(item, _depth + 1))
+        elif isinstance(metadata, str):
+            tokens.append(metadata.lower())
+        return tokens
+
+    def classify(
+        self,
+        action_type: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> ConvergentGoal | None:
+        """Classify an action type and optional metadata against convergent goal patterns.
+
+        Returns the highest-priority matching ConvergentGoal, or None if neither
+        action_type nor metadata matches any convergent pattern.
         """
         action_lower = action_type.lower()
         for pattern, goal in self._rules:
             if pattern in action_lower:
                 return goal
+        if metadata:
+            matched: list[ConvergentGoal] = []
+            for token in self._extract_metadata_tokens(metadata):
+                for pattern, goal in self._rules:
+                    if pattern in token:
+                        matched.append(goal)
+            if matched:
+                return max(matched, key=lambda g: self._GOAL_PRIORITY.get(g, 0))
         return None
 
     def record(
@@ -167,18 +211,18 @@ class ConvergenceDetector:
         action_type: str,
         metadata: dict[str, Any] | None = None,
     ) -> ConvergentGoal | None:
-        """Record an agent action and classify it.
+        """Record an agent action and classify it (inspecting both action_type and metadata).
 
         Args:
             agent_id: The agent performing the action.
             action_type: Type/name of the action.
-            metadata: Additional context (not used for classification,
-                stored for audit purposes).
+            metadata: Additional context inspected for convergent signals
+                (e.g., renamed actions carrying malicious behavior in metadata).
 
         Returns:
-            The ConvergentGoal if the action matched a pattern, else None.
+            The ConvergentGoal if the action or metadata matched a pattern, else None.
         """
-        goal = self.classify(action_type)
+        goal = self.classify(action_type, metadata=metadata)
         with self._lock:
             history = self._actions[agent_id]
             history.append((action_type, goal))
