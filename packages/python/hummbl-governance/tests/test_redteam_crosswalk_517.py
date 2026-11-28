@@ -55,7 +55,7 @@ PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 class TestFinding1AuthorityEngineBypass:
     """Pins remaining structured-limit and legacy-charter bypasses in AuthorityEngine."""
 
-    def test_structured_limit_without_class_keyword_is_ignored(self, tmp_path: Path) -> None:
+    def test_structured_numeric_limit_without_class_keyword_is_enforced(self, tmp_path: Path) -> None:
         policy = {
             "mutation_classes": {
                 "MEDIUM": {"examples": ["file_write"]},
@@ -76,16 +76,23 @@ class TestFinding1AuthorityEngineBypass:
         policy_path.write_text(json.dumps(policy), encoding="utf-8")
 
         engine = AuthorityEngine(state_dir=tmp_path, policy_path=policy_path)
-        result = engine.check(
+        denied = engine.check(
             agent_id="worker-1",
             role_id="worker",
             authority="file_write",
             context={"requests_per_minute": 99999},
         )
-        # Neither limit mentions "medium", so _check_structured_limit skips both.
-        assert result.permitted is True
+        assert denied.permitted is False
 
-    def test_structured_limit_accepts_unverified_truthy_receipt_string(self, tmp_path: Path) -> None:
+        allowed = engine.check(
+            agent_id="worker-1",
+            role_id="worker",
+            authority="file_write",
+            context={"requests_per_minute": 50},
+        )
+        assert allowed.permitted is True
+
+    def test_structured_limit_enforces_arbitrary_named_prerequisites(self, tmp_path: Path) -> None:
         policy = {
             "mutation_classes": {
                 "HIGH": {"examples": ["archive_repo"]},
@@ -106,7 +113,6 @@ class TestFinding1AuthorityEngineBypass:
         policy_path.write_text(json.dumps(policy), encoding="utf-8")
 
         engine = AuthorityEngine(state_dir=tmp_path, policy_path=policy_path)
-        # Missing receipt is blocked:
         denied = engine.check(
             agent_id="lead-1",
             role_id="lead",
@@ -115,17 +121,28 @@ class TestFinding1AuthorityEngineBypass:
         )
         assert denied.permitted is False
 
-        # Any truthy string satisfies operator_decision_receipt, and the
-        # "without security audit signoff" limit is not parsed at all:
-        bypassed = engine.check(
+        # Providing only operator_decision_receipt no longer bypasses security audit signoff:
+        still_denied = engine.check(
             agent_id="lead-1",
             role_id="lead",
             authority="archive_repo",
-            context={"operator_decision_receipt": "unverified-placeholder"},
+            context={"operator_decision_receipt": "DECISION-2026-001"},
         )
-        assert bypassed.permitted is True
+        assert still_denied.permitted is False
 
-    def test_legacy_charter_fallback_bypassed_by_negated_substring(self, tmp_path: Path) -> None:
+        # Both structured prerequisites present -> permitted:
+        allowed = engine.check(
+            agent_id="lead-1",
+            role_id="lead",
+            authority="archive_repo",
+            context={
+                "operator_decision_receipt": "DECISION-2026-001",
+                "security_audit_signoff": True,
+            },
+        )
+        assert allowed.permitted is True
+
+    def test_legacy_charter_fallback_rejects_negated_substring_bypass(self, tmp_path: Path) -> None:
         charters_dir = tmp_path / "charters"
         charters_dir.mkdir()
         (charters_dir / "deployer.md").write_text(
@@ -136,15 +153,25 @@ class TestFinding1AuthorityEngineBypass:
         missing_policy = tmp_path / "does_not_exist.json"
         engine = AuthorityEngine(state_dir=tmp_path, policy_path=missing_policy)
 
-        # Negated substring in an unrelated field satisfies `required in str(context)`.
-        result = engine.check(
+        # Negated substring in an unrelated field is now rejected:
+        denied = engine.check(
             agent_id="deployer-1",
             role_id="deployer",
             authority="deploy_prod",
             context={"note": "no approval needed"},
             role_charters_dir=charters_dir,
         )
-        assert result.permitted is True
+        assert denied.permitted is False
+
+        # Explicit affirmative structured key is permitted:
+        allowed = engine.check(
+            agent_id="deployer-1",
+            role_id="deployer",
+            authority="deploy_prod",
+            context={"approval": True},
+            role_charters_dir=charters_dir,
+        )
+        assert allowed.permitted is True
 
     def test_mutation_gate_decision_receipt_verification_is_length_only(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
