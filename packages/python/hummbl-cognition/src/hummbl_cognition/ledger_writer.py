@@ -397,7 +397,21 @@ def _resolve_ledger_path(override: str | Path | None = None) -> Path:
     if env_path:
         return Path(env_path)
 
+    _resolve_ledger_path_warn_once()
     return DEFAULT_LEDGER_PATH
+
+
+_WARNED_DEFAULT_LEDGER = False
+
+
+def _resolve_ledger_path_warn_once() -> None:
+    global _WARNED_DEFAULT_LEDGER
+    if not _WARNED_DEFAULT_LEDGER:
+        _WARNED_DEFAULT_LEDGER = True
+        logger.warning(
+            "COGNITION_LEDGER unset and no override supplied; falling back to package-relative DEFAULT_LEDGER_PATH=%s",
+            DEFAULT_LEDGER_PATH,
+        )
 
 
 def _resolve_signing_secret() -> bytes | None:
