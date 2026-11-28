@@ -46,6 +46,7 @@ Environment variables:
 import json
 import os
 import sys
+import tempfile
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
@@ -66,7 +67,7 @@ from hummbl_governance import (
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-STATE_DIR = os.environ.get("GOVERNANCE_STATE_DIR", "/tmp/governance")
+STATE_DIR = os.environ.get("GOVERNANCE_STATE_DIR", os.path.join(tempfile.gettempdir(), "governance"))  # nosec B108
 DB_PATH = os.environ.get("GOVERNANCE_DB_PATH", os.path.join(STATE_DIR, "costs.db"))
 AUDIT_DIR = os.environ.get("GOVERNANCE_AUDIT_DIR", os.path.join(STATE_DIR, "audit"))
 
