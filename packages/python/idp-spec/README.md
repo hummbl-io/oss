@@ -176,7 +176,7 @@ The IDP helpers default to `ENABLE_IDP=true` when the variable is unset. Setting
 | `ENABLE_IDP` value | `delegation_token` | `delegation_context` | `GovernanceBus.append()` |
 |---|---|---|---|
 | unset / `"true"` (case-insensitive) | Enabled (normal validation) | Enabled (normal transitions) | Enabled (scrubs & writes entry) |
-| `"false"` / empty / unrecognized | Fails closed (`RuntimeError` on create; `False` on validate/check) | Fails closed (`IDP_E_DISABLED`) | Fails closed (`(False, IDP_E_AUDIT_INCOMPLETE)`, nothing written) |
+| `"false"` / empty / unrecognized | Fails closed (`RuntimeError` on create; `False` on validate/check) | Lifecycle methods (`transition`, `can_subdelegate`, `create_child`) fail closed (`IDP_E_DISABLED`); root creation (`create_root`, `create_root_context`) is not gated | Fails closed (`(False, IDP_E_AUDIT_INCOMPLETE)`, nothing written) |
 
 ```bash
 # IDP helpers enabled by default
