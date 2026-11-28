@@ -1,0 +1,102 @@
+name: Publish verified MCP server package
+"on":
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-npm-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: >-
+      ${{ github.repository == 'hummbl-io/oss' &&
+          startsWith(github.event.release.tag_name, 'mcp-server/v') &&
+          vars.MCP_RELEASE_RELAY_LOGIN != '' &&
+          github.event.sender.login == vars.MCP_RELEASE_RELAY_LOGIN &&
+          github.event.release.author.login == vars.MCP_RELEASE_RELAY_LOGIN }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      asset_id: ${{ steps.receipt.outputs.asset_id }}
+      sha256: ${{ steps.receipt.outputs.sha256 }}
+      version: ${{ steps.receipt.outputs.version }}
+      dist_tag: ${{ steps.receipt.outputs.dist_tag }}
+    steps:
+      - name: Check the release tag points to reviewed main history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(gh api "repos/hummbl-io/oss/compare/$GITHUB_SHA...main" --jq .status)
+          [[ "$status" == identical || "$status" == ahead ]]
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check the package receipt verifier
+        run: python3 tools/test_verify_mcp_npm_release.py
+      - name: Verify the release receipt and immutable asset ID
+        id: receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ github.event.release.id }}
+          RELAY_LOGIN: ${{ vars.MCP_RELEASE_RELAY_LOGIN }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh api "repos/hummbl-io/oss/releases/$RELEASE_ID" > "$RUNNER_TEMP/receipt.json"
+          jq -e --arg tag "$EVENT_TAG" '.tag_name == $tag' "$RUNNER_TEMP/receipt.json" >/dev/null
+          python3 tools/verify_mcp_npm_release.py release "$RUNNER_TEMP/receipt.json"
+      - name: Verify package identity and bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSET_ID: ${{ steps.receipt.outputs.asset_id }}
+          EXPECTED_SHA256: ${{ steps.receipt.outputs.sha256 }}
+          VERSION: ${{ steps.receipt.outputs.version }}
+        run: |
+          gh api -H 'Accept: application/octet-stream' "repos/hummbl-io/oss/releases/assets/$ASSET_ID" > "$RUNNER_TEMP/npm.tgz"
+          python3 tools/verify_mcp_npm_release.py package "$RUNNER_TEMP/npm.tgz" "$EXPECTED_SHA256" "$VERSION"
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24.x"
+          package-manager-cache: false
+      - name: Fetch the approved asset and recheck its digest
+        working-directory: ${{ runner.temp }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSET_ID: ${{ needs.verify.outputs.asset_id }}
+          EXPECTED_SHA256: ${{ needs.verify.outputs.sha256 }}
+        run: |
+          gh api -H 'Accept: application/octet-stream' "repos/hummbl-io/oss/releases/assets/$ASSET_ID" > npm.tgz
+          printf '%s  npm.tgz\n' "$EXPECTED_SHA256" | sha256sum --check --strict
+      - name: Publish these bytes using npm trusted publishing
+        working-directory: ${{ runner.temp }}
+        env:
+          DIST_TAG: ${{ needs.verify.outputs.dist_tag }}
+          VERSION: ${{ needs.verify.outputs.version }}
+          NPM_CONFIG_GLOBALCONFIG: /dev/null
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/mcp-npmrc
+          # This workflow publishes bytes built in another repository.
+          NPM_CONFIG_PROVENANCE: "false"
+        run: |
+          set -euo pipefail
+          node -e 'const m=/^(\d+)\.(\d+)\.(\d+)$/.exec(process.argv[1]); if (process.versions.node.split(".")[0] !== "24" || !m || +m[1] < 11 || (+m[1] === 11 && (+m[2] < 5 || (+m[2] === 5 && +m[3] < 1)))) process.exit(1)' "$(npm --version)"
+          case "$DIST_TAG" in latest|alpha|beta|next) ;; *) exit 1 ;; esac
+          printf 'registry=https://registry.npmjs.org/\n' > "$NPM_CONFIG_USERCONFIG"
+          integrity="sha512-$(openssl dgst -sha512 -binary npm.tgz | openssl base64 -A)"
+          status=$(curl -sS --max-time 20 -o record.json -w '%{http_code}' "https://registry.npmjs.org/@hummbl%2fmcp-server/$VERSION")
+          case "$status" in
+            200) jq -e --arg sri "$integrity" '.dist.integrity == $sri' record.json >/dev/null ;;
+            404) env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish ./npm.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org --tag "$DIST_TAG" ;;
+            *) echo "Unexpected npm registry status $status" >&2; exit 1 ;;
+          esac
