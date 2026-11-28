@@ -22,11 +22,14 @@ The Kernel loads the Scaling Law Atlas at boot.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ScalingLaw:
@@ -59,14 +62,14 @@ class Violation:
 class LawEngine:
     """Engine for loading scaling laws and evaluating receipts against them."""
 
-    def __init__(self, atlas_dir: Path | None = None) -> None:
+    def __init__(self, atlas_dir: Path | None = None, *, strict: bool = False) -> None:
         if atlas_dir is None:
             # Resolution order:
             # 1. HUMMBL_KERNEL_ATLAS_DIR environment variable
             # 2. Package data directory (bundled with hummbl-governance)
             # 3. Relative path from repo root
             # 4. Home directory (legacy external atlas)
-            # 5. Empty (degraded mode — no laws loaded)
+            # 5. Empty (degraded mode — no laws loaded; flagged in self.degraded)
             env_dir = os.environ.get("HUMMBL_KERNEL_ATLAS_DIR")
             if env_dir:
                 atlas_dir = Path(env_dir)
@@ -86,7 +89,18 @@ class LawEngine:
                     atlas_dir = Path("/dev/null")  # nonexistent → degraded mode
         self.atlas_dir = atlas_dir
         self.laws: dict[str, ScalingLaw] = {}
+        self.degraded: bool = False
+        self.degraded_reason: str | None = None
         self._load_atlas()
+        if not self.laws:
+            self.degraded = True
+            if not self.atlas_dir.exists():
+                self.degraded_reason = f"atlas directory not found: {self.atlas_dir}"
+            else:
+                self.degraded_reason = f"no SL-*.yaml laws loaded from: {self.atlas_dir}"
+            logger.warning("LawEngine degraded (0 laws loaded): %s", self.degraded_reason)
+            if strict:
+                raise RuntimeError(f"LawEngine failed closed: {self.degraded_reason}")
 
     def _load_atlas(self) -> None:
         """Load all scaling law records from the atlas directory."""

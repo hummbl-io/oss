@@ -227,9 +227,10 @@ class Kernel:
         if not self.booted:
             return {"status": "NOT_BOOTED", "healthy": False}
 
+        law_healthy = len(self.law.laws) > 0 and not getattr(self.law, "degraded", False)
         engine_health = {
             "receipt_engine": True,
-            "law_engine": True,  # Engine healthy even if atlas empty (degraded mode)
+            "law_engine": law_healthy,
             "identity_engine": self.identity.registry_file.exists(),
             "sequence_engine": self.sequence.counters_file.exists(),
             "evidence_engine": True,
@@ -238,6 +239,10 @@ class Kernel:
         }
 
         all_healthy = all(engine_health.values())
+        degraded_reasons: list[str] = []
+        if not law_healthy:
+            reason = getattr(self.law, "degraded_reason", None) or "no scaling laws loaded"
+            degraded_reasons.append(f"law_engine: {reason}")
 
         return {
             "status": "HEALTHY" if all_healthy else "DEGRADED",
@@ -246,6 +251,7 @@ class Kernel:
             "boot_receipt_id": self.boot_receipt_id,
             "engines": engine_health,
             "laws_loaded": len(self.law.laws),
+            "degraded_reasons": degraded_reasons,
             "identities_loaded": len(self.identity._identities),
             "schedules_active": len(self.schedule._schedules),
         }
