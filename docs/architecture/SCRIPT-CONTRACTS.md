@@ -155,13 +155,6 @@ the package version at `packages/*/pyproject.toml`.
 | hummbl-mcp-cognitive-ledger | `hummbl-mcp-cognitive-ledger` | `cognitive_ledger_mcp_server:main` |
 | hummbl-mcp-coordination-bus | `hummbl-mcp-coordination-bus` | `coordination_bus_mcp_server:main` |
 | hummbl-mcp-discord | `hummbl-mcp-discord` | `discord_mcp_server:main` |
-| hummbl-mcp-governance | `hummbl-agent-monitor-mcp` | `governance_mcp_agent_monitor:main` |
-| hummbl-mcp-governance | `hummbl-compliance-mcp` | `governance_mcp_compliance:main` |
-| hummbl-mcp-governance | `hummbl-governance-mcp` | `governance_mcp_server:main` |
-| hummbl-mcp-governance | `hummbl-identity-mcp` | `governance_mcp_identity:main` |
-| hummbl-mcp-governance | `hummbl-physical-mcp` | `governance_mcp_physical:main` |
-| hummbl-mcp-governance | `hummbl-reasoning-mcp` | `governance_mcp_reasoning:main` |
-| hummbl-mcp-governance | `hummbl-sandbox-mcp` | `governance_mcp_sandbox:main` |
 | hummbl-mcp-omnichannel | `hummbl-mcp-omnichannel` | `omnichannel_mcp_server:main` |
 | hummbl-mcp-omnichannel | `hummbl-omnichannel-http` | `omnichannel_http_server:main` |
 | hummbl-mcp-omnichannel | `hummbl-omnichannel-sync` | `omnichannel_d1_sync:main` |

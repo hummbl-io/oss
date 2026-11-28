@@ -351,6 +351,16 @@ def check() -> int:
         if not (ROOT / k).exists():
             problems.append(f"override names missing file: {k}")
 
+    # Console script names must be unique across monorepo packages.
+    ep_owners: dict[str, list[str]] = {}
+    for pkg, script_name, _ in entrypoints:
+        ep_owners.setdefault(script_name, []).append(pkg)
+    for script_name, pkgs in sorted(ep_owners.items()):
+        if len(pkgs) > 1:
+            problems.append(
+                f"duplicate console entrypoint '{script_name}' across packages: {', '.join(pkgs)}"
+            )
+
     expected = render(contracts, entrypoints)
     if not DOC.exists():
         problems.append(f"{DOC.relative_to(ROOT)} does not exist — run the generator")

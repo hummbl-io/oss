@@ -36,14 +36,9 @@ PyPI = "https://pypi.org/project/hummbl-mcp-governance/"
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
 
-[project.scripts]
-hummbl-governance-mcp = "governance_mcp_server:main"
-hummbl-compliance-mcp = "governance_mcp_compliance:main"
-hummbl-sandbox-mcp = "governance_mcp_sandbox:main"
-hummbl-identity-mcp = "governance_mcp_identity:main"
-hummbl-agent-monitor-mcp = "governance_mcp_agent_monitor:main"
-hummbl-reasoning-mcp = "governance_mcp_reasoning:main"
-hummbl-physical-mcp = "governance_mcp_physical:main"
+# Console entrypoints (hummbl-governance-mcp, hummbl-compliance-mcp, etc.) are
+# canonically registered by the hummbl-governance dependency so installing
+# hummbl-mcp-governance does not clobber hummbl-governance's binaries.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
