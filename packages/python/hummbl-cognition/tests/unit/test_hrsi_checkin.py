@@ -36,9 +36,9 @@ def tmp_paths(tmp_path: Path):
 
 
 class TestRecordCycle:
-    def test_default_state_dir_is_repository_root_state(self, monkeypatch):
+    def test_default_state_dir_is_canonical_agents_state(self, monkeypatch):
         monkeypatch.delenv("HRSI_COGNITION_DIR", raising=False)
-        expected = Path(__file__).resolve().parents[3] / "_state" / "cognition"
+        expected = Path.home() / ".agents" / "_state" / "cognition"
         assert resolve_cognition_dir() == expected
 
     def test_explicit_cognition_dir_override(self, tmp_path, monkeypatch):

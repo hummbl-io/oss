@@ -70,13 +70,14 @@ _BASE_TAGS = ("hrsi-cycle", "hrsi-gap2")
 def resolve_cognition_dir() -> Path:
     """Resolve the shared HRSI state directory.
 
-    HRSI_COGNITION_DIR is the only supported override. Otherwise state lives
-    at the repository root so skills and CLI processes observe the same files.
+    HRSI_COGNITION_DIR overrides the default. Otherwise state lives under
+    ``~/.agents/_state/cognition`` so installed packages never write a shadow
+    ledger inside ``site-packages`` or ``packages/python/_state/``.
     """
     explicit = os.environ.get("HRSI_COGNITION_DIR", "").strip()
     if explicit:
         return Path(explicit).expanduser().resolve()
-    return Path(__file__).resolve().parents[3] / "_state" / "cognition"
+    return Path.home() / ".agents" / "_state" / "cognition"
 
 
 COGNITION_DIR = resolve_cognition_dir()

@@ -33,7 +33,7 @@ def run_eval_cases(
             results.append(
                 EvalResult(
                     case.name,
-                    not case.expect_blocked,
+                    False,
                     f"raised {type(exc).__name__}: {exc}",
                 )
             )
