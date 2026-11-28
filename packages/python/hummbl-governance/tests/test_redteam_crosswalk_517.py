@@ -344,42 +344,36 @@ class TestFinding6ReceiptHmacAttribution:
 
 
 # ---------------------------------------------------------------------------
-# Finding 7: Cryptographic key transport in OpenSSL command arguments
+# Finding 7: Cryptographic key transport in OpenSSL command arguments (FIXED)
 # ---------------------------------------------------------------------------
 
 
 class TestFinding7OpenSSLKeyTransport:
-    """Pins in-process cryptography path vs OpenSSL -K argv exposure in stdlib fallback."""
+    """Verifies Finding 7 remediation: zero subprocesses / zero argv key transport."""
 
-    def test_openssl_fallback_passes_raw_hex_key_in_process_argv(self) -> None:
+    def test_stdlib_fallback_executes_in_process_without_subprocess(self) -> None:
+        import subprocess
+
         aes_key = bytes(range(32))
         mac_key = bytes(range(32, 64))
         crypto = EnvelopeCryptosystem(aes_key, mac_key)
 
-        captured_argv: list[list[str]] = []
-
-        def fake_popen(args: list[str], **_kwargs: object) -> MagicMock:
-            captured_argv.append(list(args))
-            proc = MagicMock()
-            proc.returncode = 0
-            # Return 16-byte dummy ciphertext block matching AES block size.
-            proc.communicate.return_value = (b"\x10" * 16, b"")
-            return proc
-
         with (
             patch.object(envelope_cryptosystem, "_HAS_CRYPTOGRAPHY", False),
-            patch.object(envelope_cryptosystem.subprocess, "Popen", side_effect=fake_popen),
+            patch.object(
+                subprocess,
+                "Popen",
+                side_effect=AssertionError("subprocess.Popen must never be called in stdlib fallback"),
+            ),
         ):
-            envelope = crypto.encrypt_envelope(b"hello")
-            crypto.decrypt_envelope(envelope)
+            envelope = crypto.encrypt_envelope(b"hello-no-argv-key")
+            plaintext = crypto.decrypt_envelope(envelope)
 
-        assert len(captured_argv) == 2
-        for argv in captured_argv:
-            assert "-K" in argv
-            key_idx = argv.index("-K") + 1
-            assert argv[key_idx] == aes_key.hex()
+        assert plaintext == b"hello-no-argv-key"
 
     def test_cryptography_backend_avoids_subprocess_when_installed(self) -> None:
+        import subprocess
+
         if not envelope_cryptosystem._HAS_CRYPTOGRAPHY:
             pytest.skip("optional cryptography dependency not installed")
 
@@ -388,7 +382,7 @@ class TestFinding7OpenSSLKeyTransport:
         crypto = EnvelopeCryptosystem(aes_key, mac_key)
 
         with patch.object(
-            envelope_cryptosystem.subprocess,
+            subprocess,
             "Popen",
             side_effect=AssertionError("subprocess.Popen must not be called when cryptography is available"),
         ):

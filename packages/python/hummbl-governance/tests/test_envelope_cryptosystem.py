@@ -72,44 +72,83 @@ def test_padding_validation_integrity(monkeypatch) -> None:
     enc_key = secrets.token_bytes(32)
     mac_key = secrets.token_bytes(32)
 
-    # Encrypt some dummy data to form a valid MAC signature envelope FIRST using real Popen
     real_crypto = EnvelopeCryptosystem(enc_key, mac_key)
     envelope = real_crypto.encrypt_envelope(b"dummy")
 
-    # Force the openssl fallback path so subprocess mocking works.
-    # When the cryptography library is available, decrypt_envelope uses
-    # in-process AES and never calls subprocess.Popen.
     import hummbl_governance.envelope_cryptosystem as sc_module
     monkeypatch.setattr(sc_module, "_HAS_CRYPTOGRAPHY", False)
 
-    # We mock subprocess.Popen entirely to return a successful run
-    # but with controlled decrypted output to trigger the manual padding checks.
-    import subprocess
-
-    class MockPopen:
-        def __init__(self, args, stdin=None, stdout=None, stderr=None):
-            self.returncode = 0
-            self.output = b""
-
-        def communicate(self, input=None):
-            return self.output, b""
-
-    mock_proc = MockPopen([])
-    monkeypatch.setattr(subprocess, "Popen", lambda *args, **kwargs: mock_proc)
+    controlled_output = {"data": b""}
+    monkeypatch.setattr(
+        EnvelopeCryptosystem,
+        "_decrypt_stdlib",
+        lambda self, iv, ct: controlled_output["data"],
+    )
 
     crypto = EnvelopeCryptosystem(enc_key, mac_key)
 
     # Test bad padding length (> 16)
-    mock_proc.output = b"A" * 15 + b"\x11"
+    controlled_output["data"] = b"A" * 15 + b"\x11"
     with pytest.raises(ValueError, match="Invalid padding length"):
         crypto.decrypt_envelope(envelope)
 
     # Test bad padding length (< 1)
-    mock_proc.output = b"A" * 16 + b"\x00"
+    controlled_output["data"] = b"A" * 16 + b"\x00"
     with pytest.raises(ValueError, match="Invalid padding length"):
         crypto.decrypt_envelope(envelope)
 
     # Test bad padding sequence
-    mock_proc.output = b"A" * 14 + b"\x03\x02"
+    controlled_output["data"] = b"A" * 14 + b"\x03\x02"
     with pytest.raises(ValueError, match="Invalid padding sequence"):
         crypto.decrypt_envelope(envelope)
+
+
+def test_fips_197_appendix_c3_aes256_vector() -> None:
+    """Verify pure-Python AES-256 block cipher against official NIST FIPS-197 C.3."""
+    from hummbl_governance.envelope_cryptosystem import (
+        _aes256_decrypt_block,
+        _aes256_encrypt_block,
+        _expand_key_256,
+    )
+
+    key = bytes.fromhex(
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    )
+    plaintext = bytes.fromhex("00112233445566778899aabbccddeeff")
+    expected_ct = bytes.fromhex("8ea2b7ca516745bfeafc49904b496089")
+
+    rkeys = _expand_key_256(key)
+    ct = _aes256_encrypt_block(plaintext, rkeys)
+    assert ct == expected_ct
+    assert _aes256_decrypt_block(ct, rkeys) == plaintext
+
+
+def test_stdlib_and_cryptography_backends_are_wire_compatible(monkeypatch) -> None:
+    """Envelopes encrypted by one backend must decrypt cleanly under the other."""
+    import hummbl_governance.envelope_cryptosystem as sc_module
+
+    enc_key = secrets.token_bytes(32)
+    mac_key = secrets.token_bytes(32)
+    payloads = [b"", b"x", b"0123456789abcdef", b"0123456789abcdef0", b"B" * 137]
+
+    # Always verify stdlib round-trip with _HAS_CRYPTOGRAPHY=False.
+    monkeypatch.setattr(sc_module, "_HAS_CRYPTOGRAPHY", False)
+    crypto = EnvelopeCryptosystem(enc_key, mac_key)
+    stdlib_envelopes = [crypto.encrypt_envelope(p) for p in payloads]
+    for p, env in zip(payloads, stdlib_envelopes):
+        assert crypto.decrypt_envelope(env) == p
+
+    # If optional cryptography is installed, verify full bidirectional interop.
+    try:
+        from cryptography.hazmat.primitives.ciphers import Cipher  # noqa: F401
+    except ImportError:
+        return
+
+    monkeypatch.setattr(sc_module, "_HAS_CRYPTOGRAPHY", True)
+    for p, env in zip(payloads, stdlib_envelopes):
+        assert crypto.decrypt_envelope(env) == p
+
+    crypto_envelopes = [crypto.encrypt_envelope(p) for p in payloads]
+    monkeypatch.setattr(sc_module, "_HAS_CRYPTOGRAPHY", False)
+    for p, env in zip(payloads, crypto_envelopes):
+        assert crypto.decrypt_envelope(env) == p
