@@ -307,10 +307,12 @@ class TestFinding5ConvergenceDetectorBypass:
 
 
 class TestFinding6ReceiptHmacAttribution:
-    """Pins K3 ghost-agent rejection vs shared-secret forgery across registered agents."""
+    """Verifies Finding 6 remediation: per-agent key isolation blocks cross-agent forgery."""
 
-    def test_shared_hmac_secret_allows_cross_agent_receipt_forgery(self, tmp_path: Path) -> None:
+    def test_per_agent_keys_prevent_cross_agent_receipt_forgery(self, tmp_path: Path) -> None:
         shared_secret = b"shared-fleet-hmac-secret-32bytes"
+        key_a = b"dedicated-agent-a-secret-32bytes"
+        key_b = b"dedicated-agent-b-secret-32bytes"
         identity = IdentityEngine(tmp_path)
         identity.register(agent_id="agent-a", trust_tier="TRUSTED", capabilities=["read"])
         identity.register(agent_id="agent-b", trust_tier="TRUSTED", capabilities=["read"])
@@ -319,15 +321,21 @@ class TestFinding6ReceiptHmacAttribution:
             state_dir=tmp_path,
             signing_secret=shared_secret,
             identity_engine=identity,
+            agent_keys={"agent-a": key_a, "agent-b": key_b},
+            require_agent_key=True,
         )
 
         # Unregistered ghost agent is rejected by K3 check:
         with pytest.raises(KernelPanic):
             engine.create(agent_id="ghost-agent", action_type="STATUS")
 
-        # Any holder of the shared secret (e.g. agent-b) can forge a valid
-        # receipt attributed to agent-a without any per-agent key:
         legit = engine.create(agent_id="agent-a", action_type="STATUS", payload={"ok": True})
+        assert engine.validate(legit) is True
+
+        # Holder of shared_secret or agent-b's key CANNOT forge a valid receipt for agent-a:
+        import hashlib
+        import hmac as _hmac
+
         forged = Receipt(
             receipt_id="r-forged000001",
             agent_id="agent-a",
@@ -337,10 +345,11 @@ class TestFinding6ReceiptHmacAttribution:
             action_type="APPROVE_DEPLOY",
             payload={"forged_by": "agent-b"},
         )
-        forged.signature = engine._sign(forged)
-
-        assert forged.verify_signature(shared_secret) is True
-        assert engine.validate(forged) is True
+        for bad_key in (shared_secret, key_b):
+            forged.signature = _hmac.new(
+                bad_key, forged.canonical_json().encode("utf-8"), hashlib.sha256
+            ).hexdigest()
+            assert engine.validate(forged) is False
 
 
 # ---------------------------------------------------------------------------
