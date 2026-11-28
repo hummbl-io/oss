@@ -89,6 +89,11 @@ class Sandbox:
         self.kill_switch = KillSwitch.load_from_file(state_dir)
         self.circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=30)
         self.audit = AuditLog(base_dir=str(state_dir / "audit"))
+        self.capability_fence = (
+            CapabilityFence(allowed=sorted(self.allowed_tools))
+            if (CapabilityFence is not None and self.allowed_tools)
+            else None
+        )
 
     def _check_hard_blocks(self, tool):
         """Check kill switch and circuit breaker (hard denials)."""
@@ -101,11 +106,25 @@ class Sandbox:
     def _check_policy(self, tool, path, cost):
         """Check tool allowlist, path blocklist, and cost cap."""
         reasons = []
-        if self.allowed_tools and tool not in self.allowed_tools:
+        if self.capability_fence is not None:
+            try:
+                self.capability_fence.check(tool)
+            except Exception:
+                reasons.append(f"Tool '{tool}' not in allowed set: {sorted(self.allowed_tools)}")
+        elif self.allowed_tools and tool not in self.allowed_tools:
             reasons.append(f"Tool '{tool}' not in allowed set: {sorted(self.allowed_tools)}")
         if path:
+            raw_parts = Path(path).parts
+            if ".." in raw_parts or ".." in path.replace("\\", "/").split("/"):
+                reasons.append(f"Path '{path}' contains forbidden '..' traversal component")
+            norm_path = os.path.normpath(path).replace("\\", "/")
             for bp in self.blocked_paths:
-                if path.startswith(bp):
+                norm_bp = os.path.normpath(bp).replace("\\", "/").rstrip("/")
+                if (
+                    path.startswith(bp)
+                    or norm_path == norm_bp
+                    or norm_path.startswith(norm_bp + "/")
+                ):
                     reasons.append(f"Path '{path}' is in blocked scope: {bp}")
         if self.cost_spent + cost > self.max_cost:
             reasons.append(f"Cost ${self.cost_spent + cost:.2f} would exceed cap ${self.max_cost:.2f}")
@@ -277,6 +296,33 @@ def _handle_sandbox_validate_output(arguments):
             issues.append({"type": "secret_leak", "pattern": desc})
     if len(output) > 100000:
         issues.append({"type": "excessive_output", "length": len(output)})
+    if OutputValidator is not None:
+        from hummbl_governance.output_validator import (
+            EncodingBypassDetector,
+            InjectionDetector,
+            JailbreakPatternDetector,
+            PIIDetector,
+            SteganographyDetector,
+        )
+
+        validator = OutputValidator(
+            rules=[
+                PIIDetector(),
+                InjectionDetector(),
+                JailbreakPatternDetector(),
+                SteganographyDetector(),
+                EncodingBypassDetector(),
+            ]
+        )
+        val_result = validator.validate(output)
+        for v in val_result.get("violations", []):
+            issues.append(
+                {
+                    "type": v["rule"],
+                    "detail": v["detail"],
+                    "severity": v["severity"],
+                }
+            )
     return {
         "valid": len(issues) == 0,
         "issues": issues,

@@ -61,3 +61,20 @@ def test_kinematic_governor_dynamic_scaling():
     assert gov.get_scaled_velocity(PhysicalSafetyMode.NORMAL) == 1.0
     assert gov.get_scaled_velocity(PhysicalSafetyMode.CAUTION) == 0.25
     assert gov.get_scaled_velocity(PhysicalSafetyMode.EMERGENCY) == 0.0
+
+
+def test_kinematic_governor_rejects_nan_inf_and_negative():
+    gov = KinematicGovernor(max_velocity=1.0, max_force=50.0, max_jerk=5.0)
+    assert gov.check_motion(velocity=float("nan"))["allowed"] is False
+    assert gov.check_motion(force=float("inf"))["allowed"] is False
+    assert gov.check_motion(jerk=float("-inf"))["allowed"] is False
+    assert gov.check_motion(velocity=-0.1)["allowed"] is False
+
+
+def test_phri_monitor_fails_closed_on_nan_inf_or_negative_distance():
+    monitor = pHRISafetyMonitor(min_distance=0.5, critical_distance=0.1)
+    assert monitor.check_safety(distance=float("nan"))["mode"] == PhysicalSafetyMode.EMERGENCY
+    assert monitor.check_safety(distance=float("inf"))["mode"] == PhysicalSafetyMode.EMERGENCY
+    assert monitor.check_safety(distance=float("-inf"))["mode"] == PhysicalSafetyMode.EMERGENCY
+    assert monitor.check_safety(distance=-1.0)["mode"] == PhysicalSafetyMode.EMERGENCY
+

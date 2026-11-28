@@ -121,6 +121,26 @@ def test_nist_map_controls_nonexistent_dir():
     assert result["entries_analyzed"] == 0
 
 
+def test_compliance_rejects_path_traversal_and_outside_allowed_root(tmp_path, monkeypatch):
+    traversal = mcp_compliance.handle_tool("nist_map_controls", {"governance_dir": "../etc"})
+    assert "error" in traversal
+    assert ".." in traversal["error"]
+
+    allowed_root = tmp_path / "allowed"
+    allowed_root.mkdir()
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    monkeypatch.setenv("GOVERNANCE_ALLOWED_AUDIT_ROOT", str(allowed_root))
+
+    blocked = mcp_compliance.handle_tool("soc2_assess", {"governance_dir": str(outside_dir)})
+    assert "error" in blocked
+    assert "GOVERNANCE_ALLOWED_AUDIT_ROOT" in blocked["error"]
+
+    inside = mcp_compliance.handle_tool("soc2_assess", {"governance_dir": str(allowed_root)})
+    assert "error" not in inside
+
+
+
 # ---------------------------------------------------------------------------
 # soc2_assess
 # ---------------------------------------------------------------------------
