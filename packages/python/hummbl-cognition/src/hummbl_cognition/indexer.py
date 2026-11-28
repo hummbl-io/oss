@@ -42,6 +42,42 @@ RETRIEVAL_DECAY_HALF_LIFE_DAYS = float(
     os.environ.get("COGNITION_RETRIEVAL_DECAY_HALF_LIFE_DAYS", "30")
 )
 
+# 4-Tier Knowledge Volatility Half-Lives (days) & Supersession Penalty
+TIER_HALF_LIFE_DAYS: dict[str, float] = {
+    "V1": 0.5,    # Ephemeral telemetry / watchdog bus imports / watch-cycles
+    "V2": 14.0,   # Volatile operational / HRSI daily cycles / file-scoped state
+    "V3": 60.0,   # Domain & project research / discoveries
+    "V4": 365.0,  # Durable architectural decisions, corrections, lessons, conventions
+}
+SUPERSESSION_PENALTY = 0.15
+
+
+def classify_decay_tier(meta: dict[str, Any]) -> str:
+    """Classify a ledger entry metadata dict into volatility tier V1..V4."""
+    agent = str(meta.get("agent", "")).lower()
+    tags = {str(t).lower() for t in (meta.get("tags") or ())}
+    entry_type = str(meta.get("type", "")).lower()
+    scope = str(meta.get("scope", "")).lower()
+
+    if (
+        agent == "watchdog"
+        or "bus-import" in tags
+        or "watch-cycle" in tags
+        or "telemetry-ephemeral" in tags
+    ):
+        return "V1"
+    if "hrsi-cycle" in tags or "hrsi-gap2" in tags or scope == "file":
+        return "V2"
+    if entry_type in ("decision", "correction", "lesson", "convention"):
+        return "V4"
+    return "V3"
+
+
+def tier_half_life_days(meta: dict[str, Any]) -> float:
+    """Return the empirical half-life in days for a ledger entry's volatility tier."""
+    tier = meta.get("decay_tier") or classify_decay_tier(meta)
+    return TIER_HALF_LIFE_DAYS.get(str(tier), TIME_DECAY_HALF_LIFE_DAYS)
+
 # Stopwords for English (minimal set -- keeps index small without a dep)
 _STOPWORDS = frozenset(
     {
@@ -170,6 +206,7 @@ class BM25Index:
             return 0
 
         total_length = 0
+        superseded_ids = {e.supersedes for e in entries if e.supersedes}
 
         for entry in entries:
             # Build searchable text from all relevant fields
@@ -188,7 +225,7 @@ class BM25Index:
             self.doc_lengths[entry.id] = doc_len
 
             # Store metadata for retrieval
-            self.doc_meta[entry.id] = {
+            meta_dict: dict[str, Any] = {
                 "timestamp": entry.timestamp,
                 "agent": entry.agent,
                 "type": entry.type,
@@ -198,10 +235,13 @@ class BM25Index:
                 "tags": list(entry.tags),
                 "links": list(entry.links),
                 "supersedes": entry.supersedes,
+                "superseded": entry.id in superseded_ids,
                 "previous_hash": entry.previous_hash,
                 "valid_time": entry.valid_time,
                 "contests": entry.contests,
             }
+            meta_dict["decay_tier"] = classify_decay_tier(meta_dict)
+            self.doc_meta[entry.id] = meta_dict
 
             # Build inverted index
             term_counts = Counter(tokens)
@@ -231,6 +271,8 @@ class BM25Index:
         since: str | None = None,
         boost_retrievals: bool = True,
         time_decay: bool = False,
+        tiered_decay: bool = False,
+        penalize_superseded: bool = False,
         retrieval_decay: bool = False,
         now: str | None = None,
         exclude_ids: set[str] | None = None,
@@ -299,8 +341,16 @@ class BM25Index:
             ref_dt = None
 
         # Apply time decay: exponential decay based on entry age
+        use_tiered = tiered_decay or (
+            os.environ.get("COGNITION_TIERED_TIME_DECAY", "").strip().lower()
+            in ("1", "true", "yes")
+        )
+        use_superseded_penalty = penalize_superseded or (
+            os.environ.get("COGNITION_PENALIZE_SUPERSEDED", "").strip().lower()
+            in ("1", "true", "yes")
+        )
         if time_decay and ref_dt is not None:
-            time_lambda = 0.693 / TIME_DECAY_HALF_LIFE_DAYS
+            uniform_lambda = 0.693 / TIME_DECAY_HALF_LIFE_DAYS
             for doc_id in scores:
                 meta = self.doc_meta.get(doc_id)
                 if not meta:
@@ -311,10 +361,21 @@ class BM25Index:
                 try:
                     entry_dt = datetime.fromisoformat(entry_ts.replace("Z", "+00:00"))
                     age_days = max((ref_dt - entry_dt).total_seconds() / 86400.0, 0.0)
+                    time_lambda = (
+                        0.693 / tier_half_life_days(meta)
+                        if use_tiered
+                        else uniform_lambda
+                    )
                     time_factor = math.exp(-time_lambda * age_days)
                     scores[doc_id] *= time_factor
                 except (ValueError, TypeError):
                     pass  # Skip entries with unparseable timestamps
+
+        if use_superseded_penalty:
+            for doc_id in scores:
+                meta = self.doc_meta.get(doc_id)
+                if meta and meta.get("superseded") is True:
+                    scores[doc_id] *= SUPERSESSION_PENALTY
 
         # Apply retrieval frequency boost (stigmergic ranking)
         if boost_retrievals and self.retrieval_counts:

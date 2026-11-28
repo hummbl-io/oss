@@ -288,7 +288,25 @@ def record_cycle(
         confidence=1.0,
         tags=tuple(tags),
     )
-    effective_ledger_path = ledger_path or LEDGER_PATH
+    if ledger_path is not None:
+        effective_ledger_path = Path(ledger_path)
+    elif cycles_path is not None and Path(cycles_path).resolve() != CYCLES_PATH.resolve():
+        effective_ledger_path = Path(cycles_path).resolve().parent / "ledger.jsonl"
+    elif (
+        baseline_path is not None
+        and Path(baseline_path).resolve() != BASELINE_PATH.resolve()
+    ):
+        effective_ledger_path = Path(baseline_path).resolve().parent / "ledger.jsonl"
+    elif (
+        os.environ.get("PYTEST_CURRENT_TEST")
+        and not os.environ.get("HRSI_COGNITION_DIR", "").strip()
+    ):
+        raise RuntimeError(
+            "Refusing to write to production HRSI ledger during pytest without "
+            "explicit ledger_path, cycles_path, baseline_path, or HRSI_COGNITION_DIR"
+        )
+    else:
+        effective_ledger_path = LEDGER_PATH
     cycle["ledger_id"] = entry.id
     transaction_lock = cycles_path.parent / ".hrsi-checkin.lock"
     with _cycle_transaction_lock(transaction_lock):

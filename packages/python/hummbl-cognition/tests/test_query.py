@@ -120,3 +120,37 @@ class TestLatestByScope:
     def test_latest_empty_ledger(self, tmp_ledger_path: Path) -> None:
         result = latest_by_scope(ledger_path=tmp_ledger_path)
         assert result == {}
+
+
+class TestTieredDecayAndSupersession:
+    def test_classify_decay_tiers_and_superseded_downweighting(
+        self, tmp_ledger_path: Path
+    ) -> None:
+        from hummbl_cognition.indexer import BM25Index, classify_decay_tier
+
+        assert classify_decay_tier({"agent": "watchdog", "tags": ["bus-import"]}) == "V1"
+        assert classify_decay_tier({"agent": "reuben", "tags": ["hrsi-cycle"]}) == "V2"
+        assert classify_decay_tier({"type": "decision", "scope": "project"}) == "V4"
+        assert classify_decay_tier({"type": "discovery", "scope": "project"}) == "V3"
+
+        old_entry = _make_entry(content="Alpha architecture invariant routing protocol")
+        r_old = post_entry(old_entry, ledger_path=tmp_ledger_path)
+        new_entry = _make_entry(
+            content="Alpha architecture invariant routing protocol updated",
+            supersedes=r_old.id,
+        )
+        r_new = post_entry(new_entry, ledger_path=tmp_ledger_path)
+
+        idx = BM25Index(index_path=tmp_ledger_path.parent / "index.json")
+        idx.build(ledger_path=tmp_ledger_path)
+        assert idx.doc_meta[r_old.id]["superseded"] is True
+        assert idx.doc_meta[r_new.id]["superseded"] is False
+
+        hits = idx.search(
+            "Alpha architecture invariant routing",
+            penalize_superseded=True,
+        )
+        assert len(hits) == 2
+        assert hits[0]["id"] == r_new.id
+        assert hits[0]["score"] > hits[1]["score"] * 3
+
