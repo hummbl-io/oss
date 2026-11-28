@@ -22,6 +22,7 @@ enforcing limits on velocity, force, and proximity.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, Optional
@@ -49,6 +50,19 @@ class KinematicGovernor:
                      force: Optional[float] = None,
                      jerk: Optional[float] = None) -> Dict[str, Any]:
         """Check if proposed motion parameters are within limits."""
+        for label, val in (("Velocity", velocity), ("Force", force), ("Jerk", jerk)):
+            if val is not None:
+                if (
+                    not isinstance(val, (int, float))
+                    or isinstance(val, bool)
+                    or not math.isfinite(val)
+                    or val < 0.0
+                ):
+                    return {
+                        "allowed": False,
+                        "reason": f"{label} {val} must be a non-negative finite number",
+                    }
+
         if velocity is not None and velocity > self.max_velocity:
             return {"allowed": False, "reason": f"Velocity {velocity} exceeds limit {self.max_velocity}"}
 
@@ -83,6 +97,16 @@ class pHRISafetyMonitor:
             return {"mode": PhysicalSafetyMode.EMERGENCY, "reason": "Collision detected"}
 
         if distance is not None:
+            if (
+                not isinstance(distance, (int, float))
+                or isinstance(distance, bool)
+                or not math.isfinite(distance)
+                or distance < 0.0
+            ):
+                return {
+                    "mode": PhysicalSafetyMode.EMERGENCY,
+                    "reason": f"Invalid or non-finite sensor distance: {distance}",
+                }
             if distance <= self.critical_distance:
                 return {"mode": PhysicalSafetyMode.EMERGENCY, "reason": f"Critical proximity breach: {distance}m"}
             if distance <= self.min_distance:

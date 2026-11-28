@@ -34,7 +34,9 @@ Tools:
     lamport_compare        - Compare two timestamps for causal ordering
 """
 
+import hmac
 import json
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -68,7 +70,36 @@ _tokens: dict[str, DelegationToken] = {}
 # ---------------------------------------------------------------------------
 
 
+def _check_operator_token(args: dict, op_name: str) -> dict | None:
+    """Verify operator token when IDENTITY_OPERATOR_TOKEN, HUMMBL_OPERATOR_TOKEN, or IDENTITY_REQUIRE_TOKEN is set."""
+    expected = (
+        os.environ.get("IDENTITY_OPERATOR_TOKEN", "").strip()
+        or os.environ.get("HUMMBL_OPERATOR_TOKEN", "").strip()
+    )
+    require_token = os.environ.get("IDENTITY_REQUIRE_TOKEN", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    if not expected and not require_token:
+        return None
+    provided = str(args.get("token", ""))
+    if not expected or not hmac.compare_digest(
+        provided.encode("utf-8", "replace"), expected.encode("utf-8", "replace")
+    ):
+        return {
+            "error": (
+                f"{op_name} requires a valid operator 'token' matching "
+                "IDENTITY_OPERATOR_TOKEN (or HUMMBL_OPERATOR_TOKEN)"
+            )
+        }
+    return None
+
+
 def _identity_register(args: dict) -> dict:
+    auth_err = _check_operator_token(args, "identity_register")
+    if auth_err is not None:
+        return auth_err
     agent_id = args.get("agent_id", "")
     trust_tier = args.get("trust_tier", "low")
     aliases = args.get("aliases", [])
@@ -139,6 +170,9 @@ def _identity_validate(args: dict) -> dict:
 
 
 def _delegation_create(args: dict) -> dict:
+    auth_err = _check_operator_token(args, "delegation_create")
+    if auth_err is not None:
+        return auth_err
     issuer = args.get("issuer", "")
     subject = args.get("subject", "")
     ops_allowed = args.get("ops_allowed", [])

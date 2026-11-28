@@ -268,8 +268,29 @@ _TUPLE_TO_SOC2 = {
 # ---------------------------------------------------------------------------
 # Helper: read governance entries from a directory
 # ---------------------------------------------------------------------------
+def _validate_governance_dir(governance_dir: str) -> str:
+    """Validate governance_dir against '..' traversal and optional GOVERNANCE_ALLOWED_AUDIT_ROOT."""
+    if not isinstance(governance_dir, str) or not governance_dir.strip():
+        raise ValueError("governance_dir must be a non-empty string")
+    if "\x00" in governance_dir:
+        raise ValueError("governance_dir contains null byte")
+    raw_path = Path(governance_dir)
+    if ".." in raw_path.parts or ".." in governance_dir.replace("\\", "/").split("/"):
+        raise ValueError("governance_dir cannot contain '..' path traversal components")
+    allowed_root = os.environ.get("GOVERNANCE_ALLOWED_AUDIT_ROOT", "").strip()
+    if allowed_root:
+        resolved_dir = raw_path.resolve()
+        resolved_root = Path(allowed_root).resolve()
+        if not resolved_dir.is_relative_to(resolved_root):
+            raise ValueError(
+                f"governance_dir must reside within GOVERNANCE_ALLOWED_AUDIT_ROOT ({resolved_root})"
+            )
+    return governance_dir
+
+
 def _read_governance_entries(governance_dir: str) -> list[dict]:
     """Read all governance JSONL entries from the specified directory."""
+    _validate_governance_dir(governance_dir)
     gdir = Path(governance_dir)
     if not gdir.exists():
         return []
@@ -690,22 +711,33 @@ TOOLS = [
 # ---------------------------------------------------------------------------
 def handle_tool(name: str, arguments: dict) -> dict:
     """Dispatch a tool call to the appropriate handler."""
+    if name in (
+        "nist_map_controls",
+        "soc2_assess",
+        "iso_crosswalk",
+        "compliance_evidence_export",
+    ):
+        gov_dir = arguments.get("governance_dir", AUDIT_DIR)
+        try:
+            _validate_governance_dir(gov_dir)
+        except ValueError as exc:
+            return {"error": str(exc)}
 
     if name == "nist_map_controls":
-        return _nist_map_controls(arguments["governance_dir"])
+        return _nist_map_controls(arguments.get("governance_dir", AUDIT_DIR))
 
     elif name == "soc2_assess":
-        return _soc2_assess(arguments["governance_dir"])
+        return _soc2_assess(arguments.get("governance_dir", AUDIT_DIR))
 
     elif name == "iso_crosswalk":
-        return _iso_crosswalk(arguments["governance_dir"])
+        return _iso_crosswalk(arguments.get("governance_dir", AUDIT_DIR))
 
     elif name == "stride_analysis":
         return _stride_analysis(arguments.get("interactions", []))
 
     elif name == "compliance_evidence_export":
         return _compliance_evidence_export(
-            arguments["governance_dir"],
+            arguments.get("governance_dir", AUDIT_DIR),
             arguments.get("framework", "all"),
         )
 

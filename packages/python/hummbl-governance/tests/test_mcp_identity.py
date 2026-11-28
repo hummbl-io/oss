@@ -76,6 +76,20 @@ class TestIdentityRegister:
         result = m.handle_tool("identity_register", {"agent_id": "agent-3"})
         assert result["trust_tier"] == "low"
 
+    def test_register_requires_operator_token_when_env_set(self, monkeypatch):
+        m = fresh_module()
+        monkeypatch.setenv("IDENTITY_OPERATOR_TOKEN", "secret-op-token")
+        denied = m.handle_tool("identity_register", {"agent_id": "rogue-agent", "trust_tier": "high"})
+        assert "error" in denied
+        assert "IDENTITY_OPERATOR_TOKEN" in denied["error"]
+
+        allowed = m.handle_tool(
+            "identity_register",
+            {"agent_id": "trusted-agent", "trust_tier": "high", "token": "secret-op-token"},
+        )
+        assert allowed.get("registered") is True
+
+
 
 class TestIdentityLookup:
     def setup_method(self):
@@ -208,6 +222,36 @@ class TestDelegationCreate:
         )
         token_id = result["token_id"]
         assert token_id in self.m._tokens
+
+    def test_create_requires_operator_token_when_env_set(self, monkeypatch):
+        monkeypatch.setenv("IDENTITY_OPERATOR_TOKEN", "op-secret-123")
+        denied = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": ["execute"],
+                "task_id": "t1",
+                "contract_id": "c1",
+                "token": "wrong-token",
+            },
+        )
+        assert "error" in denied
+        assert "IDENTITY_OPERATOR_TOKEN" in denied["error"]
+
+        allowed = self.m.handle_tool(
+            "delegation_create",
+            {
+                "issuer": "orch",
+                "subject": "worker",
+                "ops_allowed": ["execute"],
+                "task_id": "t1",
+                "contract_id": "c1",
+                "token": "op-secret-123",
+            },
+        )
+        assert "token_id" in allowed
+
 
 
 class TestDelegationValidate:
