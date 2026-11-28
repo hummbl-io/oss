@@ -92,6 +92,7 @@ Explore all 51 implemented primitives:
 ```bash
 git clone https://github.com/hummbl-io/oss.git
 cd packages/python/hummbl-governance
+python examples/enterprise_proof_pack.py
 python examples/kill_switch_modes.py
 python examples/circuit_breaker_wrap.py
 python examples/cost_governor.py
