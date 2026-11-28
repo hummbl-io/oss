@@ -58,7 +58,7 @@ PYPISTATS_RECENT = "https://pypistats.org/api/packages/{pkg}/recent"
 PYPISTATS_OVERALL = "https://pypistats.org/api/packages/{pkg}/overall?mirrors=false"
 
 REQUEST_TIMEOUT = 15
-RATE_LIMIT_SLEEP = 2.5  # seconds between API calls (pypistats rate limits)
+RATE_LIMIT_SLEEP = 4.0  # seconds between API calls (pypistats rate limits)
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 5.0  # seconds; doubled each retry (5, 10, 20)
 

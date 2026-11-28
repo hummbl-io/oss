@@ -86,7 +86,7 @@ Lean (not a PyPI package, not in the Python CI matrix):
 `packages/lean/hummbl-formalization`.
 Explore the [formal reasoning exhibits](packages/lean/hummbl-formalization/README.md#exhibit-gallery):
 tree recovery, operation order, quantifier scope, and vacuous checks. Synthetic
-data, a pinned Lean compiler, and no Mathlib dependency.
+data, a pinned Lean compiler, and zero external dependencies in the standalone `examples/*.lean` exhibits (`lakefile.toml` declares `mathlib` only for the surrounding Lake project).
 Canonical install names owned by HUMMBL and recommended from this repo:
 ```text
 pip install base120
